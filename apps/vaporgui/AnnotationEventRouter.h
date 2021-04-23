@@ -40,7 +40,7 @@ class CopyRegionAnnotationWidget;
 class VComboBox;
 class VPushButton;
 
-class AnnotationEventRouter : public QWidget, public Ui_AnnotationGUI, public EventRouter {
+class AnnotationEventRouter : public QWidget, public EventRouter {
     Q_OBJECT
 
 public:
@@ -89,21 +89,14 @@ private:
 
     vector<double> getTableRow(int row);
 
-    void connectAnnotationWidgets();
-
     AnnotationEventRouter() {}
 
     void setColorHelper(QWidget *w, vector<double> &rgb);
     void updateColorHelper(const vector<double> &rgb, QWidget *w);
 
     void updateAxisAnnotations();
-    void updateAxisColor();
-    void updateAxisBackgroundColor();
     void updateAxisTable();
-    void updateAxisEnabledCheckbox();
-    void updateLatLonCheckbox();
     void updateCopyRegionCombo();
-    void updateTicOrientationCombos();
     void gatherRenderers(std::vector<string>&, string, string, string, string);
 
     void   updateDataMgrCombo();
@@ -121,9 +114,8 @@ private:
     void                convertLonToPCS(double &xCoord);
     void                convertLatToPCS(double &yCoord);
 
-    void initializeAnnotation(VAPoR::AxisAnnotation *aa);
-    void initializeAnnotationExtents(VAPoR::AxisAnnotation *aa);
-    void initializeTicSizes(VAPoR::AxisAnnotation *aa);
+    //void initializeAnnotation(VAPoR::AxisAnnotation *aa);
+    //void initializeAnnotationExtents(VAPoR::AxisAnnotation *aa);
 
     virtual void _updateTab();
 

@@ -77,7 +77,7 @@ std::vector<std::string> split(const std::string &s, char delim)
 
 }    // namespace
 
-AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_AnnotationGUI(), EventRouter(ce, AnnotationParams::GetClassType())
+AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), EventRouter(ce, AnnotationParams::GetClassType())
 {
     setupUi(this);
 
@@ -88,8 +88,6 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
     AxisAnnotation* aa = _getCurrentAxisAnnotation();
     std::vector<double> c = aa->GetAxisColor();
-
-    connectAnnotationWidgets();
 
     _animConnected = false;
     _ap = NULL;
@@ -187,22 +185,6 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
 
 AnnotationEventRouter::~AnnotationEventRouter() {}
 
-void AnnotationEventRouter::connectAnnotationWidgets()
-{
-    connect(_axisAnnotationEnabledCheckbox, SIGNAL(toggled(bool)), this, SLOT(setAxisAnnotation(bool)));
-    connect(_latLonAnnotationCheckbox, SIGNAL(toggled(bool)), this, SLOT(setLatLonAnnotation(bool)));
-    connect(_textSizeCombo, SIGNAL(valueChanged(int)), this, SLOT(setAxisTextSize(int)));
-    connect(_digitsCombo, SIGNAL(valueChanged(int)), this, SLOT(setAxisDigits(int)));
-    connect(_ticWidthCombo, SIGNAL(valueChanged(double)), this, SLOT(setAxisTicWidth(double)));
-    connect(axisColorButton, SIGNAL(pressed()), this, SLOT(setAxisColor()));
-    connect(axisBackgroundColorButton, SIGNAL(pressed()), this, SLOT(setAxisBackgroundColor()));
-    connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
-    connect(xTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setXTicOrientation(int)));
-    connect(yTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrientation(int)));
-    connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));
-    connect(copyRegionButton, SIGNAL(pressed()), this, SLOT(copyRegionFromRenderer()));
-}
-
 void AnnotationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 {
     help.clear();
@@ -212,7 +194,8 @@ void AnnotationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 
 void AnnotationEventRouter::_updateTab()
 {
-    updateAxisAnnotations();
+    updateCopyRegionCombo();
+    updateAxisTable();
 
     AxisAnnotation* a = _getCurrentAxisAnnotation();
     _axisAnnotationGroup1->Update(a);
@@ -329,43 +312,6 @@ void AnnotationEventRouter::updateCopyRegionCombo()
         }
     }
     _copyRegionCombo->SetOptions( renderers );
-}
-
-void AnnotationEventRouter::updateAxisEnabledCheckbox()
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    bool            annotationEnabled = aa->GetAxisAnnotationEnabled();
-    if (annotationEnabled)
-        _axisAnnotationEnabledCheckbox->setCheckState(Qt::Checked);
-    else
-        _axisAnnotationEnabledCheckbox->setCheckState(Qt::Unchecked);
-}
-
-void AnnotationEventRouter::updateLatLonCheckbox()
-{
-    string projString = getProjString();
-    if (projString.size() == 0) {
-        _latLonAnnotationCheckbox->setEnabled(false);
-        return;
-    } else
-        _latLonAnnotationCheckbox->setEnabled(true);
-
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    bool            annotateLatLon = aa->GetLatLonAxesEnabled();
-    if (annotateLatLon)
-        _latLonAnnotationCheckbox->setCheckState(Qt::Checked);
-    else
-        _latLonAnnotationCheckbox->setCheckState(Qt::Unchecked);
-}
-
-void AnnotationEventRouter::updateTicOrientationCombos()
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    vector<double>  ticDir = aa->GetTicDirs();
-
-    xTicOrientationCombo->setCurrentIndex(ticDir[0] - 1);
-    yTicOrientationCombo->setCurrentIndex(ticDir[1] / 2);
-    zTicOrientationCombo->setCurrentIndex(ticDir[2]);
 }
 
 void AnnotationEventRouter::scaleNormalizedCoordsToWorld(std::vector<double> &coords)
@@ -540,7 +486,7 @@ void AnnotationEventRouter::initializeTicSizes(AxisAnnotation *aa)
     aa->SetTicSize(ticSizes);
 }
 
-void AnnotationEventRouter::initializeAnnotationExtents(AxisAnnotation *aa)
+/*void AnnotationEventRouter::initializeAnnotationExtents(AxisAnnotation *aa)
 {
     vector<double> minExts(3, 0.0);
     vector<double> maxExts(3, 1.0);
@@ -561,31 +507,7 @@ void AnnotationEventRouter::initializeAnnotation(AxisAnnotation *aa)
     paramsMgr->EndSaveStateGroup();
 
     aa->SetAxisAnnotationInitialized(true);
-}
-
-void AnnotationEventRouter::updateAxisAnnotations()
-{
-    updateCopyRegionCombo();
-    updateAxisEnabledCheckbox();
-    updateLatLonCheckbox();
-    updateTicOrientationCombos();
-    updateAxisTable();
-    updateAxisColor();
-    updateAxisBackgroundColor();
-
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-
-    int textSize = aa->GetAxisFontSize();
-    _textSizeCombo->Update(4, 50, textSize);
-
-    int numDigits = aa->GetAxisDigits();
-    _digitsCombo->Update(1, 12, numDigits);
-
-    // GLdouble minMax[2];
-    // glGetDoublev(GL_ALIASED_LINE_WIDTH_RANGE, minMax);
-    double ticWidth = aa->GetTicWidth();
-    _ticWidthCombo->Update(0, 7, ticWidth);    // minMax[0], minMax[1], ticWidth);
-}
+}*/
 
 void AnnotationEventRouter::axisAnnotationTableChanged()
 {
@@ -635,123 +557,4 @@ vector<double> AnnotationEventRouter::getTableRow(int row)
         contents.push_back(val);
     }
     return contents;
-}
-
-void AnnotationEventRouter::setColorHelper(QWidget *w, vector<double> &rgb)
-{
-    rgb.clear();
-
-    QPalette pal(w->palette());
-    QColor   newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-
-    rgb.push_back(newColor.red() / 255.0);
-    rgb.push_back(newColor.green() / 255.0);
-    rgb.push_back(newColor.blue() / 255.0);
-}
-
-void AnnotationEventRouter::setAxisColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(axisColorEdit, rgb);
-    if (rgb.size() == 3) rgb.push_back(1.f);
-
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetAxisColor(rgb);
-}
-
-void AnnotationEventRouter::setAxisBackgroundColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(axisBackgroundColorEdit, rgb);
-    if (rgb.size() == 3) rgb.push_back(1.f);
-
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetAxisBackgroundColor(rgb);
-}
-
-void AnnotationEventRouter::updateAxisColor()
-{
-    vector<double>  rgb;
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    rgb = aa->GetAxisColor();
-
-    updateColorHelper(rgb, axisColorEdit);
-}
-
-void AnnotationEventRouter::updateColorHelper(const vector<double> &rgb, QWidget *w)
-{
-    QColor color((int)(rgb[0] * 255.0), (int)(rgb[1] * 255.0), (int)(rgb[2] * 255.0));
-
-    QPalette pal;
-    pal.setColor(QPalette::Base, color);
-    w->setPalette(pal);
-}
-
-void AnnotationEventRouter::updateAxisBackgroundColor()
-{
-    vector<double>  rgb;
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    rgb = aa->GetAxisBackgroundColor();
-
-    updateColorHelper(rgb, axisBackgroundColorEdit);
-}
-
-void AnnotationEventRouter::setAxisDigits(int digits)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetAxisDigits(digits);
-}
-
-void AnnotationEventRouter::setAxisTicWidth(double width)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetTicWidth(width);
-}
-
-void AnnotationEventRouter::setXTicOrientation(int)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    vector<double>  ticDir = aa->GetTicDirs();
-    ticDir[0] = xTicOrientationCombo->currentIndex() + 1;    // Y(1) or Z(2)
-    aa->SetTicDirs(ticDir);
-}
-void AnnotationEventRouter::setYTicOrientation(int)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    vector<double>  ticDir = aa->GetTicDirs();
-    ticDir[1] = yTicOrientationCombo->currentIndex() * 2;    // X(0) or Z(2)
-    aa->SetTicDirs(ticDir);
-}
-void AnnotationEventRouter::setZTicOrientation(int)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    vector<double>  ticDir = aa->GetTicDirs();
-    ticDir[2] = zTicOrientationCombo->currentIndex();    // X(0) or Y(1)
-    aa->SetTicDirs(ticDir);
-}
-
-void AnnotationEventRouter::setLatLonAnnot(bool val)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetLatLonAxesEnabled(val);
-}
-
-void AnnotationEventRouter::setAxisAnnotation(bool toggled)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetAxisAnnotationEnabled(toggled);
-}
-
-void AnnotationEventRouter::setLatLonAnnotation(bool val)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetLatLonAxesEnabled(val);
-}
-
-void AnnotationEventRouter::setAxisTextSize(int size)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetAxisFontSize(size);
 }
