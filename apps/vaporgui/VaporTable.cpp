@@ -43,6 +43,7 @@ VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastC
     _showToolTips = false;
 
     SetVerticalHeaderWidth(100);
+    _table->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     connect(_table, &QTableWidget::cellClicked, this, &VaporTable::emitCellClicked);
     connect(_table, &QTableWidget::cellChanged, this, &VaporTable::emitValueChanged);

@@ -36,6 +36,9 @@ class ControlExec;
 
 class PGroup;
 class PSection;
+class CopyRegionAnnotationWidget;
+class VComboBox;
+class VPushButton;
 
 class AnnotationEventRouter : public QWidget, public Ui_AnnotationGUI, public EventRouter {
     Q_OBJECT
@@ -101,7 +104,7 @@ private:
     void updateLatLonCheckbox();
     void updateCopyRegionCombo();
     void updateTicOrientationCombos();
-    void addRendererToCombo(string, string, string, string);
+    void gatherRenderers(std::vector<string>&, string, string, string, string);
 
     void   updateDataMgrCombo();
     string getProjString();
@@ -128,8 +131,12 @@ private:
     bool             _animConnected;
 
     VaporTable* _annotationVaporTable2;
+    CopyRegionAnnotationWidget* _copyRegionWidget;
+    VComboBox* _copyRegionCombo;
+    VPushButton* _copyRegionButton;
 
-    PGroup   *_axisAnnotationGroup;
+    PGroup   *_axisAnnotationGroup1;
+    PGroup   *_axisAnnotationGroup2;
     PGroup   *_axisArrowGroup;
     PGroup   *_timeAnnotationGroup;
     PGroup   *_3DGeometryGroup;

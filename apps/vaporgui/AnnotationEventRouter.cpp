@@ -27,6 +27,7 @@
 #include <qrect.h>
 #include <qmessagebox.h>
 #include <qlineedit.h>
+#include <QSpacerItem>
 #include "GL/glew.h"
 #include <vapor/AnnotationParams.h>
 #include <vapor/DataStatus.h>
@@ -49,6 +50,11 @@
 #include "PWidgets.h"
 #include "PEnumDropdownHLI.h"
 #include "PSliderEditHLI.h"
+#include "CopyRegionAnnotationWidget.h"
+#include "PCopyRegionAnnotationWidget.h"
+#include "PCopyRegionWidget.h"
+#include "VComboBox.h"
+#include "VPushButton.h"
 
 using namespace VAPoR;
 
@@ -82,21 +88,40 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
     AxisAnnotation* aa = _getCurrentAxisAnnotation();
     std::vector<double> c = aa->GetAxisColor();
-    std::cout << c[0] << " " << c[1] << " " << c[2] << " " << c[3] << std::endl;
 
     connectAnnotationWidgets();
 
     _animConnected = false;
     _ap = NULL;
 
-    _axisAnnotationGroup = new PGroup({
+    VSection* annotationTab = new VSection("Axis Annotations");
+    _axisAnnotationGroup1 = new PGroup({
         new PCheckbox( AxisAnnotation::_annotationEnabledTag,"Axis Annotations Enabled" ),
         new PCheckbox( AxisAnnotation::_latLonAxesTag,"Annotate with lat/lon" ),
+    });
+    annotationTab->layout()->addWidget(_axisAnnotationGroup1);
+
+    QTableWidget* annotationTable = new QTableWidget;
+    _annotationVaporTable2 = new VaporTable(annotationTable);
+    connect(_annotationVaporTable2, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
+    _annotationVaporTable2->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
+    annotationTab->layout()->addWidget(annotationTable);
+    _copyRegionCombo = new VComboBox({"No currently instantiated renderers"});
+    _copyRegionButton = new VPushButton("Copy");
+    connect(_copyRegionButton, SIGNAL(ButtonClicked()), this, SLOT(copyRegionFromRenderer()));
+    //annotationTab->layout()->addWidget(new VLineItem("Renderer", new QSpacerItem(0,0), _copyRegionCombo));
+    //annotationTab->layout()->addWidget(new VLineItem("Copy region from Renderer", new QSpacerItem(0,0), _copyRegionCombo));
+    annotationTab->layout()->addWidget(new VLineItem("Copy Region From Renderer", _copyRegionCombo));
+    annotationTab->layout()->addWidget(new VLineItem("", _copyRegionButton));
+    
+
+    
+    _axisAnnotationGroup2 = new PGroup({
         new PColorSelector(AxisAnnotation::_colorTag, "Axis Text Color"),
         new PColorSelector(AxisAnnotation::_backgroundColorTag, "Text Background Color"),
         (new PIntegerSliderEditHLI<AxisAnnotation>("Font Size", &AxisAnnotation::GetAxisFontSize, &AxisAnnotation::SetAxisFontSize))->SetRange(2, 48)->EnableDynamicUpdate(),
         (new PIntegerSliderEdit(AxisAnnotation::_digitsTag, "Digits"))->SetRange(0, 8)->EnableDynamicUpdate(),
-        //(new PIntegerSliderEdit(AxisAnnotation::_ticWidthTag, "Tic Width"))->SetRange(0, 10)->EnableDynamicUpdate(), // Broken
+        //(new PIntegerSliderEdit(AxisAnnotation::_ticWidthTag, "Tic Width"))->SetRange(0, 10)->EnableDynamicUpdate(), // Broken, see 2711
         new PEnumDropdownHLI<AxisAnnotation>(
             "X Tickmark Orientation",
             {"Y axis", "Z axis"},
@@ -119,14 +144,8 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
             &AxisAnnotation::SetZTicDir
         ),
     });
+    annotationTab->layout()->addWidget(_axisAnnotationGroup2);
 
-    QTableWidget* annotationTable = new QTableWidget;
-    _annotationVaporTable2 = new VaporTable(annotationTable);
-    _annotationVaporTable2->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
-    VSection* annotationTab = new VSection("Axis Annotations");
-    annotationTab->layout()->addWidget(annotationTable);
-    //layout()->addWidget(_axisAnnotationGroup);
-    annotationTab->layout()->addWidget(_axisAnnotationGroup);
     layout()->addWidget(annotationTab);
 
     _timeAnnotationGroup = new PGroup({
@@ -196,7 +215,8 @@ void AnnotationEventRouter::_updateTab()
     updateAxisAnnotations();
 
     AxisAnnotation* a = _getCurrentAxisAnnotation();
-    _axisAnnotationGroup->Update(a);
+    _axisAnnotationGroup1->Update(a);
+    _axisAnnotationGroup2->Update(a, _controlExec->GetParamsMgr());
     std::vector<double> c = a->GetAxisColor();
 
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
@@ -210,7 +230,8 @@ void AnnotationEventRouter::_updateTab()
 
 void AnnotationEventRouter::copyRegionFromRenderer()
 {
-    string copyString = copyRegionCombo->currentText().toStdString();
+    //string copyString = copyRegionCombo->currentText().toStdString();
+    string copyString = _copyRegionCombo->GetValue();
     if (copyString == "") return;
 
     std::vector<std::string> elems = split(copyString, ':');
@@ -248,7 +269,7 @@ void AnnotationEventRouter::copyRegionFromRenderer()
     paramsMgr->EndSaveStateGroup();
 }
 
-void AnnotationEventRouter::addRendererToCombo(string visName, string typeName, string visAbb, string dataSetName)
+void AnnotationEventRouter::gatherRenderers(std::vector<string> &renderers, string visName, string typeName, string visAbb, string dataSetName)
 {
     // Abbreviate Params names by removing 'Params" from them.
     // Then store them in a map for later reference.
@@ -264,14 +285,16 @@ void AnnotationEventRouter::addRendererToCombo(string visName, string typeName, 
 
     for (int k = 0; k < renNames.size(); k++) {
         string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
-        QString qDisplayName = QString::fromStdString(displayName);
-        copyRegionCombo->addItem(qDisplayName);
+        renderers.push_back( displayName );
+        //QString qDisplayName = QString::fromStdString(displayName);
+        //copyRegionCombo->addItem(qDisplayName);
     }
 }
 
 void AnnotationEventRouter::updateCopyRegionCombo()
 {
     copyRegionCombo->clear();
+
 
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
     std::string       dataSetName = vParams->GetCurrentAxisDataMgrName();
@@ -282,6 +305,7 @@ void AnnotationEventRouter::updateCopyRegionCombo()
     std::vector<std::string> visNames = paramsMgr->GetVisualizerNames();
     DataStatus *             dataStatus = _controlExec->GetDataStatus();
 
+    std::vector<string> renderers = {};
     for (int i = 0; i < visNames.size(); i++) {
         string visName = visNames[i];
 
@@ -300,10 +324,11 @@ void AnnotationEventRouter::updateCopyRegionCombo()
             std::vector<string> dmNames = dataStatus->GetDataMgrNames();
             for (int k = 0; k < dmNames.size(); k++) {
                 string dataSetName = dmNames[k];
-                addRendererToCombo(visName, typeName, visAbb, dataSetName);
+                gatherRenderers(renderers, visName, typeName, visAbb, dataSetName);
             }
         }
     }
+    _copyRegionCombo->SetOptions( renderers );
 }
 
 void AnnotationEventRouter::updateAxisEnabledCheckbox()
@@ -606,7 +631,7 @@ vector<double> AnnotationEventRouter::getTableRow(int row)
 {
     vector<double> contents;
     for (int col = 0; col < 3; col++) {
-        double val = _annotationVaporTable->GetValue(row, col);
+        double val = _annotationVaporTable2->GetValue(row, col);
         contents.push_back(val);
     }
     return contents;
