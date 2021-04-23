@@ -36,7 +36,6 @@ class ControlExec;
 
 class PGroup;
 class PSection;
-class CopyRegionAnnotationWidget;
 class VComboBox;
 class VPushButton;
 
@@ -111,11 +110,11 @@ private:
     VComboBox *                 _copyRegionCombo;
     VPushButton *               _copyRegionButton;
 
-    PGroup *_axisAnnotationGroup1;
-    PGroup *_axisAnnotationGroup2;
-    PGroup *_axisArrowGroup;
-    PGroup *_timeAnnotationGroup;
-    PGroup *_3DGeometryGroup;
+    PGroup *  _axisAnnotationGroup1;
+    PGroup *  _axisAnnotationGroup2;
+    PGroup *  _axisArrowGroup;
+    PGroup *  _timeAnnotationGroup;
+    PGroup *  _3DGeometryGroup;
 };
 
 #endif    // ANNOTATIONEVENTROUTER_H

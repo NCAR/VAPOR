@@ -27,7 +27,6 @@
 #include <qrect.h>
 #include <qmessagebox.h>
 #include <qlineedit.h>
-#include <QSpacerItem>
 #include "GL/glew.h"
 #include <vapor/AnnotationParams.h>
 #include <vapor/DataStatus.h>
@@ -50,9 +49,6 @@
 #include "PWidgets.h"
 #include "PEnumDropdownHLI.h"
 #include "PSliderEditHLI.h"
-#include "CopyRegionAnnotationWidget.h"
-#include "PCopyRegionAnnotationWidget.h"
-#include "PCopyRegionWidget.h"
 #include "VComboBox.h"
 #include "VPushButton.h"
 
