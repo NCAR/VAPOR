@@ -79,16 +79,7 @@ std::vector<std::string> split(const std::string &s, char delim)
 
 AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), EventRouter(ce, AnnotationParams::GetClassType())
 {
-    setupUi(this);
-
-    _textSizeCombo = new Combo(axisTextSizeEdit, axisTextSizeSlider, true);
-    _digitsCombo = new Combo(axisDigitsEdit, axisDigitsSlider, true);
-    _ticWidthCombo = new Combo(ticWidthEdit, ticWidthSlider);
-    _annotationVaporTable = new VaporTable(axisAnnotationTable);
-    _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
-    AxisAnnotation* aa = _getCurrentAxisAnnotation();
-    std::vector<double> c = aa->GetAxisColor();
-
+    setLayout( new QVBoxLayout);
     _animConnected = false;
     _ap = NULL;
 
@@ -100,19 +91,15 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     annotationTab->layout()->addWidget(_axisAnnotationGroup1);
 
     QTableWidget* annotationTable = new QTableWidget;
-    _annotationVaporTable2 = new VaporTable(annotationTable);
-    connect(_annotationVaporTable2, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
-    _annotationVaporTable2->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
+    _annotationVaporTable = new VaporTable(annotationTable);
+    connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
+    _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
     annotationTab->layout()->addWidget(annotationTable);
-    _copyRegionCombo = new VComboBox({"No currently instantiated renderers"});
+    _copyRegionCombo = new VComboBox({"Currently no renderers"});
     _copyRegionButton = new VPushButton("Copy");
     connect(_copyRegionButton, SIGNAL(ButtonClicked()), this, SLOT(copyRegionFromRenderer()));
-    //annotationTab->layout()->addWidget(new VLineItem("Renderer", new QSpacerItem(0,0), _copyRegionCombo));
-    //annotationTab->layout()->addWidget(new VLineItem("Copy region from Renderer", new QSpacerItem(0,0), _copyRegionCombo));
     annotationTab->layout()->addWidget(new VLineItem("Copy Region From Renderer", _copyRegionCombo));
     annotationTab->layout()->addWidget(new VLineItem("", _copyRegionButton));
-    
-
     
     _axisAnnotationGroup2 = new PGroup({
         new PColorSelector(AxisAnnotation::_colorTag, "Axis Text Color"),
@@ -276,8 +263,7 @@ void AnnotationEventRouter::gatherRenderers(std::vector<string> &renderers, stri
 
 void AnnotationEventRouter::updateCopyRegionCombo()
 {
-    copyRegionCombo->clear();
-
+    //copyRegionCombo->clear();
 
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
     std::string       dataSetName = vParams->GetCurrentAxisDataMgrName();
@@ -385,7 +371,6 @@ void AnnotationEventRouter::updateAxisTable()
     colHeaders.push_back("Z");
 
     _annotationVaporTable->Update(5, 3, tableValues, rowHeaders, colHeaders);
-    _annotationVaporTable2->Update(5, 3, tableValues, rowHeaders, colHeaders);
 }
 
 string AnnotationEventRouter::getProjString()
@@ -479,36 +464,6 @@ std::vector<double> AnnotationEventRouter::getDomainExtents() const
     return extents;
 }
 
-// Initialize tic length to 2.5% of the domain that they're oriented on.
-void AnnotationEventRouter::initializeTicSizes(AxisAnnotation *aa)
-{
-    vector<double> ticSizes(3, .025);
-    aa->SetTicSize(ticSizes);
-}
-
-/*void AnnotationEventRouter::initializeAnnotationExtents(AxisAnnotation *aa)
-{
-    vector<double> minExts(3, 0.0);
-    vector<double> maxExts(3, 1.0);
-
-    aa->SetMinTics(minExts);
-    aa->SetMaxTics(maxExts);
-    aa->SetAxisOrigin(minExts);
-}
-
-void AnnotationEventRouter::initializeAnnotation(AxisAnnotation *aa)
-{
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    paramsMgr->BeginSaveStateGroup("Initialize axis annotation table");
-
-    initializeAnnotationExtents(aa);
-    initializeTicSizes(aa);
-
-    paramsMgr->EndSaveStateGroup();
-
-    aa->SetAxisAnnotationInitialized(true);
-}*/
-
 void AnnotationEventRouter::axisAnnotationTableChanged()
 {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
@@ -553,7 +508,7 @@ vector<double> AnnotationEventRouter::getTableRow(int row)
 {
     vector<double> contents;
     for (int col = 0; col < 3; col++) {
-        double val = _annotationVaporTable2->GetValue(row, col);
+        double val = _annotationVaporTable->GetValue(row, col);
         contents.push_back(val);
     }
     return contents;

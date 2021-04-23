@@ -4,6 +4,7 @@
 VComboBox::VComboBox(const std::vector<std::string> &values) : VHBoxWidget()
 {
     _combo = new QComboBox;
+    _combo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
     // Disable scroll wheel
     //

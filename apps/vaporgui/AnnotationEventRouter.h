@@ -63,26 +63,25 @@ public:
     virtual void _confirmText(){};
 
 protected slots:
-    void setAxisAnnotation(bool);
+    /*void setAxisAnnotation(bool);
     void setLatLonAnnotation(bool);
     void setAxisTextSize(int);
     void setAxisDigits(int);
     void setAxisTicWidth(double);
     void setAxisColor();
     void setAxisBackgroundColor();
-    void axisAnnotationTableChanged();
     void setXTicOrientation(int);
     void setYTicOrientation(int);
     void setZTicOrientation(int);
 
-    void setLatLonAnnot(bool);
+    void setLatLonAnnot(bool);*/
+    void axisAnnotationTableChanged();
     void copyRegionFromRenderer();
 
 private:
     Combo *     _textSizeCombo;
     Combo *     _digitsCombo;
     Combo *     _ticWidthCombo;
-    VaporTable *_annotationVaporTable;
 
     std::map<std::string, std::string> _visNames;
     std::map<std::string, std::string> _renTypeNames;
@@ -122,7 +121,7 @@ private:
     AnimationParams *_ap;
     bool             _animConnected;
 
-    VaporTable* _annotationVaporTable2;
+    VaporTable* _annotationVaporTable;
     CopyRegionAnnotationWidget* _copyRegionWidget;
     VComboBox* _copyRegionCombo;
     VPushButton* _copyRegionButton;
