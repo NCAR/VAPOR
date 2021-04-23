@@ -54,20 +54,17 @@ static ParamsRegistrar<AxisAnnotation> registrar(AxisAnnotation::GetClassType())
 //----------------------------------------------------------------------------
 // Constructor
 //----------------------------------------------------------------------------
-AxisAnnotation::AxisAnnotation(ParamsBase::StateSave *ssave) : ParamsBase(ssave, AxisAnnotation::GetClassType()) {
+AxisAnnotation::AxisAnnotation(ParamsBase::StateSave *ssave) : ParamsBase(ssave, AxisAnnotation::GetClassType()) {}
 
-}
-
-AxisAnnotation::AxisAnnotation(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node) {
-
-}
+AxisAnnotation::AxisAnnotation(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node) {}
 
 //----------------------------------------------------------------------------
 // Destructor
 //----------------------------------------------------------------------------
 AxisAnnotation::~AxisAnnotation() { MyBase::SetDiagMsg("AxisAnnotation::~AxisAnnotation() this=%p", this); }
 
-void AxisAnnotation::Initialize() {
+void AxisAnnotation::Initialize()
+{
     vector<double> minExts(3, 0.0);
     vector<double> maxExts(3, 1.0);
 
@@ -78,9 +75,9 @@ void AxisAnnotation::Initialize() {
     SetValueDoubleVec(_colorTag, "Axis annotation text color", {1.0, 1.0, 1.0});
     SetValueLong(_fontSizeTag, "Axis annotation font size", 24);
     SetValueLong(_digitsTag, "Set axis num digits", 2);
-    SetTicWidth( 1 );
+    SetTicWidth(1);
     SetAxisAnnotationInitialized(true);
-    //SetValueDoubleVec(_ticSizeTag, {.05, .05, .05});
+    // SetValueDoubleVec(_ticSizeTag, {.05, .05, .05});
 }
 
 void AxisAnnotation::SetAxisAnnotationEnabled(bool val)
@@ -192,31 +189,28 @@ vector<double> AxisAnnotation::GetTicSize() const
     return GetValueDoubleVec(_ticSizeTag, defaultv);
 }
 
-void AxisAnnotation::SetXTicDir( double dir ) {
+void AxisAnnotation::SetXTicDir(double dir)
+{
     std::vector<double> v = GetTicDirs();
     v[0] = dir;
     SetTicDirs(v);
 }
 
-int AxisAnnotation::GetXTicDir() const {
-    return GetTicDirs()[0];
-}
+int AxisAnnotation::GetXTicDir() const { return GetTicDirs()[0]; }
 
-int AxisAnnotation::GetYTicDir() const {
-    return GetTicDirs()[1];
-}
+int AxisAnnotation::GetYTicDir() const { return GetTicDirs()[1]; }
 
-int AxisAnnotation::GetZTicDir() const {
-    return GetTicDirs()[2];
-}
+int AxisAnnotation::GetZTicDir() const { return GetTicDirs()[2]; }
 
-void AxisAnnotation::SetYTicDir( double dir ) {
+void AxisAnnotation::SetYTicDir(double dir)
+{
     std::vector<double> v = GetTicDirs();
     v[2] = dir;
     SetTicDirs(v);
 }
 
-void AxisAnnotation::SetZTicDir( double dir ) {
+void AxisAnnotation::SetZTicDir(double dir)
+{
     std::vector<double> v = GetTicDirs();
     v[2] = dir;
     SetTicDirs(v);

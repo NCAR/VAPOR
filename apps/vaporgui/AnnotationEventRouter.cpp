@@ -79,18 +79,18 @@ std::vector<std::string> split(const std::string &s, char delim)
 
 AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), EventRouter(ce, AnnotationParams::GetClassType())
 {
-    setLayout( new QVBoxLayout);
+    setLayout(new QVBoxLayout);
     _animConnected = false;
     _ap = NULL;
 
-    VSection* annotationTab = new VSection("Axis Annotations");
+    VSection *annotationTab = new VSection("Axis Annotations");
     _axisAnnotationGroup1 = new PGroup({
-        new PCheckbox( AxisAnnotation::_annotationEnabledTag,"Axis Annotations Enabled" ),
-        new PCheckbox( AxisAnnotation::_latLonAxesTag,"Annotate with lat/lon" ),
+        new PCheckbox(AxisAnnotation::_annotationEnabledTag, "Axis Annotations Enabled"),
+        new PCheckbox(AxisAnnotation::_latLonAxesTag, "Annotate with lat/lon"),
     });
     annotationTab->layout()->addWidget(_axisAnnotationGroup1);
 
-    QTableWidget* annotationTable = new QTableWidget;
+    QTableWidget *annotationTable = new QTableWidget;
     _annotationVaporTable = new VaporTable(annotationTable);
     connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
     _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
@@ -100,73 +100,39 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     connect(_copyRegionButton, SIGNAL(ButtonClicked()), this, SLOT(copyRegionFromRenderer()));
     annotationTab->layout()->addWidget(new VLineItem("Copy Region From Renderer", _copyRegionCombo));
     annotationTab->layout()->addWidget(new VLineItem("", _copyRegionButton));
-    
+
     _axisAnnotationGroup2 = new PGroup({
         new PColorSelector(AxisAnnotation::_colorTag, "Axis Text Color"),
         new PColorSelector(AxisAnnotation::_backgroundColorTag, "Text Background Color"),
         (new PIntegerSliderEditHLI<AxisAnnotation>("Font Size", &AxisAnnotation::GetAxisFontSize, &AxisAnnotation::SetAxisFontSize))->SetRange(2, 48)->EnableDynamicUpdate(),
         (new PIntegerSliderEdit(AxisAnnotation::_digitsTag, "Digits"))->SetRange(0, 8)->EnableDynamicUpdate(),
         //(new PIntegerSliderEdit(AxisAnnotation::_ticWidthTag, "Tic Width"))->SetRange(0, 10)->EnableDynamicUpdate(), // Broken, see 2711
-        new PEnumDropdownHLI<AxisAnnotation>(
-            "X Tickmark Orientation",
-            {"Y axis", "Z axis"},
-            {1, 2},
-            &AxisAnnotation::GetXTicDir,
-            &AxisAnnotation::SetXTicDir
-        ),
-        new PEnumDropdownHLI<AxisAnnotation>(
-            "Y Tickmark Orientation",
-            {"X axis", "Z axis"},
-            {0, 2},
-            &AxisAnnotation::GetYTicDir,
-            &AxisAnnotation::SetYTicDir
-        ),
-        new PEnumDropdownHLI<AxisAnnotation>(
-            "Z Tickmark Orientation",
-            {"X axis", "Y axis"},
-            {0, 1},
-            &AxisAnnotation::GetZTicDir,
-            &AxisAnnotation::SetZTicDir
-        ),
+        new PEnumDropdownHLI<AxisAnnotation>("X Tickmark Orientation", {"Y axis", "Z axis"}, {1, 2}, &AxisAnnotation::GetXTicDir, &AxisAnnotation::SetXTicDir),
+        new PEnumDropdownHLI<AxisAnnotation>("Y Tickmark Orientation", {"X axis", "Z axis"}, {0, 2}, &AxisAnnotation::GetYTicDir, &AxisAnnotation::SetYTicDir),
+        new PEnumDropdownHLI<AxisAnnotation>("Z Tickmark Orientation", {"X axis", "Y axis"}, {0, 1}, &AxisAnnotation::GetZTicDir, &AxisAnnotation::SetZTicDir),
     });
     annotationTab->layout()->addWidget(_axisAnnotationGroup2);
 
     layout()->addWidget(annotationTab);
 
-    _timeAnnotationGroup = new PGroup({
-        new PSection("Time Annotation", {
-            new PEnumDropdown(
-                AnnotationParams::_timeTypeTag, 
-                {"No annotation", "Time step number", "User time", "Formatted date/time"}, 
-                {0, 1, 2, 3}, 
-                "Annotation type" 
-            ),
-            new PIntegerInput(AnnotationParams::_timeSizeTag, "Font Size"),
-            (new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X Position"))->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y Position"))->EnableDynamicUpdate(),
-            new PColorSelector(AnnotationParams::_timeColorTag, "Text Color")
-        })
-    });
+    _timeAnnotationGroup = new PGroup({new PSection(
+        "Time Annotation", {new PEnumDropdown(AnnotationParams::_timeTypeTag, {"No annotation", "Time step number", "User time", "Formatted date/time"}, {0, 1, 2, 3}, "Annotation type"),
+                            new PIntegerInput(AnnotationParams::_timeSizeTag, "Font Size"), (new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X Position"))->EnableDynamicUpdate(),
+                            (new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y Position"))->EnableDynamicUpdate(), new PColorSelector(AnnotationParams::_timeColorTag, "Text Color")})});
     layout()->addWidget(_timeAnnotationGroup);
 
-    _axisArrowGroup = new PGroup({
-        new PSection("Orientation Arrows", {
-            (new PCheckbox(AnnotationParams::AxisArrowEnabledTag, "Show arrows (XYZ->RGB)")),
-            (new PDoubleSliderEdit(AnnotationParams::AxisArrowSizeTag, "Size"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit(AnnotationParams::AxisArrowXPosTag, "X Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit(AnnotationParams::AxisArrowYPosTag, "Y Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate()
-        })
-    });
+    _axisArrowGroup = new PGroup({new PSection("Orientation Arrows", {(new PCheckbox(AnnotationParams::AxisArrowEnabledTag, "Show arrows (XYZ->RGB)")),
+                                                                      (new PDoubleSliderEdit(AnnotationParams::AxisArrowSizeTag, "Size"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
+                                                                      (new PDoubleSliderEdit(AnnotationParams::AxisArrowXPosTag, "X Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
+                                                                      (new PDoubleSliderEdit(AnnotationParams::AxisArrowYPosTag, "Y Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate()})});
     layout()->addWidget(_axisArrowGroup);
-    
-    _3DGeometryGroup = new PGroup({
-        new PSection("3D Geometry", {
-            new PCheckbox(AnnotationParams::_domainFrameTag, "Display Domain Bounds"),
-            new PColorSelector(AnnotationParams::_domainColorTag, "Domain Frame Color"),
-            new PColorSelector(AnnotationParams::_backgroundColorTag, "Background Color"),
-            //new PColorSelector(AnnotationParams::_regionColorTag, "Region Frame Color")  Broken.  See #1742
-        })
-    });
+
+    _3DGeometryGroup = new PGroup(
+        {new PSection("3D Geometry", {
+                                         new PCheckbox(AnnotationParams::_domainFrameTag, "Display Domain Bounds"), new PColorSelector(AnnotationParams::_domainColorTag, "Domain Frame Color"),
+                                         new PColorSelector(AnnotationParams::_backgroundColorTag, "Background Color"),
+                                         // new PColorSelector(AnnotationParams::_regionColorTag, "Region Frame Color")  Broken.  See #1742
+                                     })});
     layout()->addWidget(_3DGeometryGroup);
 }
 
@@ -184,7 +150,7 @@ void AnnotationEventRouter::_updateTab()
     updateCopyRegionCombo();
     updateAxisTable();
 
-    AxisAnnotation* a = _getCurrentAxisAnnotation();
+    AxisAnnotation *a = _getCurrentAxisAnnotation();
     _axisAnnotationGroup1->Update(a);
     _axisAnnotationGroup2->Update(a, _controlExec->GetParamsMgr());
     std::vector<double> c = a->GetAxisColor();
@@ -200,7 +166,7 @@ void AnnotationEventRouter::_updateTab()
 
 void AnnotationEventRouter::copyRegionFromRenderer()
 {
-    //string copyString = copyRegionCombo->currentText().toStdString();
+    // string copyString = copyRegionCombo->currentText().toStdString();
     string copyString = _copyRegionCombo->GetValue();
     if (copyString == "") return;
 
@@ -255,15 +221,15 @@ void AnnotationEventRouter::gatherRenderers(std::vector<string> &renderers, stri
 
     for (int k = 0; k < renNames.size(); k++) {
         string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
-        renderers.push_back( displayName );
-        //QString qDisplayName = QString::fromStdString(displayName);
-        //copyRegionCombo->addItem(qDisplayName);
+        renderers.push_back(displayName);
+        // QString qDisplayName = QString::fromStdString(displayName);
+        // copyRegionCombo->addItem(qDisplayName);
     }
 }
 
 void AnnotationEventRouter::updateCopyRegionCombo()
 {
-    //copyRegionCombo->clear();
+    // copyRegionCombo->clear();
 
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
     std::string       dataSetName = vParams->GetCurrentAxisDataMgrName();
@@ -297,7 +263,7 @@ void AnnotationEventRouter::updateCopyRegionCombo()
             }
         }
     }
-    _copyRegionCombo->SetOptions( renderers );
+    _copyRegionCombo->SetOptions(renderers);
 }
 
 void AnnotationEventRouter::scaleNormalizedCoordsToWorld(std::vector<double> &coords)

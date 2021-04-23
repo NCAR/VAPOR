@@ -53,14 +53,14 @@ public:
     void           SetTicSize(vector<double> ticsizes);
     vector<double> GetTicSize() const;
 
-    void           SetXTicDir( double dir );
-    int            GetXTicDir() const;
+    void SetXTicDir(double dir);
+    int  GetXTicDir() const;
 
-    void           SetYTicDir( double dir );
-    int            GetYTicDir() const;
+    void SetYTicDir(double dir);
+    int  GetYTicDir() const;
 
-    void           SetZTicDir( double dir );
-    int            GetZTicDir() const;
+    void SetZTicDir(double dir);
+    int  GetZTicDir() const;
 
     void           SetTicDirs(vector<double> ticdirs);
     vector<double> GetTicDirs() const;

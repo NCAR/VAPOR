@@ -63,7 +63,7 @@ const string AnnotationParams::_timeColorTag = "TimeColor";
 const string AnnotationParams::_timeTypeTag = "TimeType";
 const string AnnotationParams::_timeSizeTag = "TimeSize";
 const string AnnotationParams::_projStringTag = "ProjString";
-const string AnnotationParams::_currentTimeStepTag= "CurrentTimeStep";
+const string AnnotationParams::_currentTimeStepTag = "CurrentTimeStep";
 
 vector<double> AnnotationParams::_previousStretch;
 
@@ -117,7 +117,7 @@ void AnnotationParams::_init()
     SetValueDouble(_timeLLYTag, "Initializing timestep lly coordinate", 0.01);
     SetValueLong(_timeSizeTag, "Initializing timestep font size", 24);
     SetValueDoubleVec(_timeColorTag, "Initializing timestep color", {1., 1., 1.});
-    //SetValueLong(_annotationEnabledTag, "Initializing axis annotation enabled default", 0);
+    // SetValueLong(_annotationEnabledTag, "Initializing axis annotation enabled default", 0);
     SetValueLong(_latLonAxesTag, "Initializing axis annotation enabled default", 0);
 }
 

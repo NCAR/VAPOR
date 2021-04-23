@@ -96,7 +96,7 @@ private:
     void updateAxisAnnotations();
     void updateAxisTable();
     void updateCopyRegionCombo();
-    void gatherRenderers(std::vector<string>&, string, string, string, string);
+    void gatherRenderers(std::vector<string> &, string, string, string, string);
 
     void   updateDataMgrCombo();
     string getProjString();
@@ -113,24 +113,24 @@ private:
     void                convertLonToPCS(double &xCoord);
     void                convertLatToPCS(double &yCoord);
 
-    //void initializeAnnotation(VAPoR::AxisAnnotation *aa);
-    //void initializeAnnotationExtents(VAPoR::AxisAnnotation *aa);
+    // void initializeAnnotation(VAPoR::AxisAnnotation *aa);
+    // void initializeAnnotationExtents(VAPoR::AxisAnnotation *aa);
 
     virtual void _updateTab();
 
     AnimationParams *_ap;
     bool             _animConnected;
 
-    VaporTable* _annotationVaporTable;
-    CopyRegionAnnotationWidget* _copyRegionWidget;
-    VComboBox* _copyRegionCombo;
-    VPushButton* _copyRegionButton;
+    VaporTable *                _annotationVaporTable;
+    CopyRegionAnnotationWidget *_copyRegionWidget;
+    VComboBox *                 _copyRegionCombo;
+    VPushButton *               _copyRegionButton;
 
-    PGroup   *_axisAnnotationGroup1;
-    PGroup   *_axisAnnotationGroup2;
-    PGroup   *_axisArrowGroup;
-    PGroup   *_timeAnnotationGroup;
-    PGroup   *_3DGeometryGroup;
+    PGroup *  _axisAnnotationGroup1;
+    PGroup *  _axisAnnotationGroup2;
+    PGroup *  _axisArrowGroup;
+    PGroup *  _timeAnnotationGroup;
+    PGroup *  _3DGeometryGroup;
 };
 
 #endif    // ANNOTATIONEVENTROUTER_H

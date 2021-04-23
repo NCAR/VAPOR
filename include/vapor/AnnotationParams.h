@@ -48,7 +48,7 @@ class XmlNode;
 //! When local settings are used, they only affect one currently active visualizer.
 //! The AnnotationParams class also has several methods that are useful in setting up data requests from the DataMgr.
 //!
-//class PARAMS_API AnnotationParams : public ParamsBase {
+// class PARAMS_API AnnotationParams : public ParamsBase {
 class PARAMS_API AnnotationParams : public ParamsBase {
 public:
     //! Create a AnnotationParams object from scratch
@@ -65,8 +65,8 @@ public:
 
     virtual ~AnnotationParams(){};
 
-    size_t GetCurrentTimestep() const { return GetValueLong( _currentTimeStepTag, 0 ); }
-    void SetCurrentTimestep( size_t ts ) { SetValueLong( _currentTimeStepTag, "current time step", ts ); }
+    size_t GetCurrentTimestep() const { return GetValueLong(_currentTimeStepTag, 0); }
+    void   SetCurrentTimestep(size_t ts) { SetValueLong(_currentTimeStepTag, "current time step", ts); }
 
     void GetDomainColor(double color[3]) const;
     void GetDomainColor(std::vector<double> &color) const { _getColor(color, _domainColorTag); }

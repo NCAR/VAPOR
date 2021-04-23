@@ -184,7 +184,7 @@ void AnnotationRenderer::DrawText()
     _glManager->PixelCoordinateSystemPush();
 
     DrawText(_miscAnnot);
-    //DrawText(_timeAnnot);
+    // DrawText(_timeAnnot);
     _drawTimeAnnotation();
     DrawText(_axisAnnot);
 
@@ -192,45 +192,43 @@ void AnnotationRenderer::DrawText()
     _glManager->PixelCoordinateSystemPop();
 }
 
-void AnnotationRenderer::_drawTimeAnnotation() {
-    //ClearText(1);
+void AnnotationRenderer::_drawTimeAnnotation()
+{
+    // ClearText(1);
     AnnotationParams *params = m_paramsMgr->GetAnnotationParams(m_winName);
-    size_t ts = params->GetCurrentTimestep();
-   
+    size_t            ts = params->GetCurrentTimestep();
+
     std::string timeText;
-    auto type = params->GetValueLong(AnnotationParams::_timeTypeTag, 0);
+    auto        type = params->GetValueLong(AnnotationParams::_timeTypeTag, 0);
 
     if (type == 0) {
         ClearText(1);
-    } 
-    else if (type == 1) { // drawTimeStep
+    } else if (type == 1) {    // drawTimeStep
         //_controlExec->ClearText(1);
-        timeText = "Timestep: " + std::to_string( ts ); 
-    } 
-    else if (type == 2) { // drawTimeUser()
-        vector<double> timeCoords = m_dataStatus->GetTimeCoordinates();
+        timeText = "Timestep: " + std::to_string(ts);
+    } else if (type == 2) {    // drawTimeUser()
+        vector<double>     timeCoords = m_dataStatus->GetTimeCoordinates();
         std::ostringstream ss;
         ss << timeCoords[ts];
         timeText = ss.str();
-    } 
-    else if (type == 3) { // drawTimeStamp()
+    } else if (type == 3) {    // drawTimeStamp()
         timeText = m_dataStatus->GetTimeCoordsFormatted()[ts];
     }
- 
- 
+
+
     billboard board;
-    board.text = timeText; //params->GetValueString(AnnotationParams::_timeAnnotationTag, "");
+    board.text = timeText;    // params->GetValueString(AnnotationParams::_timeAnnotationTag, "");
     board.xn = params->GetValueDouble(AnnotationParams::_timeLLXTag, 0.01);
     board.yn = params->GetValueDouble(AnnotationParams::_timeLLYTag, 0.01);
     board.x = 0;
     board.y = 0;
     board.size = params->GetValueLong(AnnotationParams::_timeSizeTag, 24.);
-    std::vector<double> color = params->GetValueDoubleVec(AnnotationParams::_timeColorTag, {1.0,1.0,1.0});
+    std::vector<double> color = params->GetValueDoubleVec(AnnotationParams::_timeColorTag, {1.0, 1.0, 1.0});
     board.color[0] = color[0];
     board.color[1] = color[1];
     board.color[2] = color[2];
 
-    DrawText( {board} );
+    DrawText({board});
 }
 
 void AnnotationRenderer::DrawText(vector<billboard> billboards)
@@ -741,7 +739,7 @@ void AnnotationRenderer::renderText(double text, double coord[], AxisAnnotation 
     label.VerticalAlignment = TextLabel::Top;
     label.Padding = fontSize / 4.f;
     label.ForegroundColor = glm::vec4(axisColor[0], axisColor[1], axisColor[2], axisColor[3]);
-    //label.BackgroundColor = glm::vec4(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
+    // label.BackgroundColor = glm::vec4(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
     label.BackgroundColor = glm::vec4(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1.);
     label.DrawText(glm::vec3(coord[0], coord[1], coord[2]), textString);
 }
