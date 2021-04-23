@@ -63,18 +63,6 @@ public:
     virtual void _confirmText(){};
 
 protected slots:
-    /*void setAxisAnnotation(bool);
-    void setLatLonAnnotation(bool);
-    void setAxisTextSize(int);
-    void setAxisDigits(int);
-    void setAxisTicWidth(double);
-    void setAxisColor();
-    void setAxisBackgroundColor();
-    void setXTicOrientation(int);
-    void setYTicOrientation(int);
-    void setZTicOrientation(int);
-
-    void setLatLonAnnot(bool);*/
     void axisAnnotationTableChanged();
     void copyRegionFromRenderer();
 
@@ -112,9 +100,6 @@ private:
     void                convertLonLatToPCS(double &xCoord, double &yCoord);
     void                convertLonToPCS(double &xCoord);
     void                convertLatToPCS(double &yCoord);
-
-    // void initializeAnnotation(VAPoR::AxisAnnotation *aa);
-    // void initializeAnnotationExtents(VAPoR::AxisAnnotation *aa);
 
     virtual void _updateTab();
 

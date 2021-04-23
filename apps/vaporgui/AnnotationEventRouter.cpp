@@ -166,7 +166,6 @@ void AnnotationEventRouter::_updateTab()
 
 void AnnotationEventRouter::copyRegionFromRenderer()
 {
-    // string copyString = copyRegionCombo->currentText().toStdString();
     string copyString = _copyRegionCombo->GetValue();
     if (copyString == "") return;
 
@@ -222,15 +221,11 @@ void AnnotationEventRouter::gatherRenderers(std::vector<string> &renderers, stri
     for (int k = 0; k < renNames.size(); k++) {
         string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
         renderers.push_back(displayName);
-        // QString qDisplayName = QString::fromStdString(displayName);
-        // copyRegionCombo->addItem(qDisplayName);
     }
 }
 
 void AnnotationEventRouter::updateCopyRegionCombo()
 {
-    // copyRegionCombo->clear();
-
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
     std::string       dataSetName = vParams->GetCurrentAxisDataMgrName();
 

@@ -15,6 +15,9 @@ class DataMgr;
 class CopyRegionWidget : public VSectionGroup {
     Q_OBJECT
 
+    QPushButton *copyButton;
+    QComboBox *  copyCombo;
+
 public:
     CopyRegionWidget(QWidget *parent = 0);
 
@@ -34,18 +37,15 @@ public:
                   "necessary for copying renderer regions");
     }
     bool isContainer() const { return true; }
-    virtual void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
+    void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
 signals:
     void valueChanged();
 
-protected slots:
-    virtual void copyRegion();
+private slots:
+    void copyRegion();
 
-protected:
-    QPushButton *copyButton;
-    QComboBox *  copyCombo;
-
+private:
     void updateCopyCombo();
 
     // Configures a box to have equal minimum and maximum

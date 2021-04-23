@@ -16,7 +16,6 @@ set (SRCS
 	Statistics.cpp
 	Plot.cpp
 	CopyRegionWidget.cpp
-	CopyRegionAnnotationWidget.cpp
 	RangeCombos.cpp
 	BarbEventRouter.cpp
 	BarbEventRouter.h
@@ -213,8 +212,6 @@ set (SRCS
 	PTransformWidget.h
 	PCopyRegionWidget.cpp
 	PCopyRegionWidget.h
-	PCopyRegionAnnotationWidget.cpp
-	PCopyRegionAnnotationWidget.h
 	PSliceSampleLocationSelector.cpp
 	PSliceSampleLocationSelector.h
 	PAnnotationColorbarWidget.cpp
@@ -280,7 +277,6 @@ set (SRCS
 	FlowEventRouter.h
 	Combo.h
 	CopyRegionWidget.h
-	CopyRegionAnnotationWidget.h
 	FileOperationChecker.h
 	GUIStateParams.h
 	MouseModeParams.h
