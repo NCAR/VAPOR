@@ -378,20 +378,18 @@ int ControlExec::LoadState(string stateFile)
     return (0);
 }
 
-void ControlExec::SetNumThreads(size_t nthreads) {
+void ControlExec::SetNumThreads(size_t nthreads)
+{
     //
     // Set the number of PThreads to use
     //
-    _dataStatus->SetNumThreads(nthreads); 
+    _dataStatus->SetNumThreads(nthreads);
 
     //
-    // Now set the number of threads used by OpenMP. If nthreads <1, the OS will 
-    // determine the number of threads. 
+    // Now set the number of threads used by OpenMP. If nthreads <1, the OS will
+    // determine the number of threads.
     //
-    if (nthreads > 0) {
-        omp_set_num_threads(nthreads);
-    }
-    
+    if (nthreads > 0) { omp_set_num_threads(nthreads); }
 }
 
 size_t ControlExec::GetNumThreads() const { return (_dataStatus->GetNumThreads()); }
