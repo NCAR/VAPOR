@@ -68,12 +68,14 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/DCUtils.h
 	${PROJECT_SOURCE_DIR}/include/vapor/QuadTreeRectangle.hpp
 	${PROJECT_SOURCE_DIR}/include/vapor/QuadTreeRectangleP.h
+	${PROJECT_SOURCE_DIR}/include/vapor/OpenMPSupport.h
 )
 
 add_library (vdc SHARED ${SRC} ${HEADERS})
 
 if( USE_OMP )
   target_compile_options( vdc PUBLIC ${OpenMP_CXX_FLAGS} )
+    target_compile_definitions (vdc PUBLIC USE_OMP)
 endif()
 
 target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ})

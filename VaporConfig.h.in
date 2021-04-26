@@ -1,6 +1,0 @@
-#ifndef VAPOR_CONFIG
-#define VAPOR_CONFIG
-
-#cmakedefine USE_OMP
-
-#endif

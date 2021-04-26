@@ -81,12 +81,6 @@ if( USE_OMP )
     endif()
 endif()
 
-#
-# configure a header file to pass some of the CMake settings to the source code
-#
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/VaporConfig.h.in" "VaporConfig.h")
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 set (GENERATE_FULL_INSTALLER ON)
 if (BUILD_GUI)
 	set (BUILD_VDC ON)

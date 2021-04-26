@@ -1,7 +1,4 @@
-
 #pragma once
-
-#include "VaporConfig.h"
 
 #ifdef USE_OMP
     #include <omp.h>
