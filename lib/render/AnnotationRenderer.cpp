@@ -184,7 +184,6 @@ void AnnotationRenderer::DrawText()
     _glManager->PixelCoordinateSystemPush();
 
     DrawText(_miscAnnot);
-    // DrawText(_timeAnnot);
     _drawTimeAnnotation();
     DrawText(_axisAnnot);
 
@@ -194,7 +193,6 @@ void AnnotationRenderer::DrawText()
 
 void AnnotationRenderer::_drawTimeAnnotation()
 {
-    // ClearText(1);
     AnnotationParams *params = m_paramsMgr->GetAnnotationParams(m_winName);
     size_t            ts = params->GetCurrentTimestep();
 
@@ -204,7 +202,6 @@ void AnnotationRenderer::_drawTimeAnnotation()
     if (type == 0) {
         ClearText(1);
     } else if (type == 1) {    // drawTimeStep
-        //_controlExec->ClearText(1);
         timeText = "Timestep: " + std::to_string(ts);
     } else if (type == 2) {    // drawTimeUser()
         vector<double>     timeCoords = m_dataStatus->GetTimeCoordinates();
@@ -217,7 +214,7 @@ void AnnotationRenderer::_drawTimeAnnotation()
 
 
     billboard board;
-    board.text = timeText;    // params->GetValueString(AnnotationParams::_timeAnnotationTag, "");
+    board.text = timeText;
     board.xn = params->GetValueDouble(AnnotationParams::_timeLLXTag, 0.01);
     board.yn = params->GetValueDouble(AnnotationParams::_timeLLYTag, 0.01);
     board.x = 0;
@@ -739,7 +736,6 @@ void AnnotationRenderer::renderText(double text, double coord[], AxisAnnotation 
     label.VerticalAlignment = TextLabel::Top;
     label.Padding = fontSize / 4.f;
     label.ForegroundColor = glm::vec4(axisColor[0], axisColor[1], axisColor[2], axisColor[3]);
-    // label.BackgroundColor = glm::vec4(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
     label.BackgroundColor = glm::vec4(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1.);
     label.DrawText(glm::vec3(coord[0], coord[1], coord[2]), textString);
 }

@@ -77,7 +77,6 @@ void AxisAnnotation::Initialize()
     SetValueLong(_digitsTag, "Set axis num digits", 2);
     SetTicWidth(1);
     SetAxisAnnotationInitialized(true);
-    // SetValueDoubleVec(_ticSizeTag, {.05, .05, .05});
 }
 
 void AxisAnnotation::SetAxisAnnotationEnabled(bool val)
@@ -218,7 +217,6 @@ void AxisAnnotation::SetZTicDir(double dir)
 
 void AxisAnnotation::SetTicDirs(vector<double> ticDirs)
 {
-    std::cout << ticDirs[0] << " " << ticDirs[1] << " " << ticDirs[2] << std::endl;
     VAssert(ticDirs.size() == 3);
     SetValueDoubleVec(_ticDirsTag, "Set tic direction", ticDirs);
 }

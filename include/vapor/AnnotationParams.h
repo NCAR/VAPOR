@@ -48,7 +48,6 @@ class XmlNode;
 //! When local settings are used, they only affect one currently active visualizer.
 //! The AnnotationParams class also has several methods that are useful in setting up data requests from the DataMgr.
 //!
-// class PARAMS_API AnnotationParams : public ParamsBase {
 class PARAMS_API AnnotationParams : public ParamsBase {
 public:
     //! Create a AnnotationParams object from scratch
