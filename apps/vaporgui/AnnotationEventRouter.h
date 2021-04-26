@@ -23,7 +23,6 @@
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
-#include "ui_AnnotationGUI.h"
 #include "RangeCombos.h"
 #include "VaporTable.h"
 #include <vapor/AxisAnnotation.h>
@@ -106,7 +105,6 @@ private:
     bool             _animConnected;
 
     VaporTable *                _annotationVaporTable;
-    CopyRegionAnnotationWidget *_copyRegionWidget;
     VComboBox *                 _copyRegionCombo;
     VPushButton *               _copyRegionButton;
 

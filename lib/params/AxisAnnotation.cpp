@@ -129,7 +129,7 @@ void AxisAnnotation::SetNumTics(std::vector<double> num)
 
 std::vector<double> AxisAnnotation::GetNumTics() const
 {
-    vector<double> defaultv(3, 6.0);
+    vector<double> defaultv = {3, 3, 2};
     vector<double> val = GetValueDoubleVec(_numTicsTag, defaultv);
 
     for (int i = 0; i < val.size(); i++) {
@@ -204,7 +204,7 @@ int AxisAnnotation::GetZTicDir() const { return GetTicDirs()[2]; }
 void AxisAnnotation::SetYTicDir(double dir)
 {
     std::vector<double> v = GetTicDirs();
-    v[2] = dir;
+    v[1] = dir;
     SetTicDirs(v);
 }
 

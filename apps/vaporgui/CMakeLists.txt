@@ -298,7 +298,6 @@ set (UIS
 	LeftPanel.ui
 	animationTab.ui
 	NavigationTab.ui
-	AnnotationGUI.ui
 	NewRendererDialog.ui
 	TransformTableGUI.ui
 	statsWindow.ui

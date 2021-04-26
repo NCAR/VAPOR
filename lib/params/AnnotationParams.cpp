@@ -108,7 +108,6 @@ void AnnotationParams::_init()
     SetBackgroundColor(clr);
     SetUseRegionFrame(false);
     SetUseDomainFrame(true);
-    vector<double> dvec(3, 0.0);
     SetValueLong(AxisArrowEnabledTag, "Initializing AxisArrowEnabledTag", 0);
     SetValueDouble(AxisArrowSizeTag, "Initializing AxisArrowSizeTag", .2);
     SetValueDouble(AxisArrowXPosTag, "Initializing AxisArrowXPosTag", .05);
