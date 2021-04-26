@@ -104,9 +104,9 @@ private:
     AnimationParams *_ap;
     bool             _animConnected;
 
-    VaporTable *                _annotationVaporTable;
-    VComboBox *                 _copyRegionCombo;
-    VPushButton *               _copyRegionButton;
+    VaporTable * _annotationVaporTable;
+    VComboBox *  _copyRegionCombo;
+    VPushButton *_copyRegionButton;
 
     PGroup *_axisAnnotationGroup1;
     PGroup *_axisAnnotationGroup2;
