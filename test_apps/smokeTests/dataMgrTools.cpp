@@ -129,7 +129,7 @@ void TestVariables(VAPoR::DataMgr &dataMgr)
             cout << "    Dimension Lengths:  " << s << endl;
             cout << "    Topology Dimension: " << dataMgr.GetVarTopologyDim(varName) << endl;
             cout << endl;
-            PrintStats(rms, numMissingValues, disagreements);
+            PrintStats(rms, numMissingValues, disagreements, 0.0);
         }
     }
 }
