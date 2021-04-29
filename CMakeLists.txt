@@ -77,7 +77,7 @@ if( USE_OMP )
     if( OpenMP_CXX_FOUND AND OpenMP_CXX_FLAGS )
         message(STATUS "OpenMP found! (${OpenMP_CXX_LIB_NAMES})")
     else()
-        message(STATUS "OpenMP NOT found!")
+        message(STATUS "OpenMP NOT found! Are you using Apple Clang?")
     endif()
 endif()
 
