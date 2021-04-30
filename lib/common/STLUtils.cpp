@@ -9,6 +9,11 @@ bool STLUtils::ContainsIgnoreCase(const std::string &toSearch, const std::string
 
 bool STLUtils::BeginsWith(const std::string &str, const std::string &match) { return str.size() >= match.size() && equal(match.begin(), match.end(), str.begin()); }
 
+bool STLUtils::EndsWith(const std::string &str, const std::string &match)
+{
+    return str.size() >= match.size() && equal(match.begin(), match.end(), str.end() - match.size());
+}
+
 std::string STLUtils::ToLower(std::string str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);

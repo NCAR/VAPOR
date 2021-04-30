@@ -823,7 +823,7 @@ DerivedCoordVar_CF1D::DerivedCoordVar_CF1D(string derivedVarName, DC *dc, string
     _dimName = dimName;
     _dimLen = 0;
 
-    _coordVarInfo = DC::CoordVar(_derivedVarName, units, DC::XType::FLOAT, vector<bool>(1, false), axis, false, vector<string>(1, dimName), "");
+    _coordVarInfo = DC::CoordVar(_derivedVarName, units, DC::XType::FLOAT, vector<bool>(1, false), axis, true, vector<string>(1, dimName), "");
 }
 
 int DerivedCoordVar_CF1D::Initialize()
@@ -865,21 +865,19 @@ int DerivedCoordVar_CF1D::GetDimLensAtLevel(int level, std::vector<size_t> &dims
 
 int DerivedCoordVar_CF1D::OpenVariableRead(size_t ts, int level, int lod)
 {
-    if (level != 0) {
-        SetErrMsg("Invalid parameter");
-        return (-1);
-    }
+//    if (level != 0) {
+//        SetErrMsg("Invalid parameter");
+//        return (-1);
+//    }
 
-    if (lod != 0) {
-        SetErrMsg("Invalid parameter");
-        return (-1);
-    }
+//    if (lod != 0) {
+//        SetErrMsg("Invalid parameter");
+//        return (-1);
+//    }
 
     DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, _derivedVarName, level, lod);
 
     return (_fileTable.AddEntry(f));
-
-    return (0);
 }
 
 int DerivedCoordVar_CF1D::CloseVariable(int fd)

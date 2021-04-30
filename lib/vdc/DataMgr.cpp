@@ -12,7 +12,10 @@
 #include <vapor/DCWRF.h>
 #include <vapor/DCCF.h>
 #include <vapor/DCMPAS.h>
+#include <vapor/DCP.h>
+#include <vapor/DCMelanie.h>
 #include <vapor/DerivedVar.h>
+#include <vapor/DerivedParticleDensity.h>
 #include <vapor/DataMgr.h>
 #ifdef WIN32
     #include <float.h>
@@ -599,7 +602,14 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         _dc = new DCCF();
     } else if (_format.compare("mpas") == 0) {
         _dc = new DCMPAS();
-    } else {
+    }
+    else if (_format.compare("dcp") == 0) {
+        _dc = new DCP();
+    }
+    else if (_format.compare("melanie") == 0) {
+        _dc = new DCMelanie();
+    }
+    else {
         SetErrMsg("Invalid data collection format : %s", _format.c_str());
         return (-1);
     }
@@ -635,6 +645,46 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         SetErrMsg("Failed to get time coordinates");
         return (-1);
     }
+
+
+    if (_format == "dcp") {
+//        printf("============ Init Density =============\n");
+
+        vector<string> dims = {"densityX", "densityY", "densityZ"};
+
+        vector<double> min, max;
+        GetVariableExtents(0, "Position_x", -1, -1, min, max);
+
+//        printf("min = "); PRINTARG(min); printf("\n");
+//        printf("max = "); PRINTARG(max); printf("\n");
+
+        DerivedCoordVar1DSpan *XC = new DerivedCoordVar1DSpan("XC", _dc, dims[0], 0, "", "Position_x");
+        DerivedCoordVar1DSpan *YC = new DerivedCoordVar1DSpan("YC", _dc, dims[1], 1, "", "Position_y");
+        DerivedCoordVar1DSpan *ZC = new DerivedCoordVar1DSpan("ZC", _dc, dims[2], 2, "", "Position_z");
+        XC->Initialize();
+        YC->Initialize();
+        ZC->Initialize();
+        _dvm.AddCoordVar(XC);
+        _dvm.AddCoordVar(YC);
+        _dvm.AddCoordVar(ZC);
+
+        DC::Mesh mesh("density", dims, {XC->GetName(), YC->GetName(), ZC->GetName()});
+        _dvm.AddMesh(mesh);
+
+
+        DerivedParticleDensity *dpd = new DerivedParticleDensity("Particle_Density", _dc, mesh.GetName(), this);
+        dpd->Initialize();
+        AddDerivedVar(dpd);
+
+        auto dataVars = GetDataVarNames(3);
+        for (auto var : dataVars) {
+            DerivedParticleAverage *dpa = new DerivedParticleAverage(var+"_avg", _dc, mesh.GetName(), this, var);
+            dpa->Initialize();
+            AddDerivedVar(dpa);
+        }
+    }
+
+
     return (0);
 }
 
@@ -1784,6 +1834,7 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
         int rc = _readRegion(fd, grid_min, grid_max, region);
         if (rc < 0) {
             if (region) delete[] region;
+            _closeVariable(fd);
             return (-1);
         }
     }
@@ -2512,10 +2563,15 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     if (layers_dimlen) { vertexDims.push_back(layers_dimlen); }
 
     dimname = m.GetFaceDimName();
-    status = _dc->GetDimension(dimname, dimension);
-    VAssert(status);
-    faceDims.push_back(dimension.GetLength());
-    if (layers_dimlen) { faceDims.push_back(layers_dimlen - 1); }
+    if (!dimname.empty()) {
+        status = _dc->GetDimension(dimname, dimension);
+        VAssert(status);
+        faceDims.push_back(dimension.GetLength());
+        if (layers_dimlen) {
+            faceDims.push_back(layers_dimlen - 1);
+        }
+    } else
+        VAssert(!"FaceDim Required");
 
     dimname = m.GetEdgeDimName();
     if (dimname.size()) {
@@ -2546,14 +2602,25 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     bool ok = _getVarConnVars(var.GetName(), face_node_var, node_face_var, dummy, dummy, dummy, dummy);
     VAssert(ok);
 
-    DC::AuxVar auxvar;
-    status = _dc->GetAuxVarInfo(face_node_var, auxvar);
-    VAssert(status);
-    vertexOffset = auxvar.GetOffset();
+   DC::AuxVar auxvar;
 
-    status = _dc->GetAuxVarInfo(node_face_var, auxvar);
-    VAssert(status);
-    faceOffset = auxvar.GetOffset();
+   if (!face_node_var.empty()) {
+       status = _dc->GetAuxVarInfo(face_node_var, auxvar);
+       VAssert(status);
+       vertexOffset = auxvar.GetOffset();
+   } else {
+       VAssert(!"FaceNodeVar Required");
+       vertexOffset = 0;
+   }
+
+    if (!node_face_var.empty()) {
+        status = _dc->GetAuxVarInfo(node_face_var, auxvar);
+        VAssert(status);
+        faceOffset = auxvar.GetOffset();
+    } else {
+        VAssert(!"NodeFaceVar Required");
+        faceOffset = 0;
+    }
 }
 
 string DataMgr::_get_grid_type(string varname) const

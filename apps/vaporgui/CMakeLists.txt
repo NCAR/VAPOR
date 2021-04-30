@@ -248,6 +248,8 @@ set (SRCS
     BookmarkParams.h
     CheckForUpdate.cpp
     CheckForUpdate.h
+    ParticleEventRouter.cpp
+    ParticleEventRouter.h
 
 	# Need to include all files that request .ui files
 	Statistics.h

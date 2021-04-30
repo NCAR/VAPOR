@@ -17,6 +17,8 @@
 
 namespace VAPoR {
 
+class UnstructuredGrid3D;
+
 class VDF_API GridHelper : public Wasp::MyBase {
 public:
     GridHelper(size_t max_size = 10) : _qtrCache(max_size) {}
@@ -138,20 +140,33 @@ private:
                                                              const vector<int *> &conn_blkvec, const vector<size_t> &conn_bs, const vector<size_t> &conn_bmin, const vector<size_t> &conn_bmax,
                                                              const vector<size_t> &vertexDims, const vector<size_t> &faceDims, const vector<size_t> &edgeDims, UnstructuredGrid::Location location,
                                                              size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset, long faceOffset);
+    
+    UnstructuredGrid3D *_make_grid_unstructured_3d(
+        size_t ts,
+        int level,
+        int lod,
+        const DC::DataVar &var,
+        const vector <DC::CoordVar> &cvarsinfo,
+        const vector <size_t> &dims,
+        const vector <float *> &blkvec,
+        const vector <size_t> &bs,
+        const vector <size_t> &bmin,
+        const vector <size_t> &bmax,
+        const vector <int *> &conn_blkvec,
+        const vector <size_t> &conn_bs,
+        const vector <size_t> &conn_bmin,
+        const vector <size_t> &conn_bmax,
+        const vector <size_t> &vertexDims,
+        const vector <size_t> &faceDims,
+        const vector <size_t> &edgeDims,
+        UnstructuredGrid::Location location,
+        size_t maxVertexPerFace,
+        size_t maxFacePerVertex,
+        long vertexOffset,
+        long faceOffset
+    );
 
     void _makeGridHelper(const DC::DataVar &var, const std::vector<size_t> &roi_dims, const std::vector<size_t> &dims, Grid *g) const;
-
-    bool _isUnstructured2D(const DC::Mesh &m, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<std::vector<string>> &cdimnames) const;
-
-    bool _isUnstructuredLayered(const DC::Mesh &m, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<std::vector<string>> &cdimnames) const;
-
-    bool _isRegular(const DC::Mesh &m, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<std::vector<string>> &cdimnames) const;
-
-    bool _isStretched(const DC::Mesh &m, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<std::vector<string>> &cdimnames) const;
-
-    bool _isLayered(const DC::Mesh &m, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<std::vector<string>> &cdimnames) const;
-
-    bool _isCurvilinear(const DC::Mesh &m, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<std::vector<string>> &cdimnames) const;
 
     string _getQuadTreeRectangleKey(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &bmin, const vector<size_t> &bmax) const;
 };

@@ -4,6 +4,7 @@
 #include <map>
 #include <vapor/QuadTreeRectangle.hpp>
 #include <vapor/GridHelper.h>
+#include <vapor/UnstructuredGrid3D.h>
 using namespace Wasp;
 using namespace VAPoR;
 
@@ -77,6 +78,18 @@ bool isLayered(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsinfo, const v
     if (!(cdimnames[2].size() == 3)) return (false);
 
     return (true);
+}
+
+bool isUnstructured3D(
+const DC::Mesh &m,
+const std::vector <DC::CoordVar> &cvarsinfo,
+const std::vector <std::vector <string>> &cdimnames)
+{
+    DC::Mesh::Type mtype = m.GetMeshType();
+    if (mtype == DC::Mesh::UNSTRUC_3D) {
+        return (true);
+    }
+    return(false);
 }
 
 bool isCurvilinear(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsinfo, const vector<vector<string>> &cdimnames)
@@ -541,6 +554,162 @@ UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(size_t ts, 
     return (g);
 }
 
+
+UnstructuredGrid3D *GridHelper::_make_grid_unstructured_3d(
+    size_t ts,
+    int level,
+    int lod,
+    const DC::DataVar &var,
+    const vector <DC::CoordVar> &cvarsinfo,
+    const vector <size_t> &dims,
+    const vector <float *> &blkvec,
+    const vector <size_t> &bs,
+    const vector <size_t> &bmin,
+    const vector <size_t> &bmax,
+    const vector <int *> &conn_blkvec,
+    const vector <size_t> &conn_bs,
+    const vector <size_t> &conn_bmin,
+    const vector <size_t> &conn_bmax,
+    const vector <size_t> &vertexDims,
+    const vector <size_t> &faceDims,
+    const vector <size_t> &edgeDims,
+    UnstructuredGrid::Location location,
+    size_t maxVertexPerFace,
+    size_t maxFacePerVertex,
+    long vertexOffset,
+    long faceOffset
+) {
+    VAssert (dims.size() == 1);
+    VAssert (dims.size() == bs.size());
+    VAssert (dims.size() == bmin.size());
+    VAssert (dims.size() == bmax.size());
+    VAssert(blkvec.size() == 4);
+
+    VAssert(conn_blkvec.size() >= 2);
+    
+
+    // block pointers for data
+    //
+    size_t nblocks = 1;
+    size_t block_size = 1;
+    for (int i=0; i<bs.size(); i++) {
+        nblocks *= bmax[i]-bmin[i]+1;
+        block_size *= bs[i];
+    }
+
+    vector <float *> blkptrs;
+    for (int i=0; i<nblocks; i++) {
+        if (blkvec[0]) blkptrs.push_back(blkvec[0] + i*block_size);
+    }
+
+
+    // Block pointers for X coordinates, which are always 1D
+    //
+    nblocks = 1;
+    block_size = 1;
+    vector <size_t> bs1d = {bs[0]};
+    for (int i=0; i<bs1d.size(); i++) {
+        nblocks *= bmax[i]-bmin[i]+1;
+        block_size *= bs1d[i];
+    }
+
+    vector <float *> xcblkptrs;
+    for (int i=0; i<nblocks; i++) {
+        xcblkptrs.push_back(blkvec[1] + i*block_size);
+    }
+
+    // Block pointers for Y coordinates, which are always 1D
+    //
+    nblocks = 1;
+    block_size = 1;
+    for (int i=0; i<bs1d.size(); i++) {
+        nblocks *= bmax[i]-bmin[i]+1;
+        block_size *= bs1d[i];
+    }
+    vector <float *> ycblkptrs;
+    for (int i=0; i<nblocks; i++) {
+        ycblkptrs.push_back(blkvec[2] + i*block_size);
+    }
+
+    // Block pointers for Z coordinates, which are always 2D
+    //
+    nblocks = 1;
+    block_size = 1;
+    for (int i=0; i<bs.size(); i++) {
+        nblocks *= bmax[i]-bmin[i]+1;
+        block_size *= bs[i];
+    }
+    vector <float *> zcblkptrs;
+    for (int i=0; i<nblocks; i++) {
+        zcblkptrs.push_back(blkvec[3] + i*block_size);
+    }
+
+    // N.B. assumes blkvec contains contiguous blocks :-(
+    //
+    const int *vertexOnFace = conn_blkvec[0];
+    const int *faceOnVertex = conn_blkvec[1];
+    const int *faceOnFace = conn_blkvec.size()==3 ? conn_blkvec[2] : NULL;
+
+    vector <size_t> vertexDims1D = {vertexDims[0]};
+    vector <size_t> faceDims1D = {faceDims[0]};
+    vector <size_t> edgeDims1D;
+    if (edgeDims.size()) {
+        edgeDims1D.push_back(edgeDims[0]);
+    }
+
+    UnstructuredGridCoordless xug(
+        vertexDims1D, faceDims1D, edgeDims1D, bs1d, xcblkptrs, 2,
+        vertexOnFace, faceOnVertex, faceOnFace, location,
+        maxVertexPerFace, maxFacePerVertex,
+        vertexOffset, faceOffset
+    );
+
+    UnstructuredGridCoordless yug(
+        vertexDims1D, faceDims1D, edgeDims1D, bs1d, ycblkptrs, 2,
+        vertexOnFace, faceOnVertex, faceOnFace, location,
+        maxVertexPerFace, maxFacePerVertex,
+        vertexOffset, faceOffset
+    );
+
+    UnstructuredGridCoordless zug(
+        vertexDims, faceDims, edgeDims, bs, zcblkptrs, 3,
+        vertexOnFace, faceOnVertex, faceOnFace, location,
+        maxVertexPerFace, maxFacePerVertex,
+        vertexOffset, faceOffset
+    );
+
+    string qtr_key = _getQuadTreeRectangleKey(
+        ts, level, lod, cvarsinfo, bmin, bmax
+    );
+
+    // Try to get a shared pointer to the QuadTreeRectangle from the
+    // cache. If one does not exist the Grid class will make one. We use
+    // a shared pointer so that we can cache it for use by other Grid
+    // classes. This a peformance optimization, necessary be creating
+    // a QuadTreeRectangle is expensive.
+    //
+    std::shared_ptr<const QuadTreeRectangle<float, size_t> > qtr = _qtrCache.get(qtr_key);
+
+    UnstructuredGrid3D *g = new UnstructuredGrid3D(
+        vertexDims, faceDims, edgeDims, bs, blkptrs,
+        vertexOnFace, faceOnVertex, faceOnFace, location,
+        maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset,
+        xug, yug, zug, qtr
+    );
+
+    // No QuadTreeRectangle in cache. So get shared pointer for one created
+    // by UnstructuredGrid2D() and cache it for later use. The memory
+    // will be garbage collected when all pointers to it go out of scope
+    //
+//    if (! qtr) {
+//        qtr = g->GetQuadTreeRectangle();
+//        (void) _qtrCache.put(qtr_key, qtr);
+//    }
+
+    return(g);
+}
+
+
 void GridHelper::_makeGridHelper(const DC::DataVar &var, const vector<size_t> &roi_dims, const vector<size_t> &dims, Grid *g) const
 {
     VAssert(roi_dims.size() == dims.size());
@@ -615,7 +784,17 @@ UnstructuredGrid *GridHelper::MakeGridUnstructured(string gridType, size_t ts, i
     } else if (gridType == UnstructuredGridLayered::GetClassType()) {
         rg = _make_grid_unstructured_layered(ts, level, lod, var, cvarsinfo, roi_dims, blkvec, bsvec[0], bminvec[0], bmaxvec[0], conn_blkvec, conn_bsvec[0], conn_bminvec[0], conn_bmaxvec[0],
                                              vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
-    } else {
+    }
+    else if (gridType == UnstructuredGrid3D::GetClassType()) {
+        rg = _make_grid_unstructured_3d(
+            ts, level, lod, var, cvarsinfo, roi_dims,
+            blkvec, bsvec[0], bminvec[0], bmaxvec[0],
+            conn_blkvec, conn_bsvec[0], conn_bminvec[0], conn_bmaxvec[0],
+            vertexDims, faceDims, edgeDims, location, maxVertexPerFace,
+            maxFacePerVertex, vertexOffset, faceOffset
+        );
+    }
+    else {
         return (NULL);
     }
 
@@ -634,6 +813,8 @@ string GridHelper::GetGridType(const DC::Mesh &m, const vector<DC::CoordVar> &cv
     if (isUnstructured2D(m, cvarsinfo, cdimnames)) { return (UnstructuredGrid2D::GetClassType()); }
 
     if (isUnstructuredLayered(m, cvarsinfo, cdimnames)) { return (UnstructuredGridLayered::GetClassType()); }
+    
+    if (isUnstructured3D(m, cvarsinfo, cdimnames)) { return UnstructuredGrid3D::GetClassType(); }
 
     if (isRegular(m, cvarsinfo, cdimnames)) { return (RegularGrid::GetClassType()); }
 
@@ -642,11 +823,15 @@ string GridHelper::GetGridType(const DC::Mesh &m, const vector<DC::CoordVar> &cv
     if (isLayered(m, cvarsinfo, cdimnames)) { return (LayeredGrid::GetClassType()); }
 
     if (isCurvilinear(m, cvarsinfo, cdimnames)) { return (CurvilinearGrid::GetClassType()); }
+    
+    if (isUnstructured3D(m, cvarsinfo, cdimnames)) {
+        return UnstructuredGrid3D::GetClassType();
+    }
 
     return ("");
 }
 
-bool GridHelper::IsUnstructured(std::string gridType) const { return (gridType == UnstructuredGrid2D::GetClassType() || gridType == UnstructuredGridLayered::GetClassType()); }
+bool GridHelper::IsUnstructured(std::string gridType) const { return (gridType == UnstructuredGrid2D::GetClassType() || gridType == UnstructuredGridLayered::GetClassType() || gridType == UnstructuredGrid3D::GetClassType()); }
 
 bool GridHelper::IsStructured(std::string gridType) const
 {

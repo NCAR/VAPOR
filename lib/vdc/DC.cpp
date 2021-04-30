@@ -305,6 +305,23 @@ DC::Mesh::Mesh(std::string name, size_t max_nodes_per_face, size_t max_faces_per
     _dim_names.push_back(layers_dim_name);
 }
 
+DC::Mesh::Mesh(
+               std::string name,
+               int max_nodes_per_face,
+               int max_faces_per_node,
+               std::string node_dim_name,
+               std::string face_dim_name,
+               std::vector <string> coord_vars
+)
+{
+    _Mesh(name, coord_vars, max_nodes_per_face, max_faces_per_node, UNSTRUC_3D);
+
+    _node_dim_name = node_dim_name;
+    _face_dim_name = face_dim_name;
+
+    _dim_names.push_back(node_dim_name);
+}
+
 size_t DC::Mesh::GetTopologyDim() const
 {
     switch (_mtype) {
