@@ -170,9 +170,7 @@ AxisAnnotation *AnnotationParams::GetAxisAnnotation()
     }
     AxisAnnotation *aa;
     aa = (AxisAnnotation *)_axisAnnotations->GetParams(defaultAnnotation);
-    if ( !aa->GetAxisAnnotationInitialized() ) {
-        aa->Initialize();
-    }
+    if (!aa->GetAxisAnnotationInitialized()) { aa->Initialize(); }
     return aa;
 }
 
