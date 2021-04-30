@@ -79,23 +79,23 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     _animConnected = false;
     _ap = NULL;
 
-    VSection *annotationTab = new VSection("Axis Annotations");
+    VSection *axisAnnotationTab = new VSection("Axis Annotations");
     _axisAnnotationGroup1 = new PGroup({
         new PCheckbox(AxisAnnotation::_annotationEnabledTag, "Axis Annotations Enabled"),
         new PCheckbox(AxisAnnotation::_latLonAxesTag, "Annotate with lat/lon"),
     });
-    annotationTab->layout()->addWidget(_axisAnnotationGroup1);
+    axisAnnotationTab->layout()->addWidget(_axisAnnotationGroup1);
 
     QTableWidget *annotationTable = new QTableWidget;
     _annotationVaporTable = new VaporTable(annotationTable);
     connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
     _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
-    annotationTab->layout()->addWidget(annotationTable);
+    axisAnnotationTab->layout()->addWidget(annotationTable);
     _copyRegionCombo = new VComboBox({"Currently no renderers"});
     _copyRegionButton = new VPushButton("Copy");
     connect(_copyRegionButton, SIGNAL(ButtonClicked()), this, SLOT(copyRegionFromRenderer()));
-    annotationTab->layout()->addWidget(new VLineItem("Copy Region From Renderer", _copyRegionCombo));
-    annotationTab->layout()->addWidget(new VLineItem("", _copyRegionButton));
+    axisAnnotationTab->layout()->addWidget(new VLineItem("Copy Region From Renderer", _copyRegionCombo));
+    axisAnnotationTab->layout()->addWidget(new VLineItem("", _copyRegionButton));
 
     _axisAnnotationGroup2 = new PGroup({
         new PColorSelector(AxisAnnotation::_colorTag, "Axis Text Color"),
@@ -107,9 +107,9 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
         new PEnumDropdownHLI<AxisAnnotation>("Y Tickmark Orientation", {"X axis", "Z axis"}, {0, 2}, &AxisAnnotation::GetYTicDir, &AxisAnnotation::SetYTicDir),
         new PEnumDropdownHLI<AxisAnnotation>("Z Tickmark Orientation", {"X axis", "Y axis"}, {0, 1}, &AxisAnnotation::GetZTicDir, &AxisAnnotation::SetZTicDir),
     });
-    annotationTab->layout()->addWidget(_axisAnnotationGroup2);
+    axisAnnotationTab->layout()->addWidget(_axisAnnotationGroup2);
 
-    layout()->addWidget(annotationTab);
+    layout()->addWidget(axisAnnotationTab);
 
     _timeAnnotationGroup = new PGroup({new PSection(
         "Time Annotation", {new PEnumDropdown(AnnotationParams::_timeTypeTag, {"No annotation", "Time step number", "User time", "Formatted date/time"}, {0, 1, 2, 3}, "Annotation type"),
@@ -397,14 +397,6 @@ AxisAnnotation *AnnotationEventRouter::_getCurrentAxisAnnotation()
 {
     AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
     AxisAnnotation *  aa = aParams->GetAxisAnnotation();
-
-    bool initialized = aa->GetAxisAnnotationInitialized();
-    if (!initialized) {
-        ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-        paramsMgr->BeginSaveStateGroup("Initialize axis annotation");
-        aa->Initialize();
-        paramsMgr->EndSaveStateGroup();
-    }
 
     return aa;
 }
