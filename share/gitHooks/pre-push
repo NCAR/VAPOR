@@ -11,7 +11,7 @@ if [ "$BRANCH" = "readTheDocs" ]; then
 # Otherwise format the changed lines in all commits up to this push
 #
 else
-    for COMMIT in $(git log --pretty=format:%h main...$BRANCH); do
+    for COMMIT in $(git log --pretty=format:%h origin/$BRANCH...$BRANCH); do
         echo "Reading Commit: $COMMIT"
         for FILE in $(git diff-tree --no-commit-id --name-only -r $COMMIT |grep -E "\.h|\.cpp"); do
             NUMBERS=""
