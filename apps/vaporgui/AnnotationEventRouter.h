@@ -48,8 +48,6 @@ public:
 
     virtual void hookUpTab(){};
 
-    virtual void GetWebHelp(std::vector<std::pair<string, string>> &help) const;
-
     //! Ignore wheel event in tab (to avoid confusion)
     virtual void wheelEvent(QWheelEvent *) {}
 

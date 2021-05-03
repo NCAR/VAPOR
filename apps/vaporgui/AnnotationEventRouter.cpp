@@ -134,13 +134,6 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
 
 AnnotationEventRouter::~AnnotationEventRouter() {}
 
-void AnnotationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
-{
-    help.clear();
-
-    help.push_back(make_pair("Overview of the VizFeature tab", "http://www.vapor.ucar.edu/docs/vapor-gui-help/vizfeature-tab#VizFeatureOverview"));
-}
-
 void AnnotationEventRouter::_updateTab()
 {
     updateCopyRegionCombo();
