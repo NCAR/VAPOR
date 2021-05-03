@@ -194,7 +194,7 @@ void AnnotationRenderer::DrawText()
 void AnnotationRenderer::_drawTimeAnnotation()
 {
     AnnotationParams *params = m_paramsMgr->GetAnnotationParams(m_winName);
-    //size_t            ts = params->GetCurrentTimestep();
+    // size_t            ts = params->GetCurrentTimestep();
 
     std::string timeText;
     auto        type = params->GetValueLong(AnnotationParams::_timeTypeTag, 0);
