@@ -3,6 +3,15 @@
 
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 
+# If our current branch does not exist in the remote repository yet, then compare
+# our local changes with main.  Otherwise, compare our local changes with the remote
+# branch.
+if [ `git ls-remote --heads https://github.com/NCAR/VAPOR.git $BRANCH | wc -l` = 0 ]; then
+    COMPARE_BRANCH="main"
+else
+    COMPARE_BRANCH=$BRANCH
+fi
+
 # If we're on the readTheDocs branch, skip clang-format
 #
 if [ "$BRANCH" = "readTheDocs" ]; then
@@ -11,7 +20,7 @@ if [ "$BRANCH" = "readTheDocs" ]; then
 # Otherwise format the changed lines in all commits up to this push
 #
 else
-    for COMMIT in $(git log --pretty=format:%h origin/$BRANCH...$BRANCH); do
+    for COMMIT in $(git log --pretty=format:%h origin/$COMPARE_BRANCH...$BRANCH); do
         echo "Reading Commit: $COMMIT"
         for FILE in $(git diff-tree --no-commit-id --name-only -r $COMMIT |grep -E "\.h|\.cpp"); do
             NUMBERS=""
