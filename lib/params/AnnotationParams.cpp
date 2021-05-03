@@ -63,7 +63,6 @@ const string AnnotationParams::_timeColorTag = "TimeColor";
 const string AnnotationParams::_timeTypeTag = "TimeType";
 const string AnnotationParams::_timeSizeTag = "TimeSize";
 const string AnnotationParams::_projStringTag = "ProjString";
-const string AnnotationParams::_currentTimeStepTag = "CurrentTimeStep";
 
 vector<double> AnnotationParams::_previousStretch;
 

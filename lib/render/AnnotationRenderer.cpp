@@ -194,7 +194,7 @@ void AnnotationRenderer::DrawText()
 void AnnotationRenderer::_drawTimeAnnotation()
 {
     AnnotationParams *params = m_paramsMgr->GetAnnotationParams(m_winName);
-    size_t            ts = params->GetCurrentTimestep();
+    //size_t            ts = params->GetCurrentTimestep();
 
     std::string timeText;
     auto        type = params->GetValueLong(AnnotationParams::_timeTypeTag, 0);
@@ -202,14 +202,14 @@ void AnnotationRenderer::_drawTimeAnnotation()
     if (type == 0) {
         ClearText(1);
     } else if (type == 1) {    // drawTimeStep
-        timeText = "Timestep: " + std::to_string(ts);
+        timeText = "Timestep: " + std::to_string(_currentTimestep);
     } else if (type == 2) {    // drawTimeUser()
         vector<double>     timeCoords = m_dataStatus->GetTimeCoordinates();
         std::ostringstream ss;
-        ss << timeCoords[ts];
+        ss << timeCoords[_currentTimestep];
         timeText = ss.str();
     } else if (type == 3) {    // drawTimeStamp()
-        timeText = m_dataStatus->GetTimeCoordsFormatted()[ts];
+        timeText = m_dataStatus->GetTimeCoordsFormatted()[_currentTimestep];
     }
 
 
@@ -488,8 +488,6 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     std::vector<double> domainExtents;
     _calculateDomainExtents(domainExtents);
 
-    _currentTimestep = ts;
-
     mm->MatrixModeModelView();
     mm->PushMatrix();
 
@@ -706,10 +704,9 @@ string AnnotationRenderer::getCurrentDataMgrName() const
 
 std::vector<double> AnnotationRenderer::getDomainExtents() const
 {
-    int            ts = _currentTimestep;
     vector<double> minExts, maxExts;
 
-    m_dataStatus->GetActiveExtents(m_paramsMgr, ts, minExts, maxExts);
+    m_dataStatus->GetActiveExtents(m_paramsMgr, _currentTimestep, minExts, maxExts);
 
     std::vector<double> extents;
     for (int i = 0; i < minExts.size(); i++) { extents.push_back(minExts[i]); }

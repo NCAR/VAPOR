@@ -161,7 +161,6 @@ void AnimationEventRouter::setCurrentTimestep(size_t ts) const
     vector<string> winNames = paramsMgr->GetVisualizerNames();
     for (int i = 0; i < winNames.size(); i++) {
         AnnotationParams *annotationParams = paramsMgr->GetAnnotationParams(winNames[i]);
-        annotationParams->SetCurrentTimestep(ts);
 
         vector<string> dataSetNames = dataStatus->GetDataMgrNames();
         for (int j = 0; j < dataSetNames.size(); j++) {

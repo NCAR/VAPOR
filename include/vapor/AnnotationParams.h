@@ -64,9 +64,6 @@ public:
 
     virtual ~AnnotationParams(){};
 
-    size_t GetCurrentTimestep() const { return GetValueLong(_currentTimeStepTag, 0); }
-    void   SetCurrentTimestep(size_t ts) { SetValueLong(_currentTimeStepTag, "current time step", ts); }
-
     void GetDomainColor(double color[3]) const;
     void GetDomainColor(std::vector<double> &color) const { _getColor(color, _domainColorTag); }
 
@@ -134,7 +131,6 @@ private:
     ParamsContainer *_axisAnnotations;
 
 public:
-    static const string _currentTimeStepTag;
     static const string _domainColorTag;
     static const string _domainFrameTag;
     static const string _regionFrameTag;
