@@ -18,6 +18,7 @@ set (SRC
 	DC.cpp
 	DCWRF.cpp
 	DCCF.cpp
+	DCBOV.cpp
 	DCMPAS.cpp
 	VDC.cpp
 	VDCNetCDF.cpp
@@ -53,6 +54,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/DC.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCWRF.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCCF.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DCBOV.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCMPAS.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VDC.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VDCNetCDF.h
