@@ -649,34 +649,6 @@ int DCBOV::_InitDimensions(NetCDFCFCollection *ncdfc)
         Dimension dim(dimnames[i], dimlens[i]);
         _dimsMap[dimnames[i]] = dim;
     }
-
-    /*
-    // Get dimension names and lengths for all dimensions in the
-    // CF data set.
-    //
-    vector<string> dimnames = ncdfc->GetDimNames();
-    vector<size_t> dimlens = ncdfc->GetDims();
-    VAssert(dimnames.size() == dimlens.size());
-
-    //
-    // Find all dimensions and their associated axis (X,Y,Z,T). From
-    // CF 1.6:
-    //
-    // All of a variable's dimensions that are latitude, longitude, vertical,
-    // or time dimensions (see Section 1.2, “Terminology”) must have
-    // corresponding coordinate variables, i.e., one-dimensional variables
-    // with the same name as the dimension (see examples in Chapter 4,
-    // Coordinate Types ). This is the only method of associating dimensions
-    // with coordinates that is supported by COARDS.
-    //
-    for (int i = 0; i < dimnames.size(); i++) {
-        // if (! ncdfc->IsCoordVarCF(dimnames[i])) continue;
-
-        Dimension dim(dimnames[i], dimlens[i]);
-        _dimsMap[dimnames[i]] = dim;
-    }
-
-    return (0);*/
 }
 
 // Given a data variable name return the variable's dimensions and
@@ -775,8 +747,8 @@ int DCBOV::_InitVars(NetCDFCFCollection *ncdfc)
         for (std::map<string,DC::Dimension>::iterator it = _dimsMap.begin(); it!=_dimsMap.end(); ++it )
             scoordvars.push_back(it->first);
 
-        string         time_dim_name;
-        string         time_coordvar;
+        string         time_dim_name = "t";
+        string         time_coordvar = "t";
 
 //        int rc = _GetVarCoordinates(ncdfc, vars[i], sdimnames, scoordvars, time_dim_name, time_coordvar);
 //        if (rc < 0) {
@@ -795,17 +767,17 @@ int DCBOV::_InitVars(NetCDFCFCollection *ncdfc)
         //
         _meshMap[mesh.GetName()] = mesh;
 
-        double mv;
-        bool   has_missing = ncdfc->GetMissingValue(vars[i], mv);
+        //double mv;
+        //bool   has_missing = ncdfc->GetMissingValue(vars[i], mv);
+        //if (!has_missing) {
+        //    _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
+        //} else {
+        //    _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE, mv);
+        //}
+        _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
 
-        if (!has_missing) {
-            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
-        } else {
-            _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE, mv);
-        }
-
-        int rc = DCUtils::CopyAtt(*ncdfc, vars[i], _dataVarsMap[vars[i]]);
-        if (rc < 0) return (-1);
+        //int rc = DCUtils::CopyAtt(*ncdfc, vars[i], _dataVarsMap[vars[i]]);
+        //if (rc < 0) return (-1);
     }
 
     return (0);
