@@ -12,6 +12,7 @@
 #include <vapor/DCWRF.h>
 #include <vapor/DCCF.h>
 #include <vapor/DCMPAS.h>
+#include <vapor/DCBOV.h>
 #include <vapor/DerivedVar.h>
 #include <vapor/DataMgr.h>
 #ifdef WIN32
@@ -599,6 +600,8 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         _dc = new DCCF();
     } else if (_format.compare("mpas") == 0) {
         _dc = new DCMPAS();
+    } else if (_format.compare("bov") == 0) {
+        _dc = new DCBOV();
     } else {
         SetErrMsg("Invalid data collection format : %s", _format.c_str());
         return (-1);

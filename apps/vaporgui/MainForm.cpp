@@ -66,6 +66,7 @@
 #include <vapor/DCWRF.h>
 #include <vapor/DCMPAS.h>
 #include <vapor/DCCF.h>
+#include <vapor/DCBOV.h>
 
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
@@ -558,6 +559,8 @@ bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std
         *fmt = "mpas";
     else if (isDatasetValidFormat<DCCF>(paths))
         *fmt = "cf";
+    else if (isDatasetValidFormat<DCBOV>(paths))
+        *fmt = "bov";
     else
         return false;
     return true;
@@ -824,6 +827,11 @@ void MainForm::_createFileMenu()
     _dataImportMPAS_Action->setText(tr("MPAS"));
     _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the "
                                        "current session");
+    
+    _dataImportBOV_Action = new QAction(this);
+    _dataImportBOV_Action->setText(tr("BOV"));
+    _dataImportBOV_Action->setToolTip("Specify one BOV data file to import into the "
+                                       "current session");
 
     _fileOpenAction = new QAction(this);
     _fileOpenAction->setEnabled(true);
@@ -866,6 +874,7 @@ void MainForm::_createFileMenu()
     _importMenu->addAction(_dataImportWRF_Action);
     _importMenu->addAction(_dataImportCF_Action);
     _importMenu->addAction(_dataImportMPAS_Action);
+    _importMenu->addAction(_dataImportBOV_Action);
     _File->addSeparator();
 
     // _File->addAction(createTextSeparator(" Session"));
@@ -880,6 +889,7 @@ void MainForm::_createFileMenu()
     connect(_dataImportWRF_Action, SIGNAL(triggered()), this, SLOT(importWRFData()));
     connect(_dataImportCF_Action, SIGNAL(triggered()), this, SLOT(importCFData()));
     connect(_dataImportMPAS_Action, SIGNAL(triggered()), this, SLOT(importMPASData()));
+    connect(_dataImportBOV_Action, SIGNAL(triggered()), this, SLOT(importBOVData()));
 
     connect(_fileNew_SessionAction, SIGNAL(triggered()), this, SLOT(sessionNew()));
     connect(_fileOpenAction, SIGNAL(triggered()), this, SLOT(sessionOpen()));
@@ -1701,6 +1711,12 @@ void MainForm::importMPASData()
 {
     vector<string> files;
     loadDataHelper("", files, "MPAS files", "", "mpas", true);
+}
+
+void MainForm::importBOVData()
+{
+    vector<string> files;
+    loadDataHelper("", files, "BOV files", "", "bov", true);
 }
 
 bool MainForm::doesQStringContainNonASCIICharacter(const QString &s)

@@ -87,6 +87,11 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
         return (-1);
     }
 
+    map<string, DC::Dimension>::const_iterator itr;
+    for (itr = _dimsMap.begin(); itr != _dimsMap.end(); ++itr) { 
+        std::cout << "dim " << itr->first << std::endl; 
+    }
+
     // Set up the horizontal coordinate variables
     //
     rc = _InitHorizontalCoordinates(ncdfc);
@@ -765,7 +770,6 @@ int DCCF::_InitVars(NetCDFCFCollection *ncdfc)
         } else {
             _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE, mv);
         }
-
         rc = DCUtils::CopyAtt(*ncdfc, vars[i], _dataVarsMap[vars[i]]);
         if (rc < 0) return (-1);
     }
