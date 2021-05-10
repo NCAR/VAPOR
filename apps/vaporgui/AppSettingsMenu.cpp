@@ -8,6 +8,80 @@
 #include "PCheckboxHLI.h"
 #include "VPushButton.h"
 #include "ErrorReporter.h"
+#include "CheckForUpdate.h"
+
+class PUpdateChecker : public PWidget
+{
+    VGroup *_group;
+    QLabel *_label;
+    VPushButton *_checkButton;
+    VPushButton *_getButton;
+    UpdateInfo _updateInfo;
+    
+    void updateGUI() const override {}
+    void openURL()
+    {
+        if (!_updateInfo.url.empty())
+            _updateInfo.OpenURL();
+    }
+    void checkForUpdate()
+    {
+        CheckForUpdate([=](bool updateAvailable, UpdateInfo info) {
+            if (updateAvailable) {
+                DisplayUpdateAvailable(info);
+            } else {
+                if (info.error)
+                    DisplayError();
+                else
+                    DisplayUpToDate();
+            }
+        });
+    }
+    
+public:
+    PUpdateChecker()
+    : PWidget("", _group = new VGroup)
+    {
+        _checkButton = new VPushButton("Check for update");
+        _group->Add(_checkButton);
+        
+        _label = new QLabel;
+        _label->setHidden(true);
+        _group->Add(_label);
+        
+        _getButton = new VPushButton("Get Latest Version");
+        _getButton->setHidden(true);
+        _group->Add(_getButton);
+        
+        QObject::connect(_checkButton, &VPushButton::ButtonClicked, this, &PUpdateChecker::checkForUpdate);
+        QObject::connect(_getButton, &VPushButton::ButtonClicked, this, &PUpdateChecker::openURL);
+    }
+    void DisplayUpToDate()
+    {
+        _label->setText("Vapor is up to date");
+        
+        _checkButton->setHidden(true);
+        _label->setVisible(true);
+        _getButton->setHidden(true);
+    }
+    void DisplayUpdateAvailable(UpdateInfo info)
+    {
+        _updateInfo = info;
+        _label->setText(QString::fromStdString("New version available: " + info.version));
+        
+        _checkButton->setHidden(true);
+        _label->setVisible(true);
+        _getButton->setVisible(true);
+    }
+    void DisplayError()
+    {
+        _label->setText("Unable to check for new version.");
+        
+        _checkButton->setHidden(true);
+        _label->setVisible(true);
+        _getButton->setHidden(true);
+    }
+};
 
 AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(), _params(nullptr)
 {
@@ -34,6 +108,14 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
 
         new PSection("Default Search Paths", {new PDirectorySelectorHLI<SettingsParams>("Session file path", &SettingsParams::GetSessionDir, &SettingsParams::SetSessionDir),
                                               new PDirectorySelectorHLI<SettingsParams>("Data set path", &SettingsParams::GetMetadataDir, &SettingsParams::SetMetadataDir)}),
+        
+        // clang-format off
+        new PSection("Updates", {
+            new PCheckboxHLI<SettingsParams>("Automatically check for updates", &SettingsParams::GetAutoCheckForUpdates, &SettingsParams::SetAutoCheckForUpdates),
+            new PUpdateChecker,
+        }),
+        // clang-format on
+        
         new PButton("Restore defaults", [](VAPoR::ParamsBase *p) { dynamic_cast<SettingsParams *>(p)->Init(); }),
     });
 

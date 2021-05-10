@@ -126,8 +126,12 @@ public:
     static const string _sessionAutoSaveEnabledTag;
 
     std::string GetSettingsPath() const;
+    
+    void SetAutoCheckForUpdates(bool b);
+    bool GetAutoCheckForUpdates() const;
 
     static const string UseAllCoresTag;
+    static const string AutoCheckForUpdatesTag;
 
     bool LoadFromSettingsFile();
 
