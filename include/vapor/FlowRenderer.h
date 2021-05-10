@@ -20,6 +20,7 @@ class RENDER_API FlowRenderer final : public Renderer {
 public:
     FlowRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr);
 
+    // Rule of five
     ~FlowRenderer();
     FlowRenderer(const FlowRenderer &) = delete;
     FlowRenderer(const FlowRenderer &&) = delete;
