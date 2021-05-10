@@ -56,10 +56,10 @@ void CheckForUpdate(function<void(bool updateAvailable, UpdateInfo info)> callba
     }
 
     QNetworkRequest req;
-#ifdef NDEBUG
-    req.setUrl(QUrl("https://api.github.com/repos/NCAR/VAPOR/releases"));
-#else
+#ifdef TESTING_API
     req.setUrl(QUrl("http://localhost:8000/api.json"));
+#else
+    req.setUrl(QUrl("https://api.github.com/repos/NCAR/VAPOR/releases"));
 #endif
     manager->get(req);
 }

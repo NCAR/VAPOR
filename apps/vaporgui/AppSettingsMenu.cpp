@@ -24,6 +24,10 @@ class PUpdateChecker : public PWidget {
     }
     void checkForUpdate()
     {
+        _label->setText("Checking...");
+        _checkButton->setHidden(true);
+        _label->setVisible(true);
+        
         CheckForUpdate([=](bool updateAvailable, UpdateInfo info) {
             if (updateAvailable) {
                 DisplayUpdateAvailable(info);
