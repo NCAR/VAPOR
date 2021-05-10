@@ -8,8 +8,8 @@ class QNetworkAccessManager;
 struct UpdateInfo {
     std::string version;
     std::string url;
-    bool error = false;
-    
+    bool        error = false;
+
     void OpenURL();
 };
 

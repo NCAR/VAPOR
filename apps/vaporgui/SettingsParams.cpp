@@ -403,15 +403,9 @@ void SettingsParams::SetFidelityDefault2D(long lodDef, long refDef)
     SetValueLongVec(_fidelityDefault2DTag, "Set fidelity 2D default", val);
 }
 
-void SettingsParams::SetAutoCheckForUpdates(bool b)
-{
-    SetValueLong(AutoCheckForUpdatesTag, "", b);
-}
+void SettingsParams::SetAutoCheckForUpdates(bool b) { SetValueLong(AutoCheckForUpdatesTag, "", b); }
 
-bool SettingsParams::GetAutoCheckForUpdates() const
-{
-    return GetValueLong(AutoCheckForUpdatesTag, true);
-}
+bool SettingsParams::GetAutoCheckForUpdates() const { return GetValueLong(AutoCheckForUpdatesTag, true); }
 
 bool SettingsParams::LoadFromSettingsFile()
 {

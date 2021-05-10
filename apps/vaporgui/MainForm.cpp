@@ -474,9 +474,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
 
     _controlExec->SetSaveStateEnabled(true);
     _controlExec->RebaseStateSave();
-    
-    if (interactive && GetSettingsParams()->GetValueLong(SettingsParams::AutoCheckForUpdatesTag, true))
-        CheckForUpdates();
+
+    if (interactive && GetSettingsParams()->GetValueLong(SettingsParams::AutoCheckForUpdatesTag, true)) CheckForUpdates();
 }
 
 int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int width, int height)
@@ -570,13 +569,12 @@ bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std
 void MainForm::CheckForUpdates()
 {
 #ifndef NDEBUG
-    return; // Don't check for updates in debug builds
+    return;    // Don't check for updates in debug builds
 #endif
-    
+
     CheckForUpdate([this](bool updateAvailable, UpdateInfo info) {
-        if (!updateAvailable)
-            return;
-        
+        if (!updateAvailable) return;
+
         QCheckBox *cb = new QCheckBox("Automatically check for updates");
         cb->setChecked(true);
         QMessageBox popup;
@@ -584,11 +582,10 @@ void MainForm::CheckForUpdates()
         QPushButton *get = popup.addButton("Get Latest Version", QMessageBox::ActionRole);
         popup.addButton("Ok", QMessageBox::AcceptRole);
         popup.setCheckBox(cb);
-        
+
         popup.exec();
-        if (popup.clickedButton() == get)
-            info.OpenURL();
-        
+        if (popup.clickedButton() == get) info.OpenURL();
+
         if (!cb->isChecked()) {
             GetSettingsParams()->SetValueLong(SettingsParams::AutoCheckForUpdatesTag, "", false);
             GetSettingsParams()->SaveSettings();

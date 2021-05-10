@@ -76,7 +76,7 @@ class MainForm : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainForm(vector<QString> files, QApplication *app, bool interactive=true, QWidget *parent = 0);
+    MainForm(vector<QString> files, QApplication *app, bool interactive = true, QWidget *parent = 0);
     ~MainForm();
 
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
@@ -313,7 +313,7 @@ private:
 
     template<class T> bool isDatasetValidFormat(const std::vector<std::string> &paths) const;
     bool                   determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;
-    
+
     void CheckForUpdates();
 
     bool isOpenGLContextActive() const;
