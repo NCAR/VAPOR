@@ -14,16 +14,16 @@
 
 namespace VAPoR {
 
+class BOVCollection;
+
 //!
 //! \class DCBOV
 //! \ingroup Public_VDCBOV
 //!
-//! \brief Class for reading a NetCDF Climate Forecast (CF)  data set
-//! stored as a series
-//! of NetCDF files.
+//! \brief Class for reading a "Brick of Values"
 //!
-//! \author John Clyne
-//! \date    March, 2015
+//! \author Scott Pearse
+//! \date    May, 2021
 //!
 class VDF_API DCBOV : public VAPoR::DC {
 public:
@@ -36,14 +36,15 @@ public:
 protected:
     //! Initialize the DCBOV class
     //!
-    //! Prepare a CF data set for reading. This method prepares
+    //! Prepare a BOV data set for reading. This method prepares
     //! the DCBOV class for reading the files indicated by
     //! \p paths.
     //! The method should be called immediately after the constructor,
     //! before any other class methods. This method
     //! exists only because C++ constructors can not return error codes.
     //!
-    //! \param[in] path A list of CF NetCDF files comprising the output of
+    //! \param[in] path A single BOV header file describing a the structore of a "Brick
+    //! of raw IEEE floating point numbers stored in a file.
     //! a single CF model run.
     //!
     //! \retval status A negative int is returned on failure
@@ -153,6 +154,7 @@ private:
     NetCDFCFCollection *_ncdfc;
     VAPoR::UDUnits      _udunits;
 
+    BOVCollection*      _bovCollection;
 
     string _varname;
     string                                      _proj4String;
@@ -162,10 +164,6 @@ private:
     std::map<string, DC::DataVar>               _dataVarsMap;
     std::map<string, string>                    _coordVarKeys;
     std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
-
-    int _get_time_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar);
-
-    //int _AddCoordvars(const vector<string> &cvars);
 
     int _InitCoordinates();
 
@@ -177,15 +175,30 @@ private:
 
     template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
 
-    ///////////////////////////////////////////////////////////////////////////
-    //
-    //	Specializations of the NetCDFCollection::DerivedVar class used to
-    // support derived variables - required variables that are not
-    // found in the CF data.
-    //
-    ///////////////////////////////////////////////////////////////////////////
 
-    //
+};
+    
+class BOVCollection : public Wasp::MyBase {
+    public:
+        BOVCollection();
+        int Initialize( const std::vector<std::string> &paths );
+
+    private:
+        float _time;
+        std::vector<std::string> _files;
+        std::vector<size_t>      _dims;
+        DC::XType                _dataType;
+        std::string              _dataFile;
+        std::string              _endianness;
+        std::string              _centering;
+        std::vector<float>       _origin;
+        std::vector<float>       _brickSize;
+        int                      _byteOffset;
+        bool                     _divideBrick;
+        std::vector<size_t>      _dataBricklets;
+        size_t                   _dataComponents;
+
+        std::string _findValue( std::string &line ) const;
 };
 };    // namespace VAPoR
 

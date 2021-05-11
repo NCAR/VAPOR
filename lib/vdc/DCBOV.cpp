@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <map>
 #include <iostream>
+#include <fstream>
 #include "vapor/VAssert.h"
 #include <stdio.h>
 
@@ -35,10 +36,8 @@ size_t vproduct(vector<size_t> a)
 
 };    // namespace
 
-DCBOV::DCBOV()
+DCBOV::DCBOV() : _bovCollection(nullptr)
 {
-    _ncdfc = NULL;
-
     _dimsMap.clear();
     _coordVarsMap.clear();
     _dataVarsMap.clear();
@@ -49,21 +48,35 @@ DCBOV::DCBOV()
 
 DCBOV::~DCBOV()
 {
-    if (_ncdfc) delete _ncdfc;
-
     for (int i = 0; i < _derivedVars.size(); i++) {
         if (_derivedVars[i]) delete _derivedVars[i];
     }
     _derivedVars.clear();
+
+    if (_bovCollection != nullptr) {
+        delete _bovCollection;
+    }
 }
 
 int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
+    for (int i=0; i<paths.size(); i++)
+        std::cout << paths[i] << std::endl;
+    for (int i=0; i<options.size(); i++)
+        std::cout << options[i] << std::endl;
+
+    _bovCollection = new BOVCollection();
+    int rc = _bovCollection->Initialize( paths );
+    if (rc < 0) {
+        SetErrMsg("Failure reading .bov file");
+        return (-1);
+    }
+
     //
     //  Get the dimensions of the grid.
     //	Initializes members: _dimsMap
     //
-    int rc = _InitDimensions();
+    rc = _InitDimensions();
     if (rc < 0) {
         SetErrMsg("No valid dimensions");
         return (-1);
@@ -432,21 +445,55 @@ bool DCBOV::variableExists(size_t ts, string varname, int, int) const {
     //return (_ncdfc->VariableExists(ts, varname)); 
 }
 
-int DCBOV::_get_time_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar)
+BOVCollection::BOVCollection() : 
+    _dataType(DC::FLOAT),
+    _dataFile(""),
+    _endianness(""),
+    _centering(""),
+    _byteOffset(0),
+    _divideBrick(false),
+    _dataComponents(1) 
 {
-    //cvar.clear();
-    //cvar = "t";
-    //return 0;
+    _files.clear();
+    _dims.clear();
+    _origin.clear();
+    _brickSize.clear();
+    _dataBricklets.clear();
+}
 
-    vector<string> cvars;
-    int            rc = ncdfc->GetVarCoordVarNames(dvar, cvars);
-    if (rc < 0) return (-1);
+int BOVCollection::Initialize( const std::vector<std::string> &paths ) {
+    VAssert( paths.size() == 1 );
+    std::cout << "foo" << std::endl;
 
-    for (int i = 0; i < cvars.size(); i++) {
-        if (ncdfc->IsTimeCoordVar(cvars[i])) {
-            VAssert(cvar.empty());
-            cvar = cvars[i];
+    size_t pos;
+    std::string line;
+    std::ifstream header;
+    header.open( paths[0] );
+    if( header.is_open() ) {
+        while( getline( header, line ) ) {
+            //pos = line.find("TIME:");
+            //if( pos != std::string::npos ) ??
+            std::stringstream ss( line );
+            pos = line.find("DATA_FILE:");
+            if( pos != std::string::npos ) _dataFile = "myFile";
+            std::cout << "bar" << std::endl;
+
         }
     }
-    return (0);
+    else {
+        //SetErrMsg("Failed to open %s", paths[0]);
+        SetErrMsg("Failed to open bov file");
+    }
+}
+
+std::string BOVCollection::_findValue( std::string &line ) const {
+    std::string delimiter = " = ";
+
+    size_t pos=0;
+    std::string token;
+    while(( pos = line.find(delimiter)) != std::string::npos) {
+        token = line.substr(0, pos);
+        std::cout << token << std::endl;
+        line.erase(0, pos+delimiter.length());
+    }
 }

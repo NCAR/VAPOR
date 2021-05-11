@@ -1716,7 +1716,7 @@ void MainForm::importMPASData()
 void MainForm::importBOVData()
 {
     vector<string> files;
-    loadDataHelper("", files, "BOV files", "", "bov", true);
+    loadDataHelper("", files, "BOV files", "", "bov", false);
 }
 
 bool MainForm::doesQStringContainNonASCIICharacter(const QString &s)
