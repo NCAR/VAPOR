@@ -184,20 +184,34 @@ class BOVCollection : public Wasp::MyBase {
         int Initialize( const std::vector<std::string> &paths );
 
     private:
-        float _time;
+        std::string              _time;
         std::vector<std::string> _files;
-        std::vector<size_t>      _dims;
-        DC::XType                _dataType;
+        std::vector<int>         _dataSize;
+        DC::XType                _dataFormat;
+        std::string              _variable;
         std::string              _dataFile;
-        std::string              _endianness;
+        std::string              _dataEndian;
         std::string              _centering;
-        std::vector<float>       _origin;
+        std::vector<float>       _brickOrigin;
         std::vector<float>       _brickSize;
         int                      _byteOffset;
         bool                     _divideBrick;
-        std::vector<size_t>      _dataBricklets;
-        size_t                   _dataComponents;
+        std::vector<int>         _dataBricklets;
+        int                      _dataComponents;
 
+        template<typename T>
+        int _readMetadataT( const std::string &token, std::string &line, T &value, bool verbose=true );
+        template<>
+        int _readMetadataT<DC::XType>( const std::string &token, std::string &line, DC::XType &value, bool verbose );
+        
+        template<typename T>
+        int _readMetadataT( const std::string &token, std::string &line, std::vector<T> &value, bool verbose=true );
+
+        int _readMetadata( const std::string &token, std::string &line, int &value, bool verbose=true );
+        int _readMetadata( const std::string &token, std::string &line, bool &value, bool verbose=true );
+        //int _readMetadata( const std::string &token, std::string &line, DC::XType &value, bool verbose=true );
+        int _readMetadata( const std::string &token, std::string &line, std::string &value, bool verbose=true );
+        int _readMetadata( const std::string &token, std::string &line, std::vector<int> &value, bool verbose=true );
         std::string _findValue( std::string &line ) const;
 };
 };    // namespace VAPoR

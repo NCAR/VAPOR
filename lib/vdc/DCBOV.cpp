@@ -60,10 +60,10 @@ DCBOV::~DCBOV()
 
 int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
-    for (int i=0; i<paths.size(); i++)
+    /*for (int i=0; i<paths.size(); i++)
         std::cout << paths[i] << std::endl;
     for (int i=0; i<options.size(); i++)
-        std::cout << options[i] << std::endl;
+        std::cout << options[i] << std::endl;*/
 
     _bovCollection = new BOVCollection();
     int rc = _bovCollection->Initialize( paths );
@@ -440,30 +440,29 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
 }
 
 bool DCBOV::variableExists(size_t ts, string varname, int, int) const { 
-    std::cout << ts << " " << varname << std::endl;
+    //std::cout << ts << " " << varname << std::endl;
     return true;
     //return (_ncdfc->VariableExists(ts, varname)); 
 }
 
 BOVCollection::BOVCollection() : 
-    _dataType(DC::FLOAT),
+    _dataFormat(DC::FLOAT),
     _dataFile(""),
-    _endianness(""),
+    _dataEndian(""),
     _centering(""),
     _byteOffset(0),
     _divideBrick(false),
     _dataComponents(1) 
 {
     _files.clear();
-    _dims.clear();
-    _origin.clear();
+    _dataSize.clear();
+    _brickOrigin.clear();
     _brickSize.clear();
     _dataBricklets.clear();
 }
 
 int BOVCollection::Initialize( const std::vector<std::string> &paths ) {
     VAssert( paths.size() == 1 );
-    std::cout << "foo" << std::endl;
 
     size_t pos;
     std::string line;
@@ -471,13 +470,19 @@ int BOVCollection::Initialize( const std::vector<std::string> &paths ) {
     header.open( paths[0] );
     if( header.is_open() ) {
         while( getline( header, line ) ) {
-            //pos = line.find("TIME:");
-            //if( pos != std::string::npos ) ??
-            std::stringstream ss( line );
-            pos = line.find("DATA_FILE:");
-            if( pos != std::string::npos ) _dataFile = "myFile";
-            std::cout << "bar" << std::endl;
-
+            _readMetadataT("TIME", line, _time);
+            _readMetadataT("DATA_FILE", line, _dataFile);
+            _readMetadataT("DATA_SIZE", line, _dataSize);
+            _readMetadataT("DATA_FORMAT", line, _dataFormat);
+            _readMetadataT("VARIABLE", line, _variable);
+            _readMetadataT("DATA_ENDIAN", line, _dataEndian);
+            _readMetadataT("CENTERING", line, _centering);
+            _readMetadataT("BRICK_ORIGIN", line, _brickSize);
+            _readMetadataT("BRICK_SIZE", line, _brickSize);
+            _readMetadataT("BYTE_OFFSET", line, _byteOffset);
+            _readMetadataT("DIVIDE_BRICK", line, _divideBrick);
+            _readMetadataT("DATA_BRICKLETS", line, _dataBricklets);
+            _readMetadataT("DATA_COMPONENTS", line, _dataComponents);
         }
     }
     else {
@@ -486,14 +491,195 @@ int BOVCollection::Initialize( const std::vector<std::string> &paths ) {
     }
 }
 
+int BOVCollection::_readMetadata( const std::string &token, std::string &line, bool &value, bool verbose ) {
+    // Skip comments
+    if (line[0] == '#') {
+        return 0;
+    }
+
+    size_t pos = line.find(token);
+    if( pos != std::string::npos ) {  // Found the token
+        value = _findValue(line) == "true" ? true : false;
+        if (verbose) {
+            std::cout << token << " " << _divideBrick << std::endl;
+        }
+    }
+    return 0;
+}
+
+template<>
+int BOVCollection::_readMetadataT<DC::XType>( const std::string &token, std::string &line, DC::XType &value, bool verbose ) {
+    // Skip comments
+    if (line[0] == '#') {
+        return 0;
+    }
+
+    size_t pos = line.find( token );
+    if( pos != std::string::npos ) {
+        std::string format = _findValue( line );
+        if      (format == "BYTE"  ) _dataFormat = DC::INT8;
+        else if (format == "SHORT" ) _dataFormat = DC::INVALID;  // No XType for 16bit short
+        else if (format == "INT"   ) _dataFormat = DC::INT32;
+        else if (format == "FLOAT" ) _dataFormat = DC::FLOAT;
+        else if (format == "DOUBLE") _dataFormat = DC::DOUBLE;
+        else                         _dataFormat = DC::INVALID;
+
+        if (verbose) {
+            std::cout << token << " " << _dataFormat << std::endl;
+        }
+
+        if ( _dataFormat == DC::INVALID ) {
+            SetErrMsg("Invalid BOV data format.  Must be either BYTE,SHORT,INT,FLOAT, or DOUBLE.");
+            return -1;
+        return 0;
+        }
+    }
+}
+
+int BOVCollection::_readMetadata( const std::string &token, std::string &line, std::string &value, bool verbose ) {
+    // Skip comments
+    if (line[0] == '#') {
+        return 0;
+    }
+
+    size_t pos = line.find( token );
+    if ( pos != std::string::npos ) { // We found the token
+        value = _findValue( line );
+        if (verbose ) {
+            std::cout << token << " " << value << std::endl;
+        }
+        return 0;
+    }
+    return 0; // String assignment is no-fail
+}
+
+int BOVCollection::_readMetadata( const std::string &token, std::string &line, int &value, bool verbose ) {
+    // Skip comments
+    if (line[0] == '#') {
+        return 0;
+    }
+
+    size_t pos = line.find( token );
+    if ( pos != std::string::npos ) { // We found the token
+        try {
+            value = stoi( _findValue( line ) );
+            if (verbose ) {
+                std::cout << token << " " << value << std::endl;
+            }
+            return 0;
+        }
+        catch (const std::invalid_argument& ia) {
+            std::string message = "Invalid integer value for " + token + " in BOV header file";
+            SetErrMsg(message.c_str());
+            return -1;
+        }
+    }
+    return 0; // String assignment is no-fail
+}
+
+template<typename T>
+int BOVCollection::_readMetadataT( const std::string &token, std::string &line, T &value, bool verbose ) {
+    // Skip comments
+    if (line[0] == '#') {
+        return 0;
+    }
+
+    size_t pos = line.find( token );
+    if ( pos != std::string::npos ) { // We found the token
+        stringstream ss( _findValue( line ) );
+        if ( std::is_same<T, bool>::value ) {
+            ss >> std::boolalpha >> value;
+        }
+        else {
+            ss >> value;
+        }
+
+        if (verbose ) {
+            std::cout << token << " --- " << value << std::endl;
+        }
+        if (ss.bad()) {
+            std::cout << "              FAIL" << std::endl;
+            std::string message = "Invalid value for " + token + " in BOV header file";
+            SetErrMsg(message.c_str());
+            return -1;
+        }
+    }
+    return 0; 
+}
+
+template<typename T>
+int BOVCollection::_readMetadataT( const std::string & token, std::string &line, std::vector<T> &value, bool verbose) {
+    // Skip comments
+    if (line[0] == '#') {
+        return 0;
+    }
+
+    size_t pos = line.find( token );
+    if( pos != std::string::npos ) { // We found the token
+        T lineValue;
+        std::stringstream lineStream = stringstream( _findValue( line ) );
+        std::cout << token << " " << lineStream.str() << std::endl;
+        while( lineStream >> lineValue ) {
+            value.push_back( lineValue );
+        }
+        
+        if ( lineStream.bad() ) {
+            value.clear();
+            std::cout << "              FAIL v " << token << std::endl;
+            std::string message = "Invalid value for " + token + " in BOV header file";
+            SetErrMsg(message.c_str());
+            return -1;
+        }
+
+        if (verbose) {
+            std::cout << token << " ";
+            for (int i=0; i<value.size();i++)
+                std:: cout << value[i] << "v";
+            std::cout << std::endl;
+        }
+    }
+    return 0;
+}
+
+int BOVCollection::_readMetadata( const std::string & token, std::string &line, std::vector<int> &value, bool verbose) {
+    // Skip comments
+    if (line[0] == '#') {
+        return 0;
+    }
+
+    size_t pos = line.find( token );
+    if( pos != std::string::npos ) { // We found the token
+        std::string stringValue;
+        std::stringstream ss = stringstream( _findValue( line ) );
+        while( std::getline( ss, stringValue, ' ' )) {  // Split the stringstream by ' '
+            try {
+                value.push_back( stoi(stringValue) );
+            }
+            catch (const std::invalid_argument& ia) {
+                std::string message = "Invalid value for " + token + " in BOV header file";
+                value.clear();
+                return -1;
+            }
+        }
+
+        if (verbose) {
+        std::cout << token << " ";
+        for (int i=0; i<value.size();i++)
+            std:: cout << value[i] << " ";
+        std::cout << std::endl;
+        }
+    }
+    return 0;
+}
+
 std::string BOVCollection::_findValue( std::string &line ) const {
-    std::string delimiter = " = ";
+    std::string delimiter = ": ";
 
     size_t pos=0;
     std::string token;
     while(( pos = line.find(delimiter)) != std::string::npos) {
         token = line.substr(0, pos);
-        std::cout << token << std::endl;
         line.erase(0, pos+delimiter.length());
-    }
+    } 
+    return line; 
 }
