@@ -491,22 +491,6 @@ int BOVCollection::Initialize( const std::vector<std::string> &paths ) {
     }
 }
 
-int BOVCollection::_readMetadata( const std::string &token, std::string &line, bool &value, bool verbose ) {
-    // Skip comments
-    if (line[0] == '#') {
-        return 0;
-    }
-
-    size_t pos = line.find(token);
-    if( pos != std::string::npos ) {  // Found the token
-        value = _findValue(line) == "true" ? true : false;
-        if (verbose) {
-            std::cout << token << " " << _divideBrick << std::endl;
-        }
-    }
-    return 0;
-}
-
 template<>
 int BOVCollection::_readMetadataT<DC::XType>( const std::string &token, std::string &line, DC::XType &value, bool verbose ) {
     // Skip comments
@@ -515,7 +499,7 @@ int BOVCollection::_readMetadataT<DC::XType>( const std::string &token, std::str
     }
 
     size_t pos = line.find( token );
-    if( pos != std::string::npos ) {
+    if( pos != std::string::npos ) {  // We found the token
         std::string format = _findValue( line );
         if      (format == "BYTE"  ) _dataFormat = DC::INT8;
         else if (format == "SHORT" ) _dataFormat = DC::INVALID;  // No XType for 16bit short
@@ -534,47 +518,6 @@ int BOVCollection::_readMetadataT<DC::XType>( const std::string &token, std::str
         return 0;
         }
     }
-}
-
-int BOVCollection::_readMetadata( const std::string &token, std::string &line, std::string &value, bool verbose ) {
-    // Skip comments
-    if (line[0] == '#') {
-        return 0;
-    }
-
-    size_t pos = line.find( token );
-    if ( pos != std::string::npos ) { // We found the token
-        value = _findValue( line );
-        if (verbose ) {
-            std::cout << token << " " << value << std::endl;
-        }
-        return 0;
-    }
-    return 0; // String assignment is no-fail
-}
-
-int BOVCollection::_readMetadata( const std::string &token, std::string &line, int &value, bool verbose ) {
-    // Skip comments
-    if (line[0] == '#') {
-        return 0;
-    }
-
-    size_t pos = line.find( token );
-    if ( pos != std::string::npos ) { // We found the token
-        try {
-            value = stoi( _findValue( line ) );
-            if (verbose ) {
-                std::cout << token << " " << value << std::endl;
-            }
-            return 0;
-        }
-        catch (const std::invalid_argument& ia) {
-            std::string message = "Invalid integer value for " + token + " in BOV header file";
-            SetErrMsg(message.c_str());
-            return -1;
-        }
-    }
-    return 0; // String assignment is no-fail
 }
 
 template<typename T>
@@ -614,6 +557,8 @@ int BOVCollection::_readMetadataT( const std::string & token, std::string &line,
         return 0;
     }
 
+    value.clear();
+
     size_t pos = line.find( token );
     if( pos != std::string::npos ) { // We found the token
         T lineValue;
@@ -636,37 +581,6 @@ int BOVCollection::_readMetadataT( const std::string & token, std::string &line,
             for (int i=0; i<value.size();i++)
                 std:: cout << value[i] << "v";
             std::cout << std::endl;
-        }
-    }
-    return 0;
-}
-
-int BOVCollection::_readMetadata( const std::string & token, std::string &line, std::vector<int> &value, bool verbose) {
-    // Skip comments
-    if (line[0] == '#') {
-        return 0;
-    }
-
-    size_t pos = line.find( token );
-    if( pos != std::string::npos ) { // We found the token
-        std::string stringValue;
-        std::stringstream ss = stringstream( _findValue( line ) );
-        while( std::getline( ss, stringValue, ' ' )) {  // Split the stringstream by ' '
-            try {
-                value.push_back( stoi(stringValue) );
-            }
-            catch (const std::invalid_argument& ia) {
-                std::string message = "Invalid value for " + token + " in BOV header file";
-                value.clear();
-                return -1;
-            }
-        }
-
-        if (verbose) {
-        std::cout << token << " ";
-        for (int i=0; i<value.size();i++)
-            std:: cout << value[i] << " ";
-        std::cout << std::endl;
         }
     }
     return 0;
