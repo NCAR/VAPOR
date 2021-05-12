@@ -297,7 +297,7 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
 
     float verts0[4];
     verts0[0] = AccessIJK(i, j, k);
-    verts0[1] = dims[0] > 1 ? AccessIJK(i+1, j, k) : 0.0;
+    verts0[1] = dims[0] > 1 ? AccessIJK(i + 1, j, k) : 0.0;
     verts0[2] = dims[1] > 1 ? AccessIJK(i, j+1, k) : 0.0;
     verts0[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i+1, j+1, k) : 0.0;
 
