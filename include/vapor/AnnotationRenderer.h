@@ -58,6 +58,7 @@ public:
     void OverlayPaint(size_t ts);
 
     void AddText(string text, int x, int y, int size, float color[3], int type = 0);
+    void AddTextNormalizedCoords(string text, float x, float y, int size, float color[3], int type = 0);
 
     void DrawText();
 
@@ -79,6 +80,8 @@ private:
         string text;
         int    x;
         int    y;
+        float  xn;
+        float  yn;
         int    size;
         float  color[3];
     };

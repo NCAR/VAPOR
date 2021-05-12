@@ -914,7 +914,7 @@ int DCWRF::_InitHorizontalCoordinatesHelper(NetCDFCollection *ncdfc, string name
 
         spaceDimNames = ncdfc->GetSpatialDimNames(name);
         reverse(spaceDimNames.begin(), spaceDimNames.end());
-    } else if (ncdfc->VariableExists(name) && _proj4String.empty() && !_isWRFSFIRE(ncdfc)) {
+    } else if (ncdfc->VariableExists(name) && _proj4String.empty() && _isConstantValuedVariable(ncdfc, name)) {
         // For idealized case we need to synthesize Cartesian coordinates
         //
         derivedVar = _makeDerivedHorizontalIdealized(ncdfc, name, timeDimName, spaceDimNames);

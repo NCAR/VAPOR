@@ -32,7 +32,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             new PEnumDropdown(FP::_isSteadyTag, {"Streamlines", "Pathlines"}, {true, false}, "Flow Type"),
             (new PShowIf(FP::_isSteadyTag))->Equals(true)->Then({
                 new PEnumDropdown(FP::_flowDirectionTag, {"Forward", "Backward", "Bi-Directional"}, {(int)FlowDir::FORWARD, (int)FlowDir::BACKWARD, (int)FlowDir::BI_DIR}, "Flow Direction"),
-                (new PIntegerInput(FP::_steadyNumOfStepsTag, "Integration Steps"))->SetRange(0, 10000)->EnableDynamicUpdate(),
+                (new PIntegerInput(FP::_steadyNumOfStepsTag, "Integration Steps"))->SetRange(0, 10000),
             })->Else({
                 _pathlineLengthSlider = new PIntegerSliderEdit(FP::_pastNumOfTimeSteps, "Pathline Length"),
                 _pathlineInjectionSlider = new PIntegerSliderEdit(FP::_seedInjInterval, "Injection Interval"),
@@ -55,7 +55,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM_BIAS)->Then({
                 (new PIntegerSliderEdit(FP::_randomNumOfSeedsTag, "Seed count"))->SetRange(1, 500),
                 (new PIntegerSliderEdit(FP::_rakeBiasStrength, "Bias weight"))->SetRange(-100, 100),
-                new PVariableSelector(FP::_rakeBiasVariable)
+                new PVariableSelector(FP::_rakeBiasVariable, "Bias Variable")
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
                 (new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file"))->SetTooltip(

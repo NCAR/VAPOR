@@ -743,6 +743,25 @@ XmlParser::XmlParser()
 
 int XmlParser::LoadFromFile(XmlNode *node, string path)
 {
+    ifstream in(path);
+    if (!in) {
+        SetErrMsg("Failed to open file %s : %M", path.c_str());
+        return (-1);
+    }
+
+    int rc = LoadFromFile(node, in);
+    in.close();
+
+    if (rc < 0 || in.bad() || !_nodeStack.empty()) {
+        SetErrMsg("IO Error reading XML file");
+        return (-1);
+    }
+
+    return (0);
+}
+
+int XmlParser::LoadFromFile(XmlNode *node, istream &in)
+{
     VAssert(node != NULL);
 
     _root = node;
@@ -755,12 +774,6 @@ int XmlParser::LoadFromFile(XmlNode *node, string path)
     // Delete all current children
     //
     _root->DeleteAll();
-
-    ifstream in(path);
-    if (!in) {
-        SetErrMsg("Failed to open file %s : %M", path.c_str());
-        return (-1);
-    }
 
     XML_Parser expatParser = XML_ParserCreate(NULL);
     VAssert(expatParser != NULL);
@@ -786,13 +799,7 @@ int XmlParser::LoadFromFile(XmlNode *node, string path)
     }
     XML_ParserFree(expatParser);
 
-    if (in.bad() || !_nodeStack.empty()) {
-        SetErrMsg("IO Error reading XML file");
-        return (-1);
-    }
-    in.close();
-
-    return (0);
+    return 0;
 }
 
 void XmlParser::_startElementHandler(string tag, map<string, string> &myattrs)

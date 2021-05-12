@@ -151,7 +151,7 @@ void CalcEngineMgr::_sync()
     // Reubild PyEngine instances from database
     //
 
-    vector<string>  dataSetNames = _paramsMgr->GetDataMgrNames();
+    vector<string>  dataSetNames = _dataStatus->GetDataMgrNames();
     DatasetsParams *dParams = _paramsMgr->GetDatasetsParams();
     VAssert(dParams);
 

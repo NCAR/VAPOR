@@ -341,7 +341,9 @@ void VizWinMgr::Update(bool fast)
 int VizWinMgr::EnableImageCapture(string filename, string winName)
 {
     _vizWindow[winName]->makeCurrent();
+    _vizWindow[winName]->_preRender();
     return _controlExec->EnableImageCapture(filename, winName);
+    _vizWindow[winName]->_postRender();
 }
 
 void VizWinMgr::Shutdown()

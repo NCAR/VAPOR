@@ -261,6 +261,7 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
     calculateMaxBinSize();
     _populated = true;
 
+    dm->UnlockGrid(grid);
     delete grid;
     return 0;
 }

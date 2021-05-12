@@ -499,7 +499,7 @@ DataMgr::DataMgr(string format, size_t mem_size, int nthreads)
     _nthreads = nthreads;
     _mem_size = mem_size;
 
-    if (!_mem_size) _mem_size = 100;
+    if (!_mem_size) _mem_size = std::numeric_limits<size_t>::max() / 1048576;
 
     _dc = NULL;
 
@@ -937,7 +937,7 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
         return (new RegularGrid());
     }
 
-    return (DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui));
+    return (DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui, lock));
 }
 
 Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool lock, bool dataless)
@@ -1289,6 +1289,9 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
         for (int i = 0; i < conn_blkvec.size(); i++) {
             if (conn_blkvec[i]) _unlock_blocks(conn_blkvec[i]);
         }
+    } else {
+        if (blkvec.size()) _lockedFloatBlks[rg] = blkvec;
+        if (conn_blkvec.size()) _lockedIntBlks[rg] = conn_blkvec;
     }
 
     return (rg);
@@ -1655,13 +1658,19 @@ void DataMgr::Clear()
 void DataMgr::UnlockGrid(const Grid *rg)
 {
     SetDiagMsg("DataMgr::UnlockGrid()");
-    const vector<float *> &blks = rg->GetBlks();
-    if (blks.size()) _unlock_blocks(blks[0]);
 
-    const LayeredGrid *lg = dynamic_cast<const LayeredGrid *>(rg);
-    if (lg) {
-        const Grid &rg = lg->GetZRG();
-        if (rg.GetBlks().size()) _unlock_blocks(rg.GetBlks()[0]);
+    const auto fb = _lockedFloatBlks.find(rg);
+    if (fb != _lockedFloatBlks.end()) {
+        auto &bvec = fb->second;
+        for (auto b : bvec) { _unlock_blocks(b); }
+        _lockedFloatBlks.erase(fb);
+    }
+
+    const auto ib = _lockedIntBlks.find(rg);
+    if (ib != _lockedIntBlks.end()) {
+        auto &bvec = ib->second;
+        for (auto b : bvec) { _unlock_blocks(b); }
+        _lockedIntBlks.erase(ib);
     }
 }
 

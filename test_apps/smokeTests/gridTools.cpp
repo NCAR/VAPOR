@@ -317,20 +317,23 @@ bool RunTest(Grid *grid)
     size_t disagreements;
     double t0 = Wasp::GetTime();
 
-    if (CompareIndexToCoords(grid, rms, numMissingValues, disagreements) == false) {
-        cerr << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
-        rc = false;
-    }
+    rc = CompareIndexToCoords(grid, rms, numMissingValues, disagreements);
 
     if (grid->GetInterpolationOrder() == 0) {
-        cout << "  nearestNeighbor: " << endl;
+        cout << "  Interpolation order: nearestNeighbor " << endl;
     } else {
-        cout << "  linear:          " << endl;
+        cout << "  Interpolation order: linear          " << endl;
     }
 
     double time = Wasp::GetTime() - t0;
 
     PrintStats(rms, numMissingValues, disagreements, time);
+
+    if (rc == false) {
+        cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
+    } else {
+        cout << endl;
+    }
 
     return rc;
 }
@@ -460,15 +463,15 @@ LayeredGrid *MakeLayeredGrid(const vector<size_t> &dims, const vector<size_t> &b
     RegularGrid rg(dims, bs, zCoordBlocks, minu, maxu);
     MakeRampOnAxis(&rg, minu[Z], maxu[Z], Z);
 
-    double         deltax = maxu[0] - minu[0] / (dims[0] - 1);
+    double         deltax = dims[X] > 1 ? maxu[X] - minu[X] / (dims[X] - 1) : 1;
     vector<double> xcoords;
-    for (int i = 0; i < dims[0]; i++) { xcoords.push_back(minu[0] + (i * deltax)); }
+    for (int i = 0; i < dims[X]; i++) { xcoords.push_back(minu[X] + (i * deltax)); }
 
     // Get horizontal dimensions
     //
-    double         deltay = maxu[1] - minu[1] / (dims[1] - 1);
+    double         deltay = dims[Y] > 2 ? maxu[Y] - minu[Y] / (dims[Y] - 1) : 1;
     vector<double> ycoords;
-    for (int i = 0; i < dims[1]; i++) { ycoords.push_back(minu[1] + (i * deltay)); }
+    for (int i = 0; i < dims[Y]; i++) { ycoords.push_back(minu[1] + (i * deltay)); }
 
     std::vector<float *> dataBlocks = AllocateBlocks(bs, dims);
     LayeredGrid *        lg = new LayeredGrid(dims, bs, dataBlocks, xcoords, ycoords, rg);
@@ -486,17 +489,21 @@ VAPoR::StretchedGrid *MakeStretchedGrid(const vector<size_t> &dims, const vector
     double yRange = maxu[Y] - minu[Y];
     double zRange = maxu[Z] - minu[Z];
 
+    double xDenom = dims[X] > 1 ? dims[X] - 1 : 1;
+    double yDenom = dims[Y] > 1 ? dims[Y] - 1 : 1;
+    double zDenom = dims[Z] > 1 ? dims[Z] - 1 : 1;
+
     // Parabolically increasing coordinates
     for (size_t i = 0; i < dims[X]; i++) {
-        double xIncrement = xRange * pow(float(i) / (dims[X] - 1), 2);
+        double xIncrement = xRange * pow(float(i) / xDenom, 2.0);
         xCoords[i] = xIncrement + minu[X];
     }
     for (size_t i = 0; i < dims[Y]; i++) {
-        double yIncrement = yRange * pow(float(i) / (dims[Y] - 1), 2);
+        double yIncrement = yRange * pow(float(i) / yDenom, 2.0);
         yCoords[i] = yIncrement + minu[Y];
     }
     for (size_t i = 0; i < dims[Z]; i++) {
-        double zIncrement = zRange * pow(float(i) / (dims[Z] - 1), 2.0);
+        double zIncrement = zRange * pow(float(i) / zDenom, 2.0);
         zCoords[i] = zIncrement + minu[Z];
     }
 
@@ -507,8 +514,8 @@ VAPoR::StretchedGrid *MakeStretchedGrid(const vector<size_t> &dims, const vector
 
 VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const vector<size_t> &dims, const vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu)
 {
-    assert(dims.size() >= 2);
-    assert(bs.size() >= 2);
+    VAssert(dims.size() >= 2);
+    VAssert(bs.size() >= 2);
 
     vector<size_t>             bs1d = {bs[0] * bs[1]};
     vector<size_t>             dims1d = {dims[0] * dims[1]};

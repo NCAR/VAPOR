@@ -528,6 +528,7 @@ public:
     ~XmlParser() {}
 
     int LoadFromFile(XmlNode *root, string path);
+    int LoadFromFile(XmlNode *root, istream &in);
 
 private:
     enum type { UNKNOWN, PARENT, LONG_DATA, DOUBLE_DATA, STRING_DATA };

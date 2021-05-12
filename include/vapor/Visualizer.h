@@ -157,6 +157,8 @@ public:
     //
     void DrawText(string text, int x, int y, int size, float color[3], int type = 0) { _vizFeatures->AddText(text, x, y, size, color, type); }
 
+    void DrawTextNormalizedCoords(string text, float x, float y, int size, float color[3], int type = 0) { _vizFeatures->AddTextNormalizedCoords(text, x, y, size, color, type); }
+
     void ClearText() { _vizFeatures->ClearText(); }
 
     //! Force each renderer to empty its cache

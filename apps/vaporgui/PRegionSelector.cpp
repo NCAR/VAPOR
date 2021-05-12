@@ -56,6 +56,8 @@ bool PRegionSelector1D::isShown() const
     case Box::YZ: return d == 1 || d == 2;
     default: assert(0);
     }
+
+    return false;
 }
 
 VAPoR::Box *PRegionSelector1D::getBox() const { return getParams<RenderParams>()->GetBox(); }

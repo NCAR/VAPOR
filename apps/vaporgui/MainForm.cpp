@@ -82,6 +82,7 @@
 #include "FileOperationChecker.h"
 #include "windowsUtils.h"
 #include "ParamsWidgetDemo.h"
+#include "AppSettingsMenu.h"
 
 #include <QProgressDialog>
 #include <QProgressBar>
@@ -89,6 +90,10 @@
 #include <QStyle>
 #include <vapor/Progress.h>
 #include <vapor/OSPRay.h>
+
+#include <vapor/XmlNode.h>
+#include <vapor/Base16StringStream.h>
+#include "BookmarkParams.h"
 
 // Following shortcuts are provided:
 // CTRL_N: new session
@@ -167,6 +172,7 @@ void MainForm::_initMembers()
 
     _editUndoAction = NULL;
     _editRedoAction = NULL;
+    _appSettingsAction = NULL;
     _timeStepEdit = NULL;
     _timeStepEditValidator = NULL;
 
@@ -229,6 +235,7 @@ void MainForm::_initMembers()
     _interactiveRefinementSpin = NULL;
     _tabDockWindow = NULL;
 
+    _appSettingsMenu = nullptr;
     _stats = NULL;
     _plot = NULL;
     _pythonVariables = NULL;
@@ -384,13 +391,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     _controlExec->SetCacheSize(sP->GetCacheMB());
     _controlExec->SetNumThreads(sP->GetNumThreads());
 
-    bool lockSize = sP->GetWinSizeLock();
-    if (lockSize) {
-        size_t width, height;
-        sP->GetWinSize(width, height);
-        setFixedSize(QSize(width, height));
-    }
-
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
     _tabMgr = new TabManager(this, _controlExec);
@@ -461,7 +461,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
 
         string fmt;
         if (determineDatasetFormat(paths, &fmt)) {
-            loadDataHelper(paths, "", "", fmt, true, ReplaceFirst);
+            loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
         } else {
             MSG_ERR("Could not determine dataset format for command line parameters");
         }
@@ -888,6 +888,21 @@ void MainForm::_createFileMenu()
     connect(_fileExitAction, SIGNAL(triggered()), this, SLOT(fileExit()));
 }
 
+#include <QProxyStyle>
+class QCustomIconSizeProxyStyle : public QProxyStyle {
+    const int _size;
+
+public:
+    QCustomIconSizeProxyStyle(int size) : _size(size) {}
+    virtual int pixelMetric(PixelMetric metric, const QStyleOption *option, const QWidget *widget) const override
+    {
+        if (metric == PM_SmallIconSize)
+            return _size;
+        else
+            return QCommonStyle::pixelMetric(metric, option, widget);
+    }
+};
+
 void MainForm::_createEditMenu()
 {
     _editUndoAction = new QAction(this);
@@ -902,13 +917,29 @@ void MainForm::_createEditMenu()
     _editRedoAction->setToolTip("Redo the last undone session state change");
     _editRedoAction->setEnabled(false);
 
+
     _Edit = menuBar()->addMenu(tr("Edit"));
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
+
     _Edit->addSeparator();
+    _appSettingsMenu = new AppSettingsMenu(this);
+    _Edit->addAction("Preferences", _appSettingsMenu, &QDialog::open);
 
     connect(_editUndoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_editRedoAction, SIGNAL(triggered()), this, SLOT(redo()));
+
+
+    _Edit->addSeparator();
+    _Edit->addAction("Create Bookmark", this, &MainForm::createBookmark);
+
+    _loadBookmarkMenu = new QMenu("Load Bookmark");
+    _loadBookmarkMenu->setStyle(new QCustomIconSizeProxyStyle(BookmarkParams::DefaultIconSize()));
+    _Edit->addMenu(_loadBookmarkMenu);
+
+    _deleteBookmarkMenu = new QMenu("Delete Bookmark");
+    _deleteBookmarkMenu->setStyle(new QCustomIconSizeProxyStyle(BookmarkParams::DefaultIconSize()));
+    _Edit->addMenu(_deleteBookmarkMenu);
 }
 
 void MainForm::_createToolsMenu()
@@ -1060,6 +1091,145 @@ void MainForm::_createDeveloperMenu()
 #endif
 }
 
+void MainForm::createBookmark()
+{
+    bool    ok;
+    QString input = QInputDialog::getText(this, "New Bookmark", "Bookmark Name:", QLineEdit::Normal, "", &ok);
+    if (!ok) return;
+
+    string title = input.toStdString();
+    if (title.empty()) title = "Unnamed Bookmark";
+
+    auto p = GetStateParams();
+
+    p->BeginGroup("Create Bookmark");
+
+    vector<BookmarkParams> bookmarks;
+    for (auto *b : p->GetBookmarks()) bookmarks.push_back(BookmarkParams(*b));
+    p->ClearBookmarks();
+
+    Base16StringStream ss;
+    ss << *_paramsMgr->GetXMLRoot();
+
+    for (auto &b : bookmarks) p->AddBookmark(&b);
+
+    string           activeVizWin = p->GetActiveVizName();
+    ViewpointParams *vpp = _paramsMgr->GetViewpointParams(activeVizWin);
+
+    bool useCustomViewport = vpp->GetValueLong(vpp->UseCustomFramebufferTag, 0);
+    int  customViewportWidth = vpp->GetValueLong(vpp->CustomFramebufferWidthTag, 0);
+    int  customViewportHeight = vpp->GetValueLong(vpp->CustomFramebufferHeightTag, 0);
+
+    const int     iconSize = BookmarkParams::DefaultIconSize();
+    const int     iconDataSize = iconSize * iconSize * 3;
+    unsigned char iconData[iconDataSize];
+    char          iconDataString[64];
+    sprintf(iconDataString, ":RAM:%p", iconData);
+    // The above string is a "file path" that points to an address in memory
+    // which tells the visualizer to save the resulting image to ram rather than
+    // to disk. The current "image capture" implementation is very buggy spaghetti
+    // and this is the cleanest solution without major refactoring.
+
+    vpp->SetValueLong(vpp->UseCustomFramebufferTag, "", true);
+    vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", iconSize);
+    vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", iconSize);
+
+    _vizWinMgr->EnableImageCapture(iconDataString, activeVizWin);
+
+    vpp->SetValueLong(vpp->UseCustomFramebufferTag, "", useCustomViewport);
+    vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", customViewportWidth);
+    vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", customViewportHeight);
+
+    Base16StringStream is;
+    is.write((char *)iconData, iconDataSize);
+
+    BookmarkParams *b = p->CreateBookmark();
+    b->SetName(title);
+    b->SetIcon(iconSize, is.ToString());
+    b->SetData(ss.ToString());
+    p->EndGroup();
+}
+
+void MainForm::populateBookmarkList()
+{
+    auto bookmarks = GetStateParams()->GetBookmarks();
+    _loadBookmarkMenu->clear();
+    _deleteBookmarkMenu->clear();
+
+    if (bookmarks.empty()) {
+        _loadBookmarkMenu->addAction("(empty)")->setEnabled(false);
+        _deleteBookmarkMenu->addAction("(empty)")->setEnabled(false);
+    }
+
+    unsigned char *buf = nullptr;
+    size_t         bufSize = 0;
+
+    int i = 0;
+    for (auto b : bookmarks) {
+        if (bufSize != b->GetIconDataSize()) {
+            if (buf) delete[] buf;
+            buf = new unsigned char[b->GetIconDataSize()];
+            bufSize = b->GetIconDataSize();
+        }
+
+        Base16DecoderStream ds(b->GetIconData());
+        ds.read((char *)buf, bufSize);
+        int    s = b->GetIconSize();
+        QImage iconImage(buf, s, s, s * 3, QImage::Format_RGB888);
+        QIcon  icon(QPixmap::fromImage(iconImage));
+
+        _loadBookmarkMenu->addAction(icon, QString::fromStdString(b->GetName()), [this, i]() { loadBookmark(i); });
+        _deleteBookmarkMenu->addAction(icon, QString::fromStdString(b->GetName()), [this, i]() { deleteBookmark(i); });
+        i++;
+    }
+
+    if (buf) delete[] buf;
+}
+
+void MainForm::loadBookmark(int i)
+{
+    auto p = GetStateParams();
+
+    XmlNode             root;
+    XmlParser           parser;
+    Base16DecoderStream stream(p->GetBookmark(i)->GetData());
+    parser.LoadFromFile(&root, stream);
+
+    bool paramsStateSaveEnabled = _controlExec->GetSaveStateEnabled();
+    _controlExec->SetSaveStateEnabled(false);
+
+    vector<BookmarkParams> bookmarks;
+    for (auto *b : p->GetBookmarks()) bookmarks.push_back(BookmarkParams(*b));
+
+    _vizWinMgr->Shutdown();
+    _tabMgr->Shutdown();
+    closeAllParamsDatasets();
+
+    _controlExec->LoadState(&root);
+    p = GetStateParams();
+    p->ClearBookmarks();
+    for (auto &b : bookmarks) p->AddBookmark(&b);
+
+    loadAllParamsDatasets();
+    _vizWinMgr->Restart();
+    _tabMgr->Restart();
+
+    _vizWinMgr->Reinit();
+    _tabMgr->Reinit();
+
+    _controlExec->CreateRenderers();
+
+    _controlExec->SetSaveStateEnabled(paramsStateSaveEnabled);
+    _controlExec->UndoRedoClear();
+    _stateChangeCB();
+}
+
+void MainForm::deleteBookmark(int i)
+{
+    auto p = GetStateParams();
+    p->DeleteBookmark(i);
+}
+
 void MainForm::createMenus()
 {
     // menubar
@@ -1085,11 +1255,7 @@ void MainForm::sessionOpenHelper(string fileName, bool loadDatasets)
     _vizWinMgr->Shutdown();
     _tabMgr->Shutdown();
 
-    // Close any open data sets
-    //
-    GUIStateParams *p = GetStateParams();
-    vector<string>  dataSetNames = p->GetOpenDataSetNames();
-    for (int i = 0; i < dataSetNames.size(); i++) { closeDataHelper(dataSetNames[i]); }
+    closeAllParamsDatasets();
 
     if (!fileName.empty()) {
         int rc = _controlExec->LoadState(fileName);
@@ -1101,32 +1267,18 @@ void MainForm::sessionOpenHelper(string fileName, bool loadDatasets)
         _controlExec->LoadState();
     }
 
+    GetSettingsParams()->LoadFromSettingsFile();
+
     // Ugh. Load state will of course set open data sets in database
     //
+
     GUIStateParams *newP = GetStateParams();
-    dataSetNames = newP->GetOpenDataSetNames();
+    auto            dataSetNames = newP->GetOpenDataSetNames();
 
-    if (loadDatasets) {
-        for (int i = 0; i < dataSetNames.size(); i++) {
-            string         name = dataSetNames[i];
-            vector<string> paths = newP->GetOpenDataSetPaths(name);
-            if (std::all_of(paths.begin(), paths.end(), [](string path) { return FileUtils::Exists(path); })) {
-                loadDataHelper(paths, "", "", newP->GetOpenDataSetFormat(name), true, DatasetExistsAction::AddNew);
-            } else {
-                newP->RemoveOpenDateSet(name);
-
-                string err = "This session links to the dataset " + name + " which was not found. Please open this dataset if it is in a different location";
-
-                string details;
-                for (const auto &path : paths)
-                    if (!FileUtils::Exists(path)) details += "\"" + path + "\" not found.\n";
-
-                ErrorReporter::GetInstance()->Report(err, ErrorReporter::Warning, details);
-            }
-        }
-    } else {
+    if (loadDatasets)
+        loadAllParamsDatasets();
+    else
         for (auto name : dataSetNames) newP->RemoveOpenDateSet(name);
-    }
 
     _vizWinMgr->Restart();
     _tabMgr->Restart();
@@ -1134,6 +1286,37 @@ void MainForm::sessionOpenHelper(string fileName, bool loadDatasets)
     // Close data can't be undone
     //
     _controlExec->UndoRedoClear();
+}
+
+void MainForm::closeAllParamsDatasets()
+{
+    GUIStateParams *p = GetStateParams();
+    vector<string>  dataSetNames = p->GetOpenDataSetNames();
+    for (int i = 0; i < dataSetNames.size(); i++) { closeDataHelper(dataSetNames[i]); }
+}
+
+void MainForm::loadAllParamsDatasets()
+{
+    GUIStateParams *newP = GetStateParams();
+    auto            dataSetNames = newP->GetOpenDataSetNames();
+
+    for (int i = 0; i < dataSetNames.size(); i++) {
+        string         name = dataSetNames[i];
+        vector<string> paths = newP->GetOpenDataSetPaths(name);
+        if (std::all_of(paths.begin(), paths.end(), [](string path) { return FileUtils::Exists(path); })) {
+            loadDataHelper(name, paths, "", "", newP->GetOpenDataSetFormat(name), true, DatasetExistsAction::AddNew);
+        } else {
+            newP->RemoveOpenDateSet(name);
+
+            string err = "This session links to the dataset " + name + " which was not found. Please open this dataset if it is in a different location";
+
+            string details;
+            for (const auto &path : paths)
+                if (!FileUtils::Exists(path)) details += "\"" + path + "\" not found.\n";
+
+            ErrorReporter::GetInstance()->Report(err, ErrorReporter::Warning, details);
+        }
+    }
 }
 
 void MainForm::sessionOpen(QString qfileName, bool loadDatasets)
@@ -1396,7 +1579,7 @@ bool MainForm::openDataHelper(string dataSetName, string format, const vector<st
     return (true);
 }
 
-void MainForm::loadDataHelper(const vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction)
+void MainForm::loadDataHelper(string dataSetName, const vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction)
 {
     vector<string> myFiles = files;
 
@@ -1425,7 +1608,7 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
 
     // Generate data set name
     //
-    string dataSetName = _getDataSetName(myFiles[0], existsAction);
+    if (dataSetName.empty()) { dataSetName = _getDataSetName(myFiles[0], existsAction); }
     if (dataSetName.empty()) return;
 
     vector<string> options = {"-project_to_pcs", "-vertical_xform"};
@@ -1471,7 +1654,7 @@ void MainForm::loadData(string fileName)
     vector<string> files;
     if (!fileName.empty()) { files.push_back(fileName); }
 
-    loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.nc *.vdc)", "vdc", false);
+    loadDataHelper("", files, "Choose the Master data File to load", "Vapor VDC files (*.nc *.vdc)", "vdc", false);
 
     _tabMgr->adjustSize();
     _tabDockWindow->adjustSize();
@@ -1505,19 +1688,19 @@ void MainForm::closeData(string fileName)
 void MainForm::importWRFData()
 {
     vector<string> files;
-    loadDataHelper(files, "WRF-ARW NetCDF files", "", "wrf", true);
+    loadDataHelper("", files, "WRF-ARW NetCDF files", "", "wrf", true);
 }
 
 void MainForm::importCFData()
 {
     vector<string> files;
-    loadDataHelper(files, "NetCDF CF files", "", "cf", true);
+    loadDataHelper("", files, "NetCDF CF files", "", "cf", true);
 }
 
 void MainForm::importMPASData()
 {
     vector<string> files;
-    loadDataHelper(files, "MPAS files", "", "mpas", true);
+    loadDataHelper("", files, "MPAS files", "", "mpas", true);
 }
 
 bool MainForm::doesQStringContainNonASCIICharacter(const QString &s)
@@ -1808,9 +1991,11 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         if (_stats) { _stats->Update(); }
         if (_plot) { _plot->Update(); }
         if (_pythonVariables) { _pythonVariables->Update(); }
+        if (_appSettingsMenu) { _appSettingsMenu->Update(GetSettingsParams()); }
 
         setUpdatesEnabled(false);
         _tabMgr->Update();
+        populateBookmarkList();
 
 #ifndef NDEBUG
         _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
@@ -1921,7 +2106,8 @@ void MainForm::_performSessionAutoSave()
 
     if (_eventsSinceLastSave >= eventCountForAutoSave) {
         string autoSaveFile = sParams->GetAutoSaveSessionFile();
-        _paramsMgr->SaveToFile(autoSaveFile);
+        int    rc = _paramsMgr->SaveToFile(autoSaveFile);
+        if (rc < 0) { MSG_ERR("Unable to write settings file " + autoSaveFile); }
         _eventsSinceLastSave = 0;
     }
 }
@@ -1955,7 +2141,8 @@ void MainForm::enableWidgets(bool onOff)
     //	_stepBackAction->setEnabled(onOff);
     _interactiveRefinementSpin->setEnabled(onOff);
     _alignViewCombo->setEnabled(onOff);
-    _Edit->setEnabled(onOff);
+    _editUndoAction->setEnabled(onOff);
+    _editRedoAction->setEnabled(onOff);
     _windowSelector->setEnabled(onOff);
     _tabMgr->setEnabled(onOff);
     _statsAction->setEnabled(onOff);

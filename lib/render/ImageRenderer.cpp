@@ -498,7 +498,6 @@ int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei he
     }
 
     if (hgtGrid) {
-        dataMgr->UnlockGrid(hgtGrid);
         delete hgtGrid;
     }
 

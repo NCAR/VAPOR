@@ -16,6 +16,7 @@ set (SRC
 	VAssert.cpp
 	Progress.cpp
 	TMSUtils.cpp
+    Base16StringStream.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
 )
 
@@ -39,6 +40,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/VAssert.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Progress.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TMSUtils.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Base16StringStream.h
 )
 
 add_library (common SHARED ${SRC} ${HEADERS})

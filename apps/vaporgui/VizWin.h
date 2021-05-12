@@ -92,6 +92,8 @@ public slots:
 
 private:
     void _renderHelper(bool fast);
+    void _preRender();
+    void _postRender();
     void updateManip(bool initialize = false);
 
     // Event handling
@@ -149,6 +151,8 @@ private:
     VAPoR::TranslateStretchManip *_manip;
 
     bool _openGLInitFlag;
+
+    friend class VizWinMgr;
 };
 
 #endif    // VIZWIN_H

@@ -76,7 +76,6 @@ public:
     // Functions for interaction with VAPOR components
     //
     void AssignDataManager(VAPoR::DataMgr *dmgr);
-    void UpdateParamAndVarNames(const VAPoR::FlowParams *p);
     void UpdateParams(const VAPoR::FlowParams *);
 
     //

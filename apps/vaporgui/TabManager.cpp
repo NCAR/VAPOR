@@ -26,7 +26,6 @@
 #include "AnimationEventRouter.h"
 #include "AnnotationEventRouter.h"
 #include "NavigationEventRouter.h"
-#include "SettingsEventRouter.h"
 #include "RenderEventRouter.h"
 #include "RenderHolder.h"
 #include "TabManager.h"
@@ -35,7 +34,7 @@
 using namespace VAPoR;
 
 const string TabManager::_renderersTabName = "Renderers";
-const string TabManager::_navigationTabName = "Navigation";
+const string TabManager::_navigationTabName = "Scene";
 const string TabManager::_settingsTabName = "Settings";
 
 TabManager::TabManager(QWidget *parent, ControlExec *ce) : QTabWidget(parent)
@@ -44,7 +43,7 @@ TabManager::TabManager(QWidget *parent, ControlExec *ce) : QTabWidget(parent)
 
     // order of vector is order of display
     //
-    _tabNames = {_renderersTabName, _navigationTabName, _settingsTabName};
+    _tabNames = {_renderersTabName, _navigationTabName};
 
     // Initialize arrays of widgets and types
     //
@@ -417,10 +416,6 @@ void TabManager::_createAllDefaultTabs()
 
     connect((NavigationEventRouter *)er, SIGNAL(ProjectionTypeChanged(int)), this, SLOT(_projectionTypeChanged(int)));
 
-    parent = _getSubTabWidget(_settingsTabName);
-    er = new SettingsEventRouter(parent, _controlExec);
-    _installTab(_settingsTabName, er->GetType(), er);
-
     // Create renderers from render factory
     //
     vector<string> renderNames = RenderEventRouterFactory::Instance()->GetFactoryNames();
@@ -453,7 +448,6 @@ void TabManager::_installTab(string tabName, string subTabName, EventRouter *eRo
     eRouter->hookUpTab();
     QWidget *tabWidget = dynamic_cast<QWidget *>(eRouter);
     VAssert(tabWidget);
-    if (subTabName != SettingsParams::GetClassType()) { tabWidget->setEnabled(false); }
     _addSubTabWidget(tabWidget, subTabName, tabName);
 }
 
@@ -471,8 +465,8 @@ void TabManager::_installWidgets()
 
     // Create top widgets.  Tab widgets exist but need to be
     // inserted as tabs, based on their type
-    // Type RENDERERS is for renderers, NAVIGATION for nav and SETTINGS for settings.
-    // Create top Tab Widgets to hold the nav and settings
+    // Type RENDERERS is for renderers, NAVIGATION for nav
+    // Create top Tab Widgets to hold the nav
     for (int i = 1; i < _tabNames.size(); i++) { _tabWidgets[_tabNames[i]] = new QTabWidget(this); }
 
     for (int i = 0; i < _subTabWidgets[_renderersTabName].size(); i++) {
