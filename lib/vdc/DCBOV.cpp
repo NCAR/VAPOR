@@ -59,11 +59,6 @@ DCBOV::~DCBOV()
 
 int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
-    /*for (int i=0; i<paths.size(); i++)
-        std::cout << paths[i] << std::endl;
-    for (int i=0; i<options.size(); i++)
-        std::cout << options[i] << std::endl;*/
-
     _bovCollection = new BOVCollection();
     int rc = _bovCollection->Initialize(paths);
     if (rc < 0) {
@@ -98,58 +93,47 @@ int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &op
 int DCBOV::_InitDimensions()
 {
     _dimsMap.clear();
-    // std::vector<std::string> dimnames = {"t","z","y","x"};
-    // std::vector<size_t>      dimlens  = {1,10,10,10};
-    std::vector<std::string> dimnames = {"x", "y", "z", "t"};
-    std::vector<size_t>      dimlens = {10, 10, 10, 1};
-    // std::vector<std::string> dimnames = {"x","y","z"};
-    // std::vector<size_t>      dimlens  = {10,10,10};
+    std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
+    std::vector<int>         dimlens  = _bovCollection->GetDataSize();
+    VAssert( dimnames.size() == 3 );
+    VAssert( dimnames.size() == dimlens.size() );
+
     for (int i = 0; i < dimnames.size(); i++) {
         Dimension dim(dimnames[i], dimlens[i]);
         _dimsMap[dimnames[i]] = dim;
     }
+
+    string timeDim = _bovCollection->GetTimeDimension();
+    Dimension dim(timeDim, 1);
+    _dimsMap[timeDim] = dim;
 }
 
 int DCBOV::_InitCoordinates()
 {
-    // std::vector<std::string> cvars = {"x","y","z","t"};
-    std::vector<std::string> spatialVars = {"x", "y", "z"};
-
-    // See if the variable has uniform spacing. If so, set the uniform hint
-    //
     bool uniformHint = true;
-
-    // Finally, add the variable to _coordVarsMap.
-    //
-    // std::vector<string> dimnames = {"x", "y", "z", "t"};
-    std::vector<string> dimnames = {"x", "y", "z"};
-    /*for (std::map<string,DC::Dimension>::iterator it = _dimsMap.begin(); it!=_dimsMap.end(); ++it ) {
-        std::cout << it->first << std::endl;
-        dimnames.push_back(it->first);
-    }*/
     vector<bool> periodic(false);
-
     std::string units = "m";
 
-    DC::Attribute unitAttribute("units", DC::TEXT, "m");
+    std::vector<std::string> dims = _bovCollection->GetSpatialDimensions();
 
-    std::vector<DC::Attribute> axisAttributes = {
-        DC::Attribute("axis", DC::TEXT, "X"),
-        DC::Attribute("axis", DC::TEXT, "Y"),
-        DC::Attribute("axis", DC::TEXT, "Z"),
-    };
+    DC::Attribute unitAttribute("units", DC::TEXT, units);
 
-    for (int i = 0; i < spatialVars.size(); i++) {
-        //_coordVarsMap[spatialVars[i]] = CoordVar(spatialVars[i], units, DC::FLOAT, periodic, i, uniformHint, {dimnames[i]}, "t");
-        _coordVarsMap[spatialVars[i]] = CoordVar(spatialVars[i], units, DC::FLOAT, periodic, i, uniformHint, {dimnames[i]}, "");
-        _coordVarsMap[spatialVars[i]].SetAttribute(axisAttributes[i]);
-        _coordVarsMap[spatialVars[i]].SetAttribute(unitAttribute);
-    }
+    _coordVarsMap[dims[0]] = CoordVar(dims[0], units, DC::FLOAT, periodic, 0, uniformHint, {dims[0]}, "");
+    _coordVarsMap[dims[0]].SetAttribute(DC::Attribute("axis", DC::TEXT, "X"));
+    _coordVarsMap[dims[0]].SetAttribute(unitAttribute);
 
-    //_coordVarsMap["t"] = CoordVar("t", "seconds since 2000-1-1 0:0:0", DC::FLOAT, periodic, 3, uniformHint, dimnames, "t");
-    _coordVarsMap["t"] = CoordVar("t", "seconds since 2000-1-1 0:0:0", DC::FLOAT, periodic, 3, true, {}, "t");
-    _coordVarsMap["t"].SetAttribute(DC::Attribute("units", DC::TEXT, "seconds since 2000-1-1 0:0:0"));
-    _coordVarsMap["t"].SetAttribute(DC::Attribute("axis", DC::TEXT, "T"));
+    _coordVarsMap[dims[1]] = CoordVar(dims[1], units, DC::FLOAT, periodic, 1, uniformHint, {dims[1]}, "");
+    _coordVarsMap[dims[1]].SetAttribute(DC::Attribute("axis", DC::TEXT, "Y"));
+    _coordVarsMap[dims[1]].SetAttribute(unitAttribute);
+
+    _coordVarsMap[dims[2]] = CoordVar(dims[2], units, DC::FLOAT, periodic, 2, uniformHint, {dims[2]}, "");
+    _coordVarsMap[dims[2]].SetAttribute(DC::Attribute("axis", DC::TEXT, "Z"));
+    _coordVarsMap[dims[2]].SetAttribute(unitAttribute);
+
+    std::string timeDim = _bovCollection->GetTimeDimension();
+    _coordVarsMap[timeDim] = CoordVar(timeDim, "seconds since 2000-1-1 0:0:0", DC::FLOAT, periodic, 3, true, {}, timeDim);
+    _coordVarsMap[timeDim].SetAttribute(DC::Attribute("units", DC::TEXT, "seconds since 2000-1-1 0:0:0"));
+    _coordVarsMap[timeDim].SetAttribute(DC::Attribute("axis", DC::TEXT, "T"));
 
     return 0;
 }
@@ -162,26 +146,24 @@ int DCBOV::_InitVars()
     _dataVarsMap.clear();
     _meshMap.clear();
 
-
     vector<bool> periodic(3, false);
 
-    vector<string> vars = {"myVar"};
+    //vector<string> vars = {"myVar"};
+    vector<string> vars = { _bovCollection->GetDataVariableName() };
 
     // For each variable add a member to _dataVarsMap
     //
     for (int i = 0; i < vars.size(); i++) {
-        vector<string> sdimnames = {"x", "y", "z"};
-        vector<string> scoordvars = {"x", "y", "z"};
-        // vector<string> sdimnames;
+        //vector<string> sdimnames = {"x", "y", "z"};
+        //vector<string> scoordvars = {"x", "y", "z"};
+        std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
 
-        // string         time_dim_name = "t";
-        // string         time_coordvar = "t";
         string time_dim_name = "";
         string time_coordvar = "";
 
         string units = "m";
 
-        Mesh mesh("myMesh", sdimnames, scoordvars);
+        Mesh mesh("myMesh", dimnames, dimnames);
 
         // Create new mesh. We're being lazy here and probably should only
         // createone if it doesn't ready exist
@@ -412,7 +394,8 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
         for (int i = 0; i < 10; i++) region[i] = float(i);
     } else if (_varname == "t") {
         region[0] = 1.f;
-    } else if (_varname == "myVar") {
+    //} else if (_varname == "myVar") {
+    } else if (_varname == _bovCollection->GetDataVariableName()) {
         for (int i = 0; i < 1000; i++) region[i] = float(i);
     }
     /*FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);

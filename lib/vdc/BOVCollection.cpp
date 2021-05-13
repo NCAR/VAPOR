@@ -17,33 +17,55 @@
 
 using namespace VAPoR;
 
-BOVCollection::BOVCollection() : _dataFormat(DC::FLOAT), _dataFile(""), _dataEndian(""), _centering(""), _byteOffset(0), _divideBrick(false), _dataComponents(1)
+BOVCollection::BOVCollection() : 
+    _time("0"),
+    _dataFile(""),
+    _dataFormat(DC::FLOAT), 
+    _variable("brickVar"),
+    _dataEndian("LITTLE"), 
+    _centering("ZONAL"), 
+    _byteOffset(0), 
+    _divideBrick(false), 
+    _dataComponents(1),
+    _timeDimension("t")
 {
-    _files.clear();
     _dataSize.clear();
-    _brickOrigin.clear();
-    _brickSize.clear();
+    _brickOrigin.resize(3, 0.);
+    _brickSize.resize(3, 1.);
     _dataBricklets.clear();
+    _spatialDimensions = {"x", "y", "z"};
 }
 
 int BOVCollection::Initialize(const std::vector<std::string> &paths)
 {
     VAssert(paths.size() == 1);
 
+    int           rc;
     size_t        pos;
     std::string   line;
     std::ifstream header;
     header.open(paths[0]);
     if (header.is_open()) {
         while (getline(header, line)) {
+
+            rc = _readMetadata("DATA_FILE", line, _dataFile);
+            if (rc < 0) {
+                SetErrMsg("Failure reading .bov data file");
+                return (-1);
+            }
+
+            rc = _readMetadata("DATA_SIZE", line, _dataSize);
+            if (rc < 0) {
+                SetErrMsg("Failure reading .bov data size");
+                return (-1);
+            }
+
             _readMetadata("TIME", line, _time);
-            _readMetadata("DATA_FILE", line, _dataFile);
-            _readMetadata("DATA_SIZE", line, _dataSize);
             _readMetadata("DATA_FORMAT", line, _dataFormat);
             _readMetadata("VARIABLE", line, _variable);
             _readMetadata("DATA_ENDIAN", line, _dataEndian);
             _readMetadata("CENTERING", line, _centering);
-            _readMetadata("BRICK_ORIGIN", line, _brickSize);
+            _readMetadata("BRICK_ORIGIN", line, _brickOrigin);
             _readMetadata("BRICK_SIZE", line, _brickSize);
             _readMetadata("BYTE_OFFSET", line, _byteOffset);
             _readMetadata("DIVIDE_BRICK", line, _divideBrick);
@@ -54,6 +76,22 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
         // SetErrMsg("Failed to open %s", paths[0]);
         SetErrMsg("Failed to open bov file");
     }
+}
+
+std::string BOVCollection::GetDataVariableName() const {
+    return _variable;
+}
+
+std::vector<std::string> BOVCollection::GetSpatialDimensions() const {
+    return _spatialDimensions;
+}
+
+std::string BOVCollection::GetTimeDimension() const {
+    return _timeDimension;
+}
+
+std::vector<int> BOVCollection::GetDataSize() const {
+    return _dataSize;
 }
 
 template<> int BOVCollection::_readMetadata<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
@@ -117,12 +155,12 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
     // Skip comments
     if (line[0] == '#') { return 0; }
 
-    value.clear();
-
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
         T                 lineValue;
         std::stringstream lineStream = stringstream(_findValue(line));
+        
+        value.clear();
         while (lineStream >> lineValue) { value.push_back(lineValue); }
 
         if (lineStream.bad() || value.size() != 3) {
