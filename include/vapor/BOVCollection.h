@@ -18,7 +18,6 @@ private:
     std::vector<int>         _dataSize;
     DC::XType                _dataFormat;
     std::string              _variable;
-    std::string              _dataFile;
     std::string              _dataEndian;
     std::string              _centering;
     std::vector<float>       _brickOrigin;
