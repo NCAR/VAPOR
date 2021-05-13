@@ -54,9 +54,7 @@ DCBOV::~DCBOV()
     }
     _derivedVars.clear();
 
-    if (_bovCollection != nullptr) {
-        delete _bovCollection;
-    }
+    if (_bovCollection != nullptr) { delete _bovCollection; }
 }
 
 int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &options)
@@ -67,7 +65,7 @@ int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &op
         std::cout << options[i] << std::endl;*/
 
     _bovCollection = new BOVCollection();
-    int rc = _bovCollection->Initialize( paths );
+    int rc = _bovCollection->Initialize(paths);
     if (rc < 0) {
         SetErrMsg("Failure reading .bov file");
         return (-1);
@@ -100,12 +98,12 @@ int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &op
 int DCBOV::_InitDimensions()
 {
     _dimsMap.clear();
-    //std::vector<std::string> dimnames = {"t","z","y","x"};
-    //std::vector<size_t>      dimlens  = {1,10,10,10};
-    std::vector<std::string> dimnames = {"x","y","z","t"};
-    std::vector<size_t>      dimlens  = {10,10,10,1};
-    //std::vector<std::string> dimnames = {"x","y","z"};
-    //std::vector<size_t>      dimlens  = {10,10,10};
+    // std::vector<std::string> dimnames = {"t","z","y","x"};
+    // std::vector<size_t>      dimlens  = {1,10,10,10};
+    std::vector<std::string> dimnames = {"x", "y", "z", "t"};
+    std::vector<size_t>      dimlens = {10, 10, 10, 1};
+    // std::vector<std::string> dimnames = {"x","y","z"};
+    // std::vector<size_t>      dimlens  = {10,10,10};
     for (int i = 0; i < dimnames.size(); i++) {
         Dimension dim(dimnames[i], dimlens[i]);
         _dimsMap[dimnames[i]] = dim;
@@ -114,8 +112,8 @@ int DCBOV::_InitDimensions()
 
 int DCBOV::_InitCoordinates()
 {
-    //std::vector<std::string> cvars = {"x","y","z","t"};
-    std::vector<std::string> spatialVars = {"x","y","z"};
+    // std::vector<std::string> cvars = {"x","y","z","t"};
+    std::vector<std::string> spatialVars = {"x", "y", "z"};
 
     // See if the variable has uniform spacing. If so, set the uniform hint
     //
@@ -123,7 +121,7 @@ int DCBOV::_InitCoordinates()
 
     // Finally, add the variable to _coordVarsMap.
     //
-    //std::vector<string> dimnames = {"x", "y", "z", "t"};
+    // std::vector<string> dimnames = {"x", "y", "z", "t"};
     std::vector<string> dimnames = {"x", "y", "z"};
     /*for (std::map<string,DC::Dimension>::iterator it = _dimsMap.begin(); it!=_dimsMap.end(); ++it ) {
         std::cout << it->first << std::endl;
@@ -133,26 +131,26 @@ int DCBOV::_InitCoordinates()
 
     std::string units = "m";
 
-    DC::Attribute unitAttribute( "units", DC::TEXT, "m" );
-   
-    std::vector<DC::Attribute> axisAttributes = { 
-        DC::Attribute( "axis", DC::TEXT, "X" ),
-        DC::Attribute( "axis", DC::TEXT, "Y" ),
-        DC::Attribute( "axis", DC::TEXT, "Z" ),
+    DC::Attribute unitAttribute("units", DC::TEXT, "m");
+
+    std::vector<DC::Attribute> axisAttributes = {
+        DC::Attribute("axis", DC::TEXT, "X"),
+        DC::Attribute("axis", DC::TEXT, "Y"),
+        DC::Attribute("axis", DC::TEXT, "Z"),
     };
 
-    for (int i=0; i<spatialVars.size(); i++) {
+    for (int i = 0; i < spatialVars.size(); i++) {
         //_coordVarsMap[spatialVars[i]] = CoordVar(spatialVars[i], units, DC::FLOAT, periodic, i, uniformHint, {dimnames[i]}, "t");
         _coordVarsMap[spatialVars[i]] = CoordVar(spatialVars[i], units, DC::FLOAT, periodic, i, uniformHint, {dimnames[i]}, "");
-        _coordVarsMap[spatialVars[i]].SetAttribute( axisAttributes[i] );
-        _coordVarsMap[spatialVars[i]].SetAttribute( unitAttribute );
+        _coordVarsMap[spatialVars[i]].SetAttribute(axisAttributes[i]);
+        _coordVarsMap[spatialVars[i]].SetAttribute(unitAttribute);
     }
 
     //_coordVarsMap["t"] = CoordVar("t", "seconds since 2000-1-1 0:0:0", DC::FLOAT, periodic, 3, uniformHint, dimnames, "t");
     _coordVarsMap["t"] = CoordVar("t", "seconds since 2000-1-1 0:0:0", DC::FLOAT, periodic, 3, true, {}, "t");
-    _coordVarsMap["t"].SetAttribute( DC::Attribute( "units", DC::TEXT, "seconds since 2000-1-1 0:0:0" ) );
-    _coordVarsMap["t"].SetAttribute( DC::Attribute( "axis",  DC::TEXT, "T" ) );
- 
+    _coordVarsMap["t"].SetAttribute(DC::Attribute("units", DC::TEXT, "seconds since 2000-1-1 0:0:0"));
+    _coordVarsMap["t"].SetAttribute(DC::Attribute("axis", DC::TEXT, "T"));
+
     return 0;
 }
 
@@ -172,14 +170,14 @@ int DCBOV::_InitVars()
     // For each variable add a member to _dataVarsMap
     //
     for (int i = 0; i < vars.size(); i++) {
-        vector<string> sdimnames = {"x","y","z"};
+        vector<string> sdimnames = {"x", "y", "z"};
         vector<string> scoordvars = {"x", "y", "z"};
-        //vector<string> sdimnames;
+        // vector<string> sdimnames;
 
-        //string         time_dim_name = "t";
-        //string         time_coordvar = "t";
-        string         time_dim_name = "";
-        string         time_coordvar = "";
+        // string         time_dim_name = "t";
+        // string         time_coordvar = "t";
+        string time_dim_name = "";
+        string time_coordvar = "";
 
         string units = "m";
 
@@ -191,8 +189,8 @@ int DCBOV::_InitVars()
         _meshMap[mesh.GetName()] = mesh;
 
         _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
-        _dataVarsMap[vars[i]].SetAttribute( DC::Attribute( "standard_name", DC::TEXT, vars[i] ) );
-        _dataVarsMap[vars[i]].SetAttribute( DC::Attribute( "units", DC::TEXT, units ) );
+        _dataVarsMap[vars[i]].SetAttribute(DC::Attribute("standard_name", DC::TEXT, vars[i]));
+        _dataVarsMap[vars[i]].SetAttribute(DC::Attribute("units", DC::TEXT, units));
     }
 
     return (0);
@@ -381,12 +379,12 @@ int DCBOV::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 int DCBOV::openVariableRead(size_t ts, string varname)
 {
     _varname = varname;
-    //return 0;
-    //int aux = _ncdfc->OpenRead(ts, varname);
+    // return 0;
+    // int aux = _ncdfc->OpenRead(ts, varname);
 
-    //if (aux < 0) return (aux);
+    // if (aux < 0) return (aux);
 
-    FileTable::FileObject *f = new FileTable::FileObject(ts, varname, 0, 0, 0);//aux);
+    FileTable::FileObject *f = new FileTable::FileObject(ts, varname, 0, 0, 0);    // aux);
     return (_fileTable.AddEntry(f));
 }
 
@@ -410,15 +408,12 @@ int DCBOV::closeVariable(int fd)
 
 template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
-    if ( _varname == "x" || _varname == "y" || _varname == "z" ) {
-        for (int i=0; i<10; i++) region[i] = float(i);
-    }
-    else if ( _varname == "t" ) {
+    if (_varname == "x" || _varname == "y" || _varname == "z") {
+        for (int i = 0; i < 10; i++) region[i] = float(i);
+    } else if (_varname == "t") {
         region[0] = 1.f;
-    }
-    else if ( _varname == "myVar" ) {
-        for (int i=0; i<1000; i++)
-            region[i] = float(i);
+    } else if (_varname == "myVar") {
+        for (int i = 0; i < 1000; i++) region[i] = float(i);
     }
     /*FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
 
@@ -440,20 +435,20 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     return (_ncdfc->Read(ncdf_start, ncdf_count, region, aux));*/
 }
 
-bool DCBOV::variableExists(size_t ts, string varname, int, int) const { 
-    //std::cout << ts << " " << varname << std::endl;
+bool DCBOV::variableExists(size_t ts, string varname, int, int) const {
+    // std::cout << ts << " " << varname << std::endl;
     return true;
-    //return (_ncdfc->VariableExists(ts, varname)); 
+    // return (_ncdfc->VariableExists(ts, varname));
 }
 
-/*BOVCollection::BOVCollection() : 
+/*BOVCollection::BOVCollection() :
     _dataFormat(DC::FLOAT),
     _dataFile(""),
     _dataEndian(""),
     _centering(""),
     _byteOffset(0),
     _divideBrick(false),
-    _dataComponents(1) 
+    _dataComponents(1)
 {
     _files.clear();
     _dataSize.clear();
@@ -548,7 +543,7 @@ int BOVCollection::_readMetadata( const std::string &token, std::string &line, T
             return -1;
         }
     }
-    return 0; 
+    return 0;
 }
 
 template<typename T>
@@ -567,7 +562,7 @@ int BOVCollection::_readMetadata( const std::string & token, std::string &line, 
         while( lineStream >> lineValue ) {
             value.push_back( lineValue );
         }
-        
+
         if ( lineStream.bad() || value.size()!=3 ) {
             value.clear();
             std::cout << "FAIL v " << token << std::endl;
@@ -594,6 +589,6 @@ std::string BOVCollection::_findValue( std::string &line ) const {
     while(( pos = line.find(delimiter)) != std::string::npos) {
         token = line.substr(0, pos);
         line.erase(0, pos+delimiter.length());
-    } 
-    return line; 
+    }
+    return line;
 }*/

@@ -827,11 +827,11 @@ void MainForm::_createFileMenu()
     _dataImportMPAS_Action->setText(tr("MPAS"));
     _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the "
                                        "current session");
-    
+
     _dataImportBOV_Action = new QAction(this);
     _dataImportBOV_Action->setText(tr("BOV"));
     _dataImportBOV_Action->setToolTip("Specify one BOV data file to import into the "
-                                       "current session");
+                                      "current session");
 
     _fileOpenAction = new QAction(this);
     _fileOpenAction->setEnabled(true);

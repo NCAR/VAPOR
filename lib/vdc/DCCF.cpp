@@ -88,9 +88,7 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
     }
 
     map<string, DC::Dimension>::const_iterator itr;
-    for (itr = _dimsMap.begin(); itr != _dimsMap.end(); ++itr) { 
-        std::cout << "dim " << itr->first << std::endl; 
-    }
+    for (itr = _dimsMap.begin(); itr != _dimsMap.end(); ++itr) { std::cout << "dim " << itr->first << std::endl; }
 
     // Set up the horizontal coordinate variables
     //

@@ -154,9 +154,9 @@ private:
     NetCDFCFCollection *_ncdfc;
     VAPoR::UDUnits      _udunits;
 
-    BOVCollection*      _bovCollection;
+    BOVCollection *_bovCollection;
 
-    string _varname;
+    string                                      _varname;
     string                                      _proj4String;
     std::map<string, DC::Dimension>             _dimsMap;
     std::map<string, DC::CoordVar>              _coordVarsMap;
@@ -174,10 +174,8 @@ private:
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 
     template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
-
-
 };
-}    
+}    // namespace VAPoR
 /*class BOVCollection : public Wasp::MyBase {
     public:
         BOVCollection();
@@ -203,7 +201,7 @@ private:
         int _readMetadata( const std::string &token, std::string &line, T &value, bool verbose=true );
         template<>
         int _readMetadata<DC::XType>( const std::string &token, std::string &line, DC::XType &value, bool verbose );
-        
+
         template<typename T>
         int _readMetadata( const std::string &token, std::string &line, std::vector<T> &value, bool verbose=true );
 
