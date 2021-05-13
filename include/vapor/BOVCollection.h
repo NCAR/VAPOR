@@ -14,13 +14,18 @@ public:
 
     std::string              GetDataVariableName() const;
     std::string              GetTimeDimension() const;
-    std::vector<int>         GetDataSize() const;
+    std::vector<size_t>      GetDataSize() const;
     std::vector<std::string> GetSpatialDimensions() const;
+    DC::XType                GetDataFormat() const;
+    std::vector<float>       GetBrickOrigin() const;
+    std::vector<float>       GetBrickSize() const;
+
+    template<typename T> int ReadRegion( std::string, T* region );
 
 private:
     std::string              _time;
     std::string              _dataFile;
-    std::vector<int>         _dataSize;
+    std::vector<size_t>      _dataSize;
     DC::XType                _dataFormat;
     std::string              _variable;
     std::string              _dataEndian;

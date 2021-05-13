@@ -94,7 +94,7 @@ int DCBOV::_InitDimensions()
 {
     _dimsMap.clear();
     std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
-    std::vector<int>         dimlens  = _bovCollection->GetDataSize();
+    std::vector<size_t>      dimlens  = _bovCollection->GetDataSize();
     VAssert( dimnames.size() == 3 );
     VAssert( dimnames.size() == dimlens.size() );
 
@@ -106,6 +106,8 @@ int DCBOV::_InitDimensions()
     string timeDim = _bovCollection->GetTimeDimension();
     Dimension dim(timeDim, 1);
     _dimsMap[timeDim] = dim;
+    
+    return 0;
 }
 
 int DCBOV::_InitCoordinates()
@@ -130,6 +132,8 @@ int DCBOV::_InitCoordinates()
     _coordVarsMap[dims[2]].SetAttribute(DC::Attribute("axis", DC::TEXT, "Z"));
     _coordVarsMap[dims[2]].SetAttribute(unitAttribute);
 
+    // Is there something better to use than "seconds since 2000-1-1 0:0:0"?
+    // Should it be stored in BOVCollection?
     std::string timeDim = _bovCollection->GetTimeDimension();
     _coordVarsMap[timeDim] = CoordVar(timeDim, "seconds since 2000-1-1 0:0:0", DC::FLOAT, periodic, 3, true, {}, timeDim);
     _coordVarsMap[timeDim].SetAttribute(DC::Attribute("units", DC::TEXT, "seconds since 2000-1-1 0:0:0"));
@@ -148,32 +152,23 @@ int DCBOV::_InitVars()
 
     vector<bool> periodic(3, false);
 
-    //vector<string> vars = {"myVar"};
-    vector<string> vars = { _bovCollection->GetDataVariableName() };
+    std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
+    std::string var                   = _bovCollection->GetDataVariableName();
+    DC::XType format                  = _bovCollection->GetDataFormat();
+    string time_dim_name              = "";
+    string time_coordvar              = "";
+    string units                      = "m"; // Should this be stored in BOVCollection?
 
-    // For each variable add a member to _dataVarsMap
+    Mesh mesh(var, dimnames, dimnames);
+
+    // Create new mesh. We're being lazy here and probably should only
+    // createone if it doesn't ready exist
     //
-    for (int i = 0; i < vars.size(); i++) {
-        //vector<string> sdimnames = {"x", "y", "z"};
-        //vector<string> scoordvars = {"x", "y", "z"};
-        std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
+    _meshMap[mesh.GetName()] = mesh;
 
-        string time_dim_name = "";
-        string time_coordvar = "";
-
-        string units = "m";
-
-        Mesh mesh("myMesh", dimnames, dimnames);
-
-        // Create new mesh. We're being lazy here and probably should only
-        // createone if it doesn't ready exist
-        //
-        _meshMap[mesh.GetName()] = mesh;
-
-        _dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
-        _dataVarsMap[vars[i]].SetAttribute(DC::Attribute("standard_name", DC::TEXT, vars[i]));
-        _dataVarsMap[vars[i]].SetAttribute(DC::Attribute("units", DC::TEXT, units));
-    }
+    _dataVarsMap[var] = DataVar(var, units, format, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
+    _dataVarsMap[var].SetAttribute(DC::Attribute("standard_name", DC::TEXT, var));
+    _dataVarsMap[var].SetAttribute(DC::Attribute("units", DC::TEXT, units));
 
     return (0);
 }
@@ -361,6 +356,7 @@ int DCBOV::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 int DCBOV::openVariableRead(size_t ts, string varname)
 {
     _varname = varname;
+std::cout << "int DCBOV::openVariableRead(size_t ts, string varname) " << varname << std::endl;
     // return 0;
     // int aux = _ncdfc->OpenRead(ts, varname);
 
@@ -372,27 +368,53 @@ int DCBOV::openVariableRead(size_t ts, string varname)
 
 int DCBOV::closeVariable(int fd)
 {
-    /*DC::FileTable::FileObject *w = _fileTable.GetEntry(fd);
+    DC::FileTable::FileObject *w = _fileTable.GetEntry(fd);
+
+    std::cout << "closeVariable( " << w->GetVarname() << std::endl;
 
     if (!w) {
         SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
-    int aux = w->GetAux();
+    //int aux = w->GetAux();
 
-    int rc = _ncdfc->Close(aux);
+    //int rc = _ncdfc->Close(aux);
 
     _fileTable.RemoveEntry(fd);
 
-    return (rc);*/
+    //return (rc);*/
     return 0;
 }
 
 template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
-    if (_varname == "x" || _varname == "y" || _varname == "z") {
-        for (int i = 0; i < 10; i++) region[i] = float(i);
-    } else if (_varname == "t") {
+    FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
+    if (!w) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    std::string varname = w->GetVarname();
+
+    std::vector<std::string> spatialDims = _bovCollection->GetSpatialDimensions();
+    std::vector<size_t>      dataSize    = _bovCollection->GetDataSize();
+    std::vector<float>       origin      = _bovCollection->GetBrickOrigin();
+    std::vector<float>       brickSize   = _bovCollection->GetBrickSize();
+
+    // Return spatial coordinate variable values
+    for (int dim=0; dim<spatialDims.size(); dim++) {
+        if ( varname == spatialDims[dim] ) {
+            float increment = brickSize[dim]/dataSize[dim];
+            for ( int i=0; i<dataSize[dim]; i++ ) {
+                region[i] = origin[dim] + i*increment;
+            }
+        }
+    }
+
+    //if (_varname == "x" || _varname == "y" || _varname == "z") {
+    //    for (int i = 0; i < 10; i++) region[i] = float(i);
+    //} else if (_varname == "t") {
+    if (_varname == "t") {
         region[0] = 1.f;
     //} else if (_varname == "myVar") {
     } else if (_varname == _bovCollection->GetDataVariableName()) {

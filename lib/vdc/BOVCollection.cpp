@@ -90,8 +90,25 @@ std::string BOVCollection::GetTimeDimension() const {
     return _timeDimension;
 }
 
-std::vector<int> BOVCollection::GetDataSize() const {
+std::vector<size_t> BOVCollection::GetDataSize() const {
     return _dataSize;
+}
+
+DC::XType BOVCollection::GetDataFormat() const {
+    return _dataFormat;
+}
+
+std::vector<float> BOVCollection::GetBrickOrigin() const {
+    return _brickOrigin;
+}
+
+std::vector<float> BOVCollection::GetBrickSize() const {
+    return _brickSize;
+}
+
+template <typename T>
+int BOVCollection::ReadRegion( std::string varname, T *region ) {
+    return 0;
 }
 
 template<> int BOVCollection::_readMetadata<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
