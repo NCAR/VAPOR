@@ -177,8 +177,8 @@ private:
 
 
 };
-    
-class BOVCollection : public Wasp::MyBase {
+}    
+/*class BOVCollection : public Wasp::MyBase {
     public:
         BOVCollection();
         int Initialize( const std::vector<std::string> &paths );
@@ -200,20 +200,15 @@ class BOVCollection : public Wasp::MyBase {
         int                      _dataComponents;
 
         template<typename T>
-        int _readMetadataT( const std::string &token, std::string &line, T &value, bool verbose=true );
+        int _readMetadata( const std::string &token, std::string &line, T &value, bool verbose=true );
         template<>
-        int _readMetadataT<DC::XType>( const std::string &token, std::string &line, DC::XType &value, bool verbose );
+        int _readMetadata<DC::XType>( const std::string &token, std::string &line, DC::XType &value, bool verbose );
         
         template<typename T>
-        int _readMetadataT( const std::string &token, std::string &line, std::vector<T> &value, bool verbose=true );
+        int _readMetadata( const std::string &token, std::string &line, std::vector<T> &value, bool verbose=true );
 
-        int _readMetadata( const std::string &token, std::string &line, int &value, bool verbose=true );
-        int _readMetadata( const std::string &token, std::string &line, bool &value, bool verbose=true );
-        //int _readMetadata( const std::string &token, std::string &line, DC::XType &value, bool verbose=true );
-        int _readMetadata( const std::string &token, std::string &line, std::string &value, bool verbose=true );
-        int _readMetadata( const std::string &token, std::string &line, std::vector<int> &value, bool verbose=true );
         std::string _findValue( std::string &line ) const;
 };
-};    // namespace VAPoR
+};    // namespace VAPoR*/
 
 #endif

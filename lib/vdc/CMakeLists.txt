@@ -13,6 +13,7 @@ set (SRC
 	NetCDFSimple.cpp
 	NetCDFCollection.cpp
 	NetCDFCFCollection.cpp
+    BOVCollection.cpp
 	UDUnitsClass.cpp
 	Proj4API.cpp
 	DC.cpp
@@ -49,6 +50,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/NetCDFSimple.h
 	${PROJECT_SOURCE_DIR}/include/vapor/NetCDFCollection.h
 	${PROJECT_SOURCE_DIR}/include/vapor/NetCDFCFCollection.h
+	${PROJECT_SOURCE_DIR}/include/vapor/BOVCollection.h
 	${PROJECT_SOURCE_DIR}/include/vapor/UDUnitsClass.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Proj4API.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DC.h
