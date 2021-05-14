@@ -123,7 +123,7 @@ public:
         }
         return GetBox()->IsPlanar() ? 2 : 3;
     }
-    
+
     //! \copydoc RenderParams::GetActualColorMapVariableName()
     virtual string GetActualColorMapVariableName() const override
     {
