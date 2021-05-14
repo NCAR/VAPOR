@@ -30,6 +30,15 @@ public:
     //! \copydoc RenderParams::GetRenderDim()
     //
     virtual size_t GetRenderDim() const override { return (3); }
+    
+    //! \copydoc RenderParams::GetActualColorMapVariableName()
+    virtual string GetActualColorMapVariableName() const override
+    {
+        if (UseSingleColor())
+            return "";
+        else
+            return GetVariableName();
+    }
 
     int GetSampleRate() const;
 

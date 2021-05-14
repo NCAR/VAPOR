@@ -90,6 +90,12 @@ public:
         int value = ((int)GetValueLong(_numTMSLODTag, 4));
         return value;
     }
+    
+    //! \copydoc RenderParams::GetActualColorMapVariableName()
+    virtual string GetActualColorMapVariableName() const override
+    {
+        return "";
+    }
 
 public:
     static const std::string _fileNameTag;

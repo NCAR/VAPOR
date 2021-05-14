@@ -2,6 +2,7 @@
 
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
+#include <vapor/STLUtils.h>
 
 namespace VAPoR {
 
@@ -53,6 +54,17 @@ public:
     //! \copydoc RenderParams::GetRenderDim()
     //
     virtual size_t GetRenderDim() const override { return (3); }
+    
+    //! \copydoc RenderParams::GetActualColorMapVariableName()
+    virtual string GetActualColorMapVariableName() const override
+    {
+        if (STLUtils::Contains(STLUtils::ToLower(GetAlgorithm()), "ospray"))
+            return GetVariableName();
+        else if (GetValueLong(UseColormapVariableTag, 0))
+            return GetColorMapVariableName();
+        else
+            return GetVariableName();
+    }
 
     static const std::vector<std::string> GetAlgorithmNames(Type type = Type::Any);
     static void                           Register(const std::string &name, Type type = Type::Any);

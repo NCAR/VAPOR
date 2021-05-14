@@ -74,6 +74,12 @@ public:
     //! \copydoc RenderParams::GetRenderDim()
     //
     virtual size_t GetRenderDim() const override { return (2); }
+    
+    //! \copydoc RenderParams::GetActualColorMapVariableName()
+    virtual string GetActualColorMapVariableName() const override
+    {
+        return GetColorMapVariableName();
+    }
 
     int GetNumDigits() const
     {
