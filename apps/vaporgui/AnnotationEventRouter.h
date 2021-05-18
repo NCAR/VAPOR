@@ -106,8 +106,8 @@ private:
     VComboBox *  _copyRegionCombo;
     VPushButton *_copyRegionButton;
 
-    std::vector<PGroup*> _groups;
-    std::vector<PGroup*> _axisGroups;
+    std::vector<PGroup *> _groups;
+    std::vector<PGroup *> _axisGroups;
 };
 
 #endif    // ANNOTATIONEVENTROUTER_H
