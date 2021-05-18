@@ -175,7 +175,7 @@ int           main(int argc, char **argv)
 
     vector<QString> files;
     for (int i = 1; i < argc; i++) { files.push_back(argv[i]); }
-    MainForm *mw = new MainForm(files, app);
+    MainForm *mw = new MainForm(files, app, !opt.render);
 
     // StartupParams* sParams = new StartupParams(0);
 

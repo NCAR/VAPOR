@@ -83,6 +83,7 @@
 #include "windowsUtils.h"
 #include "ParamsWidgetDemo.h"
 #include "AppSettingsMenu.h"
+#include "CheckForUpdate.h"
 
 #include <QProgressDialog>
 #include <QProgressBar>
@@ -318,7 +319,7 @@ public:
 
 // Only the main program should call the constructor:
 //
-MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : QMainWindow(parent)
+MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, QWidget *parent) : QMainWindow(parent)
 {
     _initMembers();
 
@@ -473,6 +474,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
 
     _controlExec->SetSaveStateEnabled(true);
     _controlExec->RebaseStateSave();
+
+    if (interactive && GetSettingsParams()->GetValueLong(SettingsParams::AutoCheckForUpdatesTag, true)) CheckForUpdates();
 }
 
 int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int width, int height)
@@ -561,6 +564,33 @@ bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std
     else
         return false;
     return true;
+}
+
+void MainForm::CheckForUpdates()
+{
+#ifndef NDEBUG
+    return;    // Don't check for updates in debug builds
+#endif
+
+    CheckForUpdate([this](bool updateAvailable, UpdateInfo info) {
+        if (!updateAvailable) return;
+
+        QCheckBox *cb = new QCheckBox("Automatically check for updates");
+        cb->setChecked(true);
+        QMessageBox popup;
+        popup.setText(QString::fromStdString("A newer version of Vapor is available: " + info.version));
+        QPushButton *get = popup.addButton("Get Latest Version", QMessageBox::ActionRole);
+        popup.addButton("Ok", QMessageBox::AcceptRole);
+        popup.setCheckBox(cb);
+
+        popup.exec();
+        if (popup.clickedButton() == get) info.OpenURL();
+
+        if (!cb->isChecked()) {
+            GetSettingsParams()->SetValueLong(SettingsParams::AutoCheckForUpdatesTag, "", false);
+            GetSettingsParams()->SaveSettings();
+        }
+    });
 }
 
 void MainForm::_createAnimationToolBar()
