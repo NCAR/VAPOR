@@ -120,8 +120,6 @@ int HelloRenderer::_paintGL(bool)
         }
     }
 
-    _dataMgr->UnlockGrid(helloGrid);
-
     // Obtain the line width
     float width = (float)rParams->GetLineThickness();
 
