@@ -58,7 +58,7 @@ public:
     //! \copydoc RenderParams::GetActualColorMapVariableName()
     virtual string GetActualColorMapVariableName() const override
     {
-        if (STLUtils::Contains(STLUtils::ToLower(GetAlgorithm()), "ospray"))
+        if (GetAlgorithm() == OSPVolmeAlgorithmName)
             return GetVariableName();
         else if (GetValueLong(UseColormapVariableTag, 0))
             return GetColorMapVariableName();
@@ -100,6 +100,8 @@ public:
     static const std::string OSPSampleRateScalar;
     static const std::string OSPAmbientLightIntensity;
     static const std::string OSPDirectionalLightIntensity;
+    
+    static const std::string OSPVolmeAlgorithmName;
 };
 
 };    // namespace VAPoR
