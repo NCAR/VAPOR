@@ -51,6 +51,7 @@
 #include "PSliderEditHLI.h"
 #include "VComboBox.h"
 #include "VPushButton.h"
+#include "Updateable.h"
 
 using namespace VAPoR;
 
@@ -80,11 +81,12 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     _ap = NULL;
 
     VSection *axisAnnotationTab = new VSection("Axis Annotations");
-    _axisAnnotationGroup1 = new PGroup({
+    PGroup* axisAnnotationGroup1 = new PGroup({
         new PCheckbox(AxisAnnotation::_annotationEnabledTag, "Axis Annotations Enabled"),
         new PCheckbox(AxisAnnotation::_latLonAxesTag, "Annotate with lat/lon"),
     });
-    axisAnnotationTab->layout()->addWidget(_axisAnnotationGroup1);
+    axisAnnotationTab->layout()->addWidget(axisAnnotationGroup1);
+    _axisGroups.push_back(axisAnnotationGroup1);
 
     QTableWidget *annotationTable = new QTableWidget;
     _annotationVaporTable = new VaporTable(annotationTable);
@@ -97,7 +99,7 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     axisAnnotationTab->layout()->addWidget(new VLineItem("Copy Region From Renderer", _copyRegionCombo));
     axisAnnotationTab->layout()->addWidget(new VLineItem("", _copyRegionButton));
 
-    _axisAnnotationGroup2 = new PGroup({
+    PGroup* axisAnnotationGroup2 = new PGroup({
         new PColorSelector(AxisAnnotation::_colorTag, "Axis Text Color"),
         new PColorSelector(AxisAnnotation::_backgroundColorTag, "Text Background Color"),
         (new PIntegerSliderEditHLI<AxisAnnotation>("Font Size", &AxisAnnotation::GetAxisFontSize, &AxisAnnotation::SetAxisFontSize))->SetRange(2, 48)->EnableDynamicUpdate(),
@@ -107,29 +109,33 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
         new PEnumDropdownHLI<AxisAnnotation>("Y Tickmark Orientation", {"X axis", "Z axis"}, {0, 2}, &AxisAnnotation::GetYTicDir, &AxisAnnotation::SetYTicDir),
         new PEnumDropdownHLI<AxisAnnotation>("Z Tickmark Orientation", {"X axis", "Y axis"}, {0, 1}, &AxisAnnotation::GetZTicDir, &AxisAnnotation::SetZTicDir),
     });
-    axisAnnotationTab->layout()->addWidget(_axisAnnotationGroup2);
+    axisAnnotationTab->layout()->addWidget(axisAnnotationGroup2);
+    _axisGroups.push_back(axisAnnotationGroup2);
 
     layout()->addWidget(axisAnnotationTab);
 
-    _timeAnnotationGroup = new PGroup({new PSection(
+    PGroup* timeAnnotationGroup = new PGroup({new PSection(
         "Time Annotation", {new PEnumDropdown(AnnotationParams::_timeTypeTag, {"No annotation", "Time step number", "User time", "Formatted date/time"}, {0, 1, 2, 3}, "Annotation type"),
                             new PIntegerInput(AnnotationParams::_timeSizeTag, "Font Size"), (new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X Position"))->EnableDynamicUpdate(),
                             (new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y Position"))->EnableDynamicUpdate(), new PColorSelector(AnnotationParams::_timeColorTag, "Text Color")})});
-    layout()->addWidget(_timeAnnotationGroup);
+    layout()->addWidget(timeAnnotationGroup);
+    _groups.push_back(timeAnnotationGroup);
 
-    _axisArrowGroup = new PGroup({new PSection("Orientation Arrows", {(new PCheckbox(AnnotationParams::AxisArrowEnabledTag, "Show arrows (XYZ->RGB)")),
+    PGroup* axisArrowGroup = new PGroup({new PSection("Orientation Arrows", {(new PCheckbox(AnnotationParams::AxisArrowEnabledTag, "Show arrows (XYZ->RGB)")),
                                                                       (new PDoubleSliderEdit(AnnotationParams::AxisArrowSizeTag, "Size"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
                                                                       (new PDoubleSliderEdit(AnnotationParams::AxisArrowXPosTag, "X Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
                                                                       (new PDoubleSliderEdit(AnnotationParams::AxisArrowYPosTag, "Y Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate()})});
-    layout()->addWidget(_axisArrowGroup);
+    layout()->addWidget(axisArrowGroup);
+    _groups.push_back(axisArrowGroup);
 
-    _3DGeometryGroup = new PGroup(
+    PGroup* ThreeDGeometryGroup = new PGroup(
         {new PSection("3D Geometry", {
                                          new PCheckbox(AnnotationParams::_domainFrameTag, "Display Domain Bounds"), new PColorSelector(AnnotationParams::_domainColorTag, "Domain Frame Color"),
                                          new PColorSelector(AnnotationParams::_backgroundColorTag, "Background Color"),
                                          // new PColorSelector(AnnotationParams::_regionColorTag, "Region Frame Color")  Broken.  See #1742
                                      })});
-    layout()->addWidget(_3DGeometryGroup);
+    layout()->addWidget(ThreeDGeometryGroup);
+    _groups.push_back(ThreeDGeometryGroup);
 }
 
 AnnotationEventRouter::~AnnotationEventRouter() {}
@@ -140,15 +146,10 @@ void AnnotationEventRouter::_updateTab()
     updateAxisTable();
 
     AxisAnnotation *a = _getCurrentAxisAnnotation();
-    _axisAnnotationGroup1->Update(a);
-    _axisAnnotationGroup2->Update(a, _controlExec->GetParamsMgr());
-    std::vector<double> c = a->GetAxisColor();
-
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
 
-    _axisArrowGroup->Update(vParams);
-    _timeAnnotationGroup->Update(vParams);
-    _3DGeometryGroup->Update(vParams);
+    for (PGroup *group: _groups) group->Update(vParams);
+    for (PGroup *group: _axisGroups) group->Update(a, _controlExec->GetParamsMgr());
 
     return;
 }
