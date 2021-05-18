@@ -187,7 +187,7 @@ void test_get_value(Grid *g)
 #if defined(_OPENMP)
     int    requested_num_threads = get_num_ompthreads();
 #endif
-#pragma omp parallel num_threads(requested_num_threads);
+#pragma omp parallel num_threads(requested_num_threads)
     {
         size_t my_ecount = 0;
         size_t my_count = 0;
