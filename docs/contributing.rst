@@ -198,8 +198,8 @@ CentOS:
 .. note::
     Vapor uses docker images as a basis for its continuous integration test suite, which are built from Dockerfiles located in <source-directory>/share/docker.  The docker files in this directory can be used as a reference to how our different test systems build Vapor.
 
-Build Vapor with CMake
-______________________
+Building Vapor from source 
+__________________________
 
 On all operating systems, create a directory where the build will take place.  One option is to put the build directory inside of the Vapor source code directory.
 
