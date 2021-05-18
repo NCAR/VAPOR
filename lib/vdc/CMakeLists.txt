@@ -76,13 +76,12 @@ add_library (vdc SHARED ${SRC} ${HEADERS})
 if( USE_OMP )
   target_compile_options( vdc PUBLIC ${OpenMP_CXX_FLAGS} )
   target_compile_definitions (vdc PUBLIC USE_OMP)
+  target_link_libraries (vdc PUBLIC OpenMP::OpenMP_CXX)
+else()
+  target_compile_options( vdc PUBLIC "-Wno-unknown-pragmas" )
 endif()
 
 target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ})
-
-if( USE_OMP )
-  target_link_libraries (vdc PUBLIC OpenMP::OpenMP_CXX)
-endif()
 
 add_definitions (-DVDF_EXPORTS)
 
