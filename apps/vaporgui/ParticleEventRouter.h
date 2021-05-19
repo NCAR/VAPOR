@@ -5,7 +5,7 @@
 
 //! \class ParticleEventRouter
 //! \ingroup Public_GUI
-//! \brief Barb renderer GUI
+//! \brief Particle renderer GUI
 //! \author Stas Jaroszynski
 
 class ParticleEventRouter : public RenderEventRouterGUI {
@@ -18,6 +18,6 @@ public:
 
 protected:
     virtual string _getDescription() const;
-    virtual string _getSmallIconImagePath() const { return "Barbs_small.png"; }
-    virtual string _getIconImagePath() const { return "Barbs.png"; }
+    virtual string _getSmallIconImagePath() const { return "Particles_small.png"; }
+    virtual string _getIconImagePath() const { return "Particles.png"; }
 };

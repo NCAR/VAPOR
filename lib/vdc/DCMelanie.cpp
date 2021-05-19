@@ -17,43 +17,6 @@
 #include <vapor/DCUtils.h>
 
 using namespace VAPoR;
-using namespace std;
-
-static const string ToStr(const vector<size_t> &v) {
-    vector<string> vs;
-    for (const auto &e : v)
-        vs.push_back(to_string(e));
-    
-    return "{" + STLUtils::Join(vs, ", ") + "}";
-}
-
-static const string ToStr(const vector<string> &v) {
-    return "{" + STLUtils::Join(v, ", ") + "}";
-}
-
-template<typename T>
-static const char *TypeToChar(const T &t);
-
-template<> const char *TypeToChar<int>   (const int    &t) { return "int"; }
-template<> const char *TypeToChar<float> (const float  &t) { return "float"; }
-template<> const char *TypeToChar<string>(const string &t) { return "string"; }
-template<> const char *TypeToChar<vector<long>>  (const vector<long>   &t) { return "vector<long>"; }
-template<> const char *TypeToChar<vector<double>>(const vector<double> &t) { return "vector<double>"; }
-
-namespace {
-
-#ifdef UNUSED_FUNCTION
-// Product of elements in a vector
-//
-size_t vproduct(vector <size_t> a) {
-	size_t ntotal = 1;
-
-	for (int i=0; i<a.size(); i++) ntotal *= a[i];
-	return(ntotal);
-}
-#endif
-
-};
 
 DCMelanie::DCMelanie() {
 	_ncdfc = NULL;
@@ -81,55 +44,6 @@ static void ReplaceAll(string *s, char a, char b)
 {
     for (auto &c : *s)
         c = c == a ? b : c;
-}
-
-static const string S(const string &v) {return v;}
-template<typename T> const string S(const T &v) {return std::to_string(v);}
-template<typename T> const string S(vector<T> v) {
-    string s = "{";
-    for (int i = 0; i < v.size(); i++) {
-        s += S(v[i]);
-        if (i != v.size()-1)
-            s += ", ";
-    }
-    s += "}";
-    return s;
-}
-template<typename T> void P(const T &v) {printf("%s", S(v).c_str());}
-
-static void DumpNCDFC(NetCDFCollection *n)
-{
-    auto dimNames = n->GetDimNames();
-    auto dimLens = n->GetDims();
-    
-    printf("Dimensions\n");
-    for (int i = 0; i < dimNames.size(); i++)
-        printf("\t%s[%li]\n", dimNames[i].c_str(), dimLens[i]);
-    
-    printf("Variables\n");
-    for (int dim = 0; dim < 5; dim++) {
-        auto varNames = n->GetVariableNames(dim, true);
-        for (auto var : varNames) {
-            printf("\t%s[%i](", var.c_str(), dim);
-            auto dimNames = n->GetDimNames(var);
-            for (auto dim : dimNames)
-                printf("%s%s", dim.c_str(), dim==dimNames[dimNames.size()-1] ? "" : ", ");
-            printf(")\n");
-            
-            auto attNames = n->GetAttNames(var);
-            for (auto att : attNames) {
-                printf("\t\t%s = ", att.c_str());
-                int type = n->GetAttType(var, att);
-                switch (type) {
-                    case NC_INT64: {vector<long> v; n->GetAtt(var, att, v); P(v);} break;
-                    case NC_DOUBLE: {vector<double> v; n->GetAtt(var, att, v); P(v);} break;
-                    case NC_CHAR: {string v; n->GetAtt(var, att, v); P(v);} break;
-                    default: printf("ERR"); break;
-                }
-                printf("\n");
-            }
-        }
-    }
 }
 
 int DCMelanie::initialize(
@@ -183,8 +97,6 @@ int DCMelanie::initialize(
 //    printf("Particle Attributes\n");
 //    for (auto s : particleAttributes)
 //        printf("\t%s\n", s.c_str());
-    
-    DumpNCDFC(ncdfc);
 
     
     // Dimensions
@@ -362,7 +274,7 @@ bool DCMelanie::_getAttTemplate(
 	string varname, string attname, T &values
 ) const {
     
-    printf("%s(%s, %s, %s&)\n", __func__, varname.c_str(), attname.c_str(), TypeToChar(values));
+//    printf("%s(%s, %s, %s&)\n", __func__, varname.c_str(), attname.c_str(), TypeToChar(values));
 
 	DC::BaseVar var;
 	bool status = getBaseVarInfo(varname, var);
@@ -402,12 +314,12 @@ bool DCMelanie::getAtt(
 }
 
 std::vector <string> DCMelanie::getAttNames(string varname) const {
-    printf("%s(%s) = ", __func__, varname.c_str());
+//    printf("%s(%s) = ", __func__, varname.c_str());
     
 	DC::BaseVar var;
 	bool status = getBaseVarInfo(varname, var);
     if (! status) {
-        printf("{} (ERR)\n");
+//        printf("{} (ERR)\n");
         return(vector <string> ());
     }
 
@@ -419,12 +331,12 @@ std::vector <string> DCMelanie::getAttNames(string varname) const {
 		names.push_back(itr->first);
 	}
 
-    printf("%s\n", ToStr(names).c_str());
+//    printf("%s\n", ToStr(names).c_str());
 	return(names);
 }
 
 DC::XType DCMelanie::getAttType(string varname, string attname) const {
-    printf("%s(%s, %s)\n", __func__, varname.c_str(), attname.c_str());
+//    printf("%s(%s, %s)\n", __func__, varname.c_str(), attname.c_str());
 	DC::BaseVar var;
 	bool status = getBaseVarInfo(varname, var);
 	if (! status) return(DC::INVALID);
@@ -443,7 +355,8 @@ int DCMelanie::getDimLensAtLevel(
 	dims_at_level.clear();
 	bs_at_level.clear();
 
-	bool ok = GetVarDimLens(varname, true, dims_at_level);
+    VAssert(0);
+	bool ok = GetVarDimLens(varname, true, dims_at_level, 0);
 	if (!ok) {
 		SetErrMsg("Undefined variable name : %s", varname.c_str());
 		return(-1);
@@ -460,11 +373,11 @@ int DCMelanie::getDimLensAtLevel(
 int DCMelanie::openVariableRead(
 	size_t ts, string varname
 ) {
-    printf("%s(%li, %s) = ", __func__, ts, varname.c_str());
+//    printf("%s(%li, %s) = ", __func__, ts, varname.c_str());
     
     if (STLUtils::Contains(fakeVars, varname)) {
         int ret = fakeVarsFileCounter++;
-        printf("(fake) %i\n", ret);
+//        printf("(fake) %i\n", ret);
         _fdMap[ret] = varname;
         return ret;
     }
@@ -475,8 +388,8 @@ int DCMelanie::openVariableRead(
         STLUtils::EndsWith(ncdfName, "_z"))
     {
         ncdfName = ncdfName.substr(0, ncdfName.length()-2);
-        printf("<removing _axis>\n\t");
-        printf("%s(%li, %s) = ", __func__, ts, ncdfName.c_str());
+//        printf("<removing _axis>\n\t");
+//        printf("%s(%li, %s) = ", __func__, ts, ncdfName.c_str());
     }
     
     ncdfName = getOriginalVarName(ncdfName);
@@ -487,14 +400,14 @@ int DCMelanie::openVariableRead(
         aux = _fileTable.AddEntry(f);
     }
     
-    printf("%i\n", aux);
+//    printf("%i\n", aux);
     _fdMap[aux] = varname;
 	return aux;
 }
 
 
 int DCMelanie::closeVariable(int fd) {
-    printf("%s(%i)\n", __func__, fd);
+//    printf("%s(%i)\n", __func__, fd);
     _fdMap.erase(_fdMap.find(fd));
     
     if (fd >= fakeVarsFileCounterStart) {
@@ -527,14 +440,14 @@ int DCMelanie::_readRegionTemplate(
     vector<size_t> min = min_;
     vector<size_t> max = max_;
     string varname = _fdMap[fd];
-    printf("%s(%i(%s), %s, %s, %s*)\n", __func__, fd, varname.c_str(), ToStr(min).c_str(), ToStr(max).c_str(), TypeToChar(*region));
+//    printf("%s(%i(%s), %s, %s, %s*)\n", __func__, fd, varname.c_str(), ToStr(min).c_str(), ToStr(max).c_str(), TypeToChar(*region));
     
     VAssert(min.size() == 1);
     
     bool fake = fd >= fakeVarsFileCounterStart;
     
     if (fake) {
-        printf("\t (Fake)\n");
+//        printf("\t (Fake)\n");
         for (size_t i = min[0]; i <= max[0]; i++)
             region[i] = i/(double)(max[0]-1);
         return 0;
@@ -559,7 +472,7 @@ int DCMelanie::_readRegionTemplate(
         min[0] = axis;
         max[0] = axis;
         
-        printf("\t %s(%i(%s), %s, %s, %s*)\n", __func__, fd, varname.substr(0,varname.length()-2).c_str(), ToStr(min).c_str(), ToStr(max).c_str(), TypeToChar(*region));
+//        printf("\t %s(%i(%s), %s, %s, %s*)\n", __func__, fd, varname.substr(0,varname.length()-2).c_str(), ToStr(min).c_str(), ToStr(max).c_str(), TypeToChar(*region));
     }
     
 	FileTable::FileObject *w = (FileTable::FileObject *) _fileTable.GetEntry(fd);
@@ -602,8 +515,8 @@ bool DCMelanie::variableExists(
         if (it.first == varname) found = true;
     }
     
-    if (found == false)
-        printf("WARNING %s(%li, %s) = %s\n", __func__, ts, varname.c_str(), found?"true":"false");
+//    if (found == false)
+//        printf("WARNING %s(%li, %s) = %s\n", __func__, ts, varname.c_str(), found?"true":"false");
     return found;
 }
 

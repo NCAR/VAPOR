@@ -68,11 +68,7 @@ public:
     virtual int		_paintGL(bool fast);
 
 private:
-    GLuint _VAO=0, _VBO=0;
-//    unsigned int _nVertices;
-
-    int  _buildCache();
-    void _clearCache() {};
+    void _clearCache() {}
 };
     
 };

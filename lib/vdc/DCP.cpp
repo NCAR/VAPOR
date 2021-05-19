@@ -17,43 +17,6 @@
 #include <vapor/DCUtils.h>
 
 using namespace VAPoR;
-using namespace std;
-
-[[maybe_unused]] static const string ToStr(const vector<size_t> &v) {
-    vector<string> vs;
-    for (const auto &e : v)
-        vs.push_back(to_string(e));
-    
-    return "{" + STLUtils::Join(vs, ", ") + "}";
-}
-
-[[maybe_unused]] static const string ToStr(const vector<string> &v) {
-    return "{" + STLUtils::Join(v, ", ") + "}";
-}
-
-template<typename T>
-static const char *TypeToChar(const T &t);
-
-template<> [[maybe_unused]] const char *TypeToChar<int>   (const int    &t) { return "int"; }
-template<> [[maybe_unused]] const char *TypeToChar<float> (const float  &t) { return "float"; }
-template<> [[maybe_unused]] const char *TypeToChar<string>(const string &t) { return "string"; }
-template<> [[maybe_unused]] const char *TypeToChar<vector<long>>  (const vector<long>   &t) { return "vector<long>"; }
-template<> [[maybe_unused]] const char *TypeToChar<vector<double>>(const vector<double> &t) { return "vector<double>"; }
-
-namespace {
-
-#ifdef UNUSED_FUNCTION
-// Product of elements in a vector
-//
-size_t vproduct(vector <size_t> a) {
-	size_t ntotal = 1;
-
-	for (int i=0; i<a.size(); i++) ntotal *= a[i];
-	return(ntotal);
-}
-#endif
-
-};
 
 DCP::DCP() {
 	_ncdfc = NULL;
@@ -74,59 +37,6 @@ static void ReplaceAll(string *s, char a, char b)
 {
     for (auto &c : *s)
         c = c == a ? b : c;
-}
-
-[[maybe_unused]] static const string S(const string &v) {return v;}
-[[maybe_unused]] static const string S(const bool &v) {return v?"true":"false";}
-template<typename T> const string S(const T &v) {return std::to_string(v);}
-template<typename T> const string S(vector<T> v) {
-    string s = "{";
-    for (int i = 0; i < v.size(); i++) {
-        s += S(v[i]);
-        if (i != v.size()-1)
-            s += ", ";
-    }
-    s += "}";
-    return s;
-}
-template<typename T> void P(const T &v) {printf("%s", S(v).c_str());}
-template<typename T> const char *C(const T &v) {
-    static string ret[32];
-    static int i = -1;
-    if (++i >= 32) i = 0;
-    ret[i] = S(v);
-    return ret[i].c_str();
-}
-
-static void DumpNCDFC(NetCDFCollection *n)
-{
-    auto dimNames = n->GetDimNames();
-    auto dimLens = n->GetDims();
-    
-    printf("Dimensions\n");
-    for (int i = 0; i < dimNames.size(); i++)
-        printf("\t%s[%li]\n", dimNames[i].c_str(), dimLens[i]);
-    
-    printf("Variables\n");
-    for (int dim = 0; dim < 5; dim++) {
-        auto varNames = n->GetVariableNames(dim, true);
-        for (auto var : varNames) {
-            printf("\t%s[%i]%s\n", var.c_str(), dim, C(n->GetDimNames(var)));
-            
-            auto attNames = n->GetAttNames(var);
-            for (auto att : attNames) {
-                printf("\t\t%s = ", att.c_str());
-                int type = n->GetAttType(var, att);
-                switch (type) {
-                    case NC_INT64: {vector<long> v; n->GetAtt(var, att, v); P(v);} break;
-                    case NC_DOUBLE: {vector<double> v; n->GetAtt(var, att, v); P(v);} break;
-                    case NC_CHAR: {string v; n->GetAtt(var, att, v); P(v);} break;
-                    default: printf("ERR"); break;
-                }
-                printf("\n");
-            }
-        }
-    }
 }
 
 int DCP::initialize(
@@ -155,7 +65,6 @@ int DCP::initialize(
 		return(-1);
 	}
     
-    DumpNCDFC(ncdfc);
     
     // Dimensions
     // ==================
@@ -163,6 +72,7 @@ int DCP::initialize(
     string axisDim;
     auto dimNames = ncdfc->GetDimNames();
     auto dimLens = ncdfc->GetDims();
+    auto dimIsTimeVarying = ncdfc->GetDimsAreTimeVarying();
     
     bool dimNamePhony = false;
     for (auto d : dimNames)
@@ -177,11 +87,16 @@ int DCP::initialize(
     }
     
     for (int i = 0; i < dimNames.size(); i++)
-        _dimsMap[dimNames[i]] = DC::Dimension(dimNames[i], dimLens[i]);
+        if (dimIsTimeVarying[i])
+            _dimsMap[dimNames[i]] = DC::Dimension(dimNames[i], vector<size_t>{dimLens[i], 0});
+        else
+            _dimsMap[dimNames[i]] = DC::Dimension(dimNames[i], dimLens[i]);
     
+#if DCP_ENABLE_PARTICLE_DENSITY
     _dimsMap["densityX"] = DC::Dimension("densityX", 32);
     _dimsMap["densityY"] = DC::Dimension("densityY", 32);
     _dimsMap["densityZ"] = DC::Dimension("densityZ", 4);
+#endif
     
     
     // Aux Vars
@@ -248,82 +163,15 @@ int DCP::initialize(
         }
     }
     
+    if (_dataVarsMap.empty()) {
+        // If no data other than position, add a fake empty var to allow
+        // the position data to be rendered on its own
+        vector<bool> periodic(3, false);
+        _dataVarsMap[fakeEmptyVar] = DC::DataVar(fakeEmptyVar, "", DC::FLOAT, periodic, mesh.GetName(), getTimeCoordVar(coords[0]), DC::Mesh::NODE);
+        fakeVars.push_back(fakeEmptyVar);
+    }
+    
     return 0;
-    /*
-    auto particleAttributes = ncdfc->GetVariableNames(1,true);
-    auto particleVecs = ncdfc->GetVariableNames(2,true);
-    
-    for (auto &n : particleAttributes) n = sanitizeVarName(n);
-    for (auto &n : particleVecs)       n = sanitizeVarName(n);
-    
-    string particlePositions = "Position";
-    vector<string> coords = {
-        particlePositions + "_x",
-        particlePositions + "_y",
-        particlePositions + "_z",
-    };
-    {
-        auto positionPos = find(particleVecs.begin(), particleVecs.end(), particlePositions);
-        VAssert(positionPos != particleVecs.end());
-        particleVecs.erase(positionPos);
-    }
-    
-//    printf("Particle Coordinates\n");
-//    printf("\t%s\n", particlePositions.c_str());
-//    printf("Particle Vecs\n");
-//    for (auto s : particleVecs)
-//        printf("\t%s\n", s.c_str());
-//    printf("Particle Attributes\n");
-//    for (auto s : particleAttributes)
-//        printf("\t%s\n", s.c_str());
-    
-    // Coord Vars
-    // ==================
-    string timeCoordVar = "";
-    {
-        vector <bool> periodic(false);
-        for (int i = 0; i < 3; i++) {
-            auto c = coords[i];
-            auto axis = i;
-            _coordVarsMap[c] = CoordVar(c, "", DC::FLOAT, periodic, axis, false, {"phony_dim_0"}, timeDim);
-        }
-    }
-    
-    // Aux Vars
-    // ==================
-    {
-        vector<bool> periodic(3, false);
-        for (auto v : {nodeFaceVar, faceNodeVar})
-            _auxVarsMap[v] = AuxVar(v, "", DC::INT32, "", vector<size_t>(), periodic, {particlesDim});
-    }
-    
-    // Mesh
-    // ==================
-    DC::Mesh mesh("particles", 1, 1, "phony_dim_0", "phony_dim_0", coords);
-    mesh.SetNodeFaceVar(nodeFaceVar);
-    mesh.SetFaceNodeVar(faceNodeVar);
-    _meshMap[mesh.GetName()] = mesh;
-    
-    
-    // Data Vars
-    // ==================
-    {
-        vector<bool> periodic(3, false);
-        for (string v : particleVecs) {
-            auto dims = ncdfc->GetDimNames(getOriginalVarName(v));
-            if (STLUtils::Contains(dims, axesDim)) {
-                for (auto axis : {"_x", "_y", "_z"})
-                    _dataVarsMap[v+axis] = DC::DataVar(v+axis, "", DC::FLOAT, periodic, mesh.GetName(), timeCoordVar, DC::Mesh::NODE);
-            } else {
-                _dataVarsMap[v] = DC::DataVar(v, "", DC::FLOAT, periodic, mesh.GetName(), timeCoordVar, DC::Mesh::NODE);
-            }
-        }
-    }
-    
-	_ncdfc = ncdfc;
-
-	return(0);
-     */
 }
 
 bool DCP::isCoordVar(const string &var) const
@@ -368,16 +216,36 @@ string DCP::getTimeCoordVar(const string &var) const
     return "";
 }
 
-bool DCP::getDimension(
-	string dimname, DC::Dimension &dimension
-) const {
-	map <string, DC::Dimension>::const_iterator itr;
+bool DCP::getDimension(string dimname, DC::Dimension &dimension) const
+{
+    VAssert(0);
+    return false;
+}
 
-	itr = _dimsMap.find(dimname);
-	if (itr == _dimsMap.end()) return(false);
-
-	dimension = itr->second;
-	return(true); 
+bool DCP::getDimension(string dimname, DC::Dimension &dimension, long ts) const
+{
+    if (ts == -1
+#if DCP_ENABLE_PARTICLE_DENSITY
+        && !STLUtils::Contains(dimname, "density")
+#endif
+        ) {
+        assert(0);
+        return false;
+    }
+    
+    map <string, DC::Dimension>::const_iterator itr;
+    itr = _dimsMap.find(dimname);
+    if (itr == _dimsMap.end()) return(false);
+    dimension = itr->second;
+    
+    if (dimension.IsTimeVarying()) {
+        long len = _ncdfc->GetDimLengthAtTime(dimname, ts);
+        if (len >= 0) {
+            dimension = Dimension(dimname, len);
+        }
+    }
+    
+    return true;
 }
 
 std::vector <string> DCP::getDimensionNames() const {
@@ -483,7 +351,7 @@ bool DCP::_getAttTemplate(
 	string varname, string attname, T &values
 ) const {
     
-    printf("%s(%s, %s, %s&)\n", __func__, varname.c_str(), attname.c_str(), TypeToChar(values));
+//    printf("%s(%s, %s, %s&)\n", __func__, varname.c_str(), attname.c_str(), TypeToChar(values));
 
     if (_ncdfc->GetAttType(varname, attname) < 0)
         return false;
@@ -518,7 +386,7 @@ bool DCP::getAtt(
 }
 
 std::vector <string> DCP::getAttNames(string varname) const {
-    printf("%s(%s) = ", __func__, varname.c_str());
+//    printf("%s(%s) = ", __func__, varname.c_str());
     
     if (varname.empty()) {
         return _ncdfc->GetAttNames("");
@@ -526,7 +394,7 @@ std::vector <string> DCP::getAttNames(string varname) const {
         DC::BaseVar var;
         bool status = getBaseVarInfo(varname, var);
         if (! status) {
-            printf("{} (ERR)\n");
+//            printf("{} (ERR)\n");
             return(vector <string> ());
         }
 
@@ -538,13 +406,13 @@ std::vector <string> DCP::getAttNames(string varname) const {
             names.push_back(itr->first);
         }
 
-        printf("%s\n", ToStr(names).c_str());
+//        printf("%s\n", ToStr(names).c_str());
         return(names);
     }
 }
 
 DC::XType DCP::getAttType(string varname, string attname) const {
-    printf("%s(%s, %s)\n", __func__, varname.c_str(), attname.c_str());
+//    printf("%s(%s, %s)\n", __func__, varname.c_str(), attname.c_str());
 	DC::BaseVar var;
 	bool status = getBaseVarInfo(varname, var);
 	if (! status) return(DC::INVALID);
@@ -556,14 +424,18 @@ DC::XType DCP::getAttType(string varname, string attname) const {
 	return(att.GetXType());
 }
 
-int DCP::getDimLensAtLevel(
-	string varname, int, std::vector <size_t> &dims_at_level,
-	std::vector <size_t> &bs_at_level
-) const {
+int DCP::getDimLensAtLevel(string varname, int, std::vector <size_t> &dims_at_level, std::vector <size_t> &bs_at_level) const
+{
+    VAssert(0);
+    return -1;
+}
+
+int DCP::getDimLensAtLevel(string varname, int, std::vector <size_t> &dims_at_level, std::vector <size_t> &bs_at_level, long ts) const
+{
 	dims_at_level.clear();
 	bs_at_level.clear();
 
-	bool ok = GetVarDimLens(varname, true, dims_at_level);
+	bool ok = GetVarDimLens(varname, true, dims_at_level, ts);
 	if (!ok) {
 		SetErrMsg("Undefined variable name : %s", varname.c_str());
 		return(-1);
@@ -580,11 +452,11 @@ int DCP::getDimLensAtLevel(
 int DCP::openVariableRead(
 	size_t ts, string varname
 ) {
-    printf("DCP::%s(%li, %s) = ", __func__, ts, varname.c_str());
+//    printf("DCP::%s(%li, %s) = ", __func__, ts, varname.c_str());
     
     if (STLUtils::Contains(fakeVars, varname)) {
         int ret = fakeVarsFileCounter++;
-        printf("(fake) %i\n", ret);
+//        printf("(fake) %i\n", ret);
         _fdMap[ret] = varname;
         return ret;
     }
@@ -596,8 +468,8 @@ int DCP::openVariableRead(
     {
         if (!_ncdfc->VariableExists(varname)) {
             ncdfName = ncdfName.substr(0, ncdfName.length()-2);
-            printf("<removing _axis>\n\t");
-            printf("DCP::%s(%li, %s) = ", __func__, ts, ncdfName.c_str());
+//            printf("<removing _axis>\n\t");
+//            printf("DCP::%s(%li, %s) = ", __func__, ts, ncdfName.c_str());
         }
     }
     
@@ -609,14 +481,14 @@ int DCP::openVariableRead(
         aux = _fileTable.AddEntry(f);
     }
     
-    printf("%i\n", aux);
+//    printf("%i\n", aux);
     _fdMap[aux] = varname;
 	return aux;
 }
 
 
 int DCP::closeVariable(int fd) {
-    printf("DCP::%s(%i)\n", __func__, fd);
+//    printf("DCP::%s(%i)\n", __func__, fd);
     
     auto fdIt = _fdMap.find(fd);
     if (fdIt != _fdMap.end())
@@ -659,9 +531,13 @@ int DCP::_readRegionTemplate(
     bool fake = fd >= fakeVarsFileCounterStart;
     
     if (fake) {
-//        printf("\t (Fake)\n");
-        for (size_t i = min[0]; i <= max[0]; i++)
-            region[i] = i/(double)(max[0]-1);
+        if (_fdMap[fd] == fakeEmptyVar) {
+            for (size_t i = min[0]; i <= max[0]; i++)
+                region[i] = 0;
+        } else {
+            for (size_t i = min[0]; i <= max[0]; i++)
+                region[i] = i/(double)(max[0]-1);
+        }
         return 0;
     }
     
@@ -676,10 +552,9 @@ int DCP::_readRegionTemplate(
 //        for (size_t i = min[0]; i <= max[0]; i++)
 //            region[i] = Particle_Position[i*3+axis];
 //        return 0;
-        
-        
 //        min.push_back(axis);
 //        max.push_back(axis);
+            
             min.push_back(min[0]);
             max.push_back(max[0]);
             min[0] = axis;
@@ -729,8 +604,8 @@ bool DCP::variableExists(
         if (it.first == varname) found = true;
     }
     
-    if (found == false)
-        printf("WARNING %s(%li, %s) = %s\n", __func__, ts, varname.c_str(), found?"true":"false");
+//    if (found == false)
+//        printf("WARNING %s(%li, %s) = %s\n", __func__, ts, varname.c_str(), found?"true":"false");
     return found;
 }
 

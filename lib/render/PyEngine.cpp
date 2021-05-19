@@ -520,7 +520,7 @@ int PyEngine::DerivedPythonVar::Initialize()
     vector<string> dimNames = m.GetDimNames();
     for (int i = 0; i < dimNames.size(); i++) {
         DC::Dimension dim;
-        status = _dataMgr->GetDimension(dimNames[i], dim);
+        status = _dataMgr->GetDimension(dimNames[i], dim, -1);
         VAssert(status);
 
         _dims.push_back(dim.GetLength());
@@ -561,7 +561,7 @@ bool PyEngine::DerivedPythonVar::GetBaseVarInfo(DC::BaseVar &var) const
 int PyEngine::DerivedPythonVar::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {
     if (_meshMatchFlag && _inNames.size()) {
-        int rc = _dataMgr->GetDimLensAtLevel(_inNames[0], level, dims_at_level);
+        int rc = _dataMgr->GetDimLensAtLevel(_inNames[0], level, dims_at_level, -1);
         VAssert(rc >= 0);
     } else {
         dims_at_level = _dims;

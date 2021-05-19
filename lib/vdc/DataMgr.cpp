@@ -15,7 +15,9 @@
 #include <vapor/DCP.h>
 #include <vapor/DCMelanie.h>
 #include <vapor/DerivedVar.h>
+#if DCP_ENABLE_PARTICLE_DENSITY
 #include <vapor/DerivedParticleDensity.h>
+#endif
 #include <vapor/DataMgr.h>
 #ifdef WIN32
     #include <float.h>
@@ -646,17 +648,12 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         return (-1);
     }
 
-
+#if DCP_ENABLE_PARTICLE_DENSITY
     if (_format == "dcp") {
-//        printf("============ Init Density =============\n");
-
         vector<string> dims = {"densityX", "densityY", "densityZ"};
 
         vector<double> min, max;
         GetVariableExtents(0, "Position_x", -1, -1, min, max);
-
-//        printf("min = "); PRINTARG(min); printf("\n");
-//        printf("max = "); PRINTARG(max); printf("\n");
 
         DerivedCoordVar1DSpan *XC = new DerivedCoordVar1DSpan("XC", _dc, dims[0], 0, "", "Position_x");
         DerivedCoordVar1DSpan *YC = new DerivedCoordVar1DSpan("YC", _dc, dims[1], 1, "", "Position_y");
@@ -671,7 +668,6 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         DC::Mesh mesh("density", dims, {XC->GetName(), YC->GetName(), ZC->GetName()});
         _dvm.AddMesh(mesh);
 
-
         DerivedParticleDensity *dpd = new DerivedParticleDensity("Particle_Density", _dc, mesh.GetName(), this);
         dpd->Initialize();
         AddDerivedVar(dpd);
@@ -683,7 +679,7 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
             AddDerivedVar(dpa);
         }
     }
-
+#endif
 
     return (0);
 }
@@ -909,7 +905,7 @@ int DataMgr::GetNumTimeSteps(string varname) const
     if (time_dim_name.empty()) return (1);
 
     DC::Dimension dim;
-    ok = GetDimension(time_dim_name, dim);
+    ok = GetDimension(time_dim_name, dim, 0);
     if (!ok) return (0);
 
     return (dim.GetLength());
@@ -998,7 +994,7 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool 
     }
 
     vector<size_t> dims_at_level;
-    int            rc = GetDimLensAtLevel(varname, level, dims_at_level);
+    int            rc = GetDimLensAtLevel(varname, level, dims_at_level, ts);
     if (rc < 0) {
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (NULL);
@@ -1017,7 +1013,7 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool 
 // Find the subset of the data dimension that are the coord dimensions
 //
 void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &data_dimlens, const vector<size_t> &data_bmin, const vector<size_t> &data_bmax, string coord_varname, int order,
-                                    vector<size_t> &coord_dimlens, vector<size_t> &coord_bmin, vector<size_t> &coord_bmax, bool structured) const
+                                    vector<size_t> &coord_dimlens, vector<size_t> &coord_bmin, vector<size_t> &coord_bmax, bool structured, long ts) const
 {
     VAssert(data_bmin.size() == data_bmax.size());
     coord_dimlens.clear();
@@ -1025,12 +1021,12 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
     coord_bmax.clear();
 
     vector<DC::Dimension> data_dims;
-    bool                  ok = _getVarDimensions(data_varname, data_dims);
+    bool                  ok = _getVarDimensions(data_varname, data_dims, ts);
     VAssert(ok);
     VAssert(data_dims.size() == data_bmin.size());
 
     vector<DC::Dimension> coord_dims;
-    ok = _getVarDimensions(coord_varname, coord_dims);
+    ok = _getVarDimensions(coord_varname, coord_dims, ts);
     VAssert(ok);
 
     if (structured) {
@@ -1141,7 +1137,7 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
     // Grid and block dimensions at requested refinement
     //
     vector<size_t> dims;
-    int            rc = GetDimLensAtLevel(varname, level, dims);
+    int            rc = GetDimLensAtLevel(varname, level, dims, ts);
     VAssert(rc >= 0);
     dimsvec.push_back(dims);
 
@@ -1165,7 +1161,7 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
         // are a subset of the data indices.
         //
         vector<size_t> coord_dims, coord_bmin, coord_bmax;
-        _setupCoordVecsHelper(varname, dims, bmin, bmax, cvarnames[i], i, coord_dims, coord_bmin, coord_bmax, structured);
+        _setupCoordVecsHelper(varname, dims, bmin, bmax, cvarnames[i], i, coord_dims, coord_bmin, coord_bmax, structured, ts);
 
         vector<size_t> bs(_bs.begin(), _bs.begin() + coord_bmin.size());
 
@@ -1214,7 +1210,7 @@ int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, vecto
         string name = varnames[i];
 
         vector<size_t> dims;
-        int            rc = GetDimLensAtLevel(name, level, dims);
+        int            rc = GetDimLensAtLevel(name, level, dims, ts);
         if (rc < 0) {
             SetErrMsg("Invalid variable reference : %s", name.c_str());
             return (-1);
@@ -1312,7 +1308,7 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
         long                       vertexOffset;
         long                       faceOffset;
 
-        _ugrid_setup(dvar, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
+        _ugrid_setup(dvar, vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset, ts);
 
         rg = _gridHelper.MakeGridUnstructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dimsvec[0], blkvec, bsvec, bminvec, bmaxvec, conn_blkvec, conn_bsvec, conn_bminvec, conn_bmaxvec,
                                               vertexDims, faceDims, edgeDims, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
@@ -1482,7 +1478,7 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
     return (0);
 }
 
-int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
+int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts) const
 {
     VAssert(_dc);
     dims_at_level.clear();
@@ -1493,7 +1489,7 @@ int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &d
     if (dvar) {
         rc = dvar->GetDimLensAtLevel(level, dims_at_level, bs_at_level);
     } else {
-        rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+        rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level, ts);
     }
     if (rc < 0) return (-1);
 
@@ -1801,7 +1797,7 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
     //
     if (level < -nlevels) {
         vector<size_t> dims;
-        int            rc = GetDimLensAtLevel(varname, level, dims);
+        int            rc = GetDimLensAtLevel(varname, level, dims, ts);
         VAssert(rc >= 0);
         VAssert(dims.size() == grid_dims.size());
 
@@ -1910,7 +1906,7 @@ T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, c
     if (!blks) return (NULL);
 
     vector<size_t> file_dims, file_bs;
-    int            rc = GetDimLensAtLevel(varname, level, file_dims, file_bs);
+    int            rc = GetDimLensAtLevel(varname, level, file_dims, file_bs, ts);
     VAssert(rc >= 0);
 
     // Get voxel coordinates of requested region, clamped to grid
@@ -2535,7 +2531,7 @@ int DataMgr::_initTimeCoord()
 
 void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDims, std::vector<size_t> &faceDims, std::vector<size_t> &edgeDims,
                            UnstructuredGrid::Location &location,    // node,face, edge
-                           size_t &maxVertexPerFace, size_t &maxFacePerVertex, long &vertexOffset, long &faceOffset) const
+                           size_t &maxVertexPerFace, size_t &maxFacePerVertex, long &vertexOffset, long &faceOffset, long ts) const
 {
     vertexDims.clear();
     faceDims.clear();
@@ -2551,20 +2547,20 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     if (m.GetMeshType() == DC::Mesh::UNSTRUC_LAYERED) {
         string dimname = m.GetLayersDimName();
         VAssert(!dimname.empty());
-        status = _dc->GetDimension(dimname, dimension);
+        status = _dc->GetDimension(dimname, dimension, ts);
         VAssert(status);
         layers_dimlen = dimension.GetLength();
     }
 
     string dimname = m.GetNodeDimName();
-    status = _dc->GetDimension(dimname, dimension);
+    status = _dc->GetDimension(dimname, dimension, ts);
     VAssert(status);
     vertexDims.push_back(dimension.GetLength());
     if (layers_dimlen) { vertexDims.push_back(layers_dimlen); }
 
     dimname = m.GetFaceDimName();
     if (!dimname.empty()) {
-        status = _dc->GetDimension(dimname, dimension);
+        status = _dc->GetDimension(dimname, dimension, ts);
         VAssert(status);
         faceDims.push_back(dimension.GetLength());
         if (layers_dimlen) {
@@ -2575,7 +2571,7 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
 
     dimname = m.GetEdgeDimName();
     if (dimname.size()) {
-        status = _dc->GetDimension(dimname, dimension);
+        status = _dc->GetDimension(dimname, dimension, ts);
         VAssert(status);
         edgeDims.push_back(dimension.GetLength());
         if (layers_dimlen) { edgeDims.push_back(layers_dimlen - 1); }
@@ -2677,7 +2673,7 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
     }
 
     vector<size_t> dims_at_level;
-    int            rc = GetDimLensAtLevel(varname, level, dims_at_level);
+    int            rc = GetDimLensAtLevel(varname, level, dims_at_level, ts);
     if (rc < 0) {
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (-1);
@@ -2889,22 +2885,22 @@ void DataMgr::_assignTimeCoord(string &coord_var) const
     if (varInfo.GetAxis() == 3 && !_udunits.IsTimeUnit(varInfo.GetUnits())) { coord_var = coord_var + "T"; }
 }
 
-bool DataMgr::_getVarDimensions(string varname, vector<DC::Dimension> &dimensions) const
+bool DataMgr::_getVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const
 {
     dimensions.clear();
 
-    if (!IsVariableDerived(varname)) { return (_dc->GetVarDimensions(varname, true, dimensions)); }
+    if (!IsVariableDerived(varname)) { return (_dc->GetVarDimensions(varname, true, dimensions, ts)); }
 
     if (_getDerivedDataVar(varname)) {
-        return (_getDataVarDimensions(varname, dimensions));
+        return (_getDataVarDimensions(varname, dimensions, ts));
     } else if (_getDerivedCoordVar(varname)) {
-        return (_getCoordVarDimensions(varname, dimensions));
+        return (_getCoordVarDimensions(varname, dimensions, ts));
     } else {
         return (false);
     }
 }
 
-bool DataMgr::_getDataVarDimensions(string varname, vector<DC::Dimension> &dimensions) const
+bool DataMgr::_getDataVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const
 {
     dimensions.clear();
 
@@ -2934,7 +2930,7 @@ bool DataMgr::_getDataVarDimensions(string varname, vector<DC::Dimension> &dimen
     for (int i = 0; i < dimnames.size(); i++) {
         DC::Dimension dim;
 
-        status = _dc->GetDimension(dimnames[i], dim);
+        status = _dc->GetDimension(dimnames[i], dim, ts);
         if (!status) return (false);
 
         dimensions.push_back(dim);
@@ -2943,7 +2939,7 @@ bool DataMgr::_getDataVarDimensions(string varname, vector<DC::Dimension> &dimen
     return (true);
 }
 
-bool DataMgr::_getCoordVarDimensions(string varname, vector<DC::Dimension> &dimensions) const
+bool DataMgr::_getCoordVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const
 {
     dimensions.clear();
 
@@ -2955,7 +2951,7 @@ bool DataMgr::_getCoordVarDimensions(string varname, vector<DC::Dimension> &dime
 
     for (int i = 0; i < dimnames.size(); i++) {
         DC::Dimension dim;
-        status = _dc->GetDimension(dimnames[i], dim);
+        status = _dc->GetDimension(dimnames[i], dim, ts);
         if (!status) return (false);
 
         dimensions.push_back(dim);
@@ -2969,7 +2965,7 @@ bool DataMgr::_getVarDimNames(string varname, vector<string> &dimnames) const
 
     vector<DC::Dimension> dims;
 
-    bool status = _getVarDimensions(varname, dims);
+    bool status = _getVarDimensions(varname, dims, 0);
     if (!status) return (status);
 
     for (int i = 0; i < dims.size(); i++) { dimnames.push_back(dims[i].GetName()); }
@@ -3086,18 +3082,16 @@ int DataMgr::_closeVariable(int fd)
 int DataMgr::_getVar(string varname, int level, int lod, float *data)
 {
     vector<size_t> dims_at_level, dummy;
-    int            rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy);
-    if (rc < 0) return (-1);
-
-    // Number of per time step
-    //
-    size_t var_size = 1;
-    for (int i = 0; i < dims_at_level.size(); i++) { var_size *= dims_at_level[i]; }
 
     size_t numts = _dc->GetNumTimeSteps(varname);
 
     float *ptr = data;
     for (size_t ts = 0; ts < numts; ts++) {
+        int rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);
+        if (rc < 0) return (-1);
+        size_t var_size = 1;
+        for (int i = 0; i < dims_at_level.size(); i++) { var_size *= dims_at_level[i]; }
+        
         rc = _getVar(ts, varname, level, lod, ptr);
         if (rc < 0) return (-1);
 
@@ -3110,7 +3104,7 @@ int DataMgr::_getVar(string varname, int level, int lod, float *data)
 int DataMgr::_getVar(size_t ts, string varname, int level, int lod, float *data)
 {
     vector<size_t> dims_at_level, dummy;
-    int            rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy);
+    int            rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);
     if (rc < 0) return (-1);
     vector<size_t> min, max;
     for (int i = 0; i < dims_at_level.size(); i++) {
@@ -3130,10 +3124,10 @@ int DataMgr::_getVar(size_t ts, string varname, int level, int lod, float *data)
     return (0);
 }
 
-int DataMgr::_getLatlonExtents(string varname, bool lonflag, float &min, float &max)
+int DataMgr::_getLatlonExtents(string varname, bool lonflag, float &min, float &max, long ts)
 {
     vector<size_t> dims, dummy;
-    int            rc = _dc->GetDimLensAtLevel(varname, 0, dims, dummy);
+    int            rc = _dc->GetDimLensAtLevel(varname, 0, dims, dummy, ts);
     if (rc < 0) {
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (-1);
@@ -3173,14 +3167,14 @@ int DataMgr::_getLatlonExtents(string varname, bool lonflag, float &min, float &
     return (0);
 }
 
-int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax)
+int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax, long ts)
 {
     lonmin = lonmax = latmin = latmax = 0.0;
 
-    int rc = _getLatlonExtents(lon, true, lonmin, lonmax);
+    int rc = _getLatlonExtents(lon, true, lonmin, lonmax, ts);
     if (rc < 0) return (-1);
 
-    rc = _getLatlonExtents(lat, false, latmin, latmax);
+    rc = _getLatlonExtents(lat, false, latmin, latmax, ts);
     if (rc < 0) return (-1);
 
     return (0);
@@ -3214,7 +3208,7 @@ int DataMgr::_initProj4StringDefault()
     if (coordvars.empty()) return (0);
 
     float lonmin, lonmax, latmin, latmax;
-    int   rc = _getCoordPairExtents(coordvars[0], coordvars[1], lonmin, lonmax, latmin, latmax);
+    int   rc = _getCoordPairExtents(coordvars[0], coordvars[1], lonmin, lonmax, latmin, latmax, 0);
     if (rc < 0) return (-1);
 
     float         lon_0 = (lonmin + lonmax) / 2.0;

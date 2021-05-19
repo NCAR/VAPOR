@@ -733,14 +733,14 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar()
     if (!ok) return (-1);
 
     vector<size_t> lonDims;
-    ok = _dc->GetVarDimLens(_lonName, true, lonDims);
+    ok = _dc->GetVarDimLens(_lonName, true, lonDims, -1);
     if (!ok) {
         SetErrMsg("GetVarDimLens(%s) failed", _lonName.c_str());
         return (-1);
     }
 
     vector<size_t> latDims;
-    ok = _dc->GetVarDimLens(_latName, true, latDims);
+    ok = _dc->GetVarDimLens(_latName, true, latDims, -1);
     if (!ok) {
         SetErrMsg("GetVarDimLens(%s) failed", _lonName.c_str());
         return (-1);
@@ -821,19 +821,12 @@ DerivedCoordVar_CF1D::DerivedCoordVar_CF1D(string derivedVarName, DC *dc, string
 {
     _dc = dc;
     _dimName = dimName;
-    _dimLen = 0;
 
     _coordVarInfo = DC::CoordVar(_derivedVarName, units, DC::XType::FLOAT, vector<bool>(1, false), axis, true, vector<string>(1, dimName), "");
 }
 
 int DerivedCoordVar_CF1D::Initialize()
 {
-    DC::Dimension dimension;
-    int           rc = _dc->GetDimension(_dimName, dimension);
-    if (rc < 0) return (-1);
-
-    _dimLen = dimension.GetLength();
-
     return (0);
 }
 
@@ -850,11 +843,18 @@ bool DerivedCoordVar_CF1D::GetCoordVarInfo(DC::CoordVar &cvar) const
 }
 
 int DerivedCoordVar_CF1D::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
+{ return GetDimLensAtLevel(level, dims_at_level, bs_at_level, -1); }
+
+int DerivedCoordVar_CF1D::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts) const
 {
     dims_at_level.clear();
     bs_at_level.clear();
+    
+    DC::Dimension dimension;
+    int           rc = _dc->GetDimension(_dimName, dimension, ts);
+    if (rc < 0) return (-1);
 
-    dims_at_level.push_back(_dimLen);
+    dims_at_level.push_back(dimension.GetLength());
 
     // No blocking
     //
@@ -1467,7 +1467,7 @@ int DerivedCoordVar_Staggered::GetDimLensAtLevel(int level, std::vector<size_t> 
     bs_at_level.clear();
 
     vector<size_t> dummy;
-    int            rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, dummy);
+    int            rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, dummy, -1);
     if (rc < 0) return (-1);
 
     dims_at_level[_stagDim] += 1;
@@ -1632,7 +1632,7 @@ int DerivedCoordVar_UnStaggered::GetDimLensAtLevel(int level, std::vector<size_t
     dims_at_level.clear();
     bs_at_level.clear();
 
-    int rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, bs_at_level);
+    int rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, bs_at_level, -1);
     if (rc < 0) return (-1);
 
     dims_at_level[_stagDim] -= 1;
@@ -1882,7 +1882,7 @@ int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(int level, std::vector
     bs_at_level.clear();
 
     vector<size_t> dims, bs;
-    int            rc = _dc->GetDimLensAtLevel(_PHVar, -1, dims, bs);
+    int            rc = _dc->GetDimLensAtLevel(_PHVar, -1, dims, bs, -1);
     if (rc < 0) return (-1);
 
     if (_derivedVarName == "Elevation") {
@@ -1943,7 +1943,7 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(int fd, const vector<size_t> 
     // same grid as the W component of velocity
     //
     vector<size_t> wDims, dummy;
-    int            rc = _dc->GetDimLensAtLevel(_PHVar, f->GetLevel(), wDims, dummy);
+    int            rc = _dc->GetDimLensAtLevel(_PHVar, f->GetLevel(), wDims, dummy, -1);
     if (rc < 0) return (-1);
 
     vector<size_t> myDims;

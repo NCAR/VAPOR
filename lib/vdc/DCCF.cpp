@@ -287,7 +287,7 @@ int DCCF::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_le
     dims_at_level.clear();
     bs_at_level.clear();
 
-    bool ok = GetVarDimLens(varname, true, dims_at_level);
+    bool ok = GetVarDimLens(varname, true, dims_at_level, 0);
     if (!ok) {
         SetErrMsg("Undefined variable name : %s", varname.c_str());
         return (-1);

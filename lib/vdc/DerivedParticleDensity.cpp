@@ -58,28 +58,6 @@ int DerivedParticleDensity::CloseVariable(int fd)
     return 0;
 }
 
-static const string S(const string &v) {return v;}
-static const string S(const bool &v) {return v?"true":"false";}
-template<typename T> const string S(const T &v) {return std::to_string(v);}
-template<typename T> const string S(vector<T> v) {
-    string s = "{";
-    for (int i = 0; i < v.size(); i++) {
-        s += S(v[i]);
-        if (i != v.size()-1)
-            s += ", ";
-    }
-    s += "}";
-    return s;
-}
-template<typename T> void P(const T &v) {printf("%s", S(v).c_str());}
-template<typename T> const char *C(const T &v) {
-    static string ret[32];
-    static int i = -1;
-    if (++i >= 32) i = 0;
-    ret[i] = S(v);
-    return ret[i].c_str();
-}
-
 int DerivedParticleDensity::ReadRegion(int fd, const std::vector <size_t> &min, const std::vector <size_t> &max, float *region)
 {
     DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
@@ -90,7 +68,7 @@ int DerivedParticleDensity::ReadRegion(int fd, const std::vector <size_t> &min, 
     
     
     vector<size_t> dims;
-    _dataMgr->GetDimLens(_derivedVarName, dims);
+    _dataMgr->GetDimLens(_derivedVarName, dims, f->GetTS());
     if (dims.size() != 3) {
         assert(0);
         return -1;
@@ -185,7 +163,7 @@ int DerivedParticleDensity::GetDimLensAtLevel(int level, std::vector <size_t> &d
     _dataMgr->GetMesh(_meshName, mesh);
     DC::Dimension dim;
     for (auto dimName : mesh.GetDimNames()) {
-        _dataMgr->GetDimension(dimName, dim);
+        _dataMgr->GetDimension(dimName, dim, -1);
         dims_at_level.push_back(dim.GetLength());
     }
     
@@ -306,6 +284,7 @@ int DerivedCoordVar1DSpan::ReadRegion(int fd, const std::vector <size_t> &min, c
 {
     VAssert(min.size() == 1);
     VAssert(max.size() == 1);
+    long ts = -1;
     
     if (!_derivedVarName.empty()) {
         if (!_dc->IsCoordVar(_inputCoordVar)) {
@@ -335,7 +314,7 @@ int DerivedCoordVar1DSpan::ReadRegion(int fd, const std::vector <size_t> &min, c
         }
         
         DC::Dimension dim;
-        _dc->GetDimension(dims[0], dim);
+        _dc->GetDimension(dims[0], dim, f->GetTS());
         int fd = _dc->OpenVariableRead(f->GetTS(), _inputCoordVar);
         if (fd < 0) {
             assert(0);
@@ -343,6 +322,7 @@ int DerivedCoordVar1DSpan::ReadRegion(int fd, const std::vector <size_t> &min, c
         }
         size_t nCoords = dim.GetLength();
         float *coords = new float[nCoords];
+        ts = f->GetTS();
         
         _dc->ReadRegion(fd, {0}, {nCoords-1}, coords);
         float min = FLT_MAX;
@@ -366,7 +346,7 @@ int DerivedCoordVar1DSpan::ReadRegion(int fd, const std::vector <size_t> &min, c
         return -1;
     }
     DC::Dimension dim;
-    _dc->GetDimension(dims[0], dim);
+    _dc->GetDimension(dims[0], dim, ts);
     size_t dimLen = dim.GetLength();
     
     size_t n = 1 + max[0] - min[0];

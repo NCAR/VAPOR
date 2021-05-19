@@ -82,7 +82,7 @@ int SliceParams::GetDefaultSampleRate() const
     string         varName = GetVariableName();
     int            refLevel = GetRefinementLevel();
     vector<size_t> dimsAtLevel;
-    _dataMgr->GetDimLensAtLevel(varName, refLevel, dimsAtLevel);
+    _dataMgr->GetDimLensAtLevel(varName, refLevel, dimsAtLevel, GetCurrentTimestep());
     int sampleRate = *max_element(dimsAtLevel.begin(), dimsAtLevel.end());
 
     if (sampleRate < MIN_DEFAULT_SAMPLERATE) sampleRate = MIN_DEFAULT_SAMPLERATE;

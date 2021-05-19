@@ -10,6 +10,7 @@ endif ()
 
 if (BUILD_VDC AND ${GENERATE_FULL_INSTALLER})
 	set (SHARE_DIRS
+		doc
 		fonts
 		images
 		shaders

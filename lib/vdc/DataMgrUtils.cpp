@@ -351,7 +351,7 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<st
 int DataMgrUtils::GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname, int refinementLevel)
 {
     std::vector<size_t> dimsAtLevel;
-    int                 rc = dataMgr->GetDimLensAtLevel(varname, refinementLevel, dimsAtLevel);
+    int                 rc = dataMgr->GetDimLensAtLevel(varname, refinementLevel, dimsAtLevel, 0);
     VAssert(rc >= 0);
 
     long size = 1;

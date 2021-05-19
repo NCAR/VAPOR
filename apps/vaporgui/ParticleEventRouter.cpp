@@ -4,7 +4,6 @@
 #include "PConstantColorWidget.h"
 
 using namespace VAPoR;
-typedef BarbParams BP;
 
 static RenderEventRouterRegistrar<ParticleEventRouter> registrar(ParticleEventRouter::GetClassType());
 
@@ -15,20 +14,24 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
     AddVariablesSubtab(new PGroup({
         new PSection("Variable Selection", {
             new PScalarVariableSelector,
-            new PColorMapVariableSelector,
+            new PXFieldVariableSelector,
+            new PYFieldVariableSelector,
+            new PZFieldVariableSelector,
         }),
-        (new PFidelitySection)->Add(new PIntegerInput("stride", "Stride")),
-        new PSection("Direction", {
-            new PCheckbox("show_direction", "Show"),
-            (new PDoubleSliderEdit("ns", "Scale"))->SetRange(0.0001, 10)->EnableDynamicUpdate(),
-            new PVariableSelector("nx", "X"),
-            new PVariableSelector("nx", "Y"),
-            new PVariableSelector("nx", "Z"),
+        new PSection("Data Fidelity", {
+            (new PIntegerInput(ParticleParams::StrideTag, "Stride"))->SetRange(1, 1000)
         }),
     }));
     
     AddAppearanceSubtab(new PGroup({
-        new PColormapTFEditor,
+        new PTFEditor,
+        new PSection("Direction", {
+            new PCheckbox(ParticleParams::ShowDirectionTag, "Show"),
+            (new PDoubleSliderEdit(ParticleParams::DirectionScaleTag, "Scale"))->SetRange(0.0001, 10)->EnableDynamicUpdate(),
+            new PXFieldVariableSelector,
+            new PYFieldVariableSelector,
+            new PZFieldVariableSelector,
+        }),
     }));
     
     AddGeometrySubtab(new PGeometrySubtab);

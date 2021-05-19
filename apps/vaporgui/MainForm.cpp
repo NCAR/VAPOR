@@ -897,8 +897,6 @@ void MainForm::_createFileMenu()
     _importMenu->addAction(_dataImportCF_Action);
     _importMenu->addAction(_dataImportMPAS_Action);
     _importMenu->addAction("DCP", this, [this]() {loadDataHelper("", {}, "DCP files", "", "dcp", true, DatasetExistsAction::Prompt);});
-    _importMenu->addAction("Melanie", this, [this]() {loadDataHelper("", {}, "CF files", "", "melanie", true, DatasetExistsAction::Prompt);});
-    _importMenu->addAction("Test DCP", this, [this]() {loadDataHelper("", {"/Users/stasj/Developer/data/melanie/melanie_40000.nc"}, "CF files", "", "dcp", true, DatasetExistsAction::Prompt);});
     _File->addSeparator();
 
     // _File->addAction(createTextSeparator(" Session"));

@@ -13,8 +13,13 @@
 #ifndef	_DCP_H_
 #define	_DCP_H_
 
+#define DCP_ENABLE_PARTICLE_DENSITY 0
+
 namespace VAPoR {
 
+
+//! DCP is a simple daa format for particle data. The full specification can be found at
+//! vapor/share/doc/DCP_Format.md
 
 class VDF_API DCP : public VAPoR::DC {
 public:
@@ -47,9 +52,8 @@ protected:
 
  //! \copydoc DC::getDimension()
  //!
- virtual bool getDimension(
-	string dimname, DC::Dimension &dimension
- ) const;
+ virtual bool getDimension(string dimname, DC::Dimension &dimension) const;
+    virtual bool getDimension(string dimname, DC::Dimension &dimension, long ts) const;
 
  //! \copydoc DC::getDimensionNames()
  //!
@@ -129,10 +133,8 @@ protected:
 
  //! \copydoc DC::GetDimLensAtLevel()
  //!
- virtual int getDimLensAtLevel(
-	string varname, int level, std::vector <size_t> &dims_at_level,
-	std::vector <size_t> &bs_at_level
- ) const;
+ virtual int getDimLensAtLevel(string varname, int level, std::vector <size_t> &dims_at_level, std::vector <size_t> &bs_at_level) const;
+    virtual int getDimLensAtLevel(string varname, int level, std::vector <size_t> &dims_at_level, std::vector <size_t> &bs_at_level, long ts) const;
 
 
  //! \copydoc DC::OpenVariableRead()
@@ -206,7 +208,8 @@ private:
     
     const string nodeFaceVar = "cellsOnVertex";
     const string faceNodeVar = "verticesOnCell";
-    const vector<string> fakeVars = {
+    const string fakeEmptyVar = "empty";
+    vector<string> fakeVars = {
         nodeFaceVar,
         faceNodeVar
     };

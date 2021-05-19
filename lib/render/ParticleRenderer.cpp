@@ -60,42 +60,13 @@ ParticleRenderer::ParticleRenderer(const ParamsMgr* pm, string winName,
            ParticleRenderer::GetClassType(), instName, dataMgr) {}
 
 ParticleRenderer::~ParticleRenderer()
-{
-    if (_VAO) glDeleteVertexArrays(1, &_VAO);
-    if (_VBO) glDeleteBuffers(1, &_VBO);
-    _VAO = _VBO = 0;
-}
-
-int ParticleRenderer::_buildCache()
-{
-    
-    
-//    _nVertices = vertices.size();
-//    glBindVertexArray(_VAO);
-//    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-//    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
-//    glBindVertexArray(0);
-//    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
-    return 0;
-}
+{}
 
 int ParticleRenderer::_paintGL(bool)
 {
     int rc = 0;
-    _buildCache();
-    
-//    ShaderProgram *shader = _glManager->shaderManager->GetShader("Particle");
-//    if (shader == nullptr) return -1;
-//    shader->Bind();
-    
-    // glLineWidth(_cacheParams.lineThickness);
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
-//    glBindVertexArray(_VAO);
-//    glDrawArrays(GL_LINES, 0, _nVertices);
-//    glBindVertexArray(0);
-//    shader->UnBind();
     
     auto p = GetActiveParams();
     
@@ -113,23 +84,14 @@ int ParticleRenderer::_paintGL(bool)
     Grid *grid = _dataMgr->GetVariable(p->GetCurrentTimestep(),varName, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt);
     if (!grid) return -1;
     
-    size_t realNP = SIZE_T_MAX;
     vector<long> values;
     
-//    _dc->GetAtt("", "realNP", values);
-//    if (!values.empty())
-//        realNP = values[0];
-    
-    size_t stride = max(1L, p->GetValueLong("stride", 1));
-    bool showDir = p->GetValueLong("show_direction", 0);
-    float dirScale = p->GetValueDouble("ns", 1);
+    size_t stride = max(1L, p->GetValueLong(ParticleParams::StrideTag, 1));
+    bool showDir = p->GetValueLong(ParticleParams::ShowDirectionTag, 0);
+    float dirScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1);
     vector<Grid*> vecGrids;
     if (showDir) {
-        vector<string> vecNames = {
-            p->GetValueString("nx", ""),
-            p->GetValueString("ny", ""),
-            p->GetValueString("nz", "")
-        };
+        vector<string> vecNames = p->GetFieldVariableNames();
         vector<string> mainVarCoords;
         _dataMgr->GetVarCoordVars(varName, true, mainVarCoords);
         
@@ -167,6 +129,7 @@ int ParticleRenderer::_paintGL(bool)
     lgl->Color3f(1, 1, 1);
     lgl->Begin(showDir ? GL_LINES : GL_POINTS);
     
+    long renderedParticles = 0;
     auto node = grid->ConstNodeBegin(minExt, maxExt);
     auto nodeEnd = grid->ConstNodeEnd();
     vector<double> coordsBuf(3);
@@ -187,6 +150,7 @@ int ParticleRenderer::_paintGL(bool)
         
         lgl->Color4fv(&LUT[4*glm::clamp((int)(255*(value-mapMin)/mapDif), 0, 255)]);
         lgl->Vertex3fv((float*)&p);
+        renderedParticles++;
         
         if (showDir) {
             const glm::vec3 n(*(dirs[0]), *(dirs[1]), *(dirs[2]));
@@ -199,6 +163,8 @@ int ParticleRenderer::_paintGL(bool)
     }
     lgl->End();
     
+//    printf("Rendered %li particles\n", renderedParticles);
+    
     delete grid;
     for (auto g : vecGrids)
         delete g;
@@ -207,18 +173,6 @@ int ParticleRenderer::_paintGL(bool)
 
 int ParticleRenderer::_initializeGL()
 {
-//    glGenVertexArrays(1, &_VAO);
-//    glBindVertexArray(_VAO);
-//    glGenBuffers(1, &_VBO);
-//    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), NULL);
-//    glEnableVertexAttribArray(0);
-//    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(struct VertexData, v));
-//    glEnableVertexAttribArray(1);
-//    glBindVertexArray(0);
-//
-//    _lutTexture.Generate();
-
     return 0;
 }
 

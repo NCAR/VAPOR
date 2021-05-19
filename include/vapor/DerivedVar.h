@@ -68,6 +68,11 @@ public:
     virtual std::vector<string> GetInputs() const = 0;
 
     virtual int GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const = 0;
+    
+    virtual int GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts) const
+    {
+        return GetDimLensAtLevel(level, dims_at_level, bs_at_level);
+    }
 
     virtual size_t GetNumRefLevels() const { return (1); }
 
@@ -318,6 +323,7 @@ public:
     virtual std::vector<string> GetInputs() const { return (std::vector<string>()); }
 
     virtual int GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+    virtual int GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts) const;
 
     virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
 
@@ -332,7 +338,6 @@ public:
 private:
     DC *         _dc;
     string       _dimName;
-    size_t       _dimLen;
     DC::CoordVar _coordVarInfo;
 };
 

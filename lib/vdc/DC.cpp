@@ -338,7 +338,7 @@ size_t DC::Mesh::GetTopologyDim() const
 
 DC::DC() {}
 
-int DC::GetHyperSliceInfo(string varname, int level, std::vector<size_t> &hslice_dims, size_t &nslice)
+int DC::GetHyperSliceInfo(string varname, int level, std::vector<size_t> &hslice_dims, size_t &nslice, long ts)
 {
     hslice_dims.clear();
     nslice = 0;
@@ -346,7 +346,7 @@ int DC::GetHyperSliceInfo(string varname, int level, std::vector<size_t> &hslice
     vector<size_t> dims_at_level;
     vector<size_t> dummy;
 
-    int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy);
+    int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);
     if (rc < 0) return (-1);
 
     if (dims_at_level.size() == 0) return (0);
@@ -391,7 +391,7 @@ vector<string> DC::GetDataVarNames(int ndim) const
     return (names);
 }
 
-bool DC::_getDataVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const
+bool DC::_getDataVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions, long ts) const
 {
     dimensions.clear();
 
@@ -423,7 +423,7 @@ bool DC::_getDataVarDimensions(string varname, bool spatial, vector<DC::Dimensio
         for (int i = 0; i < dimnames.size(); i++) {
             Dimension dim;
 
-            status = GetDimension(dimnames[i], dim);
+            status = GetDimension(dimnames[i], dim, ts);
             if (!status) return (false);
 
             dimensions.push_back(dim);
@@ -437,7 +437,7 @@ bool DC::_getDataVarDimensions(string varname, bool spatial, vector<DC::Dimensio
     string tvar = var.GetTimeCoordVar();
     if (!tvar.empty()) {
         vector<DC::Dimension> timedims;
-        status = _getCoordVarDimensions(tvar, false, timedims);
+        status = _getCoordVarDimensions(tvar, false, timedims, ts);
         if (!status) return (false);
 
         VAssert(timedims.size() == 1);
@@ -447,7 +447,7 @@ bool DC::_getDataVarDimensions(string varname, bool spatial, vector<DC::Dimensio
     return (true);
 }
 
-bool DC::_getCoordVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const
+bool DC::_getCoordVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions, long ts) const
 {
     dimensions.clear();
 
@@ -459,7 +459,7 @@ bool DC::_getCoordVarDimensions(string varname, bool spatial, vector<DC::Dimensi
 
     for (int i = 0; i < dimnames.size(); i++) {
         Dimension dim;
-        status = GetDimension(dimnames[i], dim);
+        status = GetDimension(dimnames[i], dim, ts);
         if (!status) return (false);
 
         dimensions.push_back(dim);
@@ -472,7 +472,7 @@ bool DC::_getCoordVarDimensions(string varname, bool spatial, vector<DC::Dimensi
     string timedim = var.GetTimeDimName();
     if (!timedim.empty()) {
         Dimension dim;
-        status = GetDimension(timedim, dim);
+        status = GetDimension(timedim, dim, ts);
         if (!status) return (false);
 
         dimensions.push_back(dim);
@@ -480,7 +480,7 @@ bool DC::_getCoordVarDimensions(string varname, bool spatial, vector<DC::Dimensi
     return (true);
 }
 
-bool DC::_getAuxVarDimensions(string varname, vector<DC::Dimension> &dimensions) const
+bool DC::_getAuxVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const
 {
     dimensions.clear();
 
@@ -492,7 +492,7 @@ bool DC::_getAuxVarDimensions(string varname, vector<DC::Dimension> &dimensions)
 
     for (int i = 0; i < dimnames.size(); i++) {
         Dimension dim;
-        status = GetDimension(dimnames[i], dim);
+        status = GetDimension(dimnames[i], dim, ts);
         if (!status) return (false);
 
         dimensions.push_back(dim);
@@ -527,7 +527,7 @@ template<class T> int DC::_readSliceTemplate(int fd, T *slice)
     int    level = f->GetLevel();
     int    sliceNum = f->GetSlice();
 
-    int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy);
+    int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy, f->GetTS());
     if (rc < 0) return (rc);
 
     vector<size_t> hslice_dims;
@@ -575,7 +575,7 @@ template<class T> int DC::_readTemplate(int fd, T *data)
     string varname = f->GetVarname();
     int    level = f->GetLevel();
 
-    int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy);
+    int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy, f->GetTS());
     if (rc < 0) return (rc);
 
     vector<size_t> min, max;
@@ -591,18 +591,16 @@ template<class T> int DC::_getVarTemplate(string varname, int level, int lod, T 
 {
     vector<size_t> dims_at_level;
     vector<size_t> dummy;
-    int            rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy);
-    if (rc < 0) return (-1);
-
-    // Number of per time step
-    //
-    size_t var_size = 1;
-    for (int i = 0; i < dims_at_level.size(); i++) { var_size *= dims_at_level[i]; }
 
     size_t numts = GetNumTimeSteps(varname);
 
     T *ptr = data;
     for (size_t ts = 0; ts < numts; ts++) {
+        int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);
+        if (rc < 0) return (-1);
+        size_t var_size = 1;
+        for (int i = 0; i < dims_at_level.size(); i++) { var_size *= dims_at_level[i]; }
+        
         rc = GetVar(ts, varname, level, lod, ptr);
         if (rc < 0) return (-1);
 
@@ -634,28 +632,28 @@ template<class T> int DC::_getVarTemplate(size_t ts, string varname, int level, 
 template int DC::_getVarTemplate<float>(size_t ts, string varname, int level, int lod, float *data);
 template int DC::_getVarTemplate<int>(size_t ts, string varname, int level, int lod, int *data);
 
-bool DC::GetVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions) const
+bool DC::GetVarDimensions(string varname, bool spatial, vector<DC::Dimension> &dimensions, long ts) const
 {
     dimensions.clear();
 
     if (IsDataVar(varname)) {
-        return (_getDataVarDimensions(varname, spatial, dimensions));
+        return (_getDataVarDimensions(varname, spatial, dimensions, ts));
     } else if (IsCoordVar(varname)) {
-        return (_getCoordVarDimensions(varname, spatial, dimensions));
+        return (_getCoordVarDimensions(varname, spatial, dimensions, ts));
     } else if (IsAuxVar(varname)) {
-        return (_getAuxVarDimensions(varname, dimensions));
+        return (_getAuxVarDimensions(varname, dimensions, ts));
     } else {
         return (false);
     }
 }
 
-bool DC::GetVarDimLens(string varname, bool spatial, vector<size_t> &dimlens) const
+bool DC::GetVarDimLens(string varname, bool spatial, vector<size_t> &dimlens, long ts) const
 {
     dimlens.clear();
 
     vector<DC::Dimension> dims;
 
-    bool status = DC::GetVarDimensions(varname, spatial, dims);
+    bool status = DC::GetVarDimensions(varname, spatial, dims, ts);
     if (!status) return (status);
 
     for (int i = 0; i < dims.size(); i++) { dimlens.push_back(dims[i].GetLength()); }
@@ -663,14 +661,14 @@ bool DC::GetVarDimLens(string varname, bool spatial, vector<size_t> &dimlens) co
     return (true);
 }
 
-bool DC::GetVarDimLens(string varname, vector<size_t> &sdimlens, size_t &time_dimlen) const
+bool DC::GetVarDimLens(string varname, vector<size_t> &sdimlens, size_t &time_dimlen, long ts) const
 {
     sdimlens.clear();
     time_dimlen = 0;
 
     vector<DC::Dimension> dims;
 
-    bool status = DC::GetVarDimensions(varname, false, dims);
+    bool status = DC::GetVarDimensions(varname, false, dims, ts);
     if (!status) return (status);
 
     if (DC::IsTimeVarying(varname)) {
@@ -689,7 +687,7 @@ bool DC::GetVarDimNames(string varname, bool spatial, vector<string> &dimnames) 
 
     vector<DC::Dimension> dims;
 
-    bool status = DC::GetVarDimensions(varname, spatial, dims);
+    bool status = DC::GetVarDimensions(varname, spatial, dims, 0);
     if (!status) return (status);
 
     for (int i = 0; i < dims.size(); i++) { dimnames.push_back(dims[i].GetName()); }
@@ -704,7 +702,7 @@ bool DC::GetVarDimNames(string varname, vector<string> &sdimnames, string &time_
 
     vector<DC::Dimension> dims;
 
-    bool status = DC::GetVarDimensions(varname, false, dims);
+    bool status = DC::GetVarDimensions(varname, false, dims, 0);
     if (!status) return (status);
 
     if (DC::IsTimeVarying(varname)) {
@@ -806,7 +804,7 @@ int DC::GetNumTimeSteps(string varname) const
     if (time_dim_name.empty()) return (1);
 
     DC::Dimension dim;
-    ok = GetDimension(time_dim_name, dim);
+    ok = GetDimension(time_dim_name, dim, 0);
     if (!ok) return (0);
 
     return (dim.GetLength());
@@ -961,7 +959,7 @@ vector<int> DC::FileTable::GetEntries() const
     return (fds);
 }
 
-bool DC::GetMeshDimLens(const string &mesh_name, std::vector<size_t> &dims) const
+bool DC::GetMeshDimLens(const string &mesh_name, std::vector<size_t> &dims, long ts) const
 {
     dims.clear();
 
@@ -973,7 +971,7 @@ bool DC::GetMeshDimLens(const string &mesh_name, std::vector<size_t> &dims) cons
     for (int i = 0; i < dimNames.size(); i++) {
         DC::Dimension dimension;
 
-        status = GetDimension(dimNames[i], dimension);
+        status = GetDimension(dimNames[i], dimension, ts);
         if (!status) return (false);
 
         dims.push_back(dimension.GetLength());
