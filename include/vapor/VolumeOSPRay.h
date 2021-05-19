@@ -21,7 +21,7 @@ public:
     VolumeOSPRay(GLManager *gl, VolumeRenderer *renderer);
     ~VolumeOSPRay();
 
-    static std::string GetName() { return "OSPRay (experimental)"; }
+    static std::string GetName();
     static Type        GetType() { return Type::DVR; }
     virtual bool       RequiresChunkedRendering() { return false; }
 

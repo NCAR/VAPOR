@@ -2,6 +2,7 @@
 
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
+#include <vapor/STLUtils.h>
 
 namespace VAPoR {
 
@@ -54,6 +55,17 @@ public:
     //
     virtual size_t GetRenderDim() const override { return (3); }
 
+    //! \copydoc RenderParams::GetActualColorMapVariableName()
+    virtual string GetActualColorMapVariableName() const override
+    {
+        if (GetAlgorithm() == OSPVolmeAlgorithmName)
+            return GetVariableName();
+        else if (GetValueLong(UseColormapVariableTag, 0))
+            return GetColorMapVariableName();
+        else
+            return GetVariableName();
+    }
+
     static const std::vector<std::string> GetAlgorithmNames(Type type = Type::Any);
     static void                           Register(const std::string &name, Type type = Type::Any);
 
@@ -88,6 +100,8 @@ public:
     static const std::string OSPSampleRateScalar;
     static const std::string OSPAmbientLightIntensity;
     static const std::string OSPDirectionalLightIntensity;
+
+    static const std::string OSPVolmeAlgorithmName;
 };
 
 };    // namespace VAPoR

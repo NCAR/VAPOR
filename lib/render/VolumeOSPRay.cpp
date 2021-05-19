@@ -28,6 +28,8 @@ using namespace VAPoR;
 
 static VolumeAlgorithmRegistrar<VolumeOSPRay> registration;
 
+std::string VolumeOSPRay::GetName() { return VolumeParams::OSPVolmeAlgorithmName; }
+
 VolumeOSPRay::VolumeOSPRay(GLManager *gl, VolumeRenderer *renderer) : VolumeAlgorithm(gl, renderer)
 {
     _ospCamera = ospNewCamera("perspective");
