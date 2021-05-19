@@ -361,18 +361,21 @@ int VolumeCellTraversal::_getHeuristicBBLevels() const
 {
     int levels = _BBLevels;
 
-    if (levels == 12) levels -= 4;
-    else if (levels >= 9) levels -= 3;
-    else if (levels >= 7) levels -= 2;
-    else if (levels >= 2) levels -= 1;
-    
+    if (levels == 12)
+        levels -= 4;
+    else if (levels >= 9)
+        levels -= 3;
+    else if (levels >= 7)
+        levels -= 2;
+    else if (levels >= 2)
+        levels -= 1;
+
     // Nvidia's loop optimizer has an exponential Big-O complexity in
     // relation to nesting and anything over 6 takes too long to compile.
     GLManager::Vendor vendor = GLManager::GetVendor();
     if (vendor == GLManager::Vendor::Nvidia)
-        if (levels > 6)
-            levels = 6;
-    
+        if (levels > 6) levels = 6;
+
     return levels;
 }
 
