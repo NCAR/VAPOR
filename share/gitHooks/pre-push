@@ -1,16 +1,37 @@
 #!/bin/sh
 #
 
+DRYRUN='false'
+MAIN='false'
+
+# -d initiates a dry-run where code will be scanned, but changes will not be applied
+# -m initiates a comparison between the local HEAD and 'main', instead of comparing
+#    the the local HEAD with the remote HEAD
+while getopts dm flag;
+do
+    case ${flag} in
+        d) DRYRUN='true' ;;
+        m) MAIN='true' ;;
+    esac
+done
+
+echo "  Running dryrun?    $DRYRUN"
+echo "  Force comparison to main? $MAIN"
+
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 
 # If our current branch does not exist in the remote repository yet, then compare
 # our local changes with main.  Otherwise, compare our local changes with the remote
 # branch.
-if [ `git ls-remote --heads https://github.com/NCAR/VAPOR.git $BRANCH | wc -l` = 0 ]; then
-    COMPARE_BRANCH="main"
-else
-    COMPARE_BRANCH=$BRANCH
+if [ "${MAIN}" != "true" ]; then
+    if [ `git ls-remote --heads https://github.com/NCAR/VAPOR.git $BRANCH | wc -l` = 0 ]; then
+        COMPARE_BRANCH="main"
+    else
+        COMPARE_BRANCH=$BRANCH
+    fi
 fi
+
+echo "  Comparing current changes with branch: $COMPARE_BRANCH"
 
 # If we're on the readTheDocs branch, skip clang-format
 #
@@ -22,21 +43,28 @@ if [ "$BRANCH" = "readTheDocs" ]; then
 else
     for COMMIT in $(git log --pretty=format:%h origin/$COMPARE_BRANCH...$BRANCH); do
         echo "Reading Commit: $COMMIT"
-        for FILE in $(git diff-tree --no-commit-id --name-only -r $COMMIT |grep -E "\.h|\.cpp"); do
+        for FILE in $(git diff --name-only $COMMIT^ $COMMIT |grep -E "\.h|\.cpp"); do
             NUMBERS=""
             for NUMBER in $(git blame --line-porcelain "$FILE" | egrep ^$COMMIT | cut -d' ' -f3); do
                 NUMBERS="$NUMBERS --lines $NUMBER:$NUMBER "
             done
 
             if [ "$NUMBERS" != "" ]; then
-                echo "  Running clang-format on $FILE"
-                clang-format -i $FILE $NUMBERS
-                git add $FILE
+                if [ "${DRYRUN}" = "true" ]; then
+                    echo "dry run activated"
+                    clang-format --dry-run -i $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
+                else
+                    echo "  Running clang-format on $FILE, line $NUMBERS"
+                    clang-format -i $FILE $NUMBERS
+                    git add $FILE
+                fi
             fi
         done
     done
 
-    git commit -m "clang-format pre-push hook"
+    if [ "${DRYRUN}" = "false" ]; then
+        git commit -m "clang-format pre-push hook"
+    fi
 
     # git commit will return non-zero status if there's nothing to commit.  Make sure
     # we return 0 so git 'push' will still be invoked
