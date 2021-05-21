@@ -17,9 +17,9 @@ May 21, 2021
 
 We are trying to prioritize new features for Vapor 3.6.  Our goal has always been to support scientists and help them produce superior visualizations of their simulation data. We can't do this without the feedback of the people in our user community.
 
-Please help us by providing your feedback in the survey below, which outlines new features we are considering for Vapor 3.6. 
+Please help us by providing your feedback in the survey below, which outlines new features we are considering for Vapor 3.6 and beyond. 
 
-`Vapor 3.6 - New Feature Survey <https://docs.google.com/forms/d/e/1FAIpQLSeZWvuAXaRiWyFrQ16zO25bfy8AANp8C8HpVXeMk83uQPdTLA/viewform?usp=sf_link>`_
+`New Feature Survey <https://docs.google.com/forms/d/e/1FAIpQLSeZWvuAXaRiWyFrQ16zO25bfy8AANp8C8HpVXeMk83uQPdTLA/viewform?usp=sf_link>`_
 
 Each feature in the survey is linked to an issue on GitHub (https://github.com/NCAR/VAPOR), so feel free to comment there if you'd like to track our progress, or discuss the issue further after the survey. And please let us know if you have new ideas that we haven't considered yet.
 
