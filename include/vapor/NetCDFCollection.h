@@ -394,9 +394,9 @@ public:
     //! \sa GetDimNames()
     //
     virtual std::vector<size_t> GetDims() const { return (_dimLens); };
-    
+
     virtual std::vector<bool> GetDimsAreTimeVarying() const { return _dimIsTimeVarying; }
-    
+
     long GetDimLengthAtTime(string name, long ts);
 
     //! Return the number of time steps in the data collection all variables
@@ -785,7 +785,7 @@ private:
     std::vector<string>              _dimNames;    // Names of all dimensions
     std::vector<size_t>              _dimLens;     // Names of all dimensions
     std::vector<bool>                _dimIsTimeVarying;
-//    std::vector<
+    //    std::vector<
     string                           _missingValAttName;
     std::map<string, vector<double>> _timesMap;      // map variable to time
     std::vector<double>              _times;         // all valid time coordinates

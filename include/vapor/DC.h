@@ -389,15 +389,8 @@ public:
         //! \param[in] layers_dim_name Name of dimension specifying the number
         //! of layers in the mesh.
         //
-        Mesh(
-          std::string name,
-          int max_nodes_per_face,
-          int max_faces_per_node,
-          std::string node_dim_name,
-          std::string face_dim_name,
-          std::vector <string> coord_vars
-        );
-        
+        Mesh(std::string name, int max_nodes_per_face, int max_faces_per_node, std::string node_dim_name, std::string face_dim_name, std::vector<string> coord_vars);
+
         //! Return the type of mesh
         //!
         //! Returns one of:
@@ -1348,7 +1341,7 @@ public:
     //!
     //! \sa DC::GetMesh(), DC::GetDimension()
     //
-    virtual bool GetMeshDimLens(const string &mesh_name, std::vector<size_t> &dims, long ts=-1) const;
+    virtual bool GetMeshDimLens(const string &mesh_name, std::vector<size_t> &dims, long ts = -1) const;
 
     //! Return the ordered list of dimension names for a mesh
     //!
@@ -1539,7 +1532,7 @@ public:
     //! \sa VAPoR::DC, DC::DataVar::GetBS(), DC::GetVarDimLens()
     //! \sa ReadRegionBlock()
     //
-    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts=-1) const
+    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts = -1) const
     {
         return (getDimLensAtLevel(varname, level, dims_at_level, bs_at_level, ts));
     }
@@ -1549,7 +1542,7 @@ public:
     //! This method is equivalent to calling GetDimLensAtLevel() with \p level
     //! equal to -1
     //!
-    virtual int GetDimLens(string varname, std::vector<size_t> &dims, long ts=-1)
+    virtual int GetDimLens(string varname, std::vector<size_t> &dims, long ts = -1)
     {
         vector<size_t> dummy;
         return (GetDimLensAtLevel(varname, -1, dims, dummy, ts));
@@ -1845,7 +1838,7 @@ public:
     //! not defined.
     //!
     //
-    virtual bool GetVarDimLens(string varname, bool spatial, vector<size_t> &dimlens, long ts=-1) const;
+    virtual bool GetVarDimLens(string varname, bool spatial, vector<size_t> &dimlens, long ts = -1) const;
 
     //! Return an ordered list of the variables dimension lengths
     //!
@@ -1863,7 +1856,7 @@ public:
     //! not defined.
     //!
     //
-    virtual bool GetVarDimLens(string varname, vector<size_t> &sdimlens, size_t &time_dimlen, long ts=-1) const;
+    virtual bool GetVarDimLens(string varname, vector<size_t> &sdimlens, size_t &time_dimlen, long ts = -1) const;
 
     //! Return an ordered list of the variables dimension names
     //!
@@ -2122,7 +2115,7 @@ protected:
     //! \copydoc GetDimension()
     //
     virtual bool getDimension(string dimname, DC::Dimension &dimension) const = 0;
-    
+
     //! \copydoc GetDimension()
     //
     virtual bool getDimension(string dimname, DC::Dimension &dimension, long ts) const { return getDimension(dimname, dimension); };
@@ -2201,8 +2194,11 @@ protected:
 
     //! \copydoc GetDimLensAtLevel()
     //
-    virtual int getDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts) const { return getDimLensAtLevel(varname, level, dims_at_level, bs_at_level); };
-    
+    virtual int getDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts) const
+    {
+        return getDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+    };
+
     //! \copydoc GetMapProjection()
     //
     virtual string getMapProjection() const = 0;

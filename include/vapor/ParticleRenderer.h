@@ -22,11 +22,11 @@
 
 #include <GL/glew.h>
 #ifdef Darwin
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
+    #include <OpenGL/gl.h>
+    #include <OpenGL/glu.h>
 #else
-#include <GL/gl.h>
-#include <GL/glu.h>
+    #include <GL/gl.h>
+    #include <GL/glu.h>
 #endif
 
 #include "vapor/VAssert.h"
@@ -39,38 +39,29 @@
 namespace VAPoR {
 
 class DataMgr;
-    
+
 //! \class ParticleRenderer
 //! \brief Class that draws the Particles (Particles) as specified by IsolineParams
 //! \author Stas Jaroszynski
 //! \version 1.0
 //! \date March 2018
-class RENDER_API ParticleRenderer : public Renderer
-{
-
+class RENDER_API ParticleRenderer : public Renderer {
 public:
+    ParticleRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr);
 
-	ParticleRenderer(const ParamsMgr* pm,
-							string winName,
-							string dataSetName,
-							string instName,
-							DataMgr* dataMgr);
+    virtual ~ParticleRenderer();
 
-	virtual ~ParticleRenderer();
+    static string GetClassType() { return ("Particle"); }
 
-	static string GetClassType() {
-		return("Particle");
-	}
-	
-	//! \copydoc Renderer::_initializeGL()
-	virtual int	_initializeGL();
-	//! \copydoc Renderer::_paintGL()
-    virtual int		_paintGL(bool fast);
+    //! \copydoc Renderer::_initializeGL()
+    virtual int _initializeGL();
+    //! \copydoc Renderer::_paintGL()
+    virtual int _paintGL(bool fast);
 
 private:
     void _clearCache() {}
 };
-    
-};
 
-#endif // ParticleRENDERER_H
+};    // namespace VAPoR
+
+#endif    // ParticleRENDERER_H

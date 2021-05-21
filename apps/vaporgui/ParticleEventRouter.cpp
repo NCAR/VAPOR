@@ -40,7 +40,4 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
     // clang-format on
 }
 
-string ParticleEventRouter::_getDescription() const
-{
-    return ("Render particle data");
-}
+string ParticleEventRouter::_getDescription() const { return ("Render particle data"); }

@@ -305,14 +305,7 @@ DC::Mesh::Mesh(std::string name, size_t max_nodes_per_face, size_t max_faces_per
     _dim_names.push_back(layers_dim_name);
 }
 
-DC::Mesh::Mesh(
-               std::string name,
-               int max_nodes_per_face,
-               int max_faces_per_node,
-               std::string node_dim_name,
-               std::string face_dim_name,
-               std::vector <string> coord_vars
-)
+DC::Mesh::Mesh(std::string name, int max_nodes_per_face, int max_faces_per_node, std::string node_dim_name, std::string face_dim_name, std::vector<string> coord_vars)
 {
     _Mesh(name, coord_vars, max_nodes_per_face, max_faces_per_node, UNSTRUC_3D);
 
@@ -600,7 +593,7 @@ template<class T> int DC::_getVarTemplate(string varname, int level, int lod, T 
         if (rc < 0) return (-1);
         size_t var_size = 1;
         for (int i = 0; i < dims_at_level.size(); i++) { var_size *= dims_at_level[i]; }
-        
+
         rc = GetVar(ts, varname, level, lod, ptr);
         if (rc < 0) return (-1);
 

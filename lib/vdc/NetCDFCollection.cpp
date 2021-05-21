@@ -118,7 +118,7 @@ int NetCDFCollection::Initialize(const vector<string> &files, const vector<strin
             SetErrMsg("NetCDFSimple::Initialize(%s)", files[i].c_str());
             return (-1);
         }
-//        printf("INIT %i = %s\n", i, files[i].c_str());
+        //        printf("INIT %i = %s\n", i, files[i].c_str());
 
         //
         // Get dimension names and lengths
@@ -144,8 +144,8 @@ int NetCDFCollection::Initialize(const vector<string> &files, const vector<strin
                 _dimLens[itr - _dimNames.begin()] += dims[j];
             } else if (_dimLens[itr - _dimNames.begin()] != dims[j]) {
                 _dimIsTimeVarying[itr - _dimNames.begin()] = true;
-//                SetErrMsg("Spatial dimension %s changed size", dimnames[j].c_str());
-//                return (-1);
+                //                SetErrMsg("Spatial dimension %s changed size", dimnames[j].c_str());
+                //                return (-1);
             }
         }
 
@@ -197,9 +197,9 @@ int NetCDFCollection::Initialize(const vector<string> &files, const vector<strin
 long NetCDFCollection::GetDimLengthAtTime(string name, long ts)
 {
     double realTime = _times[ts];
-    
+
     const auto end = _timesMap.cend();
-    string filePath;
+    string     filePath;
     for (auto it = _timesMap.cbegin(); it != end; ++it) {
         for (int i = 0; i < it->second.size(); i++) {
             if (it->second[i] == realTime) {
@@ -209,13 +209,13 @@ long NetCDFCollection::GetDimLengthAtTime(string name, long ts)
         }
     }
 SEARCH_FINISHED:
-    
+
     if (filePath.empty()) {
         MyBase::SetErrMsg("Time %li (%f) not found", ts, realTime);
         assert(0);
         return -1;
     }
-    
+
     NetCDFSimple *nc = nullptr;
     for (auto it = _ncdfmap.cbegin(); it != _ncdfmap.cend(); ++it) {
         if (STLUtils::BeginsWith(filePath, it->first)) {
@@ -223,23 +223,21 @@ SEARCH_FINISHED:
             break;
         }
     }
-    
+
     if (!nc) {
         MyBase::SetErrMsg("NC for file not found");
         assert(0);
         return -1;
     }
-    
+
     vector<string> names;
     vector<size_t> lengths;
     nc->GetDimensions(names, lengths);
-    
+
     for (int i = 0; i < names.size(); i++) {
-        if (names[i] == name) {
-            return lengths[i];
-        }
+        if (names[i] == name) { return lengths[i]; }
     }
-    
+
     MyBase::SetErrMsg("Dimension not found at timestep %li", ts);
     return -1;
 }

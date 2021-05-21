@@ -842,14 +842,13 @@ bool DerivedCoordVar_CF1D::GetCoordVarInfo(DC::CoordVar &cvar) const
     return (true);
 }
 
-int DerivedCoordVar_CF1D::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
-{ return GetDimLensAtLevel(level, dims_at_level, bs_at_level, -1); }
+int DerivedCoordVar_CF1D::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const { return GetDimLensAtLevel(level, dims_at_level, bs_at_level, -1); }
 
 int DerivedCoordVar_CF1D::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts) const
 {
     dims_at_level.clear();
     bs_at_level.clear();
-    
+
     DC::Dimension dimension;
     int           rc = _dc->GetDimension(_dimName, dimension, ts);
     if (rc < 0) return (-1);
@@ -865,15 +864,15 @@ int DerivedCoordVar_CF1D::GetDimLensAtLevel(int level, std::vector<size_t> &dims
 
 int DerivedCoordVar_CF1D::OpenVariableRead(size_t ts, int level, int lod)
 {
-//    if (level != 0) {
-//        SetErrMsg("Invalid parameter");
-//        return (-1);
-//    }
+    //    if (level != 0) {
+    //        SetErrMsg("Invalid parameter");
+    //        return (-1);
+    //    }
 
-//    if (lod != 0) {
-//        SetErrMsg("Invalid parameter");
-//        return (-1);
-//    }
+    //    if (lod != 0) {
+    //        SetErrMsg("Invalid parameter");
+    //        return (-1);
+    //    }
 
     DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, _derivedVarName, level, lod);
 

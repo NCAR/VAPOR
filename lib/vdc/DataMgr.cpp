@@ -16,7 +16,7 @@
 #include <vapor/DCMelanie.h>
 #include <vapor/DerivedVar.h>
 #if DCP_ENABLE_PARTICLE_DENSITY
-#include <vapor/DerivedParticleDensity.h>
+    #include <vapor/DerivedParticleDensity.h>
 #endif
 #include <vapor/DataMgr.h>
 #ifdef WIN32
@@ -604,14 +604,11 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         _dc = new DCCF();
     } else if (_format.compare("mpas") == 0) {
         _dc = new DCMPAS();
-    }
-    else if (_format.compare("dcp") == 0) {
+    } else if (_format.compare("dcp") == 0) {
         _dc = new DCP();
-    }
-    else if (_format.compare("melanie") == 0) {
+    } else if (_format.compare("melanie") == 0) {
         _dc = new DCMelanie();
-    }
-    else {
+    } else {
         SetErrMsg("Invalid data collection format : %s", _format.c_str());
         return (-1);
     }
@@ -674,7 +671,7 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
 
         auto dataVars = GetDataVarNames(3);
         for (auto var : dataVars) {
-            DerivedParticleAverage *dpa = new DerivedParticleAverage(var+"_avg", _dc, mesh.GetName(), this, var);
+            DerivedParticleAverage *dpa = new DerivedParticleAverage(var + "_avg", _dc, mesh.GetName(), this, var);
             dpa->Initialize();
             AddDerivedVar(dpa);
         }
@@ -2563,9 +2560,7 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
         status = _dc->GetDimension(dimname, dimension, ts);
         VAssert(status);
         faceDims.push_back(dimension.GetLength());
-        if (layers_dimlen) {
-            faceDims.push_back(layers_dimlen - 1);
-        }
+        if (layers_dimlen) { faceDims.push_back(layers_dimlen - 1); }
     } else
         VAssert(!"FaceDim Required");
 
@@ -2598,16 +2593,16 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     bool ok = _getVarConnVars(var.GetName(), face_node_var, node_face_var, dummy, dummy, dummy, dummy);
     VAssert(ok);
 
-   DC::AuxVar auxvar;
+    DC::AuxVar auxvar;
 
-   if (!face_node_var.empty()) {
-       status = _dc->GetAuxVarInfo(face_node_var, auxvar);
-       VAssert(status);
-       vertexOffset = auxvar.GetOffset();
-   } else {
-       VAssert(!"FaceNodeVar Required");
-       vertexOffset = 0;
-   }
+    if (!face_node_var.empty()) {
+        status = _dc->GetAuxVarInfo(face_node_var, auxvar);
+        VAssert(status);
+        vertexOffset = auxvar.GetOffset();
+    } else {
+        VAssert(!"FaceNodeVar Required");
+        vertexOffset = 0;
+    }
 
     if (!node_face_var.empty()) {
         status = _dc->GetAuxVarInfo(node_face_var, auxvar);
@@ -3091,7 +3086,7 @@ int DataMgr::_getVar(string varname, int level, int lod, float *data)
         if (rc < 0) return (-1);
         size_t var_size = 1;
         for (int i = 0; i < dims_at_level.size(); i++) { var_size *= dims_at_level[i]; }
-        
+
         rc = _getVar(ts, varname, level, lod, ptr);
         if (rc < 0) return (-1);
 
