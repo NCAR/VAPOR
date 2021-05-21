@@ -12,6 +12,9 @@
 
 We need your feedback!
 ======================
+
+May 21, 2021
+
 We are trying to prioritize new features for Vapor 3.6.  Our goal has always been to support scientists and help them produce superior visualizations of their simulation data. We can't do this without the feedback of the people in our user community.
 
 Please help us by providing your feedback in the survey below, which outlines new features we are considering for Vapor 3.6. 
@@ -26,6 +29,8 @@ Thank you for helping us produce better open source visualization software.
 
 Vapor 3.4.0 is now Live!
 ========================
+
+April 5, 2021
 
 Version 3.4 is Vapor's first usability-focused release.  See some of the new features in the following demo:
 
