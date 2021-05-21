@@ -573,7 +573,7 @@ bool CurvilinearGrid::_insideGridHelperTerrain(double x, double y, double z, con
     if (!Wasp::BinarySearchRange(zcoords, z, k)) return (false);
 
     z0 = zcoords[k];
-    z1 = k < nz-1 ? zcoords[k + 1] : z0;
+    z1 = k < nz - 1 ? zcoords[k + 1] : z0;
 
     zwgt[0] = 1.0 - (z - z0) / (z1 - z0);
     zwgt[1] = 1.0 - zwgt[0];
