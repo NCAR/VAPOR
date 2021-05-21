@@ -117,6 +117,7 @@ Grid test for 3D variable P:
     Missing value count:                                 0
     GetValueAtIndex() vs GetValue() disagreement count:  0
     Time:                                                0
+
 Projection String:  +proj=merc +lon_0=-85 +lat_ts=30 +ellps=WGS84
 
 Coordinate Variables:
