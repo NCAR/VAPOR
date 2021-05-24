@@ -12,6 +12,7 @@ public:
     BOVCollection();
     int Initialize(const std::vector<std::string> &paths);
 
+    std::string              GetDataFile() const;
     std::string              GetDataVariableName() const;
     std::string              GetTimeDimension() const;
     std::vector<size_t>      GetDataSize() const;
@@ -19,6 +20,7 @@ public:
     DC::XType                GetDataFormat() const;
     std::vector<float>       GetBrickOrigin() const;
     std::vector<float>       GetBrickSize() const;
+    std::string              GetDataEndian() const;
 
     template<typename T> int ReadRegion(std::string, T *region);
 
@@ -46,5 +48,19 @@ private:
     template<typename T> int _readMetadata(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = true);
 
     std::string _findValue(std::string &line) const;
+
+    static const std::string _timeToken;
+    static const std::string _dataFileToken;
+    static const std::string _dataSizeToken;
+    static const std::string _formatToken;
+    static const std::string _variableToken;
+    static const std::string _endianToken;
+    static const std::string _centeringToken;
+    static const std::string _originToken;
+    static const std::string _sizeToken;
+    static const std::string _offsetToken;
+    static const std::string _divideBrickToken;
+    static const std::string _dataBrickletsToken;
+    static const std::string _dataComponentsToken;
 };
 }    // namespace VAPoR

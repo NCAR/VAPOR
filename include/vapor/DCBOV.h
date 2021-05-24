@@ -173,5 +173,9 @@ private:
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 
     template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
+
+    size_t _sizeOfFormat( DC::XType type ) const;
+
+    void _swapBytes(void *vptr, size_t size, size_t n) const;
 };
 }    // namespace VAPoR
