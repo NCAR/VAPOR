@@ -82,7 +82,6 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             _readMetadata(_dataComponentsToken, line, _dataComponents);
         }
     } else {
-        // SetErrMsg("Failed to open %s", paths[0]);
         SetErrMsg(("Failed to open bov file " + paths[0]).c_str());
     }
 }
@@ -134,7 +133,7 @@ template<> int BOVCollection::_readMetadata<DC::XType>(const std::string &token,
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
-        std::string format = _findValue(line);
+        std::string format = _findTokenValue(line);
         if (format == "BYTE")
             _dataFormat = DC::INT8;
         else if (format == "SHORT")
@@ -165,7 +164,7 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
-        stringstream ss(_findValue(line));
+        stringstream ss(_findTokenValue(line));
         if (std::is_same<T, bool>::value) {
             ss >> std::boolalpha >> value;
         } else {
@@ -191,7 +190,7 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
         T                 lineValue;
-        std::stringstream lineStream = stringstream(_findValue(line));
+        std::stringstream lineStream = stringstream(_findTokenValue(line));
 
         value.clear();
         while (lineStream >> lineValue) { value.push_back(lineValue); }
@@ -213,7 +212,7 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
     return 0;
 }
 
-std::string BOVCollection::_findValue(std::string &line) const
+std::string BOVCollection::_findTokenValue(std::string &line) const
 {
     std::string delimiter = ": ";
 

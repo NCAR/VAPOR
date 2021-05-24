@@ -414,6 +414,9 @@ void DCBOV::_swapBytes(void *vptr, size_t size, size_t n) const
 
 template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
+    std::cout << "_readRegionTemplate " << min[0] << " " << min[1] << " " << min[2] << std::endl;
+    std::cout << "                    " << max[0] << " " << max[1] << " " << max[2] << std::endl;
+
     FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
     if (!w) {
         SetErrMsg("Invalid file descriptor : %d", fd);

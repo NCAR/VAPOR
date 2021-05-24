@@ -47,7 +47,7 @@ private:
 
     template<typename T> int _readMetadata(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = true);
 
-    std::string _findValue(std::string &line) const;
+    std::string _findTokenValue(std::string &line) const;
 
     static const std::string _timeToken;
     static const std::string _dataFileToken;
