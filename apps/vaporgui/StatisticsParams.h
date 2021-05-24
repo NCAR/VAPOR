@@ -55,6 +55,7 @@ public:
 
     static string  GetClassType() { return ("StatisticsParams"); }
     virtual size_t GetRenderDim() const override { return (0); }
+    virtual string GetActualColorMapVariableName() const override { return ""; }
 
 private:
     static const string _maxTSTag;

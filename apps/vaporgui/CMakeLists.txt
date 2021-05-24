@@ -246,6 +246,8 @@ set (SRCS
     RenderEventRouterGUI.h
     BookmarkParams.cpp
     BookmarkParams.h
+    CheckForUpdate.cpp
+    CheckForUpdate.h
 
 	# Need to include all files that request .ui files
 	Statistics.h
@@ -314,7 +316,7 @@ set (UIS
 
 source_group (UIs FILES ${UIS})
 
-find_package(Qt5 REQUIRED COMPONENTS Core OpenGL Widgets Gui DBus )
+find_package(Qt5 REQUIRED COMPONENTS Core OpenGL Widgets Gui DBus Network)
 
 set (CMAKE_AUTOUIC ON) # This needs to appear before adding sources to work properly
 set (CMAKE_AUTOMOC ON)
@@ -349,7 +351,7 @@ endif()
 
 target_link_libraries (
         vapor common vdc wasp render params jpeg ${GLEW} 
-        ${TIFF_LIB} geotiff ${ASSIMP_LIB} Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
+        ${TIFF_LIB} geotiff ${ASSIMP_LIB} Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus Qt5::Network
         ${PYTHON_LIB}
 )
 

@@ -192,9 +192,6 @@ int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, std
     if (!varName.empty()) {
         int rc = DataMgrUtils::GetGrids(_dataMgr, ts, varName, minExts, maxExts, true, &refLevel, &lod, &sg);
         if (rc < 0) {
-            for (int i = 0; i < varData.size(); i++) {
-                if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
-            }
             return (rc);
         }
         varData[varData.size() - 1] = sg;
@@ -268,11 +265,6 @@ int BarbRenderer::_generateBarbs()
     _barbCache.clear();
     // Render the barbs
     _operateOnGrid(varData);
-
-    // Release the locks on the data
-    for (int i = 0; i < varData.size(); i++) {
-        if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
-    }
 
     return (rc);
 }

@@ -31,6 +31,8 @@ const std::string VolumeParams::OSPSampleRateScalar = "OSPSampleRateScalar";
 const std::string VolumeParams::OSPAmbientLightIntensity = "OSPAmbientLightIntensity";
 const std::string VolumeParams::OSPDirectionalLightIntensity = "OSPDirectionalLightIntensity";
 
+const std::string VolumeParams::OSPVolmeAlgorithmName = "OSPRay (experimental)";
+
 VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, VolumeParams::GetClassType(), 3)
 {
     SetDiagMsg("VolumeParams::VolumeParams() this=%p", this);
