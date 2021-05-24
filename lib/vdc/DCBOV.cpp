@@ -14,8 +14,8 @@
 
 #include <vapor/GeoUtil.h>
 #include <vapor/UDUnitsClass.h>
+//#include <vapor/BOVCollection.h>
 #include <vapor/DCBOV.h>
-#include <vapor/BOVCollection.h>
 #include <vapor/DCUtils.h>
 
 using namespace VAPoR;
@@ -414,8 +414,9 @@ void DCBOV::_swapBytes(void *vptr, size_t size, size_t n) const
 
 template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
-    std::cout << "_readRegionTemplate " << min[0] << " " << min[1] << " " << min[2] << std::endl;
-    std::cout << "                    " << max[0] << " " << max[1] << " " << max[2] << std::endl;
+    for (int i=0; i<min.size(); i++) {
+        std::cout << "_readRegionTemplate " << min[i] << " " << max[i] << std::endl;
+    }
 
     FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
     if (!w) {
@@ -439,22 +440,19 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
         }
     }
 
-    // if (_varname == "x" || _varname == "y" || _varname == "z") {
-    //    for (int i = 0; i < 10; i++) region[i] = float(i);
-    //} else if (_varname == "t") {
     if (_varname == "t") {
         region[0] = 1.f;
-        //} else if (_varname == "myVar") {
     } else if (_varname == _bovCollection->GetDataVariableName()) {
+        //_bovCollection->ReadRegion( min, max, region );
         FILE* fp = fopen( fileName.c_str(), "rb" );
         if (!fp) {
             SetErrMsg("Invalid file: %d", fp);
             return (-1);
         }
        
-        size_t dataSize = _sizeOfFormat( _bovCollection->GetDataFormat() );
-        std::cout << "dataSize " << dataSize << std::endl;
-        if ( dataSize < 0 ) {
+        size_t formatSize = _sizeOfFormat( _bovCollection->GetDataFormat() );
+        std::cout << "formatSize " << formatSize << std::endl;
+        if ( formatSize < 0 ) {
             SetErrMsg("Invalid data format");
             return (-1);
         }
@@ -472,14 +470,28 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
 
         std::cout << typeid(*region).name() << std::endl;
 
-        size_t rc = fread( region, dataSize, numValues, fp );
-        if (rc != numValues) {
-            if (ferror(fp) != 0) {
-                MyBase::SetErrMsg("Error reading input file");
-            } else {
-                MyBase::SetErrMsg("Short read on input file");
+        size_t xStride = max[0]-min[0]+1; 
+        for (int k=min[2]; k<=max[2]; k++) {
+            int zOffset = dataSize[0]*dataSize[1]*k;
+            for (int j=min[1]; j<=max[1]; j++) {
+                int xOffset = min[0];
+                int yOffset = dataSize[0]*j;
+                int offset = formatSize*(xOffset + yOffset + zOffset);
+                
+                fseek( fp, offset, SEEK_SET );
+                size_t rc = fread( region, formatSize, xStride, fp );
+
+                if (rc != xStride) {
+                    if (ferror(fp) != 0) {
+                        MyBase::SetErrMsg("Error reading input file");
+                    } else {
+                        MyBase::SetErrMsg("Short read on input file");
+                    }
+                    return (-1);
+                }
+
+                region+=xStride;
             }
-            return (-1);
         }
         
         fclose(fp);
@@ -488,10 +500,13 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
         bool systemLittleEndian = *(char *)&n == 1 ? true : false;
         bool dataLittleEndian = _bovCollection->GetDataEndian() == "LITTLE" ? true : false;
         if ( systemLittleEndian != dataLittleEndian ) {
-            _swapBytes( region, dataSize, numValues );
+            _swapBytes( region, formatSize, numValues );
         }
         //for (int i = 0; i < 1000; i++) region[i] = float(i);
     }
+    
+
+
     /*FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
 
     if (!w) {

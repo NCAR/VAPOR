@@ -10,6 +10,7 @@
 #include <vapor/UDUnitsClass.h>
 #include <vapor/utils.h>
 #include <vapor/DC.h>
+#include <vapor/BOVCollection.h>
 
 namespace VAPoR {
 
@@ -150,7 +151,6 @@ protected:
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
 private:
-    NetCDFCFCollection *_ncdfc;
     VAPoR::UDUnits      _udunits;
 
     BOVCollection *_bovCollection;

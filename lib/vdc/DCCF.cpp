@@ -331,6 +331,10 @@ int DCCF::closeVariable(int fd)
 
 template<class T> int DCCF::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
+    for (int i=0; i<min.size(); i++) {
+        std::cout << "_readRegionTemplate " << min[i] << " " << max[i] << std::endl;
+    }
+
     FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
 
     if (!w) {

@@ -122,9 +122,9 @@ std::string BOVCollection::GetDataEndian() const {
     return _dataEndian; 
 }
 
-template<typename T> int BOVCollection::ReadRegion(std::string varname, T *region) { 
+/*template<typename T> int BOVCollection::ReadRegion(std::string varname, T *region) { 
     return 0; 
-}
+}*/
 
 template<> int BOVCollection::_readMetadata<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
 {
@@ -173,7 +173,6 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
 
         if (verbose) { std::cout << std::setw(20) << token << " " << value << std::endl; }
         if (ss.bad()) {
-            std::cout << "FAIL T" << std::endl;
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
             return -1;
@@ -224,3 +223,79 @@ std::string BOVCollection::_findTokenValue(std::string &line) const
     }
     return line;
 }
+
+/*size_t BOVCollection::_sizeOfFormat( DC::XType type ) const {
+    switch (type) {
+        case DC::XType::INVALID: return -1;
+        case DC::XType::INT8: return 1;
+        case DC::XType::INT32: return 4;
+        case DC::XType::FLOAT: return 4;
+        case DC::XType::DOUBLE: return 8;
+    }
+}
+
+void BOVCollection::_swapBytes(void *vptr, size_t size, size_t n) const
+{
+    unsigned char *ucptr = (unsigned char *)vptr;
+    unsigned char  uc;
+    size_t         i, j;
+
+    for (j = 0; j < n; j++) {
+        for (i = 0; i < size / 2; i++) {
+            uc = ucptr[i];
+            ucptr[i] = ucptr[size - i - 1];
+            ucptr[size - i - 1] = uc;
+        }
+        ucptr += size;
+    }
+}
+
+template<class T>
+int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector<size_t> &max, T *region ) {
+    FILE* fp = fopen( _dataFile.c_str(), "rb" );
+    if (!fp) {
+        SetErrMsg("Invalid file: %d", fp);
+        return (-1);
+    }
+
+    size_t dataSize = _sizeOfFormat( _dataFormat );
+    std::cout << "dataSize " << dataSize << std::endl;
+    if ( dataSize < 0 ) {
+        SetErrMsg("Invalid data format");
+        return (-1);
+    }
+
+    if ( _dataSize.size() != 3 ) {
+        SetErrMsg("Invalid grid size (must be 3D)");
+        return (-1);
+    }
+    size_t numValues = _dataSize[0]*_dataSize[1]*_dataSize[2];
+    if ( numValues < 1 ) {
+        SetErrMsg("Invalid number of grid points");
+        return (-1);
+    }
+
+    std::cout << typeid(*region).name() << std::endl;
+
+    size_t rc = fread( region, dataSize, numValues, fp );
+    if (rc != numValues) {
+        if (ferror(fp) != 0) {
+            MyBase::SetErrMsg("Error reading input file");
+        } else {
+            MyBase::SetErrMsg("Short read on input file");
+        }
+        return (-1);
+    }
+
+    fclose(fp);
+
+    int n = 1;
+    bool systemLittleEndian = *(char *)&n == 1 ? true : false;
+    bool dataLittleEndian = _dataEndian == "LITTLE" ? true : false;
+    if ( systemLittleEndian != dataLittleEndian ) {
+        _swapBytes( region, dataSize, numValues );
+    }
+    //for (int i = 0; i < 1000; i++) region[i] = float(i);
+
+    return 0;
+}*/

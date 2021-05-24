@@ -22,7 +22,7 @@ public:
     std::vector<float>       GetBrickSize() const;
     std::string              GetDataEndian() const;
 
-    template<typename T> int ReadRegion(std::string, T *region);
+    template<class T> int ReadRegion(const std::vector<size_t> &min, const std::vector<size_t> &max, T *region);
 
 private:
     std::string              _time;
@@ -48,6 +48,9 @@ private:
     template<typename T> int _readMetadata(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = true);
 
     std::string _findTokenValue(std::string &line) const;
+
+    size_t _sizeOfFormat( DC::XType ) const;
+    void _swapBytes( void* vptr, size_t size, size_t n) const;
 
     static const std::string _timeToken;
     static const std::string _dataFileToken;
