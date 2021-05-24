@@ -94,19 +94,19 @@ int DCBOV::_InitDimensions()
 {
     _dimsMap.clear();
     std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
-    std::vector<size_t>      dimlens  = _bovCollection->GetDataSize();
-    VAssert( dimnames.size() == 3 );
-    VAssert( dimnames.size() == dimlens.size() );
+    std::vector<size_t>      dimlens = _bovCollection->GetDataSize();
+    VAssert(dimnames.size() == 3);
+    VAssert(dimnames.size() == dimlens.size());
 
     for (int i = 0; i < dimnames.size(); i++) {
         Dimension dim(dimnames[i], dimlens[i]);
         _dimsMap[dimnames[i]] = dim;
     }
 
-    string timeDim = _bovCollection->GetTimeDimension();
+    string    timeDim = _bovCollection->GetTimeDimension();
     Dimension dim(timeDim, 1);
     _dimsMap[timeDim] = dim;
-    
+
     return 0;
 }
 
@@ -153,11 +153,11 @@ int DCBOV::_InitVars()
     vector<bool> periodic(3, false);
 
     std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
-    std::string var                   = _bovCollection->GetDataVariableName();
-    DC::XType format                  = _bovCollection->GetDataFormat();
-    string time_dim_name              = "";
-    string time_coordvar              = "";
-    string units                      = "m"; // Should this be stored in BOVCollection?
+    std::string              var = _bovCollection->GetDataVariableName();
+    DC::XType                format = _bovCollection->GetDataFormat();
+    string                   time_dim_name = "";
+    string                   time_coordvar = "";
+    string                   units = "m";    // Should this be stored in BOVCollection?
 
     Mesh mesh(var, dimnames, dimnames);
 
@@ -356,7 +356,7 @@ int DCBOV::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 int DCBOV::openVariableRead(size_t ts, string varname)
 {
     _varname = varname;
-std::cout << "int DCBOV::openVariableRead(size_t ts, string varname) " << varname << std::endl;
+    std::cout << "int DCBOV::openVariableRead(size_t ts, string varname) " << varname << std::endl;
     // return 0;
     // int aux = _ncdfc->OpenRead(ts, varname);
 
@@ -376,13 +376,13 @@ int DCBOV::closeVariable(int fd)
         SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
-    //int aux = w->GetAux();
+    // int aux = w->GetAux();
 
-    //int rc = _ncdfc->Close(aux);
+    // int rc = _ncdfc->Close(aux);
 
     _fileTable.RemoveEntry(fd);
 
-    //return (rc);*/
+    // return (rc);*/
     return 0;
 }
 
@@ -397,26 +397,24 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     std::string varname = w->GetVarname();
 
     std::vector<std::string> spatialDims = _bovCollection->GetSpatialDimensions();
-    std::vector<size_t>      dataSize    = _bovCollection->GetDataSize();
-    std::vector<float>       origin      = _bovCollection->GetBrickOrigin();
-    std::vector<float>       brickSize   = _bovCollection->GetBrickSize();
+    std::vector<size_t>      dataSize = _bovCollection->GetDataSize();
+    std::vector<float>       origin = _bovCollection->GetBrickOrigin();
+    std::vector<float>       brickSize = _bovCollection->GetBrickSize();
 
     // Return spatial coordinate variable values
-    for (int dim=0; dim<spatialDims.size(); dim++) {
-        if ( varname == spatialDims[dim] ) {
-            float increment = brickSize[dim]/dataSize[dim];
-            for ( int i=0; i<dataSize[dim]; i++ ) {
-                region[i] = origin[dim] + i*increment;
-            }
+    for (int dim = 0; dim < spatialDims.size(); dim++) {
+        if (varname == spatialDims[dim]) {
+            float increment = brickSize[dim] / dataSize[dim];
+            for (int i = 0; i < dataSize[dim]; i++) { region[i] = origin[dim] + i * increment; }
         }
     }
 
-    //if (_varname == "x" || _varname == "y" || _varname == "z") {
+    // if (_varname == "x" || _varname == "y" || _varname == "z") {
     //    for (int i = 0; i < 10; i++) region[i] = float(i);
     //} else if (_varname == "t") {
     if (_varname == "t") {
         region[0] = 1.f;
-    //} else if (_varname == "myVar") {
+        //} else if (_varname == "myVar") {
     } else if (_varname == _bovCollection->GetDataVariableName()) {
         for (int i = 0; i < 1000; i++) region[i] = float(i);
     }

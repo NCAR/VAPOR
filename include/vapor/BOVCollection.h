@@ -20,7 +20,7 @@ public:
     std::vector<float>       GetBrickOrigin() const;
     std::vector<float>       GetBrickSize() const;
 
-    template<typename T> int ReadRegion( std::string, T* region );
+    template<typename T> int ReadRegion(std::string, T *region);
 
 private:
     std::string              _time;

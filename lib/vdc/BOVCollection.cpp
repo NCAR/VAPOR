@@ -17,17 +17,8 @@
 
 using namespace VAPoR;
 
-BOVCollection::BOVCollection() : 
-    _time("0"),
-    _dataFile(""),
-    _dataFormat(DC::FLOAT), 
-    _variable("brickVar"),
-    _dataEndian("LITTLE"), 
-    _centering("ZONAL"), 
-    _byteOffset(0), 
-    _divideBrick(false), 
-    _dataComponents(1),
-    _timeDimension("t")
+BOVCollection::BOVCollection()
+: _time("0"), _dataFile(""), _dataFormat(DC::FLOAT), _variable("brickVar"), _dataEndian("LITTLE"), _centering("ZONAL"), _byteOffset(0), _divideBrick(false), _dataComponents(1), _timeDimension("t")
 {
     _dataSize.clear();
     _brickOrigin.resize(3, 0.);
@@ -47,7 +38,6 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
     header.open(paths[0]);
     if (header.is_open()) {
         while (getline(header, line)) {
-
             rc = _readMetadata("DATA_FILE", line, _dataFile);
             if (rc < 0) {
                 SetErrMsg("Failure reading .bov data file");
@@ -78,38 +68,21 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
     }
 }
 
-std::string BOVCollection::GetDataVariableName() const {
-    return _variable;
-}
+std::string BOVCollection::GetDataVariableName() const { return _variable; }
 
-std::vector<std::string> BOVCollection::GetSpatialDimensions() const {
-    return _spatialDimensions;
-}
+std::vector<std::string> BOVCollection::GetSpatialDimensions() const { return _spatialDimensions; }
 
-std::string BOVCollection::GetTimeDimension() const {
-    return _timeDimension;
-}
+std::string BOVCollection::GetTimeDimension() const { return _timeDimension; }
 
-std::vector<size_t> BOVCollection::GetDataSize() const {
-    return _dataSize;
-}
+std::vector<size_t> BOVCollection::GetDataSize() const { return _dataSize; }
 
-DC::XType BOVCollection::GetDataFormat() const {
-    return _dataFormat;
-}
+DC::XType BOVCollection::GetDataFormat() const { return _dataFormat; }
 
-std::vector<float> BOVCollection::GetBrickOrigin() const {
-    return _brickOrigin;
-}
+std::vector<float> BOVCollection::GetBrickOrigin() const { return _brickOrigin; }
 
-std::vector<float> BOVCollection::GetBrickSize() const {
-    return _brickSize;
-}
+std::vector<float> BOVCollection::GetBrickSize() const { return _brickSize; }
 
-template <typename T>
-int BOVCollection::ReadRegion( std::string varname, T *region ) {
-    return 0;
-}
+template<typename T> int BOVCollection::ReadRegion(std::string varname, T *region) { return 0; }
 
 template<> int BOVCollection::_readMetadata<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
 {
@@ -176,7 +149,7 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
     if (pos != std::string::npos) {    // We found the token
         T                 lineValue;
         std::stringstream lineStream = stringstream(_findValue(line));
-        
+
         value.clear();
         while (lineStream >> lineValue) { value.push_back(lineValue); }
 
