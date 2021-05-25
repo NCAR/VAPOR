@@ -240,7 +240,7 @@ int main(int argc, char **argv)
     }
 
     // Test Unstructured Grid 2D
-    if (std::find(opt.grids.begin(), opt.grids.end(), "Unstructured2D") != opt.grids.end() && opt.dims[0] > 1 && opt.dims[1] > 1 ) {
+    if (std::find(opt.grids.begin(), opt.grids.end(), "Unstructured2D") != opt.grids.end() && opt.dims[0] > 1 && opt.dims[1] > 1) {
         double              t0 = Wasp::GetTime();
         UnstructuredGrid2D *g = MakeUnstructuredGrid2D(opt.dims, opt.bs, minu, maxu);
         double              t1 = Wasp::GetTime() - t0;

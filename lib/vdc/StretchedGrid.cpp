@@ -298,8 +298,8 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
     float verts0[4];
     verts0[0] = AccessIJK(i, j, k);
     verts0[1] = dims[0] > 1 ? AccessIJK(i + 1, j, k) : 0.0;
-    verts0[2] = dims[1] > 1 ? AccessIJK(i, j+1, k) : 0.0;
-    verts0[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i+1, j+1, k) : 0.0;
+    verts0[2] = dims[1] > 1 ? AccessIJK(i, j + 1, k) : 0.0;
+    verts0[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i + 1, j + 1, k) : 0.0;
 
     float v0 = ((verts0[0] * xwgt[0] + verts0[1] * xwgt[1]) * ywgt[0]) + ((verts0[2] * xwgt[0] + verts0[3] * xwgt[1]) * ywgt[1]);
 
@@ -309,9 +309,9 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
 
     float verts1[4];
     verts1[0] = AccessIJK(i, j, k);
-    verts1[1] = dims[0] > 1 ? AccessIJK(i+1, j, k) : 0.0;
-    verts1[2] = dims[1] > 1 ? AccessIJK(i, j+1, k) : 0.0;
-    verts1[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i+1, j+1, k) : 0.0;
+    verts1[1] = dims[0] > 1 ? AccessIJK(i + 1, j, k) : 0.0;
+    verts1[2] = dims[1] > 1 ? AccessIJK(i, j + 1, k) : 0.0;
+    verts1[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i + 1, j + 1, k) : 0.0;
 
     float v1 = ((verts1[0] * xwgt[0] + verts1[1] * xwgt[1]) * ywgt[0]) + ((verts1[2] * xwgt[0] + verts1[3] * xwgt[1]) * ywgt[1]);
 
@@ -357,21 +357,19 @@ bool StretchedGrid::_insideGrid(double x, double y, double z, size_t &i, size_t 
     if (!Wasp::BinarySearchRange(_xcoords, x, i)) return (false);
 
     if (_xcoords.size() > 1) {
-	    xwgt[0] = 1.0 - (x - _xcoords[i]) / (_xcoords[i + 1] - _xcoords[i]);
-    	xwgt[1] = 1.0 - xwgt[0];
-	}
-    else {
+        xwgt[0] = 1.0 - (x - _xcoords[i]) / (_xcoords[i + 1] - _xcoords[i]);
+        xwgt[1] = 1.0 - xwgt[0];
+    } else {
         xwgt[0] = 1.0;
     }
-	
+
 
     if (!Wasp::BinarySearchRange(_ycoords, y, j)) return (false);
 
     if (_ycoords.size() > 1) {
         ywgt[0] = 1.0 - (y - _ycoords[j]) / (_ycoords[j + 1] - _ycoords[j]);
         ywgt[1] = 1.0 - ywgt[0];
-    }
-    else {
+    } else {
         ywgt[0] = 1.0;
     }
 
@@ -389,8 +387,7 @@ bool StretchedGrid::_insideGrid(double x, double y, double z, size_t &i, size_t 
     if (_zcoords.size() > 1) {
         zwgt[0] = 1.0 - (z - _zcoords[k]) / (_zcoords[k + 1] - _zcoords[k]);
         zwgt[1] = 1.0 - zwgt[0];
-    }
-    else {
+    } else {
         zwgt[0] = 1.0;
     }
 
