@@ -23,7 +23,7 @@ UnstructuredGridLayered::UnstructuredGridLayered(const std::vector<size_t> &vert
                                                  const std::vector<float *> &blks, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                                                  Location location,    // node,face, edge
                                                  size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug,
-                                                 const UnstructuredGridCoordless &yug, const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
+                                                 const UnstructuredGridCoordless &yug, const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangleP> qtr)
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset),
   _ug2d(vector<size_t>{vertexDims[0]}, vector<size_t>{faceDims[0]}, edgeDims.size() ? vector<size_t>{edgeDims[0]} : vector<size_t>(), vector<size_t>{bs[0]}, vector<float *>(), vertexOnFace,
         faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset, xug, yug, UnstructuredGridCoordless(), qtr),
@@ -279,16 +279,10 @@ void UnstructuredGridLayered::ConstCoordItrULayered::next(const long &offset)
 {
     VAssert(offset >= 0);
 
-    long offset2D = offset % _nElements2D;
+    long offset2D = (_index2D + offset) % _nElements2D;
 
-    if (offset2D + _index2D < _nElements2D) {
-        _itr2D += offset;
-        _index2D += offset;
-    } else {
-        size_t o = (offset2D + _index2D) % _nElements2D;
-        _itr2D = _ug->_ug2d.ConstCoordBegin() + o;
-        _index2D = o;
-    }
+    _itr2D += (offset2D - _index2D);
+    _index2D += (offset2D - _index2D);
 
     _coords[0] = (*_itr2D)[0];
     _coords[1] = (*_itr2D)[1];

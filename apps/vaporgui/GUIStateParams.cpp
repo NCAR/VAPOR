@@ -20,6 +20,7 @@
 #endif
 
 #include <iostream>
+#include <cassert>
 #include <QDir>
 
 #include "MouseModeParams.h"

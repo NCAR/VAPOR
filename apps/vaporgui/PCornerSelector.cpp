@@ -2,6 +2,7 @@
 #include "VCheckBox.h"
 #include <vapor/ColorbarPbase.h>
 #include <QFrame>
+#include <cassert>
 #include <QGridLayout>
 
 

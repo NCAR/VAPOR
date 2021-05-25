@@ -152,7 +152,8 @@ void ColorbarRenderer::Render(GLManager *glm, RenderParams *rp)
     float tickLength = roundf(std::max(8.f, fontSize * 0.4f));
     float tickPadding = 3;
 
-    MapperFunction *mf = rp->GetMapperFunc(rp->GetVariableName());
+    auto            colormapVarName = rp->GetActualColorMapVariableName();
+    MapperFunction *mf = rp->GetMapperFunc(colormapVarName);
     vec2            mfRange = D2V2(mf->getMinMaxMapValue());
 
     Div colorbar;

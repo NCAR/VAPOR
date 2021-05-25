@@ -292,6 +292,12 @@ public:
     //!
     virtual string GetColorMapVariableName() const;
 
+    //! Due to legacy code, the "ColorMapVariableName" is not  the name of the variable by which
+    //! the renderer is colormapping, but rather the variable it should use if it is not already using its
+    //! primary variable or a constant color. This function should return the name of the variable that
+    //! is currently being used for colormapping.
+    virtual string GetActualColorMapVariableName() const = 0;
+
     //! Turn on or off the use of single constant color (versus color map)
     //! \param[in] val true will enable constant color
     void SetUseSingleColor(bool val);

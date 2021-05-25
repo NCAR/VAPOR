@@ -68,6 +68,7 @@ const string SettingsParams::_dontShowIntelDriverWarningTag = "DontShowIntelDriv
 const string SettingsParams::_settingsNeedsWriteTag = "SettingsNeedsWrite";
 
 const string SettingsParams::UseAllCoresTag = "UseAllCoresTag";
+const string SettingsParams::AutoCheckForUpdatesTag = "AutoCheckForUpdatesTag";
 
 //
 // Register class with object factory!!!
@@ -402,6 +403,10 @@ void SettingsParams::SetFidelityDefault2D(long lodDef, long refDef)
     SetValueLongVec(_fidelityDefault2DTag, "Set fidelity 2D default", val);
 }
 
+void SettingsParams::SetAutoCheckForUpdates(bool b) { SetValueLong(AutoCheckForUpdatesTag, "", b); }
+
+bool SettingsParams::GetAutoCheckForUpdates() const { return GetValueLong(AutoCheckForUpdatesTag, true); }
+
 bool SettingsParams::LoadFromSettingsFile()
 {
     XmlNode *node = GetNode();
@@ -451,6 +456,7 @@ void SettingsParams::Init()
 
     SetAutoStretchEnabled(true);
     SetValueLong(UseAllCoresTag, "", true);
+    SetValueLong(AutoCheckForUpdatesTag, "", true);
     SetNumThreads(4);
     SetCacheMB(defaultCacheSize);
 

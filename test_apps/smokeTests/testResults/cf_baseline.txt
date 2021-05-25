@@ -45,6 +45,7 @@ Grid test for 3D variable dbz:
     RMS error:                                           0
     Missing value count:                                 0
     GetValueAtIndex() vs GetValue() disagreement count:  0
+    Time:                                                0
 
 Projection String:  
 
@@ -60,4 +61,4 @@ Time Coordinates:
 
 Time coordinate variable name: time
 Number of time steps: 1
-Elapsed time: 0.131529
+Elapsed time: 0.159113

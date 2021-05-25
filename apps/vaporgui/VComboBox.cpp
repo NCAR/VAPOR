@@ -1,5 +1,6 @@
 #include "VComboBox.h"
 #include <QStandardItemModel>
+#include <cassert>
 
 VComboBox::VComboBox(const std::vector<std::string> &values) : VHBoxWidget()
 {

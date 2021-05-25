@@ -124,6 +124,15 @@ public:
         return GetBox()->IsPlanar() ? 2 : 3;
     }
 
+    //! \copydoc RenderParams::GetActualColorMapVariableName()
+    virtual string GetActualColorMapVariableName() const override
+    {
+        if (UseSingleColor())
+            return "";
+        else
+            return GetColorMapVariableName();
+    }
+
     static const std::string RenderTypeTag;
     static const std::string RenderRadiusBaseTag;
     static const std::string RenderRadiusScalarTag;

@@ -74,6 +74,7 @@
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
 #include <vapor/FileUtils.h>
+#include <vapor/OpenMPSupport.h>
 #include "gridTools.h"
 
 #include <vapor/ConstantGrid.h>
@@ -103,7 +104,7 @@ struct opt_t {
     OptionParser::Boolean_T  help;
 } opt;
 
-OptionParser::OptDescRec_T set_opts[] = {{"grids", 1, "Regular:Stretched:Layered:Curvilinear", "Colon delimited list of grids to test"},
+OptionParser::OptDescRec_T set_opts[] = {{"grids", 1, "Regular:Stretched:Layered:Curvilinear:Unstructured2D", "Colon delimited list of grids to test"},
                                          {"arrangements", 1, "Constant:Ramp:RampOnAxis:Triangle",
                                           "Colon delimited list of "
                                           "data arrangements to test synthetic grids with"},
@@ -184,39 +185,68 @@ int main(int argc, char **argv)
     std::vector<size_t> dims2d = {opt.dims[X], opt.dims[Y]};
 
     int rc = EXIT_SUCCESS;
-    int regularRC = 0;
-    int stretchedRC = 0;
-    int layeredRC = 0;
-    int curvilinearRC = 0;
+    bool regularRC = true;
+    bool stretchedRC = true;
+    bool layeredRC = true;
+    bool curvilinearRC = true;
+    bool unstructured2DRC = true;
+
+#pragma omp parallel
+    {
+        if (omp_get_thread_num() == 0) cout << "Num threads: " << omp_get_num_threads() << endl;
+        ;
+    }
 
     // Test Regular Grid
     if (std::find(opt.grids.begin(), opt.grids.end(), "Regular") != opt.grids.end()) {
+        double               t0 = Wasp::GetTime();
         std::vector<float *> rgBlks = AllocateBlocks(opt.bs, opt.dims);
         RegularGrid *        regularGrid = new RegularGrid(opt.dims, opt.bs, rgBlks, minu, maxu);
+        double               t1 = Wasp::GetTime() - t0;
+        cout << "RegularGrid() time: " << t1 << endl;
         regularRC = RunTests(regularGrid, opt.arrangements, opt.minValue, opt.maxValue);
         delete regularGrid;
     }
 
     // Test Stretched Grid
     if (std::find(opt.grids.begin(), opt.grids.end(), "Stretched") != opt.grids.end()) {
+        double         t0 = Wasp::GetTime();
         StretchedGrid *stretchedGrid = MakeStretchedGrid(opt.dims, opt.bs, minu, maxu);
+        double         t1 = Wasp::GetTime() - t0;
+        cout << "MakeStretchedGrid() time: " << t1 << endl;
         stretchedRC = RunTests(stretchedGrid, opt.arrangements, opt.minValue, opt.maxValue);
         delete stretchedGrid;
     }
 
     // Test Layered Grid
     if (std::find(opt.grids.begin(), opt.grids.end(), "Layered") != opt.grids.end()) {
+        double       t0 = Wasp::GetTime();
         LayeredGrid *layeredGrid = MakeLayeredGrid(opt.dims, opt.bs, minu, maxu);
+        double       t1 = Wasp::GetTime() - t0;
+        cout << "MakeLayeredGrid() time: " << t1 << endl;
         layeredRC = RunTests(layeredGrid, opt.arrangements, opt.minValue, opt.maxValue);
         delete layeredGrid;
     }
 
     // Test Curvilinear Grid
     if (std::find(opt.grids.begin(), opt.grids.end(), "Curvilinear") != opt.grids.end()) {
+        double           t0 = Wasp::GetTime();
         CurvilinearGrid *curvilinearGrid;
         curvilinearGrid = MakeCurvilinearTerrainGrid(opt.bs, minu, maxu, opt.dims);
+        double t1 = Wasp::GetTime() - t0;
+        cout << "MakeCurvilinearTerrainGrid() time: " << t1 << endl;
         curvilinearRC = RunTests(curvilinearGrid, opt.arrangements, opt.minValue, opt.maxValue);
         delete curvilinearGrid;
+    }
+
+    // Test Unstructured Grid 2D
+    if (std::find(opt.grids.begin(), opt.grids.end(), "Unstructured2D") != opt.grids.end() && opt.dims[0] > 1 && opt.dims[1] > 1) {
+        double              t0 = Wasp::GetTime();
+        UnstructuredGrid2D *g = MakeUnstructuredGrid2D(opt.dims, opt.bs, minu, maxu);
+        double              t1 = Wasp::GetTime() - t0;
+        cout << "MakeUnstructuredGrid2D() time: " << t1 << endl;
+        unstructured2DRC = RunTests(g, opt.arrangements, opt.minValue, opt.maxValue);
+        delete g;
     }
 
     if (regularRC == false) {
@@ -233,6 +263,10 @@ int main(int argc, char **argv)
     }
     if (curvilinearRC == false) {
         cerr << "Errors occurred while testing Grid::CurvilinearGrid." << endl;
+        rc = EXIT_FAILURE;
+    }
+    if (unstructured2DRC == false) {
+        cerr << "Errors occurred while testing Grid::UnstructuredGrid2D." << endl;
         rc = EXIT_FAILURE;
     }
 

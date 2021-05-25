@@ -46,7 +46,7 @@ jobs:
             python3 /root/project/test_apps/smokeTests/smokeTests.py --testDataRoot=/smokeTestData/smokeTestData --binaryRoot=/root/project/build/bin --resultsDir=/root/project/test_apps/smokeTests/testResults
 
       - store_artifacts:
-          path: /project/test_apps/smokeTests/testResults
+          path: /root/project/test_apps/smokeTests/testResults
 
       - run:
           name: check for Debug warnings

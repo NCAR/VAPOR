@@ -1,3 +1,4 @@
+#include <climits>
 #include <vapor/ResourcePath.h>
 #include <vapor/CMakeConfig.h>
 #include <vapor/FileUtils.h>

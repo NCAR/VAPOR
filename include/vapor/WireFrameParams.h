@@ -27,6 +27,9 @@ public:
     //
     virtual size_t GetRenderDim() const override { return (_dataMgr->GetVarTopologyDim(GetVariableName())); }
 
+    //! \copydoc RenderParams::GetActualColorMapVariableName()
+    virtual string GetActualColorMapVariableName() const override { return GetVariableName(); }
+
 private:
     void _init();
 
