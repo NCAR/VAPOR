@@ -15,7 +15,8 @@ class CopyRegionAnnotationWidget : public CopyRegionWidget {
 public:
     CopyRegionAnnotationWidget(VAPoR::ControlExec *ce);
 
-    QString toolTip() const {
+    QString toolTip() const
+    {
         return tr("A widget for copying one renderer's "
                   "region to axis annotations");
     }
