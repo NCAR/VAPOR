@@ -7,4 +7,4 @@ using namespace VAPoR;
 
 PCopyRegionAnnotationWidget::PCopyRegionAnnotationWidget(ControlExec *ce) : PWidget("", _widget = new CopyRegionAnnotationWidget(ce)) {}
 
-void PCopyRegionAnnotationWidget::updateGUI() const { _widget->Update(getParamsMgr()); }
+void PCopyRegionAnnotationWidget::updateGUI() const { _widget->Update(); }

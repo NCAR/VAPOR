@@ -35,10 +35,10 @@ std::vector<std::string> split(const std::string &s, char delim)
 
 CopyRegionAnnotationWidget::CopyRegionAnnotationWidget(VAPoR::ControlExec *ce) : CopyRegionWidget() { _controlExec = ce; }
 
-void CopyRegionAnnotationWidget::Update(ParamsMgr *paramsMgr)
+void CopyRegionAnnotationWidget::Update()
 {
-    VAssert(paramsMgr);
-    _paramsMgr = paramsMgr;
+    _paramsMgr = _controlExec->GetParamsMgr();
+    VAssert(_paramsMgr);
     updateCopyCombo();
 }
 
