@@ -145,8 +145,6 @@ set (SRCS
 	V3DInput.h
 	VGroup.cpp
 	VGroup.h
-	ControlExecWidget.cpp
-	ControlExecWidget.h
 	Updateable.cpp
 	Updateable.h
 	POrientationSelector.cpp

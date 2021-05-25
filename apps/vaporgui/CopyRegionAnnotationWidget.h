@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CopyRegionWidget.h"
-//#include "ControlExecWidget.h"
 
 namespace VAPoR {
 class ControlExec;
