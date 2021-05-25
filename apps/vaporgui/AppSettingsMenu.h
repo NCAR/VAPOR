@@ -28,6 +28,6 @@ private:
     void accept() override;
     void reject() override;
 
-    PGroup *_settings;
+    PGroup *        _settings;
     SettingsParams *_params;
 };

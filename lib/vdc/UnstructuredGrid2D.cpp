@@ -23,7 +23,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
                                        const std::vector<float *> &blks, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                                        Location location,    // node,face, edge
                                        size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
-                                       const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
+                                       const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangleP> qtr)
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset), _xug(xug), _yug(yug),
   _zug(zug), _qtr(qtr)
 {
@@ -192,17 +192,15 @@ float UnstructuredGrid2D::GetValueNearestNeighbor(const DblArr3 &coords) const
         delete[] lambda;
         return (GetMissingValue());
     }
+    VAssert(nodes.size() == nlambda);
     VAssert(face < GetCellDimensions()[0]);
 
-    const int *ptr = _vertexOnFace + (face * _maxVertexPerFace);
-
-    int maxindx = lambda[0];
+    int maxindx = 0;
     for (int i = 1; i < nlambda; i++) {
         if (lambda[i] > lambda[maxindx]) maxindx = i;
     }
 
-    long  offset = GetNodeOffset();
-    float value = AccessIJK(*ptr + maxindx + offset);
+    float value = AccessIJK(nodes[maxindx], 0, 0);
 
     delete[] lambda;
 
@@ -272,7 +270,7 @@ UnstructuredGrid2D::ConstCoordItrU2D::ConstCoordItrU2D(const ConstCoordItrU2D &r
     _coords = rhs._coords;
     _xCoordItr = rhs._xCoordItr;
     _yCoordItr = rhs._yCoordItr;
-    _zCoordItr = rhs._zCoordItr;
+    if (rhs._ncoords >= 3) { _zCoordItr = rhs._zCoordItr; }
 }
 
 UnstructuredGrid2D::ConstCoordItrU2D::ConstCoordItrU2D() : ConstCoordItrAbstract() {}
@@ -344,12 +342,12 @@ bool UnstructuredGrid2D::_insideGridNodeCentered(const DblArr3 &coords, size_t &
 
     // Find the indices for the faces that might contain the point
     //
-    vector<size_t> face_indices;
+    vector<Size_tArr3> face_indices;
     _qtr->GetPayloadContained(pt[0], pt[1], face_indices);
 
     for (int i = 0; i < face_indices.size(); i++) {
-        if (_insideFace(face_indices[i], pt, nodes, lambda, nlambda)) {
-            face_index = face_indices[i];
+        if (_insideFace(face_indices[i][0], pt, nodes, lambda, nlambda)) {
+            face_index = face_indices[i][0];
             return (true);
         }
     }
@@ -399,45 +397,16 @@ bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], vector<size_t> &
     return ret;
 }
 
-std::shared_ptr<QuadTreeRectangle<float, size_t>> UnstructuredGrid2D::_makeQuadTreeRectangle() const
+std::shared_ptr<QuadTreeRectangleP> UnstructuredGrid2D::_makeQuadTreeRectangle() const
 {
-    size_t             maxNodes = GetMaxVertexPerCell();
-    vector<Size_tArr3> nodes(maxNodes);
-
-    size_t coordDim = GetGeometryDim();
-    VAssert(coordDim == 2);
-
-    double minu[3], maxu[3];
-    GetUserExtents(minu, maxu);
-
     const vector<size_t> &dims = GetDimensions();
     size_t                reserve_size = dims[0];
 
-    std::shared_ptr<QuadTreeRectangle<float, size_t>> qtr = std::make_shared<QuadTreeRectangle<float, size_t>>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 12, reserve_size);
+    DblArr3 minu, maxu;
+    GetUserExtents(minu, maxu);
 
-    DblArr3                 coords;
-    Grid::ConstCellIterator it = ConstCellBegin();
-    Grid::ConstCellIterator end = ConstCellEnd();
-    for (; it != end; ++it) {
-        const vector<size_t> &cell = *it;
-        VAssert(cell.size() == 1);
-        GetCellNodes(Size_tArr3{cell[0], 0, 0}, nodes);
-        if (nodes.size() < 2) continue;
+    std::shared_ptr<QuadTreeRectangleP> qtr = std::make_shared<QuadTreeRectangleP>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 12, reserve_size);
 
-        GetUserCoordinates(nodes[0], coords);
-        float left = (float)coords[0];
-        float right = (float)coords[0];
-        float top = (float)coords[1];
-        float bottom = (float)coords[1];
-        for (int i = 1; i < nodes.size(); i++) {
-            GetUserCoordinates(nodes[i], coords);
-            if (coords[0] < left) left = coords[0];
-            if (coords[0] > right) right = coords[0];
-            if (coords[1] < top) top = coords[1];
-            if (coords[1] > bottom) bottom = coords[1];
-        }
-        qtr->Insert(left, top, right, bottom, cell[0]);
-    }
-
+    qtr->Insert(this);
     return (qtr);
 }
