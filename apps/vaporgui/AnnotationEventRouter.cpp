@@ -45,7 +45,13 @@
 #include "AnnotationEventRouter.h"
 #include "vapor/ControlExecutive.h"
 #include "EventRouter.h"
+#include "VSection.h"
 #include "PWidgets.h"
+#include "PEnumDropdownHLI.h"
+#include "PSliderEditHLI.h"
+#include "VComboBox.h"
+#include "VPushButton.h"
+#include "Updateable.h"
 
 using namespace VAPoR;
 
@@ -68,98 +74,89 @@ std::vector<std::string> split(const std::string &s, char delim)
 
 }    // namespace
 
-AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), Ui_AnnotationGUI(), EventRouter(ce, AnnotationParams::GetClassType())
+AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), EventRouter(ce, AnnotationParams::GetClassType())
 {
-    setupUi(this);
-
-    _textSizeCombo = new Combo(axisTextSizeEdit, axisTextSizeSlider, true);
-    _digitsCombo = new Combo(axisDigitsEdit, axisDigitsSlider, true);
-    _ticWidthCombo = new Combo(ticWidthEdit, ticWidthSlider);
-    _annotationVaporTable = new VaporTable(axisAnnotationTable);
-    _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
-
-    connectAnnotationWidgets();
-
+    setLayout(new QVBoxLayout);
     _animConnected = false;
     _ap = NULL;
 
-    // clang-format off
-    _axisArrowGroup = new PGroup({
-        new PSection("Orientation Arrows", {
-            (new PCheckbox(AnnotationParams::AxisArrowEnabledTag, "Show arrows (XYZ->RGB)")),
-            (new PDoubleSliderEdit(AnnotationParams::AxisArrowSizeTag, "Size"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit(AnnotationParams::AxisArrowXPosTag, "X Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit(AnnotationParams::AxisArrowYPosTag, "Y Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate()
-        })
+    VSection *axisAnnotationTab = new VSection("Axis Annotations");
+    PGroup *  axisAnnotationGroup1 = new PGroup({
+        new PCheckbox(AxisAnnotation::_annotationEnabledTag, "Axis Annotations Enabled"),
+        new PCheckbox(AxisAnnotation::_latLonAxesTag, "Annotate with lat/lon"),
     });
-    layout()->addWidget(_axisArrowGroup);
-    
-    
-    _timeSlidersGroup = new PGroup({
-        new PLabel("Lower-left coordinates:"),
-        new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X"),
-        new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y"),
+    axisAnnotationTab->layout()->addWidget(axisAnnotationGroup1);
+    _axisGroups.push_back(axisAnnotationGroup1);
+
+    QTableWidget *annotationTable = new QTableWidget;
+    _annotationVaporTable = new VaporTable(annotationTable);
+    connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
+    _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
+    axisAnnotationTab->layout()->addWidget(annotationTable);
+    _copyRegionCombo = new VComboBox({"Currently no renderers"});
+    _copyRegionButton = new VPushButton("Copy");
+    connect(_copyRegionButton, SIGNAL(ButtonClicked()), this, SLOT(copyRegionFromRenderer()));
+    axisAnnotationTab->layout()->addWidget(new VLineItem("Copy Region From Renderer", _copyRegionCombo));
+    axisAnnotationTab->layout()->addWidget(new VLineItem("", _copyRegionButton));
+
+    PGroup *axisAnnotationGroup2 = new PGroup({
+        new PColorSelector(AxisAnnotation::_colorTag, "Axis Text Color"),
+        new PColorSelector(AxisAnnotation::_backgroundColorTag, "Text Background Color"),
+        (new PIntegerSliderEditHLI<AxisAnnotation>("Font Size", &AxisAnnotation::GetAxisFontSize, &AxisAnnotation::SetAxisFontSize))->SetRange(2, 48)->EnableDynamicUpdate(),
+        (new PIntegerSliderEdit(AxisAnnotation::_digitsTag, "Digits"))->SetRange(0, 8)->EnableDynamicUpdate(),
+        //(new PIntegerSliderEdit(AxisAnnotation::_ticWidthTag, "Tic Width"))->SetRange(0, 10)->EnableDynamicUpdate(), // Broken, see 2711
+        new PEnumDropdownHLI<AxisAnnotation>("X Tickmark Orientation", {"Y axis", "Z axis"}, {1, 2}, &AxisAnnotation::GetXTicDir, &AxisAnnotation::SetXTicDir),
+        new PEnumDropdownHLI<AxisAnnotation>("Y Tickmark Orientation", {"X axis", "Z axis"}, {0, 2}, &AxisAnnotation::GetYTicDir, &AxisAnnotation::SetYTicDir),
+        new PEnumDropdownHLI<AxisAnnotation>("Z Tickmark Orientation", {"X axis", "Y axis"}, {0, 1}, &AxisAnnotation::GetZTicDir, &AxisAnnotation::SetZTicDir),
     });
-    auto l = (QVBoxLayout*)tab_4->layout();
-    l->insertWidget(l->indexOf(verticalLayout_9), _timeSlidersGroup);
-    verticalLayout_9->hide();
-    // clang-format on
+    axisAnnotationTab->layout()->addWidget(axisAnnotationGroup2);
+    _axisGroups.push_back(axisAnnotationGroup2);
+
+    layout()->addWidget(axisAnnotationTab);
+
+    PGroup *timeAnnotationGroup = new PGroup({new PSection(
+        "Time Annotation", {new PEnumDropdown(AnnotationParams::_timeTypeTag, {"No annotation", "Time step number", "User time", "Formatted date/time"}, {0, 1, 2, 3}, "Annotation type"),
+                            new PIntegerInput(AnnotationParams::_timeSizeTag, "Font Size"), (new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X Position"))->EnableDynamicUpdate(),
+                            (new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y Position"))->EnableDynamicUpdate(), new PColorSelector(AnnotationParams::_timeColorTag, "Text Color")})});
+    layout()->addWidget(timeAnnotationGroup);
+    _groups.push_back(timeAnnotationGroup);
+
+    PGroup *axisArrowGroup = new PGroup({new PSection("Orientation Arrows", {(new PCheckbox(AnnotationParams::AxisArrowEnabledTag, "Show arrows (XYZ->RGB)")),
+                                                                             (new PDoubleSliderEdit(AnnotationParams::AxisArrowSizeTag, "Size"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
+                                                                             (new PDoubleSliderEdit(AnnotationParams::AxisArrowXPosTag, "X Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
+                                                                             (new PDoubleSliderEdit(AnnotationParams::AxisArrowYPosTag, "Y Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate()})});
+    layout()->addWidget(axisArrowGroup);
+    _groups.push_back(axisArrowGroup);
+
+    PGroup *ThreeDGeometryGroup = new PGroup(
+        {new PSection("3D Geometry", {
+                                         new PCheckbox(AnnotationParams::_domainFrameTag, "Display Domain Bounds"), new PColorSelector(AnnotationParams::_domainColorTag, "Domain Frame Color"),
+                                         new PColorSelector(AnnotationParams::_backgroundColorTag, "Background Color"),
+                                         // new PColorSelector(AnnotationParams::_regionColorTag, "Region Frame Color")  Broken.  See #1742
+                                     })});
+    layout()->addWidget(ThreeDGeometryGroup);
+    _groups.push_back(ThreeDGeometryGroup);
 }
 
 AnnotationEventRouter::~AnnotationEventRouter() {}
 
-void AnnotationEventRouter::connectAnnotationWidgets()
-{
-    connect(_axisAnnotationEnabledCheckbox, SIGNAL(toggled(bool)), this, SLOT(setAxisAnnotation(bool)));
-    connect(_latLonAnnotationCheckbox, SIGNAL(toggled(bool)), this, SLOT(setLatLonAnnotation(bool)));
-    connect(_textSizeCombo, SIGNAL(valueChanged(int)), this, SLOT(setAxisTextSize(int)));
-    connect(_digitsCombo, SIGNAL(valueChanged(int)), this, SLOT(setAxisDigits(int)));
-    connect(_ticWidthCombo, SIGNAL(valueChanged(double)), this, SLOT(setAxisTicWidth(double)));
-    connect(axisColorButton, SIGNAL(pressed()), this, SLOT(setAxisColor()));
-    connect(axisBackgroundColorButton, SIGNAL(pressed()), this, SLOT(setAxisBackgroundColor()));
-    connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
-    connect(xTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setXTicOrientation(int)));
-    connect(yTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrientation(int)));
-    connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));
-    connect(copyRegionButton, SIGNAL(pressed()), this, SLOT(copyRegionFromRenderer()));
-    connect(_timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged()));
-    connect(_timeSizeEdit, SIGNAL(returnPressed()), this, SLOT(timeSizeChanged()));
-    connect(_timeColorButton, SIGNAL(clicked()), this, SLOT(setTimeColor()));
-
-    connect(backgroundColorButton, SIGNAL(clicked()), this, SLOT(setBackgroundColor()));
-    connect(domainColorButton, SIGNAL(clicked()), this, SLOT(setDomainColor()));
-    connect(domainFrameCheckbox, SIGNAL(clicked()), this, SLOT(setDomainFrameEnabled()));
-    connect(regionColorButton, SIGNAL(clicked()), this, SLOT(setRegionColor()));
-}
-
-void AnnotationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
-{
-    help.clear();
-
-    help.push_back(make_pair("Overview of the VizFeature tab", "http://www.vapor.ucar.edu/docs/vapor-gui-help/vizfeature-tab#VizFeatureOverview"));
-}
-
 void AnnotationEventRouter::_updateTab()
 {
-    updateRegionColor();
-    updateDomainColor();
-    updateBackgroundColor();
-    updateTimePanel();
-    updateAxisAnnotations();
+    updateCopyRegionCombo();
+    updateAxisTable();
 
+    AxisAnnotation *  a = _getCurrentAxisAnnotation();
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
 
-    domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
-
-    _axisArrowGroup->Update(vParams);
-    _timeSlidersGroup->Update(vParams);
+    for (PGroup *group : _groups) group->Update(vParams);
+    for (PGroup *group : _axisGroups) group->Update(a, _controlExec->GetParamsMgr());
 
     return;
 }
 
 void AnnotationEventRouter::copyRegionFromRenderer()
 {
-    string copyString = copyRegionCombo->currentText().toStdString();
+    string copyString = _copyRegionCombo->GetValue();
     if (copyString == "") return;
 
     std::vector<std::string> elems = split(copyString, ':');
@@ -197,7 +194,7 @@ void AnnotationEventRouter::copyRegionFromRenderer()
     paramsMgr->EndSaveStateGroup();
 }
 
-void AnnotationEventRouter::addRendererToCombo(string visName, string typeName, string visAbb, string dataSetName)
+void AnnotationEventRouter::gatherRenderers(std::vector<string> &renderers, string visName, string typeName, string visAbb, string dataSetName)
 {
     // Abbreviate Params names by removing 'Params" from them.
     // Then store them in a map for later reference.
@@ -213,15 +210,12 @@ void AnnotationEventRouter::addRendererToCombo(string visName, string typeName, 
 
     for (int k = 0; k < renNames.size(); k++) {
         string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
-        QString qDisplayName = QString::fromStdString(displayName);
-        copyRegionCombo->addItem(qDisplayName);
+        renderers.push_back(displayName);
     }
 }
 
 void AnnotationEventRouter::updateCopyRegionCombo()
 {
-    copyRegionCombo->clear();
-
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
     std::string       dataSetName = vParams->GetCurrentAxisDataMgrName();
 
@@ -231,6 +225,7 @@ void AnnotationEventRouter::updateCopyRegionCombo()
     std::vector<std::string> visNames = paramsMgr->GetVisualizerNames();
     DataStatus *             dataStatus = _controlExec->GetDataStatus();
 
+    std::vector<string> renderers = {};
     for (int i = 0; i < visNames.size(); i++) {
         string visName = visNames[i];
 
@@ -249,47 +244,11 @@ void AnnotationEventRouter::updateCopyRegionCombo()
             std::vector<string> dmNames = dataStatus->GetDataMgrNames();
             for (int k = 0; k < dmNames.size(); k++) {
                 string dataSetName = dmNames[k];
-                addRendererToCombo(visName, typeName, visAbb, dataSetName);
+                gatherRenderers(renderers, visName, typeName, visAbb, dataSetName);
             }
         }
     }
-}
-
-void AnnotationEventRouter::updateAxisEnabledCheckbox()
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    bool            annotationEnabled = aa->GetAxisAnnotationEnabled();
-    if (annotationEnabled)
-        _axisAnnotationEnabledCheckbox->setCheckState(Qt::Checked);
-    else
-        _axisAnnotationEnabledCheckbox->setCheckState(Qt::Unchecked);
-}
-
-void AnnotationEventRouter::updateLatLonCheckbox()
-{
-    string projString = getProjString();
-    if (projString.size() == 0) {
-        _latLonAnnotationCheckbox->setEnabled(false);
-        return;
-    } else
-        _latLonAnnotationCheckbox->setEnabled(true);
-
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    bool            annotateLatLon = aa->GetLatLonAxesEnabled();
-    if (annotateLatLon)
-        _latLonAnnotationCheckbox->setCheckState(Qt::Checked);
-    else
-        _latLonAnnotationCheckbox->setCheckState(Qt::Unchecked);
-}
-
-void AnnotationEventRouter::updateTicOrientationCombos()
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    vector<double>  ticDir = aa->GetTicDirs();
-
-    xTicOrientationCombo->setCurrentIndex(ticDir[0] - 1);
-    yTicOrientationCombo->setCurrentIndex(ticDir[1] / 2);
-    zTicOrientationCombo->setCurrentIndex(ticDir[2]);
+    _copyRegionCombo->SetOptions(renderers);
 }
 
 void AnnotationEventRouter::scaleNormalizedCoordsToWorld(std::vector<double> &coords)
@@ -433,9 +392,6 @@ AxisAnnotation *AnnotationEventRouter::_getCurrentAxisAnnotation()
     AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
     AxisAnnotation *  aa = aParams->GetAxisAnnotation();
 
-    bool initialized = aa->GetAxisAnnotationInitialized();
-    if (!initialized) initializeAnnotation(aa);
-
     return aa;
 }
 
@@ -449,60 +405,6 @@ std::vector<double> AnnotationEventRouter::getDomainExtents() const
 
     std::vector<double> extents = {minExts[0], minExts[1], minExts[2], maxExts[0], maxExts[1], maxExts[2]};
     return extents;
-}
-
-// Initialize tic length to 2.5% of the domain that they're oriented on.
-void AnnotationEventRouter::initializeTicSizes(AxisAnnotation *aa)
-{
-    vector<double> ticSizes(3, .025);
-    aa->SetTicSize(ticSizes);
-}
-
-void AnnotationEventRouter::initializeAnnotationExtents(AxisAnnotation *aa)
-{
-    vector<double> minExts(3, 0.0);
-    vector<double> maxExts(3, 1.0);
-
-    aa->SetMinTics(minExts);
-    aa->SetMaxTics(maxExts);
-    aa->SetAxisOrigin(minExts);
-}
-
-void AnnotationEventRouter::initializeAnnotation(AxisAnnotation *aa)
-{
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    paramsMgr->BeginSaveStateGroup("Initialize axis annotation table");
-
-    initializeAnnotationExtents(aa);
-    initializeTicSizes(aa);
-
-    paramsMgr->EndSaveStateGroup();
-
-    aa->SetAxisAnnotationInitialized(true);
-}
-
-void AnnotationEventRouter::updateAxisAnnotations()
-{
-    updateCopyRegionCombo();
-    updateAxisEnabledCheckbox();
-    updateLatLonCheckbox();
-    updateTicOrientationCombos();
-    updateAxisTable();
-    updateAxisColor();
-    updateAxisBackgroundColor();
-
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-
-    int textSize = aa->GetAxisFontSize();
-    _textSizeCombo->Update(4, 50, textSize);
-
-    int numDigits = aa->GetAxisDigits();
-    _digitsCombo->Update(1, 12, numDigits);
-
-    // GLdouble minMax[2];
-    // glGetDoublev(GL_ALIASED_LINE_WIDTH_RANGE, minMax);
-    double ticWidth = aa->GetTicWidth();
-    _ticWidthCombo->Update(0, 7, ticWidth);    // minMax[0], minMax[1], ticWidth);
 }
 
 void AnnotationEventRouter::axisAnnotationTableChanged()
@@ -553,287 +455,4 @@ vector<double> AnnotationEventRouter::getTableRow(int row)
         contents.push_back(val);
     }
     return contents;
-}
-
-void AnnotationEventRouter::setColorHelper(QWidget *w, vector<double> &rgb)
-{
-    rgb.clear();
-
-    QPalette pal(w->palette());
-    QColor   newColor = QColorDialog::getColor(pal.color(QPalette::Base), this);
-
-    rgb.push_back(newColor.red() / 255.0);
-    rgb.push_back(newColor.green() / 255.0);
-    rgb.push_back(newColor.blue() / 255.0);
-}
-
-void AnnotationEventRouter::updateColorHelper(const vector<double> &rgb, QWidget *w)
-{
-    QColor color((int)(rgb[0] * 255.0), (int)(rgb[1] * 255.0), (int)(rgb[2] * 255.0));
-
-    QPalette pal;
-    pal.setColor(QPalette::Base, color);
-    w->setPalette(pal);
-}
-
-void AnnotationEventRouter::setRegionColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(regionColorEdit, rgb);
-    if (rgb.size() != 3) return;
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetRegionColor(rgb);
-}
-
-void AnnotationEventRouter::updateRegionColor()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    vector<double>    rgb;
-    aParams->GetRegionColor(rgb);
-
-    updateColorHelper(rgb, regionColorEdit);
-}
-
-void AnnotationEventRouter::setDomainColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(domainColorEdit, rgb);
-    if (rgb.size() != 3) return;
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetDomainColor(rgb);
-}
-
-void AnnotationEventRouter::updateDomainColor()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    vector<double>    rgb;
-    aParams->GetDomainColor(rgb);
-
-    updateColorHelper(rgb, domainColorEdit);
-}
-
-void AnnotationEventRouter::setBackgroundColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(backgroundColorEdit, rgb);
-    if (rgb.size() != 3) return;
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetBackgroundColor(rgb);
-}
-
-void AnnotationEventRouter::updateBackgroundColor()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    vector<double>    rgb;
-    aParams->GetBackgroundColor(rgb);
-
-    updateColorHelper(rgb, backgroundColorEdit);
-}
-
-void AnnotationEventRouter::setAxisColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(axisColorEdit, rgb);
-    if (rgb.size() == 3) rgb.push_back(1.f);
-
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetAxisColor(rgb);
-}
-
-void AnnotationEventRouter::setAxisBackgroundColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(axisBackgroundColorEdit, rgb);
-    if (rgb.size() == 3) rgb.push_back(1.f);
-
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetAxisBackgroundColor(rgb);
-}
-
-void AnnotationEventRouter::updateAxisColor()
-{
-    vector<double>  rgb;
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    rgb = aa->GetAxisColor();
-
-    updateColorHelper(rgb, axisColorEdit);
-}
-
-void AnnotationEventRouter::updateAxisBackgroundColor()
-{
-    vector<double>  rgb;
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    rgb = aa->GetAxisBackgroundColor();
-
-    updateColorHelper(rgb, axisBackgroundColorEdit);
-}
-
-void AnnotationEventRouter::setTimeColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(_timeColorEdit, rgb);
-    if (rgb.size() != 3) return;
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetTimeColor(rgb);
-}
-
-void AnnotationEventRouter::updateTimePanel()
-{
-    updateTimeColor();
-    updateTimeType();
-    updateTimeSize();
-    timeAnnotationChanged();
-}
-
-void AnnotationEventRouter::updateTimeColor()
-{
-    AnnotationParams *  aParams = (AnnotationParams *)GetActiveParams();
-    std::vector<double> rgb = aParams->GetTimeColor();
-
-    updateColorHelper(rgb, _timeColorEdit);
-}
-
-void AnnotationEventRouter::updateTimeType()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    int               type = aParams->GetTimeType();
-    _timeCombo->setCurrentIndex(type);
-}
-
-void AnnotationEventRouter::updateTimeSize()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    int               size = aParams->GetTimeSize();
-    _timeSizeEdit->setText(QString::number(size));
-}
-
-void AnnotationEventRouter::timeAnnotationChanged()
-{
-    int               index = _timeCombo->currentIndex();
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetTimeType(index);
-
-    switch (index) {
-    case 0: _controlExec->ClearText(); break;
-    case 1: drawTimeStep(); break;
-    case 2: drawTimeUser(); break;
-    case 3: drawTimeStamp(); break;
-    }
-}
-
-void AnnotationEventRouter::timeSizeChanged()
-{
-    float             size = _timeSizeEdit->text().toFloat();
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetTimeSize(size);
-}
-
-void AnnotationEventRouter::drawTimeStep(string myString)
-{
-    _controlExec->ClearText();
-
-    if (myString == "") { myString = "Timestep: " + std::to_string(GetCurrentTimeStep()); }
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    float             x = aParams->GetTimeLLX();
-    float             y = aParams->GetTimeLLY();
-    int               size = aParams->GetTimeSize();
-    float             color[] = {0., 0., 0.};
-    aParams->GetTimeColor(color);
-
-    _controlExec->DrawTextNormalizedCoords(myString, x, y, size, color, 1);
-}
-
-void AnnotationEventRouter::drawTimeUser()
-{
-    size_t         ts = GetCurrentTimeStep();
-    DataStatus *   ds = _controlExec->GetDataStatus();
-    vector<double> timeCoords = ds->GetTimeCoordinates();
-
-    double             myTime = timeCoords[ts];
-    std::ostringstream ss;
-    ss << myTime;
-    std::string myString = ss.str();
-    drawTimeStep(myString);
-}
-
-void AnnotationEventRouter::drawTimeStamp()
-{
-    size_t      ts = GetCurrentTimeStep();
-    DataStatus *ds = _controlExec->GetDataStatus();
-    drawTimeStep(ds->GetTimeCoordsFormatted()[ts]);
-}
-
-void AnnotationEventRouter::setAxisDigits(int digits)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetAxisDigits(digits);
-}
-
-void AnnotationEventRouter::setAxisTicWidth(double width)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetTicWidth(width);
-}
-
-void AnnotationEventRouter::setXTicOrientation(int)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    vector<double>  ticDir = aa->GetTicDirs();
-    ticDir[0] = xTicOrientationCombo->currentIndex() + 1;    // Y(1) or Z(2)
-    aa->SetTicDirs(ticDir);
-}
-void AnnotationEventRouter::setYTicOrientation(int)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    vector<double>  ticDir = aa->GetTicDirs();
-    ticDir[1] = yTicOrientationCombo->currentIndex() * 2;    // X(0) or Z(2)
-    aa->SetTicDirs(ticDir);
-}
-void AnnotationEventRouter::setZTicOrientation(int)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    vector<double>  ticDir = aa->GetTicDirs();
-    ticDir[2] = zTicOrientationCombo->currentIndex();    // X(0) or Y(1)
-    aa->SetTicDirs(ticDir);
-}
-
-void AnnotationEventRouter::setLatLonAnnot(bool val)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetLatLonAxesEnabled(val);
-}
-
-void AnnotationEventRouter::setDomainFrameEnabled()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetUseDomainFrame(domainFrameCheckbox->isChecked());
-}
-
-void AnnotationEventRouter::setAxisAnnotation(bool toggled)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetAxisAnnotationEnabled(toggled);
-}
-
-void AnnotationEventRouter::setLatLonAnnotation(bool val)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetLatLonAxesEnabled(val);
-}
-
-void AnnotationEventRouter::setAxisTextSize(int size)
-{
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    aa->SetAxisFontSize(size);
 }

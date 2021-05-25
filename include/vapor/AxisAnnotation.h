@@ -26,6 +26,8 @@ public:
     AxisAnnotation(ParamsBase::StateSave *ssave, XmlNode *node);
     virtual ~AxisAnnotation();
 
+    void Initialize();
+
     void SetAxisAnnotationEnabled(bool val);
     bool GetAxisAnnotationEnabled() const;
 
@@ -50,6 +52,15 @@ public:
 
     void           SetTicSize(vector<double> ticsizes);
     vector<double> GetTicSize() const;
+
+    void SetXTicDir(double dir);
+    int  GetXTicDir() const;
+
+    void SetYTicDir(double dir);
+    int  GetYTicDir() const;
+
+    void SetZTicDir(double dir);
+    int  GetZTicDir() const;
 
     void           SetTicDirs(vector<double> ticdirs);
     vector<double> GetTicDirs() const;
@@ -80,7 +91,6 @@ public:
 
     static string GetClassType() { return ("AxisAnnotation"); }
 
-private:
     static const string _colorTag;
     static const string _digitsTag;
     static const string _textHeightTag;
