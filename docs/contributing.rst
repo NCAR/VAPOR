@@ -293,9 +293,17 @@ On Linux, run  *cmake <vapor-source-dir> && make linuxpreinstall && make install
 Submitting Your Changes
 _______________________
 
-After your implementation is complete, push your commits to your forked repository on GitHub.  Then submit your changes you've made on your forked branch to Vapor's master branch as a GitHub Pull Request.
+After your implementation is complete, push your commits to your forked repository on GitHub.  Then issue a pull request to Vapor's main branch.
 
-Vapor will automatically run a small set of tests to see if its internals are in tact, and check for warnings.  If these tests pass, Vapor's team will review the Pull Request to make sure that Vapor's `Code Conventions <https://github.com/NCAR/VAPOR/wiki/Vapor-Coding-Convention>`_ were honored, and that the logic and structure of the code is sound.  
+Vapor's Automated Tests:
+    Our systems will automatically run a set of tests to see if Vapor's internals work as expected, for compiler warnings, and check that the code submissioin matches our style guide.  We use clang-format to ensure our main branch adheres to LLVM's style.  You can find its specification in a file called *.clang-format*, located in Vapor's root directory.  Version 11 of clang-format should be used or tests will likely fail.
+
+.. note::
+
+  For convenience, we provide a script that can be used to enable a git pre-push hook.  This hook will run clang-format automatically when initiating a push to your remote repository.  Run the script VAPOR/share/gitHooks/setupHooks.sh to set it up.  To disable the pre-push hook, simply remove the symbolic link located at VAPOR/.git/hooks/pre-push.  `Read more here <https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks>`_  for information on how git hook scripts like this operate.
+
+Manual Review:
+    If these tests pass, Vapor's team will review the Pull Request to make sure that Vapor's `Code Conventions <https://github.com/NCAR/VAPOR/wiki/Vapor-Coding-Convention>`_ were honored, and that the logic and structure of the code is sound.  
 
 After review, further changes may be requested.  If everything looks good, the Pull Request will be merged into Vapor's master repository.
 
