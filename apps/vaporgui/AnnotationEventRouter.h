@@ -60,7 +60,6 @@ public:
 
 protected slots:
     void axisAnnotationTableChanged();
-    void copyRegionFromRenderer();
 
 private:
     Combo *     _textSizeCombo;
@@ -79,8 +78,6 @@ private:
 
     void updateAxisAnnotations();
     void updateAxisTable();
-    void updateCopyRegionCombo();
-    void gatherRenderers(std::vector<string> &, string, string, string, string);
 
     void   updateDataMgrCombo();
     string getProjString();
@@ -103,8 +100,6 @@ private:
     bool             _animConnected;
 
     VaporTable * _annotationVaporTable;
-    VComboBox *  _copyRegionCombo;
-    VPushButton *_copyRegionButton;
 
     std::vector<PGroup *> _groups;
     std::vector<PGroup *> _axisGroups;

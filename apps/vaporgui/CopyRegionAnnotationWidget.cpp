@@ -4,7 +4,9 @@
 #include "vapor/Renderer.h"
 #include "vapor/ParamsMgr.h"
 #include "vapor/RenderParams.h"
+#include "AnimationParams.h"
 #include "vapor/DataMgrUtils.h"
+#include <vapor/ControlExecutive.h>
 #include "CopyRegionAnnotationWidget.h"
 #include "VLineItem.h"
 
@@ -31,7 +33,9 @@ std::vector<std::string> split(const std::string &s, char delim)
 }
 }    // namespace
 
-CopyRegionAnnotationWidget::CopyRegionAnnotationWidget( VAPoR::ControlExecutive* ce ) : CopyRegionWidget(), ControlExecWidget(ce) {}
+CopyRegionAnnotationWidget::CopyRegionAnnotationWidget( VAPoR::ControlExec* ce ) : CopyRegionWidget() {
+    _controlExec = ce;
+}
 
 void CopyRegionAnnotationWidget::Update(ParamsMgr* paramsMgr) {
     VAssert(paramsMgr);
@@ -57,26 +61,34 @@ void CopyRegionAnnotationWidget::copyRegion()
         copyBox->GetExtents(minExtents, maxExtents);
         VAssert(minExtents.size() == maxExtents.size());
 
-/*        Box *               myBox = _rParams->GetBox();
-        std::vector<double> myMin = _rParams->GetMinTics();
-        std::vector<double> myMax = _rParams->GetMaxTics();
-        myBox->GetExtents(myMin, myMax);
-        VAssert(myMin.size() == myMax.size());
-        for (int i = 0; i < myMin.size(); i++) {
-            myMin[i] = minExtents[i];
-            myMax[i] = maxExtents[i];
-        }*/
-
-        //_configurePlanarBox(myBox, &myMin, &myMax);
-
-        //myBox->SetExtents(myMin, myMax);
         AnnotationParams* a = _paramsMgr->GetAnnotationParams( visualizer );
         AxisAnnotation* aa  = a->GetAxisAnnotation();
-        std::cout << minExtents[0] << " " << minExtents[1] << " " << minExtents[2] << std::endl;
-        std::cout << maxExtents[0] << " " << maxExtents[1] << " " << maxExtents[2] << std::endl;
+
+        AnimationParams* aParams = dynamic_cast<AnimationParams*>(_paramsMgr->GetParams(AnimationParams::GetClassType()));
+        VAssert( aParams );
+        int timeStep = aParams->GetCurrentTimestep();
+
+        _scaleWorldCoordsToNormalized( minExtents, maxExtents, timeStep );
+
+        aa->SetAxisOrigin( minExtents );
         aa->SetMinTics( minExtents );
         aa->SetMaxTics( maxExtents );
 
         emit valueChanged();
+    }
+}
+
+void CopyRegionAnnotationWidget::_scaleWorldCoordsToNormalized(std::vector<double> &minExts, std::vector<double> &maxExts, int timeStep ) {
+    std::vector<double> minDomainExts, maxDomainExts;
+    DataStatus *        dataStatus = _controlExec->GetDataStatus();
+    dataStatus->GetActiveExtents(_paramsMgr, timeStep, minDomainExts, maxDomainExts);
+    VAssert( minExts.size() == maxExts.size() );
+
+    int size = minExts.size();
+    for (int i = 0; i < size; i++) {
+        double point = minExts[i] - minDomainExts[i];
+        minExts[i] = point / (maxDomainExts[i] - minDomainExts[i]);
+        point = maxExts[i] - minDomainExts[i];
+        maxExts[i] = point / (maxDomainExts[i] - minDomainExts[i]);
     }
 }

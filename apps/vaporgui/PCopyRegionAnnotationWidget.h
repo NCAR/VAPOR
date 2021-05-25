@@ -1,7 +1,12 @@
 #pragma once
 
 #include "PWidget.h"
-#include "ControlExecWidget.h"
+//#include "vapor/ControlExecutive.h"
+//#include "ControlExecWidget.h"
+
+namespace VAPoR {
+    class ControlExec;
+}
 
 class CopyRegionAnnotationWidget;
 
@@ -13,7 +18,7 @@ class PCopyRegionAnnotationWidget : public PWidget {
     CopyRegionAnnotationWidget *_widget;
 
 public:
-    PCopyRegionAnnotationWidget( VAPoR::ControlExecutive* ce);
+    PCopyRegionAnnotationWidget( VAPoR::ControlExec* ce);
 
 private:
     void updateGUI() const override;

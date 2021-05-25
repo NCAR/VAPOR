@@ -1,19 +1,20 @@
 #pragma once
 
 #include "CopyRegionWidget.h"
-#include "ControlExecWidget.h"
+//#include "ControlExecWidget.h"
 
 namespace VAPoR {
+class ControlExec;
 class RenderParams;
 class ParamsMgr;
 class DataMgr;
 }
 
-class CopyRegionAnnotationWidget : public CopyRegionWidget, ControlExecWidget {
+class CopyRegionAnnotationWidget : public CopyRegionWidget {
     Q_OBJECT
 
 public:
-    CopyRegionAnnotationWidget( VAPoR::ControlExecutive* ce );
+    CopyRegionAnnotationWidget( VAPoR::ControlExec* ce );
 
     QString name() const { return "CopyRegionAnnotationWidget"; }
     QString includeFile() const { return "CopyRegionAnnotationWidget.h"; }
@@ -34,4 +35,9 @@ public:
 
 protected slots:
     void copyRegion() override;
+
+private:
+    void _scaleWorldCoordsToNormalized(std::vector<double> &minExts, std::vector<double> &maxExts, int timeStep);
+
+    VAPoR::ControlExec* _controlExec;
 };
