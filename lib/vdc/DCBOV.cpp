@@ -440,10 +440,10 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
         }
     }
 
-    if (_varname == "t") {
+    //if (_varname == "t") {
+    if (varname == "t") {
         region[0] = 1.f;
     } else if (_varname == _bovCollection->GetDataVariableName()) {
-        //_bovCollection->ReadRegion( min, max, region );
         FILE* fp = fopen( fileName.c_str(), "rb" );
         if (!fp) {
             SetErrMsg("Invalid file: %d", fp);
@@ -470,6 +470,7 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
 
         std::cout << typeid(*region).name() << std::endl;
 
+        // Read a "pencil" of data along the X axis, one row at a time
         size_t xStride = max[0]-min[0]+1; 
         for (int k=min[2]; k<=max[2]; k++) {
             int zOffset = dataSize[0]*dataSize[1]*k;
@@ -502,33 +503,13 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
         if ( systemLittleEndian != dataLittleEndian ) {
             _swapBytes( region, formatSize, numValues );
         }
-        //for (int i = 0; i < 1000; i++) region[i] = float(i);
     }
-    
-
-
-    /*FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
-
-    if (!w) {
-        SetErrMsg("Invalid file descriptor : %d", fd);
-        return (-1);
-    }
-    int aux = w->GetAux();
-
-    vector<size_t> ncdf_start = min;
-    reverse(ncdf_start.begin(), ncdf_start.end());
-
-    vector<size_t> ncdf_max = max;
-    reverse(ncdf_max.begin(), ncdf_max.end());
-
-    vector<size_t> ncdf_count;
-    for (int i = 0; i < ncdf_start.size(); i++) { ncdf_count.push_back(ncdf_max[i] - ncdf_start[i] + 1); }
-
-    return (_ncdfc->Read(ncdf_start, ncdf_count, region, aux));*/
 }
 
 bool DCBOV::variableExists(size_t ts, string varname, int, int) const {
-    // std::cout << ts << " " << varname << std::endl;
-    return true;
-    // return (_ncdfc->VariableExists(ts, varname));
+    if ( _coordVarsMap.find( varname ) != _coordVarsMap.end() ) 
+        return true;
+    if ( _dataVarsMap.find( varname ) != _dataVarsMap.end() ) 
+        return true;
+    return false;
 }
