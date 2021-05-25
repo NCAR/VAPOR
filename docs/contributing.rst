@@ -296,7 +296,7 @@ _______________________
 After your implementation is complete, push your commits to your forked repository on GitHub.  Then issue a pull request to Vapor's main branch.
 
 Vapor's Automated Tests:
-    Our systems will automatically run a set of tests to see if Vapor's internals work as expected, for compiler warnings, and check that the code submissioin matches our style guide.  We use clang-format to ensure our main branch adheres to LLVM's style.  You can find its specification in a file called *.clang-format*, located in Vapor's root directory.  Version 11 of clang-format should be used or tests will likely fail.
+    Our systems will automatically run a set of tests to see if Vapor's internals work as expected, for compiler warnings, and check that the code submission matches our style guide.  We use clang-format to ensure our main branch adheres to LLVM's style.  You can find its specification in a file called *.clang-format*, located in Vapor's root directory.  Version 11 of clang-format should be used or tests will likely fail.
 
 .. note::
 
