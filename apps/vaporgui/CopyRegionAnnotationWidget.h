@@ -8,13 +8,13 @@ class ControlExec;
 class RenderParams;
 class ParamsMgr;
 class DataMgr;
-}
+}    // namespace VAPoR
 
 class CopyRegionAnnotationWidget : public CopyRegionWidget {
     Q_OBJECT
 
 public:
-    CopyRegionAnnotationWidget( VAPoR::ControlExec* ce );
+    CopyRegionAnnotationWidget(VAPoR::ControlExec *ce);
 
     QString name() const { return "CopyRegionAnnotationWidget"; }
     QString includeFile() const { return "CopyRegionAnnotationWidget.h"; }
@@ -31,7 +31,7 @@ public:
                   "into a set of axis annotations");
     }
 
-    virtual void Update(VAPoR::ParamsMgr* pm);
+    virtual void Update(VAPoR::ParamsMgr *pm);
 
 protected slots:
     void copyRegion() override;
@@ -39,5 +39,5 @@ protected slots:
 private:
     void _scaleWorldCoordsToNormalized(std::vector<double> &minExts, std::vector<double> &maxExts, int timeStep);
 
-    VAPoR::ControlExec* _controlExec;
+    VAPoR::ControlExec *_controlExec;
 };

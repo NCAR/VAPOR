@@ -96,7 +96,7 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     axisAnnotationTab->layout()->addWidget(annotationTable);
 
     PGroup *axisAnnotationGroup2 = new PGroup({
-        new PCopyRegionAnnotationWidget( ce ),
+        new PCopyRegionAnnotationWidget(ce),
         new PColorSelector(AxisAnnotation::_colorTag, "Axis Text Color"),
         new PColorSelector(AxisAnnotation::_backgroundColorTag, "Text Background Color"),
         (new PIntegerSliderEditHLI<AxisAnnotation>("Font Size", &AxisAnnotation::GetAxisFontSize, &AxisAnnotation::SetAxisFontSize))->SetRange(2, 48)->EnableDynamicUpdate(),

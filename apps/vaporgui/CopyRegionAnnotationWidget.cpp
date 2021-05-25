@@ -33,11 +33,10 @@ std::vector<std::string> split(const std::string &s, char delim)
 }
 }    // namespace
 
-CopyRegionAnnotationWidget::CopyRegionAnnotationWidget( VAPoR::ControlExec* ce ) : CopyRegionWidget() {
-    _controlExec = ce;
-}
+CopyRegionAnnotationWidget::CopyRegionAnnotationWidget(VAPoR::ControlExec *ce) : CopyRegionWidget() { _controlExec = ce; }
 
-void CopyRegionAnnotationWidget::Update(ParamsMgr* paramsMgr) {
+void CopyRegionAnnotationWidget::Update(ParamsMgr *paramsMgr)
+{
     VAssert(paramsMgr);
     _paramsMgr = paramsMgr;
     updateCopyCombo();
@@ -61,28 +60,29 @@ void CopyRegionAnnotationWidget::copyRegion()
         copyBox->GetExtents(minExtents, maxExtents);
         VAssert(minExtents.size() == maxExtents.size());
 
-        AnnotationParams* a = _paramsMgr->GetAnnotationParams( visualizer );
-        AxisAnnotation* aa  = a->GetAxisAnnotation();
+        AnnotationParams *a = _paramsMgr->GetAnnotationParams(visualizer);
+        AxisAnnotation *  aa = a->GetAxisAnnotation();
 
-        AnimationParams* aParams = dynamic_cast<AnimationParams*>(_paramsMgr->GetParams(AnimationParams::GetClassType()));
-        VAssert( aParams );
+        AnimationParams *aParams = dynamic_cast<AnimationParams *>(_paramsMgr->GetParams(AnimationParams::GetClassType()));
+        VAssert(aParams);
         int timeStep = aParams->GetCurrentTimestep();
 
-        _scaleWorldCoordsToNormalized( minExtents, maxExtents, timeStep );
+        _scaleWorldCoordsToNormalized(minExtents, maxExtents, timeStep);
 
-        aa->SetAxisOrigin( minExtents );
-        aa->SetMinTics( minExtents );
-        aa->SetMaxTics( maxExtents );
+        aa->SetAxisOrigin(minExtents);
+        aa->SetMinTics(minExtents);
+        aa->SetMaxTics(maxExtents);
 
         emit valueChanged();
     }
 }
 
-void CopyRegionAnnotationWidget::_scaleWorldCoordsToNormalized(std::vector<double> &minExts, std::vector<double> &maxExts, int timeStep ) {
+void CopyRegionAnnotationWidget::_scaleWorldCoordsToNormalized(std::vector<double> &minExts, std::vector<double> &maxExts, int timeStep)
+{
     std::vector<double> minDomainExts, maxDomainExts;
     DataStatus *        dataStatus = _controlExec->GetDataStatus();
     dataStatus->GetActiveExtents(_paramsMgr, timeStep, minDomainExts, maxDomainExts);
-    VAssert( minExts.size() == maxExts.size() );
+    VAssert(minExts.size() == maxExts.size());
 
     int size = minExts.size();
     for (int i = 0; i < size; i++) {

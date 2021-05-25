@@ -9,8 +9,8 @@ class ControlExecutive;
 
 class ControlExecWidget {
 public:
-    ControlExecWidget( VAPoR::ControlExecutive* ce );
+    ControlExecWidget(VAPoR::ControlExecutive *ce);
 
 protected:
-    VAPoR::ControlExecutive* _controlExec;
+    VAPoR::ControlExecutive *_controlExec;
 };

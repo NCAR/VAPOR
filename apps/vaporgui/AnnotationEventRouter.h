@@ -99,7 +99,7 @@ private:
     AnimationParams *_ap;
     bool             _animConnected;
 
-    VaporTable * _annotationVaporTable;
+    VaporTable *_annotationVaporTable;
 
     std::vector<PGroup *> _groups;
     std::vector<PGroup *> _axisGroups;

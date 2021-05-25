@@ -5,7 +5,7 @@
 //#include "ControlExecWidget.h"
 
 namespace VAPoR {
-    class ControlExec;
+class ControlExec;
 }
 
 class CopyRegionAnnotationWidget;
@@ -18,7 +18,7 @@ class PCopyRegionAnnotationWidget : public PWidget {
     CopyRegionAnnotationWidget *_widget;
 
 public:
-    PCopyRegionAnnotationWidget( VAPoR::ControlExec* ce);
+    PCopyRegionAnnotationWidget(VAPoR::ControlExec *ce);
 
 private:
     void updateGUI() const override;
