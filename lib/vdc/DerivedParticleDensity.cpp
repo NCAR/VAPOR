@@ -76,7 +76,7 @@ int DerivedParticleDensity::ReadRegion(int fd, const std::vector<size_t> &min, c
         assert(0);
         return -1;
     }
-    
+
     vector<size_t> particleDims;
     _dataMgr->GetDimLens(_dataVar, particleDims, f->GetTS());
     assert(particleDims.size() == 1);
