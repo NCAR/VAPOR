@@ -76,11 +76,11 @@ int DerivedParticleDensity::ReadRegion(int fd, const std::vector<size_t> &min, c
         assert(0);
         return -1;
     }
-
-    size_t       realNP = SIZE_T_MAX;
-    vector<long> values;
-    _dc->GetAtt("", "realNP", values);
-    if (!values.empty()) realNP = values[0];
+    
+    vector<size_t> particleDims;
+    _dataMgr->GetDimLens(_dataVar, particleDims, f->GetTS());
+    assert(particleDims.size() == 1);
+    size_t realNP = particleDims[0];
 
     int    xd = dims[0], yd = dims[1], zd = dims[2];
     float *data = new float[xd * yd * zd];

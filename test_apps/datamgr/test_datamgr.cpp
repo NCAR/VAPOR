@@ -98,7 +98,7 @@ void print_info(DataMgr &datamgr, bool verbose)
     cout << "Dimensions:" << endl;
     for (int i = 0; i < dimnames.size(); i++) {
         DC::Dimension dimension;
-        datamgr.GetDimension(dimnames[i], dimension);
+        datamgr.GetDimension(dimnames[i], dimension, -1);
         cout << "\t" << dimension.GetName() << " = " << dimension.GetLength() << endl;
     }
 
