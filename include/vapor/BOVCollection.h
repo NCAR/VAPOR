@@ -27,6 +27,7 @@ public:
 private:
     std::string              _time;
     std::string              _dataFile;
+    //std::vector<std::string> _dataFile;
     std::vector<size_t>      _dataSize;
     DC::XType                _dataFormat;
     std::string              _variable;
@@ -47,7 +48,7 @@ private:
 
     template<typename T> int _readMetadata(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = true);
 
-    std::string _findTokenValue(std::string &line) const;
+    void _findTokenValue(std::string &line) const;
 
     size_t _sizeOfFormat( DC::XType ) const;
     void _swapBytes( void* vptr, size_t size, size_t n) const;
@@ -65,5 +66,16 @@ private:
     static const std::string _divideBrickToken;
     static const std::string _dataBrickletsToken;
     static const std::string _dataComponentsToken;
+
+    static const std::string _xDim;
+    static const std::string _yDim;
+    static const std::string _zDim;
+    static const std::string _timeDim;
+
+    static const std::string _byteFormat;
+    static const std::string _shortFormat;
+    static const std::string _intFormat;
+    static const std::string _floatFormat;
+    static const std::string _doubleFormat;
 };
 }    // namespace VAPoR

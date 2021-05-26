@@ -31,14 +31,25 @@ const std::string BOVCollection::_divideBrickToken    = "DIVIDE_BRICK";
 const std::string BOVCollection::_dataBrickletsToken  = "DATA_BRICKLETS";
 const std::string BOVCollection::_dataComponentsToken = "DATA_COMPONENTS";
 
+const std::string BOVCollection::_xDim    = "x";
+const std::string BOVCollection::_yDim    = "y";
+const std::string BOVCollection::_zDim    = "z";
+const std::string BOVCollection::_timeDim = "t";
+
+const std::string BOVCollection::_byteFormat   = "BYTE";
+const std::string BOVCollection::_shortFormat  = "SHORT";
+const std::string BOVCollection::_intFormat    = "INT";
+const std::string BOVCollection::_floatFormat  = "FLOAT";
+const std::string BOVCollection::_doubleFormat = "DOUBLE";
+
 BOVCollection::BOVCollection()
-: _time("0"), _dataFile(""), _dataFormat(DC::FLOAT), _variable("brickVar"), _dataEndian("LITTLE"), _centering("ZONAL"), _byteOffset(0), _divideBrick(false), _dataComponents(1), _timeDimension("t")
+: _time("0"), _dataFile({}), _dataFormat(DC::FLOAT), _variable("brickVar"), _dataEndian("LITTLE"), _centering("ZONAL"), _byteOffset(0), _divideBrick(false), _dataComponents(1), _timeDimension(_timeDim)
 {
     _dataSize.clear();
     _brickOrigin.resize(3, 0.);
     _brickSize.resize(3, 1.);
     _dataBricklets.clear();
-    _spatialDimensions = {"x", "y", "z"};
+    _spatialDimensions = {_xDim, _yDim, _zDim};
 }
 
 int BOVCollection::Initialize(const std::vector<std::string> &paths)
@@ -65,9 +76,10 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             }
 
             rc = _readMetadata(_formatToken, line, _dataFormat);
-            if (rc < 0) {
-                SetErrMsg(("Failure reading .bov data format token " + _formatToken).c_str());
-                return (-1);
+            if (_dataFormat == DC::INVALID) {
+                std::string message = token + " must be either BYTE,SHORT,INT,FLOAT, or DOUBLE.";
+                SetErrMsg(message.c_str());
+                return -1;
             }
 
             _readMetadata(_timeToken, line, _time);
@@ -87,6 +99,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 }
 
 std::string BOVCollection::GetDataFile() const { 
+    //return _dataFile[0]; 
     return _dataFile; 
 }
 
@@ -125,7 +138,7 @@ std::string BOVCollection::GetDataEndian() const {
 /*template<typename T> int BOVCollection::ReadRegion(std::string varname, T *region) { 
     return 0; 
 }*/
-
+// Template specialization for reading data of type DC::XType
 template<> int BOVCollection::_readMetadata<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
 {
     // Skip comments
@@ -133,30 +146,28 @@ template<> int BOVCollection::_readMetadata<DC::XType>(const std::string &token,
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
-        std::string format = _findTokenValue(line);
-        if (format == "BYTE")
+        std::string format = line;
+        _findTokenValue(format);
+        if (format == _byteFormat)
             _dataFormat = DC::INT8;
-        else if (format == "SHORT")
+        else if (format == _shortFormat)
             _dataFormat = DC::INVALID;    // No XType for 16bit short
-        else if (format == "INT")
+        else if (format == _intFormat)
             _dataFormat = DC::INT32;
-        else if (format == "FLOAT")
+        else if (format == _floatFormat)
             _dataFormat = DC::FLOAT;
-        else if (format == "DOUBLE")
+        else if (format == _doubleFormat)
             _dataFormat = DC::DOUBLE;
         else
             _dataFormat = DC::INVALID;
 
         if (verbose) { std::cout << std::setw(20) << token << " " << _dataFormat << std::endl; }
 
-        if (_dataFormat == DC::INVALID) {
-            SetErrMsg("Invalid BOV data format.  Must be either BYTE,SHORT,INT,FLOAT, or DOUBLE.");
-            return -1;
-        }
         return 0;
     }
 }
 
+// Template specialization for reading data of types bool or string
 template<typename T> int BOVCollection::_readMetadata(const std::string &token, std::string &line, T &value, bool verbose)
 {
     // Skip comments
@@ -164,7 +175,8 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
-        stringstream ss(_findTokenValue(line));
+        _findTokenValue(line);
+        stringstream ss(line);
         if (std::is_same<T, bool>::value) {
             ss >> std::boolalpha >> value;
         } else {
@@ -172,6 +184,13 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
         }
 
         if (verbose) { std::cout << std::setw(20) << token << " " << value << std::endl; }
+
+        if (ss.eof() == 0) {
+            std::string message = "The keyword " + token + " may only contain one value.";
+            SetErrMsg(message.c_str());
+            return -1;
+        }
+
         if (ss.bad()) {
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
@@ -181,6 +200,8 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
     return 0;
 }
 
+// Template specialization for reading data of type std::vector<int> or std::vector<float>
+// All std::vectors returned must have a size of 3
 template<typename T> int BOVCollection::_readMetadata(const std::string &token, std::string &line, std::vector<T> &value, bool verbose)
 {
     // Skip comments
@@ -189,12 +210,19 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
         T                 lineValue;
-        std::stringstream lineStream = stringstream(_findTokenValue(line));
+        _findTokenValue(line);
+        std::stringstream lineStream = stringstream(line);
 
         value.clear();
         while (lineStream >> lineValue) { value.push_back(lineValue); }
 
-        if (lineStream.bad() || value.size() != 3) {
+        if (value.size() != 3) {
+            value.clear();
+            std::string message = token + " must be a set of three values.";
+            SetErrMsg(message.c_str());
+        }
+
+        if (lineStream.bad()) {
             value.clear();
             std::cout << "FAIL v " << token << std::endl;
             std::string message = "Invalid value for " + token + " in BOV header file.";
@@ -211,7 +239,7 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
     return 0;
 }
 
-std::string BOVCollection::_findTokenValue(std::string &line) const
+void BOVCollection::_findTokenValue(std::string &line) const
 {
     std::string delimiter = ": ";
 
@@ -221,7 +249,7 @@ std::string BOVCollection::_findTokenValue(std::string &line) const
         token = line.substr(0, pos);
         line.erase(0, pos + delimiter.length());
     }
-    return line;
+    std::cout << "                                      " << line << std::endl;
 }
 
 /*size_t BOVCollection::_sizeOfFormat( DC::XType type ) const {
