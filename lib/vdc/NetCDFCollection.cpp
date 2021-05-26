@@ -1,5 +1,6 @@
-#include <iostream>
 #include <algorithm>
+#include <cassert>
+#include <iostream>
 #include <utility>
 #include "vapor/VAssert.h"
 #include <netcdf.h>

@@ -1,5 +1,6 @@
-#include <vector>
 #include <algorithm>
+#include <cassert>
+#include <vector>
 #include <map>
 #include <iostream>
 #include "vapor/VAssert.h"
