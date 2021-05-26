@@ -17,7 +17,7 @@ May 21, 2021
 
 We are trying to prioritize new features for Vapor 3.6.  Our goal has always been to support scientists and help them produce superior visualizations of their simulation data. We can't do this without the feedback of the people in our user community.
 
-Please help us by providing your feedback in the survey below, which outlines new features we are considering for Vapor 3.6 and beyond. 
+Please help us by providing your feedback in the 5 minute survey below, which outlines new features we are considering for Vapor 3.6 and beyond. 
 
 `New Feature Survey <https://docs.google.com/forms/d/e/1FAIpQLSeZWvuAXaRiWyFrQ16zO25bfy8AANp8C8HpVXeMk83uQPdTLA/viewform?usp=sf_link>`_
 
