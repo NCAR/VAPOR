@@ -114,7 +114,7 @@ int main(int argc, char **argv)
     vector<string> dimnames = dcwrf.GetDimensionNames();
     for (int i = 0; i < dimnames.size(); i++) {
         DC::Dimension dim;
-        dcwrf.GetDimension(dimnames[i], dim);
+        dcwrf.GetDimension(dimnames[i], dim, -1);
         rc = vdc.DefineDimension(dim.GetName(), dim.GetLength());
         if (rc < 0) { exit(1); }
     }

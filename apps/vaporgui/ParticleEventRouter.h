@@ -13,7 +13,7 @@ public:
     ParticleEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
     static string GetClassType() { return VAPoR::ParticleRenderer::GetClassType(); }
     string        GetType() const { return GetClassType(); }
-    bool          Supports2DVariables() const { return true; }
+    bool          Supports2DVariables() const { return false; }
     bool          Supports3DVariables() const { return true; }
 
 protected:
