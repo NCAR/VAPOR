@@ -91,6 +91,9 @@ public:
         return value;
     }
 
+    //! \copydoc RenderParams::GetActualColorMapVariableName()
+    virtual string GetActualColorMapVariableName() const override { return ""; }
+
 public:
     static const std::string _fileNameTag;
     static const std::string _isGeoRefTag;

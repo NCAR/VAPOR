@@ -54,6 +54,9 @@ public:
 
     virtual size_t GetRenderDim() const override { return (0); }
 
+    //! \copydoc RenderParams::GetActualColorMapVariableName()
+    virtual string GetActualColorMapVariableName() const override { return GetColorMapVariableName(); }
+
 private:
     static const string m_lineThicknessTag;
     static const string m_point1Tag;

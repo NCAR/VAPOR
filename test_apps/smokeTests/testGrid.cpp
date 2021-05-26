@@ -184,10 +184,10 @@ int main(int argc, char **argv)
     std::vector<size_t> dims2d = {opt.dims[X], opt.dims[Y]};
 
     int rc = EXIT_SUCCESS;
-    int regularRC = 0;
-    int stretchedRC = 0;
-    int layeredRC = 0;
-    int curvilinearRC = 0;
+    bool regularRC = true;
+    bool stretchedRC = true;
+    bool layeredRC = true;
+    bool curvilinearRC = true;
 
     // Test Regular Grid
     if (std::find(opt.grids.begin(), opt.grids.end(), "Regular") != opt.grids.end()) {

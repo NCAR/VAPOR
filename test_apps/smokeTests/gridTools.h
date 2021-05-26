@@ -4,6 +4,7 @@
 #include <vapor/LayeredGrid.h>
 #include <vapor/CurvilinearGrid.h>
 #include <vapor/StretchedGrid.h>
+#include <vapor/UnstructuredGrid2D.h>
 
 std::vector<float *> AllocateBlocks(const std::vector<size_t> &bs, const std::vector<size_t> &dims);
 
@@ -34,13 +35,15 @@ bool TestConstCoordItr(const VAPoR::Grid *g, size_t &count, size_t &expectedCoun
 
 void PrintGridIteratorResults(std::string &gridType, std::string itrType, size_t count, size_t expectedCount, size_t disagreements, double time);
 
-void PrintStats(double rms, size_t numMissingValues, size_t disagreements);
+void PrintStats(double rms, size_t numMissingValues, size_t disagreements, double time);
 
 bool RunTest(VAPoR::Grid *grid);
 
 bool RunTests(VAPoR::Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal);
 
 VAPoR::StretchedGrid *MakeStretchedGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu);
+
+VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu);
 
 VAPoR::CurvilinearGrid *MakeCurvilinearTerrainGrid(const std::vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu, const std::vector<size_t> &dims);
 

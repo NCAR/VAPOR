@@ -70,6 +70,15 @@ public:
         return GetBox()->IsPlanar() ? 2 : 3;
     }
 
+    //! \copydoc RenderParams::GetActualColorMapVariableName()
+    virtual string GetActualColorMapVariableName() const override
+    {
+        if (UseSingleColor())
+            return "";
+        else
+            return GetColorMapVariableName();
+    }
+
 protected:
     virtual bool GetUseSingleColorDefault() const override { return true; }
 
