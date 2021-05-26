@@ -11,6 +11,7 @@
 #include <vapor/DataMgr.h>
 #include <vapor/FileUtils.h>
 #include <vapor/utils.h>
+#include <vapor/OpenMPSupport.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -91,6 +92,26 @@ OptionParser::Option_T get_options[] = {{"nts", Wasp::CvtToInt, &opt.nts, sizeof
 const char *ProgName;
 
 void ErrMsgCBHandler(const char *msg, int) { cerr << ProgName << " : " << msg << endl; }
+
+// Handle command line -nthreads argument so that pthreads and OpenMP threads
+// are treated consistently.
+//
+int get_num_ompthreads()
+{
+    int nthreads = 0;
+#pragma omp parallel
+    {
+        // use all available threads
+        //
+        if (opt.nthreads < 1) {
+            nthreads = omp_get_num_threads();
+        } else {
+            nthreads = opt.nthreads;
+        }
+    }
+    return (nthreads);
+}
+
 void print_info(DataMgr &datamgr, bool verbose)
 {
     vector<string> dimnames;
@@ -156,35 +177,49 @@ void test_get_value(Grid *g)
 
     g->SetInterpolationOrder(1);
 
-    Grid::ConstIterator itr = g->cbegin();
-    Grid::ConstIterator enditr = g->cend();
-
-    Grid::ConstCoordItr c_itr = g->ConstCoordBegin();
-    Grid::ConstCoordItr c_enditr = g->ConstCoordEnd();
-
     const float epsilon = 0.000001;
 
-    float  t0 = GetTime();
+    float t0 = GetTime();
+
+    size_t n = VProduct(g->GetDimensions());
+
     size_t ecount = 0;
-    for (; itr != enditr; ++itr, ++c_itr) {
-        float v0 = *itr;
+#if defined(_OPENMP)
+    int requested_num_threads = get_num_ompthreads();
+#endif
+#pragma omp parallel num_threads(requested_num_threads)
+    {
+        size_t my_ecount = 0;
+        size_t my_count = 0;
+        int    id = omp_get_thread_num();
+        int    nthreads = omp_get_num_threads();
+        size_t istart = id * n / nthreads;
+        size_t iend = (id + 1) * n / nthreads;
+        if (id == nthreads - 1) iend = n;
 
-        float v1 = g->GetValue(*c_itr);
+        Grid::ConstIterator itr = g->cbegin() + istart;
+        Grid::ConstCoordItr c_itr = g->ConstCoordBegin() + istart;
 
-        if (v0 != v1) {
-            if (v0 == 0.0) {
-                if (abs(v1) > epsilon) {
-                    ecount++;
-                    v1 = g->GetValue(*c_itr);
-                }
-            } else {
-                if (abs((v1 - v0) / v0) > epsilon) {
-                    ecount++;
-                    v1 = g->GetValue(*c_itr);
+        for (size_t i = istart; i < iend; i++, ++itr, ++c_itr) {
+            float v0 = *itr;
+
+            float v1 = g->GetValue(*c_itr);
+
+            if (v0 != v1) {
+                if (v0 == 0.0) {
+                    if (abs(v1) > epsilon) { my_ecount++; }
+                } else {
+                    if (abs((v1 - v0) / v0) > epsilon) { my_ecount++; }
                 }
             }
+            my_count++;
+        }
+#pragma omp critical
+        {
+            ecount += my_ecount;
         }
     }
+
     cout << "error count: " << ecount << endl;
     cout << "time: " << GetTime() - t0 << endl;
     cout << endl;

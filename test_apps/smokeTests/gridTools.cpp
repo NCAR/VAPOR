@@ -306,6 +306,7 @@ void PrintStats(double rms, size_t numMissingValues, size_t disagreements, doubl
     cout << "    Missing value count:                                 " << numMissingValues << endl;
     cout << "    GetValueAtIndex() vs GetValue() disagreement count:  " << disagreements << endl;
     cout << "    Time:                                                " << time << endl;
+    cout << endl;
 }
 
 bool RunTest(Grid *grid)

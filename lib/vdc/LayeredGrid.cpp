@@ -157,10 +157,8 @@ bool LayeredGrid::_insideGrid(const DblArr3 &coords, Size_tArr3 &indices, double
 
     if (!Wasp::BinarySearchRange(zcoords, coords[2], indices[2])) return (false);
 
-    VAssert(indices[2] < nz - 1);
-
     z0 = zcoords[indices[2]];
-    z1 = zcoords[indices[2] + 1];
+    z1 = indices[2] < nz - 1 ? zcoords[indices[2] + 1] : z0;
 
     wgts[2] = 1.0 - (coords[2] - z0) / (z1 - z0);
 

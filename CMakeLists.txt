@@ -4,7 +4,7 @@
 # 
 # libnetcdf-dev,  libudunits2-dev,  libproj-dev
 
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.10)
 project (VAPOR3)
 
 include (buildutils/UtilityFunctions.cmake)
@@ -70,6 +70,16 @@ option (BUILD_UTL "Build conversion and utility applications" ${DEFAULT_BUILD_UT
 option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
 option (BUILD_TEST_APPS "Build test applications" OFF)
 option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" OFF)
+option( USE_OMP "Use OpenMP on some calculations" OFF)
+
+if( USE_OMP )
+    find_package(OpenMP REQUIRED)
+    if( OpenMP_CXX_FOUND AND OpenMP_CXX_FLAGS )
+        message(STATUS "OpenMP found! (${OpenMP_CXX_LIB_NAMES})")
+    else()
+        message(STATUS "OpenMP NOT found! Are you using Apple Clang?")
+    endif()
+endif()
 
 set (GENERATE_FULL_INSTALLER ON)
 if (BUILD_GUI)
