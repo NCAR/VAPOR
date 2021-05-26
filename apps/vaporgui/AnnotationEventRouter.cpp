@@ -52,27 +52,9 @@
 #include "VComboBox.h"
 #include "VPushButton.h"
 #include "Updateable.h"
+#include "PCopyRegionAnnotationWidget.h"
 
 using namespace VAPoR;
-
-namespace {
-
-template<typename Out> void split(const std::string &s, char delim, Out result)
-{
-    std::stringstream ss;
-    ss.str(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) { *(result++) = item; }
-}
-
-std::vector<std::string> split(const std::string &s, char delim)
-{
-    std::vector<std::string> elems;
-    split(s, delim, std::back_inserter(elems));
-    return elems;
-}
-
-}    // namespace
 
 AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), EventRouter(ce, AnnotationParams::GetClassType())
 {
@@ -93,13 +75,9 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
     _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
     axisAnnotationTab->layout()->addWidget(annotationTable);
-    _copyRegionCombo = new VComboBox({"Currently no renderers"});
-    _copyRegionButton = new VPushButton("Copy");
-    connect(_copyRegionButton, SIGNAL(ButtonClicked()), this, SLOT(copyRegionFromRenderer()));
-    axisAnnotationTab->layout()->addWidget(new VLineItem("Copy Region From Renderer", _copyRegionCombo));
-    axisAnnotationTab->layout()->addWidget(new VLineItem("", _copyRegionButton));
 
     PGroup *axisAnnotationGroup2 = new PGroup({
+        new PCopyRegionAnnotationWidget(ce),
         new PColorSelector(AxisAnnotation::_colorTag, "Axis Text Color"),
         new PColorSelector(AxisAnnotation::_backgroundColorTag, "Text Background Color"),
         (new PIntegerSliderEditHLI<AxisAnnotation>("Font Size", &AxisAnnotation::GetAxisFontSize, &AxisAnnotation::SetAxisFontSize))->SetRange(2, 48)->EnableDynamicUpdate(),
@@ -142,7 +120,6 @@ AnnotationEventRouter::~AnnotationEventRouter() {}
 
 void AnnotationEventRouter::_updateTab()
 {
-    updateCopyRegionCombo();
     updateAxisTable();
 
     AxisAnnotation *  a = _getCurrentAxisAnnotation();
@@ -152,103 +129,6 @@ void AnnotationEventRouter::_updateTab()
     for (PGroup *group : _axisGroups) group->Update(a, _controlExec->GetParamsMgr());
 
     return;
-}
-
-void AnnotationEventRouter::copyRegionFromRenderer()
-{
-    string copyString = _copyRegionCombo->GetValue();
-    if (copyString == "") return;
-
-    std::vector<std::string> elems = split(copyString, ':');
-    string                   visualizer = _visNames[elems[0]];
-    string                   dataSetName = elems[1];
-    string                   renType = _renTypeNames[elems[2]];
-    string                   renderer = elems[3];
-
-    ParamsMgr *   paramsMgr = _controlExec->GetParamsMgr();
-    RenderParams *copyParams = paramsMgr->GetRenderParams(visualizer, dataSetName, renType, renderer);
-    VAssert(copyParams);
-
-    Box *               copyBox = copyParams->GetBox();
-    std::vector<double> minExtents, maxExtents;
-    copyBox->GetExtents(minExtents, maxExtents);
-
-    AxisAnnotation *aa = _getCurrentAxisAnnotation();
-    if (minExtents.size() < 3) {    // copyBox->IsPlanar()
-        std::vector<double> currentMin = aa->GetMinTics();
-        std::vector<double> currentMax = aa->GetMaxTics();
-        scaleNormalizedCoordsToWorld(currentMin);
-        scaleNormalizedCoordsToWorld(currentMax);
-        minExtents.push_back(currentMin[2]);
-        maxExtents.push_back(currentMax[2]);
-    }
-
-    scaleWorldCoordsToNormalized(minExtents);
-    scaleWorldCoordsToNormalized(maxExtents);
-
-    paramsMgr->BeginSaveStateGroup("Copying extents from renderer to"
-                                   " AxisAnnotation");
-    aa->SetAxisOrigin(minExtents);
-    aa->SetMinTics(minExtents);
-    aa->SetMaxTics(maxExtents);
-    paramsMgr->EndSaveStateGroup();
-}
-
-void AnnotationEventRouter::gatherRenderers(std::vector<string> &renderers, string visName, string typeName, string visAbb, string dataSetName)
-{
-    // Abbreviate Params names by removing 'Params" from them.
-    // Then store them in a map for later reference.
-    //
-    string typeAbb = typeName;
-    int    pos = typeAbb.find("Params");
-    typeAbb.erase(pos, 6);
-    _renTypeNames[typeAbb] = typeName;
-
-    std::vector<string> renNames;
-    ParamsMgr *         paramsMgr = _controlExec->GetParamsMgr();
-    renNames = paramsMgr->GetRenderParamInstances(visName, dataSetName, typeName);
-
-    for (int k = 0; k < renNames.size(); k++) {
-        string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
-        renderers.push_back(displayName);
-    }
-}
-
-void AnnotationEventRouter::updateCopyRegionCombo()
-{
-    AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
-    std::string       dataSetName = vParams->GetCurrentAxisDataMgrName();
-
-    _visNames.clear();
-
-    ParamsMgr *              paramsMgr = _controlExec->GetParamsMgr();
-    std::vector<std::string> visNames = paramsMgr->GetVisualizerNames();
-    DataStatus *             dataStatus = _controlExec->GetDataStatus();
-
-    std::vector<string> renderers = {};
-    for (int i = 0; i < visNames.size(); i++) {
-        string visName = visNames[i];
-
-        // Create a mapping of abreviated visualizer names to their
-        // actual string values.
-        //
-        string visAbb = "Vis" + std::to_string(i);
-        _visNames[visAbb] = visName;
-
-        std::vector<string> typeNames;
-        typeNames = paramsMgr->GetRenderParamsClassNames(visName);
-
-        for (int j = 0; j < typeNames.size(); j++) {
-            string typeName = typeNames[j];
-
-            std::vector<string> dmNames = dataStatus->GetDataMgrNames();
-            for (int k = 0; k < dmNames.size(); k++) {
-                string dataSetName = dmNames[k];
-                gatherRenderers(renderers, visName, typeName, visAbb, dataSetName);
-            }
-        }
-    }
-    _copyRegionCombo->SetOptions(renderers);
 }
 
 void AnnotationEventRouter::scaleNormalizedCoordsToWorld(std::vector<double> &coords)
