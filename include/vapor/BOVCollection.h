@@ -49,8 +49,8 @@ private:
 
     void _findTokenValue(std::string &line) const;
 
-    size_t _sizeOfFormat( DC::XType ) const;
-    void _swapBytes( void* vptr, size_t size, size_t n) const;
+    size_t _sizeOfFormat(DC::XType) const;
+    void   _swapBytes(void *vptr, size_t size, size_t n) const;
 
     static const std::string _timeToken;
     static const std::string _dataFileToken;

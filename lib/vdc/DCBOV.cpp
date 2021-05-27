@@ -366,26 +366,24 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
 
     std::string varname = w->GetVarname();
 
-    std::string              fileName    = _bovCollection->GetDataFile();
+    std::string              fileName = _bovCollection->GetDataFile();
     std::vector<std::string> spatialDims = _bovCollection->GetSpatialDimensions();
-    std::vector<size_t>      dataSize    = _bovCollection->GetDataSize();
-    std::vector<float>       origin      = _bovCollection->GetBrickOrigin();
-    std::vector<float>       brickSize   = _bovCollection->GetBrickSize();
+    std::vector<size_t>      dataSize = _bovCollection->GetDataSize();
+    std::vector<float>       origin = _bovCollection->GetBrickOrigin();
+    std::vector<float>       brickSize = _bovCollection->GetBrickSize();
 
     // Return spatial coordinate variable values
     for (int dim = 0; dim < spatialDims.size(); dim++) {
         if (varname == spatialDims[dim]) {
             float increment = brickSize[dim] / dataSize[dim];
-            for (int i = 0; i < dataSize[dim]; i++) { 
-                region[i] = origin[dim] + i * increment; 
-            }
+            for (int i = 0; i < dataSize[dim]; i++) { region[i] = origin[dim] + i * increment; }
         }
     }
 
     if (varname == _bovCollection->GetTimeDimension()) {
         region[0] = 1.f;
     } else if (varname == _bovCollection->GetDataVariableName()) {
-        int rc = _bovCollection->ReadRegion( min, max, region );
+        int rc = _bovCollection->ReadRegion(min, max, region);
         if (rc < 0) {
             SetErrMsg("DCBOV::_readRegionTemplate error");
             return -1;
@@ -395,9 +393,7 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
 }
 
 bool DCBOV::variableExists(size_t ts, string varname, int, int) const {
-    if ( _coordVarsMap.find( varname ) != _coordVarsMap.end() ) 
-        return true;
-    if ( _dataVarsMap.find( varname ) != _dataVarsMap.end() ) 
-        return true;
+    if (_coordVarsMap.find(varname) != _coordVarsMap.end()) return true;
+    if (_dataVarsMap.find(varname) != _dataVarsMap.end()) return true;
     return false;
 }

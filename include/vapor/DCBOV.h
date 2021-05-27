@@ -171,6 +171,5 @@ private:
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 
     template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
-
 };
 }    // namespace VAPoR
