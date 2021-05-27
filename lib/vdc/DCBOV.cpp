@@ -14,7 +14,6 @@
 
 #include <vapor/GeoUtil.h>
 #include <vapor/UDUnitsClass.h>
-//#include <vapor/BOVCollection.h>
 #include <vapor/DCBOV.h>
 #include <vapor/DCUtils.h>
 

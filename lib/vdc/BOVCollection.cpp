@@ -44,7 +44,7 @@ const std::string BOVCollection::_floatFormatString = "FLOAT";
 const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
 BOVCollection::BOVCollection()
-: _time("0"), _dataFile({}), _dataFormat(DC::XType::INVALID), _variable("brickVar"), _dataEndian("LITTLE"), _centering("ZONAL"), _byteOffset(0), _divideBrick(false), _dataComponents(1),
+: _time("0"), _dataFile(""), _dataFormat(DC::XType::INVALID), _variable("brickVar"), _dataEndian("LITTLE"), _centering("ZONAL"), _byteOffset(0), _divideBrick(false), _dataComponents(1),
   _timeDimension(_timeDim)
 {
     _dataSize.clear();
