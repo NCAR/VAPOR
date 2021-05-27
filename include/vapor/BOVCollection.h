@@ -45,7 +45,6 @@ private:
 
     template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = false);
     template<typename T> int _findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = false);
-    template<> int           _findToken<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose);
 
     void _findTokenValue(std::string &line) const;
 
@@ -77,4 +76,8 @@ private:
     static const std::string _floatFormatString;
     static const std::string _doubleFormatString;
 };
+    
+// Make gcc happy by moving template specialization outside of the class body
+//
+template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose);
 }    // namespace VAPoR

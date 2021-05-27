@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <map>
 #include <sstream>
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <type_traits>
@@ -225,7 +226,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
     if (pos != std::string::npos) {    // We found the token
         T lineValue;
         _findTokenValue(line);
-        std::stringstream lineStream = stringstream(line);
+        std::stringstream lineStream(line);
 
         value.clear();
         while (lineStream >> lineValue) { value.push_back(lineValue); }
