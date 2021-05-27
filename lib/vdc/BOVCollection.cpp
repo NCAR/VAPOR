@@ -370,11 +370,8 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
             // then read file values into that,
             // then cast those values into region?
             for (int i=0; i<count; i++) {
-                //region[offset+i] = (typename std::remove_pointer<T>::type)readBuffer[i*formatSize];
-                //region[offset+i] = (typename std::remove_pointer<T>::type)readBuffer[i];
-                std::cout << readBuffer[i] << std::endl;
-                //region[offset+i] = (float)readBuffer[i];
-                *region = (float)readBuffer[i];
+                *region = (typename std::remove_pointer<T>::type)readBuffer[i];
+                //*region = (float)readBuffer[i];
                 region++;
                 
                 //region[count+i] = (float)readBuffer[i];
@@ -383,9 +380,6 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
                 //*region = (typename std::remove_pointer<T>::type)readBuffer[i];
                 //region++;
             }
-
-            //region+=offset;
-            //region+=count;
         }
     }
 
