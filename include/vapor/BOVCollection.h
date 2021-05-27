@@ -22,12 +22,16 @@ public:
     std::vector<float>       GetBrickSize() const;
     std::string              GetDataEndian() const;
 
-    template<class T> int ReadRegion(const std::vector<size_t> &min, const std::vector<size_t> &max, T *region);
+    template<class T> int ReadRegion(const std::vector<size_t> &min, const std::vector<size_t> &max, T region);
+    //template<class T> int ReadRegion(T region);
+    /*template<class T> int ReadRegion(std::string varname, T *region) {
+        std::cout << typeid(region).name();
+        return 0;
+    };*/
 
 private:
     std::string              _time;
     std::string              _dataFile;
-    //std::vector<std::string> _dataFile;
     std::vector<size_t>      _dataSize;
     DC::XType                _dataFormat;
     std::string              _variable;
@@ -43,10 +47,9 @@ private:
     std::vector<std::string> _spatialDimensions;
     std::string              _timeDimension;
 
-    template<typename T> int _readMetadata(const std::string &token, std::string &line, T &value, bool verbose = true);
-    template<> int           _readMetadata<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose);
-
-    template<typename T> int _readMetadata(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = true);
+    template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = true);
+    template<typename T> int _findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = true);
+    template<> int           _findToken<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose);
 
     void _findTokenValue(std::string &line) const;
 
@@ -61,7 +64,7 @@ private:
     static const std::string _endianToken;
     static const std::string _centeringToken;
     static const std::string _originToken;
-    static const std::string _sizeToken;
+    static const std::string _brickSizeToken;
     static const std::string _offsetToken;
     static const std::string _divideBrickToken;
     static const std::string _dataBrickletsToken;
@@ -72,10 +75,10 @@ private:
     static const std::string _zDim;
     static const std::string _timeDim;
 
-    static const std::string _byteFormat;
-    static const std::string _shortFormat;
-    static const std::string _intFormat;
-    static const std::string _floatFormat;
-    static const std::string _doubleFormat;
+    static const std::string _byteFormatString;
+    static const std::string _shortFormatString;
+    static const std::string _intFormatString;
+    static const std::string _floatFormatString;
+    static const std::string _doubleFormatString;
 };
 }    // namespace VAPoR

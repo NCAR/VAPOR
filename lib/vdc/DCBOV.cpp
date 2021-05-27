@@ -356,7 +356,7 @@ int DCBOV::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 int DCBOV::openVariableRead(size_t ts, string varname)
 {
     _varname = varname;
-    std::cout << "int DCBOV::openVariableRead(size_t ts, string varname) " << varname << std::endl;
+    //std::cout << "int DCBOV::openVariableRead(size_t ts, string varname) " << varname << std::endl;
     // return 0;
     // int aux = _ncdfc->OpenRead(ts, varname);
 
@@ -370,7 +370,7 @@ int DCBOV::closeVariable(int fd)
 {
     DC::FileTable::FileObject *w = _fileTable.GetEntry(fd);
 
-    std::cout << "closeVariable( " << w->GetVarname() << std::endl;
+    //std::cout << "closeVariable( " << w->GetVarname() << std::endl;
 
     if (!w) {
         SetErrMsg("Invalid file descriptor : %d", fd);
@@ -414,9 +414,9 @@ void DCBOV::_swapBytes(void *vptr, size_t size, size_t n) const
 
 template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
-    for (int i=0; i<min.size(); i++) {
+    /*for (int i=0; i<min.size(); i++) {
         std::cout << "_readRegionTemplate " << min[i] << " " << max[i] << std::endl;
-    }
+    }*/
 
     FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
     if (!w) {
@@ -436,22 +436,27 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     for (int dim = 0; dim < spatialDims.size(); dim++) {
         if (varname == spatialDims[dim]) {
             float increment = brickSize[dim] / dataSize[dim];
-            for (int i = 0; i < dataSize[dim]; i++) { region[i] = origin[dim] + i * increment; }
+            for (int i = 0; i < dataSize[dim]; i++) { 
+                region[i] = origin[dim] + i * increment; 
+            }
         }
     }
 
-    //if (_varname == "t") {
-    if (varname == "t") {
+    if (varname == _bovCollection->GetTimeDimension()) {
         region[0] = 1.f;
     } else if (_varname == _bovCollection->GetDataVariableName()) {
-        FILE* fp = fopen( fileName.c_str(), "rb" );
+        int rc = _bovCollection->ReadRegion( min, max, region );
+        if (rc < 0) {
+            SetErrMsg("DCBOV::_readRegionTemplate error");
+            return -1;
+        }
+        /*FILE* fp = fopen( fileName.c_str(), "rb" );
         if (!fp) {
             SetErrMsg("Invalid file: %d", fp);
             return (-1);
         }
        
         size_t formatSize = _sizeOfFormat( _bovCollection->GetDataFormat() );
-        std::cout << "formatSize " << formatSize << std::endl;
         if ( formatSize < 0 ) {
             SetErrMsg("Invalid data format");
             return (-1);
@@ -468,7 +473,7 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
             return (-1);
         }
 
-        std::cout << typeid(*region).name() << std::endl;
+        //std::cout << typeid(*region).name() << std::endl;
 
         // Read a "pencil" of data along the X axis, one row at a time
         size_t xStride = max[0]-min[0]+1; 
@@ -502,8 +507,9 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
         bool dataLittleEndian = _bovCollection->GetDataEndian() == "LITTLE" ? true : false;
         if ( systemLittleEndian != dataLittleEndian ) {
             _swapBytes( region, formatSize, numValues );
-        }
+        }*/
     }
+    return 0;
 }
 
 bool DCBOV::variableExists(size_t ts, string varname, int, int) const {

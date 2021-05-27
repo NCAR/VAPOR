@@ -25,7 +25,7 @@ const std::string BOVCollection::_variableToken       = "VARIABLE";
 const std::string BOVCollection::_endianToken         = "DATA_ENDIAN";
 const std::string BOVCollection::_centeringToken      = "CENTERING";
 const std::string BOVCollection::_originToken         = "BRICK_ORIGIN";
-const std::string BOVCollection::_sizeToken           = "BRICK_SIZE";
+const std::string BOVCollection::_brickSizeToken           = "BRICK_SIZE";
 const std::string BOVCollection::_offsetToken         = "BYTE_OFFSET";
 const std::string BOVCollection::_divideBrickToken    = "DIVIDE_BRICK";
 const std::string BOVCollection::_dataBrickletsToken  = "DATA_BRICKLETS";
@@ -36,11 +36,11 @@ const std::string BOVCollection::_yDim    = "y";
 const std::string BOVCollection::_zDim    = "z";
 const std::string BOVCollection::_timeDim = "t";
 
-const std::string BOVCollection::_byteFormat   = "BYTE";
-const std::string BOVCollection::_shortFormat  = "SHORT";
-const std::string BOVCollection::_intFormat    = "INT";
-const std::string BOVCollection::_floatFormat  = "FLOAT";
-const std::string BOVCollection::_doubleFormat = "DOUBLE";
+const std::string BOVCollection::_byteFormatString   = "BYTE";
+const std::string BOVCollection::_shortFormatString  = "SHORT";
+const std::string BOVCollection::_intFormatString    = "INT";
+const std::string BOVCollection::_floatFormatString  = "FLOAT";
+const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
 BOVCollection::BOVCollection()
 : _time("0"), _dataFile({}), _dataFormat(DC::FLOAT), _variable("brickVar"), _dataEndian("LITTLE"), _centering("ZONAL"), _byteOffset(0), _divideBrick(false), _dataComponents(1), _timeDimension(_timeDim)
@@ -57,45 +57,76 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
     VAssert(paths.size() == 1);
 
     int           rc;
-    size_t        pos;
     std::string   line;
     std::ifstream header;
     header.open(paths[0]);
     if (header.is_open()) {
         while (getline(header, line)) {
-            rc = _readMetadata(_dataFileToken, line, _dataFile);
-            if (rc < 0) {
-                SetErrMsg(("Failure reading .bov data file " + _dataFileToken).c_str());
-                return (-1);
+
+            // The _dataFile, _dataSize, and _dataFormat variables are all required to process
+            // the BOV.  Try to find them, and report errors if we can't.
+            //
+            rc = _findToken(_dataFileToken, line, _dataFile);
+            if (rc == -1) {
+                SetErrMsg(("Failure reading BOV data file " + _dataFileToken).c_str());
+                return -1;
             }
 
-            rc = _readMetadata(_dataSizeToken, line, _dataSize);
-            if (rc < 0) {
-                SetErrMsg(("Failure reading .bov data size token " + _dataSizeToken).c_str());
-                return (-1);
+            rc = _findToken(_dataSizeToken, line, _dataSize);
+            if (rc == -1) {
+                SetErrMsg(("Failure reading BOV data size token " + _dataSizeToken).c_str());
+                return -1;
+            }
+            else if ( rc == 1 ) {
+                if ( _dataSize[0] < 1 || _dataSize[1] < 1 || _dataSize[2] < 1 ) {
+                    SetErrMsg((_dataSizeToken + " must have all dimensions > 1").c_str());
+                    return -1;
+                }
             }
 
-            rc = _readMetadata(_formatToken, line, _dataFormat);
+            rc = _findToken(_formatToken, line, _dataFormat);
             if (_dataFormat == DC::INVALID) {
-                std::string message = token + " must be either BYTE,SHORT,INT,FLOAT, or DOUBLE.";
+                std::string message = _formatToken + " must be either BYTE, SHORT, INT, FLOAT, or DOUBLE.";
                 SetErrMsg(message.c_str());
                 return -1;
             }
 
-            _readMetadata(_timeToken, line, _time);
-            _readMetadata(_variableToken, line, _variable);
-            _readMetadata(_endianToken, line, _dataEndian);
-            _readMetadata(_centeringToken, line, _centering);
-            _readMetadata(_originToken, line, _brickOrigin);
-            _readMetadata(_sizeToken, line, _brickSize);
-            _readMetadata(_offsetToken, line, _byteOffset);
-            _readMetadata(_divideBrickToken, line, _divideBrick);
-            _readMetadata(_dataBrickletsToken, line, _dataBricklets);
-            _readMetadata(_dataComponentsToken, line, _dataComponents);
+            // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
+            //
+            rc = _findToken(_originToken, line, _brickOrigin);
+            if (rc == -1) {
+                SetErrMsg(("Invalid value for token: " + _originToken).c_str());
+            }
+            rc = _findToken(_brickSizeToken, line, _brickSize);
+            if (rc == -1) {
+                SetErrMsg(("Invalid value for token: " + _brickSizeToken).c_str());
+            }
+            rc = _findToken(_endianToken, line, _dataEndian);
+            if (rc == -1) {
+                SetErrMsg(("Invalid value for token: " + _endianToken).c_str());
+            }
+            rc = _findToken(_timeToken, line, _time);
+            if (rc == -1) {
+                SetErrMsg(("Invalid value for token: " + _timeToken).c_str());
+            }
+            rc = _findToken(_variableToken, line, _variable);
+            if (rc == -1) {
+                SetErrMsg(("Invalid value for token: " + _variableToken).c_str());
+            }
+
+            // All other variables are unused.  
+            //
+            _findToken(_centeringToken, line, _centering);
+            _findToken(_offsetToken, line, _byteOffset);
+            _findToken(_divideBrickToken, line, _divideBrick);
+            _findToken(_dataBrickletsToken, line, _dataBricklets);
+            _findToken(_dataComponentsToken, line, _dataComponents);
         }
     } else {
-        SetErrMsg(("Failed to open bov file " + paths[0]).c_str());
+        SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
+        return -1;
     }
+    return 0;
 }
 
 std::string BOVCollection::GetDataFile() const { 
@@ -135,11 +166,8 @@ std::string BOVCollection::GetDataEndian() const {
     return _dataEndian; 
 }
 
-/*template<typename T> int BOVCollection::ReadRegion(std::string varname, T *region) { 
-    return 0; 
-}*/
 // Template specialization for reading data of type DC::XType
-template<> int BOVCollection::_readMetadata<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
+template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
 {
     // Skip comments
     if (line[0] == '#') { return 0; }
@@ -148,27 +176,27 @@ template<> int BOVCollection::_readMetadata<DC::XType>(const std::string &token,
     if (pos != std::string::npos) {    // We found the token
         std::string format = line;
         _findTokenValue(format);
-        if (format == _byteFormat)
+        if (format == _byteFormatString)
             _dataFormat = DC::INT8;
-        else if (format == _shortFormat)
+        else if (format == _shortFormatString)
             _dataFormat = DC::INVALID;    // No XType for 16bit short
-        else if (format == _intFormat)
+        else if (format == _intFormatString)
             _dataFormat = DC::INT32;
-        else if (format == _floatFormat)
+        else if (format == _floatFormatString)
             _dataFormat = DC::FLOAT;
-        else if (format == _doubleFormat)
+        else if (format == _doubleFormatString)
             _dataFormat = DC::DOUBLE;
         else
             _dataFormat = DC::INVALID;
 
         if (verbose) { std::cout << std::setw(20) << token << " " << _dataFormat << std::endl; }
-
-        return 0;
+        return 1;
     }
+    return 0;
 }
 
 // Template specialization for reading data of types bool or string
-template<typename T> int BOVCollection::_readMetadata(const std::string &token, std::string &line, T &value, bool verbose)
+template<typename T> int BOVCollection::_findToken(const std::string &token, std::string &line, T &value, bool verbose)
 {
     // Skip comments
     if (line[0] == '#') { return 0; }
@@ -196,20 +224,21 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
             SetErrMsg(message.c_str());
             return -1;
         }
+        return 1;  // we now have a token
     }
-    return 0;
+    return 0;   // we didn't find the token
 }
 
 // Template specialization for reading data of type std::vector<int> or std::vector<float>
 // All std::vectors returned must have a size of 3
-template<typename T> int BOVCollection::_readMetadata(const std::string &token, std::string &line, std::vector<T> &value, bool verbose)
+template<typename T> int BOVCollection::_findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose)
 {
     // Skip comments
     if (line[0] == '#') { return 0; }
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
-        T                 lineValue;
+        T lineValue;
         _findTokenValue(line);
         std::stringstream lineStream = stringstream(line);
 
@@ -220,6 +249,7 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
             value.clear();
             std::string message = token + " must be a set of three values.";
             SetErrMsg(message.c_str());
+            return -1;
         }
 
         if (lineStream.bad()) {
@@ -235,8 +265,9 @@ template<typename T> int BOVCollection::_readMetadata(const std::string &token, 
             for (int i = 0; i < value.size(); i++) std::cout << value[i] << " ";
             std::cout << std::endl;
         }
+        return 1;  // we now have a token
     }
-    return 0;
+    return 0;  // we didn't find the token
 }
 
 void BOVCollection::_findTokenValue(std::string &line) const
@@ -252,13 +283,12 @@ void BOVCollection::_findTokenValue(std::string &line) const
     std::cout << "                                      " << line << std::endl;
 }
 
-/*size_t BOVCollection::_sizeOfFormat( DC::XType type ) const {
+size_t BOVCollection::_sizeOfFormat( DC::XType type ) const {
     switch (type) {
-        case DC::XType::INVALID: return -1;
-        case DC::XType::INT8: return 1;
         case DC::XType::INT32: return 4;
         case DC::XType::FLOAT: return 4;
         case DC::XType::DOUBLE: return 8;
+        default: return -1;
     }
 }
 
@@ -279,17 +309,16 @@ void BOVCollection::_swapBytes(void *vptr, size_t size, size_t n) const
 }
 
 template<class T>
-int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector<size_t> &max, T *region ) {
+int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector<size_t> &max, T region ) {
     FILE* fp = fopen( _dataFile.c_str(), "rb" );
     if (!fp) {
         SetErrMsg("Invalid file: %d", fp);
-        return (-1);
+        return -1;
     }
 
-    size_t dataSize = _sizeOfFormat( _dataFormat );
-    std::cout << "dataSize " << dataSize << std::endl;
-    if ( dataSize < 0 ) {
-        SetErrMsg("Invalid data format");
+    size_t formatSize = _sizeOfFormat( _dataFormat );
+    if ( formatSize < 0 ) {
+        SetErrMsg("Unspecified data format");
         return (-1);
     }
 
@@ -298,21 +327,30 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
         return (-1);
     }
     size_t numValues = _dataSize[0]*_dataSize[1]*_dataSize[2];
-    if ( numValues < 1 ) {
-        SetErrMsg("Invalid number of grid points");
-        return (-1);
-    }
 
-    std::cout << typeid(*region).name() << std::endl;
+    // Read a "pencil" of data along the X axis, one row at a time
+    size_t xStride = max[0]-min[0]+1;
+    for (int k=min[2]; k<=max[2]; k++) {
+        int zOffset = _dataSize[0]*_dataSize[1]*k;
+        for (int j=min[1]; j<=max[1]; j++) {
+            int xOffset = min[0];
+            int yOffset = _dataSize[0]*j;
+            int offset = formatSize*(xOffset + yOffset + zOffset);
 
-    size_t rc = fread( region, dataSize, numValues, fp );
-    if (rc != numValues) {
-        if (ferror(fp) != 0) {
-            MyBase::SetErrMsg("Error reading input file");
-        } else {
-            MyBase::SetErrMsg("Short read on input file");
+            fseek( fp, offset, SEEK_SET );
+            size_t rc = fread( region, formatSize, xStride, fp );
+
+            if (rc != xStride) {
+                if (ferror(fp) != 0) {
+                    MyBase::SetErrMsg("Error reading input file");
+                } else {
+                    MyBase::SetErrMsg("Short read on input file");
+                }
+                return -1;
+            }
+
+            region+=xStride;
         }
-        return (-1);
     }
 
     fclose(fp);
@@ -321,9 +359,22 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
     bool systemLittleEndian = *(char *)&n == 1 ? true : false;
     bool dataLittleEndian = _dataEndian == "LITTLE" ? true : false;
     if ( systemLittleEndian != dataLittleEndian ) {
-        _swapBytes( region, dataSize, numValues );
+        _swapBytes( region, formatSize, numValues );
     }
-    //for (int i = 0; i < 1000; i++) region[i] = float(i);
 
     return 0;
+}
+
+// ReadRegion can only be used with int* float* and double*
+template int BOVCollection::ReadRegion<int*>(const std::vector<size_t>&, const std::vector<size_t>&, int*);
+template int BOVCollection::ReadRegion<float*>(const std::vector<size_t>&, const std::vector<size_t>&, float*);
+template int BOVCollection::ReadRegion<double*>(const std::vector<size_t>&, const std::vector<size_t>&, double*);
+
+/*template<class T> int BOVCollection::ReadRegion(T region) { 
+    std::cout << "type is " << typeid(region).name() << std::endl;
+    return 0; 
 }*/
+
+//template int BOVCollection::ReadRegion<int*>(int*);
+
+//template int BOVCollection::ReadRegion<float>(float);
