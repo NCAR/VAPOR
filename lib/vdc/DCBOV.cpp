@@ -386,38 +386,8 @@ int DCBOV::closeVariable(int fd)
     return 0;
 }
 
-size_t DCBOV::_sizeOfFormat( DC::XType type ) const {
-    switch (type) {
-        case DC::XType::INVALID: return -1;
-        case DC::XType::INT8: return 1;
-        case DC::XType::INT32: return 4;
-        case DC::XType::FLOAT: return 4;
-        case DC::XType::DOUBLE: return 8;
-    }
-}
-
-void DCBOV::_swapBytes(void *vptr, size_t size, size_t n) const
-{
-    unsigned char *ucptr = (unsigned char *)vptr;
-    unsigned char  uc;
-    size_t         i, j;
-
-    for (j = 0; j < n; j++) {
-        for (i = 0; i < size / 2; i++) {
-            uc = ucptr[i];
-            ucptr[i] = ucptr[size - i - 1];
-            ucptr[size - i - 1] = uc;
-        }
-        ucptr += size;
-    }
-}
-
 template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
-    /*for (int i=0; i<min.size(); i++) {
-        std::cout << "_readRegionTemplate " << min[i] << " " << max[i] << std::endl;
-    }*/
-
     FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
     if (!w) {
         SetErrMsg("Invalid file descriptor : %d", fd);
@@ -450,64 +420,6 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
             SetErrMsg("DCBOV::_readRegionTemplate error");
             return -1;
         }
-        /*FILE* fp = fopen( fileName.c_str(), "rb" );
-        if (!fp) {
-            SetErrMsg("Invalid file: %d", fp);
-            return (-1);
-        }
-       
-        size_t formatSize = _sizeOfFormat( _bovCollection->GetDataFormat() );
-        if ( formatSize < 0 ) {
-            SetErrMsg("Invalid data format");
-            return (-1);
-        }
-
-        std::vector<size_t> gridPts = _bovCollection->GetDataSize();
-        if ( gridPts.size() != 3 ) {
-            SetErrMsg("Invalid grid size (must be 3D)");
-            return (-1);
-        }
-        size_t numValues = gridPts[0]*gridPts[1]*gridPts[2];
-        if ( numValues < 1 ) {
-            SetErrMsg("Invalid number of grid points (must be greater than 0)");
-            return (-1);
-        }
-
-        //std::cout << typeid(*region).name() << std::endl;
-
-        // Read a "pencil" of data along the X axis, one row at a time
-        size_t xStride = max[0]-min[0]+1; 
-        for (int k=min[2]; k<=max[2]; k++) {
-            int zOffset = dataSize[0]*dataSize[1]*k;
-            for (int j=min[1]; j<=max[1]; j++) {
-                int xOffset = min[0];
-                int yOffset = dataSize[0]*j;
-                int offset = formatSize*(xOffset + yOffset + zOffset);
-                
-                fseek( fp, offset, SEEK_SET );
-                size_t rc = fread( region, formatSize, xStride, fp );
-
-                if (rc != xStride) {
-                    if (ferror(fp) != 0) {
-                        MyBase::SetErrMsg("Error reading input file");
-                    } else {
-                        MyBase::SetErrMsg("Short read on input file");
-                    }
-                    return (-1);
-                }
-
-                region+=xStride;
-            }
-        }
-        
-        fclose(fp);
-
-        int n = 1;
-        bool systemLittleEndian = *(char *)&n == 1 ? true : false;
-        bool dataLittleEndian = _bovCollection->GetDataEndian() == "LITTLE" ? true : false;
-        if ( systemLittleEndian != dataLittleEndian ) {
-            _swapBytes( region, formatSize, numValues );
-        }*/
     }
     return 0;
 }

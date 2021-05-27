@@ -25,7 +25,7 @@ const std::string BOVCollection::_variableToken       = "VARIABLE";
 const std::string BOVCollection::_endianToken         = "DATA_ENDIAN";
 const std::string BOVCollection::_centeringToken      = "CENTERING";
 const std::string BOVCollection::_originToken         = "BRICK_ORIGIN";
-const std::string BOVCollection::_brickSizeToken           = "BRICK_SIZE";
+const std::string BOVCollection::_brickSizeToken      = "BRICK_SIZE";
 const std::string BOVCollection::_offsetToken         = "BYTE_OFFSET";
 const std::string BOVCollection::_divideBrickToken    = "DIVIDE_BRICK";
 const std::string BOVCollection::_dataBrickletsToken  = "DATA_BRICKLETS";
@@ -43,7 +43,7 @@ const std::string BOVCollection::_floatFormatString  = "FLOAT";
 const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
 BOVCollection::BOVCollection()
-: _time("0"), _dataFile({}), _dataFormat(DC::FLOAT), _variable("brickVar"), _dataEndian("LITTLE"), _centering("ZONAL"), _byteOffset(0), _divideBrick(false), _dataComponents(1), _timeDimension(_timeDim)
+: _time("0"), _dataFile({}), _dataFormat(DC::XType::INVALID), _variable("brickVar"), _dataEndian("LITTLE"), _centering("ZONAL"), _byteOffset(0), _divideBrick(false), _dataComponents(1), _timeDimension(_timeDim)
 {
     _dataSize.clear();
     _brickOrigin.resize(3, 0.);
@@ -85,7 +85,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             }
 
             rc = _findToken(_formatToken, line, _dataFormat);
-            if (_dataFormat == DC::INVALID) {
+            if (rc == 1 && _dataFormat == DC::INVALID) {
                 std::string message = _formatToken + " must be either BYTE, SHORT, INT, FLOAT, or DOUBLE.";
                 SetErrMsg(message.c_str());
                 return -1;
@@ -126,6 +126,20 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
         SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
         return -1;
     }
+   
+    if (_dataFile == "" ) {
+        SetErrMsg(("BOV file missing token  " + _dataFileToken).c_str());
+        return -1;
+    }
+    if (_dataFormat == DC::XType::INVALID) {
+        SetErrMsg(("BOV file missing token  " + _formatToken).c_str());
+        return -1;
+    }
+    if (_dataSize.empty()) {
+        SetErrMsg(("BOV file missing token  " + _dataSizeToken).c_str());
+        return -1;
+    }
+ 
     return 0;
 }
 
@@ -216,13 +230,13 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         if (ss.eof() == 0) {
             std::string message = "The keyword " + token + " may only contain one value.";
             SetErrMsg(message.c_str());
-            return -1;
+            return -1;  // Bad token
         }
 
         if (ss.bad()) {
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
-            return -1;
+            return -1;  // Bad token
         }
         return 1;  // we now have a token
     }
@@ -249,7 +263,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
             value.clear();
             std::string message = token + " must be a set of three values.";
             SetErrMsg(message.c_str());
-            return -1;
+            return -1;  // Bad token
         }
 
         if (lineStream.bad()) {
@@ -257,7 +271,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
             std::cout << "FAIL v " << token << std::endl;
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
-            return -1;
+            return -1;  // Bad token
         }
 
         if (verbose) {
@@ -280,7 +294,6 @@ void BOVCollection::_findTokenValue(std::string &line) const
         token = line.substr(0, pos);
         line.erase(0, pos + delimiter.length());
     }
-    std::cout << "                                      " << line << std::endl;
 }
 
 size_t BOVCollection::_sizeOfFormat( DC::XType type ) const {
@@ -329,7 +342,7 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
     size_t numValues = _dataSize[0]*_dataSize[1]*_dataSize[2];
 
     // Read a "pencil" of data along the X axis, one row at a time
-    size_t xStride = max[0]-min[0]+1;
+    size_t count = max[0]-min[0]+1;
     for (int k=min[2]; k<=max[2]; k++) {
         int zOffset = _dataSize[0]*_dataSize[1]*k;
         for (int j=min[1]; j<=max[1]; j++) {
@@ -337,10 +350,14 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
             int yOffset = _dataSize[0]*j;
             int offset = formatSize*(xOffset + yOffset + zOffset);
 
-            fseek( fp, offset, SEEK_SET );
-            size_t rc = fread( region, formatSize, xStride, fp );
+            //char readBuffer[count*formatSize];
+            int readBuffer[count*formatSize];
 
-            if (rc != xStride) {
+            fseek( fp, offset, SEEK_SET );
+            //size_t rc = fread( region, formatSize, count, fp );
+            size_t rc = fread( readBuffer, formatSize, count, fp );
+
+            if (rc != count) {
                 if (ferror(fp) != 0) {
                     MyBase::SetErrMsg("Error reading input file");
                 } else {
@@ -349,7 +366,26 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
                 return -1;
             }
 
-            region+=xStride;
+            // Do I need a buffer of type _dataFormat (INT, FLOAT, or DOUBLE),
+            // then read file values into that,
+            // then cast those values into region?
+            for (int i=0; i<count; i++) {
+                //region[offset+i] = (typename std::remove_pointer<T>::type)readBuffer[i*formatSize];
+                //region[offset+i] = (typename std::remove_pointer<T>::type)readBuffer[i];
+                std::cout << readBuffer[i] << std::endl;
+                //region[offset+i] = (float)readBuffer[i];
+                *region = (float)readBuffer[i];
+                region++;
+                
+                //region[count+i] = (float)readBuffer[i];
+                //region[count+i] = (typename std::remove_pointer<T>::type)readBuffer[i];
+                
+                //*region = (typename std::remove_pointer<T>::type)readBuffer[i];
+                //region++;
+            }
+
+            //region+=offset;
+            //region+=count;
         }
     }
 
