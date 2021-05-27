@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <type_traits>
 #include "vapor/VAssert.h"
 #include <stdio.h>
 
@@ -190,11 +191,7 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
     if (pos != std::string::npos) {    // We found the token
         std::string format = line;
         _findTokenValue(format);
-        if (format == _byteFormatString)
-            _dataFormat = DC::INT8;
-        else if (format == _shortFormatString)
-            _dataFormat = DC::INVALID;    // No XType for 16bit short
-        else if (format == _intFormatString)
+        if (format == _intFormatString)
             _dataFormat = DC::INT32;
         else if (format == _floatFormatString)
             _dataFormat = DC::FLOAT;
@@ -321,6 +318,12 @@ void BOVCollection::_swapBytes(void *vptr, size_t size, size_t n) const
     }
 }
 
+template<class T1, class T2>
+void print_is_same() 
+{
+    std::cout << std::is_same<T1, T2>() << '\n';
+}
+
 template<class T>
 int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector<size_t> &max, T region ) {
     FILE* fp = fopen( _dataFile.c_str(), "rb" );
@@ -341,6 +344,7 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
     }
     size_t numValues = _dataSize[0]*_dataSize[1]*_dataSize[2];
 
+
     // Read a "pencil" of data along the X axis, one row at a time
     size_t count = max[0]-min[0]+1;
     for (int k=min[2]; k<=max[2]; k++) {
@@ -350,8 +354,9 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
             int yOffset = _dataSize[0]*j;
             int offset = formatSize*(xOffset + yOffset + zOffset);
 
-            //char readBuffer[count*formatSize];
-            int readBuffer[count*formatSize];
+            unsigned char readBuffer[count*formatSize];
+            //int readBuffer[count];
+            //float readBuffer[count];
 
             fseek( fp, offset, SEEK_SET );
             //size_t rc = fread( region, formatSize, count, fp );
@@ -366,20 +371,50 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
                 return -1;
             }
 
+            if (_dataFormat == DC::XType::INT32) {
+                //char* castBuffer = (char*)readBuffer;
+                int* castBuffer = (int*)readBuffer;
+                for (int i=0; i<count; i++) {
+                    //*region++ = (typename std::remove_pointer<T>::type)castBuffer[i];
+                    *region++ = (float)castBuffer[i];
+                }
+            }
+            if (_dataFormat == DC::XType::FLOAT) {
+                std::cout << "DC::XType::FLOAT " << formatSize << std::endl;
+                float* castBuffer = (float*)readBuffer;
+                for (int i=0; i<count; i++) {
+                    *region++ = (typename std::remove_pointer<T>::type)castBuffer[i];
+                }
+            }
+            if (_dataFormat == DC::XType::DOUBLE) {
+                double* castBuffer = (double*)readBuffer;
+                for (int i=0; i<count; i++) {
+                    *region++ = (typename std::remove_pointer<T>::type)castBuffer[i];
+                }
+            }
+
             // Do I need a buffer of type _dataFormat (INT, FLOAT, or DOUBLE),
             // then read file values into that,
             // then cast those values into region?
-            for (int i=0; i<count; i++) {
-                *region = (typename std::remove_pointer<T>::type)readBuffer[i];
+            //for (int i=0; i<count; i++) {
+                
+                //print_is_same<float, typename std::remove_pointer<T>::type>();
+                //std::cout << (typename std::remove_pointer<T>::type)readBuffer[i] << std::endl;
+                //std::cout << typeid((typename std::remove_pointer<T>::type)readBuffer[i]).name() << std::endl;
+
+                //*region = (typename std::remove_pointer<T>::type)readBuffer[i*formatSize];
+                //*region = reinterpret_cast<(typename std::remove_pointer<T>::type)>(readBuffer[i*formatSize]);
+                //*region = reinterpret_cast<double>(readBuffer[i*formatSize]);
+                //*region = (double)(readBuffer[i*formatSize]);
+            //    *region = (typename std::remove_pointer<T>::type)readBuffer[i*formatSize];
+                //*region = reinterpret_cast<(typename std::remove_pointer<T>::type)>(readBuffer[i*formatSize]);
+                //region = reinterpret_cast<T>(readBuffer[i*formatSize]);
+                //*region = static_cast<(typename std::remove_pointer<T>::type)>(readBuffer[i*formatSize]);
+                //*region = (float)readBuffer[i*formatSize];
                 //*region = (float)readBuffer[i];
-                region++;
-                
-                //region[count+i] = (float)readBuffer[i];
-                //region[count+i] = (typename std::remove_pointer<T>::type)readBuffer[i];
-                
-                //*region = (typename std::remove_pointer<T>::type)readBuffer[i];
+
                 //region++;
-            }
+            //}
         }
     }
 
