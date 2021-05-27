@@ -859,7 +859,7 @@ void MainForm::_createFileMenu()
                                        "current session");
 
     _dataImportBOV_Action = new QAction(this);
-    _dataImportBOV_Action->setText(tr("BOV"));
+    _dataImportBOV_Action->setText(tr("Brick of Values (BOV)"));
     _dataImportBOV_Action->setToolTip("Specify one BOV data file to import into the "
                                       "current session");
 

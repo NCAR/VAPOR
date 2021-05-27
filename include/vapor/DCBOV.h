@@ -103,8 +103,6 @@ protected:
     //!
     virtual string getMapProjection() const
     {
-        // Projections not supported yet :-(
-        //
         return (_proj4String);
     }
 

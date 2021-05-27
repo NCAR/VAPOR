@@ -15,6 +15,7 @@ public:
     std::string              GetDataFile() const;
     std::string              GetDataVariableName() const;
     std::string              GetTimeDimension() const;
+    std::string              GetUserTime() const;
     std::vector<size_t>      GetDataSize() const;
     std::vector<std::string> GetSpatialDimensions() const;
     DC::XType                GetDataFormat() const;
@@ -23,11 +24,6 @@ public:
     std::string              GetDataEndian() const;
 
     template<class T> int ReadRegion(const std::vector<size_t> &min, const std::vector<size_t> &max, T region);
-    //template<class T> int ReadRegion(T region);
-    /*template<class T> int ReadRegion(std::string varname, T *region) {
-        std::cout << typeid(region).name();
-        return 0;
-    };*/
 
 private:
     std::string              _time;
@@ -47,8 +43,8 @@ private:
     std::vector<std::string> _spatialDimensions;
     std::string              _timeDimension;
 
-    template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = true);
-    template<typename T> int _findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = true);
+    template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = false);
+    template<typename T> int _findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = false);
     template<> int           _findToken<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose);
 
     void _findTokenValue(std::string &line) const;

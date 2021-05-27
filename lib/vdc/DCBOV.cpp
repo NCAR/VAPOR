@@ -21,22 +21,6 @@
 using namespace VAPoR;
 using namespace std;
 
-namespace {
-
-#ifdef UNUSED_FUNCTION
-// Product of elements in a vector
-//
-size_t vproduct(vector<size_t> a)
-{
-    size_t ntotal = 1;
-
-    for (int i = 0; i < a.size(); i++) ntotal *= a[i];
-    return (ntotal);
-}
-#endif
-
-};    // namespace
-
 DCBOV::DCBOV() : _bovCollection(nullptr)
 {
     _dimsMap.clear();
@@ -132,11 +116,10 @@ int DCBOV::_InitCoordinates()
     _coordVarsMap[dims[2]].SetAttribute(DC::Attribute("axis", DC::TEXT, "Z"));
     _coordVarsMap[dims[2]].SetAttribute(unitAttribute);
 
-    // Is there something better to use than "seconds since 2000-1-1 0:0:0"?
-    // Should it be stored in BOVCollection?
+    std::string userTime = _bovCollection->GetUserTime();
     std::string timeDim = _bovCollection->GetTimeDimension();
-    _coordVarsMap[timeDim] = CoordVar(timeDim, "seconds since 2000-1-1 0:0:0", DC::FLOAT, periodic, 3, true, {}, timeDim);
-    _coordVarsMap[timeDim].SetAttribute(DC::Attribute("units", DC::TEXT, "seconds since 2000-1-1 0:0:0"));
+    _coordVarsMap[timeDim] = CoordVar(timeDim, userTime, DC::FLOAT, periodic, 3, true, {}, timeDim);
+    _coordVarsMap[timeDim].SetAttribute(DC::Attribute("units", DC::TEXT, userTime));
     _coordVarsMap[timeDim].SetAttribute(DC::Attribute("axis", DC::TEXT, "T"));
 
     return 0;
@@ -157,7 +140,7 @@ int DCBOV::_InitVars()
     DC::XType                format = _bovCollection->GetDataFormat();
     string                   time_dim_name = "";
     string                   time_coordvar = "";
-    string                   units = "m";    // Should this be stored in BOVCollection?
+    string                   units = "m";
 
     Mesh mesh(var, dimnames, dimnames);
 
@@ -355,13 +338,6 @@ int DCBOV::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 
 int DCBOV::openVariableRead(size_t ts, string varname)
 {
-    _varname = varname;
-    //std::cout << "int DCBOV::openVariableRead(size_t ts, string varname) " << varname << std::endl;
-    // return 0;
-    // int aux = _ncdfc->OpenRead(ts, varname);
-
-    // if (aux < 0) return (aux);
-
     FileTable::FileObject *f = new FileTable::FileObject(ts, varname, 0, 0, 0);    // aux);
     return (_fileTable.AddEntry(f));
 }
@@ -370,19 +346,13 @@ int DCBOV::closeVariable(int fd)
 {
     DC::FileTable::FileObject *w = _fileTable.GetEntry(fd);
 
-    //std::cout << "closeVariable( " << w->GetVarname() << std::endl;
-
     if (!w) {
         SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
-    // int aux = w->GetAux();
-
-    // int rc = _ncdfc->Close(aux);
 
     _fileTable.RemoveEntry(fd);
 
-    // return (rc);*/
     return 0;
 }
 
@@ -414,7 +384,7 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
 
     if (varname == _bovCollection->GetTimeDimension()) {
         region[0] = 1.f;
-    } else if (_varname == _bovCollection->GetDataVariableName()) {
+    } else if (varname == _bovCollection->GetDataVariableName()) {
         int rc = _bovCollection->ReadRegion( min, max, region );
         if (rc < 0) {
             SetErrMsg("DCBOV::_readRegionTemplate error");

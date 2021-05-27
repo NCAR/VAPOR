@@ -115,7 +115,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
                 SetErrMsg(("Invalid value for token: " + _variableToken).c_str());
             }
 
-            // All other variables are unused.  
+            // All other variables are currently unused.  
             //
             _findToken(_centeringToken, line, _centering);
             _findToken(_offsetToken, line, _byteOffset);
@@ -127,7 +127,9 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
         SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
         return -1;
     }
-   
+  
+    // Ensure we have the required tokens
+    // 
     if (_dataFile == "" ) {
         SetErrMsg(("BOV file missing token  " + _dataFileToken).c_str());
         return -1;
@@ -145,7 +147,6 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 }
 
 std::string BOVCollection::GetDataFile() const { 
-    //return _dataFile[0]; 
     return _dataFile; 
 }
 
@@ -159,6 +160,10 @@ std::vector<std::string> BOVCollection::GetSpatialDimensions() const {
 
 std::string BOVCollection::GetTimeDimension() const { 
     return _timeDimension; 
+}
+
+std::string BOVCollection::GetUserTime() const {
+    return _time;
 }
 
 std::vector<size_t> BOVCollection::GetDataSize() const { 
@@ -318,12 +323,6 @@ void BOVCollection::_swapBytes(void *vptr, size_t size, size_t n) const
     }
 }
 
-template<class T1, class T2>
-void print_is_same() 
-{
-    std::cout << std::is_same<T1, T2>() << '\n';
-}
-
 template<class T>
 int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector<size_t> &max, T region ) {
     FILE* fp = fopen( _dataFile.c_str(), "rb" );
@@ -344,6 +343,10 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
     }
     size_t numValues = _dataSize[0]*_dataSize[1]*_dataSize[2];
 
+    int n = 1;
+    bool systemLittleEndian = *(char *)&n == 1 ? true : false;
+    bool dataLittleEndian = _dataEndian == "LITTLE" ? true : false;
+    bool needSwap = systemLittleEndian != dataLittleEndian ? true : false;
 
     // Read a "pencil" of data along the X axis, one row at a time
     size_t count = max[0]-min[0]+1;
@@ -355,11 +358,12 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
             int offset = formatSize*(xOffset + yOffset + zOffset);
 
             unsigned char readBuffer[count*formatSize];
-            //int readBuffer[count];
-            //float readBuffer[count];
+    
+            if ( needSwap ) {
+                _swapBytes( readBuffer, formatSize, numValues );
+            }
 
             fseek( fp, offset, SEEK_SET );
-            //size_t rc = fread( region, formatSize, count, fp );
             size_t rc = fread( readBuffer, formatSize, count, fp );
 
             if (rc != count) {
@@ -372,60 +376,27 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
             }
 
             if (_dataFormat == DC::XType::INT32) {
-                //char* castBuffer = (char*)readBuffer;
                 int* castBuffer = (int*)readBuffer;
                 for (int i=0; i<count; i++) {
-                    //*region++ = (typename std::remove_pointer<T>::type)castBuffer[i];
-                    *region++ = (float)castBuffer[i];
+                    *region++ = (typename std::remove_pointer<T>::type)castBuffer[i];
                 }
             }
-            if (_dataFormat == DC::XType::FLOAT) {
-                std::cout << "DC::XType::FLOAT " << formatSize << std::endl;
+            else if (_dataFormat == DC::XType::FLOAT) {
                 float* castBuffer = (float*)readBuffer;
                 for (int i=0; i<count; i++) {
                     *region++ = (typename std::remove_pointer<T>::type)castBuffer[i];
                 }
             }
-            if (_dataFormat == DC::XType::DOUBLE) {
+            else if (_dataFormat == DC::XType::DOUBLE) {
                 double* castBuffer = (double*)readBuffer;
                 for (int i=0; i<count; i++) {
                     *region++ = (typename std::remove_pointer<T>::type)castBuffer[i];
                 }
             }
-
-            // Do I need a buffer of type _dataFormat (INT, FLOAT, or DOUBLE),
-            // then read file values into that,
-            // then cast those values into region?
-            //for (int i=0; i<count; i++) {
-                
-                //print_is_same<float, typename std::remove_pointer<T>::type>();
-                //std::cout << (typename std::remove_pointer<T>::type)readBuffer[i] << std::endl;
-                //std::cout << typeid((typename std::remove_pointer<T>::type)readBuffer[i]).name() << std::endl;
-
-                //*region = (typename std::remove_pointer<T>::type)readBuffer[i*formatSize];
-                //*region = reinterpret_cast<(typename std::remove_pointer<T>::type)>(readBuffer[i*formatSize]);
-                //*region = reinterpret_cast<double>(readBuffer[i*formatSize]);
-                //*region = (double)(readBuffer[i*formatSize]);
-            //    *region = (typename std::remove_pointer<T>::type)readBuffer[i*formatSize];
-                //*region = reinterpret_cast<(typename std::remove_pointer<T>::type)>(readBuffer[i*formatSize]);
-                //region = reinterpret_cast<T>(readBuffer[i*formatSize]);
-                //*region = static_cast<(typename std::remove_pointer<T>::type)>(readBuffer[i*formatSize]);
-                //*region = (float)readBuffer[i*formatSize];
-                //*region = (float)readBuffer[i];
-
-                //region++;
-            //}
         }
     }
 
     fclose(fp);
-
-    int n = 1;
-    bool systemLittleEndian = *(char *)&n == 1 ? true : false;
-    bool dataLittleEndian = _dataEndian == "LITTLE" ? true : false;
-    if ( systemLittleEndian != dataLittleEndian ) {
-        _swapBytes( region, formatSize, numValues );
-    }
 
     return 0;
 }
@@ -434,12 +405,3 @@ int BOVCollection::ReadRegion( const std::vector<size_t> &min, const std::vector
 template int BOVCollection::ReadRegion<int*>(const std::vector<size_t>&, const std::vector<size_t>&, int*);
 template int BOVCollection::ReadRegion<float*>(const std::vector<size_t>&, const std::vector<size_t>&, float*);
 template int BOVCollection::ReadRegion<double*>(const std::vector<size_t>&, const std::vector<size_t>&, double*);
-
-/*template<class T> int BOVCollection::ReadRegion(T region) { 
-    std::cout << "type is " << typeid(region).name() << std::endl;
-    return 0; 
-}*/
-
-//template int BOVCollection::ReadRegion<int*>(int*);
-
-//template int BOVCollection::ReadRegion<float>(float);
