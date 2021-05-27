@@ -76,7 +76,7 @@ private:
     static const std::string _floatFormatString;
     static const std::string _doubleFormatString;
 };
-    
+
 // Make gcc happy by moving template specialization outside of the class body
 //
 template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose);
