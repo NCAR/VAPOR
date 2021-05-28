@@ -634,27 +634,10 @@ UnstructuredGrid3D *GridHelper::_make_grid_unstructured_3d(size_t ts, int level,
 
     UnstructuredGridCoordless zug(vertexDims, faceDims, edgeDims, bs, zcblkptrs, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
 
-    string qtr_key = _getQuadTreeRectangleKey(ts, level, lod, cvarsinfo, bmin, bmax);
-
-    // Try to get a shared pointer to the QuadTreeRectangle from the
-    // cache. If one does not exist the Grid class will make one. We use
-    // a shared pointer so that we can cache it for use by other Grid
-    // classes. This a peformance optimization, necessary be creating
-    // a QuadTreeRectangle is expensive.
-    //
-    std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr = _qtrCache.get(qtr_key);
 
     UnstructuredGrid3D *g = new UnstructuredGrid3D(vertexDims, faceDims, edgeDims, bs, blkptrs, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset,
-                                                   faceOffset, xug, yug, zug, qtr);
+                                                   faceOffset, xug, yug, zug);
 
-    // No QuadTreeRectangle in cache. So get shared pointer for one created
-    // by UnstructuredGrid2D() and cache it for later use. The memory
-    // will be garbage collected when all pointers to it go out of scope
-    //
-    //    if (! qtr) {
-    //        qtr = g->GetQuadTreeRectangle();
-    //        (void) _qtrCache.put(qtr_key, qtr);
-    //    }
 
     return (g);
 }

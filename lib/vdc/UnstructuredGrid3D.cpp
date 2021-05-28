@@ -23,7 +23,7 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
                                        const std::vector<float *> &blks, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                                        Location location,    // node,face, edge
                                        size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
-                                       const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
+                                       const UnstructuredGridCoordless &zug)
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset), _xug(xug), _yug(yug),
   _zug(zug)
 {
@@ -139,50 +139,8 @@ bool UnstructuredGrid3D::InsideGrid(const DblArr3 &coords) const
 
 bool UnstructuredGrid3D::_insideGrid(const DblArr3 &coords, Size_tArr3 &cindices, std::vector<size_t> &nodes2D, std::vector<double> &lambda, float zwgt[2]) const
 {
-    VAssert(_location == NODE);
     VAssert(!"Not implemented");
     return false;
-
-    nodes2D.clear();
-    lambda.clear();
-
-    DblArr3 cCoords;
-    ClampCoord(coords, cCoords);
-
-    // Find the 2D horizontal cell containing the X,Y coordinates
-    //
-    std::vector<std::vector<size_t>> nodes;
-
-    bool status = false;
-    //	status = _ug2d.GetIndicesCell(cCoords, cindices, nodes, lambda);
-    if (!status) return (status);
-
-    VAssert(lambda.size() == nodes.size());
-    for (int i = 0; i < nodes.size(); i++) { nodes2D.push_back(nodes[i][0]); }
-
-    // Find k index of cell containing z
-    //
-    vector<double> zcoords;
-
-    size_t nz = GetDimensions()[1];
-    for (int kk = 0; kk < nz; kk++) {
-        float z = 0.0;
-        for (int i = 0; i < lambda.size(); i++) { z += _zug.AccessIJK(nodes2D[i], kk) * lambda[i]; }
-
-        zcoords.push_back(z);
-    }
-
-    size_t k;
-    if (!Wasp::BinarySearchRange(zcoords, cCoords[2], k)) return (false);
-
-    VAssert(k >= 0 && k < nz);
-    cindices[1] = k;
-
-    float z = cCoords[2];
-    zwgt[0] = 1.0 - (z - zcoords[k]) / (zcoords[k + 1] - zcoords[k]);
-    zwgt[1] = 1.0 - zwgt[0];
-
-    return (true);
 }
 
 

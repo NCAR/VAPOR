@@ -864,15 +864,6 @@ int DerivedCoordVar_CF1D::GetDimLensAtLevel(int level, std::vector<size_t> &dims
 
 int DerivedCoordVar_CF1D::OpenVariableRead(size_t ts, int level, int lod)
 {
-    //    if (level != 0) {
-    //        SetErrMsg("Invalid parameter");
-    //        return (-1);
-    //    }
-
-    //    if (lod != 0) {
-    //        SetErrMsg("Invalid parameter");
-    //        return (-1);
-    //    }
 
     DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, _derivedVarName, level, lod);
 

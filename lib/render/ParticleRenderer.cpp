@@ -77,7 +77,7 @@ int ParticleRenderer::_paintGL(bool)
     p->GetBox()->GetExtents(minExt, maxExt);
 #define PD3(v) printf("%s = %f, %f, %f\n", #v, v[0], v[1], v[2])
     string varName = p->GetVariableName();
-    Grid * grid = _dataMgr->GetVariable(p->GetCurrentTimestep(), varName, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt);
+    Grid * grid = _dataMgr->GetVariable(p->GetCurrentTimestep(), varName, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt, true);
     if (!grid) return -1;
 
     vector<long> values;
@@ -96,16 +96,28 @@ int ParticleRenderer::_paintGL(bool)
             _dataMgr->GetVarCoordVars(var, true, varCoords);
 
             if (mainVarCoords != varCoords) {
-                if (grid) delete grid;
-                for (auto g : vecGrids) delete g;
+                if (grid) {
+                    _dataMgr->UnlockGrid(grid);
+                    delete grid;
+                }
+                for (auto g : vecGrids) {
+                    _dataMgr->UnlockGrid(g);
+                    delete g;
+                }
                 SetErrMsg("Variable \"%s\" on different grid from main variable", var.c_str());
                 return -1;
             }
 
-            Grid *ng = _dataMgr->GetVariable(p->GetCurrentTimestep(), var, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt);
+            Grid *ng = _dataMgr->GetVariable(p->GetCurrentTimestep(), var, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt, true);
             if (!ng) {
-                if (grid) delete grid;
-                for (auto g : vecGrids) delete g;
+                if (grid) {
+                    _dataMgr->UnlockGrid(grid);
+                    delete grid;
+                }
+                for (auto g : vecGrids) {
+                    _dataMgr->UnlockGrid(g);
+                    delete g;
+                }
                 SetErrMsg("Cannot read var \"%s\"", var.c_str());
                 return -1;
             }
@@ -155,8 +167,12 @@ int ParticleRenderer::_paintGL(bool)
 
     //    printf("Rendered %li particles\n", renderedParticles);
 
+    _dataMgr->UnlockGrid(grid);
     delete grid;
-    for (auto g : vecGrids) delete g;
+    for (auto g : vecGrids) {
+        _dataMgr->UnlockGrid(g);
+        delete g;
+    }
     return rc;
 }
 

@@ -27,7 +27,7 @@ public:
                        const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                        Location location,    // node,face, edge
                        size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
-                       const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
+                       const UnstructuredGridCoordless &zug);
 
     UnstructuredGrid3D() = default;
     virtual ~UnstructuredGrid3D() = default;
