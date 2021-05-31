@@ -28,7 +28,7 @@ bool PVariableSelector::isShown() const
     return true;
 }
 
-int  PVariableSelector::getVarType() const
+int PVariableSelector::getVarType() const
 {
     if (_showParticleVars)
         return (int)VarType::Particle;

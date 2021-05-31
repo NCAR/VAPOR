@@ -125,10 +125,9 @@ int DCP::initialize(const vector<string> &paths, const std::vector<string> &opti
             }
         }
     }
-    
+
     vector<string> coordVarsNames;
-    for (auto it = _coordVarsMap.cbegin(); it != _coordVarsMap.cend(); ++it)
-        coordVarsNames.push_back(it->first);
+    for (auto it = _coordVarsMap.cbegin(); it != _coordVarsMap.cend(); ++it) coordVarsNames.push_back(it->first);
 
     string         particlePositions = "Position";
     vector<string> coords = {
@@ -136,14 +135,14 @@ int DCP::initialize(const vector<string> &paths, const std::vector<string> &opti
         particlePositions + "_y",
         particlePositions + "_z",
     };
-    
+
     for (const auto &requiredCoordVar : coords) {
         if (!STLUtils::Contains(coordVarsNames, requiredCoordVar)) {
             MyBase::SetErrMsg("File missing required coord var %s", requiredCoordVar.c_str());
             return -1;
         }
     }
-    
+
     // Mesh
     // ==================
     DC::Mesh mesh("particles", 1, 1, particlesDim, particlesDim, coords);

@@ -15,7 +15,7 @@ public:
     std::string        GetType() const { return GetClassType(); }
     bool               Supports2DVariables() const { return true; }
     bool               Supports3DVariables() const { return true; }
-    bool          SupportsParticleVariables() const { return true; }
+    bool               SupportsParticleVariables() const { return true; }
 
 protected:
     string _getDescription() const;

@@ -198,7 +198,7 @@ public:
     //!
     //! \test New in 3.0
     enum class VarType { Any, Scalar, Particle };
-    virtual std::vector<string> GetDataVarNames(int ndim, VarType type=VarType::Any) const;
+    virtual std::vector<string> GetDataVarNames(int ndim, VarType type = VarType::Any) const;
 
     //! Return a list of names for all of the defined coordinate variables.
     //!

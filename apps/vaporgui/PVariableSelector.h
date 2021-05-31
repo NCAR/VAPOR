@@ -36,7 +36,7 @@ protected:
     void         updateGUI() const override;
     bool         isShown() const override;
     bool         requireDataMgr() const override { return true; }
-    int  getVarType() const;
+    int          getVarType() const;
     int          getRendererDimension() const;
     virtual int  getDimensionality() const;
     virtual void dropdownTextChanged(std::string text) override;

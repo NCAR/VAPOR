@@ -90,7 +90,8 @@ public:
     //! small icon (thumbnail), or an empty string if none exists
     //
     RenderHolder(QWidget *parent, VAPoR::ControlExec *ce, const std::vector<QWidget *> &widgets, const std::vector<string> &widgetNames, const std::vector<string> &descriptions,
-                 const std::vector<string> &iconPaths, const std::vector<string> &smallIconPaths, const std::vector<bool> &dim2DSupport, const std::vector<bool> &dim3DSupport, vector<bool> particleSupport);
+                 const std::vector<string> &iconPaths, const std::vector<string> &smallIconPaths, const std::vector<bool> &dim2DSupport, const std::vector<bool> &dim3DSupport,
+                 vector<bool> particleSupport);
 
     virtual ~RenderHolder() {}
 

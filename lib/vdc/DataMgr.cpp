@@ -753,8 +753,8 @@ vector<string> DataMgr::GetDataVarNames(int ndim, VarType type) const
         vector<string> coordvars;
         GetVarCoordVars(vars[i], true, coordvars);
         if (coordvars.size() < ndim) continue;
-        
-        if (type == VarType::Scalar   && GetVarTopologyDim(vars[i]) == 0) continue;
+
+        if (type == VarType::Scalar && GetVarTopologyDim(vars[i]) == 0) continue;
         if (type == VarType::Particle && GetVarTopologyDim(vars[i]) != 0) continue;
 
         validVars.push_back(vars[i]);
