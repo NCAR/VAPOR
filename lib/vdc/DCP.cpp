@@ -79,6 +79,10 @@ int DCP::initialize(const vector<string> &paths, const std::vector<string> &opti
     } else {
         particlesDim = "P";
         axisDim = "axis";
+        if (!STLUtils::Contains(dimNames, string("P"))) {
+            MyBase::SetErrMsg("File missing required dimension P");
+            return -1;
+        }
     }
 
     for (int i = 0; i < dimNames.size(); i++)
@@ -88,6 +92,8 @@ int DCP::initialize(const vector<string> &paths, const std::vector<string> &opti
             _dimsMap[dimNames[i]] = DC::Dimension(dimNames[i], dimLens[i]);
 
 #if DCP_ENABLE_PARTICLE_DENSITY
+    //! Vapor does not support derived dimensions so this is a "derived" dimension to allow particle densities.
+    //! See documentation in DCP.h
     _dimsMap["densityX"] = DC::Dimension("densityX", 32);
     _dimsMap["densityY"] = DC::Dimension("densityY", 32);
     _dimsMap["densityZ"] = DC::Dimension("densityZ", 4);
@@ -119,15 +125,27 @@ int DCP::initialize(const vector<string> &paths, const std::vector<string> &opti
             }
         }
     }
+    
+    vector<string> coordVarsNames;
+    for (auto it = _coordVarsMap.cbegin(); it != _coordVarsMap.cend(); ++it)
+        coordVarsNames.push_back(it->first);
 
-    // Mesh
-    // ==================
     string         particlePositions = "Position";
     vector<string> coords = {
         particlePositions + "_x",
         particlePositions + "_y",
         particlePositions + "_z",
     };
+    
+    for (const auto &requiredCoordVar : coords) {
+        if (!STLUtils::Contains(coordVarsNames, requiredCoordVar)) {
+            MyBase::SetErrMsg("File missing required coord var %s", requiredCoordVar.c_str());
+            return -1;
+        }
+    }
+    
+    // Mesh
+    // ==================
     DC::Mesh mesh("particles", 1, 1, particlesDim, particlesDim, coords);
     mesh.SetNodeFaceVar(nodeFaceVar);
     mesh.SetFaceNodeVar(faceNodeVar);
@@ -217,6 +235,8 @@ bool DCP::getDimension(string dimname, DC::Dimension &dimension, long ts) const
 {
     if (ts == -1
 #if DCP_ENABLE_PARTICLE_DENSITY
+        //! Vapor does not support derived dimensions so this is a "derived" dimension to allow particle densities.
+        //! See documentation in DCP.h
         && !STLUtils::Contains(dimname, "density")
 #endif
     ) {

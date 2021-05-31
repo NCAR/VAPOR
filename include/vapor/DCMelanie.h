@@ -1,3 +1,5 @@
+#ifdef BUILD_DC_MELANIE
+
 #include <vector>
 #include <algorithm>
 #include <map>
@@ -175,4 +177,5 @@ private:
 };
 };    // namespace VAPoR
 
+#endif
 #endif

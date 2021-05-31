@@ -606,8 +606,10 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         _dc = new DCMPAS();
     } else if (_format.compare("dcp") == 0) {
         _dc = new DCP();
+#ifdef BUILD_DC_MELANIE
     } else if (_format.compare("melanie") == 0) {
         _dc = new DCMelanie();
+#endif
     } else {
         SetErrMsg("Invalid data collection format : %s", _format.c_str());
         return (-1);
@@ -646,6 +648,8 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
     }
 
 #if DCP_ENABLE_PARTICLE_DENSITY
+    //! Generates a regular 3D mesh for use in creating a particle density field.
+    //! See more documentation in DCP.h
     if (_format == "dcp") {
         vector<string> dims = {"densityX", "densityY", "densityZ"};
 
@@ -730,11 +734,11 @@ vector<string> DataMgr::GetDataVarNames() const
     return (validvars);
 }
 
-vector<string> DataMgr::GetDataVarNames(int ndim) const
+vector<string> DataMgr::GetDataVarNames(int ndim, VarType type) const
 {
     VAssert(_dc);
 
-    if (_dataVarNamesCache[ndim].size()) { return (_dataVarNamesCache[ndim]); }
+    if (_dataVarNamesCache[std::make_pair(type, ndim)].size()) { return (_dataVarNamesCache[std::make_pair(type, ndim)]); }
 
     vector<string> vars = _dc->GetDataVarNames(ndim);
     vector<string> derived_vars = _getDataVarNamesDerived(ndim);
@@ -749,11 +753,14 @@ vector<string> DataMgr::GetDataVarNames(int ndim) const
         vector<string> coordvars;
         GetVarCoordVars(vars[i], true, coordvars);
         if (coordvars.size() < ndim) continue;
+        
+        if (type == VarType::Scalar   && GetVarTopologyDim(vars[i]) == 0) continue;
+        if (type == VarType::Particle && GetVarTopologyDim(vars[i]) != 0) continue;
 
         validVars.push_back(vars[i]);
     }
 
-    _dataVarNamesCache[ndim] = validVars;
+    _dataVarNamesCache[std::make_pair(type, ndim)] = validVars;
     return (validVars);
 }
 

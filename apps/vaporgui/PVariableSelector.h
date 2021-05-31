@@ -12,6 +12,7 @@
 class PVariableSelector : public PStringDropdown {
     bool _addNull = false;
     int  _onlyShowForDim = -1;
+    bool _showParticleVars = false;
 
 public:
     PVariableSelector(const std::string &tag, const std::string &label = "");
@@ -25,11 +26,17 @@ public:
         _onlyShowForDim = dim;
         return this;
     }
+    PVariableSelector *ShowParticleVars()
+    {
+        _showParticleVars = true;
+        return this;
+    }
 
 protected:
     void         updateGUI() const override;
     bool         isShown() const override;
     bool         requireDataMgr() const override { return true; }
+    int  getVarType() const;
     int          getRendererDimension() const;
     virtual int  getDimensionality() const;
     virtual void dropdownTextChanged(std::string text) override;

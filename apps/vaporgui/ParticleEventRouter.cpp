@@ -13,10 +13,10 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
 
     AddVariablesSubtab(new PGroup({
         new PSection("Variable Selection", {
-            new PScalarVariableSelector,
-            new PXFieldVariableSelector,
-            new PYFieldVariableSelector,
-            new PZFieldVariableSelector,
+            (new PScalarVariableSelector)->ShowParticleVars(),
+            (new PXFieldVariableSelector)->ShowParticleVars(),
+            (new PYFieldVariableSelector)->ShowParticleVars(),
+            (new PZFieldVariableSelector)->ShowParticleVars(),
         }),
         new PSection("Data Fidelity", {
             (new PIntegerInput(ParticleParams::StrideTag, "Stride"))->SetRange(1, 1000)
@@ -28,9 +28,9 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
         new PSection("Direction", {
             new PCheckbox(ParticleParams::ShowDirectionTag, "Show"),
             (new PDoubleSliderEdit(ParticleParams::DirectionScaleTag, "Scale"))->SetRange(0.0001, 10)->EnableDynamicUpdate(),
-            new PXFieldVariableSelector,
-            new PYFieldVariableSelector,
-            new PZFieldVariableSelector,
+            (new PXFieldVariableSelector)->ShowParticleVars(),
+            (new PYFieldVariableSelector)->ShowParticleVars(),
+            (new PZFieldVariableSelector)->ShowParticleVars(),
         }),
     }));
     

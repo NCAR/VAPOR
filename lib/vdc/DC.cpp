@@ -321,7 +321,7 @@ size_t DC::Mesh::GetTopologyDim() const
     case STRUCTURED: return (_dim_names.size()); break;
     case UNSTRUC_2D: return (2); break;
     case UNSTRUC_LAYERED: return (3); break;
-    case UNSTRUC_3D: return (3); break;
+    case UNSTRUC_3D: return (0); break;
     default:
         VAssert(false);
         return (0);
@@ -377,7 +377,7 @@ vector<string> DC::GetDataVarNames(int ndim) const
         ok = GetMesh(mesh_name, mesh);
         if (!ok) continue;
 
-        size_t d = mesh.GetTopologyDim();
+        size_t d = mesh.GetGeometryDim();
 
         if (d == ndim) { names.push_back(allnames[i]); }
     }

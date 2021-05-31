@@ -1,3 +1,5 @@
+#ifdef BUILD_DC_MELANIE
+
 #include <algorithm>
 #include <cassert>
 #include <vector>
@@ -516,3 +518,5 @@ string DCMelanie::getOriginalVarName(const string &name) const
     if (it == _sanitizedToOriginalMap.end()) return name;
     return it->second;
 }
+
+#endif

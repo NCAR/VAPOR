@@ -14,7 +14,8 @@ public:
     static string GetClassType() { return VAPoR::ParticleRenderer::GetClassType(); }
     string        GetType() const { return GetClassType(); }
     bool          Supports2DVariables() const { return false; }
-    bool          Supports3DVariables() const { return true; }
+    bool          Supports3DVariables() const { return false; }
+    bool          SupportsParticleVariables() const { return true; }
 
 protected:
     virtual string _getDescription() const;

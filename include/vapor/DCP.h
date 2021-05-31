@@ -13,6 +13,9 @@
 #ifndef _DCP_H_
     #define _DCP_H_
 
+//! This enables a beta feature which automatically generates particle density fields
+//! when importing particle data. In it's current state, if DCP_ENABLE_PARTICLE_DENSITY
+//! is set to 1, it will work but the volume will have a fixed grid size and it uses a sub-optimal sampling algorithm.
     #define DCP_ENABLE_PARTICLE_DENSITY 0
 
 namespace VAPoR {

@@ -197,7 +197,8 @@ public:
     //! with the specified number of dimensions (rank).
     //!
     //! \test New in 3.0
-    virtual std::vector<string> GetDataVarNames(int ndim) const;
+    enum class VarType { Any, Scalar, Particle };
+    virtual std::vector<string> GetDataVarNames(int ndim, VarType type=VarType::Any) const;
 
     //! Return a list of names for all of the defined coordinate variables.
     //!
@@ -639,7 +640,7 @@ private:
         std::map<string, std::vector<C>> _cache;
     };
 
-    mutable std::map<size_t, std::vector<string>> _dataVarNamesCache;
+    mutable std::map<std::pair<VarType, size_t>, std::vector<string>> _dataVarNamesCache;
 
     string _format;
     int    _nthreads;
