@@ -32,6 +32,8 @@ Vapor 3.4.0 is now Live!
 
 April 5, 2021
 
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+
 Version 3.4 is Vapor's first usability-focused release.  See some of the new features in the following demo:
 
 .. raw:: html
