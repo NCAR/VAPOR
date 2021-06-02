@@ -32,10 +32,6 @@ public:
     UnstructuredGrid3D() = default;
     virtual ~UnstructuredGrid3D() = default;
 
-    // std::shared_ptr<const QuadTreeRectangle<float, size_t> >GetQuadTreeRectangle() const {
-    //	return(_ug2d.GetQuadTreeRectangle());
-    // }
-
     virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
 
     virtual size_t GetGeometryDim() const override;

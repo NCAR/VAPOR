@@ -145,8 +145,6 @@ int NetCDFCollection::Initialize(const vector<string> &files, const vector<strin
                 _dimLens[itr - _dimNames.begin()] += dims[j];
             } else if (_dimLens[itr - _dimNames.begin()] != dims[j]) {
                 _dimIsTimeVarying[itr - _dimNames.begin()] = true;
-                //                SetErrMsg("Spatial dimension %s changed size", dimnames[j].c_str());
-                //                return (-1);
             }
         }
 

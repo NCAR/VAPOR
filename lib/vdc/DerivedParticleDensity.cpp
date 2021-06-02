@@ -157,7 +157,6 @@ int DerivedParticleDensity::GetDimLensAtLevel(int level, std::vector<size_t> &di
         dims_at_level.push_back(dim.GetLength());
     }
 
-    //    dims_at_level = {128, 128, 128};
     bs_at_level = vector<size_t>(dims_at_level.size(), 1);
     return 0;
 }
