@@ -16,6 +16,8 @@ Vapor builds installers on a weekly basis.  These have new features that have no
 Current Stable Release: Vapor 3.4.0
 -----------------------------------
 
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+
 .. raw:: html
 
     <iframe width="560" height="315" src="https://www.youtube.com/embed/8FabwuxxbDo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
