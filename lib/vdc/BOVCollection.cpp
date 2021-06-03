@@ -87,7 +87,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 
             rc = _findToken(_formatToken, line, _dataFormat);
             if (rc == 1 && _dataFormat == DC::INVALID) {
-                std::string message = _formatToken + " must be either BYTE, SHORT, INT, FLOAT, or DOUBLE.";
+                std::string message = _formatToken + " must be either INT, FLOAT, or DOUBLE.";
                 SetErrMsg(message.c_str());
                 return -1;
             }
