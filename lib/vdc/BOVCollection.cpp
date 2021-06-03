@@ -160,7 +160,7 @@ std::string BOVCollection::GetDataEndian() const { return _dataEndian; }
 template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
 {
     // Skip comments
-    if (line[0] == '#') { return 0; }
+    if (line[0] == '#') { return NOT_FOUND; }
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
@@ -176,16 +176,16 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
             _dataFormat = DC::INVALID;
 
         if (verbose) { std::cout << std::setw(20) << token << " " << _dataFormat << std::endl; }
-        return 1;
+        return FOUND;
     }
-    return 0;
+    return NOT_FOUND;
 }
 
 // Template specialization for reading data of types bool or string
 template<typename T> int BOVCollection::_findToken(const std::string &token, std::string &line, T &value, bool verbose)
 {
     // Skip comments
-    if (line[0] == '#') { return 0; }
+    if (line[0] == '#') { return NOT_FOUND; }
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
@@ -202,17 +202,17 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         if (ss.eof() == 0) {
             std::string message = "The keyword " + token + " may only contain one value.";
             SetErrMsg(message.c_str());
-            return -1;    // Bad token
+            return ERROR;
         }
 
         if (ss.bad()) {
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
-            return -1;    // Bad token
+            return ERROR;
         }
-        return 1;    // we now have a token
+        return FOUND;
     }
-    return 0;    // we didn't find the token
+    return NOT_FOUND;
 }
 
 // Template specialization for reading data of type std::vector<int> or std::vector<float>
@@ -220,7 +220,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 template<typename T> int BOVCollection::_findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose)
 {
     // Skip comments
-    if (line[0] == '#') { return 0; }
+    if (line[0] == '#') { return NOT_FOUND; }
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
@@ -235,7 +235,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
             value.clear();
             std::string message = token + " must be a set of three values.";
             SetErrMsg(message.c_str());
-            return -1;    // Bad token
+            return ERROR;
         }
 
         if (lineStream.bad()) {
@@ -243,7 +243,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
             std::cout << "FAIL v " << token << std::endl;
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
-            return -1;    // Bad token
+            return ERROR;
         }
 
         if (verbose) {
@@ -251,9 +251,9 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
             for (int i = 0; i < value.size(); i++) std::cout << value[i] << " ";
             std::cout << std::endl;
         }
-        return 1;    // we now have a token
+        return FOUND;
     }
-    return 0;    // we didn't find the token
+    return NOT_FOUND;
 }
 
 void BOVCollection::_findTokenValue(std::string &line) const
@@ -328,7 +328,8 @@ template<class T> int BOVCollection::ReadRegion(const std::vector<size_t> &min, 
             int yOffset = _dataSize[0] * j;
             int offset = formatSize * (xOffset + yOffset + zOffset);
 
-            unsigned char readBuffer[count * formatSize];
+            static Wasp::SmartBuf smart_buf;
+            unsigned char* readBuffer = (unsigned char *)smart_buf.Alloc(count*formatSize);
 
             if (needSwap) { _swapBytes(readBuffer, formatSize, numValues); }
 
@@ -337,9 +338,9 @@ template<class T> int BOVCollection::ReadRegion(const std::vector<size_t> &min, 
 
             if (rc != count) {
                 if (ferror(fp) != 0) {
-                    MyBase::SetErrMsg("Error reading input file");
+                    MyBase::SetErrMsg("Error reading input file: %M");
                 } else {
-                    MyBase::SetErrMsg("Short read on input file");
+                    MyBase::SetErrMsg("Short read on input file: %M");
                 }
                 return -1;
             }

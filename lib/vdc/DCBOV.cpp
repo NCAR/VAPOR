@@ -27,16 +27,10 @@ DCBOV::DCBOV() : _bovCollection(nullptr)
     _dataVarsMap.clear();
     _meshMap.clear();
     _coordVarKeys.clear();
-    _derivedVars.clear();
 }
 
 DCBOV::~DCBOV()
 {
-    for (int i = 0; i < _derivedVars.size(); i++) {
-        if (_derivedVars[i]) delete _derivedVars[i];
-    }
-    _derivedVars.clear();
-
     if (_bovCollection != nullptr) { delete _bovCollection; }
 }
 

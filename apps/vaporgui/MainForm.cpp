@@ -858,11 +858,6 @@ void MainForm::_createFileMenu()
     _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the "
                                        "current session");
 
-    _dataImportBOV_Action = new QAction(this);
-    _dataImportBOV_Action->setText(tr("Brick of Values (BOV)"));
-    _dataImportBOV_Action->setToolTip("Specify one BOV data file to import into the "
-                                      "current session");
-
     _fileOpenAction = new QAction(this);
     _fileOpenAction->setEnabled(true);
     _fileSaveAction = new QAction(this);
@@ -904,7 +899,7 @@ void MainForm::_createFileMenu()
     _importMenu->addAction(_dataImportWRF_Action);
     _importMenu->addAction(_dataImportCF_Action);
     _importMenu->addAction(_dataImportMPAS_Action);
-    _importMenu->addAction(_dataImportBOV_Action);
+    _importMenu->addAction("Brick of Values (BOV)", this, [this]() { loadDataHelper("", {}, "BOV files", "", "bov", true, DatasetExistsAction::Prompt); });
     _File->addSeparator();
 
     // _File->addAction(createTextSeparator(" Session"));
@@ -919,7 +914,6 @@ void MainForm::_createFileMenu()
     connect(_dataImportWRF_Action, SIGNAL(triggered()), this, SLOT(importWRFData()));
     connect(_dataImportCF_Action, SIGNAL(triggered()), this, SLOT(importCFData()));
     connect(_dataImportMPAS_Action, SIGNAL(triggered()), this, SLOT(importMPASData()));
-    connect(_dataImportBOV_Action, SIGNAL(triggered()), this, SLOT(importBOVData()));
 
     connect(_fileNew_SessionAction, SIGNAL(triggered()), this, SLOT(sessionNew()));
     connect(_fileOpenAction, SIGNAL(triggered()), this, SLOT(sessionOpen()));
