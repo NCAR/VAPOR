@@ -89,9 +89,9 @@ int DCBOV::_InitDimensions()
 
 int DCBOV::_InitCoordinates()
 {
-    bool uniformHint = true;
+    bool         uniformHint = true;
     vector<bool> periodic(false);
-    std::string units = "m";
+    std::string  units = "m";
 
     std::vector<std::string> dims = _bovCollection->GetSpatialDimensions();
 
@@ -319,7 +319,8 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     return 0;
 }
 
-bool DCBOV::variableExists(size_t ts, string varname, int, int) const {
+bool DCBOV::variableExists(size_t ts, string varname, int, int) const
+{
     if (_coordVarsMap.find(varname) != _coordVarsMap.end()) return true;
     if (_dataVarsMap.find(varname) != _dataVarsMap.end()) return true;
     return false;

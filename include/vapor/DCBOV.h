@@ -22,7 +22,7 @@ class BOVCollection;
 //!
 //! \brief Class for reading a "Brick of Values", explained in section 3.1 (page 11) in the
 //! following VisIt document: https://github.com/NCAR/VAPOR/files/6341067/GettingDataIntoVisIt2.0.0.pdf
-//! 
+//!
 //! The following BOV tags are currently unsupported:
 //! - CENTERING
 //! - BYTE_OFFSET
@@ -109,10 +109,7 @@ protected:
 
     //! \copydoc DC::GetMapProjection()
     //!
-    virtual string getMapProjection() const
-    {
-        return ("");
-    }
+    virtual string getMapProjection() const { return (""); }
 
     //! \copydoc DC::GetAtt()
     //!
@@ -157,16 +154,16 @@ protected:
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
 private:
-    VAPoR::UDUnits      _udunits;
+    VAPoR::UDUnits _udunits;
 
     BOVCollection *_bovCollection;
 
-    string                                      _varname;
-    std::map<string, DC::Dimension>             _dimsMap;
-    std::map<string, DC::CoordVar>              _coordVarsMap;
-    std::map<string, DC::Mesh>                  _meshMap;
-    std::map<string, DC::DataVar>               _dataVarsMap;
-    std::map<string, string>                    _coordVarKeys;
+    string                          _varname;
+    std::map<string, DC::Dimension> _dimsMap;
+    std::map<string, DC::CoordVar>  _coordVarsMap;
+    std::map<string, DC::Mesh>      _meshMap;
+    std::map<string, DC::DataVar>   _dataVarsMap;
+    std::map<string, string>        _coordVarKeys;
 
     int _InitCoordinates();
 
@@ -176,6 +173,6 @@ private:
 
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 
-    //template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
+    // template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
 };
 }    // namespace VAPoR

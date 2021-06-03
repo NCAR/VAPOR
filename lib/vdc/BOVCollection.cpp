@@ -329,7 +329,7 @@ template<class T> int BOVCollection::ReadRegion(const std::vector<size_t> &min, 
             int offset = formatSize * (xOffset + yOffset + zOffset);
 
             static Wasp::SmartBuf smart_buf;
-            unsigned char* readBuffer = (unsigned char *)smart_buf.Alloc(count*formatSize);
+            unsigned char *       readBuffer = (unsigned char *)smart_buf.Alloc(count * formatSize);
 
             if (needSwap) { _swapBytes(readBuffer, formatSize, numValues); }
 
