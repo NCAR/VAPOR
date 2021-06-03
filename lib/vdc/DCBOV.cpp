@@ -95,25 +95,15 @@ int DCBOV::_InitCoordinates()
 
     std::vector<std::string> dims = _bovCollection->GetSpatialDimensions();
 
-    DC::Attribute unitAttribute("units", DC::TEXT, units);
-
     _coordVarsMap[dims[0]] = CoordVar(dims[0], units, DC::FLOAT, periodic, 0, uniformHint, {dims[0]}, "");
-    _coordVarsMap[dims[0]].SetAttribute(DC::Attribute("axis", DC::TEXT, "X"));
-    _coordVarsMap[dims[0]].SetAttribute(unitAttribute);
 
     _coordVarsMap[dims[1]] = CoordVar(dims[1], units, DC::FLOAT, periodic, 1, uniformHint, {dims[1]}, "");
-    _coordVarsMap[dims[1]].SetAttribute(DC::Attribute("axis", DC::TEXT, "Y"));
-    _coordVarsMap[dims[1]].SetAttribute(unitAttribute);
 
     _coordVarsMap[dims[2]] = CoordVar(dims[2], units, DC::FLOAT, periodic, 2, uniformHint, {dims[2]}, "");
-    _coordVarsMap[dims[2]].SetAttribute(DC::Attribute("axis", DC::TEXT, "Z"));
-    _coordVarsMap[dims[2]].SetAttribute(unitAttribute);
 
     std::string userTime = _bovCollection->GetUserTime();
     std::string timeDim = _bovCollection->GetTimeDimension();
     _coordVarsMap[timeDim] = CoordVar(timeDim, userTime, DC::FLOAT, periodic, 3, true, {}, timeDim);
-    _coordVarsMap[timeDim].SetAttribute(DC::Attribute("units", DC::TEXT, userTime));
-    _coordVarsMap[timeDim].SetAttribute(DC::Attribute("axis", DC::TEXT, "T"));
 
     return 0;
 }
@@ -143,8 +133,6 @@ int DCBOV::_InitVars()
     _meshMap[mesh.GetName()] = mesh;
 
     _dataVarsMap[var] = DataVar(var, units, format, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
-    _dataVarsMap[var].SetAttribute(DC::Attribute("standard_name", DC::TEXT, var));
-    _dataVarsMap[var].SetAttribute(DC::Attribute("units", DC::TEXT, units));
 
     return (0);
 }
@@ -247,69 +235,15 @@ std::vector<string> DCBOV::getCoordVarNames() const
     return (names);
 }
 
-template<class T> bool DCBOV::_getAttTemplate(string varname, string attname, T &values) const
-{
-    DC::BaseVar var;
-    bool        status = getBaseVarInfo(varname, var);
-    if (!status) return (status);
+bool DCBOV::getAtt(string varname, string attname, vector<double> &values) const { return false; }
 
-    DC::Attribute att;
-    status = var.GetAttribute(attname, att);
-    if (!status) return (status);
+bool DCBOV::getAtt(string varname, string attname, vector<long> &values) const { return false; }
 
-    att.GetValues(values);
+bool DCBOV::getAtt(string varname, string attname, string &values) const { return false; }
 
-    return (true);
-}
+std::vector<string> DCBOV::getAttNames(string varname) const { return {}; }
 
-bool DCBOV::getAtt(string varname, string attname, vector<double> &values) const
-{
-    values.clear();
-
-    return (_getAttTemplate(varname, attname, values));
-}
-
-bool DCBOV::getAtt(string varname, string attname, vector<long> &values) const
-{
-    values.clear();
-
-    return (_getAttTemplate(varname, attname, values));
-}
-
-bool DCBOV::getAtt(string varname, string attname, string &values) const
-{
-    values.clear();
-
-    return (_getAttTemplate(varname, attname, values));
-}
-
-std::vector<string> DCBOV::getAttNames(string varname) const
-{
-    DC::BaseVar var;
-    bool        status = getBaseVarInfo(varname, var);
-    if (!status) return (vector<string>());
-
-    vector<string> names;
-
-    const std::map<string, Attribute> &         atts = var.GetAttributes();
-    std::map<string, Attribute>::const_iterator itr;
-    for (itr = atts.begin(); itr != atts.end(); ++itr) { names.push_back(itr->first); }
-
-    return (names);
-}
-
-DC::XType DCBOV::getAttType(string varname, string attname) const
-{
-    DC::BaseVar var;
-    bool        status = getBaseVarInfo(varname, var);
-    if (!status) return (DC::INVALID);
-
-    DC::Attribute att;
-    status = var.GetAttribute(attname, att);
-    if (!status) return (DC::INVALID);
-
-    return (att.GetXType());
-}
+DC::XType DCBOV::getAttType(string varname, string attname) const { return INVALID; }
 
 int DCBOV::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {

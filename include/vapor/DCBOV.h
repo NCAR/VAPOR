@@ -122,11 +122,11 @@ protected:
 
     //! \copydoc DC::GetAttNames()
     //!
-    //virtual std::vector<string> getAttNames(string varname) const;
+    virtual std::vector<string> getAttNames(string varname) const;
 
     //! \copydoc DC::GetAttType()
     //!
-    //virtual XType getAttType(string varname, string attname) const;
+    virtual XType getAttType(string varname, string attname) const;
 
     //! \copydoc DC::GetDimLensAtLevel()
     //!
