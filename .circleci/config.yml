@@ -85,19 +85,12 @@ jobs:
       - run:
           name: run clang-format
           command: |
-            for COMMIT in $(git log --pretty=format:%h main...$BRANCH); do
-                for FILE in $(git diff --name-only origin/main |grep -E "\.h|\.cpp"); do
-                    NUMBERS=""
-                    for NUMBER in $(git blame --line-porcelain "$FILE" | egrep ^$COMMIT | cut -d' ' -f3); do
-                        NUMBERS="$NUMBERS --lines $NUMBER:$NUMBER "
-                    done
-
-                    if [ "$NUMBERS" != "" ]; then
-                        echo "  Running clang-format on $FILE"
-                        clang-format-11 --dry-run $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
-                    fi
-                done
+            cd /root/project
+            for FILE in $(git diff --name-only "$CIRCLE_BRANCH" $(git merge-base "$CIRCLE_BRANCH" main) |grep -E "\.h|\.cpp"); do
+                echo "  Running clang-format on $FILE"
+                clang-format-11 --dry-run $FILE >> /tmp/clang-format.txt 2>&1
             done
+            exit 0
 
       - store_artifacts:
           path: /tmp/clang-format.txt
