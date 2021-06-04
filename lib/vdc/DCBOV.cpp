@@ -302,7 +302,7 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     // Return spatial coordinate variable values
     for (int dim = 0; dim < spatialDims.size(); dim++) {
         if (varname == spatialDims[dim]) {
-            float increment = brickSize[dim] / dataSize[dim];
+            float increment = brickSize[dim] / (dataSize[dim] - 1);
             for (int i = 0; i < dataSize[dim]; i++) { region[i] = origin[dim] + i * increment; }
         }
     }
