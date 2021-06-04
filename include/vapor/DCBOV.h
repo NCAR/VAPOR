@@ -23,6 +23,18 @@ class BOVCollection;
 //! \brief Class for reading a "Brick of Values", explained in section 3.1 (page 11) in the
 //! following VisIt document: https://github.com/NCAR/VAPOR/files/6341067/GettingDataIntoVisIt2.0.0.pdf
 //!
+//! The following BOV tags are mandatory for Vapor to ingest data:
+//! - DATA_FILE
+//! - DATA_SIZE
+//! - DATA_FORMAT
+//!
+//! The following BOV tags are optional:
+//! - BRICK_ORIGIN
+//! - BRICK_SIZE
+//! - DATA_ENDIAN
+//! - TIME
+//! - VARIABLE
+//!
 //! The following BOV tags are currently unsupported:
 //! - CENTERING
 //! - BYTE_OFFSET
