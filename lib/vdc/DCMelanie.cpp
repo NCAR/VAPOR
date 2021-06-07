@@ -309,7 +309,7 @@ std::vector<string> DCMelanie::getAttNames(string varname) const
     for (itr = atts.begin(); itr != atts.end(); ++itr) { names.push_back(itr->first); }
 
     //    printf("%s\n", ToStr(names).c_str());
-    return(names);
+    return (names);
 }
 
 DC::XType DCMelanie::getAttType(string varname, string attname) const

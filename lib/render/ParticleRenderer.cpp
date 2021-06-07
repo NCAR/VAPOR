@@ -82,9 +82,9 @@ int ParticleRenderer::_paintGL(bool)
 
     vector<long> values;
 
-    size_t        stride = max(1L, p->GetValueLong(ParticleParams::StrideTag, 1));
-    bool          showDir = p->GetValueLong(ParticleParams::ShowDirectionTag, 0);
-    float         dirScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1);
+    size_t         stride = max(1L, p->GetValueLong(ParticleParams::StrideTag, 1));
+    bool           showDir = p->GetValueLong(ParticleParams::ShowDirectionTag, 0);
+    float          dirScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1);
     vector<Grid *> vecGrids;
     if (showDir) {
         vector<string> vecNames = p->GetFieldVariableNames();
