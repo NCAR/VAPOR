@@ -81,7 +81,8 @@ int DCBOV::_InitDimensions()
     }
 
     string    timeDim = _bovCollection->GetTimeDimension();
-    Dimension dim(timeDim, 1);
+    size_t    numTimes = _bovCollection->GetUserTimes().size();
+    Dimension dim(timeDim, numTimes);
     _dimsMap[timeDim] = dim;
 
     return 0;
@@ -90,20 +91,19 @@ int DCBOV::_InitDimensions()
 int DCBOV::_InitCoordinates()
 {
     bool         uniformHint = true;
-    vector<bool> periodic(false);
+    vector<bool>             periodic(false, 4);
     std::string  units = "m";
-
     std::vector<std::string> dims = _bovCollection->GetSpatialDimensions();
 
     _coordVarsMap[dims[0]] = CoordVar(dims[0], units, DC::FLOAT, periodic, 0, uniformHint, {dims[0]}, "");
-
     _coordVarsMap[dims[1]] = CoordVar(dims[1], units, DC::FLOAT, periodic, 1, uniformHint, {dims[1]}, "");
-
     _coordVarsMap[dims[2]] = CoordVar(dims[2], units, DC::FLOAT, periodic, 2, uniformHint, {dims[2]}, "");
 
-    std::string userTime = _bovCollection->GetUserTime();
     std::string timeDim = _bovCollection->GetTimeDimension();
-    _coordVarsMap[timeDim] = CoordVar(timeDim, userTime, DC::FLOAT, periodic, 3, true, {}, timeDim);
+    // size_t numTimes = _bovCollection->GetUserTimes().size();
+    //_coordVarsMap[timeDim] = CoordVar(timeDim, "s", DC::FLOAT, periodic, 3, true, {}, timeDim);
+    //_coordVarsMap[timeDim] = CoordVar(timeDim, "s", DC::FLOAT, periodic, 3, true, {timeDim}, timeDim);
+    _coordVarsMap[timeDim] = CoordVar(timeDim, "seconds", DC::FLOAT, periodic, 3, true, {timeDim}, timeDim);
 
     return 0;
 }
@@ -121,8 +121,7 @@ int DCBOV::_InitVars()
     std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
     std::string              var = _bovCollection->GetDataVariableName();
     DC::XType                format = _bovCollection->GetDataFormat();
-    string                   time_dim_name = "";
-    string                   time_coordvar = "";
+    std::string              timeCoordVar = _bovCollection->GetTimeDimension();
     string                   units = "m";
 
     Mesh mesh(var, dimnames, dimnames);
@@ -132,7 +131,7 @@ int DCBOV::_InitVars()
     //
     _meshMap[mesh.GetName()] = mesh;
 
-    _dataVarsMap[var] = DataVar(var, units, format, periodic, mesh.GetName(), time_coordvar, DC::Mesh::NODE);
+    _dataVarsMap[var] = DataVar(var, units, format, periodic, mesh.GetName(), timeCoordVar, DC::Mesh::NODE);
 
     return (0);
 }
@@ -265,7 +264,7 @@ int DCBOV::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 
 int DCBOV::openVariableRead(size_t ts, string varname)
 {
-    FileTable::FileObject *f = new FileTable::FileObject(ts, varname, 0, 0, 0);    // aux);
+    FileTable::FileObject *f = new FileTable::FileObject(ts, varname, 0, 0, 0);
     return (_fileTable.AddEntry(f));
 }
 
@@ -292,25 +291,27 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     }
 
     std::string varname = w->GetVarname();
+    size_t      ts = w->GetTS();
 
     std::string              fileName = _bovCollection->GetDataFile();
     std::vector<std::string> spatialDims = _bovCollection->GetSpatialDimensions();
     std::vector<size_t>      dataSize = _bovCollection->GetDataSize();
-    std::vector<float>       origin = _bovCollection->GetBrickOrigin();
-    std::vector<float>       brickSize = _bovCollection->GetBrickSize();
+    std::vector<double>      origin = _bovCollection->GetBrickOrigin();
+    std::vector<double>      brickSize = _bovCollection->GetBrickSize();
 
     // Return spatial coordinate variable values
     for (int dim = 0; dim < spatialDims.size(); dim++) {
         if (varname == spatialDims[dim]) {
-            float increment = brickSize[dim] / (dataSize[dim] - 1);
+            double increment = brickSize[dim] / (dataSize[dim] - 1);
             for (int i = 0; i < dataSize[dim]; i++) { region[i] = origin[dim] + i * increment; }
         }
     }
 
     if (varname == _bovCollection->GetTimeDimension()) {
-        region[0] = 1.f;
+        std::vector<double> times = _bovCollection->GetUserTimes();
+        for (int i = 0; i < times.size(); i++) region[i] = times[i];
     } else if (varname == _bovCollection->GetDataVariableName()) {
-        int rc = _bovCollection->ReadRegion(min, max, region);
+        int rc = _bovCollection->ReadRegion(varname, ts, min, max, region);
         if (rc < 0) {
             SetErrMsg("DCBOV::_readRegionTemplate error");
             return -1;
