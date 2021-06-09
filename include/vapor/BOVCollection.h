@@ -15,10 +15,12 @@ public:
     int Initialize(const std::vector<std::string> &paths);
 
     std::string              GetDataFile() const;
-    std::string              GetDataVariableName() const;
+    std::vector<std::string> GetDataVariableNames() const;
     std::string              GetTimeDimension() const;
-    double                   GetUserTime() const;
-    std::vector<double>      GetUserTimes() const;
+    // double                   GetUserTime() const;
+    // std::vector<double>      GetUserTimes() const;
+    float                    GetUserTime() const;
+    std::vector<float>       GetUserTimes() const;
     std::vector<size_t>      GetDataSize() const;
     std::vector<std::string> GetSpatialDimensions() const;
     DC::XType                GetDataFormat() const;
@@ -29,8 +31,10 @@ public:
     template<class T> int ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region);
 
 private:
-    double                   _time;
-    std::vector<double>      _times;
+    // double                   _time;
+    float _time;
+    // std::vector<double>      _times;
+    std::vector<float>       _times;
     std::string              _dataFile;
     std::vector<std::string> _dataFiles;
     std::vector<size_t>      _gridSize;
@@ -49,7 +53,8 @@ private:
     // _dataFiles allows us to access the data files via the following:
     //      std::string file = _dataFiles[var][timeStep]
     //
-    std::map<std::string, std::map<size_t, std::string>> _dataFileMap;
+    // std::map<std::string, std::map<size_t, std::string>> _dataFileMap;
+    std::map<std::string, std::map<double, std::string>> _dataFileMap;
     std::vector<std::string> _spatialDimensions;
     std::string              _timeDimension;
 

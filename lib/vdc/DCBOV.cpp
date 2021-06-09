@@ -119,19 +119,21 @@ int DCBOV::_InitVars()
     vector<bool> periodic(3, false);
 
     std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
-    std::string              var = _bovCollection->GetDataVariableName();
+    std::vector<std::string> vars = _bovCollection->GetDataVariableNames();
     DC::XType                format = _bovCollection->GetDataFormat();
     std::string              timeCoordVar = _bovCollection->GetTimeDimension();
     string                   units = "m";
 
-    Mesh mesh(var, dimnames, dimnames);
+    for (auto var : vars) {
+        Mesh mesh(var, dimnames, dimnames);
 
-    // Create new mesh. We're being lazy here and probably should only
-    // createone if it doesn't ready exist
-    //
-    _meshMap[mesh.GetName()] = mesh;
+        // Create new mesh. We're being lazy here and probably should only
+        // createone if it doesn't ready exist
+        //
+        _meshMap[mesh.GetName()] = mesh;
 
-    _dataVarsMap[var] = DataVar(var, units, format, periodic, mesh.GetName(), timeCoordVar, DC::Mesh::NODE);
+        _dataVarsMap[var] = DataVar(var, units, format, periodic, mesh.GetName(), timeCoordVar, DC::Mesh::NODE);
+    }
 
     return (0);
 }
@@ -307,15 +309,21 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
         }
     }
 
-    if (varname == _bovCollection->GetTimeDimension()) {
-        std::vector<double> times = _bovCollection->GetUserTimes();
-        for (int i = 0; i < times.size(); i++) region[i] = times[i];
-    } else if (varname == _bovCollection->GetDataVariableName()) {
+    // If a data variable is requested, read it with ReadRegion
+    std::vector<std::string> varnames = _bovCollection->GetDataVariableNames();
+    if (std::find(varnames.begin(), varnames.end(), varname) != varnames.end()) {
         int rc = _bovCollection->ReadRegion(varname, ts, min, max, region);
         if (rc < 0) {
             SetErrMsg("DCBOV::_readRegionTemplate error");
             return -1;
         }
+    }
+    // Otherwise return time values
+    else if (varname == _bovCollection->GetTimeDimension()) {
+        // std::vector<double> times = _bovCollection->GetUserTimes();
+        std::vector<float> times = _bovCollection->GetUserTimes();
+        for (int i = 0; i < times.size(); i++) region[i] = (float)times[i];
+        // region[0] = times[ts];
     }
     return 0;
 }

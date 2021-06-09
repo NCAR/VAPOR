@@ -94,9 +94,12 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             if (_gridSize == _defaultGridSize) { return _missingValueError(_gridSizeToken); }
 
             _variables.push_back(_variable);
-            _times.push_back(_time);
-            size_t ts = _times.size() - 1;
-            _dataFileMap[_variable][ts] = _dataFile;
+            if (std::find(_times.begin(), _times.end(), _time) == _times.end()) _times.push_back(_time);
+            std::sort(_times.begin(), _times.end());
+            size_t ts = std::distance(_times.begin(), std::find(_times.begin(), _times.end(), _time));    // Index of current timestep
+
+            //_dataFileMap[_variable][ts] = _dataFile;
+            _dataFileMap[_variable][_time] = _dataFile;
         } else {
             SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
             return -1;
@@ -105,8 +108,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
     }
 
 
-    std::sort(_times.begin(), _times.end());
-
+    //_times.erase( std::unique(_times.begin(), _times.end()), _times.end());
 
     return 0;
 }
@@ -265,15 +267,16 @@ int BOVCollection::_invalidValueError(std::string token) const
 
 std::string BOVCollection::GetDataFile() const { return _dataFile; }
 
-std::string BOVCollection::GetDataVariableName() const { return _variable; }
+std::vector<std::string> BOVCollection::GetDataVariableNames() const { return _variables; }
 
 std::vector<std::string> BOVCollection::GetSpatialDimensions() const { return _spatialDimensions; }
 
 std::string BOVCollection::GetTimeDimension() const { return _timeDimension; }
 
-double BOVCollection::GetUserTime() const { return _time; }
+float BOVCollection::GetUserTime() const { return _time; }
 
-std::vector<double> BOVCollection::GetUserTimes() const { return _times; }
+// std::vector<double> BOVCollection::GetUserTimes() const { return _times; }
+std::vector<float> BOVCollection::GetUserTimes() const { return _times; }
 
 std::vector<size_t> BOVCollection::GetDataSize() const { return _gridSize; }
 
@@ -425,12 +428,15 @@ void BOVCollection::_swapBytes(void *vptr, size_t size, size_t n) const
 
 template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region)
 {
-    std::string dataFile = _dataFileMap[varname][ts];
+    // double time = _times[ts];
+    float time = _times[ts];
+    // std::string dataFile = _dataFileMap[varname][ts];
+    std::string dataFile = _dataFileMap[varname][time];
     std::cout << ts << " " << varname << std::endl;
-    for (int i = 0; i < _variables.size(); i++) {
+    /*for (int i = 0; i < _variables.size(); i++) {
         std::string var = _variables[i];
         for (int j = 0; j < _times.size(); j++) { std::cout << "    " << var << " " << _times[j] << " " << _dataFileMap[varname][j] << std::endl; }
-    }
+    }*/
     std::cout << "        " << dataFile << std::endl;
 
     FILE *fp = fopen(dataFile.c_str(), "rb");
