@@ -46,5 +46,4 @@ void PRendererTransformWidget::updateGUI() const
 
 #include "PSection.h"
 
-PRendererTransformSection::PRendererTransformSection()
-: PWidgetWrapper(new PSection("Transform", {new PRendererTransformWidget})) {}
+PRendererTransformSection::PRendererTransformSection() : PWidgetWrapper(new PSection("Transform", {new PRendererTransformWidget})) {}

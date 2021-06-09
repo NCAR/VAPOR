@@ -206,8 +206,8 @@ public:
     static const string m_openDataSetsTag;
     static const string _flowDimensionalityTag;
     static const string BookmarksTag;
-private:
 
+private:
     MouseModeParams *m_mouseModeParams;
 
     VAPoR::ParamsContainer *m_openDataSets;

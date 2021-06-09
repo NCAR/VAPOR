@@ -6,7 +6,4 @@ PWidgetWrapper::PWidgetWrapper(std::string tag, PWidget *p) : PWidget(tag, _chil
 
 void PWidgetWrapper::updateGUI() const { _child->Update(getWrappedParams(), getParamsMgr(), getDataMgr()); }
 
-VAPoR::ParamsBase *PWidgetWrapper::getWrappedParams() const
-{
-    return getParams();
-}
+VAPoR::ParamsBase *PWidgetWrapper::getWrappedParams() const { return getParams(); }

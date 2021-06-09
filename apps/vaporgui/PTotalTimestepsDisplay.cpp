@@ -3,8 +3,7 @@
 #include "VLabel.h"
 
 
-PTotalTimestepsDisplay::PTotalTimestepsDisplay(VAPoR::ControlExec *ce)
-: PWidget("", _label=new VLabel), _ce(ce) {}
+PTotalTimestepsDisplay::PTotalTimestepsDisplay(VAPoR::ControlExec *ce) : PWidget("", _label = new VLabel), _ce(ce) {}
 
 
 void PTotalTimestepsDisplay::updateGUI() const

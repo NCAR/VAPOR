@@ -9,7 +9,7 @@ class ControlExec;
 
 class ViewpointTab : public QWidget, public EventRouter {
     Q_OBJECT
-    
+
     PWidget *_pg = nullptr;
 
 public:

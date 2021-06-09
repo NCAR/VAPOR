@@ -14,7 +14,7 @@ public:
     PLineItem(const std::string &tag, const std::string &label, QWidget *centerWidget, QWidget *rightWidget);
     PLineItem(const std::string &tag, const std::string &label, QWidget *rightWidget);
     PLineItem(const std::string &label, PWidget *rightWidget);
-    
+
 protected:
     void updateGUI() const override;
 };

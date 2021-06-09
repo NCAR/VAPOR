@@ -10,9 +10,11 @@ class VLabel;
 
 class PTotalTimestepsDisplay : public PWidget {
     VAPoR::ControlExec *_ce;
-    VLabel *_label;
+    VLabel *            _label;
+
 public:
     PTotalTimestepsDisplay(VAPoR::ControlExec *ce);
+
 protected:
     void updateGUI() const override;
 };

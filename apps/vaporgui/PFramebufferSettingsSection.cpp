@@ -20,7 +20,4 @@ PFramebufferSettingsSection::PFramebufferSettingsSection(VAPoR::ControlExec *ce)
 // clang-format on
 
 
-VAPoR::ParamsBase *PFramebufferSettingsSection::getWrappedParams() const
-{
-    return NavigationUtils::GetActiveViewpointParams(_ce);
-}
+VAPoR::ParamsBase *PFramebufferSettingsSection::getWrappedParams() const { return NavigationUtils::GetActiveViewpointParams(_ce); }

@@ -498,9 +498,8 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     // Re-initialize the ControlExec to match the new state
     //
     rc = openDataHelper(true);
-    
-    if (STLUtils::Contains(options, string("-auto_stretch_z")))
-        _autoStretchExtents(dataSetName);
+
+    if (STLUtils::Contains(options, string("-auto_stretch_z"))) _autoStretchExtents(dataSetName);
 
     UndoRedoClear();
     return (rc);
@@ -932,7 +931,7 @@ void ControlExec::_autoStretchExtents(string dataSetName)
         if (scales[yDimension] != 1.f) continue;
         if (scales[zDimension] != 1.f) continue;
 
-//        size_t ts = GetCurrentTimeStep();
+        //        size_t ts = GetCurrentTimeStep();
         size_t ts = 0;
         ds->GetActiveExtents(paramsMgr, winNames[i], dataSetName, ts, minExt, maxExt);
 

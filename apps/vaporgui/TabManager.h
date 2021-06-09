@@ -203,8 +203,8 @@ private:
     std::map<string, EventRouter *> _eventRouterMap;
 
     bool                   _initialized;
-    AnimationTab * _animationEventRouter;
-    ViewpointTab *_navigationEventRouter;
+    AnimationTab *         _animationEventRouter;
+    ViewpointTab *         _navigationEventRouter;
 
     TabManager() {}
 

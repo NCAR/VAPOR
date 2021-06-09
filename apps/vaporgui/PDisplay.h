@@ -17,7 +17,7 @@ public:
 
 protected:
     VLabel *_label;
-    
+
     void setText(std::string text) const;
 };
 

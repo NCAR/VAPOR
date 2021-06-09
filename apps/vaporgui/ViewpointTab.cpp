@@ -20,9 +20,9 @@ ViewpointTab::ViewpointTab(ControlExec *ce) : EventRouter(ce, ViewpointParams::G
         new PFramebufferSettingsSection(_controlExec),
         proj = new PProjectionStringSection(_controlExec),
     });
-    
+
     connect(proj, &PProjectionStringSection::Proj4StringChanged, this, &ViewpointTab::Proj4StringChanged);
-    
+
     QVBoxLayout *l = new QVBoxLayout;
     l->setContentsMargins(0, 0, 0, 0);
     setLayout(l);
@@ -30,8 +30,8 @@ ViewpointTab::ViewpointTab(ControlExec *ce) : EventRouter(ce, ViewpointParams::G
     l->addStretch();
 }
 
-void ViewpointTab::_updateTab() {
+void ViewpointTab::_updateTab()
+{
     if (isEnabled())
-        if (_pg)
-            _pg->Update(GetStateParams());
+        if (_pg) _pg->Update(GetStateParams());
 }

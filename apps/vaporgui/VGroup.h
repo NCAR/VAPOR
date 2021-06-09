@@ -8,7 +8,7 @@
 
 class VGroup : public QWidget, public AbstractWidgetGroup<VGroup, QWidget> {
 public:
-    VGroup(List children={});
+    VGroup(List children = {});
     VGroup *Add(QWidget *w);
 };
 
@@ -17,5 +17,5 @@ public:
 
 class VSubGroup : public VGroup {
 public:
-    VSubGroup(List children={});
+    VSubGroup(List children = {});
 };

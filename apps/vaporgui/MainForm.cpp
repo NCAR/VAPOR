@@ -397,7 +397,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
 
     _tabMgr = new TabManager(this, _controlExec);
     _tabMgr->setUsesScrollButtons(true);
-    
+
     _animationController = new AnimationController(_controlExec);
 
     int dpi = qApp->desktop()->logicalDpiX();
@@ -733,7 +733,7 @@ void MainForm::_createVizToolBar()
     connect(_viewAllAction, SIGNAL(triggered()), _tabMgr, SLOT(ViewAll()));
     connect(_sethomeAction, SIGNAL(triggered()), _tabMgr, SLOT(SetHomeViewpoint()));
     connect(_alignViewCombo, SIGNAL(activated(int)), _tabMgr, SLOT(AlignView(int)));
-//    connect(_viewRegionAction, SIGNAL(triggered()), _tabMgr, SLOT(CenterSubRegion()));
+    //    connect(_viewRegionAction, SIGNAL(triggered()), _tabMgr, SLOT(CenterSubRegion()));
     connect(_tileAction, SIGNAL(triggered()), _vizWinMgr, SLOT(FitSpace()));
     connect(_cascadeAction, SIGNAL(triggered()), _vizWinMgr, SLOT(Cascade()));
     connect(_interactiveRefinementSpin, SIGNAL(valueChanged(int)), this, SLOT(setInteractiveRefLevel(int)));
@@ -1647,9 +1647,8 @@ void MainForm::loadDataHelper(string dataSetName, const vector<string> &files, s
     if (dataSetName.empty()) return;
 
     vector<string> options = {"-project_to_pcs", "-vertical_xform"};
-    
-    if (GetSettingsParams()->GetAutoStretchEnabled())
-        options.push_back("-auto_stretch_z");
+
+    if (GetSettingsParams()->GetAutoStretchEnabled()) options.push_back("-auto_stretch_z");
 
     if (!p->GetProjectionString().empty()) {
         options.push_back("-proj4");

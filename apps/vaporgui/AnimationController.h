@@ -14,13 +14,14 @@ class ControlExec;
 class AnimationController : public QObject {
     Q_OBJECT
     VAPoR::ControlExec *_controlExec;
-    QTimer *_myTimer;
-    int     _direction;
-    bool    _animationOn = false;
+    QTimer *            _myTimer;
+    int                 _direction;
+    bool                _animationOn = false;
+
 public:
     AnimationController(VAPoR::ControlExec *ce);
     void Update();
-    
+
 public slots:
     void AnimationPause();
     void AnimationPlayReverse();
@@ -28,7 +29,7 @@ public slots:
     void AnimationStepForward();
     void AnimationStepReverse();
     void SetTimeStep(int ts);
-    
+
 signals:
 
     // Emitted when animation is turned on (true) or off (false)
@@ -40,13 +41,13 @@ signals:
     // onOff == true;
     //
     void AnimationDrawSignal();
-    
+
 private:
-    void setCurrentTimestep(size_t ts) const;
-    void setPlay(int direction);
+    void             setCurrentTimestep(size_t ts) const;
+    void             setPlay(int direction);
     AnimationParams *GetActiveParams() const;
-    void _updateTab();
-    
+    void             _updateTab();
+
 private slots:
     void playNextFrame();
 };

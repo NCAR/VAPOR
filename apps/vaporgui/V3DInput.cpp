@@ -33,10 +33,7 @@ void V3DInput::SetValue(const std::vector<double> &xyz)
     SetValue(xyz[0], xyz[1], xyz[2]);
 }
 
-void V3DInput::SetValue(const double xyz[3])
-{
-    SetValue(xyz[0], xyz[1], xyz[2]);
-}
+void V3DInput::SetValue(const double xyz[3]) { SetValue(xyz[0], xyz[1], xyz[2]); }
 
 void V3DInput::GetValue(double xyz[3]) const
 {

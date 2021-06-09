@@ -70,7 +70,7 @@ void NavigationUtils::ViewAll(ControlExec *ce)
 
     // Make sure the dirvec is normalized:
     double dirvec[] = {0.0, 0.0, -1.0};
-//    vnormal(dirvec);
+    //    vnormal(dirvec);
 
     double upvec[] = {0.0, 1.0, 0.0};
 
@@ -177,12 +177,12 @@ void NavigationUtils::AlignView(ControlExec *ce, int axis)
 void NavigationUtils::SetAllCameras(ControlExec *ce, const double position[3], const double direction[3], const double up[3], const double origin[3])
 {
     Trackball trackball;
-    bool ok = trackball.setFromFrame(position, direction, up, origin, true);
+    bool      ok = trackball.setFromFrame(position, direction, up, origin, true);
     if (!ok) {
         MSG_ERR("Invalid camera settings");
         return;
     }
-    
+
     trackball.TrackballSetMatrix();
     const double *m = trackball.GetModelViewMatrix();
     SetAllCameras(ce, m, origin);
@@ -198,7 +198,7 @@ void NavigationUtils::SetAllCameras(ControlExec *ce, const vector<double> &posit
 void NavigationUtils::SetAllCameras(ControlExec *ce, const double matrix[16], const double origin[3])
 {
     ParamsMgr *pm = ce->GetParamsMgr();
-    auto vizNames = pm->GetVisualizerNames();
+    auto       vizNames = pm->GetVisualizerNames();
     pm->BeginSaveStateGroup("Set Camera");
     for (auto &viz : vizNames) {
         ViewpointParams *vp = pm->GetViewpointParams(viz);
@@ -286,8 +286,8 @@ long NavigationUtils::GetCurrentTimeStep(VAPoR::ControlExec *ce)
 
 VAPoR::ViewpointParams *NavigationUtils::GetActiveViewpointParams(ControlExec *ce)
 {
-    ParamsMgr *pm = ce->GetParamsMgr();
-    auto activeViz = GetGUIStateParams(ce)->GetActiveVizName();
+    ParamsMgr *      pm = ce->GetParamsMgr();
+    auto             activeViz = GetGUIStateParams(ce)->GetActiveVizName();
     ViewpointParams *vp = pm->GetViewpointParams(activeViz);
     return vp;
 }
@@ -300,12 +300,7 @@ GUIStateParams *NavigationUtils::GetGUIStateParams(ControlExec *ce)
 }
 
 
-AnimationParams *NavigationUtils::GetAnimationParams(ControlExec *ce)
-{
-    return ((AnimationParams *)ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType()));
-}
-
-
+AnimationParams *NavigationUtils::GetAnimationParams(ControlExec *ce) { return ((AnimationParams *)ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType())); }
 
 
 

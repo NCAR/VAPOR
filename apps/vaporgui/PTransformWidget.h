@@ -10,7 +10,7 @@ class Transform;
 }
 
 class PTransformWidget : public PWidget {
-    VGroup *_group;
+    VGroup *       _group;
     V3DInput *     _translate;
     V3DInput *     _scale;
     V3DInput *     _origin;

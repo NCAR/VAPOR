@@ -5,14 +5,10 @@
 
 using namespace VAPoR;
 
-AnimationController::AnimationController(VAPoR::ControlExec *ce)
-: _controlExec(ce), _myTimer(new QTimer(this)) {}
+AnimationController::AnimationController(VAPoR::ControlExec *ce) : _controlExec(ce), _myTimer(new QTimer(this)) {}
 
 
-void AnimationController::setCurrentTimestep(size_t ts) const
-{
-    NavigationUtils::SetTimestep(_controlExec, ts);
-}
+void AnimationController::setCurrentTimestep(size_t ts) const { NavigationUtils::SetTimestep(_controlExec, ts); }
 
 // Insert values from params into tab panel
 //
@@ -174,12 +170,6 @@ void AnimationController::playNextFrame()
     _updateTab();
 }
 
-AnimationParams *AnimationController::GetActiveParams() const
-{
-    return NavigationUtils::GetAnimationParams(_controlExec);
-}
+AnimationParams *AnimationController::GetActiveParams() const { return NavigationUtils::GetAnimationParams(_controlExec); }
 
-void AnimationController::_updateTab()
-{
-    Update();
-}
+void AnimationController::_updateTab() { Update(); }
