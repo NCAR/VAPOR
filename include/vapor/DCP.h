@@ -167,12 +167,12 @@ private:
     std::map<string, string>        _coordVarKeys;
     std::map<string, string>        _sanitizedToOriginalMap;
 
-    const string          nodeFaceVar = "cellsOnVertex";
-    const string          faceNodeVar = "verticesOnCell";
-    const string          fakeEmptyVar = "empty";
-    vector<string>        fakeVars = {nodeFaceVar, faceNodeVar};
-    int                   fakeVarsFileCounterStart = 10000;
-    int                   fakeVarsFileCounter = fakeVarsFileCounterStart;
+    const string          _nodeFaceVar = "cellsOnVertex";
+    const string          _faceNodeVar = "verticesOnCell";
+    const string          _fakeEmptyVar = "empty";
+    vector<string>        _fakeVars = {_nodeFaceVar, _faceNodeVar};
+    int                   _fakeVarsFileCounterStart = 10000;
+    int                   _fakeVarsFileCounter = _fakeVarsFileCounterStart;
     std::map<int, string> _fdMap;
 
 

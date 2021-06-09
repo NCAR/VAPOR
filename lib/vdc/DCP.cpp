@@ -104,7 +104,7 @@ int DCP::initialize(const vector<string> &paths, const std::vector<string> &opti
     // ==================
     {
         vector<bool> periodic(3, false);
-        for (auto v : {nodeFaceVar, faceNodeVar}) _auxVarsMap[v] = AuxVar(v, "", DC::INT32, "", vector<size_t>(), periodic, {particlesDim});
+        for (auto v : {_nodeFaceVar, _faceNodeVar}) _auxVarsMap[v] = AuxVar(v, "", DC::INT32, "", vector<size_t>(), periodic, {particlesDim});
     }
 
     // Coord Vars
@@ -146,8 +146,8 @@ int DCP::initialize(const vector<string> &paths, const std::vector<string> &opti
     // Mesh
     // ==================
     DC::Mesh mesh("particles", 1, 1, particlesDim, particlesDim, coords);
-    mesh.SetNodeFaceVar(nodeFaceVar);
-    mesh.SetFaceNodeVar(faceNodeVar);
+    mesh.SetNodeFaceVar(_nodeFaceVar);
+    mesh.SetFaceNodeVar(_faceNodeVar);
     _meshMap[mesh.GetName()] = mesh;
 
     // Data Vars
@@ -177,8 +177,8 @@ int DCP::initialize(const vector<string> &paths, const std::vector<string> &opti
         // If no data other than position, add a fake empty var to allow
         // the position data to be rendered on its own
         vector<bool> periodic(3, false);
-        _dataVarsMap[fakeEmptyVar] = DC::DataVar(fakeEmptyVar, "", DC::FLOAT, periodic, mesh.GetName(), getTimeCoordVar(coords[0]), DC::Mesh::NODE);
-        fakeVars.push_back(fakeEmptyVar);
+        _dataVarsMap[_fakeEmptyVar] = DC::DataVar(_fakeEmptyVar, "", DC::FLOAT, periodic, mesh.GetName(), getTimeCoordVar(coords[0]), DC::Mesh::NODE);
+        _fakeVars.push_back(_fakeEmptyVar);
     }
 
     return 0;
@@ -445,8 +445,8 @@ int DCP::openVariableRead(size_t ts, string varname)
 {
     //    printf("DCP::%s(%li, %s) = ", __func__, ts, varname.c_str());
 
-    if (STLUtils::Contains(fakeVars, varname)) {
-        int ret = fakeVarsFileCounter++;
+    if (STLUtils::Contains(_fakeVars, varname)) {
+        int ret = _fakeVarsFileCounter++;
         //        printf("(fake) %i\n", ret);
         _fdMap[ret] = varname;
         return ret;
@@ -482,8 +482,8 @@ int DCP::closeVariable(int fd)
     auto fdIt = _fdMap.find(fd);
     if (fdIt != _fdMap.end()) _fdMap.erase(fdIt);
 
-    if (fd >= fakeVarsFileCounterStart) {
-        fakeVarsFileCounter--;
+    if (fd >= _fakeVarsFileCounterStart) {
+        _fakeVarsFileCounter--;
         return 0;
     }
 
@@ -513,10 +513,10 @@ template<class T> int DCP::_readRegionTemplate(int fd, const vector<size_t> &min
 
     //    VAssert(min.size() == 1);
 
-    bool fake = fd >= fakeVarsFileCounterStart;
+    bool fake = fd >= _fakeVarsFileCounterStart;
 
     if (fake) {
-        if (_fdMap[fd] == fakeEmptyVar) {
+        if (_fdMap[fd] == _fakeEmptyVar) {
             for (size_t i = min[0]; i <= max[0]; i++) region[i] = 0;
         } else {
             for (size_t i = min[0]; i <= max[0]; i++) region[i] = i / (double)(max[0] - 1);
