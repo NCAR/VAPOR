@@ -14,6 +14,7 @@ template<typename T> void AppendTo(std::vector<T> &a, const std::vector<T> &b) {
 COMMON_API bool Contains(const std::string &toSearch, const std::string &query);
 COMMON_API bool ContainsIgnoreCase(const std::string &toSearch, const std::string &query);
 COMMON_API bool BeginsWith(const std::string &str, const std::string &match);
+COMMON_API bool EndsWith(const std::string &str, const std::string &match);
 COMMON_API std::string ToLower(std::string str);
 COMMON_API std::vector<std::string> Split(std::string str, const std::string &delimeter);
 COMMON_API std::string Join(const std::vector<std::string> &parts, const std::string &delimeter);

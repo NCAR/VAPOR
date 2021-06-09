@@ -254,7 +254,7 @@ int VDC_Initialize(VDC *p, const char *path, int mode, size_t *bs, int bsCount)
 int VDC_GetDimension(const VDC *p, const char *dimname, VDCDimension *dimension)
 {
     VDC_DEBUG_printff_readF("(%s \"%s\", <VDCDimension *dimension>);\n", _VDCPToStr(p), dimname);
-    return p->GetDimension(string(dimname), *dimension);
+    return p->GetDimension(string(dimname), *dimension, -1);
 }
 
 void VDC_GetDimensionNames(const VDC *p, char ***names, int *count)
@@ -401,7 +401,7 @@ int VDC_GetVarDimLens(const VDC *p, const char *varname, int spatial, size_t **l
 {
     VDC_DEBUG_printff_readF("(%s \"%s\", %i, <**lens>, <*count>);\n", _VDCPToStr(p), varname, spatial);
     vector<size_t> lens_v;
-    bool           ret = p->GetVarDimLens(string(varname), spatial, lens_v);
+    bool           ret = p->GetVarDimLens(string(varname), spatial, lens_v, -1);
     if (ret) _size_tVectorToCArray(lens_v, lens, count);
     return ret;
 }
@@ -430,7 +430,7 @@ int VDC_GetVarDimLensAtLevel(const VDC *p, const char *varname, int level, size_
 {
     VDC_DEBUG_called_readF();
     vector<size_t> lens_v, bs_v;
-    bool           ret = p->GetDimLensAtLevel(string(varname), level, lens_v, bs_v);
+    bool           ret = p->GetDimLensAtLevel(string(varname), level, lens_v, bs_v, -1);
     if (ret == 0) _size_tVectorToCArray(lens_v, lens, count);
     return ret;
 }

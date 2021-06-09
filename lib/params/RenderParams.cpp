@@ -339,7 +339,7 @@ void RenderParams::_calculateStride(string varName)
     int                 ref = GetRefinementLevel();
 
     // Yikes.  Error reporting is turned off, so ignore the return code
-    _dataMgr->GetDimLensAtLevel(varName, ref, dimsAtLevel);
+    _dataMgr->GetDimLensAtLevel(varName, ref, dimsAtLevel, GetCurrentTimestep());
 
     int size = 1;
     for (int i = 0; i < dimsAtLevel.size(); i++) size *= dimsAtLevel[i];

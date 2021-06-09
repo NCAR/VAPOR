@@ -10,7 +10,7 @@ void PrintDimensions(const VAPoR::DataMgr &dataMgr)
     cout << endl << "Dimensions:" << endl;
     for (int i = 0; i < dimnames.size(); i++) {
         VAPoR::DC::Dimension dimension;
-        dataMgr.GetDimension(dimnames[i], dimension);
+        dataMgr.GetDimension(dimnames[i], dimension, -1);
         cout << "    " << dimension.GetName() << " = " << dimension.GetLength() << endl;
         cout << "    Time Varying: " << dimension.IsTimeVarying() << endl;
     }
@@ -119,7 +119,7 @@ void TestVariables(VAPoR::DataMgr &dataMgr)
             cout << "    # Dimensions:       " << dataMgr.GetNumDimensions(varName) << endl;
 
             std::vector<size_t> dimLens;
-            dataMgr.GetDimLens(varName, dimLens);
+            dataMgr.GetDimLens(varName, dimLens, 0);
             std::stringstream ss;
             for (size_t i = 0; i < dimLens.size(); i++) {
                 if (i != 0) ss << " ";

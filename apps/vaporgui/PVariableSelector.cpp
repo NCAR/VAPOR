@@ -4,6 +4,7 @@
 
 using VAPoR::Box;
 using VAPoR::RenderParams;
+typedef VAPoR::DataMgr::VarType VarType;
 
 #define NULL_TEXT "<none>"
 
@@ -13,7 +14,7 @@ void PVariableSelector::updateGUI() const
 {
     int nDims = getDimensionality();
 
-    auto varNames = getDataMgr()->GetDataVarNames(nDims);
+    auto varNames = getDataMgr()->GetDataVarNames(nDims, (VarType)getVarType());
 
     if (_addNull || getParamsString().empty()) varNames.insert(varNames.begin(), NULL_TEXT);
 
@@ -25,6 +26,14 @@ bool PVariableSelector::isShown() const
 {
     if (_onlyShowForDim > 0) return getRendererDimension() == _onlyShowForDim;
     return true;
+}
+
+int PVariableSelector::getVarType() const
+{
+    if (_showParticleVars)
+        return (int)VarType::Particle;
+    else
+        return (int)VarType::Scalar;
 }
 
 int PVariableSelector::getRendererDimension() const { return getParams<RenderParams>()->GetRenderDim(); }

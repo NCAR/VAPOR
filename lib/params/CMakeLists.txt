@@ -29,6 +29,7 @@ set (SRC
 	VolumeParams.cpp
 	VolumeIsoParams.cpp
 	ModelParams.cpp
+	ParticleParams.cpp
 )
 
 set (HEADERS
@@ -61,6 +62,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeIsoParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ModelParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ParticleParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Transform.h
 )
 

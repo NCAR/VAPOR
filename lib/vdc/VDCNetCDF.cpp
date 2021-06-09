@@ -152,7 +152,7 @@ int VDCNetCDF::GetHyperSliceInfo(string varname, int level, std::vector<size_t> 
     vector<size_t> dims_at_level;
     vector<size_t> bs_at_level;
 
-    int rc = GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+    int rc = GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level, -1);
     if (rc < 0) return (-1);
 
     if (dims_at_level.size() == 0) return (0);
@@ -227,7 +227,7 @@ int VDCNetCDF::GetPath(string varname, size_t ts, string &path, size_t &file_ts,
     }
 
     vector<Dimension> dimensions;
-    bool              ok = GetVarDimensions(varname, false, dimensions);
+    bool              ok = GetVarDimensions(varname, false, dimensions, -1);
     if (!ok) {
         SetErrMsg("Undefined variable name : %s", varname.c_str());
         return (false);
@@ -307,7 +307,7 @@ int VDCNetCDF::getDimLensAtLevel(string varname, int level, vector<size_t> &dims
     levels(level, nlevels, clevel, dummy);
 
     vector<size_t> dimlens;
-    bool           ok = GetVarDimLens(varname, true, dimlens);
+    bool           ok = GetVarDimLens(varname, true, dimlens, -1);
     if (!ok) {
         SetErrMsg("Undefined variable name : %s", varname.c_str());
         return (-1);
@@ -589,7 +589,7 @@ template<class T> int VDCNetCDF::_writeTemplate(int fd, const T *data)
     int    level = o->GetLevel();
 
     vector<size_t> dims, dummy;
-    int            rc = GetDimLensAtLevel(varname, level, dims, dummy);
+    int            rc = GetDimLensAtLevel(varname, level, dims, dummy, -1);
     if (rc < 0) return (rc);
 
     bool time_varying = VDC::IsTimeVarying(varname);
@@ -629,7 +629,7 @@ template<class T> int VDCNetCDF::_writeSliceTemplate(int fd, const T *slice)
     vector<size_t> dims_at_level;
     vector<size_t> dummy;
 
-    int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy);
+    int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy, -1);
     if (rc < 0) return (rc);
 
     vector<size_t> hslice_dims;
@@ -789,7 +789,7 @@ template<class T> int VDCNetCDF::_putVarTemplate(string varname, int lod, const 
 {
     vector<size_t> dims_at_level;
     vector<size_t> dummy;
-    int            rc = VDCNetCDF::GetDimLensAtLevel(varname, -1, dims_at_level, dummy);
+    int            rc = VDCNetCDF::GetDimLensAtLevel(varname, -1, dims_at_level, dummy, -1);
     if (rc < 0) return (-1);
 
     // If not a 1D time-varying variable.
@@ -1655,7 +1655,7 @@ int VDCNetCDF::_WriteMasterDataVarsDefs()
 int VDCNetCDF::_DefBaseVar(WASP *wasp, const VDC::BaseVar &var, size_t max_ts)
 {
     vector<VDC::Dimension> dims;
-    bool                   status = GetVarDimensions(var.GetName(), false, dims);
+    bool                   status = GetVarDimensions(var.GetName(), false, dims, -1);
     VAssert(status);
 
     bool time_varying = IsTimeVarying(var.GetName());
@@ -1817,7 +1817,7 @@ int VDCNetCDF::_PutAtt(WASP *wasp, string varname, string tag, const Attribute &
 bool VDCNetCDF::_var_in_master(const VDC::BaseVar &var) const
 {
     vector<DC::Dimension> dims;
-    bool                  ok = GetVarDimensions(var.GetName(), false, dims);
+    bool                  ok = GetVarDimensions(var.GetName(), false, dims, -1);
     VAssert(ok);
 
     bool time_varying = IsTimeVarying(var.GetName());

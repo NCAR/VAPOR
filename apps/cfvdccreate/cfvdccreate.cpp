@@ -200,7 +200,7 @@ int main(int argc, char **argv)
     vector<string> dimnames = dccf.GetDimensionNames();
     for (int i = 0; i < dimnames.size(); i++) {
         DC::Dimension dim;
-        dccf.GetDimension(dimnames[i], dim);
+        dccf.GetDimension(dimnames[i], dim, -1);
         rc = vdc.DefineDimension(dim.GetName(), dim.GetLength());
         if (rc < 0) { return (1); }
     }

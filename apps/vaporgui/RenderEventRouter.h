@@ -129,6 +129,8 @@ public:
     //! and its associated renderer support 3D variables.
     virtual bool Supports3DVariables() const = 0;
 
+    virtual bool SupportsParticleVariables() const { return false; };
+
     //! Virtual method to enable or disable rendering when turned on or off by
     //! a gui tab.
     //! Only useful if the tab corresponds to a renderer.
