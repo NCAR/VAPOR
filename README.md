@@ -1,5 +1,7 @@
 [![CircleCI](https://circleci.com/gh/NCAR/VAPOR.svg?style=svg)](https://circleci.com/gh/NCAR/VAPOR) 
 
+We need our users to fill out a [5 minute survey](https://docs.google.com/forms/d/e/1FAIpQLSeZWvuAXaRiWyFrQ16zO25bfy8AANp8C8HpVXeMk83uQPdTLA/viewform?usp=sf_link) so we can determine new features for Vapor 3.6.  This is your opportunity to get what YOU need into Vapor.  The deadline for providing feedback is June 18.
+
 **VAPOR** is the **V**isualization and **A**nalysis **P**latform for **O**cean, Atmosphere, and Solar **R**esearchers.  VAPOR provides an interactive 3D visualization environment that can also produce animations and still frame images.  VAPOR runs on most UNIX and Windows systems equipped with modern 3D graphics cards.
 
 The VAPOR Data Collection (**VDC**) data model allows users progressively access the fidelity of their data, allowing for the visualization of terascale data sets on commodity hardware.  VAPOR can also directly import data formats including WRF, MOM, POP, ROMS, and some GRIB and NetCDF files.
