@@ -61,7 +61,7 @@ const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 BOVCollection::BOVCollection()
 : _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _dataEndian(_defaultEndian), _centering(_defaultCentering), _byteOffset(_defaultOffset),
   _divideBrick(_defaultDivBrick), _dataComponents(_defaultComponents), _timeDimension(_timeDim), _gridSizeAssigned(false), _formatAssigned(false), _brickOriginAssigned(false),
-  _brickSizeAssigned(false), _dataEndianAssigned(false)
+  _brickSizeAssigned(false), _dataEndianAssigned(false), _byteOffsetAssigned(false)
 {
     _dataFiles.clear();
     _times.clear();
@@ -93,22 +93,20 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             if (_dataFormat == _defaultFormat) { return _missingValueError(_formatToken); }
             if (_gridSize == _defaultGridSize) { return _missingValueError(_gridSizeToken); }
 
-            _variables.push_back(_variable);
-            if (std::find(_times.begin(), _times.end(), _time) == _times.end()) _times.push_back(_time);
+            _populateDataFileMap();
+            /*_variables.push_back(_variable);
+            if (std::find(_times.begin(), _times.end(), _time) == _times.end())
+                _times.push_back(_time);
             std::sort(_times.begin(), _times.end());
-            size_t ts = std::distance(_times.begin(), std::find(_times.begin(), _times.end(), _time));    // Index of current timestep
+            size_t ts = std::distance(_times.begin(), std::find(_times.begin(), _times.end(), _time)); // Index of current timestep
 
-            //_dataFileMap[_variable][ts] = _dataFile;
-            _dataFileMap[_variable][_time] = _dataFile;
+            _dataFileMap[_variable][_time] = _dataFile;*/
         } else {
             SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
             return -1;
         }
         header.close();
     }
-
-
-    //_times.erase( std::unique(_times.begin(), _times.end()), _times.end());
 
     return 0;
 }
@@ -127,7 +125,6 @@ int BOVCollection::_parseHeader(std::ifstream &header)
             return _failureToReadError(_dataFileToken);
         else if (rc == FOUND)
             _dataFile = dataFile;
-        //_dataFiles.push_back( dataFile );
 
         double time;
         rc = _findToken(_timeToken, line, time);
@@ -135,7 +132,6 @@ int BOVCollection::_parseHeader(std::ifstream &header)
             return _failureToReadError(_timeToken);
         else if (rc == FOUND)
             _time = time;
-        //_times.push_back( time );
 
         std::string variable;
         rc = _findToken(_variableToken, line, variable);
@@ -143,7 +139,6 @@ int BOVCollection::_parseHeader(std::ifstream &header)
             return _invalidValueError(_variableToken);
         else if (rc == FOUND)
             _variable = variable;
-        //_variables.push_back(variable);
 
         std::vector<size_t> gridSize;
         rc = _findToken(_gridSizeToken, line, gridSize);
@@ -216,16 +211,37 @@ int BOVCollection::_parseHeader(std::ifstream &header)
             }
         }
 
+        size_t byteOffset;
+        rc = _findToken(_offsetToken, line, byteOffset);
+        if (rc == ERROR)
+            return _invalidValueError(_offsetToken);
+        else if (rc == FOUND) {
+            if (byteOffset != _byteOffset && _byteOffsetAssigned == true)    // Make sure _dataEndian does not vary across files
+                return _inconsistentValueError(_offsetToken);
+            else {
+                _byteOffset = byteOffset;
+                _byteOffset = true;
+            }
+        }
 
         // All other variables are currently unused.
         //
         _findToken(_centeringToken, line, _centering);
-        _findToken(_offsetToken, line, _byteOffset);
         _findToken(_divideBrickToken, line, _divideBrick);
         _findToken(_dataBrickletsToken, line, _dataBricklets);
         _findToken(_dataComponentsToken, line, _dataComponents);
     }
     return 0;
+}
+
+void BOVCollection::_populateDataFileMap()
+{
+    _variables.push_back(_variable);
+
+    if (std::find(_times.begin(), _times.end(), _time) == _times.end()) _times.push_back(_time);
+    std::sort(_times.begin(), _times.end());
+
+    _dataFileMap[_variable][_time] = _dataFile;
 }
 
 int BOVCollection::_missingValueError(std::string token) const
@@ -265,17 +281,12 @@ int BOVCollection::_invalidValueError(std::string token) const
     return -1;
 }
 
-std::string BOVCollection::GetDataFile() const { return _dataFile; }
-
 std::vector<std::string> BOVCollection::GetDataVariableNames() const { return _variables; }
 
 std::vector<std::string> BOVCollection::GetSpatialDimensions() const { return _spatialDimensions; }
 
 std::string BOVCollection::GetTimeDimension() const { return _timeDimension; }
 
-float BOVCollection::GetUserTime() const { return _time; }
-
-// std::vector<double> BOVCollection::GetUserTimes() const { return _times; }
 std::vector<float> BOVCollection::GetUserTimes() const { return _times; }
 
 std::vector<size_t> BOVCollection::GetDataSize() const { return _gridSize; }
@@ -324,7 +335,6 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         _findTokenValue(line);
         stringstream ss(line);
         if (std::is_same<T, bool>::value) {
-            // if (value !=
             ss >> std::boolalpha >> value;
         } else {
             ss >> value;
@@ -428,16 +438,8 @@ void BOVCollection::_swapBytes(void *vptr, size_t size, size_t n) const
 
 template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region)
 {
-    // double time = _times[ts];
     float time = _times[ts];
-    // std::string dataFile = _dataFileMap[varname][ts];
     std::string dataFile = _dataFileMap[varname][time];
-    std::cout << ts << " " << varname << std::endl;
-    /*for (int i = 0; i < _variables.size(); i++) {
-        std::string var = _variables[i];
-        for (int j = 0; j < _times.size(); j++) { std::cout << "    " << var << " " << _times[j] << " " << _dataFileMap[varname][j] << std::endl; }
-    }*/
-    std::cout << "        " << dataFile << std::endl;
 
     FILE *fp = fopen(dataFile.c_str(), "rb");
     if (!fp) {
@@ -472,7 +474,7 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
         for (int j = min[1]; j <= max[1]; j++) {
             int xOffset = min[0];
             int yOffset = _gridSize[0] * j;
-            int offset = formatSize * (xOffset + yOffset + zOffset);
+            int offset = formatSize * (xOffset + yOffset + zOffset) + _byteOffset;
 
             static Wasp::SmartBuf smart_buf;
             unsigned char *       readBuffer = (unsigned char *)smart_buf.Alloc(count * formatSize);

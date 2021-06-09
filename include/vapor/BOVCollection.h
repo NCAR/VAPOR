@@ -14,12 +14,8 @@ public:
     BOVCollection();
     int Initialize(const std::vector<std::string> &paths);
 
-    std::string              GetDataFile() const;
     std::vector<std::string> GetDataVariableNames() const;
     std::string              GetTimeDimension() const;
-    // double                   GetUserTime() const;
-    // std::vector<double>      GetUserTimes() const;
-    float                    GetUserTime() const;
     std::vector<float>       GetUserTimes() const;
     std::vector<size_t>      GetDataSize() const;
     std::vector<std::string> GetSpatialDimensions() const;
@@ -31,9 +27,7 @@ public:
     template<class T> int ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region);
 
 private:
-    // double                   _time;
-    float _time;
-    // std::vector<double>      _times;
+    float                    _time;
     std::vector<float>       _times;
     std::string              _dataFile;
     std::vector<std::string> _dataFiles;
@@ -50,11 +44,10 @@ private:
     std::vector<size_t>      _dataBricklets;
     int                      _dataComponents;
 
-    // _dataFiles allows us to access the data files via the following:
-    //      std::string file = _dataFiles[var][timeStep]
-    //
-    // std::map<std::string, std::map<size_t, std::string>> _dataFileMap;
-    std::map<std::string, std::map<double, std::string>> _dataFileMap;
+    // _dataFileMap allows us to access binary data files with a
+    // varname/timestep pair
+    std::map<std::string, std::map<float, std::string>> _dataFileMap;
+
     std::vector<std::string> _spatialDimensions;
     std::string              _timeDimension;
 
@@ -63,8 +56,10 @@ private:
     bool _brickOriginAssigned;
     bool _brickSizeAssigned;
     bool _dataEndianAssigned;
+    bool _byteOffsetAssigned;
 
     int _parseHeader(std::ifstream &header);
+    void _populateDataFileMap();
 
     template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = true);
     template<typename T> int _findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = true);

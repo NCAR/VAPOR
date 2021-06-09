@@ -100,9 +100,6 @@ int DCBOV::_InitCoordinates()
     _coordVarsMap[dims[2]] = CoordVar(dims[2], units, DC::FLOAT, periodic, 2, uniformHint, {dims[2]}, "");
 
     std::string timeDim = _bovCollection->GetTimeDimension();
-    // size_t numTimes = _bovCollection->GetUserTimes().size();
-    //_coordVarsMap[timeDim] = CoordVar(timeDim, "s", DC::FLOAT, periodic, 3, true, {}, timeDim);
-    //_coordVarsMap[timeDim] = CoordVar(timeDim, "s", DC::FLOAT, periodic, 3, true, {timeDim}, timeDim);
     _coordVarsMap[timeDim] = CoordVar(timeDim, "seconds", DC::FLOAT, periodic, 3, true, {timeDim}, timeDim);
 
     return 0;
@@ -295,7 +292,6 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     std::string varname = w->GetVarname();
     size_t      ts = w->GetTS();
 
-    std::string              fileName = _bovCollection->GetDataFile();
     std::vector<std::string> spatialDims = _bovCollection->GetSpatialDimensions();
     std::vector<size_t>      dataSize = _bovCollection->GetDataSize();
     std::vector<double>      origin = _bovCollection->GetBrickOrigin();
@@ -320,10 +316,8 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     }
     // Otherwise return time values
     else if (varname == _bovCollection->GetTimeDimension()) {
-        // std::vector<double> times = _bovCollection->GetUserTimes();
         std::vector<float> times = _bovCollection->GetUserTimes();
         for (int i = 0; i < times.size(); i++) region[i] = (float)times[i];
-        // region[0] = times[ts];
     }
     return 0;
 }
