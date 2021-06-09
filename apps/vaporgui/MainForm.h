@@ -40,6 +40,7 @@
 #include "GUIStateParams.h"
 #include "SettingsParams.h"
 #include "AnimationParams.h"
+#include "AnimationController.h"
 //#include "MiscParams.h"
 #include "TabManager.h"
 
@@ -198,6 +199,7 @@ private:
     VAPoR::ControlExec *_controlExec;
     VAPoR::ParamsMgr *  _paramsMgr;
     TabManager *        _tabMgr;
+    AnimationController *_animationController;
     VizWinMgr *         _vizWinMgr;
     string              _capturingAnimationVizName;
 

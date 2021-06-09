@@ -7,8 +7,8 @@ set (SRCS
 	Histo.cpp
 	VizSelectCombo.cpp
 	AnnotationEventRouter.cpp
-	AnimationEventRouter.cpp
-	NavigationEventRouter.cpp
+	ViewpointTab.cpp
+	ViewpointTab.h
 	TwoDDataEventRouter.cpp
 	TwoDDataEventRouter.h
 	WireFrameEventRouter.cpp
@@ -251,6 +251,26 @@ set (SRCS
     BookmarkParams.h
     CheckForUpdate.cpp
     CheckForUpdate.h
+    NavigationUtils.cpp
+    NavigationUtils.h
+    PDatasetTransformWidget.cpp
+    PDatasetTransformWidget.h
+    PCameraControlsSection.cpp
+    PCameraControlsSection.h
+    PProjectionStringSection.cpp
+    PProjectionStringSection.h
+    PFramebufferSettingsSection.cpp
+    PFramebufferSettingsSection.h
+    VLabel.cpp
+    VLabel.h
+    PTimestepInput.cpp
+    PTimestepInput.h
+    PTotalTimestepsDisplay.cpp
+    PTotalTimestepsDisplay.h
+    AnimationController.cpp
+    AnimationController.h
+    AnimationTab.cpp
+    AnimationTab.h
 
 	# Need to include all files that request .ui files
 	Statistics.h
@@ -274,8 +294,6 @@ set (SRCS
 	Core3_2_context.h
 	TrackBall.h
     Manip.h 
-    NavigationEventRouter.h
-	AnimationEventRouter.h
 	AnimationParams.h
 	AnnotationEventRouter.h
 	BannerGUI.h
@@ -302,8 +320,6 @@ set (SRCS
 
 set (UIS 
 	LeftPanel.ui
-	animationTab.ui
-	NavigationTab.ui
 	NewRendererDialog.ui
 	TransformTableGUI.ui
 	statsWindow.ui

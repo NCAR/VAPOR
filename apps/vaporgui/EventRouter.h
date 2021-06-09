@@ -224,11 +224,16 @@ public:
         VAssert(_controlExec != NULL);
         return ((AnimationParams *)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType()));
     }
-
+    
     size_t GetCurrentTimeStep() const
     {
+        return GetCurrentTimeStep(_controlExec);
+    }
+
+    static size_t GetCurrentTimeStep(VAPoR::ControlExec *ce)
+    {
         AnimationParams *aParams;
-        aParams = (AnimationParams *)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
+        aParams = (AnimationParams *)ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
         VAssert(aParams);
 
         return (aParams->GetCurrentTimestep());
@@ -272,7 +277,7 @@ protected:
     //! corresponding Params instance.
     //!
     //! \param[in] p Params instance associated with the current active tab.
-    virtual void _confirmText() = 0;
+    virtual void _confirmText() {};
 
     VAPoR::ControlExec *_controlExec;
     bool                _textChangedFlag;

@@ -25,9 +25,10 @@
 
 #include <vapor/ControlExecutive.h>
 #include <vapor/ParamsMgr.h>
-#include <AnimationEventRouter.h>
-#include <NavigationEventRouter.h>
+#include <AnimationTab.h>
+#include <ViewpointTab.h>
 #include "GUIStateParams.h"
+#include "NavigationUtils.h"
 class RenderHolder;
 class EventRouter;
 class RenderEventRouter;
@@ -134,41 +135,24 @@ signals:
     //
     void Proj4StringChanged(string proj4String);
 
-    void AnimationOnOffSignal(bool);
-    void AnimationDrawSignal();
-
 public slots:
-    void UseHomeViewpoint() { _navigationEventRouter->UseHomeViewpoint(); }
-    void ViewAll() { _navigationEventRouter->ViewAll(); }
-    void SetHomeViewpoint() { _navigationEventRouter->SetHomeViewpoint(); }
+    void UseHomeViewpoint() { NavigationUtils::UseHomeViewpoint(_controlExec); }
+    void SetHomeViewpoint() { NavigationUtils::SetHomeViewpoint(_controlExec); }
+    void ViewAll() { NavigationUtils::ViewAll(_controlExec); }
     void AlignView(int axis)
     {
-        _navigationEventRouter->AlignView(axis);
+        NavigationUtils::AlignView(_controlExec, axis);
 
         QComboBox *cb = (QComboBox *)sender();
         cb->blockSignals(true);
         cb->setCurrentIndex(0);
         cb->blockSignals(false);
     }
-    void CenterSubRegion() { _navigationEventRouter->CenterSubRegion(); }
-
-    void AnimationPlayForward() { _animationEventRouter->AnimationPlayForward(); }
-    void AnimationPlayBackward() { _animationEventRouter->AnimationPlayReverse(); }
-    void AnimationPause() { _animationEventRouter->AnimationPause(); }
-    void AnimationStepBackward() { _animationEventRouter->AnimationStepReverse(); }
-    void AnimationStepForward() { _animationEventRouter->AnimationStepForward(); }
-    void AnimationSetTimestep(int ts) { _animationEventRouter->SetTimeStep(ts); }
 
 protected slots:
 
 private slots:
     void _setProj4String(string proj4String) { emit Proj4StringChanged(proj4String); }
-
-    void _projectionTypeChanged(int);
-
-    void _setAnimationOnOff(bool onOff) { emit AnimationOnOffSignal(onOff); }
-
-    void _setAnimationDraw() { emit AnimationDrawSignal(); }
 
     //! Slot that responds to user selecting a 2nd level tab, i.e.
     //! a tab that corresponds to an EventRouter.
@@ -219,8 +203,8 @@ private:
     std::map<string, EventRouter *> _eventRouterMap;
 
     bool                   _initialized;
-    AnimationEventRouter * _animationEventRouter;
-    NavigationEventRouter *_navigationEventRouter;
+    AnimationTab * _animationEventRouter;
+    ViewpointTab *_navigationEventRouter;
 
     TabManager() {}
 

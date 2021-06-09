@@ -8,7 +8,7 @@
 using VAPoR::RenderParams;
 using VAPoR::Transform;
 
-PTransformWidget::PTransformWidget() : PWidget("", _group = new VSectionGroup("Transform"))
+PTransformWidget::PTransformWidget() : PWidget("", _group = new VGroup)
 {
     _group->Add(new VLineItem("Translate", _translate = new V3DInput));
     _group->Add(new VLineItem("Scale      ", _scale = new V3DInput));
@@ -42,3 +42,9 @@ void PRendererTransformWidget::updateGUI() const
     Transform *   t = rp->GetTransform();
     _widget->Update(t, getParamsMgr(), getDataMgr());
 }
+
+
+#include "PSection.h"
+
+PRendererTransformSection::PRendererTransformSection()
+: PWidgetWrapper(new PSection("Transform", {new PRendererTransformWidget})) {}

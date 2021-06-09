@@ -2,14 +2,14 @@
 
 #include "PWidget.h"
 
-class QLabel;
+class VLabel;
 
 //! \class PLabel
 //! \brief Displays static text.
 //! \author Stas Jaroszynski
 
 class PLabel : public PWidget {
-    QLabel *_label;
+    VLabel *_label;
 
 public:
     PLabel(const std::string &text);

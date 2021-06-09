@@ -9,6 +9,7 @@
 #include "VPushButton.h"
 #include "ErrorReporter.h"
 #include "CheckForUpdate.h"
+#include <QLabel>
 
 class PUpdateChecker : public PWidget {
     VGroup *     _group;

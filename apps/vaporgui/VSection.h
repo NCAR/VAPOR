@@ -47,7 +47,11 @@ class VSectionGroup : public VSection, public WidgetGroupWrapper<VSectionGroup, 
     VGroup *_vgroup;
 
 public:
-    VSectionGroup(const std::string &title) : VSection(title), WidgetGroupWrapper(_vgroup = new VGroup) { layout()->addWidget(_vgroup); }
+    VSectionGroup(const std::string &title, List children={}) : VSection(title), WidgetGroupWrapper(_vgroup = new VGroup)
+    {
+        layout()->addWidget(_vgroup);
+        _vgroup->AddM(children);
+    }
 };
 
 class VSection::SettingsMenuButton : public QToolButton {
