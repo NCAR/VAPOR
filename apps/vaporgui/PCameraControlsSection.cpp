@@ -88,6 +88,8 @@ void PCameraProjectionWidget::dropdownChanged(string s)
         type = ViewpointParams::Perspective;
     else if (s == MapOrthographic)
         type = ViewpointParams::MapOrthographic;
+    else
+        type = ViewpointParams::Perspective;
 
     ParamsMgr *pm = _ce->GetParamsMgr();
     auto       vizNames = pm->GetVisualizerNames();
