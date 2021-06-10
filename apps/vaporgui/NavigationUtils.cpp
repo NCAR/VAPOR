@@ -89,7 +89,7 @@ void NavigationUtils::AlignView(ControlExec *ce, int axis)
     float axes[3][3] = {{1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}};
 
     double dirvec[3] = {0.0, 0.0, 0.0};
-    double           upvec[3] = {0.0, 1.0, 0.0};
+    double upvec[3] = {0.0, 1.0, 0.0};
     (void)(upvec);
     ViewpointParams *vpParams = GetActiveViewpointParams(ce);
     if (!vpParams) return;
