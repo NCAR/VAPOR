@@ -170,6 +170,7 @@ private:
 
     BOVCollection *_bovCollection;
 
+    size_t                          _ts;
     string                          _varname;
     std::map<string, DC::Dimension> _dimsMap;
     std::map<string, DC::CoordVar>  _coordVarsMap;

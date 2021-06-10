@@ -121,16 +121,14 @@ int DCBOV::_InitVars()
     std::string              timeCoordVar = _bovCollection->GetTimeDimension();
     string                   units = "m";
 
-    for (auto var : vars) {
-        Mesh mesh(var, dimnames, dimnames);
+    Mesh mesh("BOV", dimnames, dimnames);
 
-        // Create new mesh. We're being lazy here and probably should only
-        // createone if it doesn't ready exist
-        //
-        _meshMap[mesh.GetName()] = mesh;
+    // Create new mesh. We're being lazy here and probably should only
+    // createone if it doesn't ready exist
+    //
+    _meshMap[mesh.GetName()] = mesh;
 
-        _dataVarsMap[var] = DataVar(var, units, format, periodic, mesh.GetName(), timeCoordVar, DC::Mesh::NODE);
-    }
+    for (auto var : vars) { _dataVarsMap[var] = DataVar(var, units, format, periodic, mesh.GetName(), timeCoordVar, DC::Mesh::NODE); }
 
     return (0);
 }
@@ -263,6 +261,9 @@ int DCBOV::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 
 int DCBOV::openVariableRead(size_t ts, string varname)
 {
+    _ts = ts;
+    _varname = varname;
+    // return(0);
     FileTable::FileObject *f = new FileTable::FileObject(ts, varname, 0, 0, 0);
     return (_fileTable.AddEntry(f));
 }
@@ -277,20 +278,23 @@ int DCBOV::closeVariable(int fd)
     }
 
     _fileTable.RemoveEntry(fd);
+    if (w != nullptr) delete w;
 
     return 0;
 }
 
 template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
-    FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
+    /*FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
     if (!w) {
         SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
 
     std::string varname = w->GetVarname();
-    size_t      ts = w->GetTS();
+    size_t      ts = w->GetTS();*/
+    std::string varname = _varname;
+    size_t      ts = _ts;
 
     std::vector<std::string> spatialDims = _bovCollection->GetSpatialDimensions();
     std::vector<size_t>      dataSize = _bovCollection->GetDataSize();
