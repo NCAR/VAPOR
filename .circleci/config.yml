@@ -29,10 +29,10 @@ jobs:
           command: |
             cd build
             cmake -DBUILD_TEST_APPS=ON ..
-            make -j7 &> /tmp/debugOutput.txt
+            make -j7 2>&1 | tee /tmp/debugOutput.txt
             make clean
             cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
-            make -j7 &> /tmp/releaseOutput.txt
+            make -j7 2>&1 | tee /tmp/releaseOutput.txt
 
       - store_artifacts:
           path: /tmp/debugOutput.txt
@@ -171,10 +171,10 @@ jobs:
             ls -lrth /usr/local/VAPOR-Deps
             cd /root/project/build
             cmake3 -DBUILD_TEST_APPS=ON ..
-            make -j7 &> /tmp/debugOutput.txt
+            make -j7 2>&1 | tee /tmp/debugOutput.txt
             make clean
             cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
-            make -j7 &> /tmp/releaseOutput.txt
+            make -j7 2>&1 | tee /tmp/releaseOutput.txt
 
       - store_artifacts:
           path: /tmp/debugOutput.txt
