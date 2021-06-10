@@ -67,6 +67,9 @@ void UnstructuredGrid2D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) cons
     minu[1] = range[0];
     maxu[1] = range[1];
 
+    minu[2] = _defaultZ;
+    maxu[2] = _defaultZ;
+
     if (GetGeometryDim() < 3) return;
 
     _zug.GetRange(range);
@@ -83,8 +86,8 @@ void UnstructuredGrid2D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
     ClampIndex(max, cMax);
 
     int ncoords = GetGeometryDim();
-    minu = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
-    minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
+    minu = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), _defaultZ};
+    minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), _defaultZ};
 
     size_t start = Wasp::LinearizeCoords(cMin.data(), GetDimensions().data(), GetDimensions().size());
     size_t stop = Wasp::LinearizeCoords(cMax.data(), GetDimensions().data(), GetDimensions().size());

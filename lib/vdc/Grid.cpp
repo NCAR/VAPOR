@@ -60,8 +60,8 @@ void Grid::GetUserExtents(DblArr3 &minu, DblArr3 &maxu) const
     size_t n = min(GetGeometryDim(), _minuCache.size());
     auto   p = [](double v) { return (v == std::numeric_limits<double>::infinity()); };
     if (std::any_of(_minuCache.begin(), _minuCache.begin() + n, p) || std::any_of(_maxuCache.begin(), _maxuCache.begin() + n, p)) {
-        _minuCache = {0.0, 0.0, 0.0};
-        _maxuCache = {0.0, 0.0, 0.0};
+        _minuCache = {0.0, 0.0, _defaultZ};
+        _maxuCache = {0.0, 0.0, _defaultZ};
         GetUserExtentsHelper(_minuCache, _maxuCache);
     }
 

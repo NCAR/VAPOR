@@ -107,10 +107,8 @@ void CurvilinearGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &ma
 
     for (int i = 0; i < GetGeometryDim(); i++) { VAssert(cMin[i] <= cMax[i]); }
 
-    for (int i = 0; i < minu.size(); i++) {
-        minu[i] = 0.0;
-        maxu[i] = 0.0;
-    }
+    minu = {0.0, 0.0, _defaultZ};
+    maxu = {0.0, 0.0, _defaultZ};
 
     // Get the horiztonal (X & Y) extents by visiting every point
     // on a single plane (horizontal coordinates are constant over Z).

@@ -91,10 +91,6 @@ void UnstructuredGrid3D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
     _zug.GetRange(min, max, range);
     minu[2] = range[0];
     maxu[2] = range[1];
-
-    //    printf("UnstructuredGrid3D::%s(-, -)\n", __func__);
-    //    printf("\t min = [%f, %f, %f]\n", minu[0], minu[1], minu[2]);
-    //    printf("\t max = [%f, %f, %f]\n", maxu[0], maxu[1], maxu[2]);
 }
 
 

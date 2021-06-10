@@ -88,6 +88,10 @@ public:
     //!
     const std::vector<size_t> &GetDimensions() const { return (_dims); }
 
+    //! Get and set the default Z value for a grid.
+    auto GetDefaultZ() const -> double {return _defaultZ;};
+    void SetDefaultZ( double d)        {_defaultZ = d;};
+
     //! Return the dimensions of the specified coordinate variable
     //!
     //! \param[in] dim An integer between 0 and the return value
@@ -438,7 +442,7 @@ public:
     virtual void GetUserCoordinates(const size_t indices[], double coords[]) const
     {
         Size_tArr3 indices3 = {0, 0, 0};
-        DblArr3    coords3 = {0.0, 0.0, 0.0};
+        DblArr3    coords3 = {0.0, 0.0, _defaultZ};
         CopyToArr3(indices, GetNodeDimensions().size(), indices3);
         GetUserCoordinates(indices3, coords3);
         CopyFromArr3(coords3, coords);
@@ -447,7 +451,7 @@ public:
     virtual void GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const
     {
         Size_tArr3 indices3 = {0, 0, 0};
-        DblArr3    coords3 = {0.0, 0.0, 0.0};
+        DblArr3    coords3 = {0.0, 0.0, _defaultZ};
         CopyToArr3(indices, indices3);
         GetUserCoordinates(indices3, coords3);
         CopyFromArr3(coords3, coords);
@@ -1210,6 +1214,7 @@ private:
     int                  _interpolationOrder = 0;    // Order of interpolation
     long                 _nodeIDOffset = 0;
     long                 _cellIDOffset = 0;
+    double               _defaultZ = 0.0;
     mutable DblArr3      _minuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
     mutable DblArr3      _maxuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
 
