@@ -325,7 +325,7 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
         std::cout << sizeof(region) << " " << typeid(T).name() << std::endl;
         std::vector<float> times = _bovCollection->GetUserTimes();
         std::cout << "time " << times[ts] << std::endl;
-        region[0] = (double)times[ts];
+        region[0] = (float)times[ts];
         // for (int i = 0; i < times.size(); i++) region[i] = times[i];
     }
     return 0;
