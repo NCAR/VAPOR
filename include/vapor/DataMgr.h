@@ -155,10 +155,10 @@ public:
 
     //! \copydoc DC::GetDimension()
     //
-    bool GetDimension(string dimname, DC::Dimension &dimension) const
+    bool GetDimension(string dimname, DC::Dimension &dimension, long ts) const
     {
         VAssert(_dc);
-        return (_dc->GetDimension(dimname, dimension));
+        return (_dc->GetDimension(dimname, dimension, ts));
     }
 
     //! \copydoc DC::GetMeshNames()
@@ -197,7 +197,8 @@ public:
     //! with the specified number of dimensions (rank).
     //!
     //! \test New in 3.0
-    virtual std::vector<string> GetDataVarNames(int ndim) const;
+    enum class VarType { Any, Scalar, Particle };
+    virtual std::vector<string> GetDataVarNames(int ndim, VarType type = VarType::Any) const;
 
     //! Return a list of names for all of the defined coordinate variables.
     //!
@@ -442,10 +443,10 @@ public:
 
     //! \copydoc DC::GetDimLensAtLevel()
     //!
-    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level) const
+    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, long ts) const
     {
         std::vector<size_t> dummy;
-        return (GetDimLensAtLevel(varname, level, dims_at_level, dummy));
+        return (GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts));
     }
 
     //! Return a variable's array dimension lengths
@@ -453,7 +454,7 @@ public:
     //! This method is equivalent to calling GetDimLensAtLevel() with \p level
     //! equal to -1
     //!
-    virtual int GetDimLens(string varname, std::vector<size_t> &dims) { return (GetDimLensAtLevel(varname, -1, dims)); }
+    virtual int GetDimLens(string varname, std::vector<size_t> &dims, long ts) { return (GetDimLensAtLevel(varname, -1, dims, ts)); }
 
     //! Unlock a floating-point region of memory
     //!
@@ -639,7 +640,7 @@ private:
         std::map<string, std::vector<C>> _cache;
     };
 
-    mutable std::map<size_t, std::vector<string>> _dataVarNamesCache;
+    mutable std::map<std::pair<VarType, size_t>, std::vector<string>> _dataVarNamesCache;
 
     string _format;
     int    _nthreads;
@@ -725,7 +726,7 @@ private:
 
     void _ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDims, std::vector<size_t> &faceDims, std::vector<size_t> &edgeDims,
                       UnstructuredGrid::Location &location,    // node,face, edge
-                      size_t &maxVertexPerFace, size_t &maxFacePerVertex, long &vertexOffset, long &faceOffset) const;
+                      size_t &maxVertexPerFace, size_t &maxFacePerVertex, long &vertexOffset, long &faceOffset, long ts) const;
 
     UnstructuredGrid2D *_make_grid_unstructured2d(size_t ts, int level, int lod, const DC::DataVar &dvarinfo, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims,
                                                   const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<int *> &conn_blkvec,
@@ -740,7 +741,7 @@ private:
     int _find_bounding_grid(size_t ts, string varname, int level, int lod, std::vector<double> min, std::vector<double> max, std::vector<size_t> &min_ui, std::vector<size_t> &max_ui);
 
     void _setupCoordVecsHelper(string data_varname, const vector<size_t> &data_dimlens, const vector<size_t> &data_bmin, const vector<size_t> &data_bmax, string coord_varname, int order,
-                               vector<size_t> &coord_dimlens, vector<size_t> &coord_bmin, vector<size_t> &coord_bmax, bool structured) const;
+                               vector<size_t> &coord_dimlens, vector<size_t> &coord_bmin, vector<size_t> &coord_bmax, bool structured, long ts) const;
 
     int _setupCoordVecs(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, vector<string> &varnames, vector<size_t> &roi_dims,
                         vector<vector<size_t>> &dimsvec, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec, bool structured) const;
@@ -800,11 +801,11 @@ private:
 
     void _assignTimeCoord(string &coord_var) const;
 
-    bool _getVarDimensions(string varname, vector<DC::Dimension> &dimensions) const;
+    bool _getVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const;
 
-    bool _getDataVarDimensions(string varname, vector<DC::Dimension> &dimensions) const;
+    bool _getDataVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const;
 
-    bool _getCoordVarDimensions(string varname, vector<DC::Dimension> &dimensions) const;
+    bool _getCoordVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const;
 
     bool _getVarDimNames(string varname, vector<string> &dimnames) const;
 
@@ -836,9 +837,9 @@ private:
 
     int _getVar(size_t ts, string varname, int level, int lod, float *data);
 
-    int _getLatlonExtents(string varname, bool lonflag, float &min, float &max);
+    int _getLatlonExtents(string varname, bool lonflag, float &min, float &max, long ts);
 
-    int _getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax);
+    int _getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax, long ts);
 
     int _initProj4StringDefault();
 
@@ -858,7 +859,7 @@ private:
 
     // Hide public DC::GetDimLensAtLevel by making it private
     //
-    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+    virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts) const;
 };
 
 };    // namespace VAPoR

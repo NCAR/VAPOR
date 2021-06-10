@@ -154,7 +154,7 @@ void PRefinementSelector::updateGUI() const
 
     for (int i = 0; i < nrf; i++) {
         vector<size_t> dims;
-        dm->GetDimLensAtLevel(varName, i, dims);
+        dm->GetDimLensAtLevel(varName, i, dims, rp->GetCurrentTimestep());
         if (dims.empty()) continue;
         auto   itr = dims.begin();
         string item = to_string(i) + " (" + to_string(*itr++);

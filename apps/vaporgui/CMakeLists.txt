@@ -271,6 +271,8 @@ set (SRCS
     AnimationController.h
     AnimationTab.cpp
     AnimationTab.h
+    ParticleEventRouter.cpp
+    ParticleEventRouter.h
 
 	# Need to include all files that request .ui files
 	Statistics.h

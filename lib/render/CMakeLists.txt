@@ -54,6 +54,7 @@ set (SRC
 	ModelRenderer.cpp
 	OSPRay.cpp
     ColorbarRenderer.cpp
+    ParticleRenderer.cpp
 )
 
 set (HEADERS
@@ -114,6 +115,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ModelRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/OSPRay.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ColorbarRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ParticleRenderer.h
 )
 
 if(BUILD_OSP)

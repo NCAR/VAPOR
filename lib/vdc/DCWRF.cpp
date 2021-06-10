@@ -327,9 +327,9 @@ int DCWRF::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 
     bool ok;
     if (_dvm.IsCoordVar(varname)) {
-        return (_dvm.GetDimLensAtLevel(varname, 0, dims_at_level, bs_at_level));
+        return (_dvm.GetDimLensAtLevel(varname, 0, dims_at_level, bs_at_level, -1));
     } else {
-        ok = GetVarDimLens(varname, true, dims_at_level);
+        ok = GetVarDimLens(varname, true, dims_at_level, -1);
     }
     if (!ok) {
         SetErrMsg("Undefined variable name : %s", varname.c_str());

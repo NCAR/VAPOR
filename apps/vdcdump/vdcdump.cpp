@@ -299,7 +299,7 @@ struct GlobalData : public Variable {
         _name = "__GLOBAL__";
         vector<string> dimNames = vdc.GetDimensionNames();
         _dimensions.resize(dimNames.size());
-        for (int i = 0; i < dimNames.size(); i++) vdc.GetDimension(dimNames[i], _dimensions[i]);
+        for (int i = 0; i < dimNames.size(); i++) vdc.GetDimension(dimNames[i], _dimensions[i], -1);
     }
     void printChild(OutFormat *out, Verbosity V, bool reversedCoordOrder) {}
     void print(OutFormat *out, Verbosity V, bool reversedCoordOrder)

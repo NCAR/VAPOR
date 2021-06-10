@@ -518,9 +518,9 @@ int DCMPAS::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_
     dims_at_level.clear();
     bs_at_level.clear();
 
-    if (_dvm.HasVar(varname)) { return (_dvm.GetDimLensAtLevel(varname, 0, dims_at_level, bs_at_level)); }
+    if (_dvm.HasVar(varname)) { return (_dvm.GetDimLensAtLevel(varname, 0, dims_at_level, bs_at_level, -1)); }
 
-    bool ok = GetVarDimLens(varname, true, dims_at_level);
+    bool ok = GetVarDimLens(varname, true, dims_at_level, -1);
     if (!ok) {
         SetErrMsg("Undefined variable name : %s", varname.c_str());
         return (-1);
@@ -539,7 +539,7 @@ int DCMPAS::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_
 int DCMPAS::_read_nEdgesOnCell(size_t ts)
 {
     DC::Dimension dimension;
-    bool          ok = GetDimension(nCellsDimName, dimension);
+    bool          ok = GetDimension(nCellsDimName, dimension, -1);
     if (!ok) {
         SetErrMsg("Invalid MPAS auxiliary variable: %s", nEdgesOnCellVarName.c_str());
         return (-1);
@@ -561,7 +561,7 @@ int DCMPAS::_read_nEdgesOnCell(size_t ts)
 int DCMPAS::_readVarToSmartBuf(size_t ts, string varname, Wasp::SmartBuf &smartBuf)
 {
     vector<size_t> dims;
-    bool           ok = GetVarDimLens(varname, true, dims);
+    bool           ok = GetVarDimLens(varname, true, dims, -1);
     VAssert(ok);
 
     size_t n = vproduct(dims);
@@ -603,12 +603,12 @@ void DCMPAS::_addMissingFlag(int *data) const
     int *nEdgesOnCell = (int *)_nEdgesOnCellBuf.GetBuf();
 
     DC::Dimension dimension;
-    bool          ok = GetDimension(nCellsDimName, dimension);
+    bool          ok = GetDimension(nCellsDimName, dimension, -1);
     VAssert(ok);
 
     size_t nCells = dimension.GetLength();
 
-    ok = GetDimension(maxEdgesDimName, dimension);
+    ok = GetDimension(maxEdgesDimName, dimension, -1);
     VAssert(ok);
 
     size_t nMaxEdges = dimension.GetLength();
@@ -627,19 +627,19 @@ void DCMPAS::_addMissingFlag(int *data) const
 void DCMPAS::_splitOnBoundary(string varname, int *connData) const
 {
     vector<size_t> connDims;
-    bool           ok = GetVarDimLens(varname, true, connDims);
+    bool           ok = GetVarDimLens(varname, true, connDims, -1);
     VAssert(ok && connDims.size() == 2);
 
     // Dimensions for vertex lon
     //
     vector<size_t> lonVertexDims;
-    ok = GetVarDimLens(lonVertexVarName, true, lonVertexDims);
+    ok = GetVarDimLens(lonVertexVarName, true, lonVertexDims, -1);
     VAssert(ok && lonVertexDims.size() == 1);
 
     // Dimensions for cell lon
     //
     vector<size_t> lonCellDims;
-    ok = GetVarDimLens(lonCellVarName, true, lonCellDims);
+    ok = GetVarDimLens(lonCellVarName, true, lonCellDims, -1);
     VAssert(ok && lonCellDims.size() == 1);
 
     // float *lonBuf1 = NULL;
@@ -1277,7 +1277,7 @@ int DCMPAS::_InitMeshes(NetCDFCollection *ncdfc)
     // Max vertices or edges per cell
     //
     DC::Dimension dimension;
-    bool          ok = GetDimension(maxEdgesDimName, dimension);
+    bool          ok = GetDimension(maxEdgesDimName, dimension, -1);
     VAssert(ok);
 
     //
@@ -1548,11 +1548,11 @@ int DCMPAS::DerivedCoordVertFromCell::GetDimLensAtLevel(int, std::vector<size_t>
     dims_at_level.clear();
     bs_at_level.clear();
 
-    int rc = _dc->GetDimLensAtLevel(_inName, -1, dims_at_level, bs_at_level);
+    int rc = _dc->GetDimLensAtLevel(_inName, -1, dims_at_level, bs_at_level, -1);
     if (rc < 0) return (-1);
 
     DC::Dimension dimension;
-    bool          ok = _dc->GetDimension(_derivedDimName, dimension);
+    bool          ok = _dc->GetDimension(_derivedDimName, dimension, -1);
     if (!ok) {
         SetErrMsg("Invalid dimension name : %s", _derivedDimName.c_str());
         return (-1);
@@ -1594,7 +1594,7 @@ float *DCMPAS::DerivedCoordVertFromCell::_getCellData()
     // Dimensions of input (cell) grid:
     //
     vector<size_t> inDims, dummy;
-    int            rc = _dc->GetDimLensAtLevel(_inName, -1, inDims, dummy);
+    int            rc = _dc->GetDimLensAtLevel(_inName, -1, inDims, dummy, -1);
     if (rc < 0) return (NULL);
 
     vector<size_t> inMin, inMax;
@@ -1619,7 +1619,7 @@ int *DCMPAS::DerivedCoordVertFromCell::_getCellsOnVertex(size_t i0, size_t i1, i
     vertexDegree = 0;
 
     vector<size_t> dims;
-    bool           ok = _dc->GetVarDimLens(_cellsOnVertexName, true, dims);
+    bool           ok = _dc->GetVarDimLens(_cellsOnVertexName, true, dims, -1);
     if (!ok) {
         SetErrMsg("Undefined variable name : %s", _cellsOnVertexName.c_str());
         return (NULL);
@@ -1659,7 +1659,7 @@ int DCMPAS::DerivedCoordVertFromCell::ReadRegion(int fd, const vector<size_t> &m
     string varname = f->GetVarname();
 
     vector<size_t> inDims, dummy;
-    int            rc = _dc->GetDimLensAtLevel(_inName, -1, inDims, dummy);
+    int            rc = _dc->GetDimLensAtLevel(_inName, -1, inDims, dummy, -1);
     if (rc < 0) return (-1);
 
     float *cellData = _getCellData();
@@ -1755,7 +1755,7 @@ int DCMPAS::DerivedZonalMeridonal::GetDimLensAtLevel(int, std::vector<size_t> &d
     dims_at_level.clear();
     bs_at_level.clear();
 
-    int rc = _dc->GetDimLensAtLevel(_normalVarName, -1, dims_at_level, bs_at_level);
+    int rc = _dc->GetDimLensAtLevel(_normalVarName, -1, dims_at_level, bs_at_level, -1);
     if (rc < 0) return (-1);
 
     // Never blocked

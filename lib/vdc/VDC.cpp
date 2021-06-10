@@ -566,7 +566,7 @@ size_t VDC::getNumRefLevels(string varname) const
     }
 
     vector<DC::Dimension> mdimensions;
-    bool                  ok = GetVarDimensions(varname, true, mdimensions);
+    bool                  ok = GetVarDimensions(varname, true, mdimensions, -1);
     if (!ok) return (1);
 
     // Determine block size
@@ -901,7 +901,7 @@ int VDC::EndDefine()
     //
     for (int i = 0; i < _newUniformVars.size(); i++) {
         vector<DC::Dimension> dimensions;
-        bool                  ok = GetVarDimensions(_newUniformVars[i], false, dimensions);
+        bool                  ok = GetVarDimensions(_newUniformVars[i], false, dimensions, -1);
         VAssert(ok);
 
         if (dimensions.size() != 1) continue;
@@ -1062,7 +1062,7 @@ bool VDC::_valid_mask_var(string varname, vector<DC::Dimension> dimensions, vect
     // variable dimensions
     //
     vector<DC::Dimension> mdimensions;
-    bool                  ok = GetVarDimensions(maskvar, false, mdimensions);
+    bool                  ok = GetVarDimensions(maskvar, false, mdimensions, -1);
     VAssert(ok);
 
     while (dimensions.size() > mdimensions.size()) dimensions.pop_back();
@@ -1105,7 +1105,7 @@ bool VDC::_ValidDefineDataVar(string varname, vector<string> dim_names, vector<s
     for (int i = 0; i < dim_names.size(); i++) {
         DC::Dimension dim;
 
-        bool ok = VDC::GetDimension(dim_names[i], dim);
+        bool ok = VDC::GetDimension(dim_names[i], dim, -1);
         if (!ok) {
             SetErrMsg("Dimension \"%s\" not defined", dim_names[i].c_str());
             return (false);

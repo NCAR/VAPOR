@@ -125,7 +125,7 @@ void FidelityWidget::getCmpFactors(string varname, vector<float> &lodCF, vector<
     vector<size_t> nGridPts;
     for (int l = 0; l < numLevels; l++) {
         vector<size_t> dims_at_level;
-        int            rc = _dataMgr->GetDimLensAtLevel(varname, l, dims_at_level);
+        int            rc = _dataMgr->GetDimLensAtLevel(varname, l, dims_at_level, -1);
         VAssert(rc >= 0);
 
         size_t        n = 1;
