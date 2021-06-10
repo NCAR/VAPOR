@@ -89,8 +89,8 @@ public:
     const std::vector<size_t> &GetDimensions() const { return (_dims); }
 
     //! Get and set the default Z value for a grid.
-    auto GetDefaultZ() const -> double {return _defaultZ;};
-    void SetDefaultZ( double d)        {_defaultZ = d;};
+    auto GetDefaultZ() const -> double { return _defaultZ; };
+    void SetDefaultZ(double d) { _defaultZ = d; };
 
     //! Return the dimensions of the specified coordinate variable
     //!
@@ -1199,7 +1199,7 @@ protected:
         }
     }
 
-    double               _defaultZ = 0.0;
+    double _defaultZ = 0.0;
 
 private:
     std::vector<size_t>  _dims;                   // dimensions of grid arrays
