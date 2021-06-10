@@ -441,6 +441,8 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
     float time = _times[ts];
     std::string dataFile = _dataFileMap[varname][time];
 
+    std::cout << "dataFile " << dataFile << std::endl;
+
     FILE *fp = fopen(dataFile.c_str(), "rb");
     if (!fp) {
         SetErrMsg("Invalid file: %d", fp);
@@ -474,12 +476,10 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
         for (int j = min[1]; j <= max[1]; j++) {
             int xOffset = min[0];
             int yOffset = _gridSize[0] * j;
-            int offset = formatSize * (xOffset + yOffset + zOffset) + _byteOffset;
+            int offset = formatSize * (xOffset + yOffset + zOffset);    // + _byteOffset;
 
             static Wasp::SmartBuf smart_buf;
             unsigned char *       readBuffer = (unsigned char *)smart_buf.Alloc(count * formatSize);
-
-            if (needSwap) { _swapBytes(readBuffer, formatSize, numValues); }
 
             fseek(fp, offset, SEEK_SET);
             size_t rc = fread(readBuffer, formatSize, count, fp);
@@ -493,6 +493,8 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
                 fclose(fp);
                 return -1;
             }
+
+            if (needSwap) { _swapBytes(readBuffer, formatSize, numValues); }
 
             if (_dataFormat == DC::XType::INT32) {
                 int *castBuffer = (int *)readBuffer;
