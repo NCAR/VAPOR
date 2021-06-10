@@ -1199,6 +1199,8 @@ protected:
         }
     }
 
+    double               _defaultZ = 0.0;
+
 private:
     std::vector<size_t>  _dims;                   // dimensions of grid arrays
     Size_tArr3           _bs = {{1, 1, 1}};       // dimensions of each block
@@ -1214,7 +1216,6 @@ private:
     int                  _interpolationOrder = 0;    // Order of interpolation
     long                 _nodeIDOffset = 0;
     long                 _cellIDOffset = 0;
-    double               _defaultZ = 0.0;
     mutable DblArr3      _minuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
     mutable DblArr3      _maxuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
 
