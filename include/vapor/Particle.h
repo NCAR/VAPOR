@@ -31,7 +31,7 @@ enum FLOW_ERROR_CODE    // these enum values are available in the flow namespace
 // Particle is not expected to serve as a base class.
 class FLOW_API Particle final {
 public:
-    glm::vec3 location{0.0f, 0.0f, 0.0f};
+    glm::vec3 location = {0.0f, 0.0f, 0.0f};
     float     value = 0.0f;
     double    time = 0.0;
 
