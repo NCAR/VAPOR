@@ -74,6 +74,8 @@ public:
     {
         auto tmp = GetDimensions();
         _nodeDimCache = {tmp[0], tmp[1], tmp[2]};
+        while( _nodeDimCache.back() == 1 )
+            _nodeDimCache.pop_back();
         return _nodeDimCache;
     }
 
