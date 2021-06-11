@@ -490,10 +490,8 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
     //_ndims = rg->GetDimensions().size();
     _ndims = 3;
     auto tmp = rg->GetDimensions();
-    if( tmp[2] == 1 )
-        _ndims --;
-    if( tmp[1] == 1 )
-        _ndims --;
+    if (tmp[2] == 1) _ndims--;
+    if (tmp[1] == 1) _ndims--;
 
     _blks = rg->GetBlks();
 

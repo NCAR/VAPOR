@@ -41,7 +41,7 @@ void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &
 RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const vector<double> &minu, const vector<double> &maxu) : StructuredGrid(dims, bs, blks)
 {
     VAssert(minu.size() == maxu.size());
-    //VAssert(minu.size() >= GetDimensions().size());
+    // VAssert(minu.size() >= GetDimensions().size());
 
     _SetExtents(minu, maxu);
 }
