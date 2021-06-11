@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <iostream>
 #include <vapor/MyBase.h>
 #include <vapor/utils.h>
@@ -18,11 +19,11 @@ public:
     std::string              GetTimeDimension() const;
     std::vector<float>       GetUserTimes() const;
     float                    GetUserTime(size_t ts) const { return GetUserTimes()[ts]; };
-    std::vector<size_t>      GetDataSize() const;
-    std::vector<std::string> GetSpatialDimensions() const;
+    std::array<size_t, 3>      GetDataSize() const;
+    std::array<std::string, 3> GetSpatialDimensions() const;
     DC::XType                GetDataFormat() const;
-    std::vector<double>      GetBrickOrigin() const;
-    std::vector<double>      GetBrickSize() const;
+    std::array<double, 3>      GetBrickOrigin() const;
+    std::array<double, 3>      GetBrickSize() const;
     std::string              GetDataEndian() const;
 
     template<class T> int ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region);
@@ -32,25 +33,25 @@ private:
     std::vector<float>       _times;
     std::string              _dataFile;
     std::vector<std::string> _dataFiles;
-    std::vector<size_t>      _gridSize;
+    std::array<size_t, 3>    _gridSize;
     DC::XType                _dataFormat;
     std::string              _variable;
     std::vector<std::string> _variables;
     std::string              _dataEndian;
     std::string              _centering;
-    std::vector<double>      _brickOrigin;
-    std::vector<double>      _brickSize;
+    std::array<double, 3>    _brickOrigin;
+    std::array<double, 3>    _brickSize;
     size_t                   _byteOffset;
     bool                     _divideBrick;
-    std::vector<size_t>      _dataBricklets;
+    std::array<size_t, 3>    _dataBricklets;
     int                      _dataComponents;
 
     // _dataFileMap allows us to access binary data files with a
     // varname/timestep pair
     std::map<std::string, std::map<float, std::string>> _dataFileMap;
 
-    std::vector<std::string> _spatialDimensions;
-    std::string              _timeDimension;
+    std::array<std::string, 3> _spatialDimensions;
+    std::string                _timeDimension;
 
     bool _gridSizeAssigned;
     bool _formatAssigned;
@@ -63,7 +64,7 @@ private:
     void _populateDataFileMap();
 
     template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = false);
-    template<typename T> int _findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = false);
+    template<typename T> int _findToken(const std::string &token, std::string &line, std::array<T, 3> &value, bool verbose = false);
 
     void _findTokenValue(std::string &line) const;
 
@@ -100,10 +101,10 @@ private:
     static const size_t              _defaultOffset;
     static const size_t              _defaultComponents;
     static const bool                _defaultDivBrick;
-    static const std::vector<double> _defaultOrigin;
-    static const std::vector<double> _defaultBrickSize;
-    static const std::vector<size_t> _defaultGridSize;
-    static const std::vector<size_t> _defaultBricklets;
+    static const std::array<double, 3> _defaultOrigin;
+    static const std::array<double, 3> _defaultBrickSize;
+    static const std::array<size_t, 3> _defaultGridSize;
+    static const std::array<size_t, 3> _defaultBricklets;
 
     static const std::string _xDim;
     static const std::string _yDim;

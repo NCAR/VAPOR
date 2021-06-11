@@ -33,10 +33,10 @@ const std::string BOVCollection::_divideBrickToken = "DIVIDE_BRICK";
 const std::string BOVCollection::_dataBrickletsToken = "DATA_BRICKLETS";
 const std::string BOVCollection::_dataComponentsToken = "DATA_COMPONENTS";
 
-const std::vector<double> BOVCollection::_defaultOrigin = {0., 0., 0.};
-const std::vector<double> BOVCollection::_defaultBrickSize = {1., 1., 1.};
-const std::vector<size_t> BOVCollection::_defaultBricklets = {0, 0, 0};
-const std::vector<size_t> BOVCollection::_defaultGridSize = {0, 0, 0};
+const std::array<double, 3> BOVCollection::_defaultOrigin = {0., 0., 0.};
+const std::array<double, 3> BOVCollection::_defaultBrickSize = {1., 1., 1.};
+const std::array<size_t, 3> BOVCollection::_defaultBricklets = {0, 0, 0};
+const std::array<size_t, 3> BOVCollection::_defaultGridSize = {0, 0, 0};
 const DC::XType           BOVCollection::_defaultFormat = DC::XType::INVALID;
 const std::string         BOVCollection::_defaultFile = "";
 const std::string         BOVCollection::_defaultVar = "brickVar";
@@ -65,9 +65,13 @@ BOVCollection::BOVCollection()
 {
     _dataFiles.clear();
     _times.clear();
+    // std::copy( _defaultGridSize, _defaultGridSize.size(), _gridSize );
     _gridSize = _defaultGridSize;
+    // std::copy( _defaultOrigin, _defaultOrigin.size(), _brickOrigin );
     _brickOrigin = _defaultOrigin;
+    // std::copy( _defaultBrickSize, _defaultBrickSize.size(), _brickSize );
     _brickSize = _defaultBrickSize;
+    // std::copy( _defaultBricklets, _defaultBricklets.size(), _dataBricklets );
     _dataBricklets = _defaultBricklets;
     _spatialDimensions = {_xDim, _yDim, _zDim};
 }
@@ -133,7 +137,7 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         else if (rc == FOUND)
             _variable = variable;
 
-        std::vector<size_t> gridSize;
+        std::array<size_t, 3> gridSize;
         rc = _findToken(_gridSizeToken, line, gridSize);
         if (rc == ERROR) {
             return _failureToReadError(_gridSizeToken);
@@ -165,7 +169,7 @@ int BOVCollection::_parseHeader(std::ifstream &header)
 
         // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
         //
-        std::vector<double> brickOrigin;
+        std::array<double, 3> brickOrigin;
         rc = _findToken(_originToken, line, brickOrigin);
         if (rc == ERROR)
             return _invalidValueError(_originToken);
@@ -178,7 +182,7 @@ int BOVCollection::_parseHeader(std::ifstream &header)
             }
         }
 
-        std::vector<double> brickSize;
+        std::array<double, 3> brickSize;
         rc = _findToken(_brickSizeToken, line, brickSize);
         if (rc == ERROR)
             return _invalidValueError(_brickSizeToken);
@@ -276,19 +280,19 @@ int BOVCollection::_invalidValueError(std::string token) const
 
 std::vector<std::string> BOVCollection::GetDataVariableNames() const { return _variables; }
 
-std::vector<std::string> BOVCollection::GetSpatialDimensions() const { return _spatialDimensions; }
+std::array<std::string, 3> BOVCollection::GetSpatialDimensions() const { return _spatialDimensions; }
 
 std::string BOVCollection::GetTimeDimension() const { return _timeDimension; }
 
 std::vector<float> BOVCollection::GetUserTimes() const { return _times; }
 
-std::vector<size_t> BOVCollection::GetDataSize() const { return _gridSize; }
+std::array<size_t, 3> BOVCollection::GetDataSize() const { return _gridSize; }
 
 DC::XType BOVCollection::GetDataFormat() const { return _dataFormat; }
 
-std::vector<double> BOVCollection::GetBrickOrigin() const { return _brickOrigin; }
+std::array<double, 3> BOVCollection::GetBrickOrigin() const { return _brickOrigin; }
 
-std::vector<double> BOVCollection::GetBrickSize() const { return _brickSize; }
+std::array<double, 3> BOVCollection::GetBrickSize() const { return _brickSize; }
 
 std::string BOVCollection::GetDataEndian() const { return _dataEndian; }
 
@@ -351,9 +355,8 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
     return NOT_FOUND;
 }
 
-// Template specialization for reading data of type std::vector<size_t> or std::vector<float>
-// All std::vectors returned must have a size of 3
-template<typename T> int BOVCollection::_findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose)
+// Template specialization for reading data of type std::array<size_t, 3> or std::array<float, 3>
+template<typename T> int BOVCollection::_findToken(const std::string &token, std::string &line, std::array<T, 3> &value, bool verbose)
 {
     // Skip comments
     if (line[0] == '#') { return NOT_FOUND; }
