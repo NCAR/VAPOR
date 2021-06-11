@@ -120,7 +120,7 @@ template<class S, class T> bool compare(S *dc1, T *dc2, size_t nts, string varna
     if (rc < 0) return (false);
 
     vector<size_t> dims2;
-    rc = dc2->GetDimLens(varname, dims2);
+    rc = dc2->GetDimLens(varname, dims2, -1);
     if (rc < 0) return (false);
 
     VAssert(dims == dims2);

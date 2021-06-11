@@ -299,9 +299,8 @@ void Grid::ConstNodeIteratorSG::next(const long &offset)
 {
     if (!_index.size()) return;
 
-    vector<size_t> maxIndex;
-    long           maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims);
-    long           newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
+    long maxIndexL = Wasp::VProduct(_dims) - 1;
+    long newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
         _index = _lastIndex;
@@ -386,9 +385,8 @@ void Grid::ConstCellIteratorSG::next()
 
 void Grid::ConstCellIteratorSG::next(const long &offset)
 {
-    vector<size_t> maxIndex;
-    long           maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims);
-    long           newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
+    long maxIndexL = Wasp::VProduct(_dims) - 1;
+    long newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
         _index = _lastIndex;
@@ -635,52 +633,38 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator+=
 
     if (!_blks.size()) return (*this);
 
-    do {
-        _xb += offset;
-        _index[0] += offset;
-        _indexL += offset;
+    _indexL = Wasp::LinearizeCoords(_index.data(), _dims3d.data(), _ndims) + offset;
 
-        if (_pred.Size()) _coordItr += offset;
+    // Check for overflow
+    //
+    if (_indexL >= _end_indexL) {
+        _indexL = _end_indexL;
+        return (*this);
+    }
 
-        if (_xb < _bs3d[0] && _index[0] < _dims3d[0]) {
-            _itr += offset;
+    Wasp::VectorizeCoords(_indexL, _dims3d.data(), _index.data(), _ndims);
+    if (_pred.Size()) _coordItr += offset;
 
-            if (_pred(*_coordItr)) { return (*this); }
+    size_t x = _index[0] % _bs3d[0];
+    size_t xb = _index[0] / _bs3d[0];
+    size_t y = _index[1] % _bs3d[1];
+    size_t yb = _index[1] / _bs3d[1];
+    size_t z = _index[2] % _bs3d[2];
+    size_t zb = _index[2] / _bs3d[2];
 
-            continue;
-        }
+    _xb = x;
 
-        // Check for overflow
-        //
-        if (_indexL >= _end_indexL) {
-            _indexL = _end_indexL;
-            return (*this);
-        }
+    float *blk = _blks[zb * _bdims3d[0] * _bdims3d[1] + yb * _bdims3d[0] + xb];
+    _itr = &blk[z * _bs3d[0] * _bs3d[1] + y * _bs3d[0] + x];
 
-        if (_index[0] >= _dims3d[0]) {
-            _index[0] = _index[0] % _dims3d[0];
-            _index[1] = _indexL / _dims3d[0];
-        }
-        _xb = _index[0] % _bs3d[0];
+    // If no predicate, or if there is a predicate and it evaluates to
+    // true, we're done.
+    //
+    if (!_pred.Size() || _pred(*_coordItr)) { return (*this); }
 
-        if (_index[1] >= _dims3d[1]) {
-            _index[1] = _index[1] % _dims3d[1];
-            _index[2] = _indexL / (_dims3d[0] * _dims3d[1]);
-        }
-
-        size_t x = _index[0] % _bs3d[0];
-        size_t xb = _index[0] / _bs3d[0];
-        size_t y = _index[1] % _bs3d[1];
-        size_t yb = _index[1] / _bs3d[1];
-        size_t z = _index[2] % _bs3d[2];
-        size_t zb = _index[2] / _bs3d[2];
-
-        float *blk = _blks[zb * _bdims3d[0] * _bdims3d[1] + yb * _bdims3d[0] + xb];
-        _itr = &blk[z * _bs3d[0] * _bs3d[1] + y * _bs3d[0] + x];
-
-    } while (_indexL != _end_indexL && !_pred(*_coordItr));
-
-    return (*this);
+    // Let operator++ increment until predicate passes (or end of list)
+    //
+    return (++(*this));
 }
 
 template<class T> Grid::ForwardIterator<T> Grid::ForwardIterator<T>::operator+(const long int &offset) const

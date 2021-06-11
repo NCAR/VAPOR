@@ -65,6 +65,7 @@
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCWRF.h>
 #include <vapor/DCMPAS.h>
+#include <vapor/DCP.h>
 #include <vapor/DCCF.h>
 #include <vapor/DCBOV.h>
 
@@ -560,6 +561,8 @@ bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std
         *fmt = "wrf";
     else if (isDatasetValidFormat<DCMPAS>(paths))
         *fmt = "mpas";
+    else if (isDatasetValidFormat<DCP>(paths))
+        *fmt = "dcp";
     else if (isDatasetValidFormat<DCCF>(paths))
         *fmt = "cf";
     else if (isDatasetValidFormat<DCBOV>(paths))
@@ -900,6 +903,7 @@ void MainForm::_createFileMenu()
     _importMenu->addAction(_dataImportCF_Action);
     _importMenu->addAction(_dataImportMPAS_Action);
     _importMenu->addAction("Brick of Values (BOV)", this, [this]() { loadDataHelper("", {}, "BOV files", "", "bov", true, DatasetExistsAction::Prompt); });
+    _importMenu->addAction("DCP", this, [this]() { loadDataHelper("", {}, "DCP files", "", "dcp", true, DatasetExistsAction::Prompt); });
     _File->addSeparator();
 
     // _File->addAction(createTextSeparator(" Session"));

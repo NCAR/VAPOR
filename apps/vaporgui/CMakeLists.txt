@@ -16,6 +16,7 @@ set (SRCS
 	Statistics.cpp
 	Plot.cpp
 	CopyRegionWidget.cpp
+	CopyRegionAnnotationWidget.cpp
 	RangeCombos.cpp
 	BarbEventRouter.cpp
 	BarbEventRouter.h
@@ -210,6 +211,8 @@ set (SRCS
 	AbstractWidgetGroup.h
 	PTransformWidget.cpp
 	PTransformWidget.h
+	PCopyRegionAnnotationWidget.cpp
+	PCopyRegionAnnotationWidget.h
 	PCopyRegionWidget.cpp
 	PCopyRegionWidget.h
 	PSliceSampleLocationSelector.cpp
@@ -248,6 +251,8 @@ set (SRCS
     BookmarkParams.h
     CheckForUpdate.cpp
     CheckForUpdate.h
+    ParticleEventRouter.cpp
+    ParticleEventRouter.h
 
 	# Need to include all files that request .ui files
 	Statistics.h
@@ -279,6 +284,7 @@ set (SRCS
 	FlowEventRouter.h
 	Combo.h
 	CopyRegionWidget.h
+	CopyRegionAnnotationWidget.h
 	FileOperationChecker.h
 	GUIStateParams.h
 	MouseModeParams.h
@@ -300,7 +306,6 @@ set (UIS
 	LeftPanel.ui
 	animationTab.ui
 	NavigationTab.ui
-	AnnotationGUI.ui
 	NewRendererDialog.ui
 	TransformTableGUI.ui
 	statsWindow.ui

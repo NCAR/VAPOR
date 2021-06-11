@@ -3,7 +3,7 @@
 #include <vapor/common.h>
 #include <vapor/Grid.h>
 #include <vapor/RegularGrid.h>
-#include <vapor/QuadTreeRectangle.hpp>
+#include <vapor/QuadTreeRectangleP.h>
 
 namespace VAPoR {
 //! \class CurvilinearGrid
@@ -60,16 +60,16 @@ public:
     //! values specify the Y user coordinates.
     //! \param[in] zcoords  A 1D vector whose size matches that of the K
     //! dimension of this class, and whose values specify the Z user coordinates.
-    //! \param[in] qtr A QuadTreeRectangle instance that contains a quad tree
+    //! \param[in] qtr A QuadTreeRectangleP instance that contains a quad tree
     //! that may be used to find the cell(s) containing a given point
     //! expressed in user coordintes. if \p qtr is NULL the class will
-    //! generate its own QuadTreeRectangle instance.
+    //! generate its own QuadTreeRectangleP instance.
     //!
     //!
     //! \sa RegularGrid()
     //
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
-                    const std::vector<double> &zcoords, std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
+                    const std::vector<double> &zcoords, std::shared_ptr<const QuadTreeRectangleP> qtr);
 
     //! \copydoc StructuredGrid::StructuredGrid()
     //!
@@ -99,16 +99,16 @@ public:
     //! \param[in] zrg A 3D RegularGrid instance whose
     //! I, J, K dimensionality matches that of this class instance, and whose
     //! values specify the Z user coordinates.
-    //! \param[in] qtr A QuadTreeRectangle instance that contains a quad tree
+    //! \param[in] qtr A QuadTreeRectangleP instance that contains a quad tree
     //! that may be used to find the cell(s) containing a given point
     //! expressed in user coordintes. if \p qtr is NULL the class will
-    //! generate its own QuadTreeRectangle instance.
+    //! generate its own QuadTreeRectangleP instance.
     //!
     //!
     //! \sa RegularGrid()
     //
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg,
-                    std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
+                    std::shared_ptr<const QuadTreeRectangleP> qtr);
 
     //! \copydoc StructuredGrid::StructuredGrid()
     //!
@@ -133,16 +133,16 @@ public:
     //! \param[in] yrg A 2D RegularGrid instance whose
     //! I and J dimensionality matches that of this class instance, and whose
     //! values specify the Y user coordinates.
-    //! \param[in] qtr A QuadTreeRectangle instance that contains a quad tree
+    //! \param[in] qtr A QuadTreeRectangleP instance that contains a quad tree
     //! that may be used to find the cell(s) containing a given point
     //! expressed in user coordintes. if \p qtr is NULL the class will
-    //! generate its own QuadTreeRectangle instance.
+    //! generate its own QuadTreeRectangleP instance.
     //!
     //!
     //! \sa RegularGrid()
     //
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
-                    std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
+                    std::shared_ptr<const QuadTreeRectangleP> qtr);
 
     CurvilinearGrid() = default;
     virtual ~CurvilinearGrid()
@@ -152,7 +152,7 @@ public:
         }
     }
 
-    std::shared_ptr<const QuadTreeRectangle<float, size_t>> GetQuadTreeRectangle() const { return (_qtr); }
+    std::shared_ptr<const QuadTreeRectangleP> GetQuadTreeRectangle() const { return (_qtr); }
 
     static std::string GetClassType() { return ("Curvilinear"); }
     std::string        GetType() const override { return (GetClassType()); }
@@ -243,16 +243,16 @@ protected:
     virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
 
 private:
-    std::vector<double>                                     _zcoords;
-    DblArr3                                                 _minu = {{0.0, 0.0, 0.0}};
-    DblArr3                                                 _maxu = {{0.0, 0.0, 0.0}};
-    RegularGrid                                             _xrg;
-    RegularGrid                                             _yrg;
-    RegularGrid                                             _zrg;
-    bool                                                    _terrainFollowing;
-    std::shared_ptr<const QuadTreeRectangle<float, size_t>> _qtr;
+    std::vector<double>                       _zcoords;
+    DblArr3                                   _minu = {{0.0, 0.0, 0.0}};
+    DblArr3                                   _maxu = {{0.0, 0.0, 0.0}};
+    RegularGrid                               _xrg;
+    RegularGrid                               _yrg;
+    RegularGrid                               _zrg;
+    bool                                      _terrainFollowing;
+    std::shared_ptr<const QuadTreeRectangleP> _qtr;
 
-    void _curvilinearGrid(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg, const std::vector<double> &zcoords, std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
+    void _curvilinearGrid(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg, const std::vector<double> &zcoords, std::shared_ptr<const QuadTreeRectangleP> qtr);
 
     bool _insideFace(const Size_tArr3 &face, double pt[2], double lambda[4], std::vector<Size_tArr3> &nodes) const;
 
@@ -264,7 +264,7 @@ private:
 
     bool _insideGridHelperTerrain(double x, double y, double z, const size_t &i, const size_t &j, size_t &k, double zwgt[2]) const;
 
-    std::shared_ptr<QuadTreeRectangle<float, size_t>> _makeQuadTreeRectangle() const;
+    std::shared_ptr<QuadTreeRectangleP> _makeQuadTreeRectangle() const;
 };
 };    // namespace VAPoR
 #endif

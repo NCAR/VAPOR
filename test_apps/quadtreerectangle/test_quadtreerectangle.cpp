@@ -5,6 +5,7 @@
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
 #include <vapor/QuadTreeRectangle.hpp>
+#include "../smokeTests/gridTools.h"
 
 using namespace std;
 
