@@ -15,16 +15,16 @@ public:
     BOVCollection();
     int Initialize(const std::vector<std::string> &paths);
 
-    std::vector<std::string> GetDataVariableNames() const;
-    std::string              GetTimeDimension() const;
-    std::vector<float>       GetUserTimes() const;
-    float                    GetUserTime(size_t ts) const { return GetUserTimes()[ts]; };
+    std::vector<std::string>   GetDataVariableNames() const;
+    std::string                GetTimeDimension() const;
+    std::vector<float>         GetUserTimes() const;
+    float                      GetUserTime(size_t ts) const { return GetUserTimes()[ts]; };
     std::array<size_t, 3>      GetDataSize() const;
     std::array<std::string, 3> GetSpatialDimensions() const;
-    DC::XType                GetDataFormat() const;
+    DC::XType                  GetDataFormat() const;
     std::array<double, 3>      GetBrickOrigin() const;
     std::array<double, 3>      GetBrickSize() const;
-    std::string              GetDataEndian() const;
+    std::string                GetDataEndian() const;
 
     template<class T> int ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region);
 
@@ -60,7 +60,7 @@ private:
     bool _dataEndianAssigned;
     bool _byteOffsetAssigned;
 
-    int _parseHeader(std::ifstream &header);
+    int  _parseHeader(std::ifstream &header);
     void _populateDataFileMap();
 
     template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = false);
@@ -68,8 +68,8 @@ private:
 
     void _findTokenValue(std::string &line) const;
 
-    int    _sizeOfFormat(DC::XType) const;
-    void   _swapBytes(void *vptr, size_t size, size_t n) const;
+    int  _sizeOfFormat(DC::XType) const;
+    void _swapBytes(void *vptr, size_t size, size_t n) const;
 
     int _invalidDimensionError(std::string token) const;
     int _invalidFormatError(std::string token) const;
@@ -92,15 +92,15 @@ private:
     static const std::string _dataBrickletsToken;
     static const std::string _dataComponentsToken;
 
-    static const double              _defaultTime;
-    static const std::string         _defaultFile;
-    static const DC::XType           _defaultFormat;
-    static const std::string         _defaultVar;
-    static const std::string         _defaultEndian;
-    static const std::string         _defaultCentering;
-    static const size_t              _defaultOffset;
-    static const size_t              _defaultComponents;
-    static const bool                _defaultDivBrick;
+    static const double                _defaultTime;
+    static const std::string           _defaultFile;
+    static const DC::XType             _defaultFormat;
+    static const std::string           _defaultVar;
+    static const std::string           _defaultEndian;
+    static const std::string           _defaultCentering;
+    static const size_t                _defaultOffset;
+    static const size_t                _defaultComponents;
+    static const bool                  _defaultDivBrick;
     static const std::array<double, 3> _defaultOrigin;
     static const std::array<double, 3> _defaultBrickSize;
     static const std::array<size_t, 3> _defaultGridSize;

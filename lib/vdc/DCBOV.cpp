@@ -70,10 +70,8 @@ int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &op
 int DCBOV::_InitDimensions()
 {
     _dimsMap.clear();
-    std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
-    std::vector<size_t>      dimlens = _bovCollection->GetDataSize();
-    VAssert(dimnames.size() == 3);
-    VAssert(dimnames.size() == dimlens.size());
+    std::array<std::string, 3> dimnames = _bovCollection->GetSpatialDimensions();
+    std::array<size_t, 3>      dimlens = _bovCollection->GetDataSize();
 
     for (int i = 0; i < dimnames.size(); i++) {
         Dimension dim(dimnames[i], dimlens[i]);
@@ -90,10 +88,10 @@ int DCBOV::_InitDimensions()
 
 int DCBOV::_InitCoordinates()
 {
-    bool         uniformHint = true;
-    vector<bool>             periodic(false, 4);
-    std::string  units = "m";
-    std::vector<std::string> dims = _bovCollection->GetSpatialDimensions();
+    bool                       uniformHint = true;
+    vector<bool>               periodic(false, 4);
+    std::string                units = "m";
+    std::array<std::string, 3> dims = _bovCollection->GetSpatialDimensions();
 
     _coordVarsMap[dims[0]] = CoordVar(dims[0], units, DC::FLOAT, periodic, 0, uniformHint, {dims[0]}, "");
     _coordVarsMap[dims[1]] = CoordVar(dims[1], units, DC::FLOAT, periodic, 1, uniformHint, {dims[1]}, "");
@@ -115,13 +113,14 @@ int DCBOV::_InitVars()
 
     vector<bool> periodic(3, false);
 
-    std::vector<std::string> dimnames = _bovCollection->GetSpatialDimensions();
-    std::vector<std::string> vars = _bovCollection->GetDataVariableNames();
-    DC::XType                format = _bovCollection->GetDataFormat();
-    std::string              timeCoordVar = _bovCollection->GetTimeDimension();
-    string                   units = "m";
+    std::array<std::string, 3> dimnames = _bovCollection->GetSpatialDimensions();
+    std::vector<std::string>   vars = _bovCollection->GetDataVariableNames();
+    DC::XType                  format = _bovCollection->GetDataFormat();
+    std::string                timeCoordVar = _bovCollection->GetTimeDimension();
+    string                     units = "m";
 
-    Mesh mesh("BOV", dimnames, dimnames);
+    std::vector<std::string> vDimNames = {dimnames[0], dimnames[1], dimnames[2]};
+    Mesh                     mesh("BOV", vDimNames, vDimNames);
 
     // Create new mesh. We're being lazy here and probably should only
     // createone if it doesn't ready exist
@@ -291,10 +290,10 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     std::string varname = w->GetVarname();
     size_t      ts = w->GetTS();
 
-    std::vector<std::string> spatialDims = _bovCollection->GetSpatialDimensions();
-    std::vector<size_t>      dataSize = _bovCollection->GetDataSize();
-    std::vector<double>      origin = _bovCollection->GetBrickOrigin();
-    std::vector<double>      brickSize = _bovCollection->GetBrickSize();
+    std::array<std::string, 3> spatialDims = _bovCollection->GetSpatialDimensions();
+    std::array<size_t, 3>      dataSize = _bovCollection->GetDataSize();
+    std::array<double, 3>      origin = _bovCollection->GetBrickOrigin();
+    std::array<double, 3>      brickSize = _bovCollection->GetBrickSize();
 
     // Return spatial coordinate variable values
     for (int dim = 0; dim < spatialDims.size(); dim++) {

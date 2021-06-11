@@ -37,15 +37,15 @@ const std::array<double, 3> BOVCollection::_defaultOrigin = {0., 0., 0.};
 const std::array<double, 3> BOVCollection::_defaultBrickSize = {1., 1., 1.};
 const std::array<size_t, 3> BOVCollection::_defaultBricklets = {0, 0, 0};
 const std::array<size_t, 3> BOVCollection::_defaultGridSize = {0, 0, 0};
-const DC::XType           BOVCollection::_defaultFormat = DC::XType::INVALID;
-const std::string         BOVCollection::_defaultFile = "";
-const std::string         BOVCollection::_defaultVar = "brickVar";
-const std::string         BOVCollection::_defaultEndian = "LITTLE";
-const std::string         BOVCollection::_defaultCentering = "ZONAL";
-const double              BOVCollection::_defaultTime = 0.;
-const size_t              BOVCollection::_defaultOffset = 0;
-const size_t              BOVCollection::_defaultComponents = 1;
-const bool                BOVCollection::_defaultDivBrick = false;
+const DC::XType             BOVCollection::_defaultFormat = DC::XType::INVALID;
+const std::string           BOVCollection::_defaultFile = "";
+const std::string           BOVCollection::_defaultVar = "brickVar";
+const std::string           BOVCollection::_defaultEndian = "LITTLE";
+const std::string           BOVCollection::_defaultCentering = "ZONAL";
+const double                BOVCollection::_defaultTime = 0.;
+const size_t                BOVCollection::_defaultOffset = 0;
+const size_t                BOVCollection::_defaultComponents = 1;
+const bool                  BOVCollection::_defaultDivBrick = false;
 
 const std::string BOVCollection::_xDim = "x";
 const std::string BOVCollection::_yDim = "y";
@@ -367,18 +367,13 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         _findTokenValue(line);
         std::stringstream lineStream(line);
 
-        value.clear();
-        while (lineStream >> lineValue) { value.push_back(lineValue); }
-
-        if (value.size() != 3) {
-            value.clear();
-            std::string message = token + " must be a set of three values.";
-            SetErrMsg(message.c_str());
-            return ERROR;
+        for (int i = 0; i < value.size(); i++) {
+            lineStream >> lineValue;
+            value[i] = lineValue;
         }
 
         if (lineStream.bad()) {
-            value.clear();
+            // value.clear();
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
             return ERROR;
@@ -434,10 +429,8 @@ void BOVCollection::_swapBytes(void *vptr, size_t size, size_t n) const
 
 template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region)
 {
-    float time = _times[ts];
+    float       time = _times[ts];
     std::string dataFile = _dataFileMap[varname][time];
-
-    std::cout << "dataFile " << dataFile << std::endl;
 
     FILE *fp = fopen(dataFile.c_str(), "rb");
     if (!fp) {
