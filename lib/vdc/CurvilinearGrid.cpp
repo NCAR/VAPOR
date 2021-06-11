@@ -234,13 +234,13 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     _coords.push_back(*_xCoordItr);
     _coords.push_back(*_yCoordItr);
 
-    //if (dims.size() == 3) {
-        if (_terrainFollowing) {
-            _coords.push_back(*_zCoordItr);
+    // if (dims.size() == 3) {
+    if (_terrainFollowing) {
+        _coords.push_back(*_zCoordItr);
         } else {
             _coords.push_back(_cg->_zcoords[0]);
         }
-    //}
+        //}
 }
 
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const ConstCoordItrCG &rhs) : ConstCoordItrAbstract()
@@ -287,7 +287,7 @@ void CurvilinearGrid::ConstCoordItrCG::next()
         return;
     }
 
-    //if (dims.size() == 2) return;
+    // if (dims.size() == 2) return;
 
     _index[1] = 0;
     _index[2]++;
@@ -339,7 +339,7 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
     _coords[0] = *_xCoordItr;
     _coords[1] = *_yCoordItr;
 
-    //if (dims.size() == 2) return;
+    // if (dims.size() == 2) return;
 
     if (_terrainFollowing) {
         _zCoordItr += offset;

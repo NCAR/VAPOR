@@ -365,7 +365,7 @@ int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid 
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
     auto dims = g->GetDimensions();
-    //VAssert(dims.size() == 2);
+    // VAssert(dims.size() == 2);
     VAssert(dims[2] == 1);
 
     _vertsWidth = dims[0];
@@ -470,7 +470,7 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
     }
 
     VAssert(g->GetTopologyDim() == 2);
-    //vector<size_t> dims = g->GetDimensions();
+    // vector<size_t> dims = g->GetDimensions();
 
     GLfloat *verts = (GLfloat *)_sb_verts.GetBuf();
     GLfloat *normals = (GLfloat *)_sb_normals.GetBuf();

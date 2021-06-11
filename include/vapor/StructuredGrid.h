@@ -70,9 +70,9 @@ public:
     static std::string GetClassType() { return ("Structured"); }
     std::string        GetType() const override { return (GetClassType()); }
 
-    const std::vector<size_t> &GetNodeDimensions() const override 
-    { 
-        auto tmp = GetDimensions(); 
+    const std::vector<size_t> &GetNodeDimensions() const override
+    {
+        auto tmp = GetDimensions();
         _nodeDimCache = {tmp[0], tmp[1], tmp[2]};
         return _nodeDimCache;
     }
@@ -118,7 +118,6 @@ private:
     std::vector<size_t> _cellDims;
 
     mutable std::vector<size_t> _nodeDimCache;
-    
 };
 };    // namespace VAPoR
 #endif

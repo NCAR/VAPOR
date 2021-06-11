@@ -368,7 +368,7 @@ int FlowRenderer::_renderAdvection(const flow::Advection *adv)
             if (_cache_isSteady) sn = std::min(sn, (int)maxSamples);
 
             for (int i = 0; i < sn + 1; i++) {
-printf("step %d: loc = (%f, %f, %f)\n", i, stream[i].location.x, stream[i].location.y, stream[i].location.z);
+                printf("step %d: loc = (%f, %f, %f)\n", i, stream[i].location.x, stream[i].location.y, stream[i].location.z);
                 // "IsSpecial" means don't render this sample.
                 if (i == sn || stream[i].IsSpecial()) {
                     int svn = sv.size();

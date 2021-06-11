@@ -38,8 +38,7 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
             blks.size() == std::accumulate(_bdims.begin(), _bdims.end(), 1, std::multiplies<size_t>()));
 
     _dims = {1, 1, 1};
-    for( auto i = 0; i < dims.size(); i++ )
-        _dims[i] = dims[i];
+    for (auto i = 0; i < dims.size(); i++) _dims[i] = dims[i];
     _periodic = vector<bool>(topology_dimension, false);
     _topologyDimension = topology_dimension;
     _missingValue = INFINITY;
@@ -493,7 +492,7 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
     _blks = rg->GetBlks();
 
     auto tmp = rg->GetDimensions();
-    _dims3d  = {tmp[0], tmp[1], tmp[2]};
+    _dims3d = {tmp[0], tmp[1], tmp[2]};
     _bdims3d = rg->GetDimensionInBlks();
     _bs3d = rg->GetBlockSize();
     for (int i = _ndims; i < 3; i++) {

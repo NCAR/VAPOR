@@ -56,7 +56,7 @@ vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
     }
 }
 
-//size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
+// size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
 size_t UnstructuredGrid2D::GetGeometryDim() const { return 3; }
 
 void UnstructuredGrid2D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const

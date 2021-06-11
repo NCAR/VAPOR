@@ -476,8 +476,8 @@ double LayeredGrid::_bilinearElevation(size_t i0, size_t i1, size_t j0, size_t j
 
 float LayeredGrid::_getValueQuadratic(const double coords[3]) const
 {
-    double  mv   = GetMissingValue();
-    auto    dims = GetDimensions();
+    double mv = GetMissingValue();
+    auto   dims = GetDimensions();
 
     // Get the indecies of the hyperslab containing the point
     // k0 = level above the point

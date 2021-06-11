@@ -31,9 +31,9 @@ int VolumeRegular::LoadData(const Grid *grid)
 int VolumeRegular::LoadSecondaryData(const Grid *grid)
 {
     _hasSecondData = false;
-    auto tmp  = grid->GetDimensions();
+    auto tmp = grid->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    if (_dataDimensions != dims ) {
+    if (_dataDimensions != dims) {
         Wasp::MyBase::SetErrMsg("Secondary (color mapped) variable has different grid from primary variable");
         return -1;
     }

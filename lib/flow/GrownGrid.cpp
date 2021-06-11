@@ -58,16 +58,16 @@ std::vector<size_t> GrownGrid::GetCoordDimensions(size_t) const
 //
 size_t GrownGrid::GetGeometryDim() const { return 3; }
 
-const std::vector<size_t> &GrownGrid::GetNodeDimensions() const 
-{ 
-    auto tmp = GetDimensions(); 
+const std::vector<size_t> &GrownGrid::GetNodeDimensions() const
+{
+    auto tmp = GetDimensions();
     _garbage = {tmp[0], tmp[1], tmp[2]};
     return _garbage;
 }
 
 const std::vector<size_t> &GrownGrid::GetCellDimensions() const
-{ 
-    auto tmp = GetDimensions(); 
+{
+    auto tmp = GetDimensions();
     _garbage = {tmp[0], tmp[1], tmp[2]};
     return _garbage;
 }

@@ -251,8 +251,7 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
             velocity[i] = grid->GetValue(coords);
             missingV[i] = grid->GetMissingValue();
         }
-printf("coords = (%f, %f, %f), vel = (%f, %f, %f)\n", coords[0],   coords[1],   coords[2],
-                                                      velocity[0], velocity[1], velocity[2]);
+        printf("coords = (%f, %f, %f), vel = (%f, %f, %f)\n", coords[0], coords[1], coords[2], velocity[0], velocity[1], velocity[2]);
         auto  hasMissing = glm::equal(velocity, missingV);
         float mult = _params_locked ? _c_vel_mult : _params->GetVelocityMultiplier();
         if (glm::any(hasMissing))
@@ -563,12 +562,11 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
     }
 #endif
 
-    if( dim == 1 ) {
+    if (dim == 1) {
         Wasp::MyBase::SetErrMsg("Variable Dimension Wrong!");
         return nullptr;
-    }
-    else if( dim == 2 ) {
-        grid->SetDefaultZ( this->DefaultZ );
+    } else if (dim == 2) {
+        grid->SetDefaultZ(this->DefaultZ);
         std::cout << "set Z = " << this->DefaultZ << std::endl;
     }
     _recentGrids.insert(key, new GridWrapper(grid, _datamgr));

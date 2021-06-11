@@ -85,7 +85,7 @@ float RegularGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
 
-    //if (dims.size() == 3) VAssert(k < dims[2]);
+    // if (dims.size() == 3) VAssert(k < dims[2]);
     VAssert(k < dims[2]);
 
     double iwgt = 0.0;
@@ -103,8 +103,8 @@ float RegularGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
     if (iwgt > 0.5) i++;
     if (jwgt > 0.5) j++;
 
-    //if (dims.size() == 3) {
-        if (kwgt > 0.5) k++;
+    // if (dims.size() == 3) {
+    if (kwgt > 0.5) k++;
     //}
 
     return (AccessIJK(i, j, k));
@@ -130,7 +130,7 @@ float RegularGrid::GetValueLinear(const DblArr3 &coords) const
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
 
-    //if (dims.size() == 3) { VAssert(k < dims[2]); }
+    // if (dims.size() == 3) { VAssert(k < dims[2]); }
     VAssert(k < dims[2]);
 
     double iwgt = 0.0;
@@ -277,7 +277,7 @@ bool RegularGrid::InsideGrid(const DblArr3 &coords) const
 RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const RegularGrid *rg, bool begin) : ConstCoordItrAbstract()
 {
     auto tmp = rg->GetDimensions();
-    _dims  = {tmp[0], tmp[1], tmp[2]};
+    _dims = {tmp[0], tmp[1], tmp[2]};
     _delta = rg->_delta;
 
     Grid::CopyFromArr3(rg->_minu, _minu);

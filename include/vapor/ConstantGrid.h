@@ -74,7 +74,7 @@ private:
 
     // Garbage data member that exists only because GetNodeDimensions() and GetCellDimensions()
     // want to return a reference to a local object. And garbage can be mutable :)
-    mutable std::vector<size_t>  _garbage;
+    mutable std::vector<size_t> _garbage;
 
 };    // end ConstantGrid class
 };    // namespace VAPoR

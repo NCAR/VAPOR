@@ -94,7 +94,7 @@ void StretchedGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coord
     Size_tArr3 cIndices;
     ClampIndex(indices, cIndices);
 
-    //vector<size_t> dims = StructuredGrid::GetDimensions();
+    // vector<size_t> dims = StructuredGrid::GetDimensions();
 
     coords[0] = _xcoords[cIndices[0]];
     coords[1] = _ycoords[cIndices[1]];
@@ -207,7 +207,7 @@ void StretchedGrid::ConstCoordItrSG::next()
         return;
     }
 
-    //if (dims.size() == 2) return;
+    // if (dims.size() == 2) return;
 
     _index[1] = 0;
     _index[2]++;
@@ -245,7 +245,7 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset)
     _coords[0] = _sg->_xcoords[_index[0]];
     _coords[1] = _sg->_ycoords[_index[1]];
 
-    //if (dims.size() == 2) return;
+    // if (dims.size() == 2) return;
 
     _coords[2] = _sg->_zcoords[_index[2]];
 }

@@ -13,7 +13,7 @@ using namespace VAPoR;
 KDTreeRG::KDTreeRG(const Grid &xg, const Grid &yg) : _points(xg, yg), _kdtree(2 /* dimension */, _points, nanoflann::KDTreeSingleIndexAdaptorParams(20 /* max leaf num */))
 {
     auto tmp = xg.GetDimensions();
-    _dims    = {tmp[0], tmp[1], tmp[2]};
+    _dims = {tmp[0], tmp[1], tmp[2]};
     _kdtree.buildIndex();
 }
 
