@@ -1,5 +1,6 @@
 #include "vapor/VaporField.h"
 #include "vapor/ConstantGrid.h"
+
 #include "GrownGrid.h"
 
 using namespace flow;
@@ -9,31 +10,30 @@ using namespace flow;
 //
 void GridKey::Reset(uint64_t ts, int32_t ref, int32_t comp, std::string var, const std::vector<double> &min, const std::vector<double> &max, float dz)
 {
-    timestep = ts;
-    refLev = ref;
-    compLev = comp;
-    defaultZ = dz;
+    _timestep = ts;
+    _refLev = ref;
+    _compLev = comp;
+    _defaultZ = dz;
 
-    for (int i = 0; i < 3; i++) {
-        ext_min[i] = 0.0;
-        ext_max[i] = 0.0;
-    }
-    for (int i = 0; i < min.size(); i++) ext_min[i] = min[i];
-    for (int i = 0; i < max.size(); i++) ext_max[i] = max[i];
+    _ext_min = {0.0, 0.0, 0.0};
+    _ext_max = {0.0, 0.0, 0.0};
 
-    varName = std::move(var);
+    for (int i = 0; i < min.size(); i++) _ext_min[i] = min[i];
+    for (int i = 0; i < max.size(); i++) _ext_max[i] = max[i];
+
+    _varName = std::move(var);
 }
 
 bool GridKey::operator==(const GridKey &other) const
 {
     // String comparison seems to occur most frequently, so put it at the first.
-    if (this->varName != other.varName) return false;
-    if (this->timestep != other.timestep) return false;
-    if (this->refLev != other.refLev) return false;
-    if (this->compLev != other.compLev) return false;
-    if (this->defaultZ != other.defaultZ) return false;
-    if (this->ext_min != other.ext_min) return false;
-    if (this->ext_max != other.ext_max) return false;
+    if (this->_varName != other._varName) return false;
+    if (this->_timestep != other._timestep) return false;
+    if (this->_refLev != other._refLev) return false;
+    if (this->_compLev != other._compLev) return false;
+    if (this->_defaultZ != other._defaultZ) return false;
+    if (this->_ext_min != other._ext_min) return false;
+    if (this->_ext_max != other._ext_max) return false;
 
     return true;
 
@@ -44,28 +44,22 @@ bool GridKey::operator==(const GridKey &other) const
     // DefaultZ isn't likely to change during a truly 3D case.
 }
 
-bool GridKey::emptyVar() const { return varName.empty(); }
+bool GridKey::emptyVar() const { return _varName.empty(); }
 
 //
 // Class GridWrapper
 //
-GridWrapper::GridWrapper(const VAPoR::Grid *gp, VAPoR::DataMgr *mp) : gridPtr(gp), mgr(mp) {}
+GridWrapper::GridWrapper(const VAPoR::Grid *gp, VAPoR::DataMgr *mp) : _gridPtr(gp), _mgr(mp) {}
 
 GridWrapper::~GridWrapper()
 {
-    if (gridPtr) {
-        if (gridPtr->GetType() == "GrownGrid") {
-            delete gridPtr;    // GrownGrid can unlock itself...
-        } else {
-            if (mgr) {
-                mgr->UnlockGrid(gridPtr);
-                delete gridPtr;
-            }
-        }
+    if (_gridPtr && _mgr) {
+        _mgr->UnlockGrid(_gridPtr);
+        delete _gridPtr;
     }
 }
 
-const VAPoR::Grid *GridWrapper::grid() const { return gridPtr; }
+const VAPoR::Grid *GridWrapper::grid() const { return _gridPtr; }
 
 //
 // Class VaporField
@@ -257,6 +251,8 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
             velocity[i] = grid->GetValue(coords);
             missingV[i] = grid->GetMissingValue();
         }
+printf("coords = (%f, %f, %f), vel = (%f, %f, %f)\n", coords[0],   coords[1],   coords[2],
+                                                      velocity[0], velocity[1], velocity[2]);
         auto  hasMissing = glm::equal(velocity, missingV);
         float mult = _params_locked ? _c_vel_mult : _params->GetVelocityMultiplier();
         if (glm::any(hasMissing))
@@ -520,7 +516,6 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
     // Let's create a new grid by doing one of the three things, and then put it in the cache.
     // 1) create it by ourselves if a ConstantGrid is required, or
     // 2) ask for it from the data manager,
-    // 3) query a 2D grid and grow it to be a GrownGrid.
     //
 
     // Note that we use a lock here, so no two threads querying _datamgr simultaneously.
@@ -552,6 +547,8 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
     // 2) it is stored in our cache, where its ownership is kept.
     // We also make it become a GrownGrid if it's 2D in nature.
     auto dim = _datamgr->GetVarTopologyDim(varName);
+
+#if 0
     if (dim == 3 || dim == 0)    // dim == 0 happens when varName is empty.
     {
         _recentGrids.insert(key, new GridWrapper(grid, _datamgr));
@@ -564,4 +561,16 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
         Wasp::MyBase::SetErrMsg("Variable Dimension Wrong!");
         return nullptr;
     }
+#endif
+
+    if( dim == 1 ) {
+        Wasp::MyBase::SetErrMsg("Variable Dimension Wrong!");
+        return nullptr;
+    }
+    else if( dim == 2 ) {
+        grid->SetDefaultZ( this->DefaultZ );
+        std::cout << "set Z = " << this->DefaultZ << std::endl;
+    }
+    _recentGrids.insert(key, new GridWrapper(grid, _datamgr));
+    return grid;
 }

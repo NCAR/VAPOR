@@ -382,6 +382,10 @@ int Advection::_advectEuler(Field *velocity, const Particle &p0, double dt, Part
 
 int Advection::_advectRK4(Field *velocity, const Particle &p0, double dt, Particle &p1) const
 {
+if( p0.location.x == -91212.) {
+    printf("p0 = (%f, %f, %f)\n", p0.location.x, p0.location.y, p0.location.z);
+}
+
     glm::vec3 k1, k2, k3, k4;
     double    dt_half = dt * 0.5;
     float     dt32 = float(dt);              // glm is strict about data types (which is a good thing).
@@ -397,6 +401,15 @@ int Advection::_advectRK4(Field *velocity, const Particle &p0, double dt, Partic
     if (rv != 0) return rv;
     p1.location = p0.location + dt32 / 6.0f * (k1 + 2.0f * (k2 + k3) + k4);
     p1.time = p0.time + dt;
+
+if( p0.location.x == -91212.) {
+    printf("k1 = (%f, %f, %f)\n", k1.x, k1.y, k1.z);
+    printf("k2 = (%f, %f, %f)\n", k2.x, k2.y, k2.z);
+    printf("k3 = (%f, %f, %f)\n", k3.x, k3.y, k3.z);
+    printf("k4 = (%f, %f, %f)\n", k4.x, k4.y, k4.z);
+    printf("p1 = (%f, %f, %f)\n", p1.location.x, p1.location.y, p1.location.z);
+}
+
     return 0;
 }
 

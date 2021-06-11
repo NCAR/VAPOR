@@ -25,7 +25,8 @@ StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> 
 {
     VAssert(bs.size() == 2 || bs.size() == 3);
 
-    _cellDims = Grid::GetDimensions();
+    auto tmp  = Grid::GetDimensions();
+    _cellDims = {tmp[0], tmp[1], tmp[2]};
     for (int i = 0; i < _cellDims.size(); i++) {
         _cellDims[i]--;
         if (_cellDims[i] < 1) _cellDims[i] = 1;
@@ -37,14 +38,15 @@ bool StructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr3>
     Size_tArr3 cCindices;
     ClampCellIndex(cindices, cCindices);
 
-    const vector<size_t> &dims = GetDimensions();
+    auto dims = GetDimensions();
 
     // Cells have the same ID's as their first node
     //
     // walk counter-clockwise order
     //
 
-    if (dims.size() == 2) {
+    //if (dims.size() == 2) {
+    if (dims[2] == 1) {
         nodes.resize(4);
         nodes[0][0] = cCindices[0];
         nodes[0][1] = cCindices[1];
@@ -115,15 +117,17 @@ bool StructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Si
     Size_tArr3 cCindices;
     ClampCellIndex(cindices, cCindices);
 
-    const vector<size_t> &dims = GetDimensions();
+    auto dims = GetDimensions();
 
-    VAssert((dims.size() == 2) && "3D cells not yet supported");
+    //VAssert((dims.size() == 2) && "3D cells not yet supported");
+    VAssert((dims[2] == 1) && "3D cells not yet supported");
 
     // Cells have the same ID's as their first node
     //
     // walk counter-clockwise order
     //
-    if (dims.size() == 2) {
+    //if (dims.size() == 2) {
+    if (dims[2] == 1) {
         Size_tArr3 indices;
 
         if (cCindices[1] != 0) {    // below
@@ -153,9 +157,10 @@ bool StructuredGrid::GetNodeCells(const Size_tArr3 &indices, std::vector<Size_tA
 {
     cells.clear();
 
-    vector<size_t> dims = GetDimensions();
+    auto dims = GetDimensions();
 
-    VAssert((dims.size() == 2) && "3D cells not yet supported");
+    //VAssert((dims.size() == 2) && "3D cells not yet supported");
+    VAssert((dims[2] == 1) && "3D cells not yet supported");
 
     // Check if invalid indices
     //
@@ -163,7 +168,8 @@ bool StructuredGrid::GetNodeCells(const Size_tArr3 &indices, std::vector<Size_tA
         if (indices[i] > (dims[i] - 1)) return (false);
     }
 
-    if (dims.size() == 2) {
+    //if (dims.size() == 2) {
+    if (dims[2] == 1) {
         Size_tArr3 indices;
 
         if (indices[0] != 0 && indices[1] != 0) {    // below, left
@@ -220,7 +226,7 @@ void StructuredGrid::ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const
         return;
     }
 
-    const vector<size_t> &dims = GetDimensions();
+    auto dims = GetDimensions();
 
     DblArr3 minu, maxu;
     GetUserExtents(minu, maxu);
@@ -247,9 +253,10 @@ void StructuredGrid::ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const
 
 bool StructuredGrid::HasInvertedCoordinateSystemHandiness() const
 {
-    const vector<size_t> &dims = GetDimensions();
+    auto dims = GetDimensions();
 
-    if (dims.size() < 2) return (true);    // Arbitrary
+    //if (dims.size() < 2) return (true);    // Arbitrary
+    if (dims[1] == 1 && dims[2] == 1) return (true);    // Arbitrary
 
     size_t vi0[] = {0, 0, 0};
     size_t vi1[] = {1, 0, 0};
@@ -269,7 +276,8 @@ bool StructuredGrid::HasInvertedCoordinateSystemHandiness() const
 
     // CCW if Z component of cross product is positive
     //
-    if (dims.size() == 2) return (c2d[2] >= 0.0);
+    //if (dims.size() == 2) return (c2d[2] >= 0.0);
+    if (dims[2] == 1) return (c2d[2] >= 0.0);
 
     size_t vi3[] = {0, 0, 1};
     double v3[3];

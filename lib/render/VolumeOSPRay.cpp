@@ -484,7 +484,7 @@ float VolumeOSPRay::_guessSamplingRateScalar(const Grid *grid) const
 
 OSPVolume VolumeOSPRay::_loadVolumeRegular(const Grid *grid)
 {
-    const vector<size_t> dims = grid->GetDimensions();
+    const auto           dims = grid->GetDimensions();
     const size_t         nVerts = dims[0] * dims[1] * dims[2];
     std::vector<double>  dataMinExtD, dataMaxExtD;
     grid->GetUserExtents(dataMinExtD, dataMaxExtD);
@@ -539,7 +539,7 @@ bool VolumeOSPRay::isQuadCoPlanar(const vec3 &a, const vec3 &b, const vec3 &c, c
 
 OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
 {
-    const vector<size_t> dims = grid->GetDimensions();
+    const auto           dims = grid->GetDimensions();
     const size_t         nVerts = dims[0] * dims[1] * dims[2];
     float                missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
 
@@ -742,8 +742,8 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
 
 OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
 {
-    const vector<size_t> nodeDims = grid->GetDimensions();
-    size_t               nodeDim = nodeDims.size();
+    const auto           nodeDims = grid->GetDimensions();
+    size_t               nodeDim = nodeDims[2] == 1 ? 2 : 3;
     const size_t         nVerts = nodeDims[0] * nodeDims[1];
     const vector<size_t> cellDims = grid->GetCellDimensions();
     const size_t         nCells = cellDims[0] * cellDims[1];

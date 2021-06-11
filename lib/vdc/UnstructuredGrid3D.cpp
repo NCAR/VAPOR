@@ -38,11 +38,14 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 vector<size_t> UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
 {
     if (dim == 0) {
-        return _xug.GetDimensions();
+        auto tmp = _xug.GetDimensions();
+        return {tmp[0], tmp[1], tmp[2]};
     } else if (dim == 1) {
-        return _yug.GetDimensions();
+        auto tmp = _yug.GetDimensions();
+        return {tmp[0], tmp[1], tmp[2]};
     } else if (dim == 2) {
-        return _zug.GetDimensions();
+        auto tmp = _zug.GetDimensions();
+        return {tmp[0], tmp[1], tmp[2]};
     } else {
         return (vector<size_t>(1, 1));
     }

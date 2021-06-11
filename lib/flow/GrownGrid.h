@@ -69,6 +69,8 @@ private:
     VAPoR::DataMgr *const    _dataMgr;    // The pointer itself cannot be changed
     const float              _defaultZ;
 
+    mutable std::vector<size_t> _garbage;
+
 };    // end GrownGrid class
 };    // namespace VAPoR
 #endif

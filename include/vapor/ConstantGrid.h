@@ -72,6 +72,10 @@ private:
     const size_t _topologyDim;    // Not to be confused with _topologyDimension in
                                   // the base Grid class, which is private to Grid.
 
+    // Garbage data member that exists only because GetNodeDimensions() and GetCellDimensions()
+    // want to return a reference to a local object. And garbage can be mutable :)
+    mutable std::vector<size_t>  _garbage;
+
 };    // end ConstantGrid class
 };    // namespace VAPoR
 #endif

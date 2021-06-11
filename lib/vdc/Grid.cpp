@@ -37,7 +37,9 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     VAssert(blks.size() == 0 ||    // dataless
             blks.size() == std::accumulate(_bdims.begin(), _bdims.end(), 1, std::multiplies<size_t>()));
 
-    _dims = dims;
+    _dims = {1, 1, 1};
+    for( auto i = 0; i < dims.size(); i++ )
+        _dims[i] = dims[i];
     _periodic = vector<bool>(topology_dimension, false);
     _topologyDimension = topology_dimension;
     _missingValue = INFINITY;
@@ -145,7 +147,7 @@ void Grid::GetRange(const Size_tArr3 &min, const Size_tArr3 &max, float range[2]
     Size_tArr3 cMax;
     ClampIndex(max, cMax);
 
-    const vector<size_t> &dims = GetDimensions();
+    auto dims = GetDimensions();
 
     float mv = GetMissingValue();
 
@@ -490,7 +492,8 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
 
     _blks = rg->GetBlks();
 
-    _dims3d = rg->GetDimensions();
+    auto tmp = rg->GetDimensions();
+    _dims3d  = {tmp[0], tmp[1], tmp[2]};
     _bdims3d = rg->GetDimensionInBlks();
     _bs3d = rg->GetBlockSize();
     for (int i = _ndims; i < 3; i++) {

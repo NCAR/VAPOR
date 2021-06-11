@@ -126,7 +126,7 @@ int ParticleRenderer::_paintGL(bool)
         }
     }
 
-    vector<size_t> dims = grid->GetDimensions();
+    auto           dims = grid->GetDimensions();
     size_t         nCoords = 1;
     for (const auto d : dims) nCoords *= d;
 

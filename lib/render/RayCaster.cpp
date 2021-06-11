@@ -305,7 +305,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     myCompressionLevel = params->GetCompressionLevel();
 
     /* Update member variables */
-    std::vector<size_t> gridDims = grid->GetDimensions();
+    auto gridDims = grid->GetDimensions();
     dims[0] = gridDims[0];
     dims[1] = gridDims[1];
     dims[2] = gridDims[2];
@@ -391,7 +391,7 @@ int RayCaster::UserCoordinates::Update2ndVariable(const RayCasterParams *params,
     }
 
     // Make sure the secondary grid shares the same dimention as the primary grid
-    std::vector<size_t> seconDims = grid->GetDimensions();
+    auto seconDims = grid->GetDimensions();
     for (int i = 0; i < 3; i++)
         if (seconDims[i] != dims[i]) {
             MyBase::SetErrMsg("The secondary and primary variable grids have different dimensions; "

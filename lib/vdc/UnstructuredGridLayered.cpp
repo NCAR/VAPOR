@@ -43,7 +43,8 @@ vector<size_t> UnstructuredGridLayered::GetCoordDimensions(size_t dim) const
     } else if (dim == 1) {
         return (_ug2d.GetCoordDimensions(dim));
     } else if (dim == 2) {
-        return (_zug.GetDimensions());
+        auto tmp = _zug.GetDimensions();
+        return {tmp[0], tmp[1], tmp[2]};
     } else {
         return (vector<size_t>(1, 1));
     }

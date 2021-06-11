@@ -39,12 +39,15 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
 vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
 {
     if (dim == 0) {
-        return (_xug.GetDimensions());
+        auto tmp = _xug.GetDimensions();
+        return {tmp[0], tmp[1], tmp[2]};
     } else if (dim == 1) {
-        return (_yug.GetDimensions());
+        auto tmp = _yug.GetDimensions();
+        return {tmp[0], tmp[1], tmp[2]};
     } else if (dim == 2) {
         if (GetGeometryDim() == 3) {
-            return (_zug.GetDimensions());
+            auto tmp = _zug.GetDimensions();
+            return {tmp[0], tmp[1], tmp[2]};
         } else {
             return (vector<size_t>(1, 1));
         }
@@ -53,7 +56,8 @@ vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
     }
 }
 
-size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
+//size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
+size_t UnstructuredGrid2D::GetGeometryDim() const { return 3; }
 
 void UnstructuredGrid2D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
 {
@@ -402,8 +406,8 @@ bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], vector<size_t> &
 
 std::shared_ptr<QuadTreeRectangleP> UnstructuredGrid2D::_makeQuadTreeRectangle() const
 {
-    const vector<size_t> &dims = GetDimensions();
-    size_t                reserve_size = dims[0];
+    auto   dims = GetDimensions();
+    size_t reserve_size = dims[0];
 
     DblArr3 minu, maxu;
     GetUserExtents(minu, maxu);

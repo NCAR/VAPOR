@@ -86,7 +86,7 @@ public:
     //! \param[out] dims The value of \p dims parameter provided to
     //! the constructor.
     //!
-    const std::vector<size_t> &GetDimensions() const { return (_dims); }
+    const std::array<size_t, 3> &GetDimensions() const { return (_dims); }
 
     //! Get and set the default Z value for a grid.
     auto GetDefaultZ() const -> double { return _defaultZ; };
@@ -1202,7 +1202,7 @@ protected:
     double _defaultZ = 0.0;
 
 private:
-    std::vector<size_t>  _dims;                   // dimensions of grid arrays
+    Size_tArr3           _dims;                   // dimensions of grid arrays
     Size_tArr3           _bs = {{1, 1, 1}};       // dimensions of each block
     Size_tArr3           _bdims = {{1, 1, 1}};    // dimensions (specified in blocks) of ROI
     std::vector<size_t>  _bsDeprecated;           // legacy API

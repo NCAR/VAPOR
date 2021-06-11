@@ -173,7 +173,8 @@ void get_var_info(DataMgr *dataMgr, const vector<Grid *> &gs, const vector<strin
         varinfo_t varinfo;
         varinfo._g = gs[i];
         varinfo._name = varNames[i];
-        varinfo._dims = gs[i]->GetDimensions();
+        auto tmp = gs[i]->GetDimensions();
+        varinfo._dims = {tmp[0], tmp[1], tmp[2]};
 
         varinfo._coordNames.clear();
         varinfo._coordAxes.clear();

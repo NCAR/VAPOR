@@ -94,7 +94,7 @@ void StretchedGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coord
     Size_tArr3 cIndices;
     ClampIndex(indices, cIndices);
 
-    vector<size_t> dims = StructuredGrid::GetDimensions();
+    //vector<size_t> dims = StructuredGrid::GetDimensions();
 
     coords[0] = _xcoords[cIndices[0]];
     coords[1] = _ycoords[cIndices[1]];
@@ -162,7 +162,7 @@ bool StretchedGrid::InsideGrid(const DblArr3 &coords) const
 StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const StretchedGrid *sg, bool begin) : ConstCoordItrAbstract()
 {
     _sg = sg;
-    vector<size_t> dims = _sg->GetDimensions();
+    auto dims = _sg->GetDimensions();
 
     _index = vector<size_t>(dims.size(), 0);
     if (!begin) { _index[dims.size() - 1] = dims[dims.size() - 1]; }
@@ -188,7 +188,7 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG() : ConstCoordItrAbstract()
 
 void StretchedGrid::ConstCoordItrSG::next()
 {
-    const vector<size_t> &dims = _sg->GetDimensions();
+    auto dims = _sg->GetDimensions();
 
     _index[0]++;
 
@@ -207,7 +207,7 @@ void StretchedGrid::ConstCoordItrSG::next()
         return;
     }
 
-    if (dims.size() == 2) return;
+    //if (dims.size() == 2) return;
 
     _index[1] = 0;
     _index[2]++;
@@ -221,7 +221,7 @@ void StretchedGrid::ConstCoordItrSG::next()
 
 void StretchedGrid::ConstCoordItrSG::next(const long &offset)
 {
-    const vector<size_t> &dims = _sg->GetDimensions();
+    auto dims = _sg->GetDimensions();
 
     if (!_index.size()) return;
 
@@ -229,8 +229,10 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset)
     ;
     for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
 
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
-    long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
+    auto tmp = std::vector<size_t>{dims[0], dims[1], dims[2]};
+
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex, tmp);
+    long newIndexL = Wasp::LinearizeCoords(_index, tmp) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
         _index = vector<size_t>(dims.size(), 0);
@@ -238,12 +240,12 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset)
         return;
     }
 
-    _index = Wasp::VectorizeCoords(newIndexL, dims);
+    _index = Wasp::VectorizeCoords(newIndexL, tmp);
 
     _coords[0] = _sg->_xcoords[_index[0]];
     _coords[1] = _sg->_ycoords[_index[1]];
 
-    if (dims.size() == 2) return;
+    //if (dims.size() == 2) return;
 
     _coords[2] = _sg->_zcoords[_index[2]];
 }
@@ -290,10 +292,10 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
 
     if (!inside) return (GetMissingValue());
 
-    vector<size_t> dims = GetDimensions();
+    auto dims = GetDimensions();
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
-    if (dims.size() > 2) VAssert(k < dims[2]);
+    VAssert(k < dims[2]);
 
     float verts0[4];
     verts0[0] = AccessIJK(i, j, k);
@@ -323,7 +325,7 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
 
 void StretchedGrid::GetUserExtentsHelper(DblArr3 &minext, DblArr3 &maxext) const
 {
-    vector<size_t> dims = StructuredGrid::GetDimensions();
+    auto dims = StructuredGrid::GetDimensions();
 
     Size_tArr3 min, max;
     for (int i = 0; i < dims.size(); i++) {

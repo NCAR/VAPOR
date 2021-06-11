@@ -101,8 +101,8 @@ private:
             VAssert(xg.GetDimensions().size() <= 2);
 
             // number of elements
-            std::vector<size_t> dims = xg.GetDimensions();
-            size_t              nelem = 1;
+            auto   dims = xg.GetDimensions();
+            size_t nelem = 1;
             for (int i = 0; i < dims.size(); i++) nelem *= dims[i];
             this->X.resize(nelem);
             this->Y.resize(nelem);
