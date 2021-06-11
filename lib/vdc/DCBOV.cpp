@@ -27,7 +27,6 @@ DCBOV::DCBOV() : _bovCollection(nullptr)
     _dataVarsMap.clear();
     _meshMap.clear();
     _coordVarKeys.clear();
-    _userTime = new float;
 }
 
 DCBOV::~DCBOV()
@@ -262,11 +261,11 @@ int DCBOV::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 
 int DCBOV::openVariableRead(size_t ts, string varname)
 {
-    _ts = ts;
-    _varname = varname;
-    *_userTime = _ts;    //_bovCollection->GetUserTime(ts);
+    //_ts = ts;
+    //_varname = varname;
     FileTable::FileObject *f = new FileTable::FileObject(ts, varname, 0, 0, 0);
     return (_fileTable.AddEntry(f));
+    // return 0;
 }
 
 int DCBOV::closeVariable(int fd)
@@ -286,17 +285,17 @@ int DCBOV::closeVariable(int fd)
 
 template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
-    /*FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
+    FileTable::FileObject *w = (FileTable::FileObject *)_fileTable.GetEntry(fd);
     if (!w) {
         SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
 
     std::string varname = w->GetVarname();
-    size_t      ts = w->GetTS();*/
+    size_t      ts = w->GetTS();
     std::cout << "DCBOV::_readRegionTemplate()" << std::endl;
-    std::string varname = _varname;
-    size_t      ts = _ts;
+    // std::string varname = _varname;
+    // size_t      ts = _ts;
 
     std::vector<std::string> spatialDims = _bovCollection->GetSpatialDimensions();
     std::vector<size_t>      dataSize = _bovCollection->GetDataSize();
@@ -330,7 +329,6 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
         // float userTime = _bovCollection->GetUserTimes().data()[ts];
         //*region = userTime;
 
-        //*region = *_userTime; // works?
 
 
         // region = &_ts;

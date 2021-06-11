@@ -94,13 +94,6 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             if (_gridSize == _defaultGridSize) { return _missingValueError(_gridSizeToken); }
 
             _populateDataFileMap();
-            /*_variables.push_back(_variable);
-            if (std::find(_times.begin(), _times.end(), _time) == _times.end())
-                _times.push_back(_time);
-            std::sort(_times.begin(), _times.end());
-            size_t ts = std::distance(_times.begin(), std::find(_times.begin(), _times.end(), _time)); // Index of current timestep
-
-            _dataFileMap[_variable][_time] = _dataFile;*/
         } else {
             SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
             return -1;
@@ -475,11 +468,12 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
         for (int j = min[1]; j <= max[1]; j++) {
             int xOffset = min[0];
             int yOffset = _gridSize[0] * j;
-            int offset = formatSize * (xOffset + yOffset + zOffset);    // + _byteOffset;
+            int offset = formatSize * (xOffset + yOffset + zOffset);
 
             static Wasp::SmartBuf smart_buf;
             unsigned char *       readBuffer = (unsigned char *)smart_buf.Alloc(count * formatSize);
 
+            fseek(fp, _byteOffset, SEEK_SET);
             fseek(fp, offset, SEEK_SET);
             size_t rc = fread(readBuffer, formatSize, count, fp);
 
