@@ -62,12 +62,12 @@ private:
     int _parseHeader(std::ifstream &header);
     void _populateDataFileMap();
 
-    template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = true);
-    template<typename T> int _findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = true);
+    template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = false);
+    template<typename T> int _findToken(const std::string &token, std::string &line, std::vector<T> &value, bool verbose = false);
 
     void _findTokenValue(std::string &line) const;
 
-    size_t _sizeOfFormat(DC::XType) const;
+    int    _sizeOfFormat(DC::XType) const;
     void   _swapBytes(void *vptr, size_t size, size_t n) const;
 
     int _invalidDimensionError(std::string token) const;

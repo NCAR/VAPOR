@@ -403,7 +403,7 @@ void BOVCollection::_findTokenValue(std::string &line) const
     }
 }
 
-size_t BOVCollection::_sizeOfFormat(DC::XType type) const
+int BOVCollection::_sizeOfFormat(DC::XType type) const
 {
     switch (type) {
     case DC::XType::INT32: return 4;
@@ -442,7 +442,7 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
         return -1;
     }
 
-    size_t formatSize = _sizeOfFormat(_dataFormat);
+    int formatSize = _sizeOfFormat(_dataFormat);
     if (formatSize < 0) {
         SetErrMsg("Unspecified data format");
         fclose(fp);
