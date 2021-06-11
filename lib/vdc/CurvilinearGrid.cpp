@@ -237,10 +237,10 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     // if (dims.size() == 3) {
     if (_terrainFollowing) {
         _coords.push_back(*_zCoordItr);
-        } else {
-            _coords.push_back(_cg->_zcoords[0]);
-        }
-        //}
+    } else {
+        _coords.push_back(_cg->_zcoords[0]);
+    }
+    //}
 }
 
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const ConstCoordItrCG &rhs) : ConstCoordItrAbstract()
