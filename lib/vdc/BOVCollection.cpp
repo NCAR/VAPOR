@@ -65,13 +65,9 @@ BOVCollection::BOVCollection()
 {
     _dataFiles.clear();
     _times.clear();
-    // std::copy( _defaultGridSize, _defaultGridSize.size(), _gridSize );
     _gridSize = _defaultGridSize;
-    // std::copy( _defaultOrigin, _defaultOrigin.size(), _brickOrigin );
     _brickOrigin = _defaultOrigin;
-    // std::copy( _defaultBrickSize, _defaultBrickSize.size(), _brickSize );
     _brickSize = _defaultBrickSize;
-    // std::copy( _defaultBricklets, _defaultBricklets.size(), _dataBricklets );
     _dataBricklets = _defaultBricklets;
     _spatialDimensions = {_xDim, _yDim, _zDim};
 }
@@ -445,11 +441,6 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
         return (-1);
     }
 
-    if (_gridSize.size() != 3) {
-        SetErrMsg("Invalid grid size (must be 3D)");
-        fclose(fp);
-        return (-1);
-    }
     size_t numValues = _gridSize[0] * _gridSize[1] * _gridSize[2];
 
     int  n = 1;
