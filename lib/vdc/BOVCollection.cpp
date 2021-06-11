@@ -213,7 +213,7 @@ int BOVCollection::_parseHeader(std::ifstream &header)
                 return _inconsistentValueError(_offsetToken);
             else {
                 _byteOffset = byteOffset;
-                _byteOffset = true;
+                _byteOffsetAssigned = true;
             }
         }
 
@@ -470,11 +470,11 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
             int yOffset = _gridSize[0] * j;
             int offset = formatSize * (xOffset + yOffset + zOffset);
 
-            static Wasp::SmartBuf smart_buf;
-            unsigned char *       readBuffer = (unsigned char *)smart_buf.Alloc(count * formatSize);
+            std::vector<unsigned char> vReadBuffer(count * formatSize);
+            unsigned char *            readBuffer = vReadBuffer.data();
 
             fseek(fp, _byteOffset, SEEK_SET);
-            fseek(fp, offset, SEEK_SET);
+            fseek(fp, offset, SEEK_CUR);
             size_t rc = fread(readBuffer, formatSize, count, fp);
 
             if (rc != count) {

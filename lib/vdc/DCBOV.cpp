@@ -261,11 +261,8 @@ int DCBOV::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 
 int DCBOV::openVariableRead(size_t ts, string varname)
 {
-    //_ts = ts;
-    //_varname = varname;
     FileTable::FileObject *f = new FileTable::FileObject(ts, varname, 0, 0, 0);
     return (_fileTable.AddEntry(f));
-    // return 0;
 }
 
 int DCBOV::closeVariable(int fd)
@@ -293,9 +290,6 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
 
     std::string varname = w->GetVarname();
     size_t      ts = w->GetTS();
-    std::cout << "DCBOV::_readRegionTemplate()" << std::endl;
-    // std::string varname = _varname;
-    // size_t      ts = _ts;
 
     std::vector<std::string> spatialDims = _bovCollection->GetSpatialDimensions();
     std::vector<size_t>      dataSize = _bovCollection->GetDataSize();
@@ -321,28 +315,7 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     }
     // Otherwise return time values
     else if (varname == _bovCollection->GetTimeDimension()) {
-        std::cout << sizeof(region) << " " << typeid(T).name() << " " << _bovCollection->GetUserTime(ts) << std::endl;
-
-        *region = _bovCollection->GetUserTimes().data()[ts];
-
-        // works?
-        // float userTime = _bovCollection->GetUserTimes().data()[ts];
-        //*region = userTime;
-
-
-
-        // region = &_ts;
-        // region = &(_bovCollection->GetUserTime(ts));
-        // float userTime = _bovCollection->GetUserTime(ts);
-        //*region = userTime;
-        // float zero = 0;
-        //*region = zero;
-        //*region = _bovCollection->GetUserTime(ts); // data does not change from first timestep
-        // std::vector<float> times = _bovCollection->GetUserTimes();
-        // std::cout << "time " << times[ts] << std::endl;
-        //*region = times[ts];
-        // region[0] = (float)times[ts];
-        // for (int i = 0; i < times.size(); i++) region[i] = times[i];
+        *region = _bovCollection->GetUserTimes()[ts];
     }
     return 0;
 }

@@ -170,7 +170,6 @@ private:
 
     BOVCollection *_bovCollection;
 
-    size_t                          _ts;
     string                          _varname;
     std::map<string, DC::Dimension> _dimsMap;
     std::map<string, DC::CoordVar>  _coordVarsMap;
@@ -185,7 +184,5 @@ private:
     int _InitVars();
 
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
-
-    // template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
 };
 }    // namespace VAPoR
