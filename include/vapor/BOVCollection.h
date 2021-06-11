@@ -17,6 +17,7 @@ public:
     std::vector<std::string> GetDataVariableNames() const;
     std::string              GetTimeDimension() const;
     std::vector<float>       GetUserTimes() const;
+    float                    GetUserTime(size_t ts) const { return GetUserTimes()[ts]; };
     std::vector<size_t>      GetDataSize() const;
     std::vector<std::string> GetSpatialDimensions() const;
     DC::XType                GetDataFormat() const;

@@ -446,7 +446,6 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
     FILE *fp = fopen(dataFile.c_str(), "rb");
     if (!fp) {
         SetErrMsg("Invalid file: %d", fp);
-        fclose(fp);
         return -1;
     }
 

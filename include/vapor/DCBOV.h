@@ -177,6 +177,7 @@ private:
     std::map<string, DC::Mesh>      _meshMap;
     std::map<string, DC::DataVar>   _dataVarsMap;
     std::map<string, string>        _coordVarKeys;
+    float *                         _userTime;
 
     int _InitCoordinates();
 
