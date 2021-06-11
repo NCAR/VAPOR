@@ -487,11 +487,16 @@ void Grid::ConstCellIteratorBoxSG::next(const long &offset)
 
 template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, const vector<double> &minu, const vector<double> &maxu) : _pred(minu, maxu)
 {
-    _ndims = rg->GetDimensions().size();
+    //_ndims = rg->GetDimensions().size();
+    _ndims = 3;
+    auto tmp = rg->GetDimensions();
+    if( tmp[2] == 1 )
+        _ndims --;
+    if( tmp[1] == 1 )
+        _ndims --;
 
     _blks = rg->GetBlks();
 
-    auto tmp = rg->GetDimensions();
     _dims3d = {tmp[0], tmp[1], tmp[2]};
     _bdims3d = rg->GetDimensionInBlks();
     _bs3d = rg->GetBlockSize();

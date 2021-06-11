@@ -37,8 +37,10 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    VAssert(xrg.GetDimensions().size() == 2);
-    VAssert(yrg.GetDimensions().size() == 2);
+    //VAssert(xrg.GetDimensions().size() == 2);
+    //VAssert(yrg.GetDimensions().size() == 2);
+    VAssert(xrg.GetDimensions()[2] == 1);
+    VAssert(yrg.GetDimensions()[2] == 1);
     VAssert(zcoords.size() == 0 || zcoords.size() == dims[2]);
 
     _terrainFollowing = false;
@@ -218,6 +220,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
 {
     _cg = cg;
     auto dims = _cg->GetDimensions();
+    auto dim_size = std::count_if(dims.begin(), dims.end(), [](size_t v){return v != 1;});
     _index = vector<size_t>(dims.size(), 0);
     _terrainFollowing = _cg->_terrainFollowing;
     if (begin) {
@@ -234,13 +237,13 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     _coords.push_back(*_xCoordItr);
     _coords.push_back(*_yCoordItr);
 
-    // if (dims.size() == 3) {
-    if (_terrainFollowing) {
-        _coords.push_back(*_zCoordItr);
-    } else {
-        _coords.push_back(_cg->_zcoords[0]);
+    if (dims_size == 3) {
+        if (_terrainFollowing) {
+            _coords.push_back(*_zCoordItr);
+        } else {
+            _coords.push_back(_cg->_zcoords[0]);
+        }
     }
-    //}
 }
 
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const ConstCoordItrCG &rhs) : ConstCoordItrAbstract()

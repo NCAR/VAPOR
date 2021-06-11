@@ -1,6 +1,7 @@
 #ifndef _Grid_
 #define _Grid_
 
+#include <algorithm>
 #include <iostream>
 #include <ostream>
 #include <vector>
@@ -86,7 +87,12 @@ public:
     //! \param[out] dims The value of \p dims parameter provided to
     //! the constructor.
     //!
-    const std::array<size_t, 3> &GetDimensions() const { return (_dims); }
+    std::array<size_t, 3> GetDimensions() const 
+    { 
+        std::array<size_t, 3> tmp = {1, 1, 1};
+        std::copy( _dims.begin(), _dims.end(), tmp.begin() );
+        return tmp;
+    }
 
     //! Get and set the default Z value for a grid.
     auto GetDefaultZ() const -> double { return _defaultZ; };
@@ -736,7 +742,10 @@ public:
     //
     virtual void SetMinAbs(const std::vector<size_t> &minAbs)
     {
-        VAssert(minAbs.size() == GetDimensions().size());
+        //VAssert(minAbs.size() == GetDimensions().size());
+        auto tmp = GetDimensions();
+        auto tmp_size = std::count_if(tmp.begin(), tmp.end(), [](size_t v){return v != 1;});
+        VAssert(minAbs.size() == tmp_size);
         _minAbs = minAbs;
     }
 
@@ -1202,7 +1211,7 @@ protected:
     double _defaultZ = 0.0;
 
 private:
-    Size_tArr3           _dims = {1, 1, 1};       // dimensions of grid arrays
+    std::vector<size_t>  _dims;                   // dimensions of grid arrays
     Size_tArr3           _bs = {{1, 1, 1}};       // dimensions of each block
     Size_tArr3           _bdims = {{1, 1, 1}};    // dimensions (specified in blocks) of ROI
     std::vector<size_t>  _bsDeprecated;           // legacy API
