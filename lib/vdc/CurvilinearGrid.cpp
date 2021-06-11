@@ -237,7 +237,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     _coords.push_back(*_xCoordItr);
     _coords.push_back(*_yCoordItr);
 
-    if (dims_size == 3) {
+    if (dim_size == 3) {
         if (_terrainFollowing) {
             _coords.push_back(*_zCoordItr);
         } else {
