@@ -40,14 +40,20 @@ vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
 {
     if (dim == 0) {
         auto tmp = _xug.GetDimensions();
-        return {tmp[0], tmp[1], tmp[2]};
+        auto dim = std::vector<size_t> {tmp[0], tmp[1], tmp[2]};
+        while( dim.back() == 1 ) dim.pop_back();
+        return dim;
     } else if (dim == 1) {
         auto tmp = _yug.GetDimensions();
-        return {tmp[0], tmp[1], tmp[2]};
+        auto dim = std::vector<size_t> {tmp[0], tmp[1], tmp[2]};
+        while( dim.back() == 1 ) dim.pop_back();
+        return dim;
     } else if (dim == 2) {
         if (GetGeometryDim() == 3) {
             auto tmp = _zug.GetDimensions();
-            return {tmp[0], tmp[1], tmp[2]};
+            auto dim = std::vector<size_t> {tmp[0], tmp[1], tmp[2]};
+            while( dim.back() == 1 ) dim.pop_back();
+            return dim;
         } else {
             return (vector<size_t>(1, 1));
         }
@@ -56,8 +62,13 @@ vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
     }
 }
 
-// size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
-size_t UnstructuredGrid2D::GetGeometryDim() const { return 3; }
+size_t UnstructuredGrid2D::GetGeometryDim() const 
+{ 
+
+    auto tmp = _zug.GetDimensions();
+    auto tmp_size = std::count_if(tmp.begin(), begin.end(), [](size_t v){return v != 1;});
+    return tmp_size == 0 ? 2 : 3;
+}
 
 void UnstructuredGrid2D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
 {
