@@ -40,12 +40,12 @@ vector<size_t> UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
     if (dim == 0) {
         auto tmp = _xug.GetDimensions();
         auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        while( dim.back() == 1 ) dim.pop_back();
+        while (dim.back() == 1) dim.pop_back();
         return dim;
     } else if (dim == 1) {
         auto tmp = _yug.GetDimensions();
         auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        while( dim.back() == 1 ) dim.pop_back();
+        while (dim.back() == 1) dim.pop_back();
         return dim;
     } else if (dim == 2) {
         auto tmp = _zug.GetDimensions();
