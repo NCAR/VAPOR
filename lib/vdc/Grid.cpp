@@ -154,14 +154,14 @@ void Grid::GetRange(const Size_tArr3 &min, const Size_tArr3 &max, float range[2]
 
     size_t jmin = 0;
     size_t jmax = 0;
-    if (dims_size > 1) {
+    if (dim_size > 1) {
         jmin = cMin[1];
         jmax = cMax[1];
     }
 
     size_t kmin = 0;
     size_t kmax = 0;
-    if (dims_size > 2) {
+    if (dim_size > 2) {
         kmin = cMin[2];
         kmax = cMax[2];
     }
@@ -488,7 +488,7 @@ void Grid::ConstCellIteratorBoxSG::next(const long &offset)
 template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, const vector<double> &minu, const vector<double> &maxu) : _pred(minu, maxu)
 {
     auto tmp = rg->GetDimensions();
-    _ndims = std::count_if(dims.begin(), dims.end(), [](size_t v) { return v != 1; });
+    _ndims = std::count_if(tmp.begin(), tmp.end(), [](size_t v) { return v != 1; });
 
     _blks = rg->GetBlks();
 

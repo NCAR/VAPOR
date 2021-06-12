@@ -333,8 +333,6 @@ void StretchedGrid::GetUserExtentsHelper(DblArr3 &minext, DblArr3 &maxext) const
         max[i] = (dims[i] - 1);
     }
 
-    minext[2] = _defaultZ;
-    maxext[2] = _defaultZ;
     DblArr3 minv, maxv;
     StretchedGrid::GetBoundingBox(min, max, minv, maxv);
     for (int i = 0; i < GetDimensions().size(); i++) {
