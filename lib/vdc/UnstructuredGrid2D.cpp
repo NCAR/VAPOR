@@ -65,7 +65,7 @@ vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
 size_t UnstructuredGrid2D::GetGeometryDim() const
 {
     auto tmp = _zug.GetDimensions();
-    auto tmp_size = std::count_if(tmp.begin(), begin.end(), [](size_t v) { return v != 1; });
+    auto tmp_size = std::count_if(tmp.begin(), tmp.end(), [](size_t v) { return v != 1; });
     return tmp_size == 0 ? 2 : 3;
 }
 
@@ -80,9 +80,6 @@ void UnstructuredGrid2D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) cons
     _yug.GetRange(range);
     minu[1] = range[0];
     maxu[1] = range[1];
-
-    minu[2] = _defaultZ;
-    maxu[2] = _defaultZ;
 
     if (GetGeometryDim() < 3) return;
 
@@ -100,8 +97,8 @@ void UnstructuredGrid2D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
     ClampIndex(max, cMax);
 
     int ncoords = GetGeometryDim();
-    minu = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), _defaultZ};
-    minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), _defaultZ};
+    minu = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+    minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max()};
 
     size_t start = Wasp::LinearizeCoords(cMin.data(), GetDimensions().data(), GetDimensions().size());
     size_t stop = Wasp::LinearizeCoords(cMax.data(), GetDimensions().data(), GetDimensions().size());
