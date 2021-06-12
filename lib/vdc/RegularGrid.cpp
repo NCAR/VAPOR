@@ -30,8 +30,7 @@ void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    while( dims.back() == 1 )
-        dims.pop_back();
+    while (dims.back() == 1) dims.pop_back();
     for (int i = 0; i < dims.size(); i++) {
         if (dims[i] > 1) {
             _delta.push_back((_maxu[i] - _minu[i]) / (double)(dims[i] - 1));
