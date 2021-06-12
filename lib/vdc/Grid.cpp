@@ -147,7 +147,7 @@ void Grid::GetRange(const Size_tArr3 &min, const Size_tArr3 &max, float range[2]
     ClampIndex(max, cMax);
 
     auto dims = GetDimensions();
-    auto dim_size = std::count_if(dims.begin(), dims.end(), [](size_t v){return v != 1;});
+    auto dim_size = std::count_if(dims.begin(), dims.end(), [](size_t v) { return v != 1; });
 
     float mv = GetMissingValue();
 
@@ -489,13 +489,12 @@ void Grid::ConstCellIteratorBoxSG::next(const long &offset)
 template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, const vector<double> &minu, const vector<double> &maxu) : _pred(minu, maxu)
 {
     auto tmp = rg->GetDimensions();
-    _ndims = std::count_if(dims.begin(), dims.end(), [](size_t v){return v != 1;});
+    _ndims = std::count_if(dims.begin(), dims.end(), [](size_t v) { return v != 1; });
 
     _blks = rg->GetBlks();
 
     _dims3d = {tmp[0], tmp[1], tmp[2]};
-    while(_dims3d.back() == 1 )
-        _dims3d.pop_back();
+    while (_dims3d.back() == 1) _dims3d.pop_back();
     _bdims3d = rg->GetDimensionInBlks();
     _bs3d = rg->GetBlockSize();
     for (int i = _ndims; i < 3; i++) {
