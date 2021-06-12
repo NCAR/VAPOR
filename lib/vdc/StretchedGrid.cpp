@@ -299,7 +299,7 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
     while (dims.back() == 1) dims.pop_back();
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
-    if( dims.size() > 2) VAssert(k < dims[2]);
+    if (dims.size() > 2) VAssert(k < dims[2]);
 
     float verts0[4];
     verts0[0] = AccessIJK(i, j, k);
