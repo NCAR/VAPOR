@@ -37,7 +37,7 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     VAssert(blks.size() == 0 ||    // dataless
             blks.size() == std::accumulate(_bdims.begin(), _bdims.end(), 1, std::multiplies<size_t>()));
 
-    _dims = {1, 1, 1};
+    _dims = dims;
     for (auto i = 0; i < dims.size(); i++) _dims[i] = dims[i];
     _periodic = vector<bool>(topology_dimension, false);
     _topologyDimension = topology_dimension;
@@ -61,8 +61,8 @@ void Grid::GetUserExtents(DblArr3 &minu, DblArr3 &maxu) const
     size_t n = min(GetGeometryDim(), _minuCache.size());
     auto   p = [](double v) { return (v == std::numeric_limits<double>::infinity()); };
     if (std::any_of(_minuCache.begin(), _minuCache.begin() + n, p) || std::any_of(_maxuCache.begin(), _maxuCache.begin() + n, p)) {
-        _minuCache = {0.0, 0.0, _defaultZ};
-        _maxuCache = {0.0, 0.0, _defaultZ};
+        _minuCache = {0.0, 0.0, 0.0};
+        _maxuCache = {0.0, 0.0, 0.0};
         GetUserExtentsHelper(_minuCache, _maxuCache);
     }
 
@@ -147,6 +147,7 @@ void Grid::GetRange(const Size_tArr3 &min, const Size_tArr3 &max, float range[2]
     ClampIndex(max, cMax);
 
     auto dims = GetDimensions();
+    auto dim_size = std::count_if(dims.begin(), dims.end(), [](size_t v){return v != 1;});
 
     float mv = GetMissingValue();
 
@@ -154,14 +155,14 @@ void Grid::GetRange(const Size_tArr3 &min, const Size_tArr3 &max, float range[2]
 
     size_t jmin = 0;
     size_t jmax = 0;
-    if (dims.size() > 1) {
+    if (dims_size > 1) {
         jmin = cMin[1];
         jmax = cMax[1];
     }
 
     size_t kmin = 0;
     size_t kmax = 0;
-    if (dims.size() > 2) {
+    if (dims_size > 2) {
         kmin = cMin[2];
         kmax = cMax[2];
     }
@@ -487,15 +488,14 @@ void Grid::ConstCellIteratorBoxSG::next(const long &offset)
 
 template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, const vector<double> &minu, const vector<double> &maxu) : _pred(minu, maxu)
 {
-    //_ndims = rg->GetDimensions().size();
-    _ndims = 3;
     auto tmp = rg->GetDimensions();
-    if (tmp[2] == 1) _ndims--;
-    if (tmp[1] == 1) _ndims--;
+    _ndims = std::count_if(dims.begin(), dims.end(), [](size_t v){return v != 1;});
 
     _blks = rg->GetBlks();
 
     _dims3d = {tmp[0], tmp[1], tmp[2]};
+    while(_dims3d.back() == 1 )
+        _dims3d.pop_back();
     _bdims3d = rg->GetDimensionInBlks();
     _bs3d = rg->GetBlockSize();
     for (int i = _ndims; i < 3; i++) {

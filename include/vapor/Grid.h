@@ -94,10 +94,6 @@ public:
         return tmp;
     }
 
-    //! Get and set the default Z value for a grid.
-    auto GetDefaultZ() const -> double { return _defaultZ; };
-    void SetDefaultZ(double d) { _defaultZ = d; };
-
     //! Return the dimensions of the specified coordinate variable
     //!
     //! \param[in] dim An integer between 0 and the return value
@@ -448,7 +444,7 @@ public:
     virtual void GetUserCoordinates(const size_t indices[], double coords[]) const
     {
         Size_tArr3 indices3 = {0, 0, 0};
-        DblArr3    coords3 = {0.0, 0.0, _defaultZ};
+        DblArr3    coords3 = {0.0, 0.0, 0.0};
         CopyToArr3(indices, GetNodeDimensions().size(), indices3);
         GetUserCoordinates(indices3, coords3);
         CopyFromArr3(coords3, coords);
@@ -457,7 +453,7 @@ public:
     virtual void GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const
     {
         Size_tArr3 indices3 = {0, 0, 0};
-        DblArr3    coords3 = {0.0, 0.0, _defaultZ};
+        DblArr3    coords3 = {0.0, 0.0, 0.0};
         CopyToArr3(indices, indices3);
         GetUserCoordinates(indices3, coords3);
         CopyFromArr3(coords3, coords);
@@ -1207,8 +1203,6 @@ protected:
             if (cIndices[i] >= dims[i]) { cIndices[i] = dims[i] - 1; }
         }
     }
-
-    double _defaultZ = 0.0;
 
 private:
     std::vector<size_t>  _dims;                   // dimensions of grid arrays
