@@ -57,8 +57,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    //VAssert(xrg.GetDimensions().size() == 2);
-    //VAssert(yrg.GetDimensions().size() == 2);
+    // VAssert(xrg.GetDimensions().size() == 2);
+    // VAssert(yrg.GetDimensions().size() == 2);
     VAssert(xrg.GetDimensions()[2] == 1);
     VAssert(yrg.GetDimensions()[2] == 1);
     VAssert(zrg.GetDimensions().size() == 3);
@@ -77,8 +77,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    //VAssert(xrg.GetDimensions().size() == 2);
-    //VAssert(yrg.GetDimensions().size() == 2);
+    // VAssert(xrg.GetDimensions().size() == 2);
+    // VAssert(yrg.GetDimensions().size() == 2);
     VAssert(xrg.GetDimensions()[2] == 1);
     VAssert(yrg.GetDimensions()[2] == 1);
 
