@@ -67,7 +67,9 @@ vector<float *> AllocateBlocks(const vector<size_t> &bs, const vector<size_t> &d
 
 void MakeTriangle(Grid *grid, float minVal, float maxVal)
 {
-    std::vector<size_t> dims = grid->GetDimensions();
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     size_t              x = dims[X];
     size_t              y = dims.size() > 1 ? dims[Y] : 1;
     size_t              z = dims.size() > 2 ? dims[Z] : 1;
@@ -85,7 +87,9 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal)
 
 void MakeConstantField(Grid *grid, float value)
 {
-    std::vector<size_t> dims = grid->GetDimensions();
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     size_t              x = dims[X];
     size_t              y = dims.size() > 1 ? dims[Y] : 1;
     size_t              z = dims.size() > 2 ? dims[Z] : 1;
@@ -99,7 +103,9 @@ void MakeConstantField(Grid *grid, float value)
 
 void MakeRamp(Grid *grid, float minVal, float maxVal)
 {
-    std::vector<size_t> dims = grid->GetDimensions();
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     size_t              x = dims[X];
     size_t              y = dims.size() > 1 ? dims[Y] : 1;
     size_t              z = dims.size() > 2 ? dims[Z] : 1;
@@ -119,7 +125,9 @@ void MakeRamp(Grid *grid, float minVal, float maxVal)
 
 void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X)
 {
-    std::vector<size_t> dims = grid->GetDimensions();
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     size_t              x = dims[X];
     size_t              y = dims.size() > 1 ? dims[Y] : 1;
     size_t              z = dims.size() > 2 ? dims[Z] : 1;
@@ -157,7 +165,9 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
     disagreements = 0;
     numMissingValues = 0;
 
-    std::vector<size_t> dims = grid->GetDimensions();
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     size_t              x = dims[X];
     size_t              y = dims.size() > 1 ? dims[Y] : 1;
     size_t              z = dims.size() > 2 ? dims[Z] : 1;
@@ -208,7 +218,9 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
 
     itr = g->ConstNodeBegin();
 
-    std::vector<size_t> dims = g->GetDimensions();
+    auto tmp = g->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
@@ -246,7 +258,9 @@ bool TestIterator(Grid *g, size_t &count, size_t &expectedCount, size_t &disagre
 
     itr = g->begin();
 
-    std::vector<size_t> dims = g->GetDimensions();
+    auto tmp = g->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
@@ -276,7 +290,9 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
 
     itr = g->ConstCoordBegin();
 
-    std::vector<size_t> dims = g->GetDimensions();
+    auto tmp = g->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
@@ -340,7 +356,9 @@ bool RunTest(Grid *grid)
 
 bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal)
 {
-    std::vector<size_t> dims = grid->GetDimensions();
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     size_t              x = dims[X];
     size_t              y = dims.size() > 1 ? dims[Y] : 1;
     size_t              z = dims.size() > 2 ? dims[Z] : 1;

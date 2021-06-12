@@ -181,7 +181,9 @@ void test_get_value(Grid *g)
 
     float t0 = GetTime();
 
-    size_t n = VProduct(g->GetDimensions());
+    auto tmp = g->GetDimensions();
+    auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    size_t n = VProduct(tmp2);
 
     size_t ecount = 0;
 #if defined(_OPENMP)
@@ -227,7 +229,9 @@ void test_get_value(Grid *g)
 
 void dump(const Grid *g)
 {
-    vector<size_t> dims = g->GetDimensions();
+    auto tmp = g->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     vector<size_t> min(dims.size(), 0);
     vector<size_t> max;
     for (int i = 0; i < dims.size(); i++) { max.push_back(dims[i] - 1); }
@@ -311,7 +315,9 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
 
     cout << "Cell face has CCW winding order : " << g->HasInvertedCoordinateSystemHandiness() << endl;
 
-    vector<size_t> dims = g->GetDimensions();
+    auto tmp = g->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    while( dims.back() == 1 ) dims.pop_back();
     cout << "Grid dimensions: [ ";
     for (int i = 0; i < dims.size(); i++) { cout << dims[i] << " "; }
     cout << "]" << endl;
