@@ -566,7 +566,7 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
         Wasp::MyBase::SetErrMsg("Variable Dimension Wrong!");
         return nullptr;
     } else if (dim == 2) {
-        //grid->SetDefaultZ(this->DefaultZ);
+        // grid->SetDefaultZ(this->DefaultZ);
         std::cout << "set Z = " << this->DefaultZ << std::endl;
     }
     _recentGrids.insert(key, new GridWrapper(grid, _datamgr));
