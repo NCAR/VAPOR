@@ -87,21 +87,18 @@ vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
     if (dim == 0) {
         auto tmp = _xrg.GetDimensions();
         vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
-        while( tmp2.back() == 1 )
-            tmp2.pop_back();
+        while (tmp2.back() == 1) tmp2.pop_back();
         return tmp2;
     } else if (dim == 1) {
         auto tmp = _yrg.GetDimensions();
         vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
-        while( tmp2.back() == 1 )
-            tmp2.pop_back();
+        while (tmp2.back() == 1) tmp2.pop_back();
         return tmp2;
     } else if (dim == 2) {
         if (_terrainFollowing) {
             auto tmp = _zrg.GetDimensions();
             vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
-            while( tmp2.back() == 1 )
-                tmp2.pop_back();
+            while (tmp2.back() == 1) tmp2.pop_back();
             return tmp2;
         } else {
             return (vector<size_t>(1, _zcoords.size()));
@@ -121,7 +118,7 @@ void CurvilinearGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &ma
 
     for (int i = 0; i < GetGeometryDim(); i++) { VAssert(cMin[i] <= cMax[i]); }
 
-    for( int i = 0; i < minu.size(); i++ ) {
+    for (int i = 0; i < minu.size(); i++) {
         minu[i] = 0.0;
         maxu[i] = 0.0;
     }
@@ -327,11 +324,10 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 
     auto dims = _cg->GetDimensions();
     auto dimv = std::vector<size_t>{dims[0], dims[1], dims[2]};
-    while( dimv.back() == 1 )
-        dimv.pop_back();
+    while (dimv.back() == 1) dimv.pop_back();
 
     vector<size_t> maxIndex;
-    
+
     for (int i = 0; i < dimv.size(); i++) maxIndex.push_back(dimv[i] - 1);
 
 
