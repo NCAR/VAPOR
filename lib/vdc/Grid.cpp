@@ -38,7 +38,6 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
             blks.size() == std::accumulate(_bdims.begin(), _bdims.end(), 1, std::multiplies<size_t>()));
 
     _dims = dims;
-    for (auto i = 0; i < dims.size(); i++) _dims[i] = dims[i];
     _periodic = vector<bool>(topology_dimension, false);
     _topologyDimension = topology_dimension;
     _missingValue = INFINITY;
