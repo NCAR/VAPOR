@@ -27,7 +27,7 @@ StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> 
 
     auto tmp = Grid::GetDimensions();
     _cellDims = {tmp[0], tmp[1], tmp[2]};
-    while(_cellDims.back() == 1) _cellDims.pop_back();
+    while (_cellDims.back() == 1) _cellDims.pop_back();
     for (int i = 0; i < _cellDims.size(); i++) {
         _cellDims[i]--;
         if (_cellDims[i] < 1) _cellDims[i] = 1;
@@ -41,7 +41,7 @@ bool StructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr3>
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    while( dims.back() == 1 ) dims.pop_back();
+    while (dims.back() == 1) dims.pop_back();
 
     // Cells have the same ID's as their first node
     //
@@ -121,7 +121,7 @@ bool StructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Si
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    while( dims.back() == 1 ) dims.pop_back();
+    while (dims.back() == 1) dims.pop_back();
 
     VAssert((dims.size() == 2) && "3D cells not yet supported");
 
@@ -161,7 +161,7 @@ bool StructuredGrid::GetNodeCells(const Size_tArr3 &indices, std::vector<Size_tA
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    while( dims.back() == 1 ) dims.pop_back();
+    while (dims.back() == 1) dims.pop_back();
 
     VAssert((dims.size() == 2) && "3D cells not yet supported");
 
@@ -230,7 +230,7 @@ void StructuredGrid::ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    while( dims.back() == 1 ) dims.pop_back();
+    while (dims.back() == 1) dims.pop_back();
 
     DblArr3 minu, maxu;
     GetUserExtents(minu, maxu);
@@ -259,7 +259,7 @@ bool StructuredGrid::HasInvertedCoordinateSystemHandiness() const
 {
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    while( dims.back() == 1 ) dims.pop_back();
+    while (dims.back() == 1) dims.pop_back();
 
     if (dims.size() < 2) return (true);    // Arbitrary
 
