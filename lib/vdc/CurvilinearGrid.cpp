@@ -86,14 +86,23 @@ vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
 {
     if (dim == 0) {
         auto tmp = _xrg.GetDimensions();
-        return {tmp[0], tmp[1], tmp[2]};
+        vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
+        while( tmp2.back() == 1 )
+            tmp2.pop_back();
+        return tmp2;
     } else if (dim == 1) {
         auto tmp = _yrg.GetDimensions();
-        return {tmp[0], tmp[1], tmp[2]};
+        vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
+        while( tmp2.back() == 1 )
+            tmp2.pop_back();
+        return tmp2;
     } else if (dim == 2) {
         if (_terrainFollowing) {
             auto tmp = _zrg.GetDimensions();
-            return {tmp[0], tmp[1], tmp[2]};
+            vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
+            while( tmp2.back() == 1 )
+                tmp2.pop_back();
+            return tmp2;
         } else {
             return (vector<size_t>(1, _zcoords.size()));
         }
@@ -112,8 +121,10 @@ void CurvilinearGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &ma
 
     for (int i = 0; i < GetGeometryDim(); i++) { VAssert(cMin[i] <= cMax[i]); }
 
-    minu = {0.0, 0.0, _defaultZ};
-    maxu = {0.0, 0.0, _defaultZ};
+    for( int i = 0; i < minu.size(); i++ ) {
+        minu[i] = 0.0;
+        maxu[i] = 0.0;
+    }
 
     // Get the horiztonal (X & Y) extents by visiting every point
     // on a single plane (horizontal coordinates are constant over Z).
