@@ -98,7 +98,7 @@ void UnstructuredGrid2D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
 
     int ncoords = GetGeometryDim();
     minu = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
-    minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max()};
+    minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
 
     size_t start = Wasp::LinearizeCoords(cMin.data(), GetDimensions().data(), GetDimensions().size());
     size_t stop = Wasp::LinearizeCoords(cMax.data(), GetDimensions().data(), GetDimensions().size());
