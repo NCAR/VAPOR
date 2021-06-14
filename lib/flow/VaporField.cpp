@@ -479,13 +479,13 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
         // Because in unsteady case, both currentTS and currentTS will be queried,
         // so we do a sanity check here. The assertion will be gone in release mode.
         assert(timestep == _c_currentTS);
-        key.Reset(_c_currentTS, _c_refLev, _c_compLev, varName, _c_ext_min, _c_ext_max );
+        key.Reset(_c_currentTS, _c_refLev, _c_compLev, varName, _c_ext_min, _c_ext_max);
     } else {
         std::vector<double> extMin, extMax;
         _params->GetBox()->GetExtents(extMin, extMax);
         int refLevel = _params->GetRefinementLevel();
         int compLevel = _params->GetCompressionLevel();
-        key.Reset(timestep, refLevel, compLevel, varName, extMin, extMax );
+        key.Reset(timestep, refLevel, compLevel, varName, extMin, extMax);
     }
 
     // First check if we have the requested grid in our cache.
@@ -532,7 +532,7 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
     if (dim == 1) {
         Wasp::MyBase::SetErrMsg("Variable Dimension Wrong!");
         return nullptr;
-    } 
+    }
     _recentGrids.insert(key, new GridWrapper(grid, _datamgr));
     return grid;
 }
