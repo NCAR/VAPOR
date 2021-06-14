@@ -453,12 +453,12 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
     // Re-use the same buffer for all the pencils.
     std::vector<unsigned char> vReadBuffer(count * formatSize);
     unsigned char *            readBuffer = vReadBuffer.data();
-    for (int k = min[2]; k <= max[2]; k++) {
+    for (size_t k = min[2]; k <= max[2]; k++) {
         int zOffset = _gridSize[0] * _gridSize[1] * k;
-        for (int j = min[1]; j <= max[1]; j++) {
-            int xOffset = min[0];
-            int yOffset = _gridSize[0] * j;
-            int offset = formatSize * (xOffset + yOffset + zOffset);
+        for (size_t j = min[1]; j <= max[1]; j++) {
+            size_t xOffset = min[0];
+            size_t yOffset = _gridSize[0] * j;
+            size_t offset = formatSize * (xOffset + yOffset + zOffset);
 
             fseek(fp, _byteOffset, SEEK_SET);
             fseek(fp, offset, SEEK_CUR);
