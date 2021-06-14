@@ -19,11 +19,10 @@ private:
     std::string           _varName;
     uint64_t              _timestep;
     int32_t               _refLev, _compLev;
-    float                 _defaultZ;
     std::array<double, 3> _ext_min, _ext_max;
 
 public:
-    void Reset(uint64_t, int32_t, int32_t, std::string, const std::vector<double> &, const std::vector<double> &, float);
+    void Reset(uint64_t, int32_t, int32_t, std::string, const std::vector<double> &, const std::vector<double> &);
 
     bool emptyVar() const;
 
@@ -91,13 +90,6 @@ public:
     int GetVelocityIntersection(size_t ts, glm::vec3 &minxyz, glm::vec3 &maxxyz) const;
 
     //
-    // Store the default Z value for variables that are 2D grids in nature.
-    // In this case, a 3D one-layer "GrownGrid" is created with
-    // the 3rd dimension being DefaultZ.
-    //
-    float DefaultZ = 0.0f;
-
-    //
     // Calculate a reasonable deltaT based on the velocity speed and domain size.
     // This is used as a one-time operation when getting ready a velocity field.
     // It'll return 0 on success, and non-zero on error conditions.
@@ -151,8 +143,6 @@ private:
     // In the case of failing to generate a requested grid, nullptr will be returned.
     // This failure will also be recorded to MyBase.
     // Note 1: If a variable name is empty, we then return a ConstantField.
-    // Note 2: If a variable is essentially 2D, we then grow it to be 3D
-    //         and return a GrownGrid.
     const VAPoR::Grid *_getAGrid(size_t timestep, const std::string &varName) const;
 };
 };    // namespace flow
