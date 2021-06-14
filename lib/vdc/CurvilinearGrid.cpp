@@ -83,18 +83,18 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
 vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
 {
     if (dim == 0) {
-        auto tmp = _xrg.GetDimensions();
+        auto           tmp = _xrg.GetDimensions();
         vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
         while (tmp2.back() == 1) tmp2.pop_back();
         return tmp2;
     } else if (dim == 1) {
-        auto tmp = _yrg.GetDimensions();
+        auto           tmp = _yrg.GetDimensions();
         vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
         while (tmp2.back() == 1) tmp2.pop_back();
         return tmp2;
     } else if (dim == 2) {
         if (_terrainFollowing) {
-            auto tmp = _zrg.GetDimensions();
+            auto           tmp = _zrg.GetDimensions();
             vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
             while (tmp2.back() == 1) tmp2.pop_back();
             return tmp2;
