@@ -488,6 +488,7 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
                 double *castBuffer = (double *)readBuffer;
                 for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
             }
+        }
     }
 
     fclose(fp);
