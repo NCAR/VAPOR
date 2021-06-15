@@ -19,6 +19,7 @@ AnimationTab::AnimationTab(QWidget *parent, ControlExec *ce) : QWidget(parent), 
                      {
                          _startTS = new PIntegerInput(AnimationParams::_startTimestepTag, "Animation Start Timestep"),
                          _stopTS = new PIntegerInput(AnimationParams::_endTimestepTag, "Animation Last Timestep"),
+                        new PCheckbox(AnimationParams::_repeatTag, "Loop Animation Playback"),
                          (new PIntegerInput(AnimationParams::_stepSizeTag, "Animation Play Step Size"))->SetRange(1, 10),
                          (new PDoubleSliderEdit(AnimationParams::_maxRateTag, "Max Animation Frames Per Second"))->SetRange(1, 60),
                      }),
