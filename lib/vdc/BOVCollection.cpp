@@ -425,11 +425,6 @@ void BOVCollection::_swapBytes(void *vptr, size_t size, size_t n) const
 
 template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region)
 {
-    std::cout << "ReadRegion " << std::endl;
-    std::cout << "  min " << min[0] << " " << min[1] << " " << min[2] << std::endl;
-    std::cout << "  max " << max[0] << " " << max[1] << " " << max[2] << std::endl;
-    std::cout << endl;
-
     float       time = _times[ts];
     std::string dataFile = _dataFileMap[varname][time];
 
