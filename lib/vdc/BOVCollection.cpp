@@ -425,12 +425,17 @@ void BOVCollection::_swapBytes(void *vptr, size_t size, size_t n) const
 
 template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region)
 {
+    std::cout << "ReadRegion " << std::endl;
+    std::cout << "  min " << min[0] << " " << min[1] << " " << min[2] << std::endl;
+    std::cout << "  max " << max[0] << " " << max[1] << " " << max[2] << std::endl;
+    std::cout << endl;
+
     float       time = _times[ts];
     std::string dataFile = _dataFileMap[varname][time];
 
     FILE *fp = fopen(dataFile.c_str(), "rb");
     if (!fp) {
-        SetErrMsg("Invalid file: %d", fp);
+        SetErrMsg("Invalid file: %M");
         return -1;
     }
 
@@ -450,18 +455,17 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
 
     // Read a "pencil" of data along the X axis, one row at a time
     size_t count = max[0] - min[0] + 1;
-    for (int k = min[2]; k <= max[2]; k++) {
-        int zOffset = _gridSize[0] * _gridSize[1] * k;
-        for (int j = min[1]; j <= max[1]; j++) {
-            int xOffset = min[0];
-            int yOffset = _gridSize[0] * j;
-            int offset = formatSize * (xOffset + yOffset + zOffset);
+    for (size_t k = min[2]; k <= max[2]; k++) {
+        size_t zOffset = _gridSize[0] * _gridSize[1] * k;
+        for (size_t j = min[1]; j <= max[1]; j++) {
+            size_t xOffset = min[0];
+            size_t yOffset = _gridSize[0] * j;
+            size_t offset = formatSize * (xOffset + yOffset + zOffset) + _byteOffset;
 
             std::vector<unsigned char> vReadBuffer(count * formatSize);
             unsigned char *            readBuffer = vReadBuffer.data();
 
-            fseek(fp, _byteOffset, SEEK_SET);
-            fseek(fp, offset, SEEK_CUR);
+            fseek(fp, offset, SEEK_SET);
             size_t rc = fread(readBuffer, formatSize, count, fp);
 
             if (rc != count) {
@@ -476,16 +480,8 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
 
             if (needSwap) { _swapBytes(readBuffer, formatSize, numValues); }
 
-            if (_dataFormat == DC::XType::INT32) {
-                int *castBuffer = (int *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
-            } else if (_dataFormat == DC::XType::FLOAT) {
-                float *castBuffer = (float *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
-            } else if (_dataFormat == DC::XType::DOUBLE) {
-                double *castBuffer = (double *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
-            }
+            T castBuffer = (T)readBuffer;
+            for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
         }
     }
 
