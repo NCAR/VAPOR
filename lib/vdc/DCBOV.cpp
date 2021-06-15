@@ -299,7 +299,9 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
     for (int dim = 0; dim < spatialDims.size(); dim++) {
         if (varname == spatialDims[dim]) {
             double increment = brickSize[dim] / (dataSize[dim] - 1);
-            for (int i = 0; i < dataSize[dim]; i++) { region[i] = origin[dim] + i * increment; }
+            double start = origin[dim] + min[0] * increment;
+            size_t steps = max[0] - min[0];
+            for (int i = 0; i <= steps; i++) { region[i] = start + i * increment; }
         }
     }
 

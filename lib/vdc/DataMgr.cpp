@@ -12,7 +12,6 @@
 #include <vapor/DCWRF.h>
 #include <vapor/DCCF.h>
 #include <vapor/DCMPAS.h>
-#include <vapor/DCBOV.h>
 #include <vapor/DCP.h>
 #include <vapor/DCMelanie.h>
 #include <vapor/DerivedVar.h>
@@ -605,8 +604,6 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         _dc = new DCCF();
     } else if (_format.compare("mpas") == 0) {
         _dc = new DCMPAS();
-    } else if (_format.compare("bov") == 0) {
-        _dc = new DCBOV();
     } else if (_format.compare("dcp") == 0) {
         _dc = new DCP();
 #ifdef BUILD_DC_MELANIE
