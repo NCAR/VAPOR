@@ -196,6 +196,8 @@ set (SRCS
 	PTFEditor.h
     PFidelitySection.cpp
     PFidelitySection.h
+    PAnnotationWidget.cpp
+    PAnnotationWidget.h
     PTMSLODInput.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
