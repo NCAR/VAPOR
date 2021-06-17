@@ -58,9 +58,6 @@ public:
 
     virtual void _confirmText(){};
 
-protected slots:
-    void axisAnnotationTableChanged();
-
 private:
     Combo *     _textSizeCombo;
     Combo *     _digitsCombo;
@@ -69,37 +66,9 @@ private:
     std::map<std::string, std::string> _visNames;
     std::map<std::string, std::string> _renTypeNames;
 
-    vector<double> getTableRow(int row);
-
     AnnotationEventRouter() {}
 
-    void setColorHelper(QWidget *w, vector<double> &rgb);
-    void updateColorHelper(const vector<double> &rgb, QWidget *w);
-
-    void updateAxisAnnotations();
-    void updateAxisTable();
-
-    void   updateDataMgrCombo();
-    string getProjString();
-
-    VAPoR::AxisAnnotation *_getCurrentAxisAnnotation();
-
-    std::vector<double> getDomainExtents() const;
-    void                scaleNormalizedCoordsToWorld(std::vector<double> &coords);
-    void                scaleWorldCoordsToNormalized(std::vector<double> &coords);
-    void                convertPCSToLon(double &xCoord);
-    void                convertPCSToLat(double &yCoord);
-    void                convertPCSToLonLat(double &xCoord, double &yCoord);
-    void                convertLonLatToPCS(double &xCoord, double &yCoord);
-    void                convertLonToPCS(double &xCoord);
-    void                convertLatToPCS(double &yCoord);
-
     virtual void _updateTab();
-
-    AnimationParams *_ap;
-    bool             _animConnected;
-
-    VaporTable *_annotationVaporTable;
 
     std::vector<PGroup *> _groups;
     std::vector<PGroup *> _axisGroups;
