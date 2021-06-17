@@ -191,9 +191,7 @@ int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, std
 
     if (!varName.empty()) {
         int rc = DataMgrUtils::GetGrids(_dataMgr, ts, varName, minExts, maxExts, true, &refLevel, &lod, &sg);
-        if (rc < 0) {
-            return (rc);
-        }
+        if (rc < 0) { return (rc); }
         varData[varData.size() - 1] = sg;
     }
 

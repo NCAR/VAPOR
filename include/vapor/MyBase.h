@@ -359,7 +359,7 @@ COMMON_API double ran1(long *);
 #endif
 
 #if defined(WIN32)
-    // Note: win32 won't seek beyond 32 bits
+      // Note: win32 won't seek beyond 32 bits
     #define FSEEK64 fseek
 #endif
 

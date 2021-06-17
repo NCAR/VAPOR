@@ -31,7 +31,7 @@ class ParamsMgr;
 }    // namespace VAPoR
 
 #ifdef WIN32
-    // Annoying unreferenced formal parameter warning
+     // Annoying unreferenced formal parameter warning
     #pragma warning(disable : 4100)
 #endif
 

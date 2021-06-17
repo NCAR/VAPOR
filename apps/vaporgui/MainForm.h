@@ -167,16 +167,16 @@ private:
 
     // Toolbars:
     //
-    QAction *     _tileAction;
-    QAction *     _cascadeAction;
-    QAction *     _homeAction;
-    QAction *     _sethomeAction;
-    QAction *     _viewAllAction;
-    QAction *     _viewRegionAction;
-    QAction *     _stepForwardAction;
-    QAction *     _stepBackAction;
-    QSpinBox *    _interactiveRefinementSpin;
-    QDockWidget * _tabDockWindow;
+    QAction *    _tileAction;
+    QAction *    _cascadeAction;
+    QAction *    _homeAction;
+    QAction *    _sethomeAction;
+    QAction *    _viewAllAction;
+    QAction *    _viewRegionAction;
+    QAction *    _stepForwardAction;
+    QAction *    _stepBackAction;
+    QSpinBox *   _interactiveRefinementSpin;
+    QDockWidget *_tabDockWindow;
 
     bool     _animationCapture = false;
     int      _progressSavedFB = -1;

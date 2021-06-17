@@ -81,9 +81,7 @@ void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std
 
     addCheckboxes(values);
 
-    if ((rows < 1) || (cols < 1)) {
-        _activeRow = -1;
-    }
+    if ((rows < 1) || (cols < 1)) { _activeRow = -1; }
     if (_activeRow >= rows) { _activeRow = rows - 1; }
 
     if (_highlightFlags & ROWS) highlightActiveRow(_activeRow);

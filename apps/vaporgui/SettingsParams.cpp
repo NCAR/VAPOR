@@ -76,9 +76,9 @@ const string SettingsParams::AutoCheckForUpdatesTag = "AutoCheckForUpdatesTag";
 static ParamsRegistrar<SettingsParams> registrar(SettingsParams::GetClassType());
 
 namespace {
-string SettingsFile = ".vapor3_settings";
+string       SettingsFile = ".vapor3_settings";
 const size_t defaultCacheSize = 0;
-}
+}    // namespace
 
 SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, bool loadFromFile) : ParamsBase(ssave, _classType)
 {
