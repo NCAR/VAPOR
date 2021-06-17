@@ -736,7 +736,6 @@ void MainForm::_createVizToolBar()
     connect(_viewAllAction, SIGNAL(triggered()), _tabMgr, SLOT(ViewAll()));
     connect(_sethomeAction, SIGNAL(triggered()), _tabMgr, SLOT(SetHomeViewpoint()));
     connect(_alignViewCombo, SIGNAL(activated(int)), _tabMgr, SLOT(AlignView(int)));
-    //    connect(_viewRegionAction, SIGNAL(triggered()), _tabMgr, SLOT(CenterSubRegion()));
     connect(_tileAction, SIGNAL(triggered()), _vizWinMgr, SLOT(FitSpace()));
     connect(_cascadeAction, SIGNAL(triggered()), _vizWinMgr, SLOT(Cascade()));
     connect(_interactiveRefinementSpin, SIGNAL(valueChanged(int)), this, SLOT(setInteractiveRefLevel(int)));

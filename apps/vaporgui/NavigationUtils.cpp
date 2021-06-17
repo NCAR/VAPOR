@@ -246,7 +246,7 @@ void NavigationUtils::SetTimestep(ControlExec *ce, size_t ts)
                 rp->SetCurrentTimestep(local_ts);
 
                 // If variable was not initialzed but now is, reset the TF mapping range
-                std::string varNames[2] = {rp->GetVariableName(), rp->GetColorMapVariableName()};
+                std::string varNames[2] = {rp->GetVariableName(), rp->GetActualColorMapVariableName()};
 
                 for (int l = 0; l < 2; l++) {
                     if (varNames[i].empty()) continue;
