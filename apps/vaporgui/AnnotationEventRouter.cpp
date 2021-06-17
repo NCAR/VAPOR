@@ -53,6 +53,7 @@
 #include "VPushButton.h"
 #include "Updateable.h"
 #include "PCopyRegionAnnotationWidget.h"
+#include "PAxisAnnotationWidget.h"
 
 using namespace VAPoR;
 
@@ -63,10 +64,8 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     _ap = NULL;
 
     VSection *axisAnnotationTab = new VSection("Axis Annotations");
-    PGroup *  axisAnnotationGroup1 = new PGroup({
-        new PCheckbox(AxisAnnotation::_annotationEnabledTag, "Axis Annotations Enabled"),
-        new PCheckbox(AxisAnnotation::_latLonAxesTag, "Annotate with lat/lon"),
-    });
+    PGroup *  axisAnnotationGroup1 = new PGroup(
+        {new PCheckbox(AxisAnnotation::_annotationEnabledTag, "Axis Annotations Enabled"), new PCheckbox(AxisAnnotation::_latLonAxesTag, "Annotate with lat/lon"), new PAxisAnnotationWidget(ce)});
     axisAnnotationTab->layout()->addWidget(axisAnnotationGroup1);
     _axisGroups.push_back(axisAnnotationGroup1);
 

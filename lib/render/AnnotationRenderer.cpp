@@ -282,6 +282,7 @@ void AnnotationRenderer::AddText(string text, int x, int y, int size, float colo
     } else if (type == 1) {    // Time annotation
         _timeAnnot.push_back(myBoard);
     } else if (type == 2) {
+        std::cout << "AddText" << std::endl;
         _axisAnnot.push_back(myBoard);
     }
 }
@@ -533,12 +534,16 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa, std::vector<double> mi
     if (minTic.empty()) minTic = aa->GetMinTics();
     if (maxTic.empty()) maxTic = aa->GetMaxTics();
 
+    std::cout << "minX " << minTic[0] << std::endl;
+
     std::vector<double> origin = aa->GetAxisOrigin();
 
     string dmName = aa->GetDataMgrName();
     scaleNormalizedCoordinatesToWorld(origin, dmName);
     scaleNormalizedCoordinatesToWorld(minTic, dmName);
     scaleNormalizedCoordinatesToWorld(maxTic, dmName);
+
+    std::cout << "  minX scaled " << minTic[0] << std::endl;
 
     vector<double> ticLength = aa->GetTicSize();
     vector<double> ticDir = aa->GetTicDirs();
@@ -571,7 +576,8 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa, std::vector<double> mi
     // ticVec[1] = ticLength[1]*scaleFactor;
     // ticVec[2] = ticLength[2]*scaleFactor;
     for (int i = 0; i < numTics[0]; i++) {
-        pointOnAxis[0] = minTic[0] + (float)i * (maxTic[0] - minTic[0]) / (float)(numTics[0] - 1);
+        // pointOnAxis[0] = minTic[0] + (float)i * (maxTic[0] - minTic[0]) / (float)(numTics[0] - 1);
+        pointOnAxis[0] = minTic[0] + (double)i * (maxTic[0] - minTic[0]) / (double)(numTics[0] - 1);
         vsub(pointOnAxis, ticVec, startPosn);
         vadd(pointOnAxis, ticVec, endPosn);
 
@@ -579,8 +585,12 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa, std::vector<double> mi
         _drawTic(startPosn, endPosn, width, axisColor);
 
         double xValue = pointOnAxis[0];
+        if (i == 0) std::cout << "xValue " << xValue << std::endl;
         double yValue = pointOnAxis[1];
-        if (latLon) convertPointToLonLat(xValue, yValue);
+        if (latLon) {
+            convertPointToLonLat(xValue, yValue);
+            if (i == 0) std::cout << "  pcs xValue " << xValue << std::endl;
+        }
         renderText(xValue, startPosn, aa);
     }
 
@@ -669,12 +679,14 @@ void AnnotationRenderer::convertPointToLonLat(double &xCoord, double &yCoord)
     double coords[2] = {xCoord, yCoord};
     double coordsForError[2] = {coords[0], coords[1]};
 
+    std::cout << "void AnnotationRenderer::convertPointToLonLat b " << xCoord << std::endl;
     string projString = m_dataStatus->GetMapProjection();
     int    rc = DataMgrUtils::ConvertPCSToLonLat(projString, coords, 1);
     if (!rc) { MyBase::SetErrMsg("Could not convert point %f, %f to Lon/Lat", coordsForError[0], coordsForError[1]); }
 
     xCoord = coords[0];
     yCoord = coords[1];
+    std::cout << "void AnnotationRenderer::convertPointToLonLat a " << xCoord << std::endl;
 }
 
 Transform *AnnotationRenderer::getTransform(string dataMgrName)
@@ -717,6 +729,7 @@ std::vector<double> AnnotationRenderer::getDomainExtents() const
 
 void AnnotationRenderer::renderText(double text, double coord[], AxisAnnotation *aa)
 {
+    std::cout << "renderText(double " << text << std::endl;
     if (aa == NULL) aa = getCurrentAxisAnnotation();
 
     std::vector<double> axisColor = aa->GetAxisColor();
