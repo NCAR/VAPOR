@@ -146,26 +146,21 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         if (rc == ERROR) return _failureToReadError(_gridSizeToken);
 
         rc = _findToken(_formatToken, line, _tmpDataFormat);
-        if (rc == ERROR)
-            return _failureToReadError(_formatToken);
+        if (rc == ERROR) return _failureToReadError(_formatToken);
 
         // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
         //
         rc = _findToken(_originToken, line, _tmpBrickOrigin);
-        if (rc == ERROR)
-            return _invalidValueError(_originToken);
+        if (rc == ERROR) return _invalidValueError(_originToken);
 
         rc = _findToken(_brickSizeToken, line, _tmpBrickSize);
-        if (rc == ERROR)
-            return _invalidValueError(_brickSizeToken);
+        if (rc == ERROR) return _invalidValueError(_brickSizeToken);
 
         rc = _findToken(_endianToken, line, _tmpDataEndian);
-        if (rc == ERROR)
-            return _invalidValueError(_endianToken);
+        if (rc == ERROR) return _invalidValueError(_endianToken);
 
         rc = _findToken(_offsetToken, line, _tmpByteOffset);
-        if (rc == ERROR)
-            return _invalidValueError(_offsetToken);
+        if (rc == ERROR) return _invalidValueError(_offsetToken);
 
         // All other variables are currently unused.
         //
