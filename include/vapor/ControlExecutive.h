@@ -684,6 +684,8 @@ private:
     int activateClassRenderers(string vizName, string dataSetName, string pClassName, vector<string> instNames, bool reportErrs);
 
     void _removeRendererHelper(string winName, string dataSetName, string paramsType, string renderName, bool removeFromParamsFlag, bool hasOpenGLContext);
+
+    void _autoStretchExtents(string dataSetName);
 };
 };    // namespace VAPoR
 

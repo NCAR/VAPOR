@@ -96,6 +96,7 @@
 #include <vapor/XmlNode.h>
 #include <vapor/Base16StringStream.h>
 #include "BookmarkParams.h"
+#include "NavigationUtils.h"
 
 // Following shortcuts are provided:
 // CTRL_N: new session
@@ -398,6 +399,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
     _tabMgr = new TabManager(this, _controlExec);
     _tabMgr->setUsesScrollButtons(true);
 
+    _animationController = new AnimationController(_controlExec);
+
     int dpi = qApp->desktop()->logicalDpiX();
     if (dpi > 96)
         _tabMgr->setMinimumWidth(675);
@@ -510,15 +513,15 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", width);
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
 
-    _tabMgr->AnimationPlayForward();
+    _animationController->AnimationPlayForward();
     _paramsMgr->EndSaveStateGroup();
 
-    connect(_tabMgr, &TabManager::AnimationOnOffSignal, this, [this]() {
+    connect(_animationController, &AnimationController::AnimationOnOffSignal, this, [this]() {
         endAnimCapture();
         close();
     });
 
-    connect(_tabMgr, &TabManager::AnimationDrawSignal, this, [this]() { printf("Rendering timestep %li\n", GetAnimationParams()->GetCurrentTimestep()); });
+    connect(_animationController, &AnimationController::AnimationDrawSignal, this, [this]() { printf("Rendering timestep %li\n", GetAnimationParams()->GetCurrentTimestep()); });
 
     return 0;
 }
@@ -642,12 +645,14 @@ void MainForm::_createAnimationToolBar()
 
     _animationToolBar->setWhatsThis(qat);
 
-    connect(_playForwardAction, SIGNAL(triggered()), _tabMgr, SLOT(AnimationPlayForward()));
-    connect(_playBackwardAction, SIGNAL(triggered()), _tabMgr, SLOT(AnimationPlayBackward()));
-    connect(_pauseAction, SIGNAL(triggered()), _tabMgr, SLOT(AnimationPause()));
-    connect(_stepForwardAction, SIGNAL(triggered()), _tabMgr, SLOT(AnimationStepForward()));
-    connect(_stepBackAction, SIGNAL(triggered()), _tabMgr, SLOT(AnimationStepBackward()));
-    connect(_timeStepEdit, SIGNAL(returnPressed()), this, SLOT(_setTimeStep()));
+    // clang-format off
+    connect(_playForwardAction,  SIGNAL(triggered()),     _animationController, SLOT(AnimationPlayForward()));
+    connect(_playBackwardAction, SIGNAL(triggered()),     _animationController, SLOT(AnimationPlayReverse()));
+    connect(_pauseAction,        SIGNAL(triggered()),     _animationController, SLOT(AnimationPause()));
+    connect(_stepForwardAction,  SIGNAL(triggered()),     _animationController, SLOT(AnimationStepForward()));
+    connect(_stepBackAction,     SIGNAL(triggered()),     _animationController, SLOT(AnimationStepReverse()));
+    connect(_timeStepEdit,       SIGNAL(returnPressed()), this, SLOT(_setTimeStep()));
+    // clang-format on
 }
 
 void MainForm::_createVizToolBar()
@@ -731,7 +736,6 @@ void MainForm::_createVizToolBar()
     connect(_viewAllAction, SIGNAL(triggered()), _tabMgr, SLOT(ViewAll()));
     connect(_sethomeAction, SIGNAL(triggered()), _tabMgr, SLOT(SetHomeViewpoint()));
     connect(_alignViewCombo, SIGNAL(activated(int)), _tabMgr, SLOT(AlignView(int)));
-    connect(_viewRegionAction, SIGNAL(triggered()), _tabMgr, SLOT(CenterSubRegion()));
     connect(_tileAction, SIGNAL(triggered()), _vizWinMgr, SLOT(FitSpace()));
     connect(_cascadeAction, SIGNAL(triggered()), _vizWinMgr, SLOT(Cascade()));
     connect(_interactiveRefinementSpin, SIGNAL(valueChanged(int)), this, SLOT(setInteractiveRefLevel(int)));
@@ -810,9 +814,9 @@ void MainForm::_disableProgressWidget()
 
 void MainForm::hookupSignals()
 {
-    connect(_tabMgr, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
+    connect(_animationController, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
 
-    connect(_tabMgr, SIGNAL(AnimationDrawSignal()), this, SLOT(_setAnimationDraw()));
+    connect(_animationController, SIGNAL(AnimationDrawSignal()), this, SLOT(_setAnimationDraw()));
 
     connect(_tabMgr, SIGNAL(ActiveEventRouterChanged(string)), this, SLOT(setActiveEventRouter(string)));
 
@@ -1647,6 +1651,8 @@ void MainForm::loadDataHelper(string dataSetName, const vector<string> &files, s
 
     vector<string> options = {"-project_to_pcs", "-vertical_xform"};
 
+    if (GetSettingsParams()->GetAutoStretchEnabled()) options.push_back("-auto_stretch_z");
+
     if (!p->GetProjectionString().empty()) {
         options.push_back("-proj4");
         options.push_back(p->GetProjectionString());
@@ -1659,7 +1665,7 @@ void MainForm::loadDataHelper(string dataSetName, const vector<string> &files, s
     //
 
     if (_sessionNewFlag) {
-        _tabMgr->ViewAll();
+        NavigationUtils::ViewAll(_controlExec);
         _tabMgr->SetHomeViewpoint();
 
         _sessionNewFlag = false;
@@ -2407,7 +2413,7 @@ void MainForm::_setTimeStep()
 {
     _paramsMgr->BeginSaveStateGroup("Change Timestep");
     int ts = _timeStepEdit->text().toInt();
-    _tabMgr->AnimationSetTimestep(ts);
+    _animationController->SetTimeStep(ts);
     _paramsMgr->EndSaveStateGroup();
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+class PWidget;
 class PTransformWidget;
 class PAnnotationColorbarWidget;
 class PButton;

@@ -9,6 +9,7 @@
 #include <string>
 #include <algorithm>
 
+#include <vapor/STLUtils.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/ControlExecutive.h>
 #include <vapor/CalcEngineMgr.h>
@@ -498,6 +499,8 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     //
     rc = openDataHelper(true);
 
+    if (STLUtils::Contains(options, string("-auto_stretch_z"))) _autoStretchExtents(dataSetName);
+
     UndoRedoClear();
     return (rc);
 }
@@ -900,3 +903,53 @@ bool ControlExec::GetFunction(string scriptType, string dataSetName, string scri
 string ControlExec::GetFunctionStdout(string scriptType, string dataSetName, string scriptName) const { return (_calcEngineMgr->GetFunctionStdout(scriptType, dataSetName, scriptName)); }
 
 std::vector<string> ControlExec::GetFunctionNames(string scriptType, string dataSetName) const { return (_calcEngineMgr->GetFunctionNames(scriptType, dataSetName)); }
+
+
+#include <cfloat>
+
+// Function moved from old NavigationEventRouter.cpp
+void ControlExec::_autoStretchExtents(string dataSetName)
+{
+    DataStatus *ds = GetDataStatus();
+
+    ParamsMgr *    paramsMgr = GetParamsMgr();
+    vector<string> winNames = paramsMgr->GetVisualizerNames();
+
+    vector<double> minExt, maxExt;
+
+    for (int i = 0; i < winNames.size(); i++) {
+        ViewpointParams *   vpParams = paramsMgr->GetViewpointParams(winNames[i]);
+        Transform *         transform = vpParams->GetTransform(dataSetName);
+        std::vector<double> scales = transform->GetScales();
+        int                 xDimension = 0;
+        int                 yDimension = 1;
+        int                 zDimension = 2;
+
+        // If a dimension's scale is not 1.f, the user has saved a session with
+        // a non-default value.  Don't modify it.
+        if (scales[xDimension] != 1.f) continue;
+        if (scales[yDimension] != 1.f) continue;
+        if (scales[zDimension] != 1.f) continue;
+
+        //        size_t ts = GetCurrentTimeStep();
+        size_t ts = 0;
+        ds->GetActiveExtents(paramsMgr, winNames[i], dataSetName, ts, minExt, maxExt);
+
+        vector<float> range;
+        float         maxRange = 0.0;
+        for (int i = 0; i < minExt.size(); i++) {
+            float r = fabs(maxExt[i] - minExt[i]);
+            if (maxRange < r) { maxRange = r; }
+            range.push_back(r);
+        }
+
+        if (fabs(maxRange) <= FLT_EPSILON) maxRange = 1.0;
+
+        vector<double> scale(range.size(), 1.0);
+        for (int i = 0; i < range.size(); i++) {
+            if (range[i] < (maxRange / 10.0) && fabs(range[i]) > FLT_EPSILON) { scale[i] = maxRange / (10.0 * range[i]); }
+        }
+
+        transform->SetScales(scale);
+    }
+}

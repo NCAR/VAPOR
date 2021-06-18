@@ -191,6 +191,7 @@ private:
 
     ActiveRenderer *m_activeRenderer;
 
+public:
     static const string m_activeVisualizer;
     static const string m_pathParamsTag;
     static const string m_sessionFileTag;
@@ -206,6 +207,7 @@ private:
     static const string _flowDimensionalityTag;
     static const string BookmarksTag;
 
+private:
     MouseModeParams *m_mouseModeParams;
 
     VAPoR::ParamsContainer *m_openDataSets;

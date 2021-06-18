@@ -4,13 +4,13 @@
 #include <vector>
 
 class V3DInput;
-class VSectionGroup;
+class VGroup;
 namespace VAPoR {
 class Transform;
 }
 
 class PTransformWidget : public PWidget {
-    VSectionGroup *_group;
+    VGroup *       _group;
     V3DInput *     _translate;
     V3DInput *     _scale;
     V3DInput *     _origin;
@@ -35,4 +35,13 @@ public:
 
 protected:
     void updateGUI() const override;
+};
+
+
+#include "PWidgetWrapper.h"
+
+
+class PRendererTransformSection : public PWidgetWrapper {
+public:
+    PRendererTransformSection();
 };

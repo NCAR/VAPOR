@@ -1,4 +1,4 @@
 #include "PLabel.h"
-#include <QLabel>
+#include "VLabel.h"
 
-PLabel::PLabel(const std::string &text) : PWidget("", _label = new QLabel(QString::fromStdString(text))) { _label->setWordWrap(true); }
+PLabel::PLabel(const std::string &text) : PWidget("", _label = new VLabel(text)) {}
