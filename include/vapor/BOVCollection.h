@@ -46,12 +46,15 @@ private:
     std::array<size_t, 3>    _dataBricklets;
     int                      _dataComponents;
 
-    // _dataFileMap allows us to access binary data files with a
-    // varname/timestep pair
-    std::map<std::string, std::map<float, std::string>> _dataFileMap;
-
-    std::array<std::string, 3> _spatialDimensions;
-    std::string                _timeDimension;
+    // Placeholder variables to store values read from BOV descriptor files.
+    // These values must be consistent among BOV files, and are validated before
+    // assigning to "actual" values such as _gridSize, declaired above.
+    std::array<size_t, 3> _tmpGridSize;
+    DC::XType             _tmpDataFormat;
+    std::string           _tmpDataEndian;
+    std::array<double, 3> _tmpBrickOrigin;
+    std::array<double, 3> _tmpBrickSize;
+    size_t                _tmpByteOffset;
 
     bool _gridSizeAssigned;
     bool _formatAssigned;
@@ -59,6 +62,14 @@ private:
     bool _brickSizeAssigned;
     bool _dataEndianAssigned;
     bool _byteOffsetAssigned;
+
+    // _dataFileMap allows us to access binary data files with a
+    // varname/timestep pair
+    std::map<std::string, std::map<float, std::string>> _dataFileMap;
+
+    std::array<std::string, 3> _spatialDimensions;
+    int                        _validateParsedValues();
+    std::string                _timeDimension;
 
     int  _parseHeader(std::ifstream &header);
     void _populateDataFileMap();
@@ -98,7 +109,7 @@ private:
     static const std::string           _defaultVar;
     static const std::string           _defaultEndian;
     static const std::string           _defaultCentering;
-    static const size_t                _defaultOffset;
+    static const size_t                _defaultByteOffset;
     static const size_t                _defaultComponents;
     static const bool                  _defaultDivBrick;
     static const std::array<double, 3> _defaultOrigin;

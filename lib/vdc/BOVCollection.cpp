@@ -43,7 +43,7 @@ const std::string           BOVCollection::_defaultVar = "brickVar";
 const std::string           BOVCollection::_defaultEndian = "LITTLE";
 const std::string           BOVCollection::_defaultCentering = "ZONAL";
 const double                BOVCollection::_defaultTime = 0.;
-const size_t                BOVCollection::_defaultOffset = 0;
+const size_t                BOVCollection::_defaultByteOffset = 0;
 const size_t                BOVCollection::_defaultComponents = 1;
 const bool                  BOVCollection::_defaultDivBrick = false;
 
@@ -59,15 +59,18 @@ const std::string BOVCollection::_floatFormatString = "FLOAT";
 const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
 BOVCollection::BOVCollection()
-: _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _dataEndian(_defaultEndian), _centering(_defaultCentering), _byteOffset(_defaultOffset),
-  _divideBrick(_defaultDivBrick), _dataComponents(_defaultComponents), _timeDimension(_timeDim), _gridSizeAssigned(false), _formatAssigned(false), _brickOriginAssigned(false),
-  _brickSizeAssigned(false), _dataEndianAssigned(false), _byteOffsetAssigned(false)
+: _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _dataEndian(_defaultEndian), _centering(_defaultCentering), _byteOffset(_defaultByteOffset),
+  _divideBrick(_defaultDivBrick), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpDataEndian(_defaultEndian), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false),
+  _formatAssigned(false), _brickOriginAssigned(false), _brickSizeAssigned(false), _dataEndianAssigned(false), _byteOffsetAssigned(false), _timeDimension(_timeDim)
 {
     _dataFiles.clear();
     _times.clear();
     _gridSize = _defaultGridSize;
+    _tmpGridSize = _defaultGridSize;
     _brickOrigin = _defaultOrigin;
+    _tmpBrickOrigin = _defaultOrigin;
     _brickSize = _defaultBrickSize;
+    _tmpBrickSize = _defaultBrickSize;
     _dataBricklets = _defaultBricklets;
     _spatialDimensions = {_xDim, _yDim, _zDim};
 }
@@ -84,6 +87,12 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             rc = _parseHeader(header);
             if (rc < 0) {
                 SetErrMsg(("Error parsing BOV file " + paths[0]).c_str());
+                return -1;
+            }
+
+            rc = _validateParsedValues();
+            if (rc < 0) {
+                SetErrMsg("Inconsistency found in BOV token.");
                 return -1;
             }
 
@@ -133,89 +142,30 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         else if (rc == FOUND)
             _variable = variable;
 
-        std::array<size_t, 3> gridSize;
-        rc = _findToken(_gridSizeToken, line, gridSize);
-        if (rc == ERROR) {
-            return _failureToReadError(_gridSizeToken);
-        } else if (rc == FOUND) {
-            if (gridSize[0] < 1 || gridSize[1] < 1 || gridSize[2] < 1)
-                return _invalidDimensionError(_gridSizeToken);
-            else if (gridSize != _gridSize && _gridSizeAssigned == true)    // Make sure gridSize does not vary across files
-                return _inconsistentValueError(_gridSizeToken);
-            else {
-                _gridSize = gridSize;
-                _gridSizeAssigned = true;
-            }
-        }
+        rc = _findToken(_gridSizeToken, line, _tmpGridSize);
+        if (rc == ERROR) return _failureToReadError(_gridSizeToken);
 
-        DC::XType dataFormat;
-        rc = _findToken(_formatToken, line, dataFormat);
+        rc = _findToken(_formatToken, line, _tmpDataFormat);
         if (rc == ERROR)
             return _failureToReadError(_formatToken);
-        else if (rc == FOUND) {
-            if (dataFormat == DC::INVALID)
-                return _invalidFormatError(_formatToken);
-            else if (dataFormat != _dataFormat && _formatAssigned == true) {    // Make sure dataFormat does not vary across files
-                return _inconsistentValueError(_formatToken);
-            } else {
-                _dataFormat = dataFormat;
-                _formatAssigned = true;
-            }
-        }
 
         // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
         //
-        std::array<double, 3> brickOrigin;
-        rc = _findToken(_originToken, line, brickOrigin);
+        rc = _findToken(_originToken, line, _tmpBrickOrigin);
         if (rc == ERROR)
             return _invalidValueError(_originToken);
-        else if (rc == FOUND) {
-            if (brickOrigin != _brickOrigin && _brickOriginAssigned == true)
-                return _inconsistentValueError(_originToken);
-            else {
-                _brickOrigin = brickOrigin;
-                _brickOriginAssigned = true;
-            }
-        }
 
-        std::array<double, 3> brickSize;
-        rc = _findToken(_brickSizeToken, line, brickSize);
+        rc = _findToken(_brickSizeToken, line, _tmpBrickSize);
         if (rc == ERROR)
             return _invalidValueError(_brickSizeToken);
-        else if (rc == FOUND) {
-            if (brickSize != _brickSize && _brickSizeAssigned == true)    // Make sure _brickSize does not vary across files
-                return _inconsistentValueError(_brickSizeToken);
-            else {
-                _brickSize = brickSize;
-                _brickSizeAssigned = true;
-            }
-        }
 
-        std::string dataEndian;
-        rc = _findToken(_endianToken, line, dataEndian);
+        rc = _findToken(_endianToken, line, _tmpDataEndian);
         if (rc == ERROR)
             return _invalidValueError(_endianToken);
-        else if (rc == FOUND) {
-            if (dataEndian != _dataEndian && _dataEndianAssigned == true)    // Make sure _dataEndian does not vary across files
-                return _inconsistentValueError(_endianToken);
-            else {
-                _dataEndian = dataEndian;
-                _dataEndianAssigned = true;
-            }
-        }
 
-        size_t byteOffset;
-        rc = _findToken(_offsetToken, line, byteOffset);
+        rc = _findToken(_offsetToken, line, _tmpByteOffset);
         if (rc == ERROR)
             return _invalidValueError(_offsetToken);
-        else if (rc == FOUND) {
-            if (byteOffset != _byteOffset && _byteOffsetAssigned == true)    // Make sure _dataEndian does not vary across files
-                return _inconsistentValueError(_offsetToken);
-            else {
-                _byteOffset = byteOffset;
-                _byteOffsetAssigned = true;
-            }
-        }
 
         // All other variables are currently unused.
         //
@@ -223,6 +173,62 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         _findToken(_divideBrickToken, line, _divideBrick);
         _findToken(_dataBrickletsToken, line, _dataBricklets);
         _findToken(_dataComponentsToken, line, _dataComponents);
+    }
+    return 0;
+}
+
+int BOVCollection::_validateParsedValues()
+{
+    // Validate grid dimensions
+    if (_tmpGridSize[0] < 1 || _tmpGridSize[1] < 1 || _tmpGridSize[2] < 1)
+        return _invalidDimensionError(_gridSizeToken);
+    else if (_tmpGridSize != _gridSize && _gridSizeAssigned == true)
+        return _inconsistentValueError(_gridSizeToken);
+    else {
+        _gridSize = _tmpGridSize;
+        _gridSizeAssigned = true;
+    }
+
+    // Validate data format
+    if (_tmpDataFormat == DC::INVALID)
+        return _invalidFormatError(_formatToken);
+    else if (_tmpDataFormat != _dataFormat && _formatAssigned == true) {
+        return _inconsistentValueError(_formatToken);
+    } else {
+        _dataFormat = _tmpDataFormat;
+        _formatAssigned = true;
+    }
+
+    // Validate brick origin
+    if (_tmpBrickOrigin != _brickOrigin && _brickOriginAssigned == true)
+        return _inconsistentValueError(_originToken);
+    else {
+        _brickOrigin = _tmpBrickOrigin;
+        _brickOriginAssigned = true;
+    }
+
+    // Validate brick size
+    if (_tmpBrickSize != _brickSize && _brickSizeAssigned == true)
+        return _inconsistentValueError(_brickSizeToken);
+    else {
+        _brickSize = _tmpBrickSize;
+        _brickSizeAssigned = true;
+    }
+
+    // Validate endian type
+    if (_tmpDataEndian != _dataEndian && _dataEndianAssigned == true)
+        return _inconsistentValueError(_endianToken);
+    else {
+        _dataEndian = _tmpDataEndian;
+        _dataEndianAssigned = true;
+    }
+
+    // Validate byte offest
+    if (_tmpByteOffset != _byteOffset && _byteOffsetAssigned == true)
+        return _inconsistentValueError(_offsetToken);
+    else {
+        _byteOffset = _tmpByteOffset;
+        _byteOffsetAssigned = true;
     }
     return 0;
 }
@@ -430,7 +436,7 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
 
     FILE *fp = fopen(dataFile.c_str(), "rb");
     if (!fp) {
-        SetErrMsg("Invalid file: %M");
+        SetErrMsg("Invalid file: %s : %M", dataFile.c_str());
         return -1;
     }
 
