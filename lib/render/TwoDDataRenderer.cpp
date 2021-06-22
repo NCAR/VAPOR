@@ -539,9 +539,7 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
         }
     }
 
-    if (hgtGrid) {
-        delete hgtGrid;
-    }
+    if (hgtGrid) { delete hgtGrid; }
 
     return (0);
 }

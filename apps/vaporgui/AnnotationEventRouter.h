@@ -62,9 +62,9 @@ protected slots:
     void axisAnnotationTableChanged();
 
 private:
-    Combo *     _textSizeCombo;
-    Combo *     _digitsCombo;
-    Combo *     _ticWidthCombo;
+    Combo *_textSizeCombo;
+    Combo *_digitsCombo;
+    Combo *_ticWidthCombo;
 
     std::map<std::string, std::string> _visNames;
     std::map<std::string, std::string> _renTypeNames;

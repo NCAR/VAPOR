@@ -504,7 +504,7 @@ int Visualizer::_captureImage(std::string path)
     _framebuffer.GetSize(&width, &height);
 
     vector<unsigned char> framebuffer(3 * width * height);
-    int            writeReturn = -1;
+    int                   writeReturn = -1;
     _getPixelData(framebuffer.data());
 
     if (STLUtils::BeginsWith(path, ":RAM:")) {

@@ -2402,9 +2402,7 @@ void MainForm::_plotClosed()
 
 void MainForm::launchPythonVariables()
 {
-    if (!_pythonVariables) {
-        _pythonVariables = new PythonVariables(this);
-    }
+    if (!_pythonVariables) { _pythonVariables = new PythonVariables(this); }
     if (_controlExec) { _pythonVariables->InitControlExec(_controlExec); }
     _pythonVariables->ShowMe();
 }
