@@ -59,16 +59,19 @@ using namespace VAPoR;
 
 AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), EventRouter(ce, AnnotationParams::GetClassType())
 {
+    // clang-format off
     setLayout(new QVBoxLayout);
 
     VSection *axisAnnotationTab = new VSection("Axis Annotations");
     PGroup *  axisAnnotationGroup1 = new PGroup(
-        {new PCheckbox(AxisAnnotation::_annotationEnabledTag, "Axis Annotations Enabled"), new PCheckbox(AxisAnnotation::_latLonAxesTag, "Annotate with lat/lon"), new PAxisAnnotationWidget(ce)});
+        {new PCheckbox(AxisAnnotation::_annotationEnabledTag, "Axis Annotations Enabled"), 
+         new PCheckbox(AxisAnnotation::_latLonAxesTag, "Annotate with lat/lon"), 
+         new PAxisAnnotationWidget(ce)
+    });
     axisAnnotationTab->layout()->addWidget(axisAnnotationGroup1);
     _axisGroups.push_back(axisAnnotationGroup1);
 
     PGroup *axisAnnotationGroup2 = new PGroup({
-        new PCopyRegionAnnotationWidget(ce),
         new PColorSelector(AxisAnnotation::_colorTag, "Axis Text Color"),
         new PColorSelector(AxisAnnotation::_backgroundColorTag, "Text Background Color"),
         (new PIntegerSliderEditHLI<AxisAnnotation>("Font Size", &AxisAnnotation::GetAxisFontSize, &AxisAnnotation::SetAxisFontSize))->SetRange(2, 48)->EnableDynamicUpdate(),
@@ -82,6 +85,12 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     _axisGroups.push_back(axisAnnotationGroup2);
 
     layout()->addWidget(axisAnnotationTab);
+
+    PGroup* copyRegionGroup = new PGroup({
+        new PCopyRegionAnnotationWidget(ce)
+    });
+    layout()->addWidget(copyRegionGroup);
+    _groups.push_back(copyRegionGroup);
 
     PGroup *timeAnnotationGroup = new PGroup({new PSection(
         "Time Annotation", {new PEnumDropdown(AnnotationParams::_timeTypeTag, {"No annotation", "Time step number", "User time", "Formatted date/time"}, {0, 1, 2, 3}, "Annotation type"),
@@ -98,13 +107,14 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     _groups.push_back(axisArrowGroup);
 
     PGroup *ThreeDGeometryGroup = new PGroup(
-        {new PSection("3D Geometry", {
-                                         new PCheckbox(AnnotationParams::_domainFrameTag, "Display Domain Bounds"), new PColorSelector(AnnotationParams::_domainColorTag, "Domain Frame Color"),
-                                         new PColorSelector(AnnotationParams::_backgroundColorTag, "Background Color"),
+        {new PSection("3D Geometry", {new PCheckbox(AnnotationParams::_domainFrameTag, "Display Domain Bounds"), 
+                                      new PColorSelector(AnnotationParams::_domainColorTag, "Domain Frame Color"),
+                                      new PColorSelector(AnnotationParams::_backgroundColorTag, "Background Color"),
                                          // new PColorSelector(AnnotationParams::_regionColorTag, "Region Frame Color")  Broken.  See #1742
                                      })});
     layout()->addWidget(ThreeDGeometryGroup);
     _groups.push_back(ThreeDGeometryGroup);
+    // clang-format on
 }
 
 AnnotationEventRouter::~AnnotationEventRouter() {}
