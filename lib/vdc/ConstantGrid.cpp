@@ -49,8 +49,8 @@ const std::vector<size_t> &ConstantGrid::GetNodeDimensions() const
 const std::vector<size_t> &ConstantGrid::GetCellDimensions() const
 {
     auto tmp = GetDimensions();
-    _garbage = {tmp[0], tmp[1], tmp[2]};
-    return _garbage;
+    _duplicate = {tmp[0], tmp[1], tmp[2]};
+    return _duplicate;
 }
 
 bool ConstantGrid::GetIndicesCell(const VAPoR::DblArr3 &coords, VAPoR::Size_tArr3 &indices) const { return false; }

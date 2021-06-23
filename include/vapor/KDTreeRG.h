@@ -3,6 +3,8 @@
 
 #include <ostream>
 #include <vector>
+#include <numeric> // std::accumulate
+#include <functional> // std::multiplies<>
 #include <vapor/Grid.h>
 
 #include "nanoflann.hpp"
@@ -98,12 +100,11 @@ private:
         PointCloud2D(const Grid &xg, const Grid &yg)
         {
             VAssert(xg.GetDimensions() == yg.GetDimensions());
-            VAssert(xg.GetDimensions().size() <= 2);
+            VAssert(xg.GetNumDimensions() <= 2);
 
             // number of elements
             auto   dims = xg.GetDimensions();
-            size_t nelem = 1;
-            for (int i = 0; i < dims.size(); i++) nelem *= dims[i];
+            size_t nelem = std::accumulate( dims.begin(), dims.end(), 1ul, std::multiplies<size_t>());
             this->X.resize(nelem);
             this->Y.resize(nelem);
 
