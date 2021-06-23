@@ -29,7 +29,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
 {
     VAssert(xug.GetDimensions() == GetDimensions());
     VAssert(yug.GetDimensions() == GetDimensions());
-    VAssert(zug.GetDimensions() == GetDimensions() || zug.GetDimensions().size() == 0);
+    VAssert(zug.GetDimensions() == GetDimensions() || zug.GetNumDimensions() == 0);
 
     VAssert(location == NODE);
 
@@ -41,22 +41,18 @@ vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
     if (dim == 0) {
         auto tmp = _xug.GetDimensions();
         auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        while (dim.back() == 1) dim.pop_back();
+        dim.resize( _xug.GetNumDimensions() );
         return dim;
     } else if (dim == 1) {
         auto tmp = _yug.GetDimensions();
         auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        while (dim.back() == 1) dim.pop_back();
+        dim.resize( _yug.GetNumDimensions() );
         return dim;
     } else if (dim == 2) {
-        if (GetGeometryDim() == 3) {
-            auto tmp = _zug.GetDimensions();
-            auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-            while (dim.back() == 1) dim.pop_back();
-            return dim;
-        } else {
-            return (vector<size_t>(1, 1));
-        }
+        auto tmp = _zug.GetDimensions();
+        auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+        dim.resize( _zug.GetNumDimensions() );
+        return dim;
     } else {
         return (vector<size_t>(1, 1));
     }
@@ -64,9 +60,7 @@ vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
 
 size_t UnstructuredGrid2D::GetGeometryDim() const
 {
-    auto tmp = _zug.GetDimensions();
-    auto tmp_size = std::count_if(tmp.begin(), tmp.end(), [](size_t v) { return v != 1; });
-    return tmp_size == 0 ? 2 : 3;
+    return (_zug.GetNumDimensions() == 0 ? 2 : 3);
 }
 
 void UnstructuredGrid2D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
@@ -100,8 +94,12 @@ void UnstructuredGrid2D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
     minu = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
     minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
 
-    size_t start = Wasp::LinearizeCoords(cMin.data(), GetDimensions().data(), GetDimensions().size());
-    size_t stop = Wasp::LinearizeCoords(cMax.data(), GetDimensions().data(), GetDimensions().size());
+    auto tmp = GetDimensions();
+    auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dim.resize( GetNumDimensions() );
+
+    size_t start = Wasp::LinearizeCoords(cMin.data(), dim.data(), dim.size());
+    size_t stop = Wasp::LinearizeCoords(cMax.data(), dim.data(), dim.size());
 
     // Currently only support ++ opererator for ConstCoordItr. So random
     // access is tricky.
