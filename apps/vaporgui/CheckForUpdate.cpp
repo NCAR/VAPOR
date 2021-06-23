@@ -27,7 +27,8 @@ void CheckForUpdate(function<void(bool updateAvailable, UpdateInfo info)> callba
 
         QObject::connect(manager, &QNetworkAccessManager::finished, manager, [&](QNetworkReply *reply) {
             if (reply->error()) {
-                cout << reply->errorString().toStdString() << endl;
+				std::string errorString = reply->errorString().toStdString();
+                std::cout << errorString << std::endl;
                 UpdateInfo info;
                 info.error = true;
                 _callback(false, info);

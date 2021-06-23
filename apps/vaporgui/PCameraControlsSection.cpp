@@ -13,7 +13,7 @@
 
 using namespace VAPoR;
 
-PTrackballWidget::PTrackballWidget(ControlExec *ce) : PWidget("", _group = new VGroup), _ce(ce)
+PTrackballWidget::PTrackballWidget(ControlExec *ce) : PWidget("", _group = new VGroup()), _ce(ce)
 {
     _group->Add(new VLineItem("Direction", _direction = new V3DInput));
     _group->Add(new VLineItem("Up Vector", _up = new V3DInput));

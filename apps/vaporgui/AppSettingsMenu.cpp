@@ -42,7 +42,7 @@ class PUpdateChecker : public PWidget {
     }
 
 public:
-    PUpdateChecker() : PWidget("", _group = new VGroup)
+    PUpdateChecker() : PWidget("", _group = new VGroup())
     {
         _checkButton = new VPushButton("Check for update");
         _group->Add(_checkButton);

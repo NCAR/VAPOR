@@ -87,7 +87,7 @@ if( USE_OMP )
   target_compile_options( vdc PUBLIC ${OpenMP_CXX_FLAGS} )
   target_compile_definitions (vdc PUBLIC USE_OMP)
   target_link_libraries (vdc PUBLIC OpenMP::OpenMP_CXX)
-else()
+elseif(NOT WIN32)
   target_compile_options( vdc PUBLIC "-Wno-unknown-pragmas" )
 endif()
 
