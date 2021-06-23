@@ -749,9 +749,7 @@ public:
     //
     virtual void SetMinAbs(const std::vector<size_t> &minAbs)
     {
-        auto tmp = GetDimensions();
-        auto tmp_size = std::count_if(tmp.begin(), tmp.end(), [](size_t v) { return v != 1; });
-        VAssert(minAbs.size() == tmp_size);
+        VAssert(minAbs.size() == this->GetNumDimensions());
         _minAbs = minAbs;
     }
 
