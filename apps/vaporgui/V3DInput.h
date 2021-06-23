@@ -18,6 +18,9 @@ public:
     V3DInput();
     void SetValue(double x, double y, double z);
     void SetValue(const std::vector<double> &xyz);
+    void                SetValue(const double xyz[3]);
+    void                GetValue(double xyz[3]) const;
+    std::vector<double> GetValue() const;
 
 signals:
     void ValueChanged(double x, double y, double z);

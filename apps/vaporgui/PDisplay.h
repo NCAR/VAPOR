@@ -1,7 +1,8 @@
 #pragma once
 
 #include "PWidget.h"
-#include <QLabel>
+
+class VLabel;
 
 //! @class PDisplay
 //! Creates a label that displays a value in the params database.
@@ -12,9 +13,12 @@ class PDisplay : public PWidget {
 
 public:
     PDisplay(const std::string &tag, const std::string &label = "");
+    PDisplay *Selectable();
 
 protected:
-    QLabel *_label;
+    VLabel *_label;
+
+    void setText(std::string text) const;
 };
 
 //! @class PStringDisplay

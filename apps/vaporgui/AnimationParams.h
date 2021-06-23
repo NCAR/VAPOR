@@ -132,7 +132,7 @@ public:
     //
     static string GetClassType() { return ("AnimationParams"); }
 
-private:
+public:
     static const string _repeatTag;
     static const string _maxRateTag;
     static const string _stepSizeTag;
@@ -141,6 +141,7 @@ private:
     static const string _playBackwardsTag;
     static const string _currentTimestepTag;
 
+private:
     //! Put a params instance into default state with no data.
     void _init();
 };

@@ -15,4 +15,5 @@ public:
 
 protected:
     void updateGUI() const override;
+    virtual VAPoR::ParamsBase *getWrappedParams() const;
 };

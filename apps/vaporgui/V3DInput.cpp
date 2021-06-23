@@ -33,6 +33,22 @@ void V3DInput::SetValue(const std::vector<double> &xyz)
     SetValue(xyz[0], xyz[1], xyz[2]);
 }
 
+void V3DInput::SetValue(const double xyz[3]) { SetValue(xyz[0], xyz[1], xyz[2]); }
+
+void V3DInput::GetValue(double xyz[3]) const
+{
+    xyz[0] = _x->GetValueDouble();
+    xyz[1] = _y->GetValueDouble();
+    xyz[2] = _z->GetValueDouble();
+}
+
+std::vector<double> V3DInput::GetValue() const
+{
+    std::vector<double> v(3);
+    GetValue(v.data());
+    return v;
+}
+
 void V3DInput::axisValueChanged(double)
 {
     double x = _x->GetValueDouble();

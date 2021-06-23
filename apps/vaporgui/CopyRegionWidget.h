@@ -33,7 +33,7 @@ public:
         return tr("This widget contains all widgets "
                   "necessary for copying renderer regions");
     }
-    bool isContainer() const { return true; }
+    bool         isContainer() const { return true; }
     virtual void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
 signals:

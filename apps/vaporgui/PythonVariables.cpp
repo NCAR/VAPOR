@@ -493,10 +493,7 @@ std::vector<string> PythonVariables::_buildInputVars() const
     return inputVars;
 }
 
-void PythonVariables::_closeScript()
-{
-    close();
-}
+void PythonVariables::_closeScript() { close(); }
 
 void PythonVariables::_coordInputVarChanged(int row, int col)
 {

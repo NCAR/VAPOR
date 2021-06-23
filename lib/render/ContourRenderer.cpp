@@ -100,7 +100,7 @@ int ContourRenderer::_buildCache()
     ContourParams *cParams = (ContourParams *)GetActiveParams();
     _saveCacheParams();
 
-    vector<VertexData>           vertices;
+    vector<VertexData> vertices;
 
     if (cParams->GetVariableName().empty()) { return 0; }
     vector<double> contours = cParams->GetContourValues(_cacheParams.varName);
