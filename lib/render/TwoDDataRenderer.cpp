@@ -411,7 +411,7 @@ int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const Grid *g, doub
 
     // Unstructured 2d grids are stored in 1d
     //
-    _vertsWidth = std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
+    _vertsWidth = std::accumulate(dims.begin(), dims.end(), 1ul, std::multiplies<size_t>());
     _vertsHeight = 1;
 
     // Count the number of triangle vertex indices needed
