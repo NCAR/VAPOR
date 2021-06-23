@@ -38,24 +38,22 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
 
 vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
 {
+    const Grid* ptr = nullptr;
+
     if (dim == 0) {
-        auto tmp = _xug.GetDimensions();
-        auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        dim.resize( _xug.GetNumDimensions() );
-        return dim;
+        ptr = &_xug;
     } else if (dim == 1) {
-        auto tmp = _yug.GetDimensions();
-        auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        dim.resize( _yug.GetNumDimensions() );
-        return dim;
+        ptr = &_yug;
     } else if (dim == 2) {
-        auto tmp = _zug.GetDimensions();
-        auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        dim.resize( _zug.GetNumDimensions() );
-        return dim;
+        ptr = &_zug;
     } else {
         return (vector<size_t>(1, 1));
     }
+
+    auto tmp = ptr->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize( ptr->GetNumDimensions() );
+    return dims;
 }
 
 size_t UnstructuredGrid2D::GetGeometryDim() const
@@ -95,11 +93,11 @@ void UnstructuredGrid2D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
     minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
 
     auto tmp = GetDimensions();
-    auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dim.resize( GetNumDimensions() );
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize( GetNumDimensions() );
 
-    size_t start = Wasp::LinearizeCoords(cMin.data(), dim.data(), dim.size());
-    size_t stop = Wasp::LinearizeCoords(cMax.data(), dim.data(), dim.size());
+    size_t start = Wasp::LinearizeCoords(cMin.data(), dims.data(), dims.size());
+    size_t stop = Wasp::LinearizeCoords(cMax.data(), dims.data(), dims.size());
 
     // Currently only support ++ opererator for ConstCoordItr. So random
     // access is tricky.
