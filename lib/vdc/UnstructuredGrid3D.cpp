@@ -27,9 +27,9 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset), _xug(xug), _yug(yug),
   _zug(zug)
 {
-    VAssert(xug.GetDimensions().size() == 1);
-    VAssert(yug.GetDimensions().size() == 1);
-    VAssert(zug.GetDimensions().size() == 1);
+    VAssert(xug.GetNumDimensions() == 1);
+    VAssert(yug.GetNumDimensions() == 1);
+    VAssert(zug.GetNumDimensions() == 1);
 
     VAssert(location == NODE);
 }
@@ -37,22 +37,22 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 
 vector<size_t> UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
 {
+    const Grid* ptr = nullptr;
+
     if (dim == 0) {
-        auto tmp = _xug.GetDimensions();
-        auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        while (dim.back() == 1) dim.pop_back();
-        return dim;
+        ptr = &_xug;
     } else if (dim == 1) {
-        auto tmp = _yug.GetDimensions();
-        auto dim = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        while (dim.back() == 1) dim.pop_back();
-        return dim;
+        ptr = &_yug;
     } else if (dim == 2) {
-        auto tmp = _zug.GetDimensions();
-        return {tmp[0], tmp[1], tmp[2]};
+        ptr = &_zug;
     } else {
         return (vector<size_t>(1, 1));
     }
+
+    auto tmp = ptr->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize( ptr->GetNumDimensions() );
+    return dims;
 }
 
 
