@@ -231,7 +231,7 @@ void dump(const Grid *g)
 {
     auto tmp = g->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    while (dims.back() == 1) dims.pop_back();
+    dims.resize( g->GetNumDimensions() );
     vector<size_t> min(dims.size(), 0);
     vector<size_t> max;
     for (int i = 0; i < dims.size(); i++) { max.push_back(dims[i] - 1); }
@@ -317,7 +317,7 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
 
     auto tmp = g->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    while (dims.back() == 1) dims.pop_back();
+    dims.resize( g->GetNumDimensions() );
     cout << "Grid dimensions: [ ";
     for (int i = 0; i < dims.size(); i++) { cout << dims[i] << " "; }
     cout << "]" << endl;
