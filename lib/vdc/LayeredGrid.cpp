@@ -45,7 +45,9 @@ vector<size_t> LayeredGrid::GetCoordDimensions(size_t dim) const
         return (vector<size_t>(1, GetDimensions()[1]));
     } else if (dim == 2) {
         auto tmp = _zrg.GetDimensions();
-        return {tmp[0], tmp[1], tmp[2]};
+        auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+        tmp2.resize( _zrg.GetNumDimensions() );
+        return tmp2;
     } else {
         return (vector<size_t>(1, 1));
     }
