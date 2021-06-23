@@ -42,16 +42,8 @@ size_t StretchedGrid::GetGeometryDim() const { return (_zcoords.size() == 0 ? 2 
 
 vector<size_t> StretchedGrid::GetCoordDimensions(size_t dim) const
 {
-    if (dim == 0) {
-        return (vector<size_t>(1, GetDimensions()[0]));
-    } else if (dim == 1) {
-        return (vector<size_t>(1, GetDimensions()[1]));
-    } else if (dim == 2) {
-        if (GetDimensions().size() == 3) {
-            return (vector<size_t>(1, GetDimensions()[2]));
-        } else {
-            return (vector<size_t>(1, 1));
-        }
+    if( dim < 3 ) {
+        return (vector<size_t>(1, GetDimensions()[dim]));
     } else {
         return (vector<size_t>(1, 1));
     }
