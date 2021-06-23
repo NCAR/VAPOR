@@ -30,7 +30,7 @@ void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    while (dims.back() == 1) dims.pop_back();
+    dims.resize( GetNumDimensions() );
     for (int i = 0; i < dims.size(); i++) {
         if (dims[i] > 1) {
             _delta.push_back((_maxu[i] - _minu[i]) / (double)(dims[i] - 1));
@@ -43,9 +43,7 @@ void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &
 RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const vector<double> &minu, const vector<double> &maxu) : StructuredGrid(dims, bs, blks)
 {
     VAssert(minu.size() == maxu.size());
-    auto tmp = GetDimensions();
-    auto dim_size = std::count_if(tmp.begin(), tmp.end(), [](size_t v) { return v != 1; });
-    VAssert(minu.size() >= dim_size);
+    VAssert(minu.size() >= GetNumDimensions() );
 
     _SetExtents(minu, maxu);
 }
@@ -57,7 +55,7 @@ vector<size_t> RegularGrid::GetCoordDimensions(size_t dim) const
     } else if (dim == 1) {
         return (vector<size_t>(1, GetDimensions()[1]));
     } else if (dim == 2) {
-        if (GetDimensions().size() == 3) {
+        if (GetNumDimensions() == 3) {
             return (vector<size_t>(1, GetDimensions()[2]));
         } else {
             return (vector<size_t>(1, 1));
@@ -82,7 +80,6 @@ float RegularGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
     if (_delta[1] != 0.0) j = (size_t)floor((cCoords[1] - _minu[1]) / _delta[1]);
 
     auto dims = GetDimensions();
-    auto dim_size = std::count_if(dims.begin(), dims.end(), [](size_t v) { return v != 1; });
 
     if (GetGeometryDim() == 3)
         if (_delta[2] != 0.0) k = (size_t)floor((cCoords[2] - _minu[2]) / _delta[2]);
@@ -90,7 +87,7 @@ float RegularGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
 
-    if (dim_size == 3) VAssert(k < dims[2]);
+    if (GetNumDimensions() == 3) VAssert(k < dims[2]);
 
     double iwgt = 0.0;
     double jwgt = 0.0;
@@ -107,8 +104,7 @@ float RegularGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
     if (iwgt > 0.5) i++;
     if (jwgt > 0.5) j++;
 
-    if (dim_size == 3)
-        if (kwgt > 0.5) k++;
+    if (GetNumDimensions() == 3 && kwgt > 0.5) k++;
 
 
     return (AccessIJK(i, j, k));
@@ -131,11 +127,10 @@ float RegularGrid::GetValueLinear(const DblArr3 &coords) const
     if (GetGeometryDim() == 3 && _delta[2] != 0.0) { k = (size_t)floor((cCoords[2] - _minu[2]) / _delta[2]); }
 
     auto dims = GetDimensions();
-    auto dim_size = std::count_if(dims.begin(), dims.end(), [](size_t v) { return v != 1; });
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
 
-    if (dim_size == 3) { VAssert(k < dims[2]); }
+    if (GetNumDimensions() == 3) { VAssert(k < dims[2]); }
 
     double iwgt = 0.0;
     double jwgt = 0.0;
@@ -227,6 +222,7 @@ void RegularGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords)
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize( GetNumDimensions() );
 
     for (int i = 0; i < dims.size(); i++) {
         size_t index = cIndices[i];
@@ -283,7 +279,7 @@ RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const RegularGrid *rg, bool begin)
 {
     auto tmp = rg->GetDimensions();
     _dims = {tmp[0], tmp[1], tmp[2]};
-    while (_dims.back() == 1) _dims.pop_back();
+    _dims.resize( rg->GetNumDimensions() );
     _delta = rg->_delta;
 
     Grid::CopyFromArr3(rg->_minu, _minu);
