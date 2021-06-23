@@ -85,13 +85,24 @@ public:
     //! Return the dimensions of grid connectivity array
     //!
     //! \param[out] dims The value of \p dims parameter provided to
-    //! the constructor.
+    //! the constructor. If the parameter has less than 3 values, then
+    //! number 1 will be filled.
     //!
     std::array<size_t, 3> GetDimensions() const
     {
-        std::array<size_t, 3> tmp = {1, 1, 1};
+        auto tmp = std::array<size_t, 3> {1, 1, 1};
         std::copy(_dims.begin(), _dims.end(), tmp.begin());
         return tmp;
+    }
+
+    //! Return the useful number of dimensions of grid connectivity array
+    //!
+    //! \param[out] dims The number of values of \p dims parameter provided to
+    //! the constructor.
+    //!
+    size_t GetNumDimensions() const
+    {
+        return _dims.size();
     }
 
     //! Return the dimensions of the specified coordinate variable

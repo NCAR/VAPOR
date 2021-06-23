@@ -42,8 +42,8 @@ size_t ConstantGrid::GetGeometryDim() const { return 3; }
 const std::vector<size_t> &ConstantGrid::GetNodeDimensions() const
 {
     auto tmp = GetDimensions();
-    _garbage = {tmp[0], tmp[1], tmp[2]};
-    return _garbage;
+    _duplicate = {tmp[0], tmp[1], tmp[2]};
+    return _duplicate;
 }
 
 const std::vector<size_t> &ConstantGrid::GetCellDimensions() const
