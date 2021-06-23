@@ -45,7 +45,10 @@ vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
     } else if (dim == 1) {
         ptr = &_yug;
     } else if (dim == 2) {
-        ptr = &_zug;
+        if (GetGeometryDim() == 3)
+            ptr = &_zug;
+        else
+            return (vector<size_t>(1, 1));
     } else {
         return (vector<size_t>(1, 1));
     }
