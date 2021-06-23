@@ -37,8 +37,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    VAssert(xrg.GetDimensions()[2] == 1);
-    VAssert(yrg.GetDimensions()[2] == 1);
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
     VAssert(zcoords.size() == 0 || zcoords.size() == dims[2]);
 
     _terrainFollowing = false;
@@ -55,9 +55,9 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    VAssert(xrg.GetDimensions()[2] == 1);
-    VAssert(yrg.GetDimensions()[2] == 1);
-    VAssert(zrg.GetDimensions().size() == 3);
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
+    VAssert(zrg.GetNumDimensions() == 3);
 
     _terrainFollowing = true;
     _curvilinearGrid(xrg, yrg, zrg, vector<double>(), qtr);
@@ -73,8 +73,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    VAssert(xrg.GetDimensions()[2] == 1);
-    VAssert(yrg.GetDimensions()[2] == 1);
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
 
     _terrainFollowing = false;
     _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), qtr);
@@ -83,20 +83,20 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
 vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
 {
     if (dim == 0) {
-        auto           tmp = _xrg.GetDimensions();
-        vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
-        while (tmp2.back() == 1) tmp2.pop_back();
+        auto tmp = _xrg.GetDimensions();
+        auto tmp2 = vector<size_t> {tmp[0], tmp[1], tmp[2]};
+        tmp2.resize( _xrg.GetNumDimensions() );
         return tmp2;
     } else if (dim == 1) {
-        auto           tmp = _yrg.GetDimensions();
-        vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
-        while (tmp2.back() == 1) tmp2.pop_back();
+        auto tmp = _yrg.GetDimensions();
+        auto tmp2 = vector<size_t> {tmp[0], tmp[1], tmp[2]};
+        tmp2.resize( _yrg.GetNumDimensions() );
         return tmp2;
     } else if (dim == 2) {
         if (_terrainFollowing) {
-            auto           tmp = _zrg.GetDimensions();
-            vector<size_t> tmp2 = {tmp[0], tmp[1], tmp[2]};
-            while (tmp2.back() == 1) tmp2.pop_back();
+            auto tmp = _zrg.GetDimensions();
+            auto tmp2 = vector<size_t> {tmp[0], tmp[1], tmp[2]};
+            tmp2.resize( _zrg.GetNumDimensions() );
             return tmp2;
         } else {
             return (vector<size_t>(1, _zcoords.size()));
@@ -225,8 +225,9 @@ bool CurvilinearGrid::InsideGrid(const DblArr3 &coords) const
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, bool begin) : ConstCoordItrAbstract()
 {
     _cg = cg;
-    auto dims = _cg->GetDimensions();
-    auto dim_size = std::count_if(dims.begin(), dims.end(), [](size_t v) { return v != 1; });
+    auto tmp = _cg->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize( _cg->GetNumDimensions() );
     _index = vector<size_t>(dims.size(), 0);
     _terrainFollowing = _cg->_terrainFollowing;
     if (begin) {
@@ -243,7 +244,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     _coords.push_back(*_xCoordItr);
     _coords.push_back(*_yCoordItr);
 
-    if (dim_size == 3) {
+    if (_cg->GetNumDimensions() == 3) {
         if (_terrainFollowing) {
             _coords.push_back(*_zCoordItr);
         } else {
@@ -273,7 +274,6 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG() : ConstCoordItrAbstract()
 void CurvilinearGrid::ConstCoordItrCG::next()
 {
     auto dims = _cg->GetDimensions();
-    auto dim_size = std::count_if(dims.begin(), dims.end(), [](size_t v) { return v != 1; });
 
     _index[0]++;
     ++_xCoordItr;
@@ -297,7 +297,7 @@ void CurvilinearGrid::ConstCoordItrCG::next()
         return;
     }
 
-    if (dim_size == 2) return;
+    if (_cg->GetNumDimensions() == 2) return;
 
     _index[1] = 0;
     _index[2]++;
@@ -320,29 +320,29 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 {
     if (!_index.size()) return;
 
-    auto dims = _cg->GetDimensions();
-    auto dimv = std::vector<size_t>{dims[0], dims[1], dims[2]};
-    while (dimv.back() == 1) dimv.pop_back();
+    auto tmp = _cg->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize( _cg->GetNumDimensions() );
 
     vector<size_t> maxIndex;
 
-    for (int i = 0; i < dimv.size(); i++) maxIndex.push_back(dimv[i] - 1);
+    for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
 
-
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dimv);
-    long newIndexL = Wasp::LinearizeCoords(_index, dimv) + offset;
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
+    long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = vector<size_t>(dimv.size(), 0);
-        _index[dimv.size() - 1] = dimv[dimv.size() - 1];
+        _index = vector<size_t>(dims.size(), 0);
+        _index[dims.size() - 1] = dims[dims.size() - 1];
         return;
     }
 
-    size_t index2DL = _index[1] * dimv[0] + _index[0];
+    size_t index2DL = _index[1] * dims[0] + _index[0];
 
-    _index = Wasp::VectorizeCoords(newIndexL, dimv);
+    _index = Wasp::VectorizeCoords(newIndexL, dims);
 
-    size_t offset2D = (long)(_index[1] * dimv[0] + _index[0]) - (long)index2DL;
+    VAssert(_index[1] * dims[0] + _index[0] >= index2DL);
+    size_t offset2D = (_index[1] * dims[0] + _index[0]) - index2DL;
 
     _xCoordItr += offset2D;
     _yCoordItr += offset2D;
@@ -350,7 +350,7 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
     _coords[0] = *_xCoordItr;
     _coords[1] = *_yCoordItr;
 
-    if (dimv.size() == 2) return;
+    if (dims.size() == 2) return;
 
     if (_terrainFollowing) {
         _zCoordItr += offset;
@@ -466,7 +466,7 @@ float CurvilinearGrid::GetValueLinear(const DblArr3 &coords) const
     auto dims = GetDimensions();
     VAssert(i < dims[0] - 1);
     VAssert(j < dims[1] - 1);
-    VAssert(k < dims[2]);
+    if( GetNumDimensions() > 2 ) VAssert(k < dims[2]);
 
     float v0s[] = {AccessIJK(i, j, k), AccessIJK(i + 1, j, k), AccessIJK(i + 1, j + 1, k), AccessIJK(i, j + 1, k)};
 
