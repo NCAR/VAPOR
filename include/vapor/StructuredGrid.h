@@ -73,9 +73,9 @@ public:
     const std::vector<size_t> &GetNodeDimensions() const override
     {
         auto tmp = GetDimensions();
-        _nodeDimCache = {tmp[0], tmp[1], tmp[2]};
-        while (_nodeDimCache.back() == 1) _nodeDimCache.pop_back();
-        return _nodeDimCache;
+        _duplicate = {tmp[0], tmp[1], tmp[2]};
+        _duplicate.resize( this->GetNumDimensions() );
+        return _duplicate;
     }
 
     const std::vector<size_t> &GetCellDimensions() const override { return (_cellDims); };
@@ -118,7 +118,7 @@ protected:
 private:
     std::vector<size_t> _cellDims;
 
-    mutable std::vector<size_t> _nodeDimCache;
+    mutable std::vector<size_t> _duplicate;
 };
 };    // namespace VAPoR
 #endif
