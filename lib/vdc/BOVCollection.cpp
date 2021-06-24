@@ -451,15 +451,15 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
 
     // Read a "pencil" of data along the X axis, one row at a time
     size_t count = max[0] - min[0] + 1;
+    // Note: allocate buffer once and reuse for many times, so repeated allocation is avoided.
+    std::vector<unsigned char> vReadBuffer(count * formatSize);
+    unsigned char *            readBuffer = vReadBuffer.data();
     for (size_t k = min[2]; k <= max[2]; k++) {
         size_t zOffset = _gridSize[0] * _gridSize[1] * k;
         for (size_t j = min[1]; j <= max[1]; j++) {
             size_t xOffset = min[0];
             size_t yOffset = _gridSize[0] * j;
             size_t offset = formatSize * (xOffset + yOffset + zOffset) + _byteOffset;
-
-            std::vector<unsigned char> vReadBuffer(count * formatSize);
-            unsigned char *            readBuffer = vReadBuffer.data();
 
             fseek(fp, offset, SEEK_SET);
             size_t rc = fread(readBuffer, formatSize, count, fp);
