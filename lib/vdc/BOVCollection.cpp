@@ -104,17 +104,18 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             if (_gridSize == _defaultGridSize) { return _missingValueError(_gridSizeToken); }
 
             std::cout << _dataFile << std::endl;
-            /*std::ifstream infile(_dataFile);
+            std::ifstream infile(_dataFile);
             if (infile.bad()) {
                 SetErrMsg(("Failed to open BOV file " + _dataFile).c_str());
                 return -1;
-            }*/
+            }
 
             _populateDataFileMap();
         } else {
             SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
             return -1;
         }
+        header.close();
     }
 
     return 0;
@@ -399,7 +400,6 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         }
 
         if (lineStream.bad()) {
-            // value.clear();
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
             return ERROR;
