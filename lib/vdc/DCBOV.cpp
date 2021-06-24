@@ -47,27 +47,21 @@ int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &op
     //  Get the dimensions of the grid.
     //	Initializes members: _dimsMap
     //
-    rc = _InitDimensions();
-    if (rc < 0) {
-        SetErrMsg("No valid dimensions");
-        return (-1);
-    }
+    _InitDimensions();
 
     // Set up the coordinate variables
     //
-    rc = _InitCoordinates();
-    if (rc < 0) { return (-1); }
+    _InitCoordinates();
 
     // Identify data and coordinate variables. Sets up members:
     // Initializes members: _dataVarsMap, _meshMap
     //
-    rc = _InitVars();
-    if (rc < 0) return (-1);
+    _InitVars();
 
     return (0);
 }
 
-int DCBOV::_InitDimensions()
+void DCBOV::_InitDimensions()
 {
     _dimsMap.clear();
     std::array<std::string, 3> dimnames = _bovCollection->GetSpatialDimensions();
@@ -82,11 +76,9 @@ int DCBOV::_InitDimensions()
     size_t    numTimes = _bovCollection->GetUserTimes().size();
     Dimension dim(timeDim, numTimes);
     _dimsMap[timeDim] = dim;
-
-    return 0;
 }
 
-int DCBOV::_InitCoordinates()
+void DCBOV::_InitCoordinates()
 {
     bool                       uniformHint = true;
     vector<bool>               periodic(false, 4);
@@ -99,14 +91,12 @@ int DCBOV::_InitCoordinates()
 
     std::string timeDim = _bovCollection->GetTimeDimension();
     _coordVarsMap[timeDim] = CoordVar(timeDim, "seconds", DC::FLOAT, vector<bool>(), 3, false, vector<string>(), timeDim);
-
-    return 0;
 }
 
 // Collect metadata for all data variables found in the CF data
 // set. Initialize the _dataVarsMap member
 //
-int DCBOV::_InitVars()
+void DCBOV::_InitVars()
 {
     _dataVarsMap.clear();
     _meshMap.clear();
@@ -128,8 +118,6 @@ int DCBOV::_InitVars()
     _meshMap[mesh.GetName()] = mesh;
 
     for (auto var : vars) { _dataVarsMap[var] = DataVar(var, units, format, periodic, mesh.GetName(), timeCoordVar, DC::Mesh::NODE); }
-
-    return (0);
 }
 
 bool DCBOV::getDimension(string dimname, DC::Dimension &dimension) const

@@ -177,11 +177,11 @@ private:
     std::map<string, DC::DataVar>   _dataVarsMap;
     std::map<string, string>        _coordVarKeys;
 
-    int _InitCoordinates();
+    void _InitCoordinates();
 
-    int _InitDimensions();
+    void _InitDimensions();
 
-    int _InitVars();
+    void _InitVars();
 
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 };

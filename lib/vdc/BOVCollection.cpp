@@ -82,6 +82,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
     int           rc;
     std::ifstream header;
     for (int i = 0; i < paths.size(); i++) {
+        std::cout << paths[i] << std::endl;
         header.open(paths[i]);
         if (header.is_open()) {
             rc = _parseHeader(header);
@@ -102,12 +103,18 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             if (_dataFormat == _defaultFormat) { return _missingValueError(_formatToken); }
             if (_gridSize == _defaultGridSize) { return _missingValueError(_gridSizeToken); }
 
+            std::cout << _dataFile << std::endl;
+            /*std::ifstream infile(_dataFile);
+            if (infile.bad()) {
+                SetErrMsg(("Failed to open BOV file " + _dataFile).c_str());
+                return -1;
+            }*/
+
             _populateDataFileMap();
         } else {
             SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
             return -1;
         }
-        header.close();
     }
 
     return 0;
@@ -297,7 +304,14 @@ std::string BOVCollection::GetDataEndian() const { return _dataEndian; }
 template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
 {
     // Skip comments
-    if (line[0] == '#') { return NOT_FOUND; }
+    for(size_t i=0; i<line.length(); i++) {
+        if (line[i] == '#') {
+            line.erase(line.begin()+i, line.end());
+            if (line[line.length()-1] == ' ')  // If last char is a space, pop it
+                line.pop_back();
+            break;
+        }
+    }
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
@@ -322,7 +336,14 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
 template<typename T> int BOVCollection::_findToken(const std::string &token, std::string &line, T &value, bool verbose)
 {
     // Skip comments
-    if (line[0] == '#') { return NOT_FOUND; }
+    for(size_t i=0; i<line.length(); i++) {
+        if (line[i] == '#') {
+            line.erase(line.begin()+i, line.end());
+            if (line[line.length()-1] == ' ')  // If last char is a space, pop it
+                line.pop_back();
+            break;
+        }
+    }
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
@@ -336,17 +357,18 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 
         if (verbose) { std::cout << std::setw(20) << token << " " << value << std::endl; }
 
-        if (ss.eof() == 0) {
-            std::string message = "The keyword " + token + " may only contain one value.";
-            SetErrMsg(message.c_str());
-            return ERROR;
-        }
-
-        if (ss.bad()) {
+        if (ss.fail()) {
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
             return ERROR;
         }
+
+        if (ss.eof() == 0) {
+            std::string message = "The keyword " + token + " should only contain one value.";
+            SetErrMsg(message.c_str());
+            return ERROR;
+        }
+
         return FOUND;
     }
     return NOT_FOUND;
@@ -356,7 +378,14 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 template<typename T> int BOVCollection::_findToken(const std::string &token, std::string &line, std::array<T, 3> &value, bool verbose)
 {
     // Skip comments
-    if (line[0] == '#') { return NOT_FOUND; }
+    for(size_t i=0; i<line.length(); i++) {
+        if (line[i] == '#') {
+            line.erase(line.begin()+i, line.end());
+            if (line[line.length()-1] == ' ')  // If last char is a space, pop it
+                line.pop_back();
+            break;
+        }
+    }
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
@@ -475,9 +504,6 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
             }
 
             if (needSwap) { _swapBytes(readBuffer, formatSize, numValues); }
-
-            // T castBuffer = (T)readBuffer;
-            // for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
 
             if (_dataFormat == DC::XType::INT32) {
                 int *castBuffer = (int *)readBuffer;
