@@ -131,44 +131,44 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         // the BOV.  Try to find them, and report errors if we can't.
         //
         rc = _findToken(_dataFileToken, line, dataFile);
-        if (rc == ERROR)
+        if (rc == (int)parseCodes::ERROR)
             return _failureToReadError(_dataFileToken);
-        else if (rc == FOUND)
+        else if (rc == (int)parseCodes::FOUND)
             _dataFile = dataFile;
 
         double time;
         rc = _findToken(_timeToken, line, time);
-        if (rc == ERROR)
+        if (rc == (int)parseCodes::ERROR)
             return _failureToReadError(_timeToken);
-        else if (rc == FOUND)
+        else if (rc == (int)parseCodes::FOUND)
             _time = time;
 
         std::string variable;
         rc = _findToken(_variableToken, line, variable);
-        if (rc == ERROR)
+        if (rc == (int)parseCodes::ERROR)
             return _invalidValueError(_variableToken);
-        else if (rc == FOUND)
+        else if (rc == (int)parseCodes::FOUND)
             _variable = variable;
 
         rc = _findToken(_gridSizeToken, line, _tmpGridSize);
-        if (rc == ERROR) return _failureToReadError(_gridSizeToken);
+        if (rc == (int)parseCodes::ERROR) return _failureToReadError(_gridSizeToken);
 
         rc = _findToken(_formatToken, line, _tmpDataFormat);
-        if (rc == ERROR) return _failureToReadError(_formatToken);
+        if (rc == (int)parseCodes::ERROR) return _failureToReadError(_formatToken);
 
         // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
         //
         rc = _findToken(_originToken, line, _tmpBrickOrigin);
-        if (rc == ERROR) return _invalidValueError(_originToken);
+        if (rc == (int)parseCodes::ERROR) return _invalidValueError(_originToken);
 
         rc = _findToken(_brickSizeToken, line, _tmpBrickSize);
-        if (rc == ERROR) return _invalidValueError(_brickSizeToken);
+        if (rc == (int)parseCodes::ERROR) return _invalidValueError(_brickSizeToken);
 
         rc = _findToken(_endianToken, line, _tmpDataEndian);
-        if (rc == ERROR) return _invalidValueError(_endianToken);
+        if (rc == (int)parseCodes::ERROR) return _invalidValueError(_endianToken);
 
         rc = _findToken(_offsetToken, line, _tmpByteOffset);
-        if (rc == ERROR) return _invalidValueError(_offsetToken);
+        if (rc == (int)parseCodes::ERROR) return _invalidValueError(_offsetToken);
 
         // All other variables are currently unused.
         //
@@ -328,9 +328,9 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
             value = DC::INVALID;
 
         if (verbose) { std::cout << std::setw(20) << token << " " << value << std::endl; }
-        return FOUND;
+        return (int)parseCodes::FOUND;
     }
-    return NOT_FOUND;
+    return (int)parseCodes::NOT_FOUND;
 }
 
 // Template specialization for reading data of types bool or string
@@ -361,18 +361,18 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         if (ss.fail()) {
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
-            return ERROR;
+            return (int)parseCodes::ERROR;
         }
 
         if (ss.eof() == 0) {
             std::string message = "The keyword " + token + " should only contain one value.";
             SetErrMsg(message.c_str());
-            return ERROR;
+            return (int)parseCodes::ERROR;
         }
 
-        return FOUND;
+        return (int)parseCodes::FOUND;
     }
-    return NOT_FOUND;
+    return (int)parseCodes::NOT_FOUND;
 }
 
 // Template specialization for reading data of type std::array<size_t, 3> or std::array<float, 3>
@@ -402,7 +402,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         if (lineStream.bad()) {
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
-            return ERROR;
+            return (int)parseCodes::ERROR;
         }
 
         if (verbose) {
@@ -410,9 +410,9 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
             for (int i = 0; i < value.size(); i++) std::cout << value[i] << " ";
             std::cout << std::endl;
         }
-        return FOUND;
+        return (int)parseCodes::FOUND;
     }
-    return NOT_FOUND;
+    return (int)parseCodes::NOT_FOUND;
 }
 
 void BOVCollection::_findTokenValue(std::string &line) const

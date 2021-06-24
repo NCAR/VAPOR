@@ -10,7 +10,7 @@ namespace VAPoR {
 
 class BOVCollection : public Wasp::MyBase {
 public:
-    enum parseCodes { ERROR = -1, NOT_FOUND = 0, FOUND = 1 };
+    enum class parseCodes { ERROR = -1, NOT_FOUND = 0, FOUND = 1 };
 
     BOVCollection();
     int Initialize(const std::vector<std::string> &paths);
@@ -74,8 +74,8 @@ private:
     int  _parseHeader(std::ifstream &header);
     void _populateDataFileMap();
 
-    template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = true);
-    template<typename T> int _findToken(const std::string &token, std::string &line, std::array<T, 3> &value, bool verbose = true);
+    template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = false);
+    template<typename T> int _findToken(const std::string &token, std::string &line, std::array<T, 3> &value, bool verbose = false);
 
     void _findTokenValue(std::string &line) const;
 
