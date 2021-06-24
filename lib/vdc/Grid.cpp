@@ -490,7 +490,7 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
 
     auto tmp = rg->GetDimensions();
     _dims3d = {tmp[0], tmp[1], tmp[2]};
-    _dims3d.resize( rg->GetNumDimensions() );
+    _dims3d.resize(rg->GetNumDimensions());
     _bdims3d = rg->GetDimensionInBlks();
     _bs3d = rg->GetBlockSize();
     for (int i = _ndims; i < 3; i++) {

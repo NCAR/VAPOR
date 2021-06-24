@@ -74,7 +74,7 @@ public:
     {
         auto tmp = GetDimensions();
         _duplicate = {tmp[0], tmp[1], tmp[2]};
-        _duplicate.resize( this->GetNumDimensions() );
+        _duplicate.resize(this->GetNumDimensions());
         return _duplicate;
     }
 

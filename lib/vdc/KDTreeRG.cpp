@@ -14,7 +14,7 @@ KDTreeRG::KDTreeRG(const Grid &xg, const Grid &yg) : _points(xg, yg), _kdtree(2 
 {
     auto tmp = xg.GetDimensions();
     _dims = {tmp[0], tmp[1], tmp[2]};
-    _dims.resize( xg.GetNumDimensions() );
+    _dims.resize(xg.GetNumDimensions());
     _kdtree.buildIndex();
 }
 

@@ -37,7 +37,7 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 
 vector<size_t> UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
 {
-    const Grid* ptr = nullptr;
+    const Grid *ptr = nullptr;
 
     if (dim == 0) {
         ptr = &_xug;
@@ -51,7 +51,7 @@ vector<size_t> UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
 
     auto tmp = ptr->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( ptr->GetNumDimensions() );
+    dims.resize(ptr->GetNumDimensions());
     return dims;
 }
 

@@ -461,7 +461,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
     const auto *grid = _getAGrid(currentTS, VelocityNames[0]);
     const auto *structuredGrid = dynamic_cast<const VAPoR::StructuredGrid *>(grid);
     if (structuredGrid) {
-        auto dims = structuredGrid->GetDimensions();
+        auto   dims = structuredGrid->GetDimensions();
         double numCellsDiagnal = std::sqrt(double(dims[0] * dims[0] + dims[1] * dims[1] + dims[2] * dims[2]));
         desiredNum = 2.0 * numCellsDiagnal;
     }

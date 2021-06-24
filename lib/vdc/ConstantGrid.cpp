@@ -43,7 +43,7 @@ const std::vector<size_t> &ConstantGrid::GetNodeDimensions() const
 {
     auto tmp = GetDimensions();
     _duplicate = {tmp[0], tmp[1], tmp[2]};
-    _duplicate.resize( GetNumDimensions() );
+    _duplicate.resize(GetNumDimensions());
     return _duplicate;
 }
 
@@ -51,7 +51,7 @@ const std::vector<size_t> &ConstantGrid::GetCellDimensions() const
 {
     auto tmp = GetDimensions();
     _duplicate = {tmp[0], tmp[1], tmp[2]};
-    _duplicate.resize( GetNumDimensions() );
+    _duplicate.resize(GetNumDimensions());
     return _duplicate;
 }
 

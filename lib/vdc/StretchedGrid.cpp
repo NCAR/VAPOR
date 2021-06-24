@@ -42,7 +42,7 @@ size_t StretchedGrid::GetGeometryDim() const { return (_zcoords.size() == 0 ? 2 
 
 vector<size_t> StretchedGrid::GetCoordDimensions(size_t dim) const
 {
-    if( dim < 3 ) {
+    if (dim < 3) {
         return (vector<size_t>(1, GetDimensions()[dim]));
     } else {
         return (vector<size_t>(1, 1));
@@ -154,7 +154,7 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const StretchedGrid *sg, bool be
     _sg = sg;
     auto tmp = _sg->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( _sg->GetNumDimensions() );
+    dims.resize(_sg->GetNumDimensions());
 
     _index = vector<size_t>(dims.size(), 0);
     if (!begin) { _index[dims.size() - 1] = dims[dims.size() - 1]; }
@@ -182,7 +182,7 @@ void StretchedGrid::ConstCoordItrSG::next()
 {
     auto tmp = _sg->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( _sg->GetNumDimensions() );
+    dims.resize(_sg->GetNumDimensions());
 
     _index[0]++;
 
@@ -217,7 +217,7 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset)
 {
     auto tmp = _sg->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( _sg->GetNumDimensions() );
+    dims.resize(_sg->GetNumDimensions());
 
     if (!_index.size()) return;
 
@@ -288,7 +288,7 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( GetNumDimensions() );
+    dims.resize(GetNumDimensions());
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
     if (dims.size() > 2) VAssert(k < dims[2]);
@@ -323,7 +323,7 @@ void StretchedGrid::GetUserExtentsHelper(DblArr3 &minext, DblArr3 &maxext) const
 {
     auto tmp = StructuredGrid::GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(StructuredGrid::GetNumDimensions()); 
+    dims.resize(StructuredGrid::GetNumDimensions());
 
     Size_tArr3 min, max;
     for (int i = 0; i < dims.size(); i++) {

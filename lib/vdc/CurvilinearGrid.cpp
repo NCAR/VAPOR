@@ -84,19 +84,19 @@ vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
 {
     if (dim == 0) {
         auto tmp = _xrg.GetDimensions();
-        auto tmp2 = vector<size_t> {tmp[0], tmp[1], tmp[2]};
-        tmp2.resize( _xrg.GetNumDimensions() );
+        auto tmp2 = vector<size_t>{tmp[0], tmp[1], tmp[2]};
+        tmp2.resize(_xrg.GetNumDimensions());
         return tmp2;
     } else if (dim == 1) {
         auto tmp = _yrg.GetDimensions();
-        auto tmp2 = vector<size_t> {tmp[0], tmp[1], tmp[2]};
-        tmp2.resize( _yrg.GetNumDimensions() );
+        auto tmp2 = vector<size_t>{tmp[0], tmp[1], tmp[2]};
+        tmp2.resize(_yrg.GetNumDimensions());
         return tmp2;
     } else if (dim == 2) {
         if (_terrainFollowing) {
             auto tmp = _zrg.GetDimensions();
-            auto tmp2 = vector<size_t> {tmp[0], tmp[1], tmp[2]};
-            tmp2.resize( _zrg.GetNumDimensions() );
+            auto tmp2 = vector<size_t>{tmp[0], tmp[1], tmp[2]};
+            tmp2.resize(_zrg.GetNumDimensions());
             return tmp2;
         } else {
             return (vector<size_t>(1, _zcoords.size()));
@@ -227,7 +227,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     _cg = cg;
     auto tmp = _cg->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( _cg->GetNumDimensions() );
+    dims.resize(_cg->GetNumDimensions());
     _index = vector<size_t>(dims.size(), 0);
     _terrainFollowing = _cg->_terrainFollowing;
     if (begin) {
@@ -322,7 +322,7 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 
     auto tmp = _cg->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( _cg->GetNumDimensions() );
+    dims.resize(_cg->GetNumDimensions());
 
     vector<size_t> maxIndex;
 
@@ -466,7 +466,7 @@ float CurvilinearGrid::GetValueLinear(const DblArr3 &coords) const
     auto dims = GetDimensions();
     VAssert(i < dims[0] - 1);
     VAssert(j < dims[1] - 1);
-    if( GetNumDimensions() > 2 ) VAssert(k < dims[2]);
+    if (GetNumDimensions() > 2) VAssert(k < dims[2]);
 
     float v0s[] = {AccessIJK(i, j, k), AccessIJK(i + 1, j, k), AccessIJK(i + 1, j + 1, k), AccessIJK(i, j + 1, k)};
 

@@ -484,9 +484,9 @@ float VolumeOSPRay::_guessSamplingRateScalar(const Grid *grid) const
 
 OSPVolume VolumeOSPRay::_loadVolumeRegular(const Grid *grid)
 {
-    const auto           dims = grid->GetDimensions();
-    const size_t         nVerts = dims[0] * dims[1] * dims[2];
-    std::vector<double>  dataMinExtD, dataMaxExtD;
+    const auto          dims = grid->GetDimensions();
+    const size_t        nVerts = dims[0] * dims[1] * dims[2];
+    std::vector<double> dataMinExtD, dataMaxExtD;
     grid->GetUserExtents(dataMinExtD, dataMaxExtD);
     vec3  dataMinExt(dataMinExtD[0], dataMinExtD[1], dataMinExtD[2]);
     vec3  dataMaxExt(dataMaxExtD[0], dataMaxExtD[1], dataMaxExtD[2]);
@@ -539,9 +539,9 @@ bool VolumeOSPRay::isQuadCoPlanar(const vec3 &a, const vec3 &b, const vec3 &c, c
 
 OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
 {
-    const auto           dims = grid->GetDimensions();
-    const size_t         nVerts = dims[0] * dims[1] * dims[2];
-    float                missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
+    const auto   dims = grid->GetDimensions();
+    const size_t nVerts = dims[0] * dims[1] * dims[2];
+    float        missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
 
     Progress::Start("Loading Grid", 2, false);
     float *vdata = new float[nVerts];

@@ -175,7 +175,7 @@ void get_var_info(DataMgr *dataMgr, const vector<Grid *> &gs, const vector<strin
         varinfo._name = varNames[i];
         auto tmp = gs[i]->GetDimensions();
         varinfo._dims = {tmp[0], tmp[1], tmp[2]};
-        varinfo._dims.resize( gs[i]->GetNumDimensions() );
+        varinfo._dims.resize(gs[i]->GetNumDimensions());
 
         varinfo._coordNames.clear();
         varinfo._coordAxes.clear();

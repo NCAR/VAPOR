@@ -38,7 +38,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
 
 vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
 {
-    const Grid* ptr = nullptr;
+    const Grid *ptr = nullptr;
 
     if (dim == 0) {
         ptr = &_xug;
@@ -55,14 +55,11 @@ vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
 
     auto tmp = ptr->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( ptr->GetNumDimensions() );
+    dims.resize(ptr->GetNumDimensions());
     return dims;
 }
 
-size_t UnstructuredGrid2D::GetGeometryDim() const
-{
-    return (_zug.GetNumDimensions() == 0 ? 2 : 3);
-}
+size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetNumDimensions() == 0 ? 2 : 3); }
 
 void UnstructuredGrid2D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
 {
@@ -97,7 +94,7 @@ void UnstructuredGrid2D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( GetNumDimensions() );
+    dims.resize(GetNumDimensions());
 
     size_t start = Wasp::LinearizeCoords(cMin.data(), dims.data(), dims.size());
     size_t stop = Wasp::LinearizeCoords(cMax.data(), dims.data(), dims.size());

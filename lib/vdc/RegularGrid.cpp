@@ -30,7 +30,7 @@ void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( GetNumDimensions() );
+    dims.resize(GetNumDimensions());
     for (int i = 0; i < dims.size(); i++) {
         if (dims[i] > 1) {
             _delta.push_back((_maxu[i] - _minu[i]) / (double)(dims[i] - 1));
@@ -43,7 +43,7 @@ void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &
 RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const vector<double> &minu, const vector<double> &maxu) : StructuredGrid(dims, bs, blks)
 {
     VAssert(minu.size() == maxu.size());
-    VAssert(minu.size() >= GetNumDimensions() );
+    VAssert(minu.size() >= GetNumDimensions());
 
     _SetExtents(minu, maxu);
 }
@@ -222,7 +222,7 @@ void RegularGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords)
 
     auto tmp = GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( GetNumDimensions() );
+    dims.resize(GetNumDimensions());
 
     for (int i = 0; i < dims.size(); i++) {
         size_t index = cIndices[i];
@@ -279,7 +279,7 @@ RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const RegularGrid *rg, bool begin)
 {
     auto tmp = rg->GetDimensions();
     _dims = {tmp[0], tmp[1], tmp[2]};
-    _dims.resize( rg->GetNumDimensions() );
+    _dims.resize(rg->GetNumDimensions());
     _delta = rg->_delta;
 
     Grid::CopyFromArr3(rg->_minu, _minu);

@@ -3,8 +3,8 @@
 
 #include <ostream>
 #include <vector>
-#include <numeric> // std::accumulate
-#include <functional> // std::multiplies<>
+#include <numeric>       // std::accumulate
+#include <functional>    // std::multiplies<>
 #include <vapor/Grid.h>
 
 #include "nanoflann.hpp"
@@ -104,7 +104,7 @@ private:
 
             // number of elements
             auto   dims = xg.GetDimensions();
-            size_t nelem = std::accumulate( dims.begin(), dims.end(), 1ul, std::multiplies<size_t>());
+            size_t nelem = std::accumulate(dims.begin(), dims.end(), 1ul, std::multiplies<size_t>());
             this->X.resize(nelem);
             this->Y.resize(nelem);
 

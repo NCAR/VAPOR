@@ -126,8 +126,8 @@ int ParticleRenderer::_paintGL(bool)
         }
     }
 
-    auto           dims = grid->GetDimensions();
-    size_t         nCoords = 1;
+    auto   dims = grid->GetDimensions();
+    size_t nCoords = 1;
     for (const auto d : dims) nCoords *= d;
 
     auto *lgl = _glManager->legacy;

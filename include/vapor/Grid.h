@@ -90,7 +90,7 @@ public:
     //!
     std::array<size_t, 3> GetDimensions() const
     {
-        auto tmp = std::array<size_t, 3> {1, 1, 1};
+        auto tmp = std::array<size_t, 3>{1, 1, 1};
         std::copy(_dims.begin(), _dims.end(), tmp.begin());
         return tmp;
     }
@@ -100,10 +100,7 @@ public:
     //! \param[out] dims The number of values of \p dims parameter provided to
     //! the constructor.
     //!
-    size_t GetNumDimensions() const
-    {
-        return _dims.size();
-    }
+    size_t GetNumDimensions() const { return _dims.size(); }
 
     //! Return the dimensions of the specified coordinate variable
     //!

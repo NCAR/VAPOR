@@ -69,10 +69,10 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal)
 {
     auto tmp = grid->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( grid->GetNumDimensions() );
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     float value = minVal;
     for (size_t k = 0; k < z; k++) {
@@ -89,10 +89,10 @@ void MakeConstantField(Grid *grid, float value)
 {
     auto tmp = grid->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( grid->GetNumDimensions() );
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
@@ -105,10 +105,10 @@ void MakeRamp(Grid *grid, float minVal, float maxVal)
 {
     auto tmp = grid->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( grid->GetNumDimensions() );
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     float increment = (maxVal - minVal) / ((x * y * z - 1) == 0 ? 1 : (x * y * z - 1));
 
@@ -127,10 +127,10 @@ void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X)
 {
     auto tmp = grid->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( grid->GetNumDimensions() );
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     float xIncrement = axis == X ? (maxVal - minVal) / (dims[X] - 1) : 0;
     float yIncrement = axis == Y ? (maxVal - minVal) / (dims[Y] - 1) : 0;
@@ -167,10 +167,10 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
 
     auto tmp = grid->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( grid->GetNumDimensions() );
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     double peak = 0.f;
     double sum = 0;
@@ -220,7 +220,7 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
 
     auto tmp = g->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( g->GetNumDimensions() );
+    dims.resize(g->GetNumDimensions());
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
@@ -260,7 +260,7 @@ bool TestIterator(Grid *g, size_t &count, size_t &expectedCount, size_t &disagre
 
     auto tmp = g->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( g->GetNumDimensions() );
+    dims.resize(g->GetNumDimensions());
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
@@ -292,7 +292,7 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
 
     auto tmp = g->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( g->GetNumDimensions() );
+    dims.resize(g->GetNumDimensions());
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
@@ -358,10 +358,10 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
 {
     auto tmp = grid->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize( grid->GetNumDimensions() );
-    size_t              x = dims[X];
-    size_t              y = dims.size() > 1 ? dims[Y] : 1;
-    size_t              z = dims.size() > 2 ? dims[Z] : 1;
+    dims.resize(grid->GetNumDimensions());
+    size_t x = dims[X];
+    size_t y = dims.size() > 1 ? dims[Y] : 1;
+    size_t z = dims.size() > 2 ? dims[Z] : 1;
 
     bool        rc = true;
     std::string type = grid->GetType();

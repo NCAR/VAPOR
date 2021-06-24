@@ -53,9 +53,9 @@ void VolumeRegular::DeleteSecondaryData()
 
 int VolumeRegular::_loadDataDirect(const Grid *grid, Texture3D *dataTexture, Texture3D *missingTexture, bool *hasMissingData)
 {
-    auto                 dims = grid->GetDimensions();
-    const size_t         nVerts = dims[0] * dims[1] * dims[2];
-    float *              data = new float[nVerts];
+    auto         dims = grid->GetDimensions();
+    const size_t nVerts = dims[0] * dims[1] * dims[2];
+    float *      data = new float[nVerts];
     if (!data) {
         Wasp::MyBase::SetErrMsg("Could not allocate enough RAM to load data");
         return -1;
