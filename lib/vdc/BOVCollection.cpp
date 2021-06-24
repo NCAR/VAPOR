@@ -305,10 +305,10 @@ std::string BOVCollection::GetDataEndian() const { return _dataEndian; }
 template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
 {
     // Skip comments
-    for(size_t i=0; i<line.length(); i++) {
+    for (size_t i = 0; i < line.length(); i++) {
         if (line[i] == '#') {
-            line.erase(line.begin()+i, line.end());
-            if (line[line.length()-1] == ' ')  // If last char is a space, pop it
+            line.erase(line.begin() + i, line.end());
+            if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
                 line.pop_back();
             break;
         }
@@ -337,10 +337,10 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
 template<typename T> int BOVCollection::_findToken(const std::string &token, std::string &line, T &value, bool verbose)
 {
     // Skip comments
-    for(size_t i=0; i<line.length(); i++) {
+    for (size_t i = 0; i < line.length(); i++) {
         if (line[i] == '#') {
-            line.erase(line.begin()+i, line.end());
-            if (line[line.length()-1] == ' ')  // If last char is a space, pop it
+            line.erase(line.begin() + i, line.end());
+            if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
                 line.pop_back();
             break;
         }
@@ -379,10 +379,10 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 template<typename T> int BOVCollection::_findToken(const std::string &token, std::string &line, std::array<T, 3> &value, bool verbose)
 {
     // Skip comments
-    for(size_t i=0; i<line.length(); i++) {
+    for (size_t i = 0; i < line.length(); i++) {
         if (line[i] == '#') {
-            line.erase(line.begin()+i, line.end());
-            if (line[line.length()-1] == ' ')  // If last char is a space, pop it
+            line.erase(line.begin() + i, line.end());
+            if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
                 line.pop_back();
             break;
         }
