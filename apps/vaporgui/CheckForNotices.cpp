@@ -25,7 +25,6 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
     static std::function<void(const std::vector<Notice> &)> _callback;
     static std::vector<Notice>                              _notices;
     static std::stack<Notice>                               _noticesToGet;
-    static bool                                             gettingList = true;
     _callback = callback;
 
 
@@ -86,7 +85,6 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
         });
     }
 
-    gettingList = true;
     QNetworkRequest req;
 #ifdef TESTING_API
     req.setUrl(QUrl("http://localhost:8000/list.json"));
