@@ -149,7 +149,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     _useHighPrecisionTriangleRoutine = _needsHighPrecisionTriangleRoutine(grid);
     _gridHasInvertedCoordinateSystemHandiness = !grid->HasInvertedCoordinateSystemHandiness();
 
-    auto       dims = grid->GetDimensions();
+    const auto dims = grid->GetDimensions();
     const auto w = dims[0], h = dims[1], d = dims[2];
     const auto nCoords = w * h * d;
     _coordDims[0] = w;
