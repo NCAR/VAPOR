@@ -99,6 +99,7 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
 
         new PSection("Vapor's Startup Settings",
                      {
+                         new PCheckboxHLI<SettingsParams>("Check for and show notices on startup", &SettingsParams::GetAutoCheckForNotices, &SettingsParams::SetAutoCheckForNotices),
                          new PCheckboxHLI<SettingsParams>("Automatically stretch domain", &SettingsParams::GetAutoStretchEnabled, &SettingsParams::SetAutoStretchEnabled),
                          new PCheckbox(SettingsParams::UseAllCoresTag, "Use all available cores for multithreaded tasks"),
                          new PSubGroup({(new PIntegerInputHLI<SettingsParams>("Limit threads to", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads))

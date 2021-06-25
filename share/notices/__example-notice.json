@@ -1,0 +1,15 @@
+{
+    "_comment-1": "This is an example notice. It will be ingored by Vapor",
+
+    "_comment-2": "This is the date at which the notice will be displayed to users",
+    "_comment-3": "The time format is yyyy-MM-dd by Qt's specification",
+	"date": "2021-06-01",
+
+    "_comment-4": "This is the date at which the notice will no longer be displayed to users",
+	"until": "2021-09-27",
+
+
+    "_comment-5": "This is the content of the notice. It uses a subset of HTML that is supported by QTextBrowser",
+
+	"content": "<br> <center><h1>Notice</h1></center> <hr> <br> <h2>Vapor's homepage: <a href='http://www.vapor.ucar.edu'>Link</a></h2>"
+}
