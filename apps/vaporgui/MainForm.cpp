@@ -609,15 +609,13 @@ void MainForm::CheckForNotices()
 #ifndef NDEBUG
     return;    // Don't check for notices in debug builds
 #endif
-    
-    CheckForGHNotices([this](const std::vector<Notice> &notices)
-    {
-        if (notices.empty())
-            return;
-        
+
+    CheckForGHNotices([this](const std::vector<Notice> &notices) {
+        if (notices.empty()) return;
+
         NoticeBoard board(notices);
         board.exec();
-        
+
         if (board.WasDisableCheckingRequested()) {
             GetSettingsParams()->SetAutoCheckForNotices(false);
             GetSettingsParams()->SaveSettings();

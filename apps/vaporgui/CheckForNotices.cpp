@@ -21,13 +21,13 @@ using Wasp::Version;
 
 void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback)
 {
-    static QNetworkAccessManager *                               manager = nullptr;
+    static QNetworkAccessManager *                          manager = nullptr;
     static std::function<void(const std::vector<Notice> &)> _callback;
-    static std::vector<Notice> _notices;
-    static std::stack<Notice> _noticesToGet;
-    static bool gettingList = true;
+    static std::vector<Notice>                              _notices;
+    static std::stack<Notice>                               _noticesToGet;
+    static bool                                             gettingList = true;
     _callback = callback;
-    
+
 
     if (!manager) {
         manager = new QNetworkAccessManager;
@@ -39,7 +39,7 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
 #endif
                 return;
             }
-            
+
 #ifdef TESTING_API
             if (STLUtils::Contains(reply->url().toString().toStdString(), "list.json")) {
 #else
@@ -52,32 +52,30 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
                 QJsonArray    array = json.array();
                 for (const QJsonValue value : array) {
                     QJsonObject file = value.toObject();
-                    Notice notice;
+                    Notice      notice;
                     notice.url = file["download_url"].toString().toStdString();
-                    
-                    if (!STLUtils::Contains(notice.url, "__example-notice"))
-                        _noticesToGet.push(notice);
+
+                    if (!STLUtils::Contains(notice.url, "__example-notice")) _noticesToGet.push(notice);
                 }
             } else {
-                QString content = reply->readAll();
+                QString       content = reply->readAll();
                 QJsonDocument json = QJsonDocument::fromJson(content.toUtf8());
-                
+
 #define TIME_FORMAT "yyyy-MM-dd"
-                
+
                 Notice notice;
                 notice.url = reply->url().toString().toStdString();
                 notice.content = json["content"].toString().toStdString();
                 notice.date = QDate::fromString(json["date"].toString(), TIME_FORMAT);
                 notice.until = QDate::fromString(json["until"].toString(), TIME_FORMAT);
-                
+
                 auto now = QDate::currentDate();
-                
-                if (notice.date <= now && notice.until >= now)
-                    _notices.push_back(notice);
+
+                if (notice.date <= now && notice.until >= now) _notices.push_back(notice);
             }
-            
+
             if (_noticesToGet.empty()) {
-                sort(_notices.begin(), _notices.end(), [](const Notice &a, const Notice &b){ return a.date > b.date; });
+                sort(_notices.begin(), _notices.end(), [](const Notice &a, const Notice &b) { return a.date > b.date; });
                 _callback(_notices);
             } else {
                 QNetworkRequest req;

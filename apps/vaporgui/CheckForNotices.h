@@ -8,7 +8,7 @@
 struct Notice {
     std::string url;
     std::string content;
-    
+
     QDate date;
     QDate until;
 };
