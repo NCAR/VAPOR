@@ -4,7 +4,7 @@
 #include <QTextBrowser>
 #include <QDialogButtonBox>
 #include <QLabel>
-#include <QCheckbox>
+#include <QCheckBox>
 #include <cassert>
 #include "VPushButton.h"
 #include "VGroup.h"
