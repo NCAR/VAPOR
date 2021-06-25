@@ -3,8 +3,6 @@
 
 #include <ostream>
 #include <vector>
-#include <numeric>       // std::accumulate
-#include <functional>    // std::multiplies<>
 #include <vapor/Grid.h>
 
 #include "nanoflann.hpp"
@@ -103,8 +101,9 @@ private:
             VAssert(xg.GetNumDimensions() <= 2);
 
             // number of elements
-            auto   dims = xg.GetDimensions();
-            size_t nelem = std::accumulate(dims.begin(), dims.end(), 1ul, std::multiplies<size_t>());
+            auto   dims  = xg.GetDimensions();
+            size_t nelem = 1;
+            for (int i = 0; i < dims.size(); i++) nelem *= dims[i];
             this->X.resize(nelem);
             this->Y.resize(nelem);
 
