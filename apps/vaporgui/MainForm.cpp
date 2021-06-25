@@ -1149,7 +1149,7 @@ void MainForm::createBookmark()
 	Base16StringStream ss;
     XmlNode::streamOut(ss, *_paramsMgr->GetXMLRoot());
 
-	for (auto& b : bookmarks) p->AddBookmark(&b);
+    for (auto& b : bookmarks) p->AddBookmark(&b);
 
 	string           activeVizWin = p->GetActiveVizName();
 	ViewpointParams* vpp = _paramsMgr->GetViewpointParams(activeVizWin);
