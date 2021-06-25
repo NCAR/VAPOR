@@ -82,28 +82,25 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
 
 vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
 {
+    Grid* ptr = nullptr;
     if (dim == 0) {
-        auto tmp = _xrg.GetDimensions();
-        auto tmp2 = vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        tmp2.resize(_xrg.GetNumDimensions());
-        return tmp2;
+        ptr = &_xrg;
     } else if (dim == 1) {
-        auto tmp = _yrg.GetDimensions();
-        auto tmp2 = vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        tmp2.resize(_yrg.GetNumDimensions());
-        return tmp2;
+        ptr = &_yrg;
     } else if (dim == 2) {
         if (_terrainFollowing) {
-            auto tmp = _zrg.GetDimensions();
-            auto tmp2 = vector<size_t>{tmp[0], tmp[1], tmp[2]};
-            tmp2.resize(_zrg.GetNumDimensions());
-            return tmp2;
+            ptr = &_zrg;
         } else {
             return (vector<size_t>(1, _zcoords.size()));
         }
     } else {
         return (vector<size_t>(1, 1));
     }
+
+    auto tmp  = ptr->GetDimensions();
+    auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    tmp2.resize( ptr->GetNumDimensions() );
+    return tmp2;
 }
 
 void CurvilinearGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const
