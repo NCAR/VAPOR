@@ -1147,7 +1147,7 @@ void MainForm::createBookmark()
 	p->ClearBookmarks();
 
 	Base16StringStream ss;
-	ss << *_paramsMgr->GetXMLRoot();
+    XmlNode::streamOut(ss, *_paramsMgr->GetXMLRoot());
 
 	for (auto& b : bookmarks) p->AddBookmark(&b);
 
