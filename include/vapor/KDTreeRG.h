@@ -101,7 +101,7 @@ private:
             VAssert(xg.GetNumDimensions() <= 2);
 
             // number of elements
-            auto   dims  = xg.GetDimensions();
+            auto   dims = xg.GetDimensions();
             size_t nelem = 1;
             for (int i = 0; i < dims.size(); i++) nelem *= dims[i];
             this->X.resize(nelem);

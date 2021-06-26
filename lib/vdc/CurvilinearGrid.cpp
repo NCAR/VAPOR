@@ -82,7 +82,7 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
 
 vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
 {
-    const Grid* ptr = nullptr;
+    const Grid *ptr = nullptr;
     if (dim == 0) {
         ptr = &_xrg;
     } else if (dim == 1) {
@@ -97,9 +97,9 @@ vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
         return (vector<size_t>(1, 1));
     }
 
-    auto tmp  = ptr->GetDimensions();
+    auto tmp = ptr->GetDimensions();
     auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    tmp2.resize( ptr->GetNumDimensions() );
+    tmp2.resize(ptr->GetNumDimensions());
     return tmp2;
 }
 
