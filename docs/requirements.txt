@@ -1,3 +1,3 @@
-jupyter_sphinx=0.8.6
-xarray=0.18.2
-numpy=1.19.2
+jupyter_sphinx==0.8.6
+xarray==0.18.2
+numpy==1.19.2
