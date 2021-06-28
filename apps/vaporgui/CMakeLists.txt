@@ -143,6 +143,8 @@ set (SRCS
     VFileSelector.h
 	V3DInput.cpp
 	V3DInput.h
+	V3DIntInput.cpp
+	V3DIntInput.h
 	VGroup.cpp
 	VGroup.h
 	Updateable.cpp
@@ -196,6 +198,8 @@ set (SRCS
 	PTFEditor.h
     PFidelitySection.cpp
     PFidelitySection.h
+    PAxisAnnotationWidget.cpp
+    PAxisAnnotationWidget.h
     PTMSLODInput.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
