@@ -1,7 +1,7 @@
 .. _gettingDataIntoVapor:
 
-Getting Data into Vapor3
-------------------------
+Getting Data into Vapor
+-----------------------
 
 Vapor can directly import the datasets listed below.  Some of them can be converted into the :ref:`VDC <vdc>` format if you are experiencing a performance bottleneck.  We strongly recommend that users start by importing their data and only convert VDC if necessary.
 
@@ -111,6 +111,13 @@ Once we have a .vdc file, the metadata has been recorded and we can transform th
 
 NetCDF and the CF Conventions
 `````````````````````````````
+
+.. include:: data/cfConventions.rst
+
+.. jupyter-execute::
+
+  name = 'world'
+  print('hello ' + name + '!')
 
 If your NetCDF data follows the CF conventions, then the process of converting it to VDC is nearly identical to the WRF conversion process.  The commands that will be used are named *cfvdccreate* for .vdc metadata creation, and *cf2vdc* for applying the transform.
 

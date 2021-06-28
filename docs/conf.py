@@ -20,7 +20,7 @@ print(sys.executable)
 print("Python " + sys.version)
 sys.path.append( "/usr/local/lib/python3.7/site-packages/" )
 import sphinx_rtd_theme
-print sphinx_rtd_theme.__file__
+print (sphinx_rtd_theme.__file__)
 # sys.path.insert(0, os.path.abspath('.'))
 #sys.path.append( "/usr/local/lib/python3.7/site-packages/breathe/" )
 #import glob
@@ -53,7 +53,8 @@ release = '3.4.0.preRelease'
 extensions = [
     'sphinx.ext.imgmath', 
     'sphinx.ext.todo', 
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'jupyter_sphinx'
     #'breathe'
     #'wheel'
 ]
