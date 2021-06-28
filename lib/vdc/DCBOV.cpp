@@ -81,7 +81,7 @@ void DCBOV::_InitDimensions()
 void DCBOV::_InitCoordinates()
 {
     bool                       uniformHint = true;
-    vector<bool>               periodic(false, 4);
+    vector<bool>               periodic(false);
     std::string                units = "m";
     std::array<std::string, 3> dims = _bovCollection->GetSpatialDimensions();
 

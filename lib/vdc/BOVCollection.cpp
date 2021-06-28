@@ -82,7 +82,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
     int           rc;
     std::ifstream header;
     for (int i = 0; i < paths.size(); i++) {
-        std::cout << paths[i] << std::endl;
+        _dataFile = _defaultFile;
         header.open(paths[i]);
         if (header.is_open()) {
             rc = _parseHeader(header);
