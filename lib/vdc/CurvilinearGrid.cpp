@@ -222,10 +222,9 @@ bool CurvilinearGrid::InsideGrid(const DblArr3 &coords) const
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, bool begin) : ConstCoordItrAbstract()
 {
     _cg = cg;
-    auto tmp = _cg->GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(_cg->GetNumDimensions());
-    _index = vector<size_t>(dims.size(), 0);
+    auto dims = _cg->GetDimensions();
+    auto ndims = _cg->GetNumDimensions();
+    _index = vector<size_t>(ndims, 0);
     _terrainFollowing = _cg->_terrainFollowing;
     if (begin) {
         _xCoordItr = _cg->_xrg.cbegin();
@@ -235,13 +234,13 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
         _xCoordItr = _cg->_xrg.cend();
         _yCoordItr = _cg->_yrg.cend();
         if (_terrainFollowing) { _zCoordItr = _cg->_zrg.cend(); }
-        _index[dims.size() - 1] = dims[dims.size() - 1];
+        _index[ndims - 1] = dims[ndims - 1];
         return;
     }
     _coords.push_back(*_xCoordItr);
     _coords.push_back(*_yCoordItr);
 
-    if (dims.size() == 3) {
+    if (ndims == 3) {
         if (_terrainFollowing) {
             _coords.push_back(*_zCoordItr);
         } else {
