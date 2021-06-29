@@ -85,6 +85,8 @@
 #include "ParamsWidgetDemo.h"
 #include "AppSettingsMenu.h"
 #include "CheckForUpdate.h"
+#include "NoticeBoard.h"
+#include "CheckForNotices.h"
 
 #include <QProgressDialog>
 #include <QProgressBar>
@@ -479,8 +481,10 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
     _controlExec->SetSaveStateEnabled(true);
     _controlExec->RebaseStateSave();
 
-    if (interactive && GetSettingsParams()->GetValueLong(SettingsParams::AutoCheckForUpdatesTag, true)) CheckForUpdates();
+    if (interactive && GetSettingsParams()->GetAutoCheckForUpdates()) CheckForUpdates();
+    if (interactive && GetSettingsParams()->GetAutoCheckForNotices()) CheckForNotices();
 }
+
 
 int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int width, int height)
 {
@@ -594,6 +598,26 @@ void MainForm::CheckForUpdates()
 
         if (!cb->isChecked()) {
             GetSettingsParams()->SetValueLong(SettingsParams::AutoCheckForUpdatesTag, "", false);
+            GetSettingsParams()->SaveSettings();
+        }
+    });
+}
+
+
+void MainForm::CheckForNotices()
+{
+#ifndef NDEBUG
+    return;    // Don't check for notices in debug builds
+#endif
+
+    CheckForGHNotices([this](const std::vector<Notice> &notices) {
+        if (notices.empty()) return;
+
+        NoticeBoard board(notices);
+        board.exec();
+
+        if (board.WasDisableCheckingRequested()) {
+            GetSettingsParams()->SetAutoCheckForNotices(false);
             GetSettingsParams()->SaveSettings();
         }
     });

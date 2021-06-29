@@ -27,7 +27,9 @@ void CheckForUpdate(function<void(bool updateAvailable, UpdateInfo info)> callba
 
         QObject::connect(manager, &QNetworkAccessManager::finished, manager, [&](QNetworkReply *reply) {
             if (reply->error()) {
+#ifndef NDEBUG
                 cout << reply->errorString().toStdString() << endl;
+#endif
                 UpdateInfo info;
                 info.error = true;
                 _callback(false, info);

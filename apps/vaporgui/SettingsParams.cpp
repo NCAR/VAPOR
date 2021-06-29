@@ -69,6 +69,7 @@ const string SettingsParams::_settingsNeedsWriteTag = "SettingsNeedsWrite";
 
 const string SettingsParams::UseAllCoresTag = "UseAllCoresTag";
 const string SettingsParams::AutoCheckForUpdatesTag = "AutoCheckForUpdatesTag";
+const string SettingsParams::AutoCheckForNoticesTag = "AutoCheckForNoticesTag";
 
 //
 // Register class with object factory!!!
@@ -404,8 +405,9 @@ void SettingsParams::SetFidelityDefault2D(long lodDef, long refDef)
 }
 
 void SettingsParams::SetAutoCheckForUpdates(bool b) { SetValueLong(AutoCheckForUpdatesTag, "", b); }
-
 bool SettingsParams::GetAutoCheckForUpdates() const { return GetValueLong(AutoCheckForUpdatesTag, true); }
+void SettingsParams::SetAutoCheckForNotices(bool b) { SetValueLong(AutoCheckForNoticesTag, "", b); }
+bool SettingsParams::GetAutoCheckForNotices() const { return GetValueLong(AutoCheckForNoticesTag, true); }
 
 bool SettingsParams::LoadFromSettingsFile()
 {
@@ -457,6 +459,7 @@ void SettingsParams::Init()
     SetAutoStretchEnabled(true);
     SetValueLong(UseAllCoresTag, "", true);
     SetValueLong(AutoCheckForUpdatesTag, "", true);
+    SetValueLong(AutoCheckForNoticesTag, "", true);
     SetNumThreads(4);
     SetCacheMB(defaultCacheSize);
 

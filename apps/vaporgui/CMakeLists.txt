@@ -275,6 +275,10 @@ set (SRCS
     AnimationController.h
     AnimationTab.cpp
     AnimationTab.h
+    CheckForNotices.cpp
+    CheckForNotices.h
+    NoticeBoard.cpp
+    NoticeBoard.h
     ParticleEventRouter.cpp
     ParticleEventRouter.h
 
