@@ -22,9 +22,6 @@ Open our dataset with xarray.  Download `simple.nc <https://drive.google.com/fil
 
 .. jupyter-execute::
 
-  from pathlib import Path
-  from google_drive_downloader import GoogleDriveDownloader ad gdd
-
   # These are to download the sample data
   from pathlib import Path
   from google_drive_downloader import GoogleDriveDownloader as gdd
