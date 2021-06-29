@@ -226,7 +226,6 @@ void StructuredGrid::ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const
     }
 
     auto dims = GetDimensions();
-    auto ndims = GetNumDimensions();
 
     DblArr3 minu, maxu;
     GetUserExtents(minu, maxu);
@@ -253,7 +252,6 @@ void StructuredGrid::ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const
 
 bool StructuredGrid::HasInvertedCoordinateSystemHandiness() const
 {
-    auto dims = GetDimensions();
     auto ndims = GetNumDimensions();
 
     if (ndims < 2) return (true);    // Arbitrary

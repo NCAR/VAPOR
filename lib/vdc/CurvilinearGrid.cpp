@@ -337,7 +337,7 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
     size_t index2DL = _index[1] * dims[0] + _index[0];
 
     _index.assign(ndims, 0);
-    VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
+    Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
 
     VAssert(_index[1] * dims[0] + _index[0] >= index2DL);
     size_t offset2D = (_index[1] * dims[0] + _index[0]) - index2DL;
