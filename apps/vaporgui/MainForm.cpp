@@ -1131,37 +1131,37 @@ void MainForm::_createDeveloperMenu()
 
 void MainForm::createBookmark()
 {
-	bool    ok;
-	QString input = QInputDialog::getText(this, "New Bookmark", "Bookmark Name:", QLineEdit::Normal, "", &ok);
-	if (!ok) return;
+    bool    ok;
+    QString input = QInputDialog::getText(this, "New Bookmark", "Bookmark Name:", QLineEdit::Normal, "", &ok);
+    if (!ok) return;
 
-	string title = input.toStdString();
-	if (title.empty()) title = "Unnamed Bookmark";
+    string title = input.toStdString();
+    if (title.empty()) title = "Unnamed Bookmark";
 
-	auto p = GetStateParams();
+    auto p = GetStateParams();
 
-	p->BeginGroup("Create Bookmark");
+    p->BeginGroup("Create Bookmark");
 
-	vector<BookmarkParams> bookmarks;
-	for (auto* b : p->GetBookmarks()) bookmarks.push_back(BookmarkParams(*b));
-	p->ClearBookmarks();
+    vector<BookmarkParams> bookmarks;
+    for (auto* b : p->GetBookmarks()) bookmarks.push_back(BookmarkParams(*b));
+    p->ClearBookmarks();
 
-	Base16StringStream ss;
-	ss << *_paramsMgr->GetXMLRoot();
+    Base16StringStream ss;
+    ss << *_paramsMgr->GetXMLRoot();
 
-	for (auto& b : bookmarks) p->AddBookmark(&b);
+    for (auto& b : bookmarks) p->AddBookmark(&b);
 
-	string           activeVizWin = p->GetActiveVizName();
-	ViewpointParams* vpp = _paramsMgr->GetViewpointParams(activeVizWin);
+    string           activeVizWin = p->GetActiveVizName();
+    ViewpointParams* vpp = _paramsMgr->GetViewpointParams(activeVizWin);
 
-	bool useCustomViewport = vpp->GetValueLong(vpp->UseCustomFramebufferTag, 0);
-	int  customViewportWidth = vpp->GetValueLong(vpp->CustomFramebufferWidthTag, 0);
-	int  customViewportHeight = vpp->GetValueLong(vpp->CustomFramebufferHeightTag, 0);
+    bool useCustomViewport = vpp->GetValueLong(vpp->UseCustomFramebufferTag, 0);
+    int  customViewportWidth = vpp->GetValueLong(vpp->CustomFramebufferWidthTag, 0);
+    int  customViewportHeight = vpp->GetValueLong(vpp->CustomFramebufferHeightTag, 0);
 
-	const int     iconSize = BookmarkParams::DefaultIconSize();
-	const int     iconDataSize = iconSize * iconSize * 3;
-	char* iconData = new char[iconDataSize];
-	char  iconDataString[64];
+    const int     iconSize = BookmarkParams::DefaultIconSize();
+    const int     iconDataSize = iconSize * iconSize * 3;
+    char* iconData = new char[iconDataSize];
+    char  iconDataString[64];
     sprintf(iconDataString, ":RAM:%p", iconData);
     // The above string is a "file path" that points to an address in memory
     // which tells the visualizer to save the resulting image to ram rather than
