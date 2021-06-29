@@ -322,7 +322,7 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
     dims.resize(_cg->GetNumDimensions());
 
     vector<size_t> maxIndex;
-    maxIndex.reserve( 3 );
+    maxIndex.reserve(3);
 
     for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
 

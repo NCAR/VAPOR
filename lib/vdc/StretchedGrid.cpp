@@ -220,7 +220,7 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset)
     if (!_index.size()) return;
 
     vector<size_t> maxIndex;
-    maxIndex.reserve( 3 );
+    maxIndex.reserve(3);
     ;
     for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
 
