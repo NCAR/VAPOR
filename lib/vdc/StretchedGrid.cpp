@@ -213,32 +213,32 @@ void StretchedGrid::ConstCoordItrSG::next()
 
 void StretchedGrid::ConstCoordItrSG::next(const long &offset)
 {
-    auto tmp = _sg->GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(_sg->GetNumDimensions());
+    auto dims = _sg->GetDimensions();
+    auto ndims = _sg->GetNumDimensions();
 
     if (!_index.size()) return;
 
     vector<size_t> maxIndex;
     maxIndex.reserve(3);
     ;
-    for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
+    for (int i = 0; i < ndims; i++) maxIndex.push_back(dims[i] - 1);
 
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
-    long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex.data(), dims.data(), ndims);
+    long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = vector<size_t>(dims.size(), 0);
-        _index[dims.size() - 1] = dims[dims.size() - 1];
+        _index = vector<size_t>(ndims, 0);
+        _index[ndims - 1] = dims[ndims - 1];
         return;
     }
 
-    _index = Wasp::VectorizeCoords(newIndexL, dims);
+    _index.assign(ndims, 0);
+    Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
 
     _coords[0] = _sg->_xcoords[_index[0]];
     _coords[1] = _sg->_ycoords[_index[1]];
 
-    if (dims.size() == 2) return;
+    if (ndims == 2) return;
 
     _coords[2] = _sg->_zcoords[_index[2]];
 }
