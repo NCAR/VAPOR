@@ -44,7 +44,7 @@ class BOVCollection;
 //!
 //! Scientific notation is supported for floating point values like BRICK_ORIGIN and BRICK_SIZE.
 //! Scientific notation is not supported for integer values like DATA_SIZE.
-//! Wild card characters are not currently supported in the DATA_FILE token.  
+//! Wild card characters are not currently supported in the DATA_FILE token.
 //! Each .bov file can only refer to a single data file.
 //!
 //! \author Scott Pearse
@@ -188,9 +188,9 @@ private:
 
     void _InitVars();
 
-    int _isCoordinateVariable( std::string variable ) const;
+    int _isCoordinateVariable(std::string variable) const;
 
-    template<class T> void _generateCoordinates( int dim, const vector<size_t> &min, const vector<size_t> &max, T *region) const;
+    template<class T> void _generateCoordinates(int dim, const vector<size_t> &min, const vector<size_t> &max, T *region) const;
 
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 };

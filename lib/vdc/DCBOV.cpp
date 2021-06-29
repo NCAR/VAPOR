@@ -267,22 +267,23 @@ int DCBOV::closeVariable(int fd)
     return 0;
 }
 
-int DCBOV::_isCoordinateVariable( std::string varname ) const {
-    int dim = -1;
+int DCBOV::_isCoordinateVariable(std::string varname) const
+{
+    int                        dim = -1;
     std::array<std::string, 3> spatialDims = _bovCollection->GetSpatialDimensions();
 
     for (int i = 0; i < spatialDims.size(); i++) {
-        if (varname == spatialDims[i]) 
-            dim=i;
+        if (varname == spatialDims[i]) dim = i;
     }
 
     return dim;
 }
 
-template<class T> void DCBOV::_generateCoordinates( int dim, const vector<size_t> &min, const vector<size_t> &max, T *region ) const {
-    std::array<size_t, 3>      dataSize = _bovCollection->GetDataSize();
-    std::array<double, 3>      origin = _bovCollection->GetBrickOrigin();
-    std::array<double, 3>      brickSize = _bovCollection->GetBrickSize();
+template<class T> void DCBOV::_generateCoordinates(int dim, const vector<size_t> &min, const vector<size_t> &max, T *region) const
+{
+    std::array<size_t, 3> dataSize = _bovCollection->GetDataSize();
+    std::array<double, 3> origin = _bovCollection->GetBrickOrigin();
+    std::array<double, 3> brickSize = _bovCollection->GetBrickSize();
 
     double increment = brickSize[dim] / (dataSize[dim] - 1);
     double start = origin[dim] + min[0] * increment;
@@ -301,13 +302,13 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
 
     std::string varname = w->GetVarname();
 
-    int dim = _isCoordinateVariable( varname );
-    if ( dim >= 0 ) {
-        _generateCoordinates( dim, min, max, region );
+    int dim = _isCoordinateVariable(varname);
+    if (dim >= 0) {
+        _generateCoordinates(dim, min, max, region);
         return 0;
     }
 
-    size_t      ts = w->GetTS();
+    size_t ts = w->GetTS();
 
     /*std::array<std::string, 3> spatialDims = _bovCollection->GetSpatialDimensions();
     std::array<size_t, 3>      dataSize = _bovCollection->GetDataSize();
