@@ -310,21 +310,6 @@ template<class T> int DCBOV::_readRegionTemplate(int fd, const vector<size_t> &m
 
     size_t ts = w->GetTS();
 
-    /*std::array<std::string, 3> spatialDims = _bovCollection->GetSpatialDimensions();
-    std::array<size_t, 3>      dataSize = _bovCollection->GetDataSize();
-    std::array<double, 3>      origin = _bovCollection->GetBrickOrigin();
-    std::array<double, 3>      brickSize = _bovCollection->GetBrickSize();
-
-    // Return spatial coordinate variable values
-    for (int dim = 0; dim < spatialDims.size(); dim++) {
-        if (varname == spatialDims[dim]) {
-            double increment = brickSize[dim] / (dataSize[dim] - 1);
-            double start = origin[dim] + min[0] * increment;
-            size_t steps = max[0] - min[0];
-            for (int i = 0; i <= steps; i++) { region[i] = start + i * increment; }
-        }
-    }*/
-
     // If a data variable is requested, read it with ReadRegion
     std::vector<std::string> varnames = _bovCollection->GetDataVariableNames();
     if (std::find(varnames.begin(), varnames.end(), varname) != varnames.end()) {
