@@ -44,8 +44,8 @@ class BOVCollection;
 //!
 //! Scientific notation is supported for floating point values like BRICK_ORIGIN and BRICK_SIZE.
 //! Scientific notation is not supported for integer values like DATA_SIZE.
-//! Wild card (*) characters are not currently supported in the DATA_FILE token.  
-//! Each data file can only refer to one .bov file.
+//! Wild card characters are not currently supported in the DATA_FILE token.  
+//! Each .bov file can only refer to a single data file.
 //!
 //! \author Scott Pearse
 //! \date    May, 2021

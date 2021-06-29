@@ -88,13 +88,13 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             rc = _parseHeader(header);
             if (rc < 0) {
                 SetErrMsg(("Error parsing BOV file " + paths[0]).c_str());
-                return -1;
+                return (int)returnCodes::BAD;
             }
 
             rc = _validateParsedValues();
             if (rc < 0) {
                 SetErrMsg("Inconsistency found in BOV token.");
-                return -1;
+                return (int)returnCodes::BAD;
             }
 
             // Ensure we have the required tokens in the header
@@ -106,18 +106,18 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             std::ifstream infile(_dataFile);
             if (infile.bad()) {
                 SetErrMsg(("Failed to open BOV file " + _dataFile).c_str());
-                return -1;
+                return (int)returnCodes::BAD;
             }
 
             _populateDataFileMap();
         } else {
             SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
-            return -1;
+            return (int)returnCodes::BAD;
         }
         header.close();
     }
 
-    return 0;
+    return (int)returnCodes::GOOD;
 }
 
 int BOVCollection::_parseHeader(std::ifstream &header)
@@ -155,7 +155,7 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         rc = _findToken(FORMAT_TOKEN, line, _tmpDataFormat);
         if (rc == (int)parseCodes::ERROR) return _failureToReadError(FORMAT_TOKEN);
 
-        // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
+        // Optional tokens.  If their values are invalid, SetErrMsg, and return (int)returnCodes::BAD.
         //
         rc = _findToken(ORIGIN_TOKEN, line, _tmpBrickOrigin);
         if (rc == (int)parseCodes::ERROR) return _invalidValueError(ORIGIN_TOKEN);
@@ -176,7 +176,7 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         _findToken(DATA_BRICKLETS_TOKEN, line, _dataBricklets);
         _findToken(DATA_COMPONENTS_TOKEN, line, _dataComponents);
     }
-    return 0;
+    return (int)returnCodes::GOOD;
 }
 
 int BOVCollection::_validateParsedValues()
@@ -232,7 +232,7 @@ int BOVCollection::_validateParsedValues()
         _byteOffset = _tmpByteOffset;
         _byteOffsetAssigned = true;
     }
-    return 0;
+    return (int)returnCodes::GOOD;
 }
 
 void BOVCollection::_populateDataFileMap()
@@ -248,38 +248,38 @@ void BOVCollection::_populateDataFileMap()
 int BOVCollection::_missingValueError(std::string token) const
 {
     SetErrMsg(("BOV file must contain token: " + token).c_str());
-    return -1;
+    return (int)returnCodes::BAD;
 }
 
 int BOVCollection::_invalidDimensionError(std::string token) const
 {
     SetErrMsg((token + " must have all dimensions > 1").c_str());
-    return -1;
+    return (int)returnCodes::BAD;
 }
 
 int BOVCollection::_invalidFormatError(std::string token) const
 {
     std::string message = token + " must be either INT, FLOAT, or DOUBLE.";
     SetErrMsg(message.c_str());
-    return -1;
+    return (int)returnCodes::BAD;
 }
 
 int BOVCollection::_failureToReadError(std::string token) const
 {
     SetErrMsg(("Failure reading BOV time token: " + token).c_str());
-    return -1;
+    return (int)returnCodes::BAD;
 }
 
 int BOVCollection::_inconsistentValueError(std::string token) const
 {
     SetErrMsg((token + " must be consistent in all BOV files").c_str());
-    return -1;
+    return (int)returnCodes::BAD;
 }
 
 int BOVCollection::_invalidValueError(std::string token) const
 {
     SetErrMsg(("Invalid value for token: " + token).c_str());
-    return -1;
+    return (int)returnCodes::BAD;
 }
 
 std::vector<std::string> BOVCollection::GetDataVariableNames() const { return _variables; }
@@ -432,7 +432,7 @@ int BOVCollection::_sizeOfFormat(DC::XType type) const
     case DC::XType::INT32: return 4;
     case DC::XType::FLOAT: return 4;
     case DC::XType::DOUBLE: return 8;
-    default: return -1;
+    default: return (int)returnCodes::BAD;
     }
 }
 
@@ -460,14 +460,14 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
     FILE *fp = fopen(dataFile.c_str(), "rb");
     if (!fp) {
         SetErrMsg("Invalid file: %s : %M", dataFile.c_str());
-        return -1;
+        return (int)returnCodes::BAD;
     }
 
     int formatSize = _sizeOfFormat(_dataFormat);
     if (formatSize < 0) {
         SetErrMsg("Unspecified data format");
         fclose(fp);
-        return (-1);
+        return (int)returnCodes::BAD;
     }
 
     size_t numValues = _gridSize[0] * _gridSize[1] * _gridSize[2];
@@ -499,7 +499,7 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
                     MyBase::SetErrMsg("Short read on input file: %M");
                 }
                 fclose(fp);
-                return -1;
+                return (int)returnCodes::BAD;
             }
 
             if (needSwap) { _swapBytes(readBuffer, formatSize, numValues); }
@@ -519,7 +519,7 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
 
     fclose(fp);
 
-    return 0;
+    return (int)returnCodes::GOOD;
 }
 
 // ReadRegion can only be used with int* float* and double*
