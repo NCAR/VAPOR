@@ -317,27 +317,27 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 {
     if (!_index.size()) return;
 
-    auto tmp = _cg->GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(_cg->GetNumDimensions());
+    auto dims = _cg->GetDimensions();
+    auto ndims = _cg->GetNumDimensions();
 
     vector<size_t> maxIndex;
     maxIndex.reserve(3);
 
-    for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
+    for (int i = 0; i < ndims; i++) maxIndex.push_back(dims[i] - 1);
 
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
-    long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex.data(), dims.data(), ndims);
+    long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = vector<size_t>(dims.size(), 0);
-        _index[dims.size() - 1] = dims[dims.size() - 1];
+        _index = vector<size_t>(ndims, 0);
+        _index[ndims - 1] = dims[ndims - 1];
         return;
     }
 
     size_t index2DL = _index[1] * dims[0] + _index[0];
 
-    _index = Wasp::VectorizeCoords(newIndexL, dims);
+    _index.assign(ndims, 0);
+    VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
 
     VAssert(_index[1] * dims[0] + _index[0] >= index2DL);
     size_t offset2D = (_index[1] * dims[0] + _index[0]) - index2DL;
