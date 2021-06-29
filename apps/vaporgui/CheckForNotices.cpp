@@ -54,7 +54,9 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
                     Notice      notice;
                     notice.url = file["download_url"].toString().toStdString();
 
-                    if (!STLUtils::Contains(notice.url, "__example-notice")) _noticesToGet.push(notice);
+                    if (!STLUtils::Contains(notice.url, "__example-notice")) continue;
+                    
+                    _noticesToGet.push(notice);
                 }
             } else {
                 QString       content = reply->readAll();
@@ -89,7 +91,7 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
 #ifdef TESTING_API
     req.setUrl(QUrl("http://localhost:8000/list.json"));
 #else
-    req.setUrl(QUrl("https://api.github.com/repos/NCAR/VAPOR/contents/share/notices"));
+    req.setUrl(QUrl("https://api.github.com/repos/NCAR/VAPOR-SupportPage/contents/notices"));
 #endif
     manager->get(req);
 }
