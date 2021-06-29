@@ -89,19 +89,19 @@ private:
     int _invalidValueError(std::string token) const;
     int _missingValueError(std::string token) const;
 
-    static const std::string _timeToken;
-    static const std::string _dataFileToken;
-    static const std::string _gridSizeToken;
-    static const std::string _formatToken;
-    static const std::string _variableToken;
-    static const std::string _endianToken;
-    static const std::string _centeringToken;
-    static const std::string _originToken;
-    static const std::string _brickSizeToken;
-    static const std::string _offsetToken;
-    static const std::string _divideBrickToken;
-    static const std::string _dataBrickletsToken;
-    static const std::string _dataComponentsToken;
+    static const std::string TIME_TOKEN;
+    static const std::string DATA_FILE_TOKEN;
+    static const std::string GRID_SIZE_TOKEN;
+    static const std::string FORMAT_TOKEN;
+    static const std::string VARIABLE_TOKEN;
+    static const std::string ENDIAN_TOKEN;
+    static const std::string CENTERING_TOKEN;
+    static const std::string ORIGIN_TOKEN;
+    static const std::string BRICK_SIZE_TOKEN;
+    static const std::string OFFSET_TOKEN;
+    static const std::string DIVIDE_BRICK_TOKEN;
+    static const std::string DATA_BRICKLETS_TOKEN;
+    static const std::string DATA_COMPONENTS_TOKEN;
 
     static const double                _defaultTime;
     static const std::string           _defaultFile;

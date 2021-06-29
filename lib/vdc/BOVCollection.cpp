@@ -19,19 +19,19 @@
 
 using namespace VAPoR;
 
-const std::string BOVCollection::_timeToken = "TIME";
-const std::string BOVCollection::_dataFileToken = "DATA_FILE";
-const std::string BOVCollection::_gridSizeToken = "DATA_SIZE";
-const std::string BOVCollection::_formatToken = "DATA_FORMAT";
-const std::string BOVCollection::_variableToken = "VARIABLE";
-const std::string BOVCollection::_endianToken = "DATA_ENDIAN";
-const std::string BOVCollection::_centeringToken = "CENTERING";
-const std::string BOVCollection::_originToken = "BRICK_ORIGIN";
-const std::string BOVCollection::_brickSizeToken = "BRICK_SIZE";
-const std::string BOVCollection::_offsetToken = "BYTE_OFFSET";
-const std::string BOVCollection::_divideBrickToken = "DIVIDE_BRICK";
-const std::string BOVCollection::_dataBrickletsToken = "DATA_BRICKLETS";
-const std::string BOVCollection::_dataComponentsToken = "DATA_COMPONENTS";
+const std::string BOVCollection::TIME_TOKEN = "TIME";
+const std::string BOVCollection::DATA_FILE_TOKEN = "DATA_FILE";
+const std::string BOVCollection::GRID_SIZE_TOKEN = "DATA_SIZE";
+const std::string BOVCollection::FORMAT_TOKEN = "DATA_FORMAT";
+const std::string BOVCollection::VARIABLE_TOKEN = "VARIABLE";
+const std::string BOVCollection::ENDIAN_TOKEN = "DATA_ENDIAN";
+const std::string BOVCollection::CENTERING_TOKEN = "CENTERING";
+const std::string BOVCollection::ORIGIN_TOKEN = "BRICK_ORIGIN";
+const std::string BOVCollection::BRICK_SIZE_TOKEN = "BRICK_SIZE";
+const std::string BOVCollection::OFFSET_TOKEN = "BYTE_OFFSET";
+const std::string BOVCollection::DIVIDE_BRICK_TOKEN = "DIVIDE_BRICK";
+const std::string BOVCollection::DATA_BRICKLETS_TOKEN = "DATA_BRICKLETS";
+const std::string BOVCollection::DATA_COMPONENTS_TOKEN = "DATA_COMPONENTS";
 
 const std::array<double, 3> BOVCollection::_defaultOrigin = {0., 0., 0.};
 const std::array<double, 3> BOVCollection::_defaultBrickSize = {1., 1., 1.};
@@ -99,11 +99,10 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 
             // Ensure we have the required tokens in the header
             //
-            if (_dataFile == _defaultFile) { return _missingValueError(_dataFileToken); }
-            if (_dataFormat == _defaultFormat) { return _missingValueError(_formatToken); }
-            if (_gridSize == _defaultGridSize) { return _missingValueError(_gridSizeToken); }
+            if (_dataFile == _defaultFile) { return _missingValueError(DATA_FILE_TOKEN); }
+            if (_dataFormat == _defaultFormat) { return _missingValueError(FORMAT_TOKEN); }
+            if (_gridSize == _defaultGridSize) { return _missingValueError(GRID_SIZE_TOKEN); }
 
-            std::cout << _dataFile << std::endl;
             std::ifstream infile(_dataFile);
             if (infile.bad()) {
                 SetErrMsg(("Failed to open BOV file " + _dataFile).c_str());
@@ -130,52 +129,52 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         // The _dataFile, _gridSize, and _dataFormat variables are all required to process
         // the BOV.  Try to find them, and report errors if we can't.
         //
-        rc = _findToken(_dataFileToken, line, dataFile);
+        rc = _findToken(DATA_FILE_TOKEN, line, dataFile);
         if (rc == (int)parseCodes::ERROR)
-            return _failureToReadError(_dataFileToken);
+            return _failureToReadError(DATA_FILE_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             _dataFile = dataFile;
 
         double time;
-        rc = _findToken(_timeToken, line, time);
+        rc = _findToken(TIME_TOKEN, line, time);
         if (rc == (int)parseCodes::ERROR)
-            return _failureToReadError(_timeToken);
+            return _failureToReadError(TIME_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             _time = time;
 
         std::string variable;
-        rc = _findToken(_variableToken, line, variable);
+        rc = _findToken(VARIABLE_TOKEN, line, variable);
         if (rc == (int)parseCodes::ERROR)
-            return _invalidValueError(_variableToken);
+            return _invalidValueError(VARIABLE_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             _variable = variable;
 
-        rc = _findToken(_gridSizeToken, line, _tmpGridSize);
-        if (rc == (int)parseCodes::ERROR) return _failureToReadError(_gridSizeToken);
+        rc = _findToken(GRID_SIZE_TOKEN, line, _tmpGridSize);
+        if (rc == (int)parseCodes::ERROR) return _failureToReadError(GRID_SIZE_TOKEN);
 
-        rc = _findToken(_formatToken, line, _tmpDataFormat);
-        if (rc == (int)parseCodes::ERROR) return _failureToReadError(_formatToken);
+        rc = _findToken(FORMAT_TOKEN, line, _tmpDataFormat);
+        if (rc == (int)parseCodes::ERROR) return _failureToReadError(FORMAT_TOKEN);
 
         // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
         //
-        rc = _findToken(_originToken, line, _tmpBrickOrigin);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(_originToken);
+        rc = _findToken(ORIGIN_TOKEN, line, _tmpBrickOrigin);
+        if (rc == (int)parseCodes::ERROR) return _invalidValueError(ORIGIN_TOKEN);
 
-        rc = _findToken(_brickSizeToken, line, _tmpBrickSize);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(_brickSizeToken);
+        rc = _findToken(BRICK_SIZE_TOKEN, line, _tmpBrickSize);
+        if (rc == (int)parseCodes::ERROR) return _invalidValueError(BRICK_SIZE_TOKEN);
 
-        rc = _findToken(_endianToken, line, _tmpDataEndian);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(_endianToken);
+        rc = _findToken(ENDIAN_TOKEN, line, _tmpDataEndian);
+        if (rc == (int)parseCodes::ERROR) return _invalidValueError(ENDIAN_TOKEN);
 
-        rc = _findToken(_offsetToken, line, _tmpByteOffset);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(_offsetToken);
+        rc = _findToken(OFFSET_TOKEN, line, _tmpByteOffset);
+        if (rc == (int)parseCodes::ERROR) return _invalidValueError(OFFSET_TOKEN);
 
         // All other variables are currently unused.
         //
-        _findToken(_centeringToken, line, _centering);
-        _findToken(_divideBrickToken, line, _divideBrick);
-        _findToken(_dataBrickletsToken, line, _dataBricklets);
-        _findToken(_dataComponentsToken, line, _dataComponents);
+        _findToken(CENTERING_TOKEN, line, _centering);
+        _findToken(DIVIDE_BRICK_TOKEN, line, _divideBrick);
+        _findToken(DATA_BRICKLETS_TOKEN, line, _dataBricklets);
+        _findToken(DATA_COMPONENTS_TOKEN, line, _dataComponents);
     }
     return 0;
 }
@@ -184,9 +183,9 @@ int BOVCollection::_validateParsedValues()
 {
     // Validate grid dimensions
     if (_tmpGridSize[0] < 1 || _tmpGridSize[1] < 1 || _tmpGridSize[2] < 1)
-        return _invalidDimensionError(_gridSizeToken);
+        return _invalidDimensionError(GRID_SIZE_TOKEN);
     else if (_tmpGridSize != _gridSize && _gridSizeAssigned == true)
-        return _inconsistentValueError(_gridSizeToken);
+        return _inconsistentValueError(GRID_SIZE_TOKEN);
     else {
         _gridSize = _tmpGridSize;
         _gridSizeAssigned = true;
@@ -194,9 +193,9 @@ int BOVCollection::_validateParsedValues()
 
     // Validate data format
     if (_tmpDataFormat == DC::INVALID)
-        return _invalidFormatError(_formatToken);
+        return _invalidFormatError(FORMAT_TOKEN);
     else if (_tmpDataFormat != _dataFormat && _formatAssigned == true) {
-        return _inconsistentValueError(_formatToken);
+        return _inconsistentValueError(FORMAT_TOKEN);
     } else {
         _dataFormat = _tmpDataFormat;
         _formatAssigned = true;
@@ -204,7 +203,7 @@ int BOVCollection::_validateParsedValues()
 
     // Validate brick origin
     if (_tmpBrickOrigin != _brickOrigin && _brickOriginAssigned == true)
-        return _inconsistentValueError(_originToken);
+        return _inconsistentValueError(ORIGIN_TOKEN);
     else {
         _brickOrigin = _tmpBrickOrigin;
         _brickOriginAssigned = true;
@@ -212,7 +211,7 @@ int BOVCollection::_validateParsedValues()
 
     // Validate brick size
     if (_tmpBrickSize != _brickSize && _brickSizeAssigned == true)
-        return _inconsistentValueError(_brickSizeToken);
+        return _inconsistentValueError(BRICK_SIZE_TOKEN);
     else {
         _brickSize = _tmpBrickSize;
         _brickSizeAssigned = true;
@@ -220,7 +219,7 @@ int BOVCollection::_validateParsedValues()
 
     // Validate endian type
     if (_tmpDataEndian != _dataEndian && _dataEndianAssigned == true)
-        return _inconsistentValueError(_endianToken);
+        return _inconsistentValueError(ENDIAN_TOKEN);
     else {
         _dataEndian = _tmpDataEndian;
         _dataEndianAssigned = true;
@@ -228,7 +227,7 @@ int BOVCollection::_validateParsedValues()
 
     // Validate byte offest
     if (_tmpByteOffset != _byteOffset && _byteOffsetAssigned == true)
-        return _inconsistentValueError(_offsetToken);
+        return _inconsistentValueError(OFFSET_TOKEN);
     else {
         _byteOffset = _tmpByteOffset;
         _byteOffsetAssigned = true;

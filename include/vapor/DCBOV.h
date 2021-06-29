@@ -183,6 +183,10 @@ private:
 
     void _InitVars();
 
+    int _isCoordinateVariable( std::string variable ) const;
+
+    template<class T> void _generateCoordinates( int dim, const vector<size_t> &min, const vector<size_t> &max, T *region) const;
+
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 };
 }    // namespace VAPoR
