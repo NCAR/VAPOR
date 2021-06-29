@@ -22,7 +22,22 @@ Open our dataset with xarray.  Download `simple.nc <https://drive.google.com/fil
 
 .. jupyter-execute::
 
-  ds = xr.open_dataset("/Users/pearse/CFConventions/data/simple.nc")
+  from pathlib import Path
+  from google_drive_downloader import GoogleDriveDownloader ad gdd
+
+  # These are to download the sample data
+  from pathlib import Path
+  from google_drive_downloader import GoogleDriveDownloader as gdd
+  
+  # Download the sample data from google drive
+  home = str(Path.home())
+  simpleNC = home + "/simple1.nc"
+  gdd.download_file_from_google_drive(file_id='18CFrtFxvHwfL30Xd91TNU38J_z-Kgywm',
+                                     dest_path=simpleNC,
+                                     unzip=False)    
+  
+  ds = xr.open_dataset(simpleNC)
+  #ds = xr.open_dataset("/Users/pearse/CFConventions/data/simple.nc")
 
 Now look at our simple.nc file, which defines X, Y, and Z spatial dimensions, a time dimension, and our scalar variable named temperature.  Note that our dataset is a 48x48x24 grid, with one timestep.
 
