@@ -34,7 +34,6 @@ Open our dataset with xarray.  Download `simple.nc <https://drive.google.com/fil
                                      unzip=False)    
   
   ds = xr.open_dataset(simpleNC)
-  #ds = xr.open_dataset("/Users/pearse/CFConventions/data/simple.nc")
 
 Now look at our simple.nc file, which defines X, Y, and Z spatial dimensions, a time dimension, and our scalar variable named temperature.  Note that our dataset is a 48x48x24 grid, with one timestep.
 
@@ -96,7 +95,6 @@ Finally, write our dataset to a new file.  Make sure you specify a valid local p
 .. jupyter-execute::
 
   ds.to_netcdf( home + "/stretchedCompliant.nc" )
-  #ds.to_netcdf("/Users/pearse/CFConventions/data/stretchedCompliant.nc")
 
 We can visualize a 2D cross section of our data doing the following:
 

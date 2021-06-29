@@ -96,7 +96,6 @@ Finally, write our dataset to a new file.  Make sure you specify a valid local p
 .. jupyter-execute::
 
   ds.to_netcdf( home + "/regularCompliant.nc")
-  #ds.to_netcdf("/Users/pearse/CFConventions/data/regularCompliant.nc")
 
 We can visualize a 2D cross section of our data doing the following:
 
