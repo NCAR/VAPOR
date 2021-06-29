@@ -92,12 +92,11 @@ void UnstructuredGrid2D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
     minu = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
     minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
 
-    auto tmp = GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(GetNumDimensions());
+    auto dims = GetDimensions();
+    auto ndims = GetNumDimensions();
 
-    size_t start = Wasp::LinearizeCoords(cMin.data(), dims.data(), dims.size());
-    size_t stop = Wasp::LinearizeCoords(cMax.data(), dims.data(), dims.size());
+    size_t start = Wasp::LinearizeCoords(cMin.data(), dims.data(), ndims);
+    size_t stop = Wasp::LinearizeCoords(cMax.data(), dims.data(), ndims);
 
     // Currently only support ++ opererator for ConstCoordItr. So random
     // access is tricky.

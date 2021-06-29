@@ -39,16 +39,15 @@ bool StructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr3>
     Size_tArr3 cCindices;
     ClampCellIndex(cindices, cCindices);
 
-    auto tmp = GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(GetNumDimensions());
+    auto dims = GetDimensions();
+    auto ndims = GetNumDimensions();
 
     // Cells have the same ID's as their first node
     //
     // walk counter-clockwise order
     //
 
-    if (dims.size() == 2) {
+    if (ndims == 2) {
         nodes.resize(4);
         nodes[0][0] = cCindices[0];
         nodes[0][1] = cCindices[1];
@@ -66,7 +65,7 @@ bool StructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr3>
         nodes[3][1] = cCindices[1] + 1;
         nodes[3][2] = 0;
 
-    } else if (dims.size() == 3) {
+    } else if (ndims == 3) {
         nodes.resize(8);
         nodes[0][0] = cCindices[0];
         nodes[0][1] = cCindices[1];
@@ -104,7 +103,7 @@ bool StructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr3>
     // Handle dims[i] == 1
     //
     for (int j = 0; j < nodes.size(); j++) {
-        for (int i = 0; i < dims.size(); i++) {
+        for (int i = 0; i < ndims; i++) {
             if (nodes[j][i] >= dims[i]) { nodes[j][i] -= 1; }
         }
     }
@@ -119,17 +118,16 @@ bool StructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Si
     Size_tArr3 cCindices;
     ClampCellIndex(cindices, cCindices);
 
-    auto tmp = GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(GetNumDimensions());
+    auto dims = GetDimensions();
+    auto ndims = GetNumDimensions();
 
-    VAssert((dims.size() == 2) && "3D cells not yet supported");
+    VAssert((ndims == 2) && "3D cells not yet supported");
 
     // Cells have the same ID's as their first node
     //
     // walk counter-clockwise order
     //
-    if (dims.size() == 2) {
+    if (ndims == 2) {
         Size_tArr3 indices;
 
         if (cCindices[1] != 0) {    // below
@@ -159,11 +157,10 @@ bool StructuredGrid::GetNodeCells(const Size_tArr3 &indices, std::vector<Size_tA
 {
     cells.clear();
 
-    auto tmp = GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(GetNumDimensions());
+    auto dims = GetDimensions();
+    auto ndims = GetNumDimensions();
 
-    VAssert((dims.size() == 2) && "3D cells not yet supported");
+    VAssert((ndims == 2) && "3D cells not yet supported");
 
     // Check if invalid indices
     //
@@ -171,7 +168,7 @@ bool StructuredGrid::GetNodeCells(const Size_tArr3 &indices, std::vector<Size_tA
         if (indices[i] > (dims[i] - 1)) return (false);
     }
 
-    if (dims.size() == 2) {
+    if (ndims == 2) {
         Size_tArr3 indices;
 
         if (indices[0] != 0 && indices[1] != 0) {    // below, left
@@ -228,9 +225,8 @@ void StructuredGrid::ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const
         return;
     }
 
-    auto tmp = GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(GetNumDimensions());
+    auto dims = GetDimensions();
+    auto ndims = GetNumDimensions();
 
     DblArr3 minu, maxu;
     GetUserExtents(minu, maxu);
@@ -257,11 +253,10 @@ void StructuredGrid::ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const
 
 bool StructuredGrid::HasInvertedCoordinateSystemHandiness() const
 {
-    auto tmp = GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(GetNumDimensions());
+    auto dims = GetDimensions();
+    auto ndims = GetNumDimensions();
 
-    if (dims.size() < 2) return (true);    // Arbitrary
+    if (ndims < 2) return (true);    // Arbitrary
 
     size_t vi0[] = {0, 0, 0};
     size_t vi1[] = {1, 0, 0};
@@ -281,7 +276,7 @@ bool StructuredGrid::HasInvertedCoordinateSystemHandiness() const
 
     // CCW if Z component of cross product is positive
     //
-    if (dims.size() == 2) return (c2d[2] >= 0.0);
+    if (ndims == 2) return (c2d[2] >= 0.0);
 
     size_t vi3[] = {0, 0, 1};
     double v3[3];

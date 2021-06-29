@@ -28,10 +28,8 @@ void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &
     CopyToArr3(minu, _minu);
     CopyToArr3(maxu, _maxu);
 
-    auto tmp = GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(GetNumDimensions());
-    for (int i = 0; i < dims.size(); i++) {
+    auto dims = GetDimensions();
+    for (int i = 0; i < GetNumDimensions(); i++) {
         if (dims[i] > 1) {
             _delta.push_back((_maxu[i] - _minu[i]) / (double)(dims[i] - 1));
         } else {
@@ -220,11 +218,9 @@ void RegularGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords)
     Size_tArr3 cIndices;
     ClampIndex(indices, cIndices);
 
-    auto tmp = GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(GetNumDimensions());
+    auto dims = GetDimensions();
 
-    for (int i = 0; i < dims.size(); i++) {
+    for (int i = 0; i < GetNumDimensions(); i++) {
         size_t index = cIndices[i];
 
         if (index >= dims[i]) { index = dims[i] - 1; }
