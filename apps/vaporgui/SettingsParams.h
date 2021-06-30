@@ -129,9 +129,12 @@ public:
 
     void SetAutoCheckForUpdates(bool b);
     bool GetAutoCheckForUpdates() const;
+    void SetAutoCheckForNotices(bool b);
+    bool GetAutoCheckForNotices() const;
 
     static const string UseAllCoresTag;
     static const string AutoCheckForUpdatesTag;
+    static const string AutoCheckForNoticesTag;
 
     bool LoadFromSettingsFile();
 

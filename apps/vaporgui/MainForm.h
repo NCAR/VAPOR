@@ -317,6 +317,7 @@ private:
     bool                   determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;
 
     void CheckForUpdates();
+    void CheckForNotices();
 
     bool isOpenGLContextActive() const;
 
