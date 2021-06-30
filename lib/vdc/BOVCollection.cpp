@@ -459,8 +459,10 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
 
     FILE *fp = fopen(dataFile.c_str(), "rb");
     if (!fp) {
-        if (dataFile == "") SetErrMsg("No data file associated with variable '%s' at timestep %d", varname.c_str(), time);
-        else SetErrMsg("Invalid file: %s : %M", dataFile.c_str());
+        if (dataFile == "")
+            SetErrMsg("No data file associated with variable '%s' at timestep %d", varname.c_str(), time);
+        else
+            SetErrMsg("Invalid file: %s : %M", dataFile.c_str());
         return -1;
     }
 
