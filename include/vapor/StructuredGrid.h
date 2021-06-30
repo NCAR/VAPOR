@@ -74,7 +74,7 @@ public:
     {
         auto tmp = GetDimensions();
         _duplicate.resize(tmp.size());
-        std::copy( tmp.begin(), tmp.end(), _duplicate.begin() );
+        std::copy(tmp.begin(), tmp.end(), _duplicate.begin());
         _duplicate.resize(this->GetNumDimensions());
         return _duplicate;
     }
