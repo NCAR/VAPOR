@@ -73,7 +73,8 @@ public:
     const std::vector<size_t> &GetNodeDimensions() const override
     {
         auto tmp = GetDimensions();
-        _duplicate = {tmp[0], tmp[1], tmp[2]};
+        _duplicate.resize(tmp.size());
+        std::copy( tmp.begin(), tmp.end(), _duplicate.begin() );
         _duplicate.resize(this->GetNumDimensions());
         return _duplicate;
     }
