@@ -29,7 +29,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
 {
     VAssert(xug.GetDimensions() == GetDimensions());
     VAssert(yug.GetDimensions() == GetDimensions());
-    VAssert(zug.GetDimensions() == GetDimensions() || zug.GetDimensions().size() == 0);
+    VAssert(zug.GetDimensions() == GetDimensions() || zug.GetNumDimensions() == 0);
 
     VAssert(location == NODE);
 
@@ -38,22 +38,28 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
 
 vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
 {
+    const Grid *ptr = nullptr;
+
     if (dim == 0) {
-        return (_xug.GetDimensions());
+        ptr = &_xug;
     } else if (dim == 1) {
-        return (_yug.GetDimensions());
+        ptr = &_yug;
     } else if (dim == 2) {
-        if (GetGeometryDim() == 3) {
-            return (_zug.GetDimensions());
-        } else {
+        if (GetGeometryDim() == 3)
+            ptr = &_zug;
+        else
             return (vector<size_t>(1, 1));
-        }
     } else {
         return (vector<size_t>(1, 1));
     }
+
+    auto tmp = ptr->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(ptr->GetNumDimensions());
+    return dims;
 }
 
-size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetDimensions().size() == 0 ? 2 : 3); }
+size_t UnstructuredGrid2D::GetGeometryDim() const { return (_zug.GetNumDimensions() == 0 ? 2 : 3); }
 
 void UnstructuredGrid2D::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
 {
@@ -86,8 +92,11 @@ void UnstructuredGrid2D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
     minu = {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
     minu = {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
 
-    size_t start = Wasp::LinearizeCoords(cMin.data(), GetDimensions().data(), GetDimensions().size());
-    size_t stop = Wasp::LinearizeCoords(cMax.data(), GetDimensions().data(), GetDimensions().size());
+    auto dims = GetDimensions();
+    auto ndims = GetNumDimensions();
+
+    size_t start = Wasp::LinearizeCoords(cMin.data(), dims.data(), ndims);
+    size_t stop = Wasp::LinearizeCoords(cMax.data(), dims.data(), ndims);
 
     // Currently only support ++ opererator for ConstCoordItr. So random
     // access is tricky.
@@ -399,8 +408,8 @@ bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], vector<size_t> &
 
 std::shared_ptr<QuadTreeRectangleP> UnstructuredGrid2D::_makeQuadTreeRectangle() const
 {
-    const vector<size_t> &dims = GetDimensions();
-    size_t                reserve_size = dims[0];
+    auto   dims = GetDimensions();
+    size_t reserve_size = dims[0];
 
     DblArr3 minu, maxu;
     GetUserExtents(minu, maxu);

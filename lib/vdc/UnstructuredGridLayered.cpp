@@ -29,9 +29,9 @@ UnstructuredGridLayered::UnstructuredGridLayered(const std::vector<size_t> &vert
         faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset, xug, yug, UnstructuredGridCoordless(), qtr),
   _zug(zug)
 {
-    VAssert(xug.GetDimensions().size() == 1);
-    VAssert(yug.GetDimensions().size() == 1);
-    VAssert(zug.GetDimensions().size() == 2);
+    VAssert(xug.GetNumDimensions() == 1);
+    VAssert(yug.GetNumDimensions() == 1);
+    VAssert(zug.GetNumDimensions() == 2);
 
     VAssert(location == NODE);
 }
@@ -43,7 +43,10 @@ vector<size_t> UnstructuredGridLayered::GetCoordDimensions(size_t dim) const
     } else if (dim == 1) {
         return (_ug2d.GetCoordDimensions(dim));
     } else if (dim == 2) {
-        return (_zug.GetDimensions());
+        auto tmp = _zug.GetDimensions();
+        auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+        dims.resize(_zug.GetNumDimensions());
+        return dims;
     } else {
         return (vector<size_t>(1, 1));
     }

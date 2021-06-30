@@ -70,7 +70,14 @@ public:
     static std::string GetClassType() { return ("Structured"); }
     std::string        GetType() const override { return (GetClassType()); }
 
-    const std::vector<size_t> &GetNodeDimensions() const override { return (GetDimensions()); }
+    const std::vector<size_t> &GetNodeDimensions() const override
+    {
+        auto tmp = GetDimensions();
+        _duplicate.resize(tmp.size());
+        std::copy(tmp.begin(), tmp.end(), _duplicate.begin());
+        _duplicate.resize(this->GetNumDimensions());
+        return _duplicate;
+    }
 
     const std::vector<size_t> &GetCellDimensions() const override { return (_cellDims); };
 
@@ -111,6 +118,8 @@ public:
 protected:
 private:
     std::vector<size_t> _cellDims;
+
+    mutable std::vector<size_t> _duplicate;
 };
 };    // namespace VAPoR
 #endif

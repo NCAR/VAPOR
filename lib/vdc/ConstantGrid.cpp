@@ -39,9 +39,21 @@ std::vector<size_t> ConstantGrid::GetCoordDimensions(size_t) const
 
 size_t ConstantGrid::GetGeometryDim() const { return 3; }
 
-const std::vector<size_t> &ConstantGrid::GetNodeDimensions() const { return (GetDimensions()); }
+const std::vector<size_t> &ConstantGrid::GetNodeDimensions() const
+{
+    auto tmp = GetDimensions();
+    _duplicate = {tmp[0], tmp[1], tmp[2]};
+    _duplicate.resize(GetNumDimensions());
+    return _duplicate;
+}
 
-const std::vector<size_t> &ConstantGrid::GetCellDimensions() const { return (GetDimensions()); }
+const std::vector<size_t> &ConstantGrid::GetCellDimensions() const
+{
+    auto tmp = GetDimensions();
+    _duplicate = {tmp[0], tmp[1], tmp[2]};
+    _duplicate.resize(GetNumDimensions());
+    return _duplicate;
+}
 
 bool ConstantGrid::GetIndicesCell(const VAPoR::DblArr3 &coords, VAPoR::Size_tArr3 &indices) const { return false; }
 

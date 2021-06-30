@@ -1,6 +1,7 @@
 #ifndef _Grid_
 #define _Grid_
 
+#include <algorithm>
 #include <iostream>
 #include <ostream>
 #include <vector>
@@ -84,9 +85,22 @@ public:
     //! Return the dimensions of grid connectivity array
     //!
     //! \param[out] dims The value of \p dims parameter provided to
+    //! the constructor. If the parameter has less than 3 values, then
+    //! number 1 will be filled.
+    //!
+    std::array<size_t, 3> GetDimensions() const
+    {
+        auto tmp = std::array<size_t, 3>{1, 1, 1};
+        std::copy(_dims.begin(), _dims.end(), tmp.begin());
+        return tmp;
+    }
+
+    //! Return the useful number of dimensions of grid connectivity array
+    //!
+    //! \param[out] dims The number of values of \p dims parameter provided to
     //! the constructor.
     //!
-    const std::vector<size_t> &GetDimensions() const { return (_dims); }
+    size_t GetNumDimensions() const { return _dims.size(); }
 
     //! Return the dimensions of the specified coordinate variable
     //!
@@ -732,7 +746,7 @@ public:
     //
     virtual void SetMinAbs(const std::vector<size_t> &minAbs)
     {
-        VAssert(minAbs.size() == GetDimensions().size());
+        VAssert(minAbs.size() == this->GetNumDimensions());
         _minAbs = minAbs;
     }
 

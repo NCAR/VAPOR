@@ -145,22 +145,20 @@ void Grid::GetRange(const Size_tArr3 &min, const Size_tArr3 &max, float range[2]
     Size_tArr3 cMax;
     ClampIndex(max, cMax);
 
-    const vector<size_t> &dims = GetDimensions();
-
     float mv = GetMissingValue();
 
     range[0] = range[1] = mv;
 
     size_t jmin = 0;
     size_t jmax = 0;
-    if (dims.size() > 1) {
+    if (GetNumDimensions() > 1) {
         jmin = cMin[1];
         jmax = cMax[1];
     }
 
     size_t kmin = 0;
     size_t kmax = 0;
-    if (dims.size() > 2) {
+    if (GetNumDimensions() > 2) {
         kmin = cMin[2];
         kmax = cMax[2];
     }
@@ -210,9 +208,9 @@ float Grid::GetValue(const DblArr3 &coords) const
 
 void Grid::_getUserCoordinatesHelper(const vector<double> &coords, double &x, double &y, double &z) const
 {
-    if (GetDimensions().size() >= 1) { x = coords[0]; }
-    if (GetDimensions().size() >= 2) { y = coords[1]; }
-    if (GetDimensions().size() >= 3) { z = coords[2]; }
+    if (GetNumDimensions() >= 1) { x = coords[0]; }
+    if (GetNumDimensions() >= 2) { y = coords[1]; }
+    if (GetNumDimensions() >= 3) { z = coords[2]; }
 }
 
 void Grid::GetUserCoordinates(size_t i, double &x, double &y, double &z) const
@@ -486,11 +484,13 @@ void Grid::ConstCellIteratorBoxSG::next(const long &offset)
 
 template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, const vector<double> &minu, const vector<double> &maxu) : _pred(minu, maxu)
 {
-    _ndims = rg->GetDimensions().size();
+    _ndims = rg->GetNumDimensions();
 
     _blks = rg->GetBlks();
 
-    _dims3d = rg->GetDimensions();
+    auto tmp = rg->GetDimensions();
+    _dims3d = {tmp[0], tmp[1], tmp[2]};
+    _dims3d.resize(rg->GetNumDimensions());
     _bdims3d = rg->GetDimensionInBlks();
     _bs3d = rg->GetBlockSize();
     for (int i = _ndims; i < 3; i++) {

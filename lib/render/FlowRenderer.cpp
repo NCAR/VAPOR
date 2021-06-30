@@ -164,8 +164,6 @@ int FlowRenderer::_paintGL(bool fast)
     FlowParams *params = dynamic_cast<FlowParams *>(GetActiveParams());
     int         rv;    // return value
 
-    _velocityField.DefaultZ = Renderer::GetDefaultZ(_dataMgr, params->GetCurrentTimestep());
-
     if (params->GetNeedFlowlineOutput()) {
         rv = _outputFlowLines();
         params->SetNeedFlowlineOutput(false);

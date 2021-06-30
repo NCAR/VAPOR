@@ -23,17 +23,17 @@ void *SmartBuf::Alloc(size_t size)
 // convert tuple of multi-dimensional coordinates, 'coord', for a space
 // with min and max bounds to a linear offset from 'min'
 //
-size_t Wasp::LinearizeCoords(const size_t *coords, const size_t *min, const size_t *max, int n)
+size_t Wasp::LinearizeCoords(const size_t *coords, const size_t *min, const size_t *max, size_t n)
 {
     size_t offset = 0;
 
-    for (int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         VAssert(coords[i] >= min[i]);
         VAssert(coords[i] <= max[i]);
     }
 
     size_t factor = 1;
-    for (int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         offset += factor * (coords[i] - min[i]);
         factor *= max[i] - min[i] + 1;
     }
@@ -46,13 +46,13 @@ size_t Wasp::LinearizeCoords(const std::vector<size_t> &coords, const std::vecto
     return (LinearizeCoords(coords.data(), dims.data(), coords.size()));
 }
 
-size_t Wasp::LinearizeCoords(const size_t *coords, const size_t *dims, int n)
+size_t Wasp::LinearizeCoords(const size_t *coords, const size_t *dims, size_t n)
 {
     VAssert(n <= MAXCOORDS);
     size_t min[MAXCOORDS];
     size_t max[MAXCOORDS];
 
-    for (int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         min[i] = 0;
         max[i] = dims[i] - 1;
     }
@@ -69,10 +69,10 @@ size_t Wasp::LinearizeCoords(const std::vector<size_t> &coords, const std::vecto
     return (LinearizeCoords(coords.data(), min.data(), max.data(), coords.size()));
 }
 
-void Wasp::VectorizeCoords(size_t offset, const size_t *min, const size_t *max, size_t *coords, int n)
+void Wasp::VectorizeCoords(size_t offset, const size_t *min, const size_t *max, size_t *coords, size_t n)
 {
     size_t factor = 1;
-    for (int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         VAssert(min[i] <= max[i]);
         coords[i] = (offset % (factor * (max[i] - min[i] + 1))) / factor;
         offset = offset - coords[i] * factor;
@@ -92,12 +92,12 @@ std::vector<size_t> Wasp::VectorizeCoords(size_t offset, const std::vector<size_
     return (coordsvec);
 }
 
-void Wasp::VectorizeCoords(size_t offset, const size_t *dims, size_t *coords, int n)
+void Wasp::VectorizeCoords(size_t offset, const size_t *dims, size_t *coords, size_t n)
 {
     VAssert(n <= MAXCOORDS);
     size_t min[MAXCOORDS];
     size_t max[MAXCOORDS];
-    for (int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         min[i] = 0;
         max[i] = dims[i] - 1;
     }

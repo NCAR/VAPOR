@@ -22,7 +22,9 @@ VolumeRegular::~VolumeRegular() {}
 int VolumeRegular::LoadData(const Grid *grid)
 {
     VolumeGLSL::LoadData(grid);
-    _dataDimensions = grid->GetDimensions();
+    assert(grid->GetNumDimensions() == 3);    // Only support 3D grids.
+    auto tmp = grid->GetDimensions();
+    _dataDimensions = {tmp[0], tmp[1], tmp[2]};
     _hasSecondData = false;
     return _loadDataDirect(grid, &_data, &_missing, &_hasMissingData);
 }
@@ -30,7 +32,9 @@ int VolumeRegular::LoadData(const Grid *grid)
 int VolumeRegular::LoadSecondaryData(const Grid *grid)
 {
     _hasSecondData = false;
-    if (_dataDimensions != grid->GetDimensions()) {
+    auto tmp = grid->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    if (_dataDimensions != dims) {
         Wasp::MyBase::SetErrMsg("Secondary (color mapped) variable has different grid from primary variable");
         return -1;
     }
@@ -50,9 +54,9 @@ void VolumeRegular::DeleteSecondaryData()
 
 int VolumeRegular::_loadDataDirect(const Grid *grid, Texture3D *dataTexture, Texture3D *missingTexture, bool *hasMissingData)
 {
-    const vector<size_t> dims = grid->GetDimensions();
-    const size_t         nVerts = dims[0] * dims[1] * dims[2];
-    float *              data = new float[nVerts];
+    auto         dims = grid->GetDimensions();
+    const size_t nVerts = dims[0] * dims[1] * dims[2];
+    float *      data = new float[nVerts];
     if (!data) {
         Wasp::MyBase::SetErrMsg("Could not allocate enough RAM to load data");
         return -1;

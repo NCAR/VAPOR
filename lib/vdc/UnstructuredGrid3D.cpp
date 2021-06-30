@@ -27,9 +27,9 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset), _xug(xug), _yug(yug),
   _zug(zug)
 {
-    VAssert(xug.GetDimensions().size() == 1);
-    VAssert(yug.GetDimensions().size() == 1);
-    VAssert(zug.GetDimensions().size() == 1);
+    VAssert(xug.GetNumDimensions() == 1);
+    VAssert(yug.GetNumDimensions() == 1);
+    VAssert(zug.GetNumDimensions() == 1);
 
     VAssert(location == NODE);
 }
@@ -37,15 +37,22 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 
 vector<size_t> UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
 {
+    const Grid *ptr = nullptr;
+
     if (dim == 0) {
-        return _xug.GetDimensions();
+        ptr = &_xug;
     } else if (dim == 1) {
-        return _yug.GetDimensions();
+        ptr = &_yug;
     } else if (dim == 2) {
-        return _zug.GetDimensions();
+        ptr = &_zug;
     } else {
         return (vector<size_t>(1, 1));
     }
+
+    auto tmp = ptr->GetDimensions();
+    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    dims.resize(ptr->GetNumDimensions());
+    return dims;
 }
 
 
@@ -91,10 +98,6 @@ void UnstructuredGrid3D::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 
     _zug.GetRange(min, max, range);
     minu[2] = range[0];
     maxu[2] = range[1];
-
-    //    printf("UnstructuredGrid3D::%s(-, -)\n", __func__);
-    //    printf("\t min = [%f, %f, %f]\n", minu[0], minu[1], minu[2]);
-    //    printf("\t max = [%f, %f, %f]\n", maxu[0], maxu[1], maxu[2]);
 }
 
 

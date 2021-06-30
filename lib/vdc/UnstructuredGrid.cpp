@@ -164,8 +164,7 @@ bool UnstructuredGrid::GetNodeCells(const Size_tArr3 &indices, std::vector<Size_
 {
     cells.clear();
 
-    vector<size_t> dims = GetDimensions();
-    VAssert(indices.size() == dims.size());
+    VAssert(indices.size() == GetNumDimensions());
 
     VAssert(0 && "GetNodeCells() Not supported");
     return false;

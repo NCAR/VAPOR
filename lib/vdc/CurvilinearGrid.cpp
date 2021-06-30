@@ -37,8 +37,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    VAssert(xrg.GetDimensions().size() == 2);
-    VAssert(yrg.GetDimensions().size() == 2);
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
     VAssert(zcoords.size() == 0 || zcoords.size() == dims[2]);
 
     _terrainFollowing = false;
@@ -55,9 +55,9 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    VAssert(xrg.GetDimensions().size() == 2);
-    VAssert(yrg.GetDimensions().size() == 2);
-    VAssert(zrg.GetDimensions().size() == 3);
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
+    VAssert(zrg.GetNumDimensions() == 3);
 
     _terrainFollowing = true;
     _curvilinearGrid(xrg, yrg, zrg, vector<double>(), qtr);
@@ -73,8 +73,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
-    VAssert(xrg.GetDimensions().size() == 2);
-    VAssert(yrg.GetDimensions().size() == 2);
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
 
     _terrainFollowing = false;
     _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), qtr);
@@ -82,19 +82,25 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
 
 vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
 {
+    const Grid *ptr = nullptr;
     if (dim == 0) {
-        return (_xrg.GetDimensions());
+        ptr = &_xrg;
     } else if (dim == 1) {
-        return (_yrg.GetDimensions());
+        ptr = &_yrg;
     } else if (dim == 2) {
         if (_terrainFollowing) {
-            return (_zrg.GetDimensions());
+            ptr = &_zrg;
         } else {
             return (vector<size_t>(1, _zcoords.size()));
         }
     } else {
         return (vector<size_t>(1, 1));
     }
+
+    auto tmp = ptr->GetDimensions();
+    auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    tmp2.resize(ptr->GetNumDimensions());
+    return tmp2;
 }
 
 void CurvilinearGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const
@@ -216,8 +222,9 @@ bool CurvilinearGrid::InsideGrid(const DblArr3 &coords) const
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, bool begin) : ConstCoordItrAbstract()
 {
     _cg = cg;
-    vector<size_t> dims = _cg->GetDimensions();
-    _index = vector<size_t>(dims.size(), 0);
+    auto dims = _cg->GetDimensions();
+    auto ndims = _cg->GetNumDimensions();
+    _index = vector<size_t>(ndims, 0);
     _terrainFollowing = _cg->_terrainFollowing;
     if (begin) {
         _xCoordItr = _cg->_xrg.cbegin();
@@ -227,13 +234,13 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
         _xCoordItr = _cg->_xrg.cend();
         _yCoordItr = _cg->_yrg.cend();
         if (_terrainFollowing) { _zCoordItr = _cg->_zrg.cend(); }
-        _index[dims.size() - 1] = dims[dims.size() - 1];
+        _index[ndims - 1] = dims[ndims - 1];
         return;
     }
     _coords.push_back(*_xCoordItr);
     _coords.push_back(*_yCoordItr);
 
-    if (dims.size() == 3) {
+    if (ndims == 3) {
         if (_terrainFollowing) {
             _coords.push_back(*_zCoordItr);
         } else {
@@ -262,7 +269,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG() : ConstCoordItrAbstract()
 
 void CurvilinearGrid::ConstCoordItrCG::next()
 {
-    const vector<size_t> &dims = _cg->GetDimensions();
+    auto dims = _cg->GetDimensions();
 
     _index[0]++;
     ++_xCoordItr;
@@ -286,7 +293,7 @@ void CurvilinearGrid::ConstCoordItrCG::next()
         return;
     }
 
-    if (dims.size() == 2) return;
+    if (_cg->GetNumDimensions() == 2) return;
 
     _index[1] = 0;
     _index[2]++;
@@ -309,26 +316,30 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 {
     if (!_index.size()) return;
 
-    const vector<size_t> &dims = _cg->GetDimensions();
+    auto dims = _cg->GetDimensions();
+    auto ndims = _cg->GetNumDimensions();
 
     vector<size_t> maxIndex;
-    ;
-    for (int i = 0; i < dims.size(); i++) maxIndex.push_back(dims[i] - 1);
+    maxIndex.reserve(3);
 
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex, dims);
-    long newIndexL = Wasp::LinearizeCoords(_index, dims) + offset;
+    for (int i = 0; i < ndims; i++) maxIndex.push_back(dims[i] - 1);
+
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex.data(), dims.data(), ndims);
+    long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = vector<size_t>(dims.size(), 0);
-        _index[dims.size() - 1] = dims[dims.size() - 1];
+        _index = vector<size_t>(ndims, 0);
+        _index[ndims - 1] = dims[ndims - 1];
         return;
     }
 
     size_t index2DL = _index[1] * dims[0] + _index[0];
 
-    _index = Wasp::VectorizeCoords(newIndexL, dims);
+    _index.assign(ndims, 0);
+    Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
 
-    size_t offset2D = (long)(_index[1] * dims[0] + _index[0]) - (long)index2DL;
+    VAssert(_index[1] * dims[0] + _index[0] >= index2DL);
+    size_t offset2D = (_index[1] * dims[0] + _index[0]) - index2DL;
 
     _xCoordItr += offset2D;
     _yCoordItr += offset2D;
@@ -449,10 +460,10 @@ float CurvilinearGrid::GetValueLinear(const DblArr3 &coords) const
     // Use Wachspress coordinates as weights to do linear interpolation
     // along XY plane
     //
-    vector<size_t> dims = GetDimensions();
+    auto dims = GetDimensions();
     VAssert(i < dims[0] - 1);
     VAssert(j < dims[1] - 1);
-    if (dims.size() > 2) VAssert(k < dims[2]);
+    if (GetNumDimensions() > 2) VAssert(k < dims[2]);
 
     float v0s[] = {AccessIJK(i, j, k), AccessIJK(i + 1, j, k), AccessIJK(i + 1, j + 1, k), AccessIJK(i, j + 1, k)};
 
