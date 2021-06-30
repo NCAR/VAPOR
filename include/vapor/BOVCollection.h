@@ -11,7 +11,6 @@ namespace VAPoR {
 class BOVCollection : public Wasp::MyBase {
 public:
     enum class parseCodes { ERROR = -1, NOT_FOUND = 0, FOUND = 1 };
-    enum class returnCodes { BAD = -1, GOOD = 0 };
 
     BOVCollection();
     int Initialize(const std::vector<std::string> &paths);
