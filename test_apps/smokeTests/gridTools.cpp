@@ -191,7 +191,7 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
 
     rms = sqrt(sum / (x * y * z));
 
-    if ((! Wasp::NearlyEqual(rms, 0.0)) || disagreements > 0) rc = false;
+    if ((!Wasp::NearlyEqual(rms, 0.0)) || disagreements > 0) rc = false;
     return rc;
 }
 
