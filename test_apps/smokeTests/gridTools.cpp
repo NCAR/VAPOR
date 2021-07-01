@@ -177,10 +177,10 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
-                Size_tArr3 indices = {i, j, k};
+                DimsType indices = {i, j, k};
                 double     trueValue = grid->GetValueAtIndex(indices);
 
-                DblArr3 coords;
+                CoordType coords;
                 grid->GetUserCoordinates(indices, coords);
                 float sampleValue = grid->GetValue(coords);
 
@@ -225,10 +225,10 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
 
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijk = Wasp::VectorizeCoords(count, dims);
-        Size_tArr3          ijk3;
+        DimsType          ijk3;
         std::copy_n(ijk.begin(), ijk3.size(), ijk3.begin());
 
-        Size_tArr3 itr3;
+        DimsType itr3;
         std::copy_n((*itr).begin(), itr3.size(), itr3.begin());
 
         double itrData = g->GetValueAtIndex(itr3);
@@ -639,7 +639,7 @@ VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const vector<size_t> &dims, co
     float deltaY = 1.0 / (dims[1] - 1);
     for (long j = 0; j < dims[1]; j++) {
         for (long i = 0; i < dims[0]; i++) {
-            Size_tArr3 indices = {j * dims[0] + i, 0, 0};
+            DimsType indices = {j * dims[0] + i, 0, 0};
 
             xug.SetValue(indices, i * deltaX);
             yug.SetValue(indices, j * deltaY);
