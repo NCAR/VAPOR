@@ -2,6 +2,7 @@
 #include <vector>
 #include "vapor/VAssert.h"
 #include <cmath>
+#include <cassert>
 #include <time.h>
 #ifdef Darwin
     #include <mach/mach_time.h>
