@@ -95,7 +95,6 @@ Compression Info for variable CANWAT:
     Refinement Levels:  4
     Compression Ratios: 62 21 4 1
 
-num threads = 1
 Grid test for 2D variable CANWAT:
     # Dimensions:       2
     Dimension Lengths:  315 309
@@ -110,7 +109,6 @@ Compression Info for variable P:
     Refinement Levels:  4
     Compression Ratios: 500 100 10 1
 
-num threads = 1
 Grid test for 3D variable P:
     # Dimensions:       3
     Dimension Lengths:  315 309 34
@@ -151,4 +149,4 @@ Time Coordinates:
 
 Time coordinate variable name: Time
 Number of time steps: 1
-Elapsed time: 17.3104
+Elapsed time: 73.9926
