@@ -249,7 +249,6 @@ jobs:
           name: make release with omp
           command: |
             cd /root/project/build
-            #cmake -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/opt/llvm/lib -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
             cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
             make -j7 2>&1 | tee /tmp/releaseOutputWithOMP.txt
 
