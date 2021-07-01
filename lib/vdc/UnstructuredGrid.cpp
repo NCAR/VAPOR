@@ -54,19 +54,16 @@ UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const 
 }
 
 
-const std::array<size_t, 3> UnstructuredGrid::GetNodeDimensions() const 
-{ 
+const std::array<size_t, 3> UnstructuredGrid::GetNodeDimensions() const
+{
     auto tmp = std::array<size_t, 3>{1, 1, 1};
-    assert( tmp.size() >= _vertexDims.size() );
+    assert(tmp.size() >= _vertexDims.size());
     std::copy(_vertexDims.begin(), _vertexDims.end(), tmp.begin());
     return tmp;
 }
 
-    
-const size_t UnstructuredGrid::GetNumNodeDimensions() const
-{
-    return _vertexDims.size();
-}
+
+const size_t UnstructuredGrid::GetNumNodeDimensions() const { return _vertexDims.size(); }
 
 
 bool UnstructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr3> &nodes) const

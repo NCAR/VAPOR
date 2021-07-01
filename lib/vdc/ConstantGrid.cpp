@@ -45,10 +45,7 @@ const std::array<size_t, 3> ConstantGrid::GetNodeDimensions() const
     return tmp;
 }
 
-const size_t  ConstantGrid::GetNumNodeDimensions() const
-{
-    return 1;
-}
+const size_t ConstantGrid::GetNumNodeDimensions() const { return 1; }
 
 const std::vector<size_t> &ConstantGrid::GetCellDimensions() const
 {

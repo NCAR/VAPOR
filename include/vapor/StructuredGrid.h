@@ -71,7 +71,7 @@ public:
     std::string        GetType() const override { return (GetClassType()); }
 
     const std::array<size_t, 3> GetNodeDimensions() const override;
-    const size_t GetNumNodeDimensions() const override;
+    const size_t                GetNumNodeDimensions() const override;
 
     const std::vector<size_t> &GetCellDimensions() const override { return (_cellDims); };
 
@@ -112,7 +112,6 @@ public:
 protected:
 private:
     std::vector<size_t> _cellDims;
-
 };
 };    // namespace VAPoR
 #endif

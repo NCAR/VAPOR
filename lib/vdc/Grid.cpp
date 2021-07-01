@@ -258,9 +258,9 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const Grid *g, bool begin) : Cons
     auto tmp = g->GetNodeDimensions();
     auto nndims = g->GetNumNodeDimensions();
     _dims.resize(nndims);
-    assert(_dims.size() <= tmp.size() );
+    assert(_dims.size() <= tmp.size());
     std::copy(tmp.begin(), tmp.begin() + nndims, _dims.begin());
-    
+
     _index = vector<size_t>(_dims.size(), 0);
     _lastIndex = _index;
     if (_dims.size()) _lastIndex[_dims.size() - 1] = _dims[_dims.size() - 1];

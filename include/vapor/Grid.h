@@ -128,8 +128,8 @@ public:
     virtual size_t GetGeometryDim() const = 0;
 
     virtual const std::array<size_t, 3> GetNodeDimensions() const = 0;
-    virtual const size_t GetNumNodeDimensions() const = 0;
-    virtual const std::vector<size_t> &GetCellDimensions() const = 0;
+    virtual const size_t                GetNumNodeDimensions() const = 0;
+    virtual const std::vector<size_t> & GetCellDimensions() const = 0;
 
     //! Return the ijk dimensions of grid in blocks
     //!

@@ -144,7 +144,7 @@ public:
     //! Return the grid node dimmensions
     //!
     const std::array<size_t, 3> GetNodeDimensions() const override;
-    const size_t GetNumNodeDimensions() const override;
+    const size_t                GetNumNodeDimensions() const override;
 
     //! Return the grid cell dimmensions
     //!
