@@ -39,7 +39,6 @@ const std::array<size_t, 3> StructuredGrid::GetNodeDimensions() const { return G
 const size_t StructuredGrid::GetNumNodeDimensions() const
 {
     return 3;
-    ;
 }
 
 bool StructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr3> &nodes) const
