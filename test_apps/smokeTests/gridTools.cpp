@@ -178,7 +178,7 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
                 DimsType indices = {i, j, k};
-                double     trueValue = grid->GetValueAtIndex(indices);
+                double   trueValue = grid->GetValueAtIndex(indices);
 
                 CoordType coords;
                 grid->GetUserCoordinates(indices, coords);
@@ -225,7 +225,7 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
 
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijk = Wasp::VectorizeCoords(count, dims);
-        DimsType          ijk3;
+        DimsType            ijk3;
         std::copy_n(ijk.begin(), ijk3.size(), ijk3.begin());
 
         DimsType itr3;
