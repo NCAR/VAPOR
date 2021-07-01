@@ -52,7 +52,8 @@ private:
     //
     std::vector<size_t>        GetCoordDimensions(size_t) const override;
     size_t                     GetGeometryDim() const override;
-    const std::vector<size_t> &GetNodeDimensions() const override;
+    const std::array<size_t, 3> GetNodeDimensions() const override;
+    const size_t               GetNumNodeDimensions() const override;
     const std::vector<size_t> &GetCellDimensions() const override;
     void                       GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const override {}
     bool                       GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu, Size_tArr3 &min, Size_tArr3 &max) const override { return (false); }
@@ -72,8 +73,6 @@ private:
     const size_t _topologyDim;    // Not to be confused with _topologyDimension in
                                   // the base Grid class, which is private to Grid.
 
-    // Duplicate data member that exists only because GetNodeDimensions() and GetCellDimensions()
-    // want to return a reference to a local object. And duplicates can be mutable :)
     mutable std::vector<size_t> _duplicate;
 
 };    // end ConstantGrid class

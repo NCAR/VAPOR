@@ -39,12 +39,15 @@ std::vector<size_t> ConstantGrid::GetCoordDimensions(size_t) const
 
 size_t ConstantGrid::GetGeometryDim() const { return 3; }
 
-const std::vector<size_t> &ConstantGrid::GetNodeDimensions() const
+const std::array<size_t, 3> ConstantGrid::GetNodeDimensions() const
 {
-    auto tmp = GetDimensions();
-    _duplicate = {tmp[0], tmp[1], tmp[2]};
-    _duplicate.resize(GetNumDimensions());
-    return _duplicate;
+    auto tmp = std::array<size_t, 3>{1, 1, 1};
+    return tmp;
+}
+
+const size_t  ConstantGrid::GetNumNodeDimensions() const
+{
+    return 1;
 }
 
 const std::vector<size_t> &ConstantGrid::GetCellDimensions() const

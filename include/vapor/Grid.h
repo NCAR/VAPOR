@@ -127,7 +127,8 @@ public:
     //
     virtual size_t GetGeometryDim() const = 0;
 
-    virtual const std::vector<size_t> &GetNodeDimensions() const = 0;
+    virtual const std::array<size_t, 3> GetNodeDimensions() const = 0;
+    virtual const size_t GetNumNodeDimensions() const = 0;
     virtual const std::vector<size_t> &GetCellDimensions() const = 0;
 
     //! Return the ijk dimensions of grid in blocks
@@ -668,7 +669,7 @@ public:
     //!
     //! \sa GetNodeDimensions()
     //
-    virtual void ClampIndex(const Size_tArr3 &indices, Size_tArr3 &cIndices) const { ClampIndex(GetNodeDimensions(), indices, cIndices); }
+    virtual void ClampIndex(const Size_tArr3 &indices, Size_tArr3 &cIndices) const { ClampIndex(GetNodeDimensions(), GetNumNodeDimensions(), indices, cIndices); }
 
     //! Clamp grid cell indices
     //!
@@ -1204,6 +1205,16 @@ protected:
         cIndices = {0, 0, 0};
 
         for (int i = 0; i < dims.size(); i++) {
+            cIndices[i] = indices[i];
+            if (cIndices[i] >= dims[i]) { cIndices[i] = dims[i] - 1; }
+        }
+    }
+
+    virtual void ClampIndex(const std::array<size_t, 3> &dims, size_t nNodeDims, const Size_tArr3 indices, Size_tArr3 &cIndices) const
+    {
+        cIndices = {0, 0, 0};
+
+        for (int i = 0; i < nNodeDims; i++) {
             cIndices[i] = indices[i];
             if (cIndices[i] >= dims[i]) { cIndices[i] = dims[i] - 1; }
         }
