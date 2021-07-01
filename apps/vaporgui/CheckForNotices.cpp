@@ -66,7 +66,7 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
 
                 Notice notice;
                 notice.url = reply->url().toString().toStdString();
-                notice.content = json["content"].toString().toStdString();
+                notice.content = json[QString("content")].toString().toStdString();
                 notice.date = QDate::fromString(json["date"].toString(), TIME_FORMAT);
                 notice.until = QDate::fromString(json["until"].toString(), TIME_FORMAT);
 
