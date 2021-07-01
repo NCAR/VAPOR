@@ -127,7 +127,6 @@ def testGrid( grid ):
         print( "  Test failed with exit code " + str(programOutput.returncode) )
     else:
         print( "  Test passed\n" )
-        print( programOutput )
 
     return rc
 
