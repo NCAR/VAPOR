@@ -58,7 +58,7 @@ public:
 
     //! \copydoc RegularGrid::GetValue()
     //!
-    float GetValue(const DblArr3 &coords) const override;
+    float GetValue(const CoordType &coords) const override;
 
     //! \copydoc Grid::GetInterpolationOrder()
     //
@@ -80,11 +80,11 @@ public:
 
     //! \copydoc Grid::GetBoundingBox()
     //!
-    virtual void GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const override;
+    virtual void GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const override;
 
     //! \copydoc Grid::GetUserCoordinates()
     //!
-    virtual void GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const override;
+    virtual void GetUserCoordinates(const DimsType &indices, CoordType &coords) const override;
 
     // For grandparent inheritance of
     // Grid::GetUserCoordinates(const size_t indices[], double coords[])
@@ -93,7 +93,7 @@ public:
 
     //! \copydoc Grid::GetIndicesCell
     //!
-    virtual bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const override;
+    virtual bool GetIndicesCell(const CoordType &coords, DimsType &indices) const override;
 
     // For grandparent inheritance of
     // Grid::GetIndicesCell(const double coords[3], size_t indices[3])
@@ -102,7 +102,7 @@ public:
 
     //! \copydoc Grid::InsideGrid()
     //!
-    bool InsideGrid(const DblArr3 &coords) const override;
+    bool InsideGrid(const CoordType &coords) const override;
 
     //! \copydoc Grid::GetPeriodic()
     //!
@@ -159,20 +159,20 @@ public:
 protected:
     //! \copydoc Grid::GetUserExtents()
     //!
-    virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
+    virtual void GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const override;
 
 private:
     StretchedGrid       _sg2d;    // horizontal coordinates maintained in stretched grid
     RegularGrid         _zrg;     // vertical coords are the values of a regular grid
     std::vector<double> _xcoords;
     std::vector<double> _ycoords;
-    DblArr3             _minu = {{0.0, 0.0, 0.0}};
-    DblArr3             _maxu = {{0.0, 0.0, 0.0}};
+    CoordType           _minu = {{0.0, 0.0, 0.0}};
+    CoordType           _maxu = {{0.0, 0.0, 0.0}};
     int                 _interpolationOrder;
 
-    virtual float GetValueNearestNeighbor(const DblArr3 &coords) const override;
+    virtual float GetValueNearestNeighbor(const CoordType &coords) const override;
 
-    virtual float GetValueLinear(const DblArr3 &coords) const override;
+    virtual float GetValueLinear(const CoordType &coords) const override;
 
     //!
     //! Return the bilinear interpolation weights of a point given in user
@@ -258,7 +258,7 @@ private:
 
     double _interpolateVaryingCoord(size_t i0, size_t j0, size_t k0, double x, double y) const;
 
-    bool _insideGrid(const DblArr3 &coords, Size_tArr3 &indices, double wgts[3]) const;
+    bool _insideGrid(const CoordType &coords, DimsType &indices, double wgts[3]) const;
 };
 };    // namespace VAPoR
 #endif

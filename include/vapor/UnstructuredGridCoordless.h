@@ -39,23 +39,23 @@ public:
     static std::string GetClassType() { return ("UnstructuredCoordless"); }
     std::string        GetType() const override { return (GetClassType()); }
 
-    virtual void GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const override
+    virtual void GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const override
     {
         minu = {0.0, 0.0, 0.0};
         maxu = {0.0, 0.0, 0.0};
     }
 
-    bool GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu, Size_tArr3 &min, Size_tArr3 &max) const override { return (false); }
+    bool GetEnclosingRegion(const CoordType &minu, const CoordType &maxu, DimsType &min, DimsType &max) const override { return (false); }
 
-    virtual void GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const override {}
+    virtual void GetUserCoordinates(const DimsType &indices, CoordType &coords) const override {}
 
-    bool GetIndicesCell(const DblArr3 &, Size_tArr3 &) const override { return (false); }
+    bool GetIndicesCell(const CoordType &, DimsType &) const override { return (false); }
 
-    bool InsideGrid(const DblArr3 &coords) const override { return (false); }
+    bool InsideGrid(const CoordType &coords) const override { return (false); }
 
-    float GetValueNearestNeighbor(const DblArr3 &coords) const override { return (0.0); }
+    float GetValueNearestNeighbor(const CoordType &coords) const override { return (0.0); }
 
-    float GetValueLinear(const DblArr3 &coords) const override { return (0.0); }
+    float GetValueLinear(const CoordType &coords) const override { return (0.0); }
 
     virtual size_t GetGeometryDim() const override { return (0); }
 
@@ -92,7 +92,7 @@ public:
     VDF_API friend std::ostream &operator<<(std::ostream &o, const UnstructuredGridCoordless &sg);
 
 protected:
-    virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override
+    virtual void GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const override
     {
         minu = {0.0, 0.0, 0.0};
         maxu = {0.0, 0.0, 0.0};

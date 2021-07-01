@@ -223,14 +223,14 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
 //
 size_t WireFrameRenderer::_buildCacheConnectivity(const Grid *grid, const vector<GLuint> &nodeMap, bool *GPUOutOfMemory) const
 {
-    auto               tmp = grid->GetDimensions();
-    auto               dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    size_t             invalidIndex = std::numeric_limits<size_t>::max();
-    size_t             numNodes = Wasp::VProduct(dims);
-    bool               layered = grid->GetTopologyDim() == 3;
-    size_t             maxVertsPerCell = grid->GetMaxVertexPerCell();
-    vector<Size_tArr3> cellNodeIndices(maxVertsPerCell);
-    vector<GLuint>     cellNodeIndicesLinear(maxVertsPerCell);
+    auto             tmp = grid->GetDimensions();
+    auto             dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
+    size_t           invalidIndex = std::numeric_limits<size_t>::max();
+    size_t           numNodes = Wasp::VProduct(dims);
+    bool             layered = grid->GetTopologyDim() == 3;
+    size_t           maxVertsPerCell = grid->GetMaxVertexPerCell();
+    vector<DimsType> cellNodeIndices(maxVertsPerCell);
+    vector<GLuint>   cellNodeIndicesLinear(maxVertsPerCell);
 
     size_t numCells = Wasp::VProduct(grid->GetCellDimensions());
     size_t maxLineIndices = numCells * (layered ? maxVertsPerCell / 2 * 3 : maxVertsPerCell * 2);

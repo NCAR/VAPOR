@@ -38,9 +38,9 @@ const std::array<size_t, 3> StructuredGrid::GetNodeDimensions() const { return G
 
 const size_t StructuredGrid::GetNumNodeDimensions() const { return 3; }
 
-bool StructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr3> &nodes) const
+bool StructuredGrid::GetCellNodes(const DimsType &cindices, vector<DimsType> &nodes) const
 {
-    Size_tArr3 cCindices;
+    DimsType cCindices;
     ClampCellIndex(cindices, cCindices);
 
     auto dims = GetDimensions();
@@ -115,11 +115,11 @@ bool StructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr3>
     return (true);
 }
 
-bool StructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Size_tArr3> &cells) const
+bool StructuredGrid::GetCellNeighbors(const DimsType &cindices, std::vector<DimsType> &cells) const
 {
     cells.clear();
 
-    Size_tArr3 cCindices;
+    DimsType cCindices;
     ClampCellIndex(cindices, cCindices);
 
     auto dims = GetDimensions();
@@ -132,7 +132,7 @@ bool StructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Si
     // walk counter-clockwise order
     //
     if (ndims == 2) {
-        Size_tArr3 indices;
+        DimsType indices;
 
         if (cCindices[1] != 0) {    // below
             indices = {cCindices[0], cCindices[1] - 1, 0};
@@ -157,7 +157,7 @@ bool StructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Si
     return (true);
 }
 
-bool StructuredGrid::GetNodeCells(const Size_tArr3 &indices, std::vector<Size_tArr3> &cells) const
+bool StructuredGrid::GetNodeCells(const DimsType &indices, std::vector<DimsType> &cells) const
 {
     cells.clear();
 
@@ -173,7 +173,7 @@ bool StructuredGrid::GetNodeCells(const Size_tArr3 &indices, std::vector<Size_tA
     }
 
     if (ndims == 2) {
-        Size_tArr3 indices;
+        DimsType indices;
 
         if (indices[0] != 0 && indices[1] != 0) {    // below, left
             indices = {indices[0] - 1, indices[1] - 1, 0};
@@ -198,7 +198,7 @@ bool StructuredGrid::GetNodeCells(const Size_tArr3 &indices, std::vector<Size_tA
     return (true);
 }
 
-bool StructuredGrid::GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu, Size_tArr3 &min, Size_tArr3 &max) const
+bool StructuredGrid::GetEnclosingRegion(const CoordType &minu, const CoordType &maxu, DimsType &min, DimsType &max) const
 {
     if (!GetIndicesCell(minu, min)) return (false);
     if (!GetIndicesCell(maxu, max)) return (false);
@@ -207,7 +207,7 @@ bool StructuredGrid::GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu
     // For curvilinear grids it's possible that minu and maxu components
     // are swapped
     //
-    DblArr3 newMinu, newMaxu;
+    CoordType newMinu, newMaxu;
     GetUserCoordinates(min.data(), newMinu.data());
     GetUserCoordinates(max.data(), newMaxu.data());
 
@@ -218,7 +218,7 @@ bool StructuredGrid::GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu
     return (true);
 };
 
-void StructuredGrid::ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const
+void StructuredGrid::ClampCoord(const CoordType &coords, CoordType &cCoords) const
 {
     const vector<bool> &periodic = GetPeriodic();
 
@@ -231,7 +231,7 @@ void StructuredGrid::ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const
 
     auto dims = GetDimensions();
 
-    DblArr3 minu, maxu;
+    CoordType minu, maxu;
     GetUserExtents(minu, maxu);
 
     cCoords = coords;
