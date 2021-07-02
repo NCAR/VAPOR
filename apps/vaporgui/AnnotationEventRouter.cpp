@@ -94,7 +94,7 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
 
     PGroup *timeAnnotationGroup = new PGroup({new PSection(
         "Time Annotation", {new PEnumDropdown(AnnotationParams::_timeTypeTag, {"No annotation", "Time step number", "User time", "Formatted date/time"}, {0, 1, 2, 3}, "Annotation type"),
-                            new PIntegerInput(AnnotationParams::_timeSizeTag, "Font Size"), 
+                            (new PIntegerSliderEdit(VAPoR::AnnotationParams::_timeSizeTag, "Font Size"))->SetRange(24, 100)->EnableDynamicUpdate(),
                             (new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X Position"))->EnableDynamicUpdate(),
                             (new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y Position"))->EnableDynamicUpdate(), 
                             new PColorSelector(AnnotationParams::_timeColorTag, "Text Color")})
