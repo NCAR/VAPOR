@@ -19,7 +19,10 @@
 
 namespace VAPoR {
 
+//! Type for specifying floating point coordinates
 using CoordType = std::array<double, 3>;
+
+//! Type for specifying integer indices
 using DimsType = std::array<size_t, 3>;
 
 //! \class Grid
@@ -31,21 +34,23 @@ using DimsType = std::array<size_t, 3>;
 //! grid.
 //!
 //! The grid samples a scalar function at each grid point.  Each
-//! grid point can be addressed by a multi-dimensional
-//! vector <size_t> indices. The fastest varying dimension is
+//! grid point can be addressed by a 3-element array defined as
+//! type \p DimsType.
+//! The fastest varying dimension is
 //! given by indices[0], etc.
 //!
 //! Because grid samples are repesented internally as arrays, when accessing
 //! multiple grid points better performance is achieved by using
 //! unit stride.
 //!
-//! \param indices A vector of integer indices i in the range 0..max,
+//! \param indices A \b DimsType i in the range 0..max,
 //! where max is one minus the value of the corresponding element
 //! returned by GetDimensions().
 //!
-//! \param coords A vector of floating point values with size given by
-//! GetGeometryDim() containig the coordinates of a point in user-defined
-//! coordinates.
+//! \param coords A \b CoordType 
+//! containig the coordinates of a point in user-defined
+//! coordinates. Elements with indices greater than GetGeometryDim()-1 are
+//! ignored.
 //!
 //
 class VDF_API Grid {
@@ -56,7 +61,7 @@ public:
     //!
     //! \param[in] dims Dimensions of arrays containing grid data.
     //!
-    //! \param[in] bs A vector with size matching \p dims, specifying the
+    //! \param[in] bs A \b DimsType with, specifying the
     //! dimensions of
     //! each block storing the sampled scalar function.
     //!
@@ -91,7 +96,7 @@ public:
     //!
     DimsType GetDimensions() const
     {
-        auto tmp = std::array<size_t, 3>{1, 1, 1};
+        auto tmp = DimsType{1, 1, 1};
         std::copy(_dims.begin(), _dims.end(), tmp.begin());
         return tmp;
     }
@@ -165,9 +170,7 @@ public:
     //! If any of the \p indecies are outside of the
     //! valid range the results are undefined
     //!
-    //! \param[in] indices of grid point along fastest varying dimension. The
-    //! size of \p indices must be equal to that of the \p dims vector
-    //! returned by GetDimensions()
+    //! \param[in] indices of grid point along fastest varying dimension. 
     //!
     virtual float GetValueAtIndex(const DimsType &indices) const;
 
