@@ -321,11 +321,9 @@ void StretchedGrid::GetUserExtentsHelper(CoordType &minext, CoordType &maxext) c
 {
     auto dims = StructuredGrid::GetDimensions();
 
-    DimsType min = {0,0,0};
-	DimsType max = {0,0,0};
-    for (int i = 0; i < dims.size(); i++) {
-        max[i] = (dims[i] - 1);
-    }
+    DimsType min = {0, 0, 0};
+    DimsType max = {0, 0, 0};
+    for (int i = 0; i < dims.size(); i++) { max[i] = (dims[i] - 1); }
 
     CoordType minv, maxv;
     StretchedGrid::GetBoundingBox(min, max, minv, maxv);

@@ -224,10 +224,10 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
 
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijk = Wasp::VectorizeCoords(count, dims);
-        DimsType            ijk3 = {0,0,0};
+        DimsType            ijk3 = {0, 0, 0};
         std::copy_n(ijk.begin(), ijk3.size(), ijk3.begin());
 
-        DimsType itr3 = {0,0,0};
+        DimsType itr3 = {0, 0, 0};
         std::copy_n((*itr).begin(), (*itr).size(), itr3.begin());
 
         double itrData = g->GetValueAtIndex(itr3);
@@ -295,8 +295,8 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
 
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijkVec = Wasp::VectorizeCoords(count, dims);
-        DimsType              ijk = {ijkVec[X], ijkVec[Y], ijkVec[Z]};
-        CoordType             coords;
+        DimsType            ijk = {ijkVec[X], ijkVec[Y], ijkVec[Z]};
+        CoordType           coords;
 
         bool disagree = false;
         g->GetUserCoordinates(ijk, coords);
