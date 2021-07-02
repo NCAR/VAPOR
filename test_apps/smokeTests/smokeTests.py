@@ -209,10 +209,10 @@ def main():
         os.mkdir( resultsDir )
 
     for grid in gridSizes:
-        if ( testGrid(grid) > 0):
+        if ( testGrid(grid) != 0):
             print ("  See artifact file " + grid + ".txt or " + resultsDir + grid + ".txt for mismatches")
             print ("  Failed assertions, if any, are shown above.\n" )
-            #sys.exit(1)
+            sys.exit(-1)
  
     for dataType, dataFile in dataMgrs.items():
         baselineFile = resultsDir + dataType + "_baseline.txt"
