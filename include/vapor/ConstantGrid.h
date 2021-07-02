@@ -50,23 +50,23 @@ private:
     // They do nothing and return meaningless values.
     // Do not use!
     //
-    std::vector<size_t>         GetCoordDimensions(size_t) const override;
-    size_t                      GetGeometryDim() const override;
-    const std::array<size_t, 3> GetNodeDimensions() const override;
-    const size_t                GetNumNodeDimensions() const override;
-    const std::vector<size_t> & GetCellDimensions() const override;
-    void                        GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const override {}
-    bool                        GetEnclosingRegion(const CoordType &minu, const CoordType &maxu, DimsType &min, DimsType &max) const override { return (false); }
-    virtual void                GetUserCoordinates(const DimsType &, CoordType &) const override {}
-    bool                        GetIndicesCell(const CoordType &coords, DimsType &indices) const override;
-    bool                        GetCellNodes(const DimsType &, std::vector<DimsType> &) const override;
-    bool                        GetCellNeighbors(const DimsType &, std::vector<DimsType> &) const override;
-    bool                        GetNodeCells(const DimsType &, std::vector<DimsType> &) const override;
-    size_t                      GetMaxVertexPerFace() const override;
-    size_t                      GetMaxVertexPerCell() const override;
-    void                        ClampCoord(const CoordType &coords, CoordType &cCoords) const override { cCoords = coords; }
-    ConstCoordItr               ConstCoordBegin() const override;
-    ConstCoordItr               ConstCoordEnd() const override;
+    std::vector<size_t>        GetCoordDimensions(size_t) const override;
+    size_t                     GetGeometryDim() const override;
+    const DimsType             GetNodeDimensions() const override;
+    const size_t               GetNumNodeDimensions() const override;
+    const std::vector<size_t> &GetCellDimensions() const override;
+    void                       GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const override {}
+    bool                       GetEnclosingRegion(const CoordType &minu, const CoordType &maxu, DimsType &min, DimsType &max) const override { return (false); }
+    virtual void               GetUserCoordinates(const DimsType &, CoordType &) const override {}
+    bool                       GetIndicesCell(const CoordType &coords, DimsType &indices) const override;
+    bool                       GetCellNodes(const DimsType &, std::vector<DimsType> &) const override;
+    bool                       GetCellNeighbors(const DimsType &, std::vector<DimsType> &) const override;
+    bool                       GetNodeCells(const DimsType &, std::vector<DimsType> &) const override;
+    size_t                     GetMaxVertexPerFace() const override;
+    size_t                     GetMaxVertexPerCell() const override;
+    void                       ClampCoord(const CoordType &coords, CoordType &cCoords) const override { cCoords = coords; }
+    ConstCoordItr              ConstCoordBegin() const override;
+    ConstCoordItr              ConstCoordEnd() const override;
 
     // Private data member that holds this constant value.
     const float  _value;
