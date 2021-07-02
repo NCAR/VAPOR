@@ -34,7 +34,7 @@ StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> 
     }
 }
 
-const std::array<size_t, 3> StructuredGrid::GetNodeDimensions() const { return GetDimensions(); }
+const DimsType StructuredGrid::GetNodeDimensions() const { return GetDimensions(); }
 
 const size_t StructuredGrid::GetNumNodeDimensions() const { return 3; }
 

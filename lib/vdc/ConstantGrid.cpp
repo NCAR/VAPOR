@@ -39,7 +39,7 @@ std::vector<size_t> ConstantGrid::GetCoordDimensions(size_t) const
 
 size_t ConstantGrid::GetGeometryDim() const { return 3; }
 
-const std::array<size_t, 3> ConstantGrid::GetNodeDimensions() const
+const VAPoR::DimsType ConstantGrid::GetNodeDimensions() const
 {
     auto tmp = std::array<size_t, 3>{1, 1, 1};
     return tmp;
