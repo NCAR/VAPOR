@@ -36,7 +36,7 @@ StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> 
 
 const DimsType StructuredGrid::GetNodeDimensions() const { return GetDimensions(); }
 
-const size_t StructuredGrid::GetNumNodeDimensions() const { return 3; }
+const size_t StructuredGrid::GetNumNodeDimensions() const { return GetNumDimensions(); }
 
 bool StructuredGrid::GetCellNodes(const DimsType &cindices, vector<DimsType> &nodes) const
 {

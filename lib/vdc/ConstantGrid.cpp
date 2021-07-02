@@ -41,11 +41,12 @@ size_t ConstantGrid::GetGeometryDim() const { return 3; }
 
 const VAPoR::DimsType ConstantGrid::GetNodeDimensions() const
 {
-    auto tmp = std::array<size_t, 3>{1, 1, 1};
-    return tmp;
+    return(GetDimensions());
 }
 
-const size_t ConstantGrid::GetNumNodeDimensions() const { return 1; }
+const size_t ConstantGrid::GetNumNodeDimensions() const {
+    return(GetNumDimensions());
+}
 
 const std::vector<size_t> &ConstantGrid::GetCellDimensions() const
 {
