@@ -25,20 +25,47 @@ jobs:
       - checkout
 
       - run:
-          name: cmake and make
+          name: make debug
           command: |
-            cd build
+            cd /root/project/build
             cmake -DBUILD_TEST_APPS=ON ..
             make -j7 2>&1 | tee /tmp/debugOutput.txt
             make clean
-            cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
-            make -j7 2>&1 | tee /tmp/releaseOutput.txt
-
+      
       - store_artifacts:
           path: /tmp/debugOutput.txt
 
+      - run:
+          name: make debug with omp
+          command: |
+            cd /root/project/build
+            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+            make -j7 2>&1 | tee /tmp/debugOutputWithOMP.txt
+            make clean
+      
+      - store_artifacts:
+          path: /tmp/debugOutputWithOMP.txt
+
+      - run:
+          name: make release
+          command: |
+            cd /root/project/build
+            cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
+            make -j7 2>&1 | tee /tmp/releaseOutput.txt
+            make clean
+      
       - store_artifacts:
           path: /tmp/releaseOutput.txt
+
+      - run:
+          name: make release with omp
+          command: |
+            cd /root/project/build
+            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+            make -j7 2>&1 | tee /tmp/releaseOutputWithOMP.txt
+
+      - store_artifacts:
+          path: /tmp/releaseOutputWithOMP.txt
 
       - run:
           name: Smoke test
@@ -59,9 +86,29 @@ jobs:
             fi
 
       - run:
+          name: check for Debug OMP warnings
+          command: |
+            if grep -q warning /tmp/debugOutputWithOMP.txt; then
+               cat /tmp/debugOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+      - run:
           name: check for Release warnings
           command: |
             if grep -q warning /tmp/releaseOutput.txt; then
+               cat /tmp/releaseOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+      - run:
+          name: check for Release OMP warnings
+          command: |
+            if grep -q warning /tmp/releaseOutputWithOMP.txt; then
                cat /tmp/releaseOutput.txt
                exit -1
             else
@@ -123,7 +170,7 @@ jobs:
           name: make installer
           command: |
             cd build
-            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
             make -j7
             make installer
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu18-Weekly}" ; done
@@ -166,21 +213,47 @@ jobs:
       - checkout
 
       - run:
-          name: cmake3 and make
+          name: make debug
           command: |
-            ls -lrth /usr/local/VAPOR-Deps
             cd /root/project/build
             cmake3 -DBUILD_TEST_APPS=ON ..
             make -j7 2>&1 | tee /tmp/debugOutput.txt
             make clean
-            cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
-            make -j7 2>&1 | tee /tmp/releaseOutput.txt
-
+      
       - store_artifacts:
           path: /tmp/debugOutput.txt
 
+      - run:
+          name: make debug with omp
+          command: |
+            cd /root/project/build
+            cmake3 -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+            make -j7 2>&1 | tee /tmp/debugOutputWithOMP.txt
+            make clean
+
+      - store_artifacts:
+          path: /tmp/debugOutputWithOMP.txt
+
+      - run:
+          name: make release
+          command: |
+            cd /root/project/build
+            cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
+            make -j7 2>&1 | tee /tmp/releaseOutput.txt
+            make clean
+
       - store_artifacts:
           path: /tmp/releaseOutput.txt
+      
+      - run:
+          name: make release with omp
+          command: |
+            cd /root/project/build
+            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+            make -j7 2>&1 | tee /tmp/releaseOutputWithOMP.txt
+
+      - store_artifacts:
+          path: /tmp/releaseOutputWithOMP.txt
 
       - run:
           name: check for Debug warnings
@@ -213,7 +286,7 @@ jobs:
           name: cmake3 and make
           command: |
             cd build
-            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
             make
             make installer
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7-Weekly}" ; done
@@ -324,7 +397,7 @@ jobs:
             cd build
             git pull
             git checkout $CIRCLE_BRANCH
-            /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
             make
             make installer
             for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/Darwin-Weekly}" ; done
@@ -489,10 +562,10 @@ workflows:
       - build_ubuntu18_installer
       - build_centos7_installer
       - build_osx_installer
-#      - build_win10_installer
+      - build_win10_installer
       - release_on_github:
           requires:
             - build_ubuntu18_installer
             - build_centos7_installer
             - build_osx_installer
-#            - build_win10_installer
+            - build_win10_installer

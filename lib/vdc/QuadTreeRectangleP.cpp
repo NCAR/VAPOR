@@ -20,7 +20,6 @@ QuadTreeRectangleP::QuadTreeRectangleP(float left, float top, float right, float
 #pragma omp parallel
     {
         nthreads = omp_get_num_threads();
-        printf("num threads = %d\n", nthreads);
     }
 
     // We split the quadtree along the X-axis to create one subtree for
@@ -45,7 +44,6 @@ QuadTreeRectangleP::QuadTreeRectangleP(size_t max_depth, size_t reserve_size) : 
 #pragma omp parallel
     {
         nthreads = omp_get_num_threads();
-        printf("num threads = %d\n", nthreads);
     }
 
     float bin_width = (1.0 - 0.0) / ((float)nthreads);
