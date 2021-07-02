@@ -55,7 +55,7 @@ UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const 
 }
 
 
-const std::array<size_t, 3> UnstructuredGrid::GetNodeDimensions() const
+const VAPoR::DimsType UnstructuredGrid::GetNodeDimensions() const
 {
     auto tmp = std::array<size_t, 3>{1, 1, 1};
     assert(tmp.size() >= _vertexDims.size());
