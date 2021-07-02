@@ -47,7 +47,7 @@ using DimsType = std::array<size_t, 3>;
 //! where max is one minus the value of the corresponding element
 //! returned by GetDimensions().
 //!
-//! \param coords A \b CoordType 
+//! \param coords A \b CoordType
 //! containig the coordinates of a point in user-defined
 //! coordinates. Elements with indices greater than GetGeometryDim()-1 are
 //! ignored.
@@ -170,7 +170,7 @@ public:
     //! If any of the \p indecies are outside of the
     //! valid range the results are undefined
     //!
-    //! \param[in] indices of grid point along fastest varying dimension. 
+    //! \param[in] indices of grid point along fastest varying dimension.
     //!
     virtual float GetValueAtIndex(const DimsType &indices) const;
 

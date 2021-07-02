@@ -39,14 +39,9 @@ std::vector<size_t> ConstantGrid::GetCoordDimensions(size_t) const
 
 size_t ConstantGrid::GetGeometryDim() const { return 3; }
 
-const VAPoR::DimsType ConstantGrid::GetNodeDimensions() const
-{
-    return(GetDimensions());
-}
+const VAPoR::DimsType ConstantGrid::GetNodeDimensions() const { return (GetDimensions()); }
 
-const size_t ConstantGrid::GetNumNodeDimensions() const {
-    return(GetNumDimensions());
-}
+const size_t ConstantGrid::GetNumNodeDimensions() const { return (GetNumDimensions()); }
 
 const std::vector<size_t> &ConstantGrid::GetCellDimensions() const
 {
