@@ -2,6 +2,7 @@
 #include <vector>
 #include "vapor/VAssert.h"
 #include <cmath>
+#include <cassert>
 #include <time.h>
 #ifdef Darwin
     #include <mach/mach_time.h>
@@ -53,9 +54,22 @@ UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const 
     Grid::SetCellOffset(cellOffset);
 }
 
-bool UnstructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr3> &nodes) const
+
+const VAPoR::DimsType UnstructuredGrid::GetNodeDimensions() const
 {
-    Size_tArr3 cCindices;
+    auto tmp = std::array<size_t, 3>{1, 1, 1};
+    assert(tmp.size() >= _vertexDims.size());
+    std::copy(_vertexDims.begin(), _vertexDims.end(), tmp.begin());
+    return tmp;
+}
+
+
+const size_t UnstructuredGrid::GetNumNodeDimensions() const { return _vertexDims.size(); }
+
+
+bool UnstructuredGrid::GetCellNodes(const DimsType &cindices, vector<DimsType> &nodes) const
+{
+    DimsType cCindices;
     ClampCellIndex(cindices, cCindices);
 
     const vector<size_t> &cdims = GetCellDimensions();
@@ -105,11 +119,11 @@ bool UnstructuredGrid::GetCellNodes(const Size_tArr3 &cindices, vector<Size_tArr
     return (true);
 }
 
-bool UnstructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Size_tArr3> &cells) const
+bool UnstructuredGrid::GetCellNeighbors(const DimsType &cindices, std::vector<DimsType> &cells) const
 {
     cells.clear();
 
-    Size_tArr3 cCindices = {0, 0, 0};
+    DimsType cCindices = {0, 0, 0};
     ClampCellIndex(cindices, cCindices);
 
     vector<size_t> cdims = GetCellDimensions();
@@ -119,7 +133,7 @@ bool UnstructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<
     const int *ptr = _faceOnFace + (_maxVertexPerFace * cCindices[0]);
     long       offset = GetCellOffset();
 
-    Size_tArr3 indices = {0, 0, 0};
+    DimsType indices = {0, 0, 0};
     if (cdims.size() == 1) {
         for (int i = 0; i < _maxVertexPerFace; i++) {
             if (*ptr == GetMissingID() || *ptr + offset < 0) break;
@@ -143,7 +157,7 @@ bool UnstructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<
         // layer below
         //
         if (cCindices[1] != 0) {
-            Size_tArr3 indices = {cCindices[0], cCindices[1], 0};
+            DimsType indices = {cCindices[0], cCindices[1], 0};
             indices[1] = cCindices[1] - 1;
             cells.push_back(indices);
         }
@@ -151,7 +165,7 @@ bool UnstructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<
         // layer above
         //
         if (cCindices[1] != cdims[1] - 1) {
-            Size_tArr3 indices = {cCindices[0], cCindices[1], 0};
+            DimsType indices = {cCindices[0], cCindices[1], 0};
             indices[1] = indices[1] + 1;
             cells.push_back(indices);
         }
@@ -160,7 +174,7 @@ bool UnstructuredGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<
     return (true);
 }
 
-bool UnstructuredGrid::GetNodeCells(const Size_tArr3 &indices, std::vector<Size_tArr3> &cells) const
+bool UnstructuredGrid::GetNodeCells(const DimsType &indices, std::vector<DimsType> &cells) const
 {
     cells.clear();
 

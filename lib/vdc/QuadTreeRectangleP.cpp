@@ -89,7 +89,7 @@ QuadTreeRectangleP::~QuadTreeRectangleP()
     _qtrs.clear();
 }
 
-bool QuadTreeRectangleP::Insert(float left, float top, float right, float bottom, Size_tArr3 payload)
+bool QuadTreeRectangleP::Insert(float left, float top, float right, float bottom, DimsType payload)
 {
     // Serial insertion of a single element
     //
@@ -179,8 +179,8 @@ bool QuadTreeRectangleP::Insert(const Grid *grid, size_t ncells)
 //
 #pragma omp parallel
     {
-        size_t             maxNodes = grid->GetMaxVertexPerCell();
-        vector<Size_tArr3> nodes(maxNodes);
+        size_t           maxNodes = grid->GetMaxVertexPerCell();
+        vector<DimsType> nodes(maxNodes);
 
         int    id = omp_get_thread_num();
         int    nthreads = omp_get_num_threads();
@@ -188,11 +188,11 @@ bool QuadTreeRectangleP::Insert(const Grid *grid, size_t ncells)
         size_t iend = (id + 1) * ncells / nthreads;
         if (id == nthreads - 1) iend = ncells;
 
-        DblArr3                 coords;
+        CoordType               coords;
         Grid::ConstCellIterator itr = grid->ConstCellBegin() + istart;
 
         for (size_t i = istart; i < iend; i++, ++itr) {
-            Size_tArr3 cell = {0, 0, 0};
+            DimsType cell = {0, 0, 0};
             Grid::CopyToArr3((*itr).data(), ncellindices, cell);
 
             grid->GetCellNodes(cell, nodes);
@@ -257,7 +257,7 @@ bool QuadTreeRectangleP::Insert(const Grid *grid, size_t ncells)
     return (status);
 }
 
-void QuadTreeRectangleP::GetPayloadContained(float x, float y, std::vector<Size_tArr3> &payloads) const
+void QuadTreeRectangleP::GetPayloadContained(float x, float y, std::vector<DimsType> &payloads) const
 {
     payloads.clear();
 
@@ -278,7 +278,7 @@ void QuadTreeRectangleP::GetPayloadContained(float x, float y, std::vector<Size_
     std::vector<pType> p;
     _qtrs[bin]->GetPayloadContained(x, y, p);
 
-    for (auto itr = p.begin(); itr != p.end(); ++itr) { payloads.push_back(Size_tArr3{(*itr)[0], (*itr)[1], 0}); }
+    for (auto itr = p.begin(); itr != p.end(); ++itr) { payloads.push_back(DimsType{(*itr)[0], (*itr)[1], 0}); }
 }
 
 void QuadTreeRectangleP::GetStats(std::vector<size_t> &payload_histo, std::vector<size_t> &level_histo) const

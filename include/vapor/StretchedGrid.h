@@ -67,21 +67,21 @@ public:
 
     // \copydoc GetGrid::GetBoundingBox()
     //
-    virtual void GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const override;
+    virtual void GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const override;
 
     // \copydoc GetGrid::GetUserCoordinates()
     //
-    virtual void GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const override;
+    virtual void GetUserCoordinates(const DimsType &indices, CoordType &coords) const override;
 
     //! \copydoc Grid::GetIndicesCell
     //!
     //! Returns resampling weights if point is found
     //
-    virtual bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices, double wgts[3]) const;
+    virtual bool GetIndicesCell(const CoordType &coords, DimsType &indices, double wgts[3]) const;
 
     //! \copydoc Grid::GetIndicesCell
     //!
-    virtual bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const override
+    virtual bool GetIndicesCell(const CoordType &coords, DimsType &indices) const override
     {
         double dummy[3];
         return (GetIndicesCell(coords, indices, dummy));
@@ -89,7 +89,7 @@ public:
 
     // \copydoc GetGrid::InsideGrid()
     //
-    virtual bool InsideGrid(const DblArr3 &coords) const override;
+    virtual bool InsideGrid(const CoordType &coords) const override;
 
     //! Returns reference to vector containing X user coordinates
     //!
@@ -144,18 +144,18 @@ public:
     virtual ConstCoordItr ConstCoordEnd() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrSG(this, false))); }
 
 protected:
-    virtual float GetValueNearestNeighbor(const DblArr3 &coords) const override;
+    virtual float GetValueNearestNeighbor(const CoordType &coords) const override;
 
-    virtual float GetValueLinear(const DblArr3 &coords) const override;
+    virtual float GetValueLinear(const CoordType &coords) const override;
 
-    void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
+    void GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const override;
 
 private:
     std::vector<double> _xcoords;
     std::vector<double> _ycoords;
     std::vector<double> _zcoords;
-    DblArr3             _minu = {{0.0, 0.0, 0.0}};
-    DblArr3             _maxu = {{0.0, 0.0, 0.0}};
+    CoordType           _minu = {{0.0, 0.0, 0.0}};
+    CoordType           _maxu = {{0.0, 0.0, 0.0}};
 
     void _stretchedGrid(const std::vector<double> &xcoords, const std::vector<double> &ycoords, const std::vector<double> &zcoords);
 

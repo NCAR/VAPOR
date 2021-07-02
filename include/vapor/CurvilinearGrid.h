@@ -163,19 +163,19 @@ public:
 
     // \copydoc GetGrid::GetBoundingBox()
     //
-    virtual void GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const override;
+    virtual void GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const override;
 
     // \copydoc GetGrid::GetUserCoordinates()
     //
-    virtual void GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const override;
+    virtual void GetUserCoordinates(const DimsType &indices, CoordType &coords) const override;
 
     //! \copydoc Grid::GetIndicesCell
     //!
-    virtual bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const override;
+    virtual bool GetIndicesCell(const CoordType &coords, DimsType &indices) const override;
 
     // \copydoc GetGrid::InsideGrid()
     //
-    virtual bool InsideGrid(const DblArr3 &coords) const override;
+    virtual bool InsideGrid(const CoordType &coords) const override;
 
     //! Returns reference to RegularGrid instance containing X user coordinates
     //!
@@ -234,18 +234,18 @@ public:
     virtual ConstCoordItr ConstCoordEnd() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrCG(this, false))); }
 
 protected:
-    virtual float GetValueNearestNeighbor(const DblArr3 &coords) const override;
+    virtual float GetValueNearestNeighbor(const CoordType &coords) const override;
 
-    virtual float GetValueLinear(const DblArr3 &coords) const override;
+    virtual float GetValueLinear(const CoordType &coords) const override;
 
     // \copydoc GetGrid::GetUserExtents()
     //
-    virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
+    virtual void GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const override;
 
 private:
     std::vector<double>                       _zcoords;
-    DblArr3                                   _minu = {{0.0, 0.0, 0.0}};
-    DblArr3                                   _maxu = {{0.0, 0.0, 0.0}};
+    CoordType                                 _minu = {{0.0, 0.0, 0.0}};
+    CoordType                                 _maxu = {{0.0, 0.0, 0.0}};
     RegularGrid                               _xrg;
     RegularGrid                               _yrg;
     RegularGrid                               _zrg;
@@ -254,7 +254,7 @@ private:
 
     void _curvilinearGrid(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg, const std::vector<double> &zcoords, std::shared_ptr<const QuadTreeRectangleP> qtr);
 
-    bool _insideFace(const Size_tArr3 &face, double pt[2], double lambda[4], std::vector<Size_tArr3> &nodes) const;
+    bool _insideFace(const DimsType &face, double pt[2], double lambda[4], std::vector<DimsType> &nodes) const;
 
     bool _insideGrid(double x, double y, double z, size_t &i, size_t &j, size_t &k, double lambda[4], double zwgt[2]) const;
 

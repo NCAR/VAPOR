@@ -117,7 +117,7 @@ int DerivedParticleDensity::ReadRegion(int fd, const std::vector<size_t> &min, c
 
 void DerivedParticleDensity::compute(Grid *inGrid, float *output, int xd, int yd, int zd, size_t realNP) const
 {
-    DblArr3 minud, maxud;
+    CoordType minud, maxud;
     inGrid->GetUserExtents(minud, maxud);
     vec3 minu(minud[0], minud[1], minud[2]);
     vec3 maxu(maxud[0], maxud[1], maxud[2]);
@@ -208,7 +208,7 @@ DerivedParticleAverage::DerivedParticleAverage(string varName, DC *dc, string me
 
 void DerivedParticleAverage::compute(Grid *inGrid, float *output, int xd, int yd, int zd, size_t realNP) const
 {
-    DblArr3 minud, maxud;
+    CoordType minud, maxud;
     inGrid->GetUserExtents(minud, maxud);
     vec3 minu(minud[0], minud[1], minud[2]);
     vec3 maxu(maxud[0], maxud[1], maxud[2]);
