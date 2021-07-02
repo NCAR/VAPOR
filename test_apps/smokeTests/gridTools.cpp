@@ -220,16 +220,15 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
 
     auto tmp = g->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(g->GetNumDimensions());
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijk = Wasp::VectorizeCoords(count, dims);
-        DimsType            ijk3;
+        DimsType            ijk3 = {0,0,0};
         std::copy_n(ijk.begin(), ijk3.size(), ijk3.begin());
 
-        DimsType itr3;
-        std::copy_n((*itr).begin(), itr3.size(), itr3.begin());
+        DimsType itr3 = {0,0,0};
+        std::copy_n((*itr).begin(), (*itr).size(), itr3.begin());
 
         double itrData = g->GetValueAtIndex(itr3);
         double gridData = g->GetValueAtIndex(ijk3);
@@ -292,17 +291,16 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
 
     auto tmp = g->GetDimensions();
     auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(g->GetNumDimensions());
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijkVec = Wasp::VectorizeCoords(count, dims);
-        size_t              ijk[] = {ijkVec[X], ijkVec[Y], ijkVec[Z]};
-        double              coords[3];
+        DimsType              ijk = {ijkVec[X], ijkVec[Y], ijkVec[Z]};
+        CoordType             coords;
 
         bool disagree = false;
         g->GetUserCoordinates(ijk, coords);
-        for (size_t dim = 0; dim < dims.size(); dim++) {
+        for (size_t dim = 0; dim < g->GetGeometryDim(); dim++) {
             if (!Wasp::NearlyEqual((*itr)[dim], coords[dim])) { disagree = true; }
         }
         if (disagree) { disagreements++; }
