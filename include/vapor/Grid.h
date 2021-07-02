@@ -5,6 +5,7 @@
 #include <iostream>
 #include <ostream>
 #include <vector>
+#include <cassert>
 #include <array>
 #include <string>
 #include <limits>
@@ -1217,7 +1218,10 @@ protected:
 
         for (int i = 0; i < dims.size(); i++) {
             cIndices[i] = indices[i];
-            if (cIndices[i] >= dims[i]) { cIndices[i] = dims[i] - 1; }
+            if (cIndices[i] >= dims[i]) {
+                assert(dims[i] > 0);
+                cIndices[i] = dims[i] - 1;
+            }
         }
     }
 
