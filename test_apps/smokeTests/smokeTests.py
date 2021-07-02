@@ -198,6 +198,8 @@ def main():
     print()
     makeBaseline = args.makeBaseline
 
+    rc = 0
+
     if ( args.makeBaseline == False and makeBaseline == True ): 
         print( "    Warning: Some or all baseline files for running DataMgr testswere missing.  "
                "    These files are needed as comparisons for the results of the current series "
@@ -212,7 +214,7 @@ def main():
         if ( testGrid(grid) != 0):
             print ("  See artifact file " + grid + ".txt or " + resultsDir + grid + ".txt for mismatches")
             print ("  Failed assertions, if any, are shown above.\n" )
-            sys.exit(-1)
+            rc = 1
  
     for dataType, dataFile in dataMgrs.items():
         baselineFile = resultsDir + dataType + "_baseline.txt"
@@ -223,10 +225,11 @@ def main():
     dataMgr = testDataMgrs( makeBaseline )
     if ( dataMgr != 0 ):
         print( "DataMgr tests failed.  Results are not identical to the baseline." )
-        exit(-1);
+        rc = 1
     else:
         print( "DataMgr tests passed" )
-        exit(0);
+
+    sys.exit(rc)
 
 if __name__ == "__main__":
     main()
