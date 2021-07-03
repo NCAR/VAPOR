@@ -118,11 +118,11 @@ int ContourRenderer::_buildCache()
 
     Grid::ConstCellIterator it = grid->ConstCellBegin(_cacheParams.boxMin, _cacheParams.boxMax);
 
-    size_t             maxNodes = grid->GetMaxVertexPerCell();
-    vector<Size_tArr3> nodes(maxNodes);
+    size_t           maxNodes = grid->GetMaxVertexPerCell();
+    vector<DimsType> nodes(maxNodes);
 
-    vector<float>   values(maxNodes);
-    vector<DblArr3> coords(maxNodes);
+    vector<float>     values(maxNodes);
+    vector<CoordType> coords(maxNodes);
 
     Grid::ConstCellIterator end = grid->ConstCellEnd();
     for (; it != end; ++it) {

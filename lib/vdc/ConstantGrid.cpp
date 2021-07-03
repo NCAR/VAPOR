@@ -8,10 +8,10 @@ ConstantGrid::ConstantGrid(float v, size_t d) : _value(v), _topologyDim(d) {}
 
 float ConstantGrid::GetConstantValue() const { return _value; }
 
-float ConstantGrid::GetValue(const VAPoR::DblArr3 &coords) const { return _value; }
-float ConstantGrid::GetValueNearestNeighbor(const VAPoR::DblArr3 &coords) const { return _value; }
+float ConstantGrid::GetValue(const VAPoR::CoordType &coords) const { return _value; }
+float ConstantGrid::GetValueNearestNeighbor(const VAPoR::CoordType &coords) const { return _value; }
 
-float ConstantGrid::GetValueLinear(const VAPoR::DblArr3 &coords) const { return _value; }
+float ConstantGrid::GetValueLinear(const VAPoR::CoordType &coords) const { return _value; }
 
 std::string ConstantGrid::GetType() const
 {
@@ -21,7 +21,7 @@ std::string ConstantGrid::GetType() const
 
 size_t ConstantGrid::GetTopologyDim() const { return _topologyDim; }
 
-void ConstantGrid::GetUserExtentsHelper(VAPoR::DblArr3 &minu, VAPoR::DblArr3 &maxu) const
+void ConstantGrid::GetUserExtentsHelper(VAPoR::CoordType &minu, VAPoR::CoordType &maxu) const
 {
     for (int i = 0; i < minu.size(); i++) {
         minu[i] = std::numeric_limits<double>::lowest();
@@ -29,7 +29,7 @@ void ConstantGrid::GetUserExtentsHelper(VAPoR::DblArr3 &minu, VAPoR::DblArr3 &ma
     }
 }
 
-bool ConstantGrid::InsideGrid(const VAPoR::DblArr3 &coords) const { return true; }
+bool ConstantGrid::InsideGrid(const VAPoR::CoordType &coords) const { return true; }
 
 std::vector<size_t> ConstantGrid::GetCoordDimensions(size_t) const
 {
@@ -39,13 +39,9 @@ std::vector<size_t> ConstantGrid::GetCoordDimensions(size_t) const
 
 size_t ConstantGrid::GetGeometryDim() const { return 3; }
 
-const std::vector<size_t> &ConstantGrid::GetNodeDimensions() const
-{
-    auto tmp = GetDimensions();
-    _duplicate = {tmp[0], tmp[1], tmp[2]};
-    _duplicate.resize(GetNumDimensions());
-    return _duplicate;
-}
+const VAPoR::DimsType ConstantGrid::GetNodeDimensions() const { return (GetDimensions()); }
+
+const size_t ConstantGrid::GetNumNodeDimensions() const { return (GetNumDimensions()); }
 
 const std::vector<size_t> &ConstantGrid::GetCellDimensions() const
 {
@@ -55,13 +51,13 @@ const std::vector<size_t> &ConstantGrid::GetCellDimensions() const
     return _duplicate;
 }
 
-bool ConstantGrid::GetIndicesCell(const VAPoR::DblArr3 &coords, VAPoR::Size_tArr3 &indices) const { return false; }
+bool ConstantGrid::GetIndicesCell(const VAPoR::CoordType &coords, VAPoR::DimsType &indices) const { return false; }
 
-bool ConstantGrid::GetCellNodes(const VAPoR::Size_tArr3 &cindices, std::vector<VAPoR::Size_tArr3> &nodes) const { return false; }
+bool ConstantGrid::GetCellNodes(const VAPoR::DimsType &cindices, std::vector<VAPoR::DimsType> &nodes) const { return false; }
 
-bool ConstantGrid::GetCellNeighbors(const VAPoR::Size_tArr3 &cindices, std::vector<VAPoR::Size_tArr3> &cells) const { return false; }
+bool ConstantGrid::GetCellNeighbors(const VAPoR::DimsType &cindices, std::vector<VAPoR::DimsType> &cells) const { return false; }
 
-bool ConstantGrid::GetNodeCells(const VAPoR::Size_tArr3 &cindices, std::vector<VAPoR::Size_tArr3> &cells) const { return false; }
+bool ConstantGrid::GetNodeCells(const VAPoR::DimsType &cindices, std::vector<VAPoR::DimsType> &cells) const { return false; }
 
 size_t ConstantGrid::GetMaxVertexPerFace() const { return 0; }
 

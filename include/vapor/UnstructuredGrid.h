@@ -127,15 +127,15 @@ public:
     static std::string GetClassType() { return ("Unstructured"); }
     std::string        GetType() const override { return (GetClassType()); }
 
-    bool GetCellNodes(const Size_tArr3 &cindices, std::vector<Size_tArr3> &nodes) const override;
+    bool GetCellNodes(const DimsType &cindices, std::vector<DimsType> &nodes) const override;
 
     //! \copydoc Grid::GetCellNeighbors()
     //!
-    virtual bool GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Size_tArr3> &cells) const override;
+    virtual bool GetCellNeighbors(const DimsType &cindices, std::vector<DimsType> &cells) const override;
 
     //! \copydoc Grid::GetNodeCells()
     //!
-    virtual bool GetNodeCells(const Size_tArr3 &indices, std::vector<Size_tArr3> &cells) const override;
+    virtual bool GetNodeCells(const DimsType &indices, std::vector<DimsType> &cells) const override;
 
     size_t GetMaxVertexPerFace() const override { return (_maxVertexPerFace); };
 
@@ -143,7 +143,8 @@ public:
 
     //! Return the grid node dimmensions
     //!
-    const std::vector<size_t> &GetNodeDimensions() const override { return (_vertexDims); }
+    const VAPoR::DimsType GetNodeDimensions() const override;
+    const size_t          GetNumNodeDimensions() const override;
 
     //! Return the grid cell dimmensions
     //!
@@ -167,7 +168,7 @@ public:
     size_t GetBoundaryID() const { return (_boundaryID); }
     void   SetBoundaryID(size_t v) { _boundaryID = v; }
 
-    virtual void ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const override { cCoords = coords; }
+    virtual void ClampCoord(const CoordType &coords, CoordType &cCoords) const override { cCoords = coords; }
 
     //! \deprecated
     //

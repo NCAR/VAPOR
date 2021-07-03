@@ -3,6 +3,7 @@
 #include "vapor/VAssert.h"
 #include <numeric>
 #include <cmath>
+#include <cassert>
 #include <algorithm>
 #include <time.h>
 #ifdef Darwin
@@ -55,7 +56,7 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
 
 float Grid::GetMissingValue() const { return (_missingValue); }
 
-void Grid::GetUserExtents(DblArr3 &minu, DblArr3 &maxu) const
+void Grid::GetUserExtents(CoordType &minu, CoordType &maxu) const
 {
     size_t n = min(GetGeometryDim(), _minuCache.size());
     auto   p = [](double v) { return (v == std::numeric_limits<double>::infinity()); };
@@ -69,25 +70,25 @@ void Grid::GetUserExtents(DblArr3 &minu, DblArr3 &maxu) const
     maxu = _maxuCache;
 }
 
-float Grid::GetValueAtIndex(const Size_tArr3 &indices) const
+float Grid::GetValueAtIndex(const DimsType &indices) const
 {
     float *fptr = GetValuePtrAtIndex(_blks, indices);
     if (!fptr) return (GetMissingValue());
     return (*fptr);
 }
 
-void Grid::SetValue(const Size_tArr3 &indices, float v)
+void Grid::SetValue(const DimsType &indices, float v)
 {
     float *fptr = GetValuePtrAtIndex(_blks, indices);
     if (!fptr) return;
     *fptr = v;
 }
 
-float *Grid::GetValuePtrAtIndex(const std::vector<float *> &blks, const Size_tArr3 &indices) const
+float *Grid::GetValuePtrAtIndex(const std::vector<float *> &blks, const DimsType &indices) const
 {
     if (!blks.size()) return (NULL);
 
-    Size_tArr3 cIndices;
+    DimsType cIndices;
     ClampIndex(indices, cIndices);
 
     size_t xb = cIndices[0] / _bs[0];
@@ -104,13 +105,13 @@ float *Grid::GetValuePtrAtIndex(const std::vector<float *> &blks, const Size_tAr
 
 float Grid::AccessIJK(size_t i, size_t j, size_t k) const
 {
-    Size_tArr3 indices = {i, j, k};
+    DimsType indices = {i, j, k};
     return (GetValueAtIndex(indices));
 }
 
 void Grid::SetValueIJK(size_t i, size_t j, size_t k, float v)
 {
-    Size_tArr3 indices = {i, j, k};
+    DimsType indices = {i, j, k};
     return (SetValue(indices, v));
 }
 
@@ -137,12 +138,12 @@ void Grid::GetRange(float range[2]) const
     }
 }
 
-void Grid::GetRange(const Size_tArr3 &min, const Size_tArr3 &max, float range[2]) const
+void Grid::GetRange(const DimsType &min, const DimsType &max, float range[2]) const
 {
-    Size_tArr3 cMin;
+    DimsType cMin;
     ClampIndex(min, cMin);
 
-    Size_tArr3 cMax;
+    DimsType cMax;
     ClampIndex(max, cMax);
 
     float mv = GetMissingValue();
@@ -184,13 +185,13 @@ void Grid::GetRange(const Size_tArr3 &min, const Size_tArr3 &max, float range[2]
     }
 }
 
-float Grid::GetValue(const DblArr3 &coords) const
+float Grid::GetValue(const CoordType &coords) const
 {
     if (!_blks.size()) return (GetMissingValue());
 
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
 #ifdef VAPOR3_0_0_ALPHA
@@ -254,7 +255,12 @@ void Grid::SetInterpolationOrder(int order)
 
 Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const Grid *g, bool begin) : ConstNodeIteratorAbstract()
 {
-    _dims = g->GetNodeDimensions();
+    auto tmp = g->GetNodeDimensions();
+    auto nndims = g->GetNumNodeDimensions();
+    _dims.resize(nndims);
+    assert(_dims.size() <= tmp.size());
+    std::copy(tmp.begin(), tmp.begin() + nndims, _dims.begin());
+
     _index = vector<size_t>(_dims.size(), 0);
     _lastIndex = _index;
     if (_dims.size()) _lastIndex[_dims.size() - 1] = _dims[_dims.size() - 1];

@@ -70,20 +70,14 @@ public:
     static std::string GetClassType() { return ("Structured"); }
     std::string        GetType() const override { return (GetClassType()); }
 
-    const std::vector<size_t> &GetNodeDimensions() const override
-    {
-        auto tmp = GetDimensions();
-        _duplicate.resize(tmp.size());
-        std::copy(tmp.begin(), tmp.end(), _duplicate.begin());
-        _duplicate.resize(this->GetNumDimensions());
-        return _duplicate;
-    }
+    const DimsType GetNodeDimensions() const override;
+    const size_t   GetNumNodeDimensions() const override;
 
     const std::vector<size_t> &GetCellDimensions() const override { return (_cellDims); };
 
     //! \copydoc Grid::GetCellNodes()
     //!
-    virtual bool GetCellNodes(const Size_tArr3 &cindices, std::vector<Size_tArr3> &nodes) const override;
+    virtual bool GetCellNodes(const DimsType &cindices, std::vector<DimsType> &nodes) const override;
     // For grandparent inheritance of
     // Grid::GetUserCoordinates(const size_t indices[], double coords[])
     //
@@ -91,19 +85,19 @@ public:
 
     //! \copydoc Grid::GetCellNeighbors()
     //!
-    virtual bool GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Size_tArr3> &cells) const override;
+    virtual bool GetCellNeighbors(const DimsType &cindices, std::vector<DimsType> &cells) const override;
 
     //! \copydoc Grid::GetNodeCells()
     //!
-    virtual bool GetNodeCells(const Size_tArr3 &cindices, std::vector<Size_tArr3> &cells) const override;
+    virtual bool GetNodeCells(const DimsType &cindices, std::vector<DimsType> &cells) const override;
 
-    virtual bool GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu, Size_tArr3 &min, Size_tArr3 &max) const override;
+    virtual bool GetEnclosingRegion(const CoordType &minu, const CoordType &maxu, DimsType &min, DimsType &max) const override;
 
     size_t GetMaxVertexPerFace() const override { return (4); };
 
     size_t GetMaxVertexPerCell() const override { return ((GetTopologyDim() == 3) ? 8 : 4); };
 
-    virtual void ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const override;
+    virtual void ClampCoord(const CoordType &coords, CoordType &cCoords) const override;
 
     //! \deprecated
     //
@@ -118,8 +112,6 @@ public:
 protected:
 private:
     std::vector<size_t> _cellDims;
-
-    mutable std::vector<size_t> _duplicate;
 };
 };    // namespace VAPoR
 #endif
