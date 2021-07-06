@@ -85,7 +85,7 @@ public:
     //!
     Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, size_t topology_dimension);
 
-    Grid() = default;
+    Grid();
     virtual ~Grid() = default;
 
     //! Return the dimensions of grid connectivity array

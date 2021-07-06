@@ -21,6 +21,12 @@
 using namespace std;
 using namespace VAPoR;
 
+Grid::Grid()
+{
+    _dims = {1, 1, 1};
+    _nDims = 0;
+}
+
 Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, size_t topology_dimension)
 {
     VAssert(dims.size() == bs.size());
