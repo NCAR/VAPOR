@@ -323,9 +323,9 @@ void StretchedGrid::GetUserExtentsHelper(CoordType &minext, CoordType &maxext) c
 
     DimsType min = {0, 0, 0};
     DimsType max = {0, 0, 0};
-    for (int i = 0; i < dims.size(); i++) { 
-        assert( dims[i] > 0 ); // will help debug
-        max[i] = (dims[i] - 1); 
+    for (int i = 0; i < dims.size(); i++) {
+        assert(dims[i] > 0);    // will help debug
+        max[i] = (dims[i] - 1);
     }
 
     CoordType minv, maxv;
