@@ -94,10 +94,7 @@ public:
     //! the constructor. If the parameter has less than 3 values, then
     //! number 1 will be filled.
     //!
-    const DimsType &GetDimensions() const
-    {
-        return _dims;
-    }
+    const DimsType &GetDimensions() const { return _dims; }
 
     //! Return the useful number of dimensions of grid connectivity array
     //!
@@ -1227,7 +1224,7 @@ protected:
     }
 
 private:
-    DimsType              _dims;                   // dimensions of grid arrays
+    DimsType             _dims;    // dimensions of grid arrays
     size_t               _nDims;
     DimsType             _bs = {{1, 1, 1}};       // dimensions of each block
     DimsType             _bdims = {{1, 1, 1}};    // dimensions (specified in blocks) of ROI

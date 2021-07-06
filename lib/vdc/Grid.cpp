@@ -38,8 +38,8 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     VAssert(blks.size() == 0 ||    // dataless
             blks.size() == std::accumulate(_bdims.begin(), _bdims.end(), 1, std::multiplies<size_t>()));
 
-	_dims = {1,1,1};
-	_nDims = dims.size();
+    _dims = {1, 1, 1};
+    _nDims = dims.size();
     std::copy(dims.begin(), dims.begin() + dims.size(), _dims.begin());
     _periodic = vector<bool>(topology_dimension, false);
     _topologyDimension = topology_dimension;
