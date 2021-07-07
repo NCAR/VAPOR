@@ -54,7 +54,7 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
                     Notice      notice;
                     notice.url = file["download_url"].toString().toStdString();
 
-                    if (!STLUtils::Contains(notice.url, "__example-notice")) continue;
+                    if (STLUtils::Contains(notice.url, "__example-notice")) continue;
 
                     _noticesToGet.push(notice);
                 }
