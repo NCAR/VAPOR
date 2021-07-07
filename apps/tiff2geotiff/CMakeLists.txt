@@ -6,7 +6,7 @@ else ()
 	target_link_libraries (tiff2geotiff tiff geotiff proj common)
 endif()
 
-install (
+OpenMPInstall (
 	TARGETS tiff2geotiff
 	DESTINATION ${INSTALL_BIN_DIR}
 	COMPONENT Utilites

@@ -9,6 +9,7 @@ project (VAPOR3)
 
 include (buildutils/UtilityFunctions.cmake)
 include (buildutils/GetGitRevisionDescription.cmake)
+include (buildutils/OpenMPInstaller.cmake)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -172,6 +173,10 @@ elseif (APPLE)
 		set (INSTALL_INCLUDE_DIR include/vapor)
 	endif ()
 	set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
+    # set (INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+    # set (CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+    # set (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    # set (CMAKE_SKIP_BUILD_RPATH FALSE)
 else ()
 	if (DIST_INSTALLER)
 		set (INSTALL_BIN_DIR lib)
@@ -293,13 +298,22 @@ if (APPLE)
             DESTINATION ${INSTALL_BIN_DIR}/styles
             COMPONENT Dependencies
             )
+        if (USE_OMP)
+            get_filename_component(OMP_PATH ${OpenMP_CXX_LIBRARIES} REALPATH)
+            install (
+                FILES ${OMP_PATH}
+                DESTINATION ${INSTALL_LIB_DIR}
+                COMPONENT Dependencies
+                )
+        endif ()
+
     endif ()
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
 	set (CPACK_BINARY_STGZ ON)
 	if (BUILD_VDC)
-		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} GLU glut expat)
+		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} GLU glut expat omp)
 	endif ()
 	if (BUILD_GUI)
 		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} quadmath)
