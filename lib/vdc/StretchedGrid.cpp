@@ -320,11 +320,11 @@ float StretchedGrid::GetValueLinear(const CoordType &coords) const
 void StretchedGrid::GetUserExtentsHelper(CoordType &minext, CoordType &maxext) const
 {
     auto dims = StructuredGrid::GetDimensions();
-    auto ndims = StructuredGrid::GetNumDimensions();
 
-    DimsType min, max;
-    for (int i = 0; i < ndims; i++) {
-        min[i] = 0;
+    DimsType min = {0, 0, 0};
+    DimsType max = {0, 0, 0};
+    for (int i = 0; i < dims.size(); i++) {
+        assert(dims[i] > 0);    // will help debug
         max[i] = (dims[i] - 1);
     }
 
