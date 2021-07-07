@@ -268,7 +268,7 @@ DC::Mesh::Mesh(std::string name, std::vector<string> dim_names, std::vector<stri
 
     _Mesh(name, coord_vars, 4, 4, STRUCTURED);
 
-    if (_name.empty()) { _name = join(dim_names, "x"); }
+    if (_name.empty()) { _name = MakeMeshName(dim_names); }
 
     _dim_names = dim_names;
 }
@@ -327,6 +327,10 @@ size_t DC::Mesh::GetTopologyDim() const
         return (0);
         break;
     }
+}
+
+string DC::Mesh::MakeMeshName(std::vector<string> s) {
+    return(join(s, "x"));
 }
 
 DC::DC() {}

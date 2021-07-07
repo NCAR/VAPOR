@@ -149,6 +149,16 @@ protected:
     //!
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
+    int initDimensions(NetCDFCFCollection *ncdfc, std::map<string, DC::Dimension> &dimsMap);
+
+    int initCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
+
+    int addCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars, std::map<string, DC::CoordVar> &coordVarsMap);
+
+    int initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> &dataVarsMap);
+
+    int initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &_meshMap);
+
 private:
     NetCDFCFCollection *_ncdfc;
     VAPoR::UDUnits      _udunits;
@@ -158,8 +168,13 @@ private:
     std::map<string, DC::CoordVar>              _coordVarsMap;
     std::map<string, DC::Mesh>                  _meshMap;
     std::map<string, DC::DataVar>               _dataVarsMap;
-    std::map<string, string>                    _coordVarKeys;
     std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
+
+    int _initHorizontalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
+
+    int _initVerticalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
+
+    int _initTimeCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
 
     int _get_vertical_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar);
 
@@ -167,23 +182,14 @@ private:
 
     int _get_latlon_coordvars(NetCDFCFCollection *ncdfc, string dvar, string &loncvar, string &latcvar) const;
 
-    int _AddCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars);
 
     // Return true if a 1D variable has uniform, absolute deltas between elements
     //
     bool _isUniform(NetCDFCFCollection *ncdfc, string varname);
 
-    int _InitHorizontalCoordinates(NetCDFCFCollection *ncdfc);
 
-    int _InitVerticalCoordinates(NetCDFCFCollection *ncdfc);
+    int _getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<string> &sdimnames, vector<string> &scoordvars, string &time_dim_name, string &time_coordvar);
 
-    int _InitTimeCoordinates(NetCDFCFCollection *ncdfc);
-
-    int _InitDimensions(NetCDFCFCollection *ncdfc);
-
-    int _GetVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<string> &sdimnames, vector<string> &scoordvars, string &time_dim_name, string &time_coordvar);
-
-    int _InitVars(NetCDFCFCollection *ncdfc);
 
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 

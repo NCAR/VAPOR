@@ -641,6 +641,12 @@ public:
         //
         size_t GetTopologyDim() const;
 
+        //! Generate a mesh name from a list of strings. The 
+        //! generated name is simply the join of the elements of \p s
+        //! using 'x' as a delimiter
+        //
+        static string MakeMeshName(std::vector<string> s);
+
         friend std::ostream &operator<<(std::ostream &o, const Mesh &mesh);
 
     private:
