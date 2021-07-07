@@ -42,7 +42,7 @@ public:
 
     //! \copydoc QuadTreeRectangle::Insert()
     //
-    bool Insert(float left, float top, float right, float bottom, Size_tArr3 payload);
+    bool Insert(float left, float top, float right, float bottom, DimsType payload);
 
     //! Parallel tree creation
     //!
@@ -67,7 +67,7 @@ public:
 
     //! \copydoc QuadTreeRectangle::GetPayloadContained()
     //
-    void GetPayloadContained(float x, float y, std::vector<Size_tArr3> &payloads) const;
+    void GetPayloadContained(float x, float y, std::vector<DimsType> &payloads) const;
 
     //! \copydoc QuadTreeRectangle::GetStats()
     //

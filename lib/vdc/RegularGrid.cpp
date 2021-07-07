@@ -63,9 +63,9 @@ vector<size_t> RegularGrid::GetCoordDimensions(size_t dim) const
     }
 }
 
-float RegularGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
+float RegularGrid::GetValueNearestNeighbor(const CoordType &coords) const
 {
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     if (!InsideGrid(cCoords)) return (GetMissingValue());
@@ -108,9 +108,9 @@ float RegularGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
     return (AccessIJK(i, j, k));
 }
 
-float RegularGrid::GetValueLinear(const DblArr3 &coords) const
+float RegularGrid::GetValueLinear(const CoordType &coords) const
 {
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     if (!InsideGrid(cCoords)) return (GetMissingValue());
@@ -193,29 +193,29 @@ float RegularGrid::GetValueLinear(const DblArr3 &coords) const
     return (c0 + kwgt * (c1 - c0));
 }
 
-void RegularGrid::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
+void RegularGrid::GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const
 {
     minu = _minu;
     maxu = _maxu;
 }
 
-void RegularGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const
+void RegularGrid::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const
 {
-    Size_tArr3 cMin;
+    DimsType cMin;
     ClampIndex(min, cMin);
 
-    Size_tArr3 cMax;
+    DimsType cMax;
     ClampIndex(max, cMax);
 
     GetUserCoordinates(cMin, minu);
     GetUserCoordinates(cMax, maxu);
 }
 
-void RegularGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const
+void RegularGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
 {
     coords = {0.0, 0.0, 0.0};
 
-    Size_tArr3 cIndices;
+    DimsType cIndices;
     ClampIndex(indices, cIndices);
 
     auto dims = GetDimensions();
@@ -229,9 +229,9 @@ void RegularGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords)
     }
 }
 
-bool RegularGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const
+bool RegularGrid::GetIndicesCell(const CoordType &coords, DimsType &indices) const
 {
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     auto dims = GetDimensions();
@@ -256,9 +256,9 @@ bool RegularGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) con
     return (true);
 }
 
-bool RegularGrid::InsideGrid(const DblArr3 &coords) const
+bool RegularGrid::InsideGrid(const CoordType &coords) const
 {
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     VAssert(GetGeometryDim() <= 3);

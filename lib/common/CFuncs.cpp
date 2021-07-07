@@ -95,7 +95,7 @@ double Wasp::GetTime()
     ts.tv_sec = ts.tv_nsec = 0;
 #endif
 
-#if defined(Linux) || defined(AIX)
+#if defined(__linux__) || defined(AIX)
     clock_gettime(CLOCK_REALTIME, &ts);
     t = (double)ts.tv_sec + (double)ts.tv_nsec * 1.0e-9;
 #endif

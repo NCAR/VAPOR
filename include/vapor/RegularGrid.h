@@ -54,11 +54,11 @@ public:
 
     //! \copydoc Grid::GetBoundingBox()
     //
-    virtual void GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const override;
+    virtual void GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const override;
 
     //! \copydoc Grid::GetUserCoordinates()
     //
-    virtual void GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const override;
+    virtual void GetUserCoordinates(const DimsType &indices, CoordType &coords) const override;
 
     // For grandparent inheritance of
     // Grid::GetUserCoordinates(const size_t indices[], double coords[])
@@ -67,11 +67,11 @@ public:
 
     //! \copydoc Grid::GetIndicesCell
     //!
-    virtual bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const override;
+    virtual bool GetIndicesCell(const CoordType &coords, DimsType &indices) const override;
 
     //! \copydoc Grid::InsideGrid()
     //
-    virtual bool InsideGrid(const DblArr3 &coords) const override;
+    virtual bool InsideGrid(const CoordType &coords) const override;
 
     class ConstCoordItrRG : public Grid::ConstCoordItrAbstract {
     public:
@@ -109,19 +109,19 @@ public:
     VDF_API friend std::ostream &operator<<(std::ostream &o, const RegularGrid &rg);
 
 protected:
-    virtual float GetValueNearestNeighbor(const DblArr3 &coords) const override;
+    virtual float GetValueNearestNeighbor(const CoordType &coords) const override;
 
-    virtual float GetValueLinear(const DblArr3 &coords) const override;
+    virtual float GetValueLinear(const CoordType &coords) const override;
 
     //! \copydoc Grid::GetUserExtents()
     //
-    virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
+    virtual void GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const override;
 
 private:
     void _SetExtents(const std::vector<double> &minu, const std::vector<double> &maxu);
 
-    DblArr3             _minu = {{0.0, 0.0, 0.0}};
-    DblArr3             _maxu = {{0.0, 0.0, 0.0}};
+    CoordType           _minu = {{0.0, 0.0, 0.0}};
+    CoordType           _maxu = {{0.0, 0.0, 0.0}};
     size_t              _geometryDim;
     std::vector<double> _delta;    // increment between grid points in user coords
 };

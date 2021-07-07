@@ -752,7 +752,7 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     float  missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
     size_t maxNodes = grid->GetMaxVertexPerCell();
     //    size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
-    std::vector<Size_tArr3> nodes(maxNodes * nodeDim);
+    std::vector<DimsType> nodes(maxNodes * nodeDim);
 
     Progress::Start("Loading Grid Data", 2, false);
     float *vdata = new float[nVerts];

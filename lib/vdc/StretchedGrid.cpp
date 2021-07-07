@@ -49,12 +49,12 @@ vector<size_t> StretchedGrid::GetCoordDimensions(size_t dim) const
     }
 }
 
-void StretchedGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const
+void StretchedGrid::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const
 {
-    Size_tArr3 cMin;
+    DimsType cMin;
     ClampIndex(min, cMin);
 
-    Size_tArr3 cMax;
+    DimsType cMax;
     ClampIndex(max, cMax);
 
     for (int i = 0; i < GetNodeDimensions().size(); i++) { VAssert(cMin[i] <= cMax[i]); }
@@ -81,9 +81,9 @@ void StretchedGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max,
     if (minu[2] > maxu[2]) std::swap(minu[2], maxu[2]);
 }
 
-void StretchedGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const
+void StretchedGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
 {
-    Size_tArr3 cIndices;
+    DimsType cIndices;
     ClampIndex(indices, cIndices);
 
     coords[0] = _xcoords[cIndices[0]];
@@ -92,11 +92,11 @@ void StretchedGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coord
     if (GetGeometryDim() > 2) { coords[2] = _zcoords[cIndices[2]]; }
 }
 
-bool StretchedGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices, double wgts[3]) const
+bool StretchedGrid::GetIndicesCell(const CoordType &coords, DimsType &indices, double wgts[3]) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double x = cCoords[0];
@@ -122,12 +122,12 @@ bool StretchedGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices, d
     return (true);
 }
 
-bool StretchedGrid::InsideGrid(const DblArr3 &coords) const
+bool StretchedGrid::InsideGrid(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to reside within the
     // grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     // Do a quick check to see if the point is completely outside of
@@ -243,11 +243,11 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset)
     _coords[2] = _sg->_zcoords[_index[2]];
 }
 
-float StretchedGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
+float StretchedGrid::GetValueNearestNeighbor(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double xwgt[2], ywgt[2], zwgt[2];
@@ -266,11 +266,11 @@ float StretchedGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
     return (AccessIJK(i, j, k));
 }
 
-float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
+float StretchedGrid::GetValueLinear(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     // handlese case where grid is 2D. I.e. if 2d then zwgt[0] == 1 &&
@@ -317,18 +317,18 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
     return (v0 * zwgt[0] + v1 * zwgt[1]);
 }
 
-void StretchedGrid::GetUserExtentsHelper(DblArr3 &minext, DblArr3 &maxext) const
+void StretchedGrid::GetUserExtentsHelper(CoordType &minext, CoordType &maxext) const
 {
     auto dims = StructuredGrid::GetDimensions();
     auto ndims = StructuredGrid::GetNumDimensions();
 
-    Size_tArr3 min, max;
+    DimsType min, max;
     for (int i = 0; i < ndims; i++) {
         min[i] = 0;
         max[i] = (dims[i] - 1);
     }
 
-    DblArr3 minv, maxv;
+    CoordType minv, maxv;
     StretchedGrid::GetBoundingBox(min, max, minv, maxv);
     for (int i = 0; i < GetNumDimensions(); i++) {
         minext[i] = minv[i];

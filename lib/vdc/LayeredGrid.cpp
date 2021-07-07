@@ -53,18 +53,18 @@ vector<size_t> LayeredGrid::GetCoordDimensions(size_t dim) const
     }
 }
 
-void LayeredGrid::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
+void LayeredGrid::GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const
 {
     minu = _minu;
     maxu = _maxu;
 }
 
-void LayeredGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const
+void LayeredGrid::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const
 {
-    Size_tArr3 cMin;
+    DimsType cMin;
     ClampIndex(min, cMin);
 
-    Size_tArr3 cMax;
+    DimsType cMax;
     ClampIndex(max, cMax);
 
     // Get extents of horizontal dimensions. Note: also get vertical
@@ -103,7 +103,7 @@ void LayeredGrid::GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, D
     maxu[2] = maxcoord;
 }
 
-bool LayeredGrid::_insideGrid(const DblArr3 &coords, Size_tArr3 &indices, double wgts[3]) const
+bool LayeredGrid::_insideGrid(const CoordType &coords, DimsType &indices, double wgts[3]) const
 {
     // Get indices and weights for horizontal slice
     //
@@ -119,11 +119,11 @@ bool LayeredGrid::_insideGrid(const DblArr3 &coords, Size_tArr3 &indices, double
 
     // Check if point is in "first" triangle (0,0), (1,0), (1,1)
     //
-    double     lambda[3];
-    double     pt[] = {coords[0], coords[1]};
-    Size_tArr3 iv = {indices[0], indices[0] + 1, indices[0] + 1};
-    Size_tArr3 jv = {indices[1], indices[1], indices[1] + 1};
-    double     tverts[] = {_xcoords[iv[0]], _ycoords[jv[0]], _xcoords[iv[1]], _ycoords[jv[1]], _xcoords[iv[2]], _ycoords[jv[2]]};
+    double   lambda[3];
+    double   pt[] = {coords[0], coords[1]};
+    DimsType iv = {indices[0], indices[0] + 1, indices[0] + 1};
+    DimsType jv = {indices[1], indices[1], indices[1] + 1};
+    double   tverts[] = {_xcoords[iv[0]], _ycoords[jv[0]], _xcoords[iv[1]], _ycoords[jv[1]], _xcoords[iv[2]], _ycoords[jv[2]]};
 
     bool inside = VAPoR::BarycentricCoordsTri(tverts, pt, lambda);
     if (!inside) {
@@ -168,11 +168,11 @@ bool LayeredGrid::_insideGrid(const DblArr3 &coords, Size_tArr3 &indices, double
     return (true);
 }
 
-float LayeredGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
+float LayeredGrid::GetValueNearestNeighbor(const CoordType &coords) const
 {
-    Size_tArr3 indices;
-    double     wgts[3];
-    bool       found = _insideGrid(coords, indices, wgts);
+    DimsType indices;
+    double   wgts[3];
+    bool     found = _insideGrid(coords, indices, wgts);
     if (!found) return (GetMissingValue());
 
     if (wgts[0] < 0.5) indices[0] += 1;
@@ -182,11 +182,11 @@ float LayeredGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
     return (AccessIJK(indices[0], indices[1], indices[2]));
 }
 
-float LayeredGrid::GetValueLinear(const DblArr3 &coords) const
+float LayeredGrid::GetValueLinear(const CoordType &coords) const
 {
-    Size_tArr3 indices;
-    double     wgts[3];
-    bool       found = _insideGrid(coords, indices, wgts);
+    DimsType indices;
+    double   wgts[3];
+    bool     found = _insideGrid(coords, indices, wgts);
     if (!found) return (GetMissingValue());
 
     size_t i0 = indices[0];
@@ -255,11 +255,11 @@ float LayeredGrid::GetValueLinear(const DblArr3 &coords) const
     return (c0 + kwgt * (c1 - c0));
 }
 
-float LayeredGrid::GetValue(const DblArr3 &coords) const
+float LayeredGrid::GetValue(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     auto dims = GetDimensions();
@@ -286,9 +286,9 @@ void LayeredGrid::SetInterpolationOrder(int order)
     _interpolationOrder = order;
 }
 
-void LayeredGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const
+void LayeredGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
 {
-    Size_tArr3 cIndices;
+    DimsType cIndices;
     ClampIndex(indices, cIndices);
 
     // First get coordinates of (horizontal) dimensions
@@ -300,9 +300,9 @@ void LayeredGrid::GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords)
     coords[2] = _zrg.GetValueAtIndex(cIndices);
 }
 
-bool LayeredGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const
+bool LayeredGrid::GetIndicesCell(const CoordType &coords, DimsType &indices) const
 {
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
     double dummy[3];
@@ -311,16 +311,16 @@ bool LayeredGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) con
     return (true);
 }
 
-bool LayeredGrid::InsideGrid(const DblArr3 &coords) const
+bool LayeredGrid::InsideGrid(const CoordType &coords) const
 {
     // Clamp coordinates on periodic boundaries to reside within the
     // grid extents (vary-dimensions can not have periodic boundaries)
     //
-    DblArr3 cCoords;
+    CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    Size_tArr3 indices;
-    bool       found = GetIndicesCell(cCoords, indices);
+    DimsType indices;
+    bool     found = GetIndicesCell(cCoords, indices);
     return (found);
 }
 
