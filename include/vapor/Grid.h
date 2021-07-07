@@ -85,7 +85,7 @@ public:
     //!
     Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, size_t topology_dimension);
 
-    Grid() = default;
+    Grid();
     virtual ~Grid() = default;
 
     //! Return the dimensions of grid connectivity array
@@ -94,19 +94,14 @@ public:
     //! the constructor. If the parameter has less than 3 values, then
     //! number 1 will be filled.
     //!
-    DimsType GetDimensions() const
-    {
-        auto tmp = DimsType{1, 1, 1};
-        std::copy(_dims.begin(), _dims.end(), tmp.begin());
-        return tmp;
-    }
+    const DimsType &GetDimensions() const { return _dims; }
 
     //! Return the useful number of dimensions of grid connectivity array
     //!
     //! \param[out] dims The number of values of \p dims parameter provided to
     //! the constructor.
     //!
-    size_t GetNumDimensions() const { return _dims.size(); }
+    size_t GetNumDimensions() const { return _nDims; }
 
     //! Return the dimensions of the specified coordinate variable
     //!
@@ -1229,7 +1224,8 @@ protected:
     }
 
 private:
-    std::vector<size_t>  _dims;                   // dimensions of grid arrays
+    DimsType             _dims;    // dimensions of grid arrays
+    size_t               _nDims;
     DimsType             _bs = {{1, 1, 1}};       // dimensions of each block
     DimsType             _bdims = {{1, 1, 1}};    // dimensions (specified in blocks) of ROI
     std::vector<size_t>  _bsDeprecated;           // legacy API

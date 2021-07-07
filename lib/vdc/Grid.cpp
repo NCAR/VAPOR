@@ -21,6 +21,12 @@
 using namespace std;
 using namespace VAPoR;
 
+Grid::Grid()
+{
+    _dims = {1, 1, 1};
+    _nDims = 0;
+}
+
 Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, size_t topology_dimension)
 {
     VAssert(dims.size() == bs.size());
@@ -38,7 +44,10 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     VAssert(blks.size() == 0 ||    // dataless
             blks.size() == std::accumulate(_bdims.begin(), _bdims.end(), 1, std::multiplies<size_t>()));
 
-    _dims = dims;
+    assert(dims.size() <= 3);    // will help debug.
+    _dims = {1, 1, 1};
+    _nDims = dims.size();
+    std::copy(dims.begin(), dims.begin() + dims.size(), _dims.begin());
     _periodic = vector<bool>(topology_dimension, false);
     _topologyDimension = topology_dimension;
     _missingValue = INFINITY;
@@ -46,7 +55,7 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     _interpolationOrder = 0;
     _nodeIDOffset = 0;
     _cellIDOffset = 0;
-    _minAbs = vector<size_t>(_dims.size(), 0);
+    _minAbs = vector<size_t>(_nDims, 0);
 
     //
     // Shallow  copy blocks
