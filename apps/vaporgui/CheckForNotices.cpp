@@ -59,8 +59,8 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
                     _noticesToGet.push(notice);
                 }
             } else {
-                QString       content = reply->readAll();
-                QJsonDocument json = QJsonDocument::fromJson(content.toUtf8());
+                QString     content = reply->readAll();
+                QJsonObject json = QJsonDocument::fromJson(content.toUtf8()).object();
 
 #define TIME_FORMAT "yyyy-MM-dd"
 
