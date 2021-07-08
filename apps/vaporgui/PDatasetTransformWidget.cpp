@@ -12,7 +12,7 @@ using namespace VAPoR;
 PDatasetTransformWidget::PDatasetTransformWidget(VAPoR::ControlExec *ce)
 : PWidget("", _section = new VSectionGroup("Transform",
                                            {
-                                               _twDataset = new PStringDropdown(SelectedDatasetTag, {}, "Dataset"),
+                                               _twDataset = new PStringDropdown("transformWidgetDatasetTag", {}, "Dataset"),
                                                _tw = new PTransformWidget,
                                            })),
   _ce(ce)
