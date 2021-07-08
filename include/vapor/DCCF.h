@@ -149,15 +149,15 @@ protected:
     //!
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
-    int initDimensions(NetCDFCFCollection *ncdfc, std::map<string, DC::Dimension> &dimsMap);
+    virtual int initDimensions(NetCDFCFCollection *ncdfc, std::map<string, DC::Dimension> &dimsMap);
 
-    int initCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
+    virtual int initCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
 
-    int addCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars, std::map<string, DC::CoordVar> &coordVarsMap);
+    virtual int addCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars, std::map<string, DC::CoordVar> &coordVarsMap);
 
-    int initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> &dataVarsMap);
+    virtual int initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> &dataVarsMap);
 
-    int initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &_meshMap);
+    virtual int initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &_meshMap);
 
 private:
     NetCDFCFCollection *_ncdfc;

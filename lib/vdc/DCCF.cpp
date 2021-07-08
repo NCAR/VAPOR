@@ -722,7 +722,7 @@ int DCCF::_getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<s
 
 // Initialize the meshMap 
 //
-int DCCF::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &_meshMap)
+int DCCF::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMap)
 {
 
     //
@@ -759,7 +759,7 @@ int DCCF::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &_meshM
         // Create new mesh. We're being lazy here and probably should only
         // createone if it doesn't ready exist
         //
-        _meshMap[mesh.GetName()] = mesh;
+        meshMap[mesh.GetName()] = mesh;
 	}
 
     return (0);
