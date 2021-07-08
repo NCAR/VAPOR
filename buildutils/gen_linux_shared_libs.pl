@@ -48,6 +48,11 @@ foreach my $l (@libs) {
 	$l =~ m/[^\/]+$/;
 	my $baseName = $&;
 	copy "$real", "$tmpDir/$baseName";
+    if ($!) {
+        print STDERR "ERROR Failed to copy '$real' to '$tmpDir/$baseName'\n";
+        print STDERR "ERROR $!\n";
+        die(1);
+    }
 	print "$tmpDir/$baseName\n";
 }
 
