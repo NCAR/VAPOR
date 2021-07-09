@@ -8,6 +8,7 @@
 
 using namespace VAPoR;
 
+const std::string PDatasetTransformWidget::SelectedDatasetTag = "transformWidgetDatasetTag";
 
 PDatasetTransformWidget::PDatasetTransformWidget(VAPoR::ControlExec *ce)
 : PWidget("", _section = new VSectionGroup("Transform",
