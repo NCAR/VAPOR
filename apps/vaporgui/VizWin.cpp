@@ -202,7 +202,7 @@ void VizWin::_setUpProjMatrix()
 
     size_t width, height;
     vParams->GetWindowSize(width, height);
-    width  *= QApplication::desktop()->devicePixelRatio();
+    width *= QApplication::desktop()->devicePixelRatio();
     height *= QApplication::desktop()->devicePixelRatio();
     int wWidth = width;
     int wHeight = height;
