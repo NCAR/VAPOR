@@ -148,7 +148,7 @@ endif()
 
 add_definitions (-DRENDER_EXPORTS)
 
-install (
+OpenMPInstall (
 	TARGETS render
 	DESTINATION ${INSTALL_LIB_DIR}
 	COMPONENT Libraries
