@@ -340,27 +340,6 @@ template<class T> int DCCF::_readRegionTemplate(int fd, const vector<size_t> &mi
 
 bool DCCF::variableExists(size_t ts, string varname, int, int) const { return (_ncdfc->VariableExists(ts, varname)); }
 
-int DCCF::_get_latlon_coordvars(NetCDFCFCollection *ncdfc, string dvar, string &loncvar, string &latcvar) const
-{
-    loncvar.clear();
-    latcvar.clear();
-
-    vector<string> cvars;
-    int            rc = ncdfc->GetVarCoordVarNames(dvar, cvars);
-    if (rc < 0) return (-1);
-
-    for (int i = 0; i < cvars.size(); i++) {
-        if (ncdfc->IsLatCoordVar(cvars[i])) {
-            VAssert(latcvar.empty());
-            latcvar = cvars[i];
-        } else if (ncdfc->IsLonCoordVar(cvars[i])) {
-            VAssert(loncvar.empty());
-            loncvar = cvars[i];
-        }
-    }
-    return (0);
-}
-
 bool DCCF::_isUniform(NetCDFCFCollection *ncdfc, string varname)
 {
     vector<size_t> dims = ncdfc->GetDims(varname);
@@ -465,62 +444,14 @@ int DCCF::initCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordV
 
 int DCCF::_initHorizontalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap)
 {
-    //
-    // Get names of data variables  in the CF data set that have 1 to 3
-    // spatial dimensions
-    //
-    vector<string> dvars;
-    for (int i = 1; i < 4; i++) {
-        vector<string> v = ncdfc->GetDataVariableNames(i, true);
-        dvars.insert(dvars.end(), v.begin(), v.end());
-    }
-
-    // Now get all of the lat and lon coordiates pairs used for
-    // for each of the 2D and 3D data variables
-    //
-    vector<string> cvars;
-    for (int i = 0; i < dvars.size(); i++) {
-        string loncvar, latcvar;
-
-        int rc = _get_latlon_coordvars(ncdfc, dvars[i], loncvar, latcvar);
-        if (rc < 0) return (-1);
-
-        if (!loncvar.empty()) cvars.push_back(loncvar);
-        if (!latcvar.empty()) cvars.push_back(latcvar);
-
-        if (loncvar.empty() || latcvar.empty()) continue;
-    }
-
-    // Remove duplicates
-    //
-
-    sort(cvars.begin(), cvars.end());
-    vector<string>::iterator last2;
-    last2 = unique(cvars.begin(), cvars.end());
-    cvars.erase(last2, cvars.end());
-
-    // Add native coordinate variables
-    //
-    int rc = addCoordvars(ncdfc, cvars, coordVarsMap);
+    vector <string> latVars = ncdfc->GetLatCoordVars();
+    int rc = addCoordvars(ncdfc, latVars, coordVarsMap);
     if (rc < 0) return (-1);
 
-    return (0);
-}
-
-int DCCF::_get_vertical_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar)
-{
-    cvar.clear();
-
-    vector<string> cvars;
-    int            rc = ncdfc->GetVarCoordVarNames(dvar, cvars);
+    vector <string> lonVars = ncdfc->GetLonCoordVars();
+    rc = addCoordvars(ncdfc, lonVars, coordVarsMap);
     if (rc < 0) return (-1);
 
-    for (int i = 0; i < cvars.size(); i++) {
-        if (ncdfc->IsVertCoordVar(cvars[i])) {
-            VAssert(cvar.empty());
-            cvar = cvars[i];
-        }
-    }
     return (0);
 }
 
@@ -528,99 +459,17 @@ int DCCF::_get_vertical_coordvar(NetCDFCFCollection *ncdfc, string dvar, string 
 //
 int DCCF::_initVerticalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap)
 {
-    //
-    // Get names of data variables  in the CF data set that have 1, 2 or 3
-    // spatial dimensions
-    //
-    vector<string> dvars;
-    for (int i = 1; i < 4; i++) {
-        vector<string> v = ncdfc->GetDataVariableNames(i, true);
-        dvars.insert(dvars.end(), v.begin(), v.end());
-    }
+    vector <string> vertVars = ncdfc->GetVertCoordVars();
+    int rc = addCoordvars(ncdfc, vertVars, coordVarsMap);
 
-    // Now get all of the vertical coordinate variable names
-    // for each of the 1D, 2D and 3D data variables
-    //
-    vector<string> cvars;
-    for (int i = 0; i < dvars.size(); i++) {
-        string vertcvar;
-
-        int rc = _get_vertical_coordvar(ncdfc, dvars[i], vertcvar);
-        if (rc < 0) return (-1);
-
-        if (vertcvar.empty()) continue;
-
-        cvars.push_back(vertcvar);
-    }
-
-    // Remove duplicates
-    //
-    sort(cvars.begin(), cvars.end());
-    vector<string>::iterator last;
-    last = unique(cvars.begin(), cvars.end());
-    cvars.erase(last, cvars.end());
-
-    // Add vertical coordinate vars
-    //
-    int rc = addCoordvars(ncdfc, cvars, coordVarsMap);
-    if (rc < 0) return (-1);
-
-    return (0);
-}
-
-int DCCF::_get_time_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar)
-{
-    cvar.clear();
-
-    vector<string> cvars;
-    int            rc = ncdfc->GetVarCoordVarNames(dvar, cvars);
-    if (rc < 0) return (-1);
-
-    for (int i = 0; i < cvars.size(); i++) {
-        if (ncdfc->IsTimeCoordVar(cvars[i])) {
-            VAssert(cvar.empty());
-            cvar = cvars[i];
-        }
-    }
     return (0);
 }
 
 int DCCF::_initTimeCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap)
 {
-    //
-    // Get names of data variables  in the CF data set that have 1, 2 or 3
-    // spatial dimensions
-    //
-    vector<string> dvars;
-    for (int i = 1; i < 4; i++) {
-        vector<string> v = ncdfc->GetDataVariableNames(i, true);
-        dvars.insert(dvars.end(), v.begin(), v.end());
-    }
-
-    // Now get all of the time coordinate variable names
-    // for each of the 1D, 2D and 3D data variables
-    //
-    vector<string> cvars;
-    for (int i = 0; i < dvars.size(); i++) {
-        string timecvar;
-
-        int rc = _get_time_coordvar(ncdfc, dvars[i], timecvar);
-        if (rc < 0) return (-1);
-
-        if (timecvar.empty()) continue;
-
-        cvars.push_back(timecvar);
-    }
-    // Remove duplicates
-    //
-    sort(cvars.begin(), cvars.end());
-    vector<string>::iterator last;
-    last = unique(cvars.begin(), cvars.end());
-    cvars.erase(last, cvars.end());
-
     // add native time coordinate variables
     //
-    int rc = addCoordvars(ncdfc, cvars, coordVarsMap);
+    int rc = addCoordvars(ncdfc, ncdfc->GetTimeCoordVars(), coordVarsMap);
     if (rc < 0) return (-1);
 
     return (0);
@@ -652,7 +501,6 @@ int DCCF::initDimensions(NetCDFCFCollection *ncdfc, std::map<string, DC::Dimensi
     // with coordinates that is supported by COARDS.
     //
     for (int i = 0; i < dimnames.size(); i++) {
-        // if (! ncdfc->IsCoordVarCF(dimnames[i])) continue;
 
         Dimension dim(dimnames[i], dimlens[i]);
         dimsMap[dimnames[i]] = dim;
@@ -670,7 +518,7 @@ int DCCF::initDimensions(NetCDFCFCollection *ncdfc, std::map<string, DC::Dimensi
 // The order of the returned vectors
 // is significant.
 //
-int DCCF::_getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<string> &sdimnames, vector<string> &scoordvars, string &time_dim_name, string &time_coordvar)
+int DCCF::getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<string> &sdimnames, vector<string> &scoordvars, string &time_dim_name, string &time_coordvar) const
 {
     sdimnames.clear();
     scoordvars.clear();
@@ -748,7 +596,7 @@ int DCCF::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMa
         string         time_dim_name;
         string         time_coordvar;
 
-        int rc = _getVarCoordinates(ncdfc, vars[i], sdimnames, scoordvars, time_dim_name, time_coordvar);
+        int rc = getVarCoordinates(ncdfc, vars[i], sdimnames, scoordvars, time_dim_name, time_coordvar);
         if (rc < 0) {
             SetErrMsg("Invalid variable : %s", vars[i].c_str());
             return (-1);
@@ -795,7 +643,7 @@ int DCCF::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> 
         string         time_dim_name;
         string         time_coordvar;
 
-        int rc = _getVarCoordinates(ncdfc, vars[i], sdimnames, scoordvars, time_dim_name, time_coordvar);
+        int rc = getVarCoordinates(ncdfc, vars[i], sdimnames, scoordvars, time_dim_name, time_coordvar);
         if (rc < 0) {
             SetErrMsg("Invalid variable : %s", vars[i].c_str());
             return (-1);

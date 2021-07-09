@@ -38,18 +38,15 @@ public:
 
     virtual int Initialize(const std::vector<string> &files);
 
-    //! Return boolean indicating whether variable is a CF coordinate variable
+    //! Return boolean indicating whether variable is a coordinate variable
     //!
     //! This method returns true if the variable named by \p var is a
-    //! "coordinate variable"
+    //! coordinate variable as defined by the CF specification. I.e.
+    //! the variable has a single spatial dimension whose name matches
+    //! \p var name; the variable can be identified as a vertical, lat, lon,
+    //! or time coordinate variable; or the variable is listed by some
+    //! other variable's "coordinate" metadata attribute.
     //!
-    //! CF1.X Definition of <em> coordinate variable </em>:
-    //!
-    //! "We use this term precisely as it is defined in section 2.3.1 of the NUG.
-    //! It is a one- dimensional variable with the same name as its
-    //! dimension [e.g., time(time)], and it is defined as a numeric data
-    //! type with values that are ordered monotonically. Missing values are
-    //! not allowed in coordinate variables."
     //!
     //! \retval true if \p var is a coordinate variable, false otherwise
     //

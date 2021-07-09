@@ -159,6 +159,9 @@ protected:
 
     virtual int initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &_meshMap);
 
+    virtual int getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<string> &sdimnames, vector<string> &scoordvars, string &time_dim_name, string &time_coordvar) const;
+
+
 private:
     NetCDFCFCollection *_ncdfc;
     VAPoR::UDUnits      _udunits;
@@ -176,19 +179,9 @@ private:
 
     int _initTimeCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
 
-    int _get_vertical_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar);
-
-    int _get_time_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar);
-
-    int _get_latlon_coordvars(NetCDFCFCollection *ncdfc, string dvar, string &loncvar, string &latcvar) const;
-
-
     // Return true if a 1D variable has uniform, absolute deltas between elements
     //
     bool _isUniform(NetCDFCFCollection *ncdfc, string varname);
-
-
-    int _getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<string> &sdimnames, vector<string> &scoordvars, string &time_dim_name, string &time_coordvar);
 
 
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
