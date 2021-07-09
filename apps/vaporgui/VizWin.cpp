@@ -26,6 +26,8 @@
 #include <QFocusEvent>
 #include <QMouseEvent>
 #include <QCloseEvent>
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QIcon>
 #include <vapor/ControlExecutive.h>
 #include <vapor/ViewpointParams.h>
@@ -200,6 +202,8 @@ void VizWin::_setUpProjMatrix()
 
     size_t width, height;
     vParams->GetWindowSize(width, height);
+    width *= QApplication::desktop()->devicePixelRatio();
+    height *= QApplication::desktop()->devicePixelRatio();
     int wWidth = width;
     int wHeight = height;
 
