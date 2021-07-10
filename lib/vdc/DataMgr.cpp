@@ -19,6 +19,7 @@
 #if DCP_ENABLE_PARTICLE_DENSITY
     #include <vapor/DerivedParticleDensity.h>
 #endif
+#include <vapor/DCUGRID.h>
 #include <vapor/DataMgr.h>
 #ifdef WIN32
     #include <float.h>
@@ -609,6 +610,8 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         _dc = new DCBOV();
     } else if (_format.compare("dcp") == 0) {
         _dc = new DCP();
+    } else if (_format.compare("ugrid") == 0) {
+        _dc = new DCUGRID();
 #ifdef BUILD_DC_MELANIE
     } else if (_format.compare("melanie") == 0) {
         _dc = new DCMelanie();
@@ -2618,10 +2621,13 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
         status = _dc->GetAuxVarInfo(node_face_var, auxvar);
         VAssert(status);
         faceOffset = auxvar.GetOffset();
+    }
+#ifdef	DEAD
     } else {
         VAssert(!"NodeFaceVar Required");
         faceOffset = 0;
     }
+#endif
 }
 
 string DataMgr::_get_grid_type(string varname) const

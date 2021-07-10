@@ -78,7 +78,7 @@ protected:
 
     //! \copydoc DC::GetAuxVarInfo()
     //!
-    virtual bool getAuxVarInfo(string varname, DC::AuxVar &var) const { return (false); }
+    virtual bool getAuxVarInfo(string varname, DC::AuxVar &var) const;
 
     //! \copydoc DC::GetBaseVarInfo()
     //
@@ -88,7 +88,7 @@ protected:
     //!
     virtual std::vector<string> getDataVarNames() const;
 
-    virtual std::vector<string> getAuxVarNames() const { return (vector<string>()); }
+    virtual std::vector<string> getAuxVarNames() const;
 
     //! \copydoc DC::GetCoordVarNames()
     //!
@@ -157,6 +157,8 @@ protected:
 
     virtual int initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> &dataVarsMap);
 
+    virtual int initAuxilliaryVars(NetCDFCFCollection *ncdfc, std::map<string, DC::AuxVar> &auxVarsMap);
+
     virtual int initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &_meshMap);
 
     virtual int getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<string> &sdimnames, vector<string> &scoordvars, string &time_dim_name, string &time_coordvar) const;
@@ -171,6 +173,7 @@ private:
     std::map<string, DC::CoordVar>              _coordVarsMap;
     std::map<string, DC::Mesh>                  _meshMap;
     std::map<string, DC::DataVar>               _dataVarsMap;
+    std::map<string, DC::AuxVar>    _auxVarsMap;
     std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
 
     int _initHorizontalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);

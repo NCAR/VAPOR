@@ -68,6 +68,7 @@
 #include <vapor/DCP.h>
 #include <vapor/DCCF.h>
 #include <vapor/DCBOV.h>
+#include <vapor/DCUGRID.h>
 
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
@@ -212,6 +213,7 @@ void MainForm::_initMembers()
     _dataImportWRF_Action = NULL;
     _dataImportCF_Action = NULL;
     _dataImportMPAS_Action = NULL;
+    _dataImportUGRID_Action = NULL;
     _dataLoad_MetafileAction = NULL;
     _dataClose_MetafileAction = NULL;
     _plotAction = NULL;
@@ -574,6 +576,8 @@ bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std
         *fmt = "cf";
     else if (isDatasetValidFormat<DCBOV>(paths))
         *fmt = "bov";
+    else if (isDatasetValidFormat<DCUGRID>(paths))
+        *fmt = "ugrid";
     else
         return false;
     return true;
@@ -889,6 +893,11 @@ void MainForm::_createFileMenu()
     _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the "
                                        "current session");
 
+    _dataImportUGRID_Action = new QAction(this);
+    _dataImportUGRID_Action->setText(tr("UGRID"));
+    _dataImportUGRID_Action->setToolTip("Specify one or more UGRID formatted files to import into "
+                                      "the current session");
+
     _fileOpenAction = new QAction(this);
     _fileOpenAction->setEnabled(true);
     _fileSaveAction = new QAction(this);
@@ -932,6 +941,7 @@ void MainForm::_createFileMenu()
     _importMenu->addAction(_dataImportMPAS_Action);
     _importMenu->addAction("Brick of Values (BOV)", this, [this]() { loadDataHelper("", {}, "BOV files", "", "bov", true, DatasetExistsAction::Prompt); });
     _importMenu->addAction("Data Collection Particles (DCP)", this, [this]() { loadDataHelper("", {}, "DCP files", "", "dcp", true, DatasetExistsAction::Prompt); });
+    _importMenu->addAction(_dataImportUGRID_Action);
     _File->addSeparator();
 
     // _File->addAction(createTextSeparator(" Session"));
@@ -946,6 +956,7 @@ void MainForm::_createFileMenu()
     connect(_dataImportWRF_Action, SIGNAL(triggered()), this, SLOT(importWRFData()));
     connect(_dataImportCF_Action, SIGNAL(triggered()), this, SLOT(importCFData()));
     connect(_dataImportMPAS_Action, SIGNAL(triggered()), this, SLOT(importMPASData()));
+    connect(_dataImportUGRID_Action, SIGNAL(triggered()), this, SLOT(importUGRIDData()));
 
     connect(_fileNew_SessionAction, SIGNAL(triggered()), this, SLOT(sessionNew()));
     connect(_fileOpenAction, SIGNAL(triggered()), this, SLOT(sessionOpen()));
@@ -1769,6 +1780,12 @@ void MainForm::importMPASData()
 {
     vector<string> files;
     loadDataHelper("", files, "MPAS files", "", "mpas", true);
+}
+
+void MainForm::importUGRIDData()
+{
+    vector<string> files;
+    loadDataHelper("", files, "UGRID files", "", "ugrid", true);
 }
 
 void MainForm::importBOVData()

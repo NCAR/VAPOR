@@ -42,6 +42,7 @@ DCCF::DCCF()
     _dimsMap.clear();
     _coordVarsMap.clear();
     _dataVarsMap.clear();
+    _auxVarsMap.clear();
     _meshMap.clear();
     _derivedVars.clear();
 }
@@ -91,6 +92,12 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
         SetErrMsg("No valid dimensions");
         return (-1);
     }
+
+    //
+    // Identify auxilliary variables. 
+    //
+    rc = initAuxilliaryVars(ncdfc, _auxVarsMap);
+    if (rc < 0) return (-1);
 
     //
     // Identify meshes. 
@@ -171,6 +178,17 @@ bool DCCF::getDataVarInfo(string varname, DC::DataVar &datavar) const
     return (true);
 }
 
+bool DCCF::getAuxVarInfo(string varName, DC::AuxVar &auxVar) const
+{
+    map<string, DC::AuxVar>::const_iterator itr;
+
+    itr = _auxVarsMap.find(varName);
+    if (itr == _auxVarsMap.end()) { return (false); }
+
+    auxVar = itr->second;
+    return (true);
+}
+
 bool DCCF::getBaseVarInfo(string varname, DC::BaseVar &var) const
 {
     map<string, DC::CoordVar>::const_iterator itr;
@@ -205,6 +223,15 @@ std::vector<string> DCCF::getCoordVarNames() const
 
     vector<string> names;
     for (itr = _coordVarsMap.begin(); itr != _coordVarsMap.end(); ++itr) { names.push_back(itr->first); }
+    return (names);
+}
+
+std::vector<string> DCCF::getAuxVarNames() const
+{
+    map<string, DC::AuxVar>::const_iterator itr;
+
+    vector<string> names;
+    for (itr = _auxVarsMap.begin(); itr != _auxVarsMap.end(); ++itr) { names.push_back(itr->first); }
     return (names);
 }
 
@@ -462,7 +489,7 @@ int DCCF::_initVerticalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, D
     vector <string> vertVars = ncdfc->GetVertCoordVars();
     int rc = addCoordvars(ncdfc, vertVars, coordVarsMap);
 
-    return (0);
+    return (rc);
 }
 
 int DCCF::_initTimeCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap)
@@ -612,6 +639,13 @@ int DCCF::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMa
 
     return (0);
 }
+
+int DCCF::initAuxilliaryVars(NetCDFCFCollection *ncdfc, std::map<string, DC::AuxVar> &auxVarsMap)
+{
+    auxVarsMap.clear();
+    return(0);
+}
+
 
 // Collect metadata for all data variables found in the CF data
 // set. Initialize dataVarsMap member
