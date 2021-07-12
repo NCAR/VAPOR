@@ -125,8 +125,8 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
     // by their units, standard name, etc.
     //
     vars.clear();
-    for (int i=0; i<4; i++) {
-        vector<string> v = NetCDFCollection::GetVariableNames(1, false);
+    for (int i=1; i<4; i++) {
+        vector<string> v = NetCDFCollection::GetVariableNames(i, false);
         vars.insert(vars.end(), v.begin(), v.end());
     }
 
@@ -136,16 +136,16 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
 
         if (_IsLonCoordVar(varinfo)) {
             _lonCoordVars.push_back(varName);
-            _coordinateVars.push_back(varName);
+            _auxCoordinateVars.push_back(varName);
         } else if (_IsLatCoordVar(varinfo)) {
             _latCoordVars.push_back(varName);
-            _coordinateVars.push_back(varName);
+            _auxCoordinateVars.push_back(varName);
         } else if (_IsVertCoordVar(varinfo)) {
             _vertCoordVars.push_back(varName);
-            _coordinateVars.push_back(varName);
+            _auxCoordinateVars.push_back(varName);
         } else if (_IsTimeCoordVar(varinfo)) {
             _timeCoordVars.push_back(varName);
-            _coordinateVars.push_back(varName);
+            _auxCoordinateVars.push_back(varName);
         }
     }
 
@@ -174,7 +174,6 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
             // actually exists in the data collection 
             //
             if (NetCDFCollection::VariableExists(coordattr[j])) {
-                _coordinateVars.push_back(coordattr[j]);
                 _auxCoordinateVars.push_back(coordattr[j]);
             }
         }
@@ -184,7 +183,7 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
     // does not follow CF conventions :-(
     //
     if (_camZ3Exists(vars)) {
-        _coordinateVars.push_back("Z3");
+        _auxCoordinateVars.push_back("Z3");
 
         DerivedVar_vertStag *derived_var = new DerivedVar_vertStag(this, "Z3", "ilev");
         string               stagVar = "Z3P1";
@@ -695,7 +694,12 @@ void NetCDFCFCollection::InstallDerivedCoordVar(string varname, DerivedVar *deri
     vector<string> dims = derivedVar->GetSpatialDimNames();
     if (derivedVar->TimeVarying()) { dims.insert(dims.begin(), derivedVar->GetTimeDimName()); }
 
-	_coordinateVars.push_back(varname);
+    if (dims.size() == 1 && dims[0] == varname) {
+    	_coordinateVars.push_back(varname);
+    }
+    else {
+    	_auxCoordinateVars.push_back(varname);
+    }
 
     switch (axis) {
     case 0: _lonCoordVars.push_back(varname); break;
@@ -728,6 +732,9 @@ void NetCDFCFCollection::RemoveDerivedVar(string varname)
 
     itr = find(_coordinateVars.begin(), _coordinateVars.end(), varname);
     if (itr != _coordinateVars.end()) _coordinateVars.erase(itr);
+
+    itr = find(_auxCoordinateVars.begin(), _auxCoordinateVars.end(), varname);
+    if (itr != _auxCoordinateVars.end()) _auxCoordinateVars.erase(itr);
 }
 
 bool NetCDFCFCollection::GetMapProjectionProj4(string varname, string &proj4string) const
@@ -992,6 +999,9 @@ bool NetCDFCFCollection::_IsVertCoordVar(const NetCDFSimple::Variable &varinfo) 
     // Check for CAM Z3 Geopotential height variable
     //
     if (_camZ3Exists(vector<string>(1, varinfo.GetName()))) return (true);
+
+    varinfo.GetAtt("positive", s);
+    if ((StrCmpNoCase(s, "up") == 0) || (StrCmpNoCase(s, "down") == 0)) return(true);
 
     string unit;
     varinfo.GetAtt("units", unit);

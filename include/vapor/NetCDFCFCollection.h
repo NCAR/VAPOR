@@ -38,10 +38,10 @@ public:
 
     virtual int Initialize(const std::vector<string> &files);
 
-    //! Return boolean indicating whether variable is a coordinate variable
+    //! Return boolean indicating whether variable is a CF "coordinate" variable
     //!
     //! This method returns true if the variable named by \p var is a
-    //! coordinate variable as defined by the CF specification. I.e.
+    //! "coordinate" variable as defined by the CF specification. I.e.
     //! the variable has a single spatial dimension whose name matches
     //! \p var name; the variable can be identified as a vertical, lat, lon,
     //! or time coordinate variable; or the variable is listed by some
@@ -49,6 +49,8 @@ public:
     //!
     //!
     //! \retval true if \p var is a coordinate variable, false otherwise
+    //!
+    //! \sa IsAuxCoordVarCF()
     //
     virtual bool IsCoordVarCF(string var) const { return (std::find(_coordinateVars.begin(), _coordinateVars.end(), var) != _coordinateVars.end()); }
 
@@ -69,6 +71,19 @@ public:
     //! \retval true if \p var is an auxliary coordinate variable, false otherwise
     //
     virtual bool IsAuxCoordVarCF(string var) const { return (std::find(_auxCoordinateVars.begin(), _auxCoordinateVars.end(), var) != _auxCoordinateVars.end()); }
+
+
+    //! Return boolean indicating whether the named variable is a
+    //! NetCDF CF "coordinate" variable or a "auxilliary" coordinate
+    //! variable. 
+    //!
+    //! \sa IsAuxCoordVarCF(), IsCoordVarCF()
+    //
+    virtual bool IsCoordinateVar(string varName) const {
+        return(IsCoordVarCF(varName) || IsAuxCoordVarCF(varName));
+    }
+
+
 
     //! Return boolean indicating whether the named variable represents
     //! latitude.
