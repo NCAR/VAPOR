@@ -572,12 +572,12 @@ bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std
         *fmt = "mpas";
     else if (isDatasetValidFormat<DCP>(paths))
         *fmt = "dcp";
+    else if (isDatasetValidFormat<DCUGRID>(paths))
+        *fmt = "ugrid";
     else if (isDatasetValidFormat<DCCF>(paths))
         *fmt = "cf";
     else if (isDatasetValidFormat<DCBOV>(paths))
         *fmt = "bov";
-    else if (isDatasetValidFormat<DCUGRID>(paths))
-        *fmt = "ugrid";
     else
         return false;
     return true;
