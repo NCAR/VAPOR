@@ -37,6 +37,9 @@ protected:
     int initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMap) override;
 
 private:
+
+    // Struct to contain the most general form of UGRID mesh
+    //
     struct uGridMeshType {
         int topology;
         vector <string> nodeCoordinates;

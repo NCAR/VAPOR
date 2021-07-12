@@ -47,6 +47,8 @@ template<class T> int _xgetVar(NetCDFCFCollection *ncdfc, size_t ts, string varn
     return (ncdfc->Close(fd));
 }
 
+// Read a netcdf attribute of type int
+//
 void getAttInt(NetCDFCFCollection *ncdfc, string varName, string attName, int &v)
 {
     v = 0;
@@ -58,6 +60,8 @@ void getAttInt(NetCDFCFCollection *ncdfc, string varName, string attName, int &v
     }
 }
 
+// Read a netcdf attribute of type string
+//
 void getAttString(NetCDFCFCollection *ncdfc, string varName, string attName, string &v)
 {
     v = "";
@@ -78,9 +82,14 @@ bool isUGridDummyVar(NetCDFCFCollection *ncdfc, string varName)
 
 
 
+// The vertical coordinate for a "layered" mesh is not explicity identified
+// by a mesh "dummy" variable. Instead we have to identify them using
+// the rules of the NetCDF CF conventions upon which UGRID is based
+//
 string DCUGRID::_getLayeredVerticalCoordVar(NetCDFCFCollection *ncdfc, string varName) const {
 
-    // First check for CF "1D coordinate" variable
+    // First check for CF "1D coordinate" variable. I.e a variable
+    // with the same name as the vertical dimension
     //
 	vector <string> dimNames = ncdfc->GetSpatialDimNames(varName);
     if (dimNames.size() != 2) return("");
@@ -89,6 +98,10 @@ string DCUGRID::_getLayeredVerticalCoordVar(NetCDFCFCollection *ncdfc, string va
         return(dimNames[0]);
     }
 
+    // We didn't find a "1D coordinate" variable, so see if varName's
+    // "coordinates" attribute names a vertical coordinate. I.e. look
+    // for what the CF conventions call an "auxilliary" variable
+    //
 	string meshName;
 	getAttString(ncdfc, varName, meshAttName, meshName);
 
@@ -194,6 +207,8 @@ size_t DCUGRID::_getMeshMaxNodesPerFace(NetCDFCFCollection *ncdfc, const uGridMe
 }
     
 
+// Get the time coordinate variable for a named variable
+//
 bool DCUGRID::_getVarTimeCoords(NetCDFCFCollection *ncdfc, string varName, string &coordName) const 
 {
     coordName.clear();
@@ -305,7 +320,7 @@ int DCUGRID::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &mes
     }
 
     // Should the correct behavior be to return an error code if 
-    // no valid meshes are found? Right now need this so that MainForm
+    // no valid meshes are found? Right now need this is done so that MainForm
     // can auto-detect the file. We should probably introduce a separate
     // detection method on the DC class.
     //
