@@ -154,7 +154,7 @@ using namespace VAPoR;
 
 const QEvent::Type MainForm::ParamsChangeEvent = (QEvent::Type)QEvent::registerEventType();
 const QEvent::Type MainForm::ParamsIntermediateChangeEvent = (QEvent::Type)QEvent::registerEventType();
-const std::string  MainForm::_documentationURL = "http://www.docs.vapor.ucar.edu";
+const std::string  MainForm::_documentationURL = "https://vapor.readthedocs.io/en/readthedocs/";
 
 namespace {
 
