@@ -339,11 +339,12 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
     for (size_t i = 0; i < line.length(); i++) {
         if (line[i] == '#') {
             line.erase(line.begin() + i, line.end());
-            if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
-                line.pop_back();
             break;
         }
     }
+
+    if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+        line.pop_back();
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
