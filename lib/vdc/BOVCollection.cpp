@@ -7,6 +7,7 @@
 #include <fstream>
 #include <type_traits>
 #include "vapor/VAssert.h"
+#include "vapor/utils.h"
 #include <stdio.h>
 
 #ifdef _WINDOWS
@@ -51,6 +52,9 @@ const std::string BOVCollection::_xDim = "x";
 const std::string BOVCollection::_yDim = "y";
 const std::string BOVCollection::_zDim = "z";
 const std::string BOVCollection::_timeDim = "t";
+
+const std::string BOVCollection::_bigEndianString = "BIG";
+const std::string BOVCollection::_littleEndianString = "LITTLE";
 
 const std::string BOVCollection::_byteFormatString = "BYTE";
 const std::string BOVCollection::_shortFormatString = "SHORT";
@@ -218,6 +222,8 @@ int BOVCollection::_validateParsedValues()
     }
 
     // Validate endian type
+    if (_tmpDataEndian != _bigEndianString && _tmpDataEndian != _littleEndianString )
+        return _invalidEndianError(ENDIAN_TOKEN);
     if (_tmpDataEndian != _dataEndian && _dataEndianAssigned == true)
         return _inconsistentValueError(ENDIAN_TOKEN);
     else {
@@ -260,6 +266,13 @@ int BOVCollection::_invalidDimensionError(std::string token) const
 int BOVCollection::_invalidFormatError(std::string token) const
 {
     std::string message = token + " must be either INT, FLOAT, or DOUBLE.";
+    SetErrMsg(message.c_str());
+    return -1;
+}
+
+int BOVCollection::_invalidEndianError(std::string token) const
+{
+    std::string message = token + " must be either " + _littleEndianString + " or " + _bigEndianString;
     SetErrMsg(message.c_str());
     return -1;
 }
@@ -474,11 +487,9 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
         return -1;
     }
 
-    size_t numValues = _gridSize[0] * _gridSize[1] * _gridSize[2];
-
     int  n = 1;
     bool systemLittleEndian = *(char *)&n == 1 ? true : false;
-    bool dataLittleEndian = _dataEndian == "LITTLE" ? true : false;
+    bool dataLittleEndian = _dataEndian == _littleEndianString ? true : false;
     bool needSwap = systemLittleEndian != dataLittleEndian ? true : false;
 
     // Read a "pencil" of data along the X axis, one row at a time
@@ -486,6 +497,7 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
     // Note: allocate buffer once and reuse for many times, so repeated allocation is avoided.
     std::vector<unsigned char> vReadBuffer(count * formatSize);
     unsigned char *            readBuffer = vReadBuffer.data();
+
     for (size_t k = min[2]; k <= max[2]; k++) {
         size_t zOffset = _gridSize[0] * _gridSize[1] * k;
         for (size_t j = min[1]; j <= max[1]; j++) {
@@ -506,8 +518,8 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
                 return -1;
             }
 
-            if (needSwap) { _swapBytes(readBuffer, formatSize, numValues); }
-
+            if (needSwap) { _swapBytes(readBuffer, formatSize, count); }
+            
             if (_dataFormat == DC::XType::INT32) {
                 int *castBuffer = (int *)readBuffer;
                 for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }

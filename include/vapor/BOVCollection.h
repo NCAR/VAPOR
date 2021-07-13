@@ -84,6 +84,7 @@ private:
 
     int _invalidDimensionError(std::string token) const;
     int _invalidFormatError(std::string token) const;
+    int _invalidEndianError(std::string token) const;
     int _failureToReadError(std::string token) const;
     int _inconsistentValueError(std::string token) const;
     int _invalidValueError(std::string token) const;
@@ -121,6 +122,9 @@ private:
     static const std::string _yDim;
     static const std::string _zDim;
     static const std::string _timeDim;
+
+    static const std::string _bigEndianString;
+    static const std::string _littleEndianString;
 
     static const std::string _byteFormatString;
     static const std::string _shortFormatString;
