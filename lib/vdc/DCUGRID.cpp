@@ -389,7 +389,13 @@ int DCUGRID::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVa
         int type = ncdfc->GetXType(varName);
         if (!(NetCDFSimple::IsNCTypeFloat(type))) { continue; }
 
-        if (IsCoordVar(varName)) {continue; }
+        // Checking for whether a variable can be a coordinate variable
+        // eliminates a lot of variables from being data variables. There
+        // doesn't seem to be any reason why a variable can't be both a
+        // data variable and a coordinate variable. Leaving this code 
+        // commented out for now.
+        //
+        // if (IsCoordVar(varName)) {continue; }
 
         // variable must have valid mesh attribute
         //
