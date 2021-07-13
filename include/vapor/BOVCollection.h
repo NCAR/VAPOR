@@ -29,6 +29,8 @@ public:
     template<class T> int ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region);
 
 private:
+    std::string              _currentFilePath;
+
     float                    _time;
     std::vector<float>       _times;
     std::string              _dataFile;
@@ -82,13 +84,14 @@ private:
     int  _sizeOfFormat(DC::XType) const;
     void _swapBytes(void *vptr, size_t size, size_t n) const;
 
-    int _invalidDimensionError(std::string token) const;
-    int _invalidFormatError(std::string token) const;
-    int _invalidEndianError(std::string token) const;
-    int _failureToReadError(std::string token) const;
-    int _inconsistentValueError(std::string token) const;
-    int _invalidValueError(std::string token) const;
-    int _missingValueError(std::string token) const;
+    int _invalidFileError(const std::string &token, const std::string &file) const;
+    int _invalidDimensionError(const std::string &token) const;
+    int _invalidFormatError(const std::string &token) const;
+    int _invalidEndianError(const std::string &token) const;
+    int _failureToReadError(const std::string &token) const;
+    int _inconsistentValueError(const std::string &token) const;
+    int _invalidValueError(const std::string &token) const;
+    int _missingValueError(const std::string &token) const;
 
     static const std::string TIME_TOKEN;
     static const std::string DATA_FILE_TOKEN;

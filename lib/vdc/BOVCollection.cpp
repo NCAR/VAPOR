@@ -62,6 +62,17 @@ const std::string BOVCollection::_intFormatString = "INT";
 const std::string BOVCollection::_floatFormatString = "FLOAT";
 const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
+namespace {
+    void SplitFilename (const string& str)
+    {
+      size_t found;
+      cout << "Splitting: " << str << endl;
+      found=str.find_last_of("/\\");
+      cout << " folder: " << str.substr(0,found) << endl;
+      cout << " file: " << str.substr(found+1) << endl;
+    }
+}
+
 BOVCollection::BOVCollection()
 : _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _dataEndian(_defaultEndian), _centering(_defaultCentering), _byteOffset(_defaultByteOffset),
   _divideBrick(_defaultDivBrick), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpDataEndian(_defaultEndian), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false),
@@ -87,6 +98,11 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
     std::ifstream header;
     for (int i = 0; i < paths.size(); i++) {
         _dataFile = _defaultFile;
+
+        _currentFilePath = paths[i];
+        size_t found = _currentFilePath.find_last_of("/\\");
+        _currentFilePath = _currentFilePath.substr(0,found);
+
         header.open(paths[i]);
         if (header.is_open()) {
             rc = _parseHeader(header);
@@ -97,7 +113,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 
             rc = _validateParsedValues();
             if (rc < 0) {
-                SetErrMsg("Inconsistency found in BOV token.");
+                SetErrMsg("Validating BOV tokens failed");
                 return -1;
             }
 
@@ -136,8 +152,9 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         rc = _findToken(DATA_FILE_TOKEN, line, dataFile);
         if (rc == (int)parseCodes::ERROR)
             return _failureToReadError(DATA_FILE_TOKEN);
-        else if (rc == (int)parseCodes::FOUND)
+        else if (rc == (int)parseCodes::FOUND) {
             _dataFile = dataFile;
+        }
 
         double time;
         rc = _findToken(TIME_TOKEN, line, time);
@@ -185,6 +202,18 @@ int BOVCollection::_parseHeader(std::ifstream &header)
 
 int BOVCollection::_validateParsedValues()
 {
+    char actualPath[PATH_MAX+1];
+    char* success = realpath(_dataFile.c_str(), actualPath);
+    if (success == nullptr)
+        // At this point we can't find the absolute path, so it might be a relative path.
+        // Try prepending the directory of the .bov file to the data file
+        _dataFile = _currentFilePath + "//" + _dataFile;
+        success = realpath(_dataFile.c_str(), actualPath);
+        if (success == nullptr)
+            return _invalidFileError(DATA_FILE_TOKEN, _dataFile);
+    else
+        _dataFile = std::string(actualPath);
+
     // Validate grid dimensions
     if (_tmpGridSize[0] < 1 || _tmpGridSize[1] < 1 || _tmpGridSize[2] < 1)
         return _invalidDimensionError(GRID_SIZE_TOKEN);
@@ -251,45 +280,51 @@ void BOVCollection::_populateDataFileMap()
     _dataFileMap[_variable][_time] = _dataFile;
 }
 
-int BOVCollection::_missingValueError(std::string token) const
+int BOVCollection::_invalidFileError(const std::string &token, const std::string &file) const
+{
+    SetErrMsg((token + " was unable to be identified").c_str());
+    return -1;
+}
+
+int BOVCollection::_missingValueError(const std::string &token) const
 {
     SetErrMsg(("BOV file must contain token: " + token).c_str());
     return -1;
 }
 
-int BOVCollection::_invalidDimensionError(std::string token) const
+int BOVCollection::_invalidDimensionError(const std::string &token) const
 {
     SetErrMsg((token + " must have all dimensions > 1").c_str());
     return -1;
 }
 
-int BOVCollection::_invalidFormatError(std::string token) const
+int BOVCollection::_invalidFormatError(const std::string &token) const
 {
     std::string message = token + " must be either INT, FLOAT, or DOUBLE.";
     SetErrMsg(message.c_str());
     return -1;
 }
 
-int BOVCollection::_invalidEndianError(std::string token) const
+int BOVCollection::_invalidEndianError(const std::string &token) const
 {
     std::string message = token + " must be either " + _littleEndianString + " or " + _bigEndianString;
     SetErrMsg(message.c_str());
     return -1;
 }
 
-int BOVCollection::_failureToReadError(std::string token) const
+int BOVCollection::_failureToReadError(const std::string &token) const
 {
-    SetErrMsg(("Failure reading BOV time token: " + token).c_str());
+    SetErrMsg(("Failure reading BOV token: " + token).c_str());
     return -1;
 }
 
-int BOVCollection::_inconsistentValueError(std::string token) const
+int BOVCollection::_inconsistentValueError(const std::string &token) const
 {
     SetErrMsg((token + " must be consistent in all BOV files").c_str());
     return -1;
 }
 
-int BOVCollection::_invalidValueError(std::string token) const
+int BOVCollection::_invalidValueError(const std::string &token) const
 {
     SetErrMsg(("Invalid value for token: " + token).c_str());
     return -1;
@@ -320,11 +355,12 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
     for (size_t i = 0; i < line.length(); i++) {
         if (line[i] == '#') {
             line.erase(line.begin() + i, line.end());
-            if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
-                line.pop_back();
             break;
         }
     }
+
+    if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+        line.pop_back();
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
@@ -395,11 +431,12 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
     for (size_t i = 0; i < line.length(); i++) {
         if (line[i] == '#') {
             line.erase(line.begin() + i, line.end());
-            if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
-                line.pop_back();
             break;
         }
     }
+            
+    if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+        line.pop_back();
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
