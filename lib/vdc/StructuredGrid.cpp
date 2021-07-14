@@ -25,16 +25,14 @@ StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> 
 {
     VAssert(bs.size() == 2 || bs.size() == 3);
 
-    auto tmp = Grid::GetDimensions();
-    _cellDims = {tmp[0], tmp[1], tmp[2]};
-    _cellDims.resize(Grid::GetNumDimensions());
+    _cellDims = Grid::GetDimensions();
     for (int i = 0; i < _cellDims.size(); i++) {
         _cellDims[i]--;
         if (_cellDims[i] < 1) _cellDims[i] = 1;
     }
 }
 
-const DimsType StructuredGrid::GetNodeDimensions() const { return GetDimensions(); }
+const DimsType &StructuredGrid::GetNodeDimensions() const { return GetDimensions(); }
 
 const size_t StructuredGrid::GetNumNodeDimensions() const { return GetNumDimensions(); }
 

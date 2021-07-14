@@ -417,7 +417,11 @@ void test_node_iterator(const StructuredGrid *sg)
     if (opt.roimin == opt.minu && opt.roimax == opt.maxu) {
         itr = sg->ConstNodeBegin();
     } else {
-        itr = sg->ConstNodeBegin(opt.roimin, opt.roimax);
+        CoordType roimin = {0.0, 0.0, 0.0};
+        CoordType roimax = {0.0, 0.0, 0.0};
+        Grid::CopyToArr3(opt.roimin, roimin);
+        Grid::CopyToArr3(opt.roimax, roimax);
+        itr = sg->ConstNodeBegin(roimin, roimax);
     }
     size_t count = 0;
     //    for ( ; itr!=sg->ConstNodeEnd(); ++itr)
@@ -443,7 +447,11 @@ void test_cell_iterator(const StructuredGrid *sg)
     if (opt.roimin == opt.minu && opt.roimax == opt.maxu) {
         itr = sg->ConstCellBegin();
     } else {
-        itr = sg->ConstCellBegin(opt.roimin, opt.roimax);
+        CoordType roimin = {0.0, 0.0, 0.0};
+        CoordType roimax = {0.0, 0.0, 0.0};
+        Grid::CopyToArr3(opt.roimin, roimin);
+        Grid::CopyToArr3(opt.roimax, roimax);
+        itr = sg->ConstCellBegin(roimin, roimax);
     }
 
     size_t count = 0;
@@ -521,7 +529,7 @@ void test_getvalue(StructuredGrid *sg)
     float               maxErr = 0.0;
     for (itr = sg->cbegin(); itr != enditr; ++itr, ++coord_itr) {
         float                 v1 = *itr;
-        const vector<double> &coord = *coord_itr;
+        const CoordType &coord = *coord_itr;
 
         float v2 = sg->GetValue(coord);
 
@@ -547,11 +555,12 @@ void test_roi_iterator()
     RegularGrid *rg = new RegularGrid(dims, bs, blks, minu, maxu);
 
     vector<double> delta;
-    vector<double> roiminu, roimaxu;
+	CoordType roiminu = {0.0, 0.0, 0.0};
+	CoordType roimaxu = {0.0, 0.0, 0.0};
     for (int i = 0; i < minu.size(); i++) {
         delta.push_back(maxu[i] - minu[i] / (dims[i] - 1));
-        roiminu.push_back(minu[i] + (delta[i] / 0.5));
-        roimaxu.push_back(maxu[i] - (delta[i] / 0.5));
+        roiminu[i] = minu[i] + (delta[i] / 0.5);
+        roimaxu[i] = maxu[i] - (delta[i] / 0.5);
     }
 
     size_t idx = 0;

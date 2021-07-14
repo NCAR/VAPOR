@@ -328,7 +328,7 @@ LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(const LayeredGrid *lg, b
 {
     _lg = lg;
     _nElements2D = lg->GetDimensions()[0] * lg->GetDimensions()[1];
-    _coords = vector<double>(3, 0.0);
+    _coords = {0.0, 0.0, 0.0};
 
     if (begin) {
         _index2D = 0;
@@ -351,7 +351,7 @@ LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(const ConstCoordItrLayer
     _itr2D = rhs._itr2D;
 }
 
-LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered() : ConstCoordItrAbstract() { _coords.clear(); }
+LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered() : ConstCoordItrAbstract() { _coords = {0.0, 0.0, 0.0}; }
 
 void LayeredGrid::ConstCoordItrLayered::next()
 {

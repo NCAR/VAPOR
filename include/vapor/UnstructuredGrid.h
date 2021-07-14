@@ -143,16 +143,18 @@ public:
 
     //! Return the grid node dimmensions
     //!
-    const VAPoR::DimsType GetNodeDimensions() const override;
+    const VAPoR::DimsType &GetNodeDimensions() const override;
     const size_t          GetNumNodeDimensions() const override;
 
     //! Return the grid cell dimmensions
     //!
-    const std::vector<size_t> &GetCellDimensions() const override { return (_faceDims); }
+    const DimsType &GetCellDimensions() const override { return (_faceDims); }
+
+    virtual const size_t GetNumCellDimensions() const override  { return (_nDims); }
 
     //! Return the grid edge dimmensions
     //!
-    const std::vector<size_t> &GetEdgeDimensions() const { return (_edgeDims); }
+    const DimsType &GetEdgeDimensions() const { return (_edgeDims); }
 
     //! Get missing element ID
     //!
@@ -196,9 +198,10 @@ protected:
     Location   _location;
 
 private:
-    std::vector<size_t> _vertexDims;
-    std::vector<size_t> _faceDims;
-    std::vector<size_t> _edgeDims;
+    DimsType            _vertexDims;
+    DimsType            _faceDims;
+    DimsType            _edgeDims;
+    size_t              _nDims;
     int                 _missingID;
     int                 _boundaryID;
 };

@@ -33,9 +33,14 @@ UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const 
     //
     VAssert(location == NODE || location == CELL);
 
-    _vertexDims = vertexDims;
-    _faceDims = faceDims;
-    _edgeDims = edgeDims;
+    _vertexDims = {1,1,1};
+    _faceDims = {1,1,1};
+    _edgeDims = {1,1,1};
+    _nDims = vertexDims.size();
+
+    CopyToArr3(vertexDims, _vertexDims);
+    CopyToArr3(faceDims, _faceDims);
+    CopyToArr3(edgeDims, _edgeDims);
 
     //
     // Shallow copy raw pointers
@@ -55,16 +60,13 @@ UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const 
 }
 
 
-const VAPoR::DimsType UnstructuredGrid::GetNodeDimensions() const
+const VAPoR::DimsType &UnstructuredGrid::GetNodeDimensions() const
 {
-    auto tmp = std::array<size_t, 3>{1, 1, 1};
-    assert(tmp.size() >= _vertexDims.size());
-    std::copy(_vertexDims.begin(), _vertexDims.end(), tmp.begin());
-    return tmp;
+    return(_vertexDims);
 }
 
 
-const size_t UnstructuredGrid::GetNumNodeDimensions() const { return _vertexDims.size(); }
+const size_t UnstructuredGrid::GetNumNodeDimensions() const { return _nDims; }
 
 
 bool UnstructuredGrid::GetCellNodes(const DimsType &cindices, vector<DimsType> &nodes) const
@@ -72,15 +74,13 @@ bool UnstructuredGrid::GetCellNodes(const DimsType &cindices, vector<DimsType> &
     DimsType cCindices;
     ClampCellIndex(cindices, cCindices);
 
-    const vector<size_t> &cdims = GetCellDimensions();
-
     // _vertexOnFace is dimensioned cdims[0] x _maxVertexPerFace
     //
     const int *ptr = _vertexOnFace + (_maxVertexPerFace * cCindices[0]);
     long       offset = GetNodeOffset();
 
     size_t n = 0;
-    if (cdims.size() == 1) {
+    if (GetNumCellDimensions() == 1) {
         nodes.resize(_maxVertexPerFace);    // ensure sufficient memory
         for (int i = 0; i < _maxVertexPerFace; i++, ptr++) {
             if (*ptr == GetMissingID() || *ptr + offset < 0) break;
@@ -126,7 +126,7 @@ bool UnstructuredGrid::GetCellNeighbors(const DimsType &cindices, std::vector<Di
     DimsType cCindices = {0, 0, 0};
     ClampCellIndex(cindices, cCindices);
 
-    vector<size_t> cdims = GetCellDimensions();
+    const DimsType &cdims = GetCellDimensions();
 
     // _faceOnFace is dimensioned cdims[0] x _maxVertexPerFace
     //
@@ -134,7 +134,7 @@ bool UnstructuredGrid::GetCellNeighbors(const DimsType &cindices, std::vector<Di
     long       offset = GetCellOffset();
 
     DimsType indices = {0, 0, 0};
-    if (cdims.size() == 1) {
+    if (GetNumCellDimensions() == 1) {
         for (int i = 0; i < _maxVertexPerFace; i++) {
             if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 

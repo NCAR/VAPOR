@@ -142,13 +142,17 @@ vector<size_t> Wasp::Dims(const vector<size_t> &min, const vector<size_t> &max)
     return (dims);
 }
 
-size_t Wasp::VProduct(const vector<size_t> &a)
+size_t Wasp::VProduct(const size_t *a, size_t n)
 {
     size_t ntotal = 1;
 
-    for (int i = 0; i < a.size(); i++) ntotal *= a[i];
+    for (size_t i = 0; i < n; i++) ntotal *= a[i];
 
     return (ntotal);
+}
+
+size_t Wasp::VProduct(const std::vector<size_t> &a) {
+    return(VProduct(a.data(), a.size()));
 }
 
 #define BLOCKSIZE 256

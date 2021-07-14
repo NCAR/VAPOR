@@ -106,11 +106,11 @@ public:
         virtual std::unique_ptr<ConstCoordItrAbstract> clone() const { return std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrU2D(*this)); };
 
     private:
-        int                 _ncoords;
+        size_t               _ncoords;
         ConstIterator       _xCoordItr;
         ConstIterator       _yCoordItr;
         ConstIterator       _zCoordItr;
-        std::vector<double> _coords;
+        CoordType           _coords;
     };
 
     virtual ConstCoordItr ConstCoordBegin() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrU2D(this, true))); }

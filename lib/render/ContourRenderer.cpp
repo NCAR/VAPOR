@@ -116,7 +116,11 @@ int ContourRenderer::_buildCache()
     double mv = grid->GetMissingValue();
     float  Z0 = GetDefaultZ(_dataMgr, _cacheParams.ts);
 
-    Grid::ConstCellIterator it = grid->ConstCellBegin(_cacheParams.boxMin, _cacheParams.boxMax);
+    CoordType boxMin = {0.0, 0.0, 0.0};
+    CoordType boxMax = {0.0, 0.0, 0.0};
+    Grid::CopyToArr3(_cacheParams.boxMin, boxMin);
+    Grid::CopyToArr3(_cacheParams.boxMax, boxMax);
+    Grid::ConstCellIterator it = grid->ConstCellBegin(boxMin, boxMax);
 
     size_t           maxNodes = grid->GetMaxVertexPerCell();
     vector<DimsType> nodes(maxNodes);
@@ -126,8 +130,8 @@ int ContourRenderer::_buildCache()
 
     Grid::ConstCellIterator end = grid->ConstCellEnd();
     for (; it != end; ++it) {
-        const vector<size_t> &cell = *it;
-        grid->GetCellNodes(cell.data(), nodes);
+        const DimsType &cell = *it;
+        grid->GetCellNodes(cell, nodes);
 
         bool hasMissing = false;
         for (int i = 0; i < nodes.size(); i++) {

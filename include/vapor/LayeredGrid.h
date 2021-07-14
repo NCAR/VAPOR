@@ -147,7 +147,7 @@ public:
     private:
         const LayeredGrid *          _lg;
         size_t                       _nElements2D;
-        std::vector<double>          _coords;
+        CoordType                    _coords;
         size_t                       _index2D;
         ConstIterator                _zCoordItr;
         StretchedGrid::ConstCoordItr _itr2D;
