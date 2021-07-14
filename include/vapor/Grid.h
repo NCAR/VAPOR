@@ -1013,6 +1013,14 @@ public:
         return ConstNodeIterator(std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorBoxSG(this, minu, maxu)));
     }
 
+    virtual ConstNodeIterator ConstNodeBegin(const std::vector<double> &minu, const std::vector<double> &maxu) const
+    {
+        CoordType minuCT, maxuCT;
+        CopyToArr3(minu, minuCT);
+        CopyToArr3(maxu, maxuCT);
+        return ConstNodeBegin(minuCT, maxuCT);
+    }
+
     virtual ConstNodeIterator ConstNodeEnd() const { return ConstNodeIterator(std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorSG(this, false))); }
 
     //
@@ -1083,6 +1091,14 @@ public:
     virtual ConstCellIterator ConstCellBegin(const CoordType &minu, const CoordType &maxu) const
     {
         return ConstCellIterator(std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorBoxSG(this, minu, maxu)));
+    }
+
+    virtual ConstCellIterator ConstCellBegin(const std::vector<double> &minu, const std::vector<double> &maxu) const
+    {
+        CoordType minuCT, maxuCT;
+        CopyToArr3(minu, minuCT);
+        CopyToArr3(maxu, maxuCT);
+        return ConstCellBegin(minuCT, maxuCT);
     }
 
     virtual ConstCellIterator ConstCellEnd() const { return ConstCellIterator(std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorSG(this, false))); }
@@ -1168,11 +1184,26 @@ public:
     //! inside or on the box defined by \p minu and \p maxu
     //
     Iterator begin(const CoordType &minu, const CoordType &maxu) { return (Iterator(this, true, minu, maxu)); }
+
+    Iterator begin(const std::vector<double> &minu, const std::vector<double> &maxu) { 
+		CoordType minuCT, maxuCT;
+		CopyToArr3(minu, minuCT);
+		CopyToArr3(maxu, maxuCT);
+		return begin(minuCT, maxuCT);
+    }
+
     Iterator begin() { return (Iterator(this, true)); }
 
     Iterator end() { return (Iterator(this, false)); }
 
     ConstIterator cbegin(const CoordType &minu, const CoordType &maxu) const { return (ConstIterator(this, true, minu, maxu)); }
+
+    ConstIterator cbegin(const std::vector<double> &minu, const std::vector<double> &maxu) { 
+		CoordType minuCT, maxuCT;
+		CopyToArr3(minu, minuCT);
+		CopyToArr3(maxu, maxuCT);
+		return cbegin(minuCT, maxuCT);
+    }
     ConstIterator cbegin() const { return (ConstIterator(this, true)); }
 
     ConstIterator cend() const { return (ConstIterator(this, false)); }
