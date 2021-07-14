@@ -99,13 +99,12 @@ target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ})
 
 add_definitions (-DVDF_EXPORTS)
 
-if(NOT WIN32)
-	OpenMPInstall (
-		TARGETS vdc
-		DESTINATION ${INSTALL_LIB_DIR}
-		COMPONENT Libraries
-		)
-endif()
+OpenMPInstall (
+    TARGETS vdc
+    DESTINATION ${INSTALL_LIB_DIR}
+    COMPONENT Libraries
+)
+
 
 install (
 	FILES ${HEADERS}
