@@ -225,6 +225,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     auto dims = _cg->GetDimensions();
     auto ndims = _cg->GetNumDimensions();
     _index = {0, 0, 0};
+    _coords = {0.0, 0.0, 0.0};
     _terrainFollowing = _cg->_terrainFollowing;
     if (begin) {
         _xCoordItr = _cg->_xrg.cbegin();
