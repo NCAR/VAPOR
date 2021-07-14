@@ -29,7 +29,7 @@ public:
     template<class T> int ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region);
 
 private:
-    std::string              _currentFilePath;
+    std::string _currentFilePath;
 
     float                    _time;
     std::vector<float>       _times;
