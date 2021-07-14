@@ -116,11 +116,7 @@ int ContourRenderer::_buildCache()
     double mv = grid->GetMissingValue();
     float  Z0 = GetDefaultZ(_dataMgr, _cacheParams.ts);
 
-    CoordType boxMin = {0.0, 0.0, 0.0};
-    CoordType boxMax = {0.0, 0.0, 0.0};
-    Grid::CopyToArr3(_cacheParams.boxMin, boxMin);
-    Grid::CopyToArr3(_cacheParams.boxMax, boxMax);
-    Grid::ConstCellIterator it = grid->ConstCellBegin(boxMin, boxMax);
+    Grid::ConstCellIterator it = grid->ConstCellBegin(_cacheParams.boxMin, _cacheParams.boxMax);
 
     size_t           maxNodes = grid->GetMaxVertexPerCell();
     vector<DimsType> nodes(maxNodes);

@@ -643,11 +643,6 @@ bool Statistics::_calc3M(std::string varname)
     std::vector<double> minExtent, maxExtent;
     statsParams->GetBox()->GetExtents(minExtent, maxExtent);
 
-    CoordType minExtentCT = {0.0, 0.0, 0.0};
-    CoordType maxExtentCT = {0.0, 0.0, 0.0};
-    Grid::CopyToArr3(minExtent, minExtentCT);
-    Grid::CopyToArr3(maxExtent, maxExtentCT);
-
     float c = 0.0;
     float sum = 0.0;
     float min = std::numeric_limits<float>::max();
@@ -660,7 +655,7 @@ bool Statistics::_calc3M(std::string varname)
             Grid::ConstIterator endItr = grid->cend();
             float               missingVal = grid->GetMissingValue();
 
-            for (Grid::ConstIterator it = grid->cbegin(minExtentCT, maxExtentCT); it != endItr; ++it) {
+            for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
                 if (*it != missingVal) {
                     float val = *it;
                     min = min < val ? min : val;
@@ -704,11 +699,6 @@ bool Statistics::_calcMedian(std::string varname)
     std::vector<double> minExtent, maxExtent;
     statsParams->GetBox()->GetExtents(minExtent, maxExtent);
 
-    CoordType minExtentCT = {0.0, 0.0, 0.0};
-    CoordType maxExtentCT = {0.0, 0.0, 0.0};
-    Grid::CopyToArr3(minExtent, minExtentCT);
-    Grid::CopyToArr3(maxExtent, maxExtentCT);
-
     std::vector<float> buffer;
     for (int ts = minTS; ts <= maxTS; ts++) {
         VAPoR::Grid *grid = currentDmgr->GetVariable(ts, varname, statsParams->GetRefinementLevel(), statsParams->GetCompressionLevel(), minExtent, maxExtent);
@@ -716,7 +706,7 @@ bool Statistics::_calcMedian(std::string varname)
             Grid::ConstIterator endItr = grid->cend();
             float               missingVal = grid->GetMissingValue();
 
-            for (Grid::ConstIterator it = grid->cbegin(minExtentCT, maxExtentCT); it != endItr; ++it) {
+            for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
                 if (*it != missingVal) buffer.push_back(*it);
             }
         }
@@ -749,11 +739,6 @@ bool Statistics::_calcStddev(std::string varname)
     std::vector<double> minExtent, maxExtent;
     statsParams->GetBox()->GetExtents(minExtent, maxExtent);
 
-    CoordType minExtentCT = {0.0, 0.0, 0.0};
-    CoordType maxExtentCT = {0.0, 0.0, 0.0};
-    Grid::CopyToArr3(minExtent, minExtentCT);
-    Grid::CopyToArr3(maxExtent, maxExtentCT);
-
     float c = 0.0;
     float sum = 0.0;
     long  count = 0;
@@ -769,7 +754,7 @@ bool Statistics::_calcStddev(std::string varname)
         if (grid) {
             Grid::ConstIterator endItr = grid->cend();
             float               missingVal = grid->GetMissingValue();
-            for (Grid::ConstIterator it = grid->cbegin(minExtentCT, maxExtentCT); it != endItr; ++it) {
+            for (Grid::ConstIterator it = grid->cbegin(minExtent, maxExtent); it != endItr; ++it) {
                 if (*it != missingVal) {
                     float val = *it;
                     float y = (val - m3[2]) * (val - m3[2]) - c;

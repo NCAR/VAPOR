@@ -222,6 +222,7 @@ void RegularGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords)
 
     for (int i = 0; i < GetNumDimensions(); i++) {
         size_t index = cIndices[i];
+        VAssert(dims[i] > 0);
 
         if (index >= dims[i]) { index = dims[i] - 1; }
 
@@ -240,6 +241,7 @@ bool RegularGrid::GetIndicesCell(const CoordType &coords, DimsType &indices) con
 
     VAssert(GetGeometryDim() <= 3);
     for (int i = 0; i < GetGeometryDim(); i++) {
+        VAssert(dims[i] > 0);
         if (cCoords[i] < _minu[i] || cCoords[i] > _maxu[i]) { return (false); }
 
         if (_delta[i] != 0.0) {

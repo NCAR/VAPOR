@@ -167,6 +167,7 @@ bool StructuredGrid::GetNodeCells(const DimsType &indices, std::vector<DimsType>
     // Check if invalid indices
     //
     for (int i = 0; i < GetGeometryDim(); i++) {
+        VAssert(dims[i] > 0);
         if (indices[i] > (dims[i] - 1)) return (false);
     }
 

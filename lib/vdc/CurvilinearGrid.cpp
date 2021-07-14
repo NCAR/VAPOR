@@ -323,7 +323,10 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 
     DimsType maxIndex = {0, 0, 0};
 
-    for (int i = 0; i < ndims; i++) maxIndex[i] = dims[i] - 1;
+    for (int i = 0; i < ndims; i++) {
+        VAssert(dims[i] > 0);
+        maxIndex[i] = dims[i] - 1;
+    }
 
     long maxIndexL = Wasp::LinearizeCoords(maxIndex.data(), dims.data(), ndims);
     long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
