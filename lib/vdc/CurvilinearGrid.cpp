@@ -224,7 +224,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     _cg = cg;
     auto dims = _cg->GetDimensions();
     auto ndims = _cg->GetNumDimensions();
-    _index = {0,0,0};
+    _index = {0, 0, 0};
     _terrainFollowing = _cg->_terrainFollowing;
     if (begin) {
         _xCoordItr = _cg->_xrg.cbegin();
@@ -263,8 +263,8 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const ConstCoordItrCG &rhs) : 
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG() : ConstCoordItrAbstract()
 {
     _cg = NULL;
-    _index = {0,0,0};
-    _coords = {0.0,0.0,0.0};
+    _index = {0, 0, 0};
+    _coords = {0.0, 0.0, 0.0};
 }
 
 void CurvilinearGrid::ConstCoordItrCG::next()
@@ -318,9 +318,9 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
     auto dims = _cg->GetDimensions();
     auto ndims = _cg->GetNumDimensions();
 
-    if (! ndims) return;
+    if (!ndims) return;
 
-    DimsType maxIndex = {0,0,0};
+    DimsType maxIndex = {0, 0, 0};
 
     for (int i = 0; i < ndims; i++) maxIndex[i] = dims[i] - 1;
 
@@ -328,14 +328,14 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
     long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = {0,0,0};
+        _index = {0, 0, 0};
         _index[ndims - 1] = dims[ndims - 1];
         return;
     }
 
     size_t index2DL = _index[1] * dims[0] + _index[0];
 
-    _index = {0,0,0};
+    _index = {0, 0, 0};
     Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
 
     VAssert(_index[1] * dims[0] + _index[0] >= index2DL);
@@ -672,7 +672,7 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
 
 std::shared_ptr<QuadTreeRectangleP> CurvilinearGrid::_makeQuadTreeRectangle() const
 {
-    const DimsType &dims = GetCellDimensions();
+    const DimsType &      dims = GetCellDimensions();
     size_t                reserve_size = dims[0] * dims[1];
 
     CoordType minu, maxu;

@@ -745,7 +745,7 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     const auto           nodeDims = grid->GetDimensions();
     size_t               nodeDim = grid->GetNumDimensions();
     const size_t         nVerts = nodeDims[0] * nodeDims[1];
-    const DimsType       &cellDims = grid->GetCellDimensions();
+    const DimsType &     cellDims = grid->GetCellDimensions();
     const size_t         nCells = cellDims[0] * cellDims[1];
     VAssert(nodeDim == 2);
 

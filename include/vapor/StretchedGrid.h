@@ -136,8 +136,8 @@ public:
 
     private:
         const StretchedGrid *_sg;
-        DimsType _index;
-        CoordType _coords;
+        DimsType             _index;
+        CoordType            _coords;
     };
 
     virtual ConstCoordItr ConstCoordBegin() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrSG(this, true))); }

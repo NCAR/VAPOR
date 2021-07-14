@@ -74,7 +74,7 @@ public:
     const size_t   GetNumNodeDimensions() const override;
 
     const DimsType &GetCellDimensions() const override { return (_cellDims); };
-    const size_t   GetNumCellDimensions() const override { return GetNumNodeDimensions(); }
+    const size_t    GetNumCellDimensions() const override { return GetNumNodeDimensions(); }
 
     //! \copydoc Grid::GetCellNodes()
     //!

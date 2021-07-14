@@ -106,7 +106,7 @@ public:
         virtual std::unique_ptr<ConstCoordItrAbstract> clone() const { return std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrU2D(*this)); };
 
     private:
-        size_t               _ncoords;
+        size_t              _ncoords;
         ConstIterator       _xCoordItr;
         ConstIterator       _yCoordItr;
         ConstIterator       _zCoordItr;

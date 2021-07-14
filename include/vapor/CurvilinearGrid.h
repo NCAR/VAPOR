@@ -222,8 +222,8 @@ public:
 
     private:
         const CurvilinearGrid *_cg;
-        DimsType                _index;
-        CoordType               _coords;
+        DimsType               _index;
+        CoordType              _coords;
         ConstIterator          _xCoordItr;
         ConstIterator          _yCoordItr;
         ConstIterator          _zCoordItr;

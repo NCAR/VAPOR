@@ -52,9 +52,9 @@ private:
     //
     std::vector<size_t>        GetCoordDimensions(size_t) const override;
     size_t                     GetGeometryDim() const override;
-    const DimsType             &GetNodeDimensions() const override;
+    const DimsType &           GetNodeDimensions() const override;
     const size_t               GetNumNodeDimensions() const override;
-    const DimsType             &GetCellDimensions() const override;
+    const DimsType &           GetCellDimensions() const override;
     const size_t               GetNumCellDimensions() const override;
     void                       GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const override {}
     bool                       GetEnclosingRegion(const CoordType &minu, const CoordType &maxu, DimsType &min, DimsType &max) const override { return (false); }

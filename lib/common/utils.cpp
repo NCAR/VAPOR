@@ -151,9 +151,7 @@ size_t Wasp::VProduct(const size_t *a, size_t n)
     return (ntotal);
 }
 
-size_t Wasp::VProduct(const std::vector<size_t> &a) {
-    return(VProduct(a.data(), a.size()));
-}
+size_t Wasp::VProduct(const std::vector<size_t> &a) { return (VProduct(a.data(), a.size())); }
 
 #define BLOCKSIZE 256
 

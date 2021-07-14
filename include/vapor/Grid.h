@@ -128,10 +128,10 @@ public:
     //
     virtual size_t GetGeometryDim() const = 0;
 
-    virtual const DimsType             &GetNodeDimensions() const = 0;
+    virtual const DimsType &           GetNodeDimensions() const = 0;
     virtual const size_t               GetNumNodeDimensions() const = 0;
-    virtual const DimsType &GetCellDimensions() const = 0;
-    virtual const size_t GetNumCellDimensions() const = 0;
+    virtual const DimsType &           GetCellDimensions() const = 0;
+    virtual const size_t               GetNumCellDimensions() const = 0;
 
     //! Return the ijk dimensions of grid in blocks
     //!
@@ -920,7 +920,7 @@ public:
     //! N.B. Current only works with node coordinates
     //!
     //
-    typedef const CoordType              ConstCoordType;
+    typedef const CoordType                        ConstCoordType;
     typedef Grid::PolyIterator<ConstCoordType>     ConstCoordItr;
     typedef Grid::AbstractIterator<ConstCoordType> ConstCoordItrAbstract;
 
@@ -934,7 +934,7 @@ public:
     //! The ConstNodeIterator is dereferenced to give the index of
     //! a node within the grid
     //!
-    typedef const DimsType              ConstIndexType;
+    typedef const DimsType                         ConstIndexType;
     typedef Grid::PolyIterator<ConstIndexType>     ConstNodeIterator;
     typedef Grid::AbstractIterator<ConstIndexType> ConstNodeIteratorAbstract;
 
@@ -1105,7 +1105,7 @@ public:
     //
     template<class T> class VDF_API ForwardIterator {
     public:
-        ForwardIterator(T *rg, bool begin = true, const CoordType &minu = {0.0,0.0,0.0}, const CoordType &maxu = {0.0,0.0,0.0});
+        ForwardIterator(T *rg, bool begin = true, const CoordType &minu = {0.0, 0.0, 0.0}, const CoordType &maxu = {0.0, 0.0, 0.0});
         ForwardIterator();
         ForwardIterator(const ForwardIterator<T> &) = default;
         ForwardIterator(ForwardIterator<T> &&rhs);
@@ -1148,12 +1148,12 @@ public:
     private:
         size_t               _ndims;
         std::vector<float *> _blks;
-        DimsType _dims3d;
-        DimsType _bdims3d;
-        DimsType _bs3d;
+        DimsType             _dims3d;
+        DimsType             _bdims3d;
+        DimsType             _bs3d;
         size_t               _blocksize;
         ConstCoordItr        _coordItr;
-        DimsType _index;         // current index into grid
+        DimsType             _index;         // current index into grid
         size_t               _indexL;        // current index into grid
         size_t               _end_indexL;    // Last valid index
         size_t               _xb;            // x index within a block

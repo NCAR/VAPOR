@@ -67,7 +67,7 @@ vector<float *> AllocateBlocks(const vector<size_t> &bs, const vector<size_t> &d
 
 void MakeTriangle(Grid *grid, float minVal, float maxVal)
 {
-    auto dims = grid->GetDimensions();
+    auto   dims = grid->GetDimensions();
     size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
     size_t y = nDims > 1 ? dims[Y] : 1;
@@ -86,7 +86,7 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal)
 
 void MakeConstantField(Grid *grid, float value)
 {
-    auto dims = grid->GetDimensions();
+    auto   dims = grid->GetDimensions();
     size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
     size_t y = nDims > 1 ? dims[Y] : 1;
@@ -101,7 +101,7 @@ void MakeConstantField(Grid *grid, float value)
 
 void MakeRamp(Grid *grid, float minVal, float maxVal)
 {
-    auto dims = grid->GetDimensions();
+    auto   dims = grid->GetDimensions();
     size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
     size_t y = nDims > 1 ? dims[Y] : 1;
@@ -122,7 +122,7 @@ void MakeRamp(Grid *grid, float minVal, float maxVal)
 
 void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X)
 {
-    auto dims = grid->GetDimensions();
+    auto   dims = grid->GetDimensions();
     size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
     size_t y = nDims > 1 ? dims[Y] : 1;
@@ -161,7 +161,7 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
     disagreements = 0;
     numMissingValues = 0;
 
-    auto dims = grid->GetDimensions();
+    auto   dims = grid->GetDimensions();
     size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
     size_t y = nDims > 1 ? dims[Y] : 1;
@@ -342,7 +342,7 @@ bool RunTest(Grid *grid)
 
 bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal)
 {
-    auto dims = grid->GetDimensions();
+    auto   dims = grid->GetDimensions();
     size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
     size_t y = nDims > 1 ? dims[Y] : 1;

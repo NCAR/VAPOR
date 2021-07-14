@@ -150,7 +150,7 @@ public:
     //!
     const DimsType &GetCellDimensions() const override { return (_faceDims); }
 
-    virtual const size_t GetNumCellDimensions() const override  { return (_nDims); }
+    virtual const size_t GetNumCellDimensions() const override { return (_nDims); }
 
     //! Return the grid edge dimmensions
     //!

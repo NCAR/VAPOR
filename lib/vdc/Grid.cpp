@@ -266,8 +266,8 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const Grid *g, bool begin) : Cons
 {
     _dims = g->GetNodeDimensions();
     _nDims = g->GetNumNodeDimensions();
-    _index = {0,0,0};
-    _lastIndex = {0,0,0};
+    _index = {0, 0, 0};
+    _lastIndex = {0, 0, 0};
     if (_nDims) _lastIndex[_nDims - 1] = _dims[_nDims - 1];
 
     if (!begin) { _index = _lastIndex; }
@@ -283,15 +283,15 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const ConstNodeIteratorSG &rhs) :
 
 Grid::ConstNodeIteratorSG::ConstNodeIteratorSG() : ConstNodeIteratorAbstract()
 {
-    _dims = {1,1,1};
+    _dims = {1, 1, 1};
     _nDims = 0;
-    _index = {0,0,0};
-    _lastIndex = {0,0,0};
+    _index = {0, 0, 0};
+    _lastIndex = {0, 0, 0};
 }
 
 void Grid::ConstNodeIteratorSG::next()
 {
-    if (! _nDims) return;
+    if (!_nDims) return;
 
     _index[0]++;
     if (_index[0] < _dims[0] || _nDims == 1) { return; }
@@ -360,9 +360,9 @@ Grid::ConstCellIteratorSG::ConstCellIteratorSG(const Grid *g, bool begin) : Cons
 {
     _dims = g->GetCellDimensions();
     _nDims = g->GetNumCellDimensions();
-    _index = {0,0,0};
+    _index = {0, 0, 0};
     _lastIndex = _index;
-    _lastIndex[_nDims - 1] = _dims[_nDims- 1];
+    _lastIndex[_nDims - 1] = _dims[_nDims - 1];
     if (!begin) { _index = _lastIndex; }
 }
 
@@ -376,10 +376,10 @@ Grid::ConstCellIteratorSG::ConstCellIteratorSG(const ConstCellIteratorSG &rhs) :
 
 Grid::ConstCellIteratorSG::ConstCellIteratorSG() : ConstCellIteratorAbstract()
 {
-    _dims = {1,1,1};
+    _dims = {1, 1, 1};
     _nDims = 0;
-    _index = {0,0,0};
-    _lastIndex = {0,0,0};
+    _index = {0, 0, 0};
+    _lastIndex = {0, 0, 0};
 }
 
 void Grid::ConstCellIteratorSG::next()
@@ -514,7 +514,7 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
     }
     _blocksize = Wasp::VProduct(_bs3d.data(), _bs3d.size());
 
-    _index = {0,0,0};
+    _index = {0, 0, 0};
     _indexL = 0;
 
     _end_indexL = 0;
@@ -561,7 +561,7 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator()
     _bs3d = {1, 1, 1};
     _blocksize = 1;
     //_coordItr = xx;
-    _index = {0,0,0};
+    _index = {0, 0, 0};
     _indexL = 0;
     _end_indexL = 0;
     _xb = 0;

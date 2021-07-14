@@ -278,7 +278,7 @@ RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const RegularGrid *rg, bool begin)
     _delta = rg->_delta;
     _minu = rg->_minu;
     _coords = rg->_minu;
-    _index = {0,0,0};
+    _index = {0, 0, 0};
 
     if (!begin) { _index[_nDims - 1] = _dims[_nDims - 1]; }
 }
@@ -295,11 +295,11 @@ RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const ConstCoordItrRG &rhs) : Cons
 
 RegularGrid::ConstCoordItrRG::ConstCoordItrRG() : ConstCoordItrAbstract()
 {
-    _index = {0,0,0};
-    _dims = {1,1,1};
-    _minu = {0.0,0.0,0.0};
-    _delta = {0.0,0.0,0.0};
-    _coords = {0.0,0.0,0.0};
+    _index = {0, 0, 0};
+    _dims = {1, 1, 1};
+    _minu = {0.0, 0.0, 0.0};
+    _delta = {0.0, 0.0, 0.0};
+    _coords = {0.0, 0.0, 0.0};
 }
 
 void RegularGrid::ConstCoordItrRG::next()
@@ -327,7 +327,7 @@ void RegularGrid::ConstCoordItrRG::next(const long &offset)
 {
     if (!_nDims) return;
 
-    static DimsType maxIndex = {0,0,0};
+    static DimsType maxIndex = {0, 0, 0};
     ;
     for (int i = 0; i < _nDims; i++) maxIndex[i] = _dims[i] - 1;
 
@@ -335,7 +335,7 @@ void RegularGrid::ConstCoordItrRG::next(const long &offset)
     long newIndexL = Wasp::LinearizeCoords(_index.data(), _dims.data(), _dims.size()) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = {0,0,0};
+        _index = {0, 0, 0};
         _index[_nDims - 1] = _dims[_nDims - 1];
         return;
     }

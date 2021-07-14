@@ -529,7 +529,7 @@ void test_getvalue(StructuredGrid *sg)
     float               maxErr = 0.0;
     for (itr = sg->cbegin(); itr != enditr; ++itr, ++coord_itr) {
         float                 v1 = *itr;
-        const CoordType &coord = *coord_itr;
+        const CoordType &     coord = *coord_itr;
 
         float v2 = sg->GetValue(coord);
 
@@ -555,8 +555,8 @@ void test_roi_iterator()
     RegularGrid *rg = new RegularGrid(dims, bs, blks, minu, maxu);
 
     vector<double> delta;
-	CoordType roiminu = {0.0, 0.0, 0.0};
-	CoordType roimaxu = {0.0, 0.0, 0.0};
+    CoordType      roiminu = {0.0, 0.0, 0.0};
+    CoordType      roimaxu = {0.0, 0.0, 0.0};
     for (int i = 0; i < minu.size(); i++) {
         delta.push_back(maxu[i] - minu[i] / (dims[i] - 1));
         roiminu[i] = minu[i] + (delta[i] / 0.5);

@@ -33,9 +33,9 @@ UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const 
     //
     VAssert(location == NODE || location == CELL);
 
-    _vertexDims = {1,1,1};
-    _faceDims = {1,1,1};
-    _edgeDims = {1,1,1};
+    _vertexDims = {1, 1, 1};
+    _faceDims = {1, 1, 1};
+    _edgeDims = {1, 1, 1};
     _nDims = vertexDims.size();
 
     CopyToArr3(vertexDims, _vertexDims);
@@ -60,10 +60,7 @@ UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const 
 }
 
 
-const VAPoR::DimsType &UnstructuredGrid::GetNodeDimensions() const
-{
-    return(_vertexDims);
-}
+const VAPoR::DimsType &UnstructuredGrid::GetNodeDimensions() const { return (_vertexDims); }
 
 
 const size_t UnstructuredGrid::GetNumNodeDimensions() const { return _nDims; }
