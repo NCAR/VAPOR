@@ -135,9 +135,9 @@ void blockit(const float *data, const vector<size_t> &dims, const vector<size_t>
     size_t block_size = vproduct(bs);
 
     vector<size_t> bdims;
-    for (int i = 0; i < bs.size(); i++) { 
+    for (int i = 0; i < bs.size(); i++) {
         VAssert(dims[i] > 0);
-        bdims.push_back(((dims[i] - 1) / bs[i]) + 1); 
+        bdims.push_back(((dims[i] - 1) / bs[i]) + 1);
     }
 
     size_t nbz = bdims.size() > 2 ? bdims[2] : 1;

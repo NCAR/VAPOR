@@ -1185,11 +1185,12 @@ public:
     //
     Iterator begin(const CoordType &minu, const CoordType &maxu) { return (Iterator(this, true, minu, maxu)); }
 
-    Iterator begin(const std::vector<double> &minu, const std::vector<double> &maxu) { 
-		CoordType minuCT, maxuCT;
-		CopyToArr3(minu, minuCT);
-		CopyToArr3(maxu, maxuCT);
-		return begin(minuCT, maxuCT);
+    Iterator begin(const std::vector<double> &minu, const std::vector<double> &maxu)
+    {
+        CoordType minuCT, maxuCT;
+        CopyToArr3(minu, minuCT);
+        CopyToArr3(maxu, maxuCT);
+        return begin(minuCT, maxuCT);
     }
 
     Iterator begin() { return (Iterator(this, true)); }
@@ -1198,11 +1199,12 @@ public:
 
     ConstIterator cbegin(const CoordType &minu, const CoordType &maxu) const { return (ConstIterator(this, true, minu, maxu)); }
 
-    ConstIterator cbegin(const std::vector<double> &minu, const std::vector<double> &maxu) { 
-		CoordType minuCT, maxuCT;
-		CopyToArr3(minu, minuCT);
-		CopyToArr3(maxu, maxuCT);
-		return cbegin(minuCT, maxuCT);
+    ConstIterator cbegin(const std::vector<double> &minu, const std::vector<double> &maxu)
+    {
+        CoordType minuCT, maxuCT;
+        CopyToArr3(minu, minuCT);
+        CopyToArr3(maxu, maxuCT);
+        return cbegin(minuCT, maxuCT);
     }
     ConstIterator cbegin() const { return (ConstIterator(this, true)); }
 
