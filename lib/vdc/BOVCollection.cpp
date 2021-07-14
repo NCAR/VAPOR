@@ -11,9 +11,12 @@
 #include "vapor/utils.h"
 #include <stdio.h>
 
-#ifdef _WINDOWS
+#ifdef WIN32
+    #include <Windows.h>
     #define _USE_MATH_DEFINES
     #pragma warning(disable : 4251 4100)
+#else
+    #include <limits.h>
 #endif
 #include <cmath>
 
