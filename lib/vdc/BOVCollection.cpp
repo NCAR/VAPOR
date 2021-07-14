@@ -200,15 +200,15 @@ int BOVCollection::_validateParsedValues()
     // from the header file's containing directory.
     char actualPath[PATH_MAX+1];
     char* success = realpath(_dataFile.c_str(), actualPath);
-    if (success == nullptr)
+    if (success == nullptr) {
         // At this point we can't find the absolute path, so it might be a relative path.
         // Try prepending the directory of the .bov file to the data file
         _dataFile = _currentFilePath + "//" + _dataFile;
         success = realpath(_dataFile.c_str(), actualPath);
         if (success == nullptr)
             return _invalidFileError(DATA_FILE_TOKEN, _dataFile);
-    else
-        _dataFile = std::string(actualPath);
+    }
+    else _dataFile = std::string(actualPath);
 
     // Validate grid dimensions
     if (_tmpGridSize[0] < 1 || _tmpGridSize[1] < 1 || _tmpGridSize[2] < 1)
