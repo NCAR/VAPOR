@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <type_traits>
+#include <sys/stat.h>
 #include "vapor/VAssert.h"
 #include "vapor/utils.h"
 #include <stdio.h>
@@ -62,17 +63,6 @@ const std::string BOVCollection::_intFormatString = "INT";
 const std::string BOVCollection::_floatFormatString = "FLOAT";
 const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
-namespace {
-    void SplitFilename (const string& str)
-    {
-      size_t found;
-      cout << "Splitting: " << str << endl;
-      found=str.find_last_of("/\\");
-      cout << " folder: " << str.substr(0,found) << endl;
-      cout << " file: " << str.substr(found+1) << endl;
-    }
-}
-
 BOVCollection::BOVCollection()
 : _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _dataEndian(_defaultEndian), _centering(_defaultCentering), _byteOffset(_defaultByteOffset),
   _divideBrick(_defaultDivBrick), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpDataEndian(_defaultEndian), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false),
@@ -99,9 +89,14 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
     for (int i = 0; i < paths.size(); i++) {
         _dataFile = _defaultFile;
 
+        // Save the path to the BOV header so we can add it
+        // to data files given with a relative path
         _currentFilePath = paths[i];
         size_t found = _currentFilePath.find_last_of("/\\");
         _currentFilePath = _currentFilePath.substr(0,found);
+
+        _timeAssigned = false;
+        _variableAssigned = false;
 
         header.open(paths[i]);
         if (header.is_open()) {
@@ -160,15 +155,21 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         rc = _findToken(TIME_TOKEN, line, time);
         if (rc == (int)parseCodes::ERROR)
             return _failureToReadError(TIME_TOKEN);
-        else if (rc == (int)parseCodes::FOUND)
+        else if (rc == (int)parseCodes::FOUND) {
+            if (_timeAssigned == true) return _multipleTimestepError();
             _time = time;
+            _timeAssigned = true;
+        }
 
         std::string variable;
         rc = _findToken(VARIABLE_TOKEN, line, variable);
         if (rc == (int)parseCodes::ERROR)
             return _invalidValueError(VARIABLE_TOKEN);
-        else if (rc == (int)parseCodes::FOUND)
+        else if (rc == (int)parseCodes::FOUND) {
+            if (_variableAssigned == true) return _multipleVariablesError();
             _variable = variable;
+            _variableAssigned = true;
+        }
 
         rc = _findToken(GRID_SIZE_TOKEN, line, _tmpGridSize);
         if (rc == (int)parseCodes::ERROR) return _failureToReadError(GRID_SIZE_TOKEN);
@@ -202,6 +203,9 @@ int BOVCollection::_parseHeader(std::ifstream &header)
 
 int BOVCollection::_validateParsedValues()
 {
+    // Validate that the data file exists.
+    // If not given an absolute path, construct one
+    // from the header file's containing directory.
     char actualPath[PATH_MAX+1];
     char* success = realpath(_dataFile.c_str(), actualPath);
     if (success == nullptr)
@@ -267,6 +271,19 @@ int BOVCollection::_validateParsedValues()
         _byteOffset = _tmpByteOffset;
         _byteOffsetAssigned = true;
     }
+
+    // Validate file size
+    size_t fileSize;
+    size_t dataSize = _gridSize[0]*_gridSize[1]*_gridSize[2]*_sizeOfFormat(_dataFormat);
+    struct stat stat_buf;
+    int rc = stat(_dataFile.c_str(), &stat_buf);
+    if (rc == 0)
+        fileSize = stat_buf.st_size;
+    else
+        return _cannotStatFileError();
+    if (dataSize != fileSize)
+        return _invalidFileSizeError(dataSize, fileSize);
+
     return 0;
 }
 
@@ -278,6 +295,17 @@ void BOVCollection::_populateDataFileMap()
     std::sort(_times.begin(), _times.end());
 
     _dataFileMap[_variable][_time] = _dataFile;
+}
+
+int BOVCollection::_cannotStatFileError() const {
+    SetErrMsg(("Unable to get file status for " + _dataFile).c_str());
+    return -1;
+}
+
+int BOVCollection::_invalidFileSizeError(size_t dataSize, size_t fileSize) const {
+    SetErrMsg(("Data file " + _dataFile + " of size " + to_string(fileSize) + " bytes does not match the size of the the data "
+        "specified in BOV header (" + to_string(dataSize) + " bytes).").c_str());
+    return -1;
 }
 
 int BOVCollection::_invalidFileError(const std::string &token, const std::string &file) const

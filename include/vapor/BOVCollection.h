@@ -84,6 +84,8 @@ private:
     int  _sizeOfFormat(DC::XType) const;
     void _swapBytes(void *vptr, size_t size, size_t n) const;
 
+    int _invalidFileSizeError(size_t dataSize, size_t fileSize) const;
+    int _cannotStatFileError() const;
     int _invalidFileError(const std::string &token, const std::string &file) const;
     int _invalidDimensionError(const std::string &token) const;
     int _invalidFormatError(const std::string &token) const;
