@@ -95,9 +95,6 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
         size_t found = _currentFilePath.find_last_of("/\\");
         _currentFilePath = _currentFilePath.substr(0,found);
 
-        _timeAssigned = false;
-        _variableAssigned = false;
-
         header.open(paths[i]);
         if (header.is_open()) {
             rc = _parseHeader(header);
@@ -155,21 +152,13 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         rc = _findToken(TIME_TOKEN, line, time);
         if (rc == (int)parseCodes::ERROR)
             return _failureToReadError(TIME_TOKEN);
-        else if (rc == (int)parseCodes::FOUND) {
-            if (_timeAssigned == true) return _multipleTimestepError();
-            _time = time;
-            _timeAssigned = true;
-        }
+        else if (rc == (int)parseCodes::FOUND) _time = time;
 
         std::string variable;
         rc = _findToken(VARIABLE_TOKEN, line, variable);
         if (rc == (int)parseCodes::ERROR)
             return _invalidValueError(VARIABLE_TOKEN);
-        else if (rc == (int)parseCodes::FOUND) {
-            if (_variableAssigned == true) return _multipleVariablesError();
-            _variable = variable;
-            _variableAssigned = true;
-        }
+        else if (rc == (int)parseCodes::FOUND) _variable = variable;
 
         rc = _findToken(GRID_SIZE_TOKEN, line, _tmpGridSize);
         if (rc == (int)parseCodes::ERROR) return _failureToReadError(GRID_SIZE_TOKEN);
@@ -387,8 +376,9 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
         }
     }
 
-    if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+    while (line[line.length() - 1] == ' ')    // If last char is a space, pop it
         line.pop_back();
+    
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
@@ -420,7 +410,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         }
     }
 
-    if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+    while (line[line.length() - 1] == ' ')    // If last char is a space, pop it
         line.pop_back();
 
     size_t pos = line.find(token);
@@ -463,7 +453,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         }
     }
             
-    if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+    while (line[line.length() - 1] == ' ')    // If last char is a space, pop it
         line.pop_back();
 
     size_t pos = line.find(token);
