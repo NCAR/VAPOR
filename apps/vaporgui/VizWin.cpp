@@ -613,7 +613,7 @@ void VizWin::Render(bool fast)
     _insideRender = true;
     _renderHelper(fast);
     _insideRender = false;
-    
+
     HideSTDERR();
     swapBuffers();
     RestoreSTDERR();
@@ -629,7 +629,7 @@ void VizWin::_renderHelper(bool fast)
 
     glClearColor(0.3, 0.3, 0.3, 1);
     glClear(GL_COLOR_BUFFER_BIT);
-    
+
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
 
