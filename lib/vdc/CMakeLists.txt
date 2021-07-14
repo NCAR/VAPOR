@@ -91,7 +91,7 @@ if( USE_OMP )
   target_compile_options( vdc PUBLIC ${OpenMP_CXX_FLAGS} )
   target_compile_definitions (vdc PUBLIC USE_OMP)
   target_link_libraries (vdc PUBLIC OpenMP::OpenMP_CXX)
-else()
+elseif( NOT WIN32 )
   target_compile_options( vdc PUBLIC "-Wno-unknown-pragmas" )
 endif()
 
@@ -99,11 +99,13 @@ target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ})
 
 add_definitions (-DVDF_EXPORTS)
 
-OpenMPInstall (
-	TARGETS vdc
-	DESTINATION ${INSTALL_LIB_DIR}
-	COMPONENT Libraries
-	)
+if(NOT WIN32)
+	OpenMPInstall (
+		TARGETS vdc
+		DESTINATION ${INSTALL_LIB_DIR}
+		COMPONENT Libraries
+		)
+endif()
 
 install (
 	FILES ${HEADERS}

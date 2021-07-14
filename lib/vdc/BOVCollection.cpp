@@ -130,44 +130,44 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         // the BOV.  Try to find them, and report errors if we can't.
         //
         rc = _findToken(DATA_FILE_TOKEN, line, dataFile);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _failureToReadError(DATA_FILE_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             _dataFile = dataFile;
 
         double time;
         rc = _findToken(TIME_TOKEN, line, time);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _failureToReadError(TIME_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             _time = time;
 
         std::string variable;
         rc = _findToken(VARIABLE_TOKEN, line, variable);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _invalidValueError(VARIABLE_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             _variable = variable;
 
         rc = _findToken(GRID_SIZE_TOKEN, line, _tmpGridSize);
-        if (rc == (int)parseCodes::ERROR) return _failureToReadError(GRID_SIZE_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR) return _failureToReadError(GRID_SIZE_TOKEN);
 
         rc = _findToken(FORMAT_TOKEN, line, _tmpDataFormat);
-        if (rc == (int)parseCodes::ERROR) return _failureToReadError(FORMAT_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR) return _failureToReadError(FORMAT_TOKEN);
 
         // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
         //
         rc = _findToken(ORIGIN_TOKEN, line, _tmpBrickOrigin);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(ORIGIN_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR) return _invalidValueError(ORIGIN_TOKEN);
 
         rc = _findToken(BRICK_SIZE_TOKEN, line, _tmpBrickSize);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(BRICK_SIZE_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR) return _invalidValueError(BRICK_SIZE_TOKEN);
 
         rc = _findToken(ENDIAN_TOKEN, line, _tmpDataEndian);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(ENDIAN_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR) return _invalidValueError(ENDIAN_TOKEN);
 
         rc = _findToken(OFFSET_TOKEN, line, _tmpByteOffset);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(OFFSET_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR) return _invalidValueError(OFFSET_TOKEN);
 
         // All other variables are currently unused.
         //
@@ -360,13 +360,13 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         if (ss.fail()) {
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
-            return (int)parseCodes::ERROR;
+            return (int)parseCodes::PARSE_ERROR;
         }
 
         if (ss.eof() == 0) {
             std::string message = "The keyword " + token + " should only contain one value.";
             SetErrMsg(message.c_str());
-            return (int)parseCodes::ERROR;
+            return (int)parseCodes::PARSE_ERROR;
         }
 
         return (int)parseCodes::FOUND;
@@ -401,7 +401,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         if (lineStream.bad()) {
             std::string message = "Invalid value for " + token + " in BOV header file.";
             SetErrMsg(message.c_str());
-            return (int)parseCodes::ERROR;
+            return (int)parseCodes::PARSE_ERROR;
         }
 
         if (verbose) {
