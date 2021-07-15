@@ -803,6 +803,7 @@ int DCMPAS::_readRegionEdgeVariable(MPASFileObject *w, const vector<size_t> &min
 
     vector<size_t> minAll, maxAll;
     for (int i = 0; i < dims.size(); i++) {
+        VAssert(dims[i] > 0);
         minAll.push_back(0);
         maxAll.push_back(dims[i] - 1);
     }

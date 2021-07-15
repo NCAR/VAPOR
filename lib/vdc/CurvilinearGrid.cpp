@@ -224,7 +224,8 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     _cg = cg;
     auto dims = _cg->GetDimensions();
     auto ndims = _cg->GetNumDimensions();
-    _index = vector<size_t>(ndims, 0);
+    _index = {0, 0, 0};
+    _coords = {0.0, 0.0, 0.0};
     _terrainFollowing = _cg->_terrainFollowing;
     if (begin) {
         _xCoordItr = _cg->_xrg.cbegin();
@@ -237,14 +238,14 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
         _index[ndims - 1] = dims[ndims - 1];
         return;
     }
-    _coords.push_back(*_xCoordItr);
-    _coords.push_back(*_yCoordItr);
+    _coords[0] = *_xCoordItr;
+    _coords[1] = *_yCoordItr;
 
     if (ndims == 3) {
         if (_terrainFollowing) {
-            _coords.push_back(*_zCoordItr);
+            _coords[2] = *_zCoordItr;
         } else {
-            _coords.push_back(_cg->_zcoords[0]);
+            _coords[2] = _cg->_zcoords[0];
         }
     }
 }
@@ -263,8 +264,8 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const ConstCoordItrCG &rhs) : 
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG() : ConstCoordItrAbstract()
 {
     _cg = NULL;
-    _index.clear();
-    _coords.clear();
+    _index = {0, 0, 0};
+    _coords = {0.0, 0.0, 0.0};
 }
 
 void CurvilinearGrid::ConstCoordItrCG::next()
@@ -314,28 +315,31 @@ void CurvilinearGrid::ConstCoordItrCG::next()
 
 void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 {
-    if (!_index.size()) return;
 
     auto dims = _cg->GetDimensions();
     auto ndims = _cg->GetNumDimensions();
 
-    vector<size_t> maxIndex;
-    maxIndex.reserve(3);
+    if (!ndims) return;
 
-    for (int i = 0; i < ndims; i++) maxIndex.push_back(dims[i] - 1);
+    DimsType maxIndex = {0, 0, 0};
+
+    for (int i = 0; i < ndims; i++) {
+        VAssert(dims[i] > 0);
+        maxIndex[i] = dims[i] - 1;
+    }
 
     long maxIndexL = Wasp::LinearizeCoords(maxIndex.data(), dims.data(), ndims);
     long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = vector<size_t>(ndims, 0);
+        _index = {0, 0, 0};
         _index[ndims - 1] = dims[ndims - 1];
         return;
     }
 
     size_t index2DL = _index[1] * dims[0] + _index[0];
 
-    _index.assign(ndims, 0);
+    _index = {0, 0, 0};
     Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
 
     VAssert(_index[1] * dims[0] + _index[0] >= index2DL);
@@ -347,7 +351,7 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
     _coords[0] = *_xCoordItr;
     _coords[1] = *_yCoordItr;
 
-    if (dims.size() == 2) return;
+    if (ndims == 2) return;
 
     if (_terrainFollowing) {
         _zCoordItr += offset;
@@ -672,7 +676,7 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
 
 std::shared_ptr<QuadTreeRectangleP> CurvilinearGrid::_makeQuadTreeRectangle() const
 {
-    const vector<size_t> &dims = GetCellDimensions();
+    const DimsType &      dims = GetCellDimensions();
     size_t                reserve_size = dims[0] * dims[1];
 
     CoordType minu, maxu;

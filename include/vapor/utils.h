@@ -102,6 +102,7 @@ COMMON_API std::vector<size_t> Dims(const std::vector<size_t> &min, const std::v
 
 //! Return the scalar product of the elements of a vector
 //!
+COMMON_API size_t VProduct(const size_t *a, size_t n);
 COMMON_API size_t VProduct(const std::vector<size_t> &a);
 
 //! Vectorize a coordinate offset. Inverse of VectorizeLinearize

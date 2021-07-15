@@ -126,8 +126,8 @@ int ContourRenderer::_buildCache()
 
     Grid::ConstCellIterator end = grid->ConstCellEnd();
     for (; it != end; ++it) {
-        const vector<size_t> &cell = *it;
-        grid->GetCellNodes(cell.data(), nodes);
+        const DimsType &cell = *it;
+        grid->GetCellNodes(cell, nodes);
 
         bool hasMissing = false;
         for (int i = 0; i < nodes.size(); i++) {

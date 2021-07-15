@@ -134,12 +134,18 @@ int ParticleRenderer::_paintGL(bool)
     lgl->Color3f(1, 1, 1);
     lgl->Begin(showDir ? GL_LINES : GL_POINTS);
 
+    CoordType minExtCT = {0.0, 0.0, 0.0};
+    CoordType maxExtCT = {0.0, 0.0, 0.0};
+
+    Grid::CopyToArr3(minExt, minExtCT);
+    Grid::CopyToArr3(maxExt, maxExtCT);
+
     long                        renderedParticles = 0;
-    auto                        node = grid->ConstNodeBegin(minExt, maxExt);
+    auto                        node = grid->ConstNodeBegin(minExtCT, maxExtCT);
     auto                        nodeEnd = grid->ConstNodeEnd();
-    vector<double>              coordsBuf(3);
+    CoordType                   coordsBuf;
     vector<Grid::ConstIterator> dirs;
-    for (auto g : vecGrids) dirs.push_back(g->cbegin(minExt, maxExt));
+    for (auto g : vecGrids) dirs.push_back(g->cbegin(minExtCT, maxExtCT));
     for (size_t i = 0; node != nodeEnd; ++node, ++i) {
         if (i % stride) {
             if (showDir)

@@ -173,7 +173,7 @@ float UnstructuredGrid3D::GetValueLinear(const CoordType &coords) const
 UnstructuredGrid3D::ConstCoordItrU3D::ConstCoordItrU3D(const UnstructuredGrid3D *ug, bool begin) : ConstCoordItrAbstract()
 {
     _ug = ug;
-    _coords = vector<double>(3, 0.0);
+    _coords = {0.0, 0.0, 0.0};
     if (begin) {
         _xCoordItr = ug->_xug.cbegin();
         _yCoordItr = ug->_yug.cbegin();

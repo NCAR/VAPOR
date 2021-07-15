@@ -83,7 +83,7 @@ public:
         ConstIterator             _xCoordItr;
         ConstIterator             _yCoordItr;
         ConstIterator             _zCoordItr;
-        std::vector<double>       _coords;
+        CoordType                 _coords;
     };
 
     virtual ConstCoordItr ConstCoordBegin() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrU3D(this, true))); }

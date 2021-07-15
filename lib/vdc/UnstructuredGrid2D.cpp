@@ -258,7 +258,7 @@ float UnstructuredGrid2D::GetValueLinear(const CoordType &coords) const
 UnstructuredGrid2D::ConstCoordItrU2D::ConstCoordItrU2D(const UnstructuredGrid2D *ug, bool begin) : ConstCoordItrAbstract()
 {
     _ncoords = ug->GetGeometryDim();
-    _coords = vector<double>(_ncoords, 0.0);
+    _coords = {0.0, 0.0, 0.0};
     if (begin) {
         _xCoordItr = ug->_xug.cbegin();
         _yCoordItr = ug->_yug.cbegin();
