@@ -96,11 +96,12 @@ public:
         virtual std::unique_ptr<ConstCoordItrAbstract> clone() const { return std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrRG(*this)); };
 
     private:
-        std::vector<size_t> _index;
-        std::vector<size_t> _dims;
-        std::vector<double> _minu;
-        std::vector<double> _delta;
-        std::vector<double> _coords;
+        DimsType  _index;
+        DimsType  _dims;
+        size_t    _nDims;
+        CoordType _minu;
+        CoordType _delta;
+        CoordType _coords;
     };
 
     virtual ConstCoordItr ConstCoordBegin() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrRG(this, true))); }
@@ -123,7 +124,7 @@ private:
     CoordType           _minu = {{0.0, 0.0, 0.0}};
     CoordType           _maxu = {{0.0, 0.0, 0.0}};
     size_t              _geometryDim;
-    std::vector<double> _delta;    // increment between grid points in user coords
+    CoordType           _delta;    // increment between grid points in user coords
 };
 };    // namespace VAPoR
 #endif

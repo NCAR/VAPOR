@@ -196,7 +196,7 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
 
         // Create an entry in nodeMap
         //
-        size_t index = Wasp::LinearizeCoords(*nodeItr, dims);
+        size_t index = Wasp::LinearizeCoords((*nodeItr).data(), dims.data(), dims.size());
 
         if (vertices.size() > std::numeric_limits<GLuint>::max()) {
 #ifndef NDEBUG
@@ -232,7 +232,7 @@ size_t WireFrameRenderer::_buildCacheConnectivity(const Grid *grid, const vector
     vector<DimsType> cellNodeIndices(maxVertsPerCell);
     vector<GLuint>   cellNodeIndicesLinear(maxVertsPerCell);
 
-    size_t numCells = Wasp::VProduct(grid->GetCellDimensions());
+    size_t numCells = Wasp::VProduct(grid->GetCellDimensions().data(), grid->GetNumCellDimensions());
     size_t maxLineIndices = numCells * (layered ? maxVertsPerCell / 2 * 3 : maxVertsPerCell * 2);
 
     // Pre-allocate memory for (much) better performance.

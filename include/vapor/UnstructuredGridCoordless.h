@@ -83,7 +83,7 @@ public:
         virtual std::unique_ptr<ConstCoordItrAbstract> clone() const { return std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrUCoordless(*this)); };
 
     private:
-        std::vector<double> _coords;
+        CoordType _coords;
     };
 
     virtual ConstCoordItr ConstCoordBegin() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrUCoordless(this, true))); }

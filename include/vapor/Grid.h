@@ -128,9 +128,10 @@ public:
     //
     virtual size_t GetGeometryDim() const = 0;
 
-    virtual const DimsType             GetNodeDimensions() const = 0;
+    virtual const DimsType &           GetNodeDimensions() const = 0;
     virtual const size_t               GetNumNodeDimensions() const = 0;
-    virtual const std::vector<size_t> &GetCellDimensions() const = 0;
+    virtual const DimsType &           GetCellDimensions() const = 0;
+    virtual const size_t               GetNumCellDimensions() const = 0;
 
     //! Return the ijk dimensions of grid in blocks
     //!
@@ -799,11 +800,12 @@ public:
     //
     class InsideBox {
     public:
-        InsideBox(const std::vector<double> &min, const std::vector<double> &max) : _min(min), _max(max) {}
+        InsideBox(const CoordType &min, const CoordType &max) : _min(min), _max(max) {}
         InsideBox() {}
 
-        bool operator()(const std::vector<double> &pt) const
+        bool operator()(const CoordType &pt) const
         {
+            if (_min == _max) return (true);
             for (int i = 0; i < _min.size() && i < pt.size(); i++) {
                 if (pt[i] < _min[i] || pt[i] > _max[i]) return (false);
             }
@@ -811,17 +813,18 @@ public:
         }
         bool operator()(const double pt[]) const
         {
+            if (_min == _max) return (true);
             for (int i = 0; i < _min.size(); i++) {
                 if (pt[i] < _min[i] || pt[i] > _max[i]) return (false);
             }
             return (true);
         }
 
-        size_t Size() const { return (_min.size()); }
+        bool Enabled() const { return (_min != _max); }
 
     private:
-        std::vector<double> _min;
-        std::vector<double> _max;
+        CoordType _min;
+        CoordType _max;
     };
 
     //
@@ -917,7 +920,7 @@ public:
     //! N.B. Current only works with node coordinates
     //!
     //
-    typedef const std::vector<double>              ConstCoordType;
+    typedef const CoordType                        ConstCoordType;
     typedef Grid::PolyIterator<ConstCoordType>     ConstCoordItr;
     typedef Grid::AbstractIterator<ConstCoordType> ConstCoordItrAbstract;
 
@@ -931,7 +934,7 @@ public:
     //! The ConstNodeIterator is dereferenced to give the index of
     //! a node within the grid
     //!
-    typedef const std::vector<size_t>              ConstIndexType;
+    typedef const DimsType                         ConstIndexType;
     typedef Grid::PolyIterator<ConstIndexType>     ConstNodeIterator;
     typedef Grid::AbstractIterator<ConstIndexType> ConstNodeIteratorAbstract;
 
@@ -971,14 +974,15 @@ public:
         virtual std::unique_ptr<ConstNodeIteratorAbstract> clone() const { return std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorSG(*this)); };
 
     protected:
-        std::vector<size_t> _dims;
-        std::vector<size_t> _index;
-        std::vector<size_t> _lastIndex;
+        DimsType _dims;
+        size_t   _nDims;
+        DimsType _index;
+        DimsType _lastIndex;
     };
 
     class ConstNodeIteratorBoxSG : public ConstNodeIteratorSG {
     public:
-        ConstNodeIteratorBoxSG(const Grid *g, const std::vector<double> &minu, const std::vector<double> &maxu);
+        ConstNodeIteratorBoxSG(const Grid *g, const CoordType &minu, const CoordType &maxu);
         ConstNodeIteratorBoxSG(const ConstNodeIteratorBoxSG &rhs);
         ConstNodeIteratorBoxSG();
 
@@ -1004,9 +1008,17 @@ public:
     //!
     virtual ConstNodeIterator ConstNodeBegin() const { return ConstNodeIterator(std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorSG(this, true))); }
 
-    virtual ConstNodeIterator ConstNodeBegin(const std::vector<double> &minu, const std::vector<double> &maxu) const
+    virtual ConstNodeIterator ConstNodeBegin(const CoordType &minu, const CoordType &maxu) const
     {
         return ConstNodeIterator(std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorBoxSG(this, minu, maxu)));
+    }
+
+    virtual ConstNodeIterator ConstNodeBegin(const std::vector<double> &minu, const std::vector<double> &maxu) const
+    {
+        CoordType minuCT, maxuCT;
+        CopyToArr3(minu, minuCT);
+        CopyToArr3(maxu, maxuCT);
+        return ConstNodeBegin(minuCT, maxuCT);
     }
 
     virtual ConstNodeIterator ConstNodeEnd() const { return ConstNodeIterator(std::unique_ptr<ConstNodeIteratorAbstract>(new ConstNodeIteratorSG(this, false))); }
@@ -1037,14 +1049,15 @@ public:
         virtual std::unique_ptr<ConstCellIteratorAbstract> clone() const { return std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorSG(*this)); };
 
     protected:
-        std::vector<size_t> _dims;
-        std::vector<size_t> _index;
-        std::vector<size_t> _lastIndex;
+        DimsType _dims;
+        size_t   _nDims;
+        DimsType _index;
+        DimsType _lastIndex;
     };
 
     class ConstCellIteratorBoxSG : public ConstCellIteratorSG {
     public:
-        ConstCellIteratorBoxSG(const Grid *g, const std::vector<double> &minu, const std::vector<double> &maxu);
+        ConstCellIteratorBoxSG(const Grid *g, const CoordType &minu, const CoordType &maxu);
         ConstCellIteratorBoxSG(const ConstCellIteratorBoxSG &rhs);
         ConstCellIteratorBoxSG();
 
@@ -1075,9 +1088,17 @@ public:
     //!
     virtual ConstCellIterator ConstCellBegin() const { return ConstCellIterator(std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorSG(this, true))); }
 
-    virtual ConstCellIterator ConstCellBegin(const std::vector<double> &minu, const std::vector<double> &maxu) const
+    virtual ConstCellIterator ConstCellBegin(const CoordType &minu, const CoordType &maxu) const
     {
         return ConstCellIterator(std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorBoxSG(this, minu, maxu)));
+    }
+
+    virtual ConstCellIterator ConstCellBegin(const std::vector<double> &minu, const std::vector<double> &maxu) const
+    {
+        CoordType minuCT, maxuCT;
+        CopyToArr3(minu, minuCT);
+        CopyToArr3(maxu, maxuCT);
+        return ConstCellBegin(minuCT, maxuCT);
     }
 
     virtual ConstCellIterator ConstCellEnd() const { return ConstCellIterator(std::unique_ptr<ConstCellIteratorAbstract>(new ConstCellIteratorSG(this, false))); }
@@ -1100,7 +1121,7 @@ public:
     //
     template<class T> class VDF_API ForwardIterator {
     public:
-        ForwardIterator(T *rg, bool begin = true, const std::vector<double> &minu = {}, const std::vector<double> &maxu = {});
+        ForwardIterator(T *rg, bool begin = true, const CoordType &minu = {0.0, 0.0, 0.0}, const CoordType &maxu = {0.0, 0.0, 0.0});
         ForwardIterator();
         ForwardIterator(const ForwardIterator<T> &) = default;
         ForwardIterator(ForwardIterator<T> &&rhs);
@@ -1143,12 +1164,12 @@ public:
     private:
         size_t               _ndims;
         std::vector<float *> _blks;
-        std::vector<size_t>  _dims3d;
-        std::vector<size_t>  _bdims3d;
-        std::vector<size_t>  _bs3d;
+        DimsType             _dims3d;
+        DimsType             _bdims3d;
+        DimsType             _bs3d;
         size_t               _blocksize;
         ConstCoordItr        _coordItr;
-        std::vector<size_t>  _index;         // current index into grid
+        DimsType             _index;         // current index into grid
         size_t               _indexL;        // current index into grid
         size_t               _end_indexL;    // Last valid index
         size_t               _xb;            // x index within a block
@@ -1162,12 +1183,29 @@ public:
     //! Construct a begin iterator that will iterate through elements
     //! inside or on the box defined by \p minu and \p maxu
     //
-    Iterator begin(const std::vector<double> &minu, const std::vector<double> &maxu) { return (Iterator(this, true, minu, maxu)); }
+    Iterator begin(const CoordType &minu, const CoordType &maxu) { return (Iterator(this, true, minu, maxu)); }
+
+    Iterator begin(const std::vector<double> &minu, const std::vector<double> &maxu)
+    {
+        CoordType minuCT, maxuCT;
+        CopyToArr3(minu, minuCT);
+        CopyToArr3(maxu, maxuCT);
+        return begin(minuCT, maxuCT);
+    }
+
     Iterator begin() { return (Iterator(this, true)); }
 
     Iterator end() { return (Iterator(this, false)); }
 
-    ConstIterator cbegin(const std::vector<double> &minu, const std::vector<double> &maxu) const { return (ConstIterator(this, true, minu, maxu)); }
+    ConstIterator cbegin(const CoordType &minu, const CoordType &maxu) const { return (ConstIterator(this, true, minu, maxu)); }
+
+    ConstIterator cbegin(const std::vector<double> &minu, const std::vector<double> &maxu)
+    {
+        CoordType minuCT, maxuCT;
+        CopyToArr3(minu, minuCT);
+        CopyToArr3(maxu, maxuCT);
+        return cbegin(minuCT, maxuCT);
+    }
     ConstIterator cbegin() const { return (ConstIterator(this, true)); }
 
     ConstIterator cend() const { return (ConstIterator(this, false)); }
@@ -1176,6 +1214,7 @@ public:
     {
         for (int i = 0; i < src.size() && i < dst.size(); i++) { dst[i] = src[i]; }
     }
+
     template<typename T> static void CopyToArr3(const T *src, size_t n, std::array<T, 3> &dst)
     {
         for (int i = 0; i < n && i < dst.size(); i++) { dst[i] = src[i]; }
@@ -1244,5 +1283,8 @@ private:
 
     virtual void _getUserCoordinatesHelper(const std::vector<double> &coords, double &x, double &y, double &z) const;
 };
+
+template void Grid::CopyToArr3<size_t>(const std::vector<size_t> &src, std::array<size_t, 3> &dst);
+
 };    // namespace VAPoR
 #endif

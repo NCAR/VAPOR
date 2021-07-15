@@ -88,7 +88,7 @@ public:
         const UnstructuredGridLayered *   _ug;
         UnstructuredGrid2D::ConstCoordItr _itr2D;
         ConstIterator                     _zCoordItr;
-        std::vector<double>               _coords;
+        CoordType                         _coords;
         size_t                            _nElements2D;
         size_t                            _index2D;
     };

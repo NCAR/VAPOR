@@ -70,10 +70,11 @@ public:
     static std::string GetClassType() { return ("Structured"); }
     std::string        GetType() const override { return (GetClassType()); }
 
-    const DimsType GetNodeDimensions() const override;
+    const DimsType &GetNodeDimensions() const override;
     const size_t   GetNumNodeDimensions() const override;
 
-    const std::vector<size_t> &GetCellDimensions() const override { return (_cellDims); };
+    const DimsType &GetCellDimensions() const override { return (_cellDims); };
+    const size_t    GetNumCellDimensions() const override { return GetNumNodeDimensions(); }
 
     //! \copydoc Grid::GetCellNodes()
     //!
@@ -111,7 +112,7 @@ public:
 
 protected:
 private:
-    std::vector<size_t> _cellDims;
+    DimsType _cellDims;
 };
 };    // namespace VAPoR
 #endif
