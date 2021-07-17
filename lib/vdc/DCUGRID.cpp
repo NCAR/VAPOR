@@ -312,7 +312,7 @@ int DCUGRID::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &mes
 
             meshName += layeredVarName;
 
-			meshMap[meshName] = Mesh(meshName, maxNodesPerFace, maxFacesPerNode, nodeDimName, faceDimName, dimNames[0], coordVarNames, m.faceNodeConnectivity, "");
+			meshMap[meshName] = Mesh(meshName, maxNodesPerFace, maxFacesPerNode, nodeDimName, faceDimName, dimNames[1], coordVarNames, m.faceNodeConnectivity, "");
         }
         else {
             continue;
@@ -396,6 +396,9 @@ int DCUGRID::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVa
         // commented out for now.
         //
         // if (IsCoordVar(varName)) {continue; }
+        // Currently coordinate variables can't be data variables :-(
+        //
+        if (ncdfc->IsCoordinateVar(varName)) continue;
 
         // variable must have valid mesh attribute
         //

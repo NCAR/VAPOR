@@ -454,7 +454,7 @@ UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(size_t ts, 
     VAssert(dims.size() == bmax.size());
     VAssert(blkvec.size() == 4);
 
-    VAssert(conn_blkvec.size() >= 2);
+    VAssert(conn_blkvec.size() >= 1);
 
     // block pointers for data
     //

@@ -666,10 +666,10 @@ int DCCF::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> 
 
     // For each variable add a member to dataVarsMap
     //
-    for (int i = 0; i < vars.size(); i++) {
+    for (auto varName : vars) {
         // variable type must be float or int
         //
-        int type = ncdfc->GetXType(vars[i]);
+        int type = ncdfc->GetXType(varName);
         if (!(NetCDFSimple::IsNCTypeFloat(type) || NetCDFSimple::IsNCTypeInt(type))) continue;
 
         vector<string> sdimnames;
@@ -677,28 +677,28 @@ int DCCF::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> 
         string         time_dim_name;
         string         time_coordvar;
 
-        int rc = getVarCoordinates(ncdfc, vars[i], sdimnames, scoordvars, time_dim_name, time_coordvar);
+        int rc = getVarCoordinates(ncdfc, varName, sdimnames, scoordvars, time_dim_name, time_coordvar);
         if (rc < 0) {
-            SetErrMsg("Invalid variable : %s", vars[i].c_str());
+            SetErrMsg("Invalid variable : %s", varName.c_str());
             return (-1);
         }
 
         string meshName = DC::Mesh::MakeMeshName(sdimnames);
 
         string units;
-        ncdfc->GetAtt(vars[i], "units", units);
+        ncdfc->GetAtt(varName, "units", units);
         if (!_udunits.ValidUnit(units)) { units = ""; }
 
         double mv;
-        bool   has_missing = ncdfc->GetMissingValue(vars[i], mv);
+        bool   has_missing = ncdfc->GetMissingValue(varName, mv);
 
         if (!has_missing) {
-            dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, meshName, time_coordvar, DC::Mesh::NODE);
+            dataVarsMap[varName] = DataVar(varName, units, DC::FLOAT, periodic, meshName, time_coordvar, DC::Mesh::NODE);
         } else {
-            dataVarsMap[vars[i]] = DataVar(vars[i], units, DC::FLOAT, periodic, meshName, time_coordvar, DC::Mesh::NODE, mv);
+            dataVarsMap[varName] = DataVar(varName, units, DC::FLOAT, periodic, meshName, time_coordvar, DC::Mesh::NODE, mv);
         }
 
-        rc = DCUtils::CopyAtt(*ncdfc, vars[i], dataVarsMap[vars[i]]);
+        rc = DCUtils::CopyAtt(*ncdfc, varName, dataVarsMap[varName]);
         if (rc < 0) return (-1);
     }
 
