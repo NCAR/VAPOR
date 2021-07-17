@@ -819,15 +819,15 @@ private:
 
     void ReInitialize();
 
-    int _InitializeTimesMap(const std::vector<string> &files, const std::vector<string> &time_dimnames, const std::vector<string> &time_coordvars, std::map<string, std::vector<double>> &timesMap,
+    int _InitializeTimesMap(const std::vector<string> &files, const std::vector<string> &time_dimnames, const std::vector<string> &time_coordvars, std::map<string, std::vector<double>> &timesMap, std::map<string, size_t> &timeDimLens,
                             std::vector<double> &times, int &file_org) const;
 
-    int _InitializeTimesMapCase1(const std::vector<string> &files, std::map<string, std::vector<double>> &timesMap) const;
+    int _InitializeTimesMapCase1(const std::vector<string> &files, std::map<string, std::vector<double>> &timesMap, std::map<string, size_t> &timeDimLens) const;
 
-    int _InitializeTimesMapCase2(const std::vector<string> &files, const std::vector<string> &time_dimnames, std::map<string, std::vector<double>> &timesMap) const;
+    int _InitializeTimesMapCase2(const std::vector<string> &files, const std::vector<string> &time_dimnames, std::map<string, std::vector<double>> &timesMap, std::map<string, size_t> &timeDimLens) const;
 
     int _InitializeTimesMapCase3(const std::vector<string> &files, const std::vector<string> &time_dimnames, const std::vector<string> &time_coordvars,
-                                 std::map<string, std::vector<double>> &timesMap) const;
+                                 std::map<string, std::vector<double>> &timesMap, map<string, size_t> &timeDimLens) const;
 
     void _InterpolateLine(const float *src, size_t n, size_t stride, bool has_missing, float mv, float *dst) const;
 

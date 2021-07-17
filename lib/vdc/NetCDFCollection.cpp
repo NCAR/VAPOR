@@ -14,6 +14,14 @@ namespace {
 
 const string derivedTimeDimName = "derivedTimeDim";
 
+template <class T>
+vector <T> make_unique(vector <T> v) {
+    sort(v.begin(), v.end());
+    auto last2 = unique(v.begin(), v.end());
+    v.erase(last2, v.end());
+    return(v); 
+}
+
 bool readSliceOK(vector<size_t> dims, size_t start[], size_t count[])
 {
     if (dims.size() == 3) {
@@ -96,18 +104,14 @@ int NetCDFCollection::Initialize(const vector<string> &files, const vector<strin
     // to its time coordinates
     //
     int file_org;    // case 1, 2, 3 (3a or 3b)
-    int rc = NetCDFCollection::_InitializeTimesMap(files, l_time_dimnames, time_coordvars, _timesMap, _times, file_org);
+    map<string, size_t> timeDimLens;
+    int rc = NetCDFCollection::_InitializeTimesMap(files, l_time_dimnames, time_coordvars, _timesMap, timeDimLens, _times, file_org);
     if (rc < 0) return (-1);
 
-    //
-    // If no time dimension specified we create one. Really only need
-    // to do this if there are multiple files with the same variable(s)
-    // appearing in multiple files.
-    //
-    if (l_time_dimnames.empty() && _times.size() > 1) {
-        l_time_dimnames.push_back(derivedTimeDimName);
-        _dimNames.push_back(derivedTimeDimName);
-        _dimLens.push_back(_times.size());
+    for (auto itr : timeDimLens) {
+		_dimNames.push_back(itr.first);
+		_dimLens.push_back(itr.second);
+		_dimIsTimeVarying.push_back(false);
     }
 
     for (int i = 0; i < files.size(); i++) {
@@ -128,6 +132,11 @@ int NetCDFCollection::Initialize(const vector<string> &files, const vector<strin
         vector<size_t> dims;
         netcdf->GetDimensions(dimnames, dims);
         for (int j = 0; j < dimnames.size(); j++) {
+
+            // Handle time dims separately
+            //
+            if (timeDimLens.find(dimnames[j]) != timeDimLens.end()) continue;
+
             // No duplicates
             //
             vector<string>::iterator itr;
@@ -137,13 +146,7 @@ int NetCDFCollection::Initialize(const vector<string> &files, const vector<strin
                 _dimLens.push_back(dims[j]);
                 _dimIsTimeVarying.push_back(false);
             }
-            //
-            // if this is a time dimension and it hasn't shown up in another
-            // file we increment the dimension length
-            //
-            else if (find(l_time_dimnames.begin(), l_time_dimnames.end(), dimnames[j]) != l_time_dimnames.end()) {
-                _dimLens[itr - _dimNames.begin()] += dims[j];
-            } else if (_dimLens[itr - _dimNames.begin()] != dims[j]) {
+            else if (_dimLens[itr - _dimNames.begin()] != dims[j]) {
                 _dimIsTimeVarying[itr - _dimNames.begin()] = true;
             }
         }
@@ -894,10 +897,11 @@ int NetCDFCollection::ReadNative(int *data, int fd)
     return (NetCDFCollection::ReadNative(start, count, data, fd));
 }
 
-int NetCDFCollection::_InitializeTimesMap(const vector<string> &files, const vector<string> &time_dimnames, const vector<string> &time_coordvars, map<string, vector<double>> &timesMap,
+int NetCDFCollection::_InitializeTimesMap(const vector<string> &files, const vector<string> &time_dimnames, const vector<string> &time_coordvars, map<string, vector<double>> &timesMap, map<string, size_t> &timeDimLens,
                                           vector<double> &times, int &file_org) const
 {
     timesMap.clear();
+    timeDimLens.clear();
     if (time_coordvars.size() && (time_coordvars.size() != time_dimnames.size())) {
         SetErrMsg("NetCDFCollection::Initialize() : number of time coordinate variables and time dimensions must match when time coordinate variables specified");
         return (-1);
@@ -906,13 +910,13 @@ int NetCDFCollection::_InitializeTimesMap(const vector<string> &files, const vec
     int rc;
     if (time_dimnames.size() == 0) {
         file_org = 1;
-        rc = _InitializeTimesMapCase1(files, timesMap);
+        rc = _InitializeTimesMapCase1(files, timesMap, timeDimLens);
     } else if ((time_dimnames.size() != 0) && (time_coordvars.size() == 0)) {
         file_org = 2;
-        rc = _InitializeTimesMapCase2(files, time_dimnames, timesMap);
+        rc = _InitializeTimesMapCase2(files, time_dimnames, timesMap, timeDimLens);
     } else {
         file_org = 3;
-        rc = _InitializeTimesMapCase3(files, time_dimnames, time_coordvars, timesMap);
+        rc = _InitializeTimesMapCase3(files, time_dimnames, time_coordvars, timesMap, timeDimLens);
     }
     if (rc < 0) return (rc);
 
@@ -928,10 +932,7 @@ int NetCDFCollection::_InitializeTimesMap(const vector<string> &files, const vec
     //
     // sort and remove duplicates
     //
-    sort(times.begin(), times.end());
-    vector<double>::iterator lastd;
-    lastd = unique(times.begin(), times.end());
-    times.erase(lastd, times.end());
+    times = make_unique(times);
 
     if (times.empty()) { times.push_back(0.0); }
 
@@ -942,7 +943,7 @@ int NetCDFCollection::_InitializeTimesMap(const vector<string> &files, const vec
     return (0);
 }
 
-int NetCDFCollection::_InitializeTimesMapCase1(const vector<string> &files, map<string, vector<double>> &timesMap) const
+int NetCDFCollection::_InitializeTimesMapCase1(const vector<string> &files, map<string, vector<double>> &timesMap, map<string, size_t> &timeDimLens) const
 {
     timesMap.clear();
 
@@ -991,13 +992,15 @@ int NetCDFCollection::_InitializeTimesMapCase1(const vector<string> &files, map<
         }
         delete netcdf;
     }
+    timeDimLens[derivedTimeDimName] = files.size();
     return (0);
 }
 
-int NetCDFCollection::_InitializeTimesMapCase2(const vector<string> &files, const vector<string> &time_dimnames, map<string, vector<double>> &timesMap) const
+int NetCDFCollection::_InitializeTimesMapCase2(const vector<string> &files, const vector<string> &time_dimnames, map<string, vector<double>> &timesMap, map<string, size_t> &timeDimLens) const
 {
     timesMap.clear();
     map<string, double> currentTime;    // current time for each variable
+    map<string, vector <double> > timeDimTimes;
 
     // Case 2: TD specified, but no TCV.
     // A variable's time coordinate is determined by the ordering
@@ -1049,13 +1052,22 @@ int NetCDFCollection::_InitializeTimesMapCase2(const vector<string> &files, cons
             }
 
             timesMap[key] = times;
+
+			vector<double> &timesref = timeDimTimes[timedim];
+			for (int t = 0; t < times.size(); t++) { timesref.push_back(times[t]); }
         }
         delete netcdf;
+    }
+
+    for (auto itr : timeDimTimes) {
+        vector <double> &ref = itr.second;
+        ref = make_unique(ref);
+        timeDimLens[itr.first] = ref.size();
     }
     return (0);
 }
 
-int NetCDFCollection::_InitializeTimesMapCase3(const vector<string> &files, const vector<string> &time_dimnames, const vector<string> &time_coordvars, map<string, vector<double>> &timesMap) const
+int NetCDFCollection::_InitializeTimesMapCase3(const vector<string> &files, const vector<string> &time_dimnames, const vector<string> &time_coordvars, map<string, vector<double>> &timesMap, map<string, size_t> &timeDimLens) const
 {
     timesMap.clear();
 
@@ -1066,6 +1078,7 @@ int NetCDFCollection::_InitializeTimesMapCase3(const vector<string> &files, cons
     map<string, int>    tcvcount;    // # of files of TCV appears in
     map<string, string> tcvfile;
     map<string, string> tcvdim;
+    map<string, vector <double> > timeDimTimes;
     for (int i = 0; i < time_coordvars.size(); i++) { tcvcount[time_coordvars[i]] = 0; }
 
     for (int i = 0; i < files.size(); i++) {
@@ -1120,9 +1133,20 @@ int NetCDFCollection::_InitializeTimesMapCase3(const vector<string> &files, cons
                 vector<double> &timesref = timesMap[key];
                 for (int t = 0; t < times.size(); t++) { timesref.push_back(times[t]); }
             }
+
+			// Map between time dimention names and time coordinates
+            //
+			vector<double> &timesref = timeDimTimes[timedim];
+			for (int t = 0; t < times.size(); t++) { timesref.push_back(times[t]); }
         }
 
         delete netcdf;
+    }
+
+    for (auto itr : timeDimTimes) {
+        vector <double> &ref = itr.second;
+        ref = make_unique(ref);
+        timeDimLens[itr.first] = ref.size();
     }
 
     //
