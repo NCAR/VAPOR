@@ -745,9 +745,9 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     const auto           nodeDims = grid->GetDimensions();
     size_t               nodeDim = grid->GetNumDimensions();
     const size_t         nVerts = nodeDims[0] * nodeDims[1];
-    const vector<size_t> cellDims = grid->GetCellDimensions();
+    const DimsType &     cellDims = grid->GetCellDimensions();
     const size_t         nCells = cellDims[0] * cellDims[1];
-    VAssert(nodeDim == 2 && cellDims.size() == 2);
+    VAssert(nodeDim == 2);
 
     float  missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
     size_t maxNodes = grid->GetMaxVertexPerCell();
@@ -788,8 +788,8 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
             delete[] cdata;
             return nullptr;
         }
-        const vector<size_t> &cell = *cellIt;
-        grid->GetCellNodes(cell.data(), nodes);
+        const DimsType &cell = *cellIt;
+        grid->GetCellNodes(cell, nodes);
         int numNodes = nodes.size();
 
         if (numNodes == 4) {

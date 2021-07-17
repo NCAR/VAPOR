@@ -422,7 +422,7 @@ int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const Grid *g, doub
     Grid::ConstCellIterator citr;
     Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
-        const vector<size_t> &cell = *citr;
+        const DimsType &cell = *citr;
         g->GetCellNodes(DimsType{cell[0], 0, 0}, nodes);
 
         if (nodes.size() < 3) continue;    // degenerate
@@ -488,7 +488,7 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
     Grid::ConstNodeIterator endnitr = g->ConstNodeEnd();
     size_t                  voffset = 0;
     for (nitr = g->ConstNodeBegin(); nitr != endnitr; ++nitr) {
-        vector<double> coords;
+        CoordType coords;
 
         g->GetUserCoordinates(*nitr, coords);
 
@@ -523,7 +523,7 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
     Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     size_t                  index = 0;
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
-        const vector<size_t> &cell = *citr;
+        const DimsType &cell = *citr;
         g->GetCellNodes(DimsType{cell[0], 0, 0}, nodes);
 
         if (nodes.size() < 3) continue;    // degenerate

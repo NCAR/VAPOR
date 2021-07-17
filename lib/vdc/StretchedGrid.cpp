@@ -152,15 +152,16 @@ bool StretchedGrid::InsideGrid(const CoordType &coords) const
 StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const StretchedGrid *sg, bool begin) : ConstCoordItrAbstract()
 {
     _sg = sg;
-    auto dims = _sg->GetDimensions();
-    auto ndims = _sg->GetNumDimensions();
+    _index = {0, 0, 0};
+    _coords = {0.0, 0.0, 0.0};
+    size_t          ndims = sg->GetGeometryDim();
+    const DimsType &dims = sg->GetDimensions();
 
-    _index = vector<size_t>(ndims, 0);
     if (!begin) { _index[ndims - 1] = dims[ndims - 1]; }
 
-    _coords.push_back(_sg->_xcoords[0]);
-    _coords.push_back(_sg->_ycoords[0]);
-    if (ndims == 3) { _coords.push_back(_sg->_zcoords[0]); }
+    _coords[0] = _sg->_xcoords[0];
+    _coords[1] = _sg->_ycoords[0];
+    if (ndims == 3) { _coords[2] = _sg->_zcoords[0]; }
 }
 
 StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const ConstCoordItrSG &rhs) : ConstCoordItrAbstract()
@@ -173,8 +174,8 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const ConstCoordItrSG &rhs) : Co
 StretchedGrid::ConstCoordItrSG::ConstCoordItrSG() : ConstCoordItrAbstract()
 {
     _sg = NULL;
-    _index.clear();
-    _coords.clear();
+    _index = {0, 0, 0};
+    _coords = {0.0, 0.0, 0.0};
 }
 
 void StretchedGrid::ConstCoordItrSG::next()
@@ -227,12 +228,12 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset)
     long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = vector<size_t>(ndims, 0);
+        _index = {0, 0, 0};
         _index[ndims - 1] = dims[ndims - 1];
         return;
     }
 
-    _index.assign(ndims, 0);
+    _index = {0, 0, 0};
     Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
 
     _coords[0] = _sg->_xcoords[_index[0]];

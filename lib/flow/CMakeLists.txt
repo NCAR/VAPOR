@@ -20,7 +20,7 @@ target_link_libraries ( flow  PUBLIC vdc params )
 
 add_definitions (-DFLOW_EXPORTS)
 
-install (
+OpenMPInstall (
 	TARGETS flow
 	DESTINATION ${INSTALL_LIB_DIR}
 	COMPONENT Libraries

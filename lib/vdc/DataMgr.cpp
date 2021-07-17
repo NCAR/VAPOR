@@ -377,6 +377,7 @@ void map_blk_to_vox(const vector<size_t> &bs, const vector<size_t> &dims, const 
     vmax.clear();
 
     for (int i = 0; i < bs.size(); i++) {
+        VAssert(dims[i] > 0);
         vmin.push_back(bmin[i] * bs[i]);
         vmax.push_back(bmax[i] * bs[i] + bs[i] - 1);
         if (vmin[i] >= dims[i]) vmin[i] = dims[i] - 1;
@@ -1817,6 +1818,7 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
         //
         vector<size_t> file_min, file_max;
         for (int i = 0; i < dims.size(); i++) {
+            VAssert(dims[i] > 0);
             vector<float> weights;
             downsample_compute_weights(dims[i], grid_dims[i], weights);
             int loffset = (int)weights[0];

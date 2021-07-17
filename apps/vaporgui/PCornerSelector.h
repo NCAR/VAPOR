@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PLineItem.h"
+#include <cmath>
 
 //! \class PCornerSelector
 //! \brief Widget for selecting a corner or side of a square

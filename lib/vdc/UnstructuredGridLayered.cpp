@@ -230,7 +230,7 @@ float UnstructuredGridLayered::GetValueLinear(const CoordType &coords) const
 UnstructuredGridLayered::ConstCoordItrULayered::ConstCoordItrULayered(const UnstructuredGridLayered *ug, bool begin) : ConstCoordItrAbstract()
 {
     _ug = ug;
-    _coords = vector<double>(3, 0.0);
+    _coords = {0.0, 0.0, 0.0};
     _nElements2D = ug->GetDimensions()[0];
     if (begin) {
         _itr2D = ug->_ug2d.ConstCoordBegin();

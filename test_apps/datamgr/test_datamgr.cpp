@@ -162,7 +162,12 @@ void test_node_iterator(const Grid *g, vector<double> minu, vector<double> maxu)
     Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
 
     float t0 = GetTime();
-    itr = g->ConstNodeBegin(minu, maxu);
+
+    CoordType minuCT = {0.0, 0.0, 0.0};
+    CoordType maxuCT = {0.0, 0.0, 0.0};
+    Grid::CopyToArr3(minu, minuCT);
+    Grid::CopyToArr3(maxu, maxuCT);
+    itr = g->ConstNodeBegin(minuCT, maxuCT);
 
     size_t count = 0;
     for (; itr != enditr; ++itr) { count++; }

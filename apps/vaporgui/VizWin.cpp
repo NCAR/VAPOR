@@ -26,6 +26,8 @@
 #include <QFocusEvent>
 #include <QMouseEvent>
 #include <QCloseEvent>
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QIcon>
 #include <vapor/ControlExecutive.h>
 #include <vapor/ViewpointParams.h>
@@ -200,6 +202,8 @@ void VizWin::_setUpProjMatrix()
 
     size_t width, height;
     vParams->GetWindowSize(width, height);
+    width *= QApplication::desktop()->devicePixelRatio();
+    height *= QApplication::desktop()->devicePixelRatio();
     int wWidth = width;
     int wHeight = height;
 
@@ -609,6 +613,10 @@ void VizWin::Render(bool fast)
     _insideRender = true;
     _renderHelper(fast);
     _insideRender = false;
+
+    HideSTDERR();
+    swapBuffers();
+    RestoreSTDERR();
 }
 
 void VizWin::_renderHelper(bool fast)
@@ -618,6 +626,9 @@ void VizWin::_renderHelper(bool fast)
     makeCurrent();
 
     if (!_openGLInitFlag || !FrameBufferReady()) { return; }
+
+    glClearColor(0.3, 0.3, 0.3, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
@@ -647,10 +658,6 @@ void VizWin::_renderHelper(bool fast)
 #endif
     }
 
-    HideSTDERR();
-    swapBuffers();
-    RestoreSTDERR();
-
     rc = CheckGLErrorMsg("VizWindowPaintGL");
     if (rc < 0) { MSG_ERR("OpenGL error"); }
 
@@ -659,9 +666,6 @@ void VizWin::_renderHelper(bool fast)
 
 void VizWin::_preRender()
 {
-    glClearColor(0., 0., 0., 1.);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     _glManager->matrixManager->MatrixModeProjection();
     _glManager->matrixManager->PushMatrix();
     _setUpProjMatrix();

@@ -355,6 +355,7 @@ vector<size_t> NetCDFCollection::GetSpatialDims(string varname) const
     for (int i = 0; i < mydims.size(); i++) {
         dims.push_back(mydims[i]);
         for (int j = 0; j < _staggeredDims.size(); j++) {
+            VAssert(mydims[i] > 0);
             if (dimnames[i].compare(_staggeredDims[j]) == 0) { dims[i] = mydims[i] - 1; }
         }
     }

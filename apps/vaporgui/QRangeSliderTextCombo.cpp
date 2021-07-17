@@ -3,6 +3,7 @@
 #include "VDoubleValidator.h"
 #include <vapor/VAssert.h>
 #include <cfloat>
+#include <cmath>
 #include <QAction>
 #include "VDoubleLineEdit.h"
 #include "VDoubleRangeMenu.h"
@@ -70,7 +71,7 @@ void QRangeSliderTextCombo::SetValue(float left, float right)
     _left = left;
     _right = right;
     setTextboxes(left, right);
-    if (abs(_max - _min) < FLT_EPSILON)
+    if (std::abs(_max - _min) < FLT_EPSILON)
         _slider->SetValue(0, 1);
     else
         _slider->SetValue((left - _min) / (_max - _min), (right - _min) / (_max - _min));

@@ -394,7 +394,7 @@ elseif (UNIX AND NOT APPLE)
 	target_link_libraries (vapor quadmath)
 endif ()
 
-install (
+OpenMPInstall (
 	TARGETS vapor
 	DESTINATION ${INSTALL_BIN_DIR}
 	COMPONENT vaporgui
