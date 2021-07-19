@@ -72,9 +72,6 @@
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
-//#include "NavigationEventRouter.h"
-//#include "AnnotationEventRouter.h"
-//#include "AnimationEventRouter.h"
 #include "BannerGUI.h"
 #include "Statistics.h"
 #include "PythonVariables.h"
@@ -100,6 +97,8 @@
 #include <vapor/Base16StringStream.h>
 #include "BookmarkParams.h"
 #include "NavigationUtils.h"
+
+#include <memory>
 
 // Following shortcuts are provided:
 // CTRL_N: new session
