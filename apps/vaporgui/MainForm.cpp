@@ -1188,7 +1188,7 @@ void MainForm::createBookmark()
 
     const int     iconSize = BookmarkParams::DefaultIconSize();
     const int     iconDataSize = iconSize * iconSize * 3;
-    unsigned char iconData[iconDataSize];
+    unsigned char* iconData = new unsigned char[iconDataSize];
     char          iconDataString[64];
     sprintf(iconDataString, ":RAM:%p", iconData);
     // The above string is a "file path" that points to an address in memory
@@ -1208,6 +1208,8 @@ void MainForm::createBookmark()
 
     Base16StringStream is;
     is.write((char *)iconData, iconDataSize);
+
+	if (iconData != nullptr) delete [] iconData;
 
     BookmarkParams *b = p->CreateBookmark();
     b->SetName(title);
