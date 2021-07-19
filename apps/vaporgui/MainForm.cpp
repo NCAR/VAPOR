@@ -1171,16 +1171,16 @@ void MainForm::createBookmark()
     p->BeginGroup("Create Bookmark");
 
     vector<BookmarkParams> bookmarks;
-    for (auto *b : p->GetBookmarks()) bookmarks.push_back(BookmarkParams(*b));
+    for (auto* b : p->GetBookmarks()) bookmarks.push_back(BookmarkParams(*b));
     p->ClearBookmarks();
 
     Base16StringStream ss;
-    ss << *_paramsMgr->GetXMLRoot();
+	XmlNode::streamOut(ss, *_paramsMgr->GetXMLRoot());
 
-    for (auto &b : bookmarks) p->AddBookmark(&b);
+    for (auto& b : bookmarks) p->AddBookmark(&b);
 
     string           activeVizWin = p->GetActiveVizName();
-    ViewpointParams *vpp = _paramsMgr->GetViewpointParams(activeVizWin);
+    ViewpointParams* vpp = _paramsMgr->GetViewpointParams(activeVizWin);
 
     bool useCustomViewport = vpp->GetValueLong(vpp->UseCustomFramebufferTag, 0);
     int  customViewportWidth = vpp->GetValueLong(vpp->CustomFramebufferWidthTag, 0);
