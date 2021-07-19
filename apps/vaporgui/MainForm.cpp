@@ -1186,12 +1186,12 @@ void MainForm::createBookmark()
     int  customViewportWidth = vpp->GetValueLong(vpp->CustomFramebufferWidthTag, 0);
     int  customViewportHeight = vpp->GetValueLong(vpp->CustomFramebufferHeightTag, 0);
 
-    const int      iconSize = BookmarkParams::DefaultIconSize();
-    const int      iconDataSize = iconSize * iconSize * 3;
-    auto iconData = std::make_unique<unsigned char[]>( iconDataSize );
+    const int iconSize = BookmarkParams::DefaultIconSize();
+    const int iconDataSize = iconSize * iconSize * 3;
+    auto      iconData = std::make_unique<unsigned char[]>(iconDataSize);
 
-    char           iconDataString[64];
-    sprintf(iconDataString, ":RAM:%p", iconData);
+    char iconDataString[64];
+    sprintf(iconDataString, ":RAM:%p", iconData.get());
     // The above string is a "file path" that points to an address in memory
     // which tells the visualizer to save the resulting image to ram rather than
     // to disk. The current "image capture" implementation is very buggy spaghetti
@@ -1208,9 +1208,7 @@ void MainForm::createBookmark()
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", customViewportHeight);
 
     Base16StringStream is;
-    is.write((char *)iconData, iconDataSize);
-
-    if (iconData != nullptr) delete[] iconData;
+    is.write((char *)iconData.get(), iconDataSize);
 
     BookmarkParams *b = p->CreateBookmark();
     b->SetName(title);
