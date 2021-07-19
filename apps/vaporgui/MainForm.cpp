@@ -1188,7 +1188,8 @@ void MainForm::createBookmark()
 
     const int      iconSize = BookmarkParams::DefaultIconSize();
     const int      iconDataSize = iconSize * iconSize * 3;
-    unsigned char *iconData = new unsigned char[iconDataSize];
+    auto iconData = std::make_unique<unsigned char[]>( iconDataSize );
+
     char           iconDataString[64];
     sprintf(iconDataString, ":RAM:%p", iconData);
     // The above string is a "file path" that points to an address in memory
