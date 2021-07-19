@@ -1187,7 +1187,7 @@ void MainForm::createBookmark()
 
     const int iconSize = BookmarkParams::DefaultIconSize();
     const int iconDataSize = iconSize * iconSize * 3;
-    auto      iconData = std::make_unique<unsigned char[]>(iconDataSize);
+    auto      iconData = std::unique_ptr<unsigned char[]>(new unsigned char[iconDataSize]);
 
     char iconDataString[64];
     sprintf(iconDataString, ":RAM:%p", iconData.get());
