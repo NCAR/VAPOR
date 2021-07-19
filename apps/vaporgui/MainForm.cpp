@@ -1171,25 +1171,25 @@ void MainForm::createBookmark()
     p->BeginGroup("Create Bookmark");
 
     vector<BookmarkParams> bookmarks;
-    for (auto* b : p->GetBookmarks()) bookmarks.push_back(BookmarkParams(*b));
+    for (auto *b : p->GetBookmarks()) bookmarks.push_back(BookmarkParams(*b));
     p->ClearBookmarks();
 
     Base16StringStream ss;
-	XmlNode::streamOut(ss, *_paramsMgr->GetXMLRoot());
+    XmlNode::streamOut(ss, *_paramsMgr->GetXMLRoot());
 
-    for (auto& b : bookmarks) p->AddBookmark(&b);
+    for (auto &b : bookmarks) p->AddBookmark(&b);
 
     string           activeVizWin = p->GetActiveVizName();
-    ViewpointParams* vpp = _paramsMgr->GetViewpointParams(activeVizWin);
+    ViewpointParams *vpp = _paramsMgr->GetViewpointParams(activeVizWin);
 
     bool useCustomViewport = vpp->GetValueLong(vpp->UseCustomFramebufferTag, 0);
     int  customViewportWidth = vpp->GetValueLong(vpp->CustomFramebufferWidthTag, 0);
     int  customViewportHeight = vpp->GetValueLong(vpp->CustomFramebufferHeightTag, 0);
 
-    const int     iconSize = BookmarkParams::DefaultIconSize();
-    const int     iconDataSize = iconSize * iconSize * 3;
-    unsigned char* iconData = new unsigned char[iconDataSize];
-    char          iconDataString[64];
+    const int      iconSize = BookmarkParams::DefaultIconSize();
+    const int      iconDataSize = iconSize * iconSize * 3;
+    unsigned char *iconData = new unsigned char[iconDataSize];
+    char           iconDataString[64];
     sprintf(iconDataString, ":RAM:%p", iconData);
     // The above string is a "file path" that points to an address in memory
     // which tells the visualizer to save the resulting image to ram rather than
@@ -1209,7 +1209,7 @@ void MainForm::createBookmark()
     Base16StringStream is;
     is.write((char *)iconData, iconDataSize);
 
-	if (iconData != nullptr) delete [] iconData;
+    if (iconData != nullptr) delete[] iconData;
 
     BookmarkParams *b = p->CreateBookmark();
     b->SetName(title);
