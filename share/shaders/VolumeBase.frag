@@ -51,7 +51,7 @@ bool readDepthBuffer = true;
 
 #include VolumeRayMath.frag
 
-vec4 ROYGBV(float v, float minV, float maxV)
+vec3 ROYGBV(float v, float minV, float maxV)
 {
     vec3 colors[6];
     colors[0] = vec3(1.00, 0.00, 0.00);
@@ -64,7 +64,14 @@ vec4 ROYGBV(float v, float minV, float maxV)
     int indexMin=int(floor(ratio));
     int indexMax=min(int(indexMin)+1,5);
     vec3 c = mix(colors[indexMin], colors[indexMax], ratio-indexMin);
-    return vec4(c, 1);
+    return c;
+}
+
+vec3 ROYGBVE(float v, float from, float to)
+{
+    if (v < from || v > to)
+        return vec3(1);
+    return ROYGBV(v, from, to);
 }
 
 float GetSamplingNoise()
