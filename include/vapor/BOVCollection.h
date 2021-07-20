@@ -81,7 +81,6 @@ private:
     int _sizeOfFormat(DC::XType) const;
 
     int _invalidFileSizeError(size_t numElements) const;
-    int _fileTooBigError() const;
     int _invalidFileError() const;
     int _invalidDimensionError(const std::string &token) const;
     int _invalidFormatError(const std::string &token) const;

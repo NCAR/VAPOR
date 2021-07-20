@@ -278,12 +278,6 @@ int BOVCollection::_validateParsedValues()
         return _invalidFileError();
     }
 
-    // If we can read another byte in the file, the file is too big
-    if (fread(readBuffer.get(), formatSize, 1, fp) != 0) {
-        fclose(fp);
-        return _fileTooBigError();
-    }
-
     fclose(fp);
 
     return 0;
@@ -297,12 +291,6 @@ void BOVCollection::_populateDataFileMap()
     std::sort(_times.begin(), _times.end());
 
     _dataFileMap[_variable][_time] = _dataFile;
-}
-
-int BOVCollection::_fileTooBigError() const
-{
-    SetErrMsg((_dataFile + " contains more data than specified in BOV header.").c_str());
-    return -1;
 }
 
 int BOVCollection::_invalidFileSizeError(size_t numElements) const
