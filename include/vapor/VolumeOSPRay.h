@@ -16,7 +16,7 @@ namespace VAPoR {
 //!
 
 #ifdef BUILD_OSPRAY
-class VolumeOSPRay : public VolumeAlgorithm {
+class RENDER_API VolumeOSPRay : public VolumeAlgorithm {
 public:
     VolumeOSPRay(GLManager *gl, VolumeRenderer *renderer);
     ~VolumeOSPRay();
@@ -100,7 +100,7 @@ public:
 //!
 //! \author Stanislaw Jaroszynski
 
-class VolumeOSPRayIso : public VolumeOSPRay {
+class RENDER_API VolumeOSPRayIso : public VolumeOSPRay {
 public:
     VolumeOSPRayIso(GLManager *gl, VolumeRenderer *renderer) : VolumeOSPRay(gl, renderer) {}
     static std::string GetName() { return "Iso OSPRay (experimental)"; }

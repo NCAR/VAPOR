@@ -72,9 +72,6 @@
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
-//#include "NavigationEventRouter.h"
-//#include "AnnotationEventRouter.h"
-//#include "AnimationEventRouter.h"
 #include "BannerGUI.h"
 #include "Statistics.h"
 #include "PythonVariables.h"
@@ -100,6 +97,8 @@
 #include <vapor/Base16StringStream.h>
 #include "BookmarkParams.h"
 #include "NavigationUtils.h"
+
+#include <memory>
 
 // Following shortcuts are provided:
 // CTRL_N: new session
@@ -1175,7 +1174,7 @@ void MainForm::createBookmark()
     p->ClearBookmarks();
 
     Base16StringStream ss;
-    ss << *_paramsMgr->GetXMLRoot();
+    XmlNode::streamOut(ss, *_paramsMgr->GetXMLRoot());
 
     for (auto &b : bookmarks) p->AddBookmark(&b);
 
@@ -1186,11 +1185,12 @@ void MainForm::createBookmark()
     int  customViewportWidth = vpp->GetValueLong(vpp->CustomFramebufferWidthTag, 0);
     int  customViewportHeight = vpp->GetValueLong(vpp->CustomFramebufferHeightTag, 0);
 
-    const int     iconSize = BookmarkParams::DefaultIconSize();
-    const int     iconDataSize = iconSize * iconSize * 3;
-    unsigned char iconData[iconDataSize];
-    char          iconDataString[64];
-    sprintf(iconDataString, ":RAM:%p", iconData);
+    const int iconSize = BookmarkParams::DefaultIconSize();
+    const int iconDataSize = iconSize * iconSize * 3;
+    auto      iconData = std::unique_ptr<unsigned char[]>(new unsigned char[iconDataSize]);
+
+    char iconDataString[64];
+    sprintf(iconDataString, ":RAM:%p", iconData.get());
     // The above string is a "file path" that points to an address in memory
     // which tells the visualizer to save the resulting image to ram rather than
     // to disk. The current "image capture" implementation is very buggy spaghetti
@@ -1207,7 +1207,7 @@ void MainForm::createBookmark()
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", customViewportHeight);
 
     Base16StringStream is;
-    is.write((char *)iconData, iconDataSize);
+    is.write((char *)iconData.get(), iconDataSize);
 
     BookmarkParams *b = p->CreateBookmark();
     b->SetName(title);

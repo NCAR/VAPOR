@@ -3,7 +3,7 @@
 #include <QVBoxLayout>
 #include "VGroup.h"
 
-PGroup::PGroup() : PGroup(new VGroup) {}
+PGroup::PGroup() : PGroup(new VGroup()) {}
 
 PGroup::PGroup(const List &widgets) : PGroup() { AddM(widgets); }
 
@@ -18,6 +18,6 @@ void PGroup::updateGUI() const
     for (PWidget *child : _children) child->Update(params, paramsMgr, dataMgr);
 }
 
-PSubGroup::PSubGroup() : PGroup(new VSubGroup) {}
+PSubGroup::PSubGroup() : PGroup(new VSubGroup()) {}
 
 PSubGroup::PSubGroup(const List &widgets) : PSubGroup() { AddM(widgets); }
