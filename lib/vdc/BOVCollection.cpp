@@ -261,7 +261,7 @@ int BOVCollection::_validateParsedValues()
     if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) { _dataFile = _currentFilePath + "//" + _dataFile; }
 
     // Validate whether we can open the data file
-    FILE* fp = fopen(_dataFile.c_str(), "rb");
+    FILE *fp = fopen(_dataFile.c_str(), "rb");
     if (fp == nullptr) return _invalidFileError();
 
     // Validate the data file's size
