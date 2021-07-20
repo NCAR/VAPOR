@@ -78,7 +78,7 @@ private:
 
     void _findTokenValue(std::string &line) const;
 
-    int  _sizeOfFormat(DC::XType) const;
+    int _sizeOfFormat(DC::XType) const;
 
     int _invalidFileSizeError(size_t numElements) const;
     int _byteOffsetError() const;

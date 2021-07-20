@@ -67,8 +67,8 @@ const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
 BOVCollection::BOVCollection()
 : _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _dataEndian(_defaultEndian), _centering(_defaultCentering), _byteOffset(_defaultByteOffset),
-  _divideBrick(_defaultDivBrick), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false),
-  _formatAssigned(false), _brickOriginAssigned(false), _brickSizeAssigned(false), _byteOffsetAssigned(false), _timeDimension(_timeDim)
+  _divideBrick(_defaultDivBrick), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false), _formatAssigned(false),
+  _brickOriginAssigned(false), _brickSizeAssigned(false), _byteOffsetAssigned(false), _timeDimension(_timeDim)
 {
     _dataFiles.clear();
     _times.clear();
@@ -170,26 +170,36 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         }
 
         rc = _findToken(GRID_SIZE_TOKEN, line, _tmpGridSize);
-        if (rc == (int)parseCodes::ERROR) return _failureToReadError(GRID_SIZE_TOKEN);
-        else if (rc == (int)parseCodes::FOUND) continue;
+        if (rc == (int)parseCodes::ERROR)
+            return _failureToReadError(GRID_SIZE_TOKEN);
+        else if (rc == (int)parseCodes::FOUND)
+            continue;
 
         rc = _findToken(FORMAT_TOKEN, line, _tmpDataFormat);
-        if (rc == (int)parseCodes::ERROR) return _failureToReadError(FORMAT_TOKEN);
-        else if (rc == (int)parseCodes::FOUND) continue;
+        if (rc == (int)parseCodes::ERROR)
+            return _failureToReadError(FORMAT_TOKEN);
+        else if (rc == (int)parseCodes::FOUND)
+            continue;
 
         // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
         //
         rc = _findToken(ORIGIN_TOKEN, line, _tmpBrickOrigin);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(ORIGIN_TOKEN);
-        else if (rc == (int)parseCodes::FOUND) continue;
+        if (rc == (int)parseCodes::ERROR)
+            return _invalidValueError(ORIGIN_TOKEN);
+        else if (rc == (int)parseCodes::FOUND)
+            continue;
 
         rc = _findToken(BRICK_SIZE_TOKEN, line, _tmpBrickSize);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(BRICK_SIZE_TOKEN);
-        else if (rc == (int)parseCodes::FOUND) continue;
+        if (rc == (int)parseCodes::ERROR)
+            return _invalidValueError(BRICK_SIZE_TOKEN);
+        else if (rc == (int)parseCodes::FOUND)
+            continue;
 
         rc = _findToken(OFFSET_TOKEN, line, _tmpByteOffset);
-        if (rc == (int)parseCodes::ERROR) return _invalidValueError(OFFSET_TOKEN);
-        else if (rc == (int)parseCodes::FOUND) continue;
+        if (rc == (int)parseCodes::ERROR)
+            return _invalidValueError(OFFSET_TOKEN);
+        else if (rc == (int)parseCodes::FOUND)
+            continue;
 
         // All other variables are currently unused.
         //
@@ -249,11 +259,9 @@ int BOVCollection::_validateParsedValues()
     }
 
     // If _dataFile is not an absolute path, prepend with the BOV header's path
-    if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) {
-        _dataFile = _currentFilePath + "//" + _dataFile;
-    }
+    if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) { _dataFile = _currentFilePath + "//" + _dataFile; }
 
-    // Validate that the file is not a directory   
+    // Validate that the file is not a directory
     FILE *fp = fopen(_dataFile.c_str(), "r+");
     if (fp == nullptr) return _invalidFileError();
     fclose(fp);
@@ -271,19 +279,19 @@ int BOVCollection::_validateParsedValues()
     }
 
     // Validate the data file's size
-    int formatSize = _sizeOfFormat(_dataFormat);
+    int    formatSize = _sizeOfFormat(_dataFormat);
     size_t count = _gridSize[0] * _gridSize[1] * _gridSize[2];
-    auto readBuffer = std::unique_ptr<unsigned char[]>(new unsigned char[count * formatSize]);
+    auto   readBuffer = std::unique_ptr<unsigned char[]>(new unsigned char[count * formatSize]);
     size_t numElements = fread(readBuffer.get(), formatSize, count, fp);
     if (numElements != count) {
         fclose(fp);
-        return _invalidFileSizeError( numElements );
+        return _invalidFileSizeError(numElements);
     }
     if (ferror(fp)) {
         fclose(fp);
         return _invalidFileError();
     }
-    
+
     // If we can read another byte in the file, the file is too big
     if (fread(readBuffer.get(), formatSize, 1, fp) != 0) {
         fclose(fp);
@@ -305,12 +313,14 @@ void BOVCollection::_populateDataFileMap()
     _dataFileMap[_variable][_time] = _dataFile;
 }
 
-int BOVCollection::_fileTooBigError() const {
+int BOVCollection::_fileTooBigError() const
+{
     SetErrMsg((_dataFile + " contains more data than specified in BOV header.").c_str());
     return -1;
 }
 
-int BOVCollection::_byteOffsetError() const {
+int BOVCollection::_byteOffsetError() const
+{
     SetErrMsg(("Seeking by " + to_string(_byteOffset) + " bytes results in error: " + strerror(errno)).c_str());
     return -1;
 }
@@ -319,7 +329,8 @@ int BOVCollection::_invalidFileSizeError(size_t numElements) const
 {
     SetErrMsg(("Data file " + _dataFile + ", which has " + to_string(numElements)
                + " values, does not match the size of the the data and offset "
-                 "specified in BOV header.").c_str());
+                 "specified in BOV header.")
+                  .c_str());
     return -1;
 }
 
@@ -445,11 +456,9 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 
         if (verbose) { std::cout << std::setw(20) << token << " " << value << std::endl; }
 
-        if (ss.fail()) {
-            return (int)parseCodes::ERROR;
-        }
+        if (ss.fail()) { return (int)parseCodes::ERROR; }
         // If there is more than one value, throw error
-        if (ss.eof() == false) return (int)parseCodes::ERROR; 
+        if (ss.eof() == false) return (int)parseCodes::ERROR;
 
         return (int)parseCodes::FOUND;
     }
@@ -486,7 +495,7 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
         }
 
         // If there are more than 3 values, throw error
-        if(!lineStream.eof()) return (int)parseCodes::ERROR;
+        if (!lineStream.eof()) return (int)parseCodes::ERROR;
 
         if (verbose) {
             std::cout << std::setw(20) << token << " ";
