@@ -1707,7 +1707,10 @@ void MainForm::loadDataHelper(string dataSetName, const vector<string> &files, s
 
     enableWidgets(true);
 
-    _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
+    size_t numTS = ds->GetTimeCoordinates().size() - 1;
+    _timeStepEditValidator->setRange(0, numTS);
+    AnimationParams *aParams = GetAnimationParams();
+    aParams->SetEndTimestep(numTS);
 
     // Opening data is not an undoable event :-(
     //
