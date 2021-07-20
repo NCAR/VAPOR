@@ -270,14 +270,6 @@ int BOVCollection::_validateParsedValues()
     fp = fopen(_dataFile.c_str(), "rb");
     if (fp == nullptr) return _invalidFileError();
 
-    // Validate that we can seek the data file.
-    // If we seek to the end of the file, there's no data to read, so report error
-    int rc = fseek(fp, _byteOffset, SEEK_SET);
-    if (rc != 0 || feof(fp)) {
-        fclose(fp);
-        return _byteOffsetError();
-    }
-
     // Validate the data file's size
     int    formatSize = _sizeOfFormat(_dataFormat);
     size_t count = _gridSize[0] * _gridSize[1] * _gridSize[2];
@@ -316,12 +308,6 @@ void BOVCollection::_populateDataFileMap()
 int BOVCollection::_fileTooBigError() const
 {
     SetErrMsg((_dataFile + " contains more data than specified in BOV header.").c_str());
-    return -1;
-}
-
-int BOVCollection::_byteOffsetError() const
-{
-    SetErrMsg(("Seeking by " + to_string(_byteOffset) + " bytes results in error: " + strerror(errno)).c_str());
     return -1;
 }
 
