@@ -24,7 +24,6 @@ public:
     DC::XType                  GetDataFormat() const;
     std::array<double, 3>      GetBrickOrigin() const;
     std::array<double, 3>      GetBrickSize() const;
-    std::string                GetDataEndian() const;
 
     template<class T> int ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region);
 
@@ -53,7 +52,6 @@ private:
     // assigning to "actual" values such as _gridSize, declaired above.
     std::array<size_t, 3> _tmpGridSize;
     DC::XType             _tmpDataFormat;
-    std::string           _tmpDataEndian;
     std::array<double, 3> _tmpBrickOrigin;
     std::array<double, 3> _tmpBrickSize;
     size_t                _tmpByteOffset;
@@ -62,7 +60,6 @@ private:
     bool _formatAssigned;
     bool _brickOriginAssigned;
     bool _brickSizeAssigned;
-    bool _dataEndianAssigned;
     bool _byteOffsetAssigned;
 
     // _dataFileMap allows us to access binary data files with a
@@ -82,14 +79,13 @@ private:
     void _findTokenValue(std::string &line) const;
 
     int  _sizeOfFormat(DC::XType) const;
-    void _swapBytes(void *vptr, size_t size, size_t n) const;
 
-    int _invalidFileSizeError(size_t dataSize, size_t fileSize) const;
-    int _cannotStatFileError() const;
-    int _invalidFileError(const std::string &token, const std::string &file) const;
+    int _invalidFileSizeError(size_t numElements) const;
+    int _byteOffsetError() const;
+    int _fileTooBigError() const;
+    int _invalidFileError() const;
     int _invalidDimensionError(const std::string &token) const;
     int _invalidFormatError(const std::string &token) const;
-    int _invalidEndianError(const std::string &token) const;
     int _failureToReadError(const std::string &token) const;
     int _inconsistentValueError(const std::string &token) const;
     int _invalidValueError(const std::string &token) const;
@@ -127,9 +123,6 @@ private:
     static const std::string _yDim;
     static const std::string _zDim;
     static const std::string _timeDim;
-
-    static const std::string _bigEndianString;
-    static const std::string _littleEndianString;
 
     static const std::string _byteFormatString;
     static const std::string _shortFormatString;
