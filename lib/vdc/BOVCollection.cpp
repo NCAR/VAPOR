@@ -143,7 +143,7 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         // the BOV.  Try to find them, and report errors if we can't.
         //
         rc = _findToken(DATA_FILE_TOKEN, line, dataFile);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _failureToReadError(DATA_FILE_TOKEN);
         else if (rc == (int)parseCodes::FOUND) {
             _dataFile = dataFile;
@@ -152,7 +152,7 @@ int BOVCollection::_parseHeader(std::ifstream &header)
 
         double time;
         rc = _findToken(TIME_TOKEN, line, time);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _failureToReadError(TIME_TOKEN);
         else if (rc == (int)parseCodes::FOUND) {
             _time = time;
@@ -161,7 +161,7 @@ int BOVCollection::_parseHeader(std::ifstream &header)
 
         std::string variable;
         rc = _findToken(VARIABLE_TOKEN, line, variable);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _invalidValueError(VARIABLE_TOKEN);
         else if (rc == (int)parseCodes::FOUND) {
             _variable = variable;
@@ -169,13 +169,13 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         }
 
         rc = _findToken(GRID_SIZE_TOKEN, line, _tmpGridSize);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _failureToReadError(GRID_SIZE_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             continue;
 
         rc = _findToken(FORMAT_TOKEN, line, _tmpDataFormat);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _failureToReadError(FORMAT_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             continue;
@@ -183,19 +183,19 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
         //
         rc = _findToken(ORIGIN_TOKEN, line, _tmpBrickOrigin);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _invalidValueError(ORIGIN_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             continue;
 
         rc = _findToken(BRICK_SIZE_TOKEN, line, _tmpBrickSize);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _invalidValueError(BRICK_SIZE_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             continue;
 
         rc = _findToken(OFFSET_TOKEN, line, _tmpByteOffset);
-        if (rc == (int)parseCodes::ERROR)
+        if (rc == (int)parseCodes::PARSE_ERROR)
             return _invalidValueError(OFFSET_TOKEN);
         else if (rc == (int)parseCodes::FOUND)
             continue;
@@ -436,9 +436,9 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 
         if (verbose) { std::cout << std::setw(20) << token << " " << value << std::endl; }
 
-        if (ss.fail()) { return (int)parseCodes::ERROR; }
+        if (ss.fail()) { return (int)parseCodes::PARSE_ERROR; }
         // If there is more than one value, throw error
-        if (ss.eof() == false) return (int)parseCodes::ERROR;
+        if (ss.eof() == false) return (int)parseCodes::PARSE_ERROR;
 
         return (int)parseCodes::FOUND;
     }
@@ -469,13 +469,13 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 
         for (int i = 0; i < value.size(); i++) {
             lineStream >> lineValue;
-            if (lineStream.fail()) return (int)parseCodes::ERROR;
+            if (lineStream.fail()) return (int)parseCodes::PARSE_ERROR;
 
             value[i] = lineValue;
         }
 
         // If there are more than 3 values, throw error
-        if (!lineStream.eof()) return (int)parseCodes::ERROR;
+        if (!lineStream.eof()) return (int)parseCodes::PARSE_ERROR;
 
         if (verbose) {
             std::cout << std::setw(20) << token << " ";
