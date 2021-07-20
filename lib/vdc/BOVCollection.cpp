@@ -17,7 +17,7 @@
     #define _USE_MATH_DEFINES
     #pragma warning(disable : 4251 4100)
 #else
-    #include <limits.h>
+    #include <climits>
 #endif
 #include <cmath>
 
