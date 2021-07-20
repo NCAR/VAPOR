@@ -7,7 +7,6 @@
 #include <iostream>
 #include <fstream>
 #include <type_traits>
-#include <sys/stat.h>
 #include "vapor/VAssert.h"
 #include "vapor/utils.h"
 #include "vapor/FileUtils.h"
@@ -260,11 +259,6 @@ int BOVCollection::_validateParsedValues()
 
     // If _dataFile is not an absolute path, prepend with the BOV header's path
     if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) { _dataFile = _currentFilePath + "//" + _dataFile; }
-
-    // Validate that the file is not a directory
-    FILE *fp = fopen(_dataFile.c_str(), "r+");
-    if (fp == nullptr) return _invalidFileError();
-    fclose(fp);
 
     // Validate whether we can open the data file
     fp = fopen(_dataFile.c_str(), "rb");
