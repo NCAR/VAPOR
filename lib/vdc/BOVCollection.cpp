@@ -10,7 +10,7 @@
 #include "vapor/VAssert.h"
 #include "vapor/utils.h"
 #include "vapor/FileUtils.h"
-#include <stdio.h>
+#include <cstdio>
 #include <climits>
 #include <cmath>
 
@@ -259,12 +259,7 @@ int BOVCollection::_validateParsedValues()
         _byteOffsetAssigned = true;
     }
 
-    // Validate whether we can open the data file
-    FILE *fp = fopen(_dataFile.c_str(), "rb");
-    if (fp == nullptr) return _invalidFileError();
-    fclose(fp);
-
-    if (_variable.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890") != std::string::npos) return _invalidVarNameError();
+    if (_variable.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_-") != std::string::npos) return _invalidVarNameError();
 
     return 0;
 }
@@ -539,7 +534,7 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
             size_t yOffset = _gridSize[0] * j;
             size_t offset = formatSize * (xOffset + yOffset + zOffset) + _byteOffset;
 
-            size_t rc = fseek(fp, offset, SEEK_SET);
+            int rc = fseek(fp, offset, SEEK_SET);
             if (rc != 0) {
                 MyBase::SetErrMsg("Unable to seek on file: %M");
                 return -1;
