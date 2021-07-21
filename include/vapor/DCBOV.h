@@ -16,6 +16,33 @@ namespace VAPoR {
 
 class BOVCollection;
 
+// Example BOV header file, bovA1.bov
+//
+// # TIME is a floating point value specifying the timestep being read in DATA_FILE
+// TIME: 1.1
+//
+// # DATA_FILE points to a binary data file.  It can be a full file path, or a path relative to the BOV header.
+// DATA_FILE: bovA1.bin
+//
+// # The data size corresponds to NX,NY,NZ in the above example code.
+// DATA_SIZE: 10 10 10
+//
+// # Allowable values for DATA_FORMAT are: INT,FLOAT,DOUBLE
+// DATA_FORMAT: FLOAT
+//
+// # VARIABLE is a string that specifies the variable being read in DATA_FILE
+// VARIABLE: myVariable
+//
+// # BRICK_ORIGIN lets you specify a new coordinate system origin for # the mesh that will be created to suit your data.
+// BRICK_ORIGIN: 0. 0. 0.
+//
+// # BRICK_SIZE lets you specify the size of the brick.
+// BRICK_SIZE: 10. 20. 5.
+//
+// # BYTE_OFFSET is optional and lets you specify some number of
+// # bytes to skip at the front of the file. This can be useful for # skipping the 4-byte header that Fortran tends to write to files. # If your file does no
+// BYTE_OFFSET: 4
+
 //!
 //! \class DCBOV
 //! \ingroup Public_VDCBOV
@@ -35,13 +62,15 @@ class BOVCollection;
 //! - VARIABLE     (default: "brickVar")
 //! - BYTE_OFFSET  (default: 0)
 //!
-//! The following BOV tags are currently unsupported:
+//! The following BOV tags are currently unsupported.  They can be included in a BOV header,
+//! but they will be unused.
 //! - DATA_ENDIAN
 //! - CENTERING
 //! - DIVIDE_BRICK
 //! - DATA_BRICKLETS
 //! - DATA_COMPONENTS
 //!
+//! If duplicate key/value pairs exist in a BOV header, the value closest to the bottom of the file will be used.
 //! Scientific notation is supported for floating point values like BRICK_ORIGIN and BRICK_SIZE.
 //! Scientific notation is not supported for integer values like DATA_SIZE.
 //! Wild card characters are not currently supported in the DATA_FILE token.

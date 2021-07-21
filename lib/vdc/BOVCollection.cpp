@@ -23,28 +23,32 @@ const std::string BOVCollection::DATA_FILE_TOKEN = "DATA_FILE";
 const std::string BOVCollection::GRID_SIZE_TOKEN = "DATA_SIZE";
 const std::string BOVCollection::FORMAT_TOKEN = "DATA_FORMAT";
 const std::string BOVCollection::VARIABLE_TOKEN = "VARIABLE";
-const std::string BOVCollection::ENDIAN_TOKEN = "DATA_ENDIAN";
-const std::string BOVCollection::CENTERING_TOKEN = "CENTERING";
 const std::string BOVCollection::ORIGIN_TOKEN = "BRICK_ORIGIN";
 const std::string BOVCollection::BRICK_SIZE_TOKEN = "BRICK_SIZE";
 const std::string BOVCollection::OFFSET_TOKEN = "BYTE_OFFSET";
+
+// These tokens are parsed, but not used in ReadRegion() logic
+const std::string BOVCollection::ENDIAN_TOKEN = "DATA_ENDIAN";
+const std::string BOVCollection::CENTERING_TOKEN = "CENTERING";
 const std::string BOVCollection::DIVIDE_BRICK_TOKEN = "DIVIDE_BRICK";
 const std::string BOVCollection::DATA_BRICKLETS_TOKEN = "DATA_BRICKLETS";
 const std::string BOVCollection::DATA_COMPONENTS_TOKEN = "DATA_COMPONENTS";
 
 const std::array<double, 3> BOVCollection::_defaultOrigin = {0., 0., 0.};
 const std::array<double, 3> BOVCollection::_defaultBrickSize = {1., 1., 1.};
-const std::array<size_t, 3> BOVCollection::_defaultBricklets = {0, 0, 0};
 const std::array<size_t, 3> BOVCollection::_defaultGridSize = {0, 0, 0};
 const DC::XType             BOVCollection::_defaultFormat = DC::XType::INVALID;
 const std::string           BOVCollection::_defaultFile = "";
-const std::string           BOVCollection::_defaultEndian = "LITTLE";
 const std::string           BOVCollection::_defaultVar = "brickVar";
-const std::string           BOVCollection::_defaultCentering = "ZONAL";
 const double                BOVCollection::_defaultTime = 0.;
 const size_t                BOVCollection::_defaultByteOffset = 0;
-const size_t                BOVCollection::_defaultComponents = 1;
+
+// Currently unused in ReadRegion() logic
+const std::string           BOVCollection::_defaultEndian = "LITTLE";
+const std::string           BOVCollection::_defaultCentering = "ZONAL";
 const bool                  BOVCollection::_defaultDivBrick = false;
+const std::array<size_t, 3> BOVCollection::_defaultBricklets = {0, 0, 0};
+const size_t                BOVCollection::_defaultComponents = 1;
 
 const std::string BOVCollection::_xDim = "x";
 const std::string BOVCollection::_yDim = "y";
@@ -62,6 +66,13 @@ BOVCollection::BOVCollection()
   _divideBrick(_defaultDivBrick), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false), _formatAssigned(false),
   _brickOriginAssigned(false), _brickSizeAssigned(false), _byteOffsetAssigned(false), _timeDimension(_timeDim)
 {
+    // Note: the following variables are unused in the ReadRegion() logic
+    // _defaultEndian
+    // _defaultCentering
+    // _defaultDivBrick
+    // _defaultBricklets
+    // _defaultComponents
+
     _dataFiles.clear();
     _times.clear();
     _gridSize = _defaultGridSize;
@@ -516,9 +527,13 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
             size_t yOffset = _gridSize[0] * j;
             size_t offset = formatSize * (xOffset + yOffset + zOffset) + _byteOffset;
 
-            fseek(fp, offset, SEEK_SET);
-            size_t rc = fread(readBuffer, formatSize, count, fp);
+            size_t rc = fseek(fp, offset, SEEK_SET);
+            if (rc != 0) {
+                MyBase::SetErrMsg("Unable to seek on file: %M");
+                return -1;
+            }
 
+            rc = fread(readBuffer, formatSize, count, fp);
             if (rc != count) {
                 if (ferror(fp) != 0) {
                     MyBase::SetErrMsg("Error reading input file: %M");
