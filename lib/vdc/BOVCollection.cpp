@@ -85,9 +85,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 
         // Save the path to the BOV header so we can add it
         // to data files given with a relative path
-        _currentFilePath = paths[i];
-        size_t found = _currentFilePath.find_last_of("/\\");
-        _currentFilePath = _currentFilePath.substr(0, found);
+        _currentFilePath = Wasp::FileUtils::Dirname(paths[i]);
 
         header.open(paths[i]);
         if (header.is_open()) {
@@ -251,7 +249,10 @@ int BOVCollection::_validateParsedValues()
     }
 
     // If _dataFile is not an absolute path, prepend with the BOV header's path
-    if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) { _dataFile = _currentFilePath + "//" + _dataFile; }
+    if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) { 
+        auto paths = {_currentFilePath, _dataFile};
+        _dataFile = Wasp::FileUtils::JoinPaths(paths); 
+    }
 
     // Validate whether we can open the data file
     FILE *fp = fopen(_dataFile.c_str(), "rb");
