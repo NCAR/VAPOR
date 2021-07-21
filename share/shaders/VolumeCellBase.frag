@@ -664,7 +664,7 @@ void main(void)
             if (i++ > 8) {
                 break;
             }
-            if (t1-t0 <= EPSILON) {
+            if (abs(t1-t0) <= EPSILON) {
                 float unitDistanceScaled = unitDistance / length(dir * scales);
                 float step = unitDistanceScaled/7.f/samplingRateMultiplier * GetSamplingNoise();
                 t1 += step;
