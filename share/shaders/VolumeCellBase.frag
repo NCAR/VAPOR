@@ -18,6 +18,42 @@ uniform sampler2DArray boxMins;
 uniform sampler2DArray boxMaxs;
 uniform isampler2D levelDims;
 
+// Temporary workaround
+ivec3 skipCellWhenSearchingForInit = ivec3(-1);
+
+#define DEBUG 0
+#define DEBUG_SHOW_CELL_INDEX 0
+#define DEBUG_SHOW_GRID 0
+#define DEBUG_SHOW_NORMALS 0
+
+#if DEBUG
+vec3 dbg = vec3(-1);
+vec3 RED   = vec3(1, 0, 0);
+vec3 GREEN = vec3(0, 1, 0);
+vec3 BLUE  = vec3(0, 0, 1);
+vec3 BLACK = vec3(0, 0, 0);
+vec3 WHITE = vec3(1, 1, 1);
+vec3 PURPLE= vec3(1, 0, 1);
+
+int dbgPriority = 0;
+void SD(vec3 color, int priority)
+{
+    if (priority >= dbgPriority) {
+        dbg = color;
+        dbgPriority = priority;
+    }
+}
+#endif 
+
+void DEBUG_SHOW()
+{
+#if DEBUG
+    if (dbg != vec3(-1))
+        fragColor = vec4(dbg, 1);
+#endif 
+}
+
+
 #define FI_LEFT  0
 #define FI_RIGHT 1
 #define FI_UP    2
@@ -391,6 +427,24 @@ bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
     return dot(d, n) < 0;
 }
 
+vec3 GetCellNonHexahedralFaceNormalAtIntersection(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face)
+{
+    float t;
+    vec3 v0, v1, v2, v3, uvw;
+    GetFaceVertices(cellIndex, face, v0, v1, v2, v3);
+    
+    if (TRI_INSTERSECT_ROUTINE(o, d, 0, v0, v1, v2, t, uvw))
+        return GetTriangleNormal(v0, v1, v2);
+    else
+        return GetTriangleNormal(v0, v2, v3);
+}
+
+bool IsRayEnteringNonHexahedralCell(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face)
+{
+    vec3 n = GetCellNonHexahedralFaceNormalAtIntersection(o, d, cellIndex, face);
+    return dot(d, n) < 0;
+}
+
 void GetSideCellBBox(ivec3 cellIndex, int sideID, int fastDim, int slowDim, OUT vec3 bmin, OUT vec3 bmax)
 {
     ivec3 index = ivec3(cellIndex[fastDim], cellIndex[slowDim], sideID);
@@ -432,17 +486,65 @@ ivec2 GetBBoxArrayDimensions(int sideID, int level)
     return texelFetch(levelDims, ivec2(sideID, level), 0).rg;
 }
 
+#if DEBUG
+float DistToEdge(vec3 p, vec3 v0, vec3 v1)
+{
+    vec3 m = normalize(v1-v0);
+    float t0 = dot(m,p-v0)/dot(m,m);
+    float de = length(p - (v0 + t0*m));
+
+    float l = length(v1-v0);
+    de /= l;
+
+    return abs(de);
+    // return length(p - v0);
+}
+
+float DistToCellEdge(vec3 o, vec3 d, float t, ivec3 cell, ivec3 face)
+{
+    vec3 v0, v1, v2, v3;
+    GetFaceVertices(cell, face, v0, v1, v2, v3);
+    vec3 p = o + d*t;
+    
+    float de = FLT_MAX;
+    de = min(de, DistToEdge(p, v0, v1));
+    de = min(de, DistToEdge(p, v1, v2));
+    de = min(de, DistToEdge(p, v2, v3));
+    de = min(de, DistToEdge(p, v3, v0));
+    // de = min(de, DistToEdge(p, v0, v2));
+
+    return de;
+}
+#endif
+
 bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 index, ivec3 side, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
+    if (index == skipCellWhenSearchingForInit)
+        return false;
     float tFace;
     vec3 null;
     if (IntersectRayCellFace(origin, dir, t0, index, side, tFace, null)) {
-        if (IsRayEnteringCell(dir, index, side)) {
+        if (IsRayEnteringNonHexahedralCell(origin, dir, index, side)) {
             // Only update initial cell values if this is the closest cell
-            if (tFace < t1) {
+            if (tFace > t0 && tFace < t1) {
                 cellIndex = index;
                 entranceFace = side;
                 t1 = tFace;
+
+#if DEBUG
+#if DEBUG_SHOW_NORMALS
+                vec3 n = GetCellNonHexahedralFaceNormalAtIntersection(origin, dir, index, side);
+                n = normalize(n/scales);
+                SD((n+vec3(1))/2.f, 0);
+#endif
+#if DEBUG_SHOW_CELL_INDEX
+                SD(index/vec3(cellDims), 0);
+#endif
+#if DEBUG_SHOW_GRID
+                float de = DistToCellEdge(origin, dir, t1, index, side);
+                if (de < 0.03) SD(WHITE, 0);
+#endif
+#endif
             }
             return true;
         }
@@ -551,6 +653,7 @@ void main(void)
         int i = 0;
         do {
             intersections = FindInitialCell(eye, dir, t0, initialCell, entranceFace, t1);
+            skipCellWhenSearchingForInit = initialCell;
             
             if (intersections > 0) {
                 vec4 color = Traverse(eye, dir, rayLightingNormal, tMin, tMax, t1, initialCell, entranceFace, t1);
@@ -558,8 +661,15 @@ void main(void)
             }
             
             // Failsafe to prevent infinite recursion due to float precision error
-            if (i++ > 8 || t1-t0 <= EPSILON)
+            if (i++ > 8) {
                 break;
+            }
+            if (t1-t0 <= EPSILON) {
+                float unitDistanceScaled = unitDistance / length(dir * scales);
+                float step = unitDistanceScaled/7.f/samplingRateMultiplier * GetSamplingNoise();
+                t1 = t0 + step;
+            }
+
 
 			if (accum.a > ALPHA_BREAK)
 				break;
@@ -567,18 +677,22 @@ void main(void)
             t0 = t1;
             
         } while (intersections > 1);
-        
+
         if (accum.a < ALPHA_DISCARD) {
             // discard; // There is a bug on in the 2015 15" AMD MBP laptops where this does not work with larger(?) datasets
             //fragColor = vec4(0);
             gl_FragDepth = GetDepthBuffer();
+            DEBUG_SHOW();
             return;
         }
         fragColor = accum;
+        DEBUG_SHOW();
         return;
     }
     // discard;
     
     gl_FragDepth = GetDepthBuffer();
     fragColor = vec4(0.f);
+
+    DEBUG_SHOW();
 }
