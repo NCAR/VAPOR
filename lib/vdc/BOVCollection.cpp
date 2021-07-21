@@ -11,14 +11,7 @@
 #include "vapor/utils.h"
 #include "vapor/FileUtils.h"
 #include <stdio.h>
-
-#ifdef WIN32
-    #include <Windows.h>
-    #define _USE_MATH_DEFINES
-    #pragma warning(disable : 4251 4100)
-#else
-    #include <climits>
-#endif
+#include <climits>
 #include <cmath>
 
 #include <vapor/BOVCollection.h>
