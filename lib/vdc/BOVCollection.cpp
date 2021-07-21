@@ -107,18 +107,18 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             if (_dataFormat == _defaultFormat) { return _missingValueError(FORMAT_TOKEN); }
             if (_gridSize == _defaultGridSize) { return _missingValueError(GRID_SIZE_TOKEN); }
 
-            std::ifstream infile(_dataFile);
-            if (infile.bad()) {
-                SetErrMsg(("Failed to open BOV file " + _dataFile).c_str());
-                return -1;
-            }
-
             _populateDataFileMap();
         } else {
             SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
             return -1;
         }
         header.close();
+
+        // If _dataFile is not an absolute path, prepend with the BOV header's path
+        if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) {
+            auto paths = {_currentFilePath, _dataFile};
+            _dataFile = Wasp::FileUtils::JoinPaths(paths);
+        }
     }
 
     return 0;
@@ -248,30 +248,9 @@ int BOVCollection::_validateParsedValues()
         _byteOffsetAssigned = true;
     }
 
-    // If _dataFile is not an absolute path, prepend with the BOV header's path
-    if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) { 
-        auto paths = {_currentFilePath, _dataFile};
-        _dataFile = Wasp::FileUtils::JoinPaths(paths); 
-    }
-
     // Validate whether we can open the data file
     FILE *fp = fopen(_dataFile.c_str(), "rb");
     if (fp == nullptr) return _invalidFileError();
-
-    // Validate the data file's size
-    int    formatSize = _sizeOfFormat(_dataFormat);
-    size_t count = _gridSize[0] * _gridSize[1] * _gridSize[2];
-    auto   readBuffer = std::unique_ptr<unsigned char[]>(new unsigned char[count * formatSize]);
-    size_t numElements = fread(readBuffer.get(), formatSize, count, fp);
-    if (numElements != count) {
-        fclose(fp);
-        return _invalidFileSizeError(numElements);
-    }
-    if (ferror(fp)) {
-        fclose(fp);
-        return _invalidFileError();
-    }
-
     fclose(fp);
 
     return 0;
@@ -368,8 +347,12 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
 
     if (line.length() == 0) return (int)parseCodes::NOT_FOUND;
 
-    while (line[line.length() - 1] == ' ')    // If last char is a space, pop it
-        line.pop_back();
+    while (line.length() > 0) {
+        if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+            line.pop_back();
+        else
+            break;
+    }
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
@@ -403,8 +386,12 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 
     if (line.length() == 0) return (int)parseCodes::NOT_FOUND;
 
-    while (line[line.length() - 1] == ' ')    // If last char is a space, pop it
-        line.pop_back();
+    while (line.length() > 0) {
+        if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+            line.pop_back();
+        else
+            break;
+    }
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token
@@ -440,8 +427,12 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 
     if (line.length() == 0) return (int)parseCodes::NOT_FOUND;
 
-    while (line[line.length() - 1] == ' ')    // If last char is a space, pop it
-        line.pop_back();
+    while (line.length() > 0) {
+        if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+            line.pop_back();
+        else
+            break;
+    }
 
     size_t pos = line.find(token);
     if (pos != std::string::npos) {    // We found the token

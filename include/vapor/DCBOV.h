@@ -29,15 +29,15 @@ class BOVCollection;
 //! - DATA_FORMAT
 //!
 //! The following BOV tags are optional:
-//! - BRICK_ORIGIN
-//! - BRICK_SIZE
-//! - TIME
-//! - VARIABLE
+//! - BRICK_ORIGIN (default: 0., 0., 0.)
+//! - BRICK_SIZE   (default: 1., 1., 1.)
+//! - TIME         (default: 0.)
+//! - VARIABLE     (default: "brickVar")
+//! - BYTE_OFFSET  (default: 0)
 //!
 //! The following BOV tags are currently unsupported:
 //! - DATA_ENDIAN
 //! - CENTERING
-//! - BYTE_OFFSET
 //! - DIVIDE_BRICK
 //! - DATA_BRICKLETS
 //! - DATA_COMPONENTS
