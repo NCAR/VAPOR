@@ -24,23 +24,23 @@ class BOVCollection;
 // # DATA_FILE points to a binary data file.  It can be a full file path, or a path relative to the BOV header.
 // DATA_FILE: bovA1.bin
 //
-// # The data size corresponds to NX,NY,NZ in the above example code.
+// # The data size corresponds to NX,NY,NZ in the above example code.  It must contain three values
 // DATA_SIZE: 10 10 10
 //
 // # Allowable values for DATA_FORMAT are: INT,FLOAT,DOUBLE
 // DATA_FORMAT: FLOAT
 //
-// # VARIABLE is a string that specifies the variable being read in DATA_FILE
+// # VARIABLE is a string that specifies the variable being read in DATA_FILE.  Must be alphanumeric (abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890)
 // VARIABLE: myVariable
 //
-// # BRICK_ORIGIN lets you specify a new coordinate system origin for # the mesh that will be created to suit your data.
+// # BRICK_ORIGIN lets you specify a new coordinate system origin for # the mesh that will be created to suit your data.  It must contain three values.
 // BRICK_ORIGIN: 0. 0. 0.
 //
-// # BRICK_SIZE lets you specify the size of the brick.
+// # BRICK_SIZE lets you specify the size of the brick on X, Y, and Z.  It must contain three values.
 // BRICK_SIZE: 10. 20. 5.
 //
 // # BYTE_OFFSET is optional and lets you specify some number of
-// # bytes to skip at the front of the file. This can be useful for # skipping the 4-byte header that Fortran tends to write to files. # If your file does no
+// # bytes to skip at the front of the file. This can be useful for # skipping the 4-byte header that Fortran tends to write to files. # If your file does not have a header then DO NOT USE BYTE_OFFSET.
 // BYTE_OFFSET: 4
 
 //!
@@ -71,10 +71,12 @@ class BOVCollection;
 //! - DATA_COMPONENTS
 //!
 //! If duplicate key/value pairs exist in a BOV header, the value closest to the bottom of the file will be used.
+//! If duplicate values exist for whatever reason, all entries must be valid (except for DATA_FILE, which gets validated after parsing)
 //! Scientific notation is supported for floating point values like BRICK_ORIGIN and BRICK_SIZE.
 //! Scientific notation is not supported for integer values like DATA_SIZE.
 //! Wild card characters are not currently supported in the DATA_FILE token.
 //! Each .bov file can only refer to a single data file.
+//! VARIABLE must be alphanumeric (abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890)
 //!
 //! \author Scott Pearse
 //! \date    May, 2021

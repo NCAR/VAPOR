@@ -62,8 +62,8 @@ const std::string BOVCollection::_floatFormatString = "FLOAT";
 const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
 BOVCollection::BOVCollection()
-: _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _dataEndian(_defaultEndian), _centering(_defaultCentering), _byteOffset(_defaultByteOffset),
-  _divideBrick(_defaultDivBrick), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false), _formatAssigned(false),
+: _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _byteOffset(_defaultByteOffset), _divideBrick(_defaultDivBrick), _dataEndian(_defaultEndian),
+  _centering(_defaultCentering), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false), _formatAssigned(false),
   _brickOriginAssigned(false), _brickSizeAssigned(false), _byteOffsetAssigned(false), _timeDimension(_timeDim)
 {
     // Note: the following variables are unused in the ReadRegion() logic
@@ -106,6 +106,12 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
                 return -1;
             }
 
+            // If _dataFile is not an absolute path, prepend with the BOV header's path
+            if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) {
+                auto paths = {_currentFilePath, _dataFile};
+                _dataFile = Wasp::FileUtils::JoinPaths(paths);
+            }
+
             rc = _validateParsedValues();
             if (rc < 0) {
                 SetErrMsg("Validating BOV tokens failed");
@@ -124,12 +130,6 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             return -1;
         }
         header.close();
-
-        // If _dataFile is not an absolute path, prepend with the BOV header's path
-        if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) {
-            auto paths = {_currentFilePath, _dataFile};
-            _dataFile = Wasp::FileUtils::JoinPaths(paths);
-        }
     }
 
     return 0;
@@ -264,6 +264,8 @@ int BOVCollection::_validateParsedValues()
     if (fp == nullptr) return _invalidFileError();
     fclose(fp);
 
+    if (_variable.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890") != std::string::npos) return _invalidVarNameError();
+
     return 0;
 }
 
@@ -276,6 +278,13 @@ void BOVCollection::_populateDataFileMap()
 
     _dataFileMap[_variable][_time] = _dataFile;
 }
+
+int BOVCollection::_invalidVarNameError() const
+{
+    SetErrMsg("Invalid variable name.  (Must be alphanumeric)");
+    return -1;
+}
+
 
 int BOVCollection::_invalidFileSizeError(size_t numElements) const
 {
@@ -375,8 +384,11 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
             value = DC::FLOAT;
         else if (format == _doubleFormatString)
             value = DC::DOUBLE;
-        else
+        else {
             value = DC::INVALID;
+            _invalidFormatError(token);
+            return (int)parseCodes::PARSE_ERROR;
+        }
 
         if (verbose) { std::cout << std::setw(20) << token << " " << value << std::endl; }
         return (int)parseCodes::FOUND;
