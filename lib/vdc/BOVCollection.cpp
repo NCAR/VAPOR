@@ -540,8 +540,8 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
                 return -1;
             }
 
-            rc = fread(readBuffer, formatSize, count, fp);
-            if (rc != count) {
+            size_t fread_rc = fread(readBuffer, formatSize, count, fp);
+            if (fread_rc != count) {
                 if (ferror(fp) != 0) {
                     MyBase::SetErrMsg("Error reading input file: %M");
                 } else {
