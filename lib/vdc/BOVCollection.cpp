@@ -259,7 +259,7 @@ int BOVCollection::_validateParsedValues()
         _byteOffsetAssigned = true;
     }
 
-    if (_variable.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_-") != std::string::npos) return _invalidVarNameError();
+    if (_variable.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-") != std::string::npos) return _invalidVarNameError();
 
     return 0;
 }

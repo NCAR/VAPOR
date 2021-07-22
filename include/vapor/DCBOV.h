@@ -30,7 +30,7 @@ class BOVCollection;
 // # Allowable values for DATA_FORMAT are: INT,FLOAT,DOUBLE
 // DATA_FORMAT: FLOAT
 //
-// # VARIABLE is a string that specifies the variable being read in DATA_FILE.  Must be alphanumeric (abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_-)
+// # VARIABLE is a string that specifies the variable being read in DATA_FILE.  Must be alphanumeric (abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-)
 // VARIABLE: myVariable
 //
 // # BRICK_ORIGIN lets you specify a new coordinate system origin for # the mesh that will be created to suit your data.  It must contain three values.
@@ -76,7 +76,7 @@ class BOVCollection;
 //! Scientific notation is not supported for integer values like DATA_SIZE.
 //! Wild card characters are not currently supported in the DATA_FILE token.
 //! Each .bov file can only refer to a single data file.
-//! VARIABLE must be alphanumeric (abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_-)
+//! VARIABLE must be alphanumeric (abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-)
 //!
 //! \author Scott Pearse
 //! \date    May, 2021
