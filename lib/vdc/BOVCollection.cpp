@@ -108,8 +108,8 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 
             // If _dataFile is not an absolute path, prepend with the BOV header's path
             if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) {
-                auto paths = {_currentFilePath, _dataFile};
-                _dataFile = Wasp::FileUtils::JoinPaths(paths);
+                auto dirAndPath = {_currentFilePath, _dataFile};
+                _dataFile = Wasp::FileUtils::JoinPaths(dirAndPath);
             }
 
             rc = _validateParsedValues();
