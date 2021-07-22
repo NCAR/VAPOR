@@ -1,3 +1,4 @@
+#include <memory>
 #include <vector>
 #include <algorithm>
 #include <map>
@@ -7,12 +8,10 @@
 #include <fstream>
 #include <type_traits>
 #include "vapor/VAssert.h"
-#include <stdio.h>
-
-#ifdef _WINDOWS
-    #define _USE_MATH_DEFINES
-    #pragma warning(disable : 4251 4100)
-#endif
+#include "vapor/utils.h"
+#include "vapor/FileUtils.h"
+#include <cstdio>
+#include <climits>
 #include <cmath>
 
 #include <vapor/BOVCollection.h>
@@ -24,28 +23,32 @@ const std::string BOVCollection::DATA_FILE_TOKEN = "DATA_FILE";
 const std::string BOVCollection::GRID_SIZE_TOKEN = "DATA_SIZE";
 const std::string BOVCollection::FORMAT_TOKEN = "DATA_FORMAT";
 const std::string BOVCollection::VARIABLE_TOKEN = "VARIABLE";
-const std::string BOVCollection::ENDIAN_TOKEN = "DATA_ENDIAN";
-const std::string BOVCollection::CENTERING_TOKEN = "CENTERING";
 const std::string BOVCollection::ORIGIN_TOKEN = "BRICK_ORIGIN";
 const std::string BOVCollection::BRICK_SIZE_TOKEN = "BRICK_SIZE";
 const std::string BOVCollection::OFFSET_TOKEN = "BYTE_OFFSET";
+
+// These tokens are parsed, but not used in ReadRegion() logic
+const std::string BOVCollection::ENDIAN_TOKEN = "DATA_ENDIAN";
+const std::string BOVCollection::CENTERING_TOKEN = "CENTERING";
 const std::string BOVCollection::DIVIDE_BRICK_TOKEN = "DIVIDE_BRICK";
 const std::string BOVCollection::DATA_BRICKLETS_TOKEN = "DATA_BRICKLETS";
 const std::string BOVCollection::DATA_COMPONENTS_TOKEN = "DATA_COMPONENTS";
 
 const std::array<double, 3> BOVCollection::_defaultOrigin = {0., 0., 0.};
 const std::array<double, 3> BOVCollection::_defaultBrickSize = {1., 1., 1.};
-const std::array<size_t, 3> BOVCollection::_defaultBricklets = {0, 0, 0};
 const std::array<size_t, 3> BOVCollection::_defaultGridSize = {0, 0, 0};
 const DC::XType             BOVCollection::_defaultFormat = DC::XType::INVALID;
 const std::string           BOVCollection::_defaultFile = "";
 const std::string           BOVCollection::_defaultVar = "brickVar";
-const std::string           BOVCollection::_defaultEndian = "LITTLE";
-const std::string           BOVCollection::_defaultCentering = "ZONAL";
 const double                BOVCollection::_defaultTime = 0.;
 const size_t                BOVCollection::_defaultByteOffset = 0;
-const size_t                BOVCollection::_defaultComponents = 1;
+
+// Currently unused in ReadRegion() logic
+const std::string           BOVCollection::_defaultEndian = "LITTLE";
+const std::string           BOVCollection::_defaultCentering = "ZONAL";
 const bool                  BOVCollection::_defaultDivBrick = false;
+const std::array<size_t, 3> BOVCollection::_defaultBricklets = {0, 0, 0};
+const size_t                BOVCollection::_defaultComponents = 1;
 
 const std::string BOVCollection::_xDim = "x";
 const std::string BOVCollection::_yDim = "y";
@@ -59,10 +62,17 @@ const std::string BOVCollection::_floatFormatString = "FLOAT";
 const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
 BOVCollection::BOVCollection()
-: _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _dataEndian(_defaultEndian), _centering(_defaultCentering), _byteOffset(_defaultByteOffset),
-  _divideBrick(_defaultDivBrick), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpDataEndian(_defaultEndian), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false),
-  _formatAssigned(false), _brickOriginAssigned(false), _brickSizeAssigned(false), _dataEndianAssigned(false), _byteOffsetAssigned(false), _timeDimension(_timeDim)
+: _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _byteOffset(_defaultByteOffset), _divideBrick(_defaultDivBrick), _dataEndian(_defaultEndian),
+  _centering(_defaultCentering), _dataComponents(_defaultComponents), _tmpDataFormat(_defaultFormat), _tmpByteOffset(_defaultByteOffset), _gridSizeAssigned(false), _formatAssigned(false),
+  _brickOriginAssigned(false), _brickSizeAssigned(false), _byteOffsetAssigned(false), _timeDimension(_timeDim)
 {
+    // Note: the following variables are unused in the ReadRegion() logic
+    // _defaultEndian
+    // _defaultCentering
+    // _defaultDivBrick
+    // _defaultBricklets
+    // _defaultComponents
+
     _dataFiles.clear();
     _times.clear();
     _gridSize = _defaultGridSize;
@@ -83,6 +93,11 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
     std::ifstream header;
     for (int i = 0; i < paths.size(); i++) {
         _dataFile = _defaultFile;
+
+        // Save the path to the BOV header so we can add it
+        // to data files given with a relative path
+        _currentFilePath = Wasp::FileUtils::Dirname(paths[i]);
+
         header.open(paths[i]);
         if (header.is_open()) {
             rc = _parseHeader(header);
@@ -91,9 +106,15 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
                 return -1;
             }
 
+            // If _dataFile is not an absolute path, prepend with the BOV header's path
+            if (!Wasp::FileUtils::IsPathAbsolute(_dataFile)) {
+                auto dirAndPath = {_currentFilePath, _dataFile};
+                _dataFile = Wasp::FileUtils::JoinPaths(dirAndPath);
+            }
+
             rc = _validateParsedValues();
             if (rc < 0) {
-                SetErrMsg("Inconsistency found in BOV token.");
+                SetErrMsg("Validating BOV tokens failed");
                 return -1;
             }
 
@@ -102,12 +123,6 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             if (_dataFile == _defaultFile) { return _missingValueError(DATA_FILE_TOKEN); }
             if (_dataFormat == _defaultFormat) { return _missingValueError(FORMAT_TOKEN); }
             if (_gridSize == _defaultGridSize) { return _missingValueError(GRID_SIZE_TOKEN); }
-
-            std::ifstream infile(_dataFile);
-            if (infile.bad()) {
-                SetErrMsg(("Failed to open BOV file " + _dataFile).c_str());
-                return -1;
-            }
 
             _populateDataFileMap();
         } else {
@@ -132,45 +147,64 @@ int BOVCollection::_parseHeader(std::ifstream &header)
         rc = _findToken(DATA_FILE_TOKEN, line, dataFile);
         if (rc == (int)parseCodes::PARSE_ERROR)
             return _failureToReadError(DATA_FILE_TOKEN);
-        else if (rc == (int)parseCodes::FOUND)
+        else if (rc == (int)parseCodes::FOUND) {
             _dataFile = dataFile;
+            continue;
+        }
 
         double time;
         rc = _findToken(TIME_TOKEN, line, time);
         if (rc == (int)parseCodes::PARSE_ERROR)
             return _failureToReadError(TIME_TOKEN);
-        else if (rc == (int)parseCodes::FOUND)
+        else if (rc == (int)parseCodes::FOUND) {
             _time = time;
+            continue;
+        }
 
         std::string variable;
         rc = _findToken(VARIABLE_TOKEN, line, variable);
         if (rc == (int)parseCodes::PARSE_ERROR)
             return _invalidValueError(VARIABLE_TOKEN);
-        else if (rc == (int)parseCodes::FOUND)
+        else if (rc == (int)parseCodes::FOUND) {
             _variable = variable;
+            continue;
+        }
 
         rc = _findToken(GRID_SIZE_TOKEN, line, _tmpGridSize);
-        if (rc == (int)parseCodes::PARSE_ERROR) return _failureToReadError(GRID_SIZE_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR)
+            return _failureToReadError(GRID_SIZE_TOKEN);
+        else if (rc == (int)parseCodes::FOUND)
+            continue;
 
         rc = _findToken(FORMAT_TOKEN, line, _tmpDataFormat);
-        if (rc == (int)parseCodes::PARSE_ERROR) return _failureToReadError(FORMAT_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR)
+            return _failureToReadError(FORMAT_TOKEN);
+        else if (rc == (int)parseCodes::FOUND)
+            continue;
 
         // Optional tokens.  If their values are invalid, SetErrMsg, and return -1.
         //
         rc = _findToken(ORIGIN_TOKEN, line, _tmpBrickOrigin);
-        if (rc == (int)parseCodes::PARSE_ERROR) return _invalidValueError(ORIGIN_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR)
+            return _invalidValueError(ORIGIN_TOKEN);
+        else if (rc == (int)parseCodes::FOUND)
+            continue;
 
         rc = _findToken(BRICK_SIZE_TOKEN, line, _tmpBrickSize);
-        if (rc == (int)parseCodes::PARSE_ERROR) return _invalidValueError(BRICK_SIZE_TOKEN);
-
-        rc = _findToken(ENDIAN_TOKEN, line, _tmpDataEndian);
-        if (rc == (int)parseCodes::PARSE_ERROR) return _invalidValueError(ENDIAN_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR)
+            return _invalidValueError(BRICK_SIZE_TOKEN);
+        else if (rc == (int)parseCodes::FOUND)
+            continue;
 
         rc = _findToken(OFFSET_TOKEN, line, _tmpByteOffset);
-        if (rc == (int)parseCodes::PARSE_ERROR) return _invalidValueError(OFFSET_TOKEN);
+        if (rc == (int)parseCodes::PARSE_ERROR)
+            return _invalidValueError(OFFSET_TOKEN);
+        else if (rc == (int)parseCodes::FOUND)
+            continue;
 
         // All other variables are currently unused.
         //
+        _findToken(ENDIAN_TOKEN, line, _dataEndian);
         _findToken(CENTERING_TOKEN, line, _centering);
         _findToken(DIVIDE_BRICK_TOKEN, line, _divideBrick);
         _findToken(DATA_BRICKLETS_TOKEN, line, _dataBricklets);
@@ -217,14 +251,6 @@ int BOVCollection::_validateParsedValues()
         _brickSizeAssigned = true;
     }
 
-    // Validate endian type
-    if (_tmpDataEndian != _dataEndian && _dataEndianAssigned == true)
-        return _inconsistentValueError(ENDIAN_TOKEN);
-    else {
-        _dataEndian = _tmpDataEndian;
-        _dataEndianAssigned = true;
-    }
-
     // Validate byte offest
     if (_tmpByteOffset != _byteOffset && _byteOffsetAssigned == true)
         return _inconsistentValueError(OFFSET_TOKEN);
@@ -232,6 +258,9 @@ int BOVCollection::_validateParsedValues()
         _byteOffset = _tmpByteOffset;
         _byteOffsetAssigned = true;
     }
+
+    if (_variable.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-") != std::string::npos) return _invalidVarNameError();
+
     return 0;
 }
 
@@ -245,38 +274,60 @@ void BOVCollection::_populateDataFileMap()
     _dataFileMap[_variable][_time] = _dataFile;
 }
 
-int BOVCollection::_missingValueError(std::string token) const
+int BOVCollection::_invalidVarNameError() const
+{
+    SetErrMsg("Invalid variable name.  (Must be alphanumeric)");
+    return -1;
+}
+
+
+int BOVCollection::_invalidFileSizeError(size_t numElements) const
+{
+    SetErrMsg(("Data file " + _dataFile + ", which has " + to_string(numElements)
+               + " values, does not match the size of the the data and offset "
+                 "specified in BOV header.")
+                  .c_str());
+    return -1;
+}
+
+int BOVCollection::_invalidFileError() const
+{
+    SetErrMsg(("Reading " + _dataFile + " failed with error: " + strerror(errno)).c_str());
+    return -1;
+}
+
+int BOVCollection::_missingValueError(const std::string &token) const
 {
     SetErrMsg(("BOV file must contain token: " + token).c_str());
     return -1;
 }
 
-int BOVCollection::_invalidDimensionError(std::string token) const
+int BOVCollection::_invalidDimensionError(const std::string &token) const
 {
     SetErrMsg((token + " must have all dimensions > 1").c_str());
     return -1;
 }
 
-int BOVCollection::_invalidFormatError(std::string token) const
+int BOVCollection::_invalidFormatError(const std::string &token) const
 {
     std::string message = token + " must be either INT, FLOAT, or DOUBLE.";
     SetErrMsg(message.c_str());
     return -1;
 }
 
-int BOVCollection::_failureToReadError(std::string token) const
+int BOVCollection::_failureToReadError(const std::string &token) const
 {
-    SetErrMsg(("Failure reading BOV time token: " + token).c_str());
+    SetErrMsg(("Failure reading BOV token: " + token).c_str());
     return -1;
 }
 
-int BOVCollection::_inconsistentValueError(std::string token) const
+int BOVCollection::_inconsistentValueError(const std::string &token) const
 {
     SetErrMsg((token + " must be consistent in all BOV files").c_str());
     return -1;
 }
 
-int BOVCollection::_invalidValueError(std::string token) const
+int BOVCollection::_invalidValueError(const std::string &token) const
 {
     SetErrMsg(("Invalid value for token: " + token).c_str());
     return -1;
@@ -298,8 +349,6 @@ std::array<double, 3> BOVCollection::GetBrickOrigin() const { return _brickOrigi
 
 std::array<double, 3> BOVCollection::GetBrickSize() const { return _brickSize; }
 
-std::string BOVCollection::GetDataEndian() const { return _dataEndian; }
-
 // Template specialization for reading data of type DC::XType
 template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, std::string &line, DC::XType &value, bool verbose)
 {
@@ -307,10 +356,17 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
     for (size_t i = 0; i < line.length(); i++) {
         if (line[i] == '#') {
             line.erase(line.begin() + i, line.end());
-            if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
-                line.pop_back();
             break;
         }
+    }
+
+    if (line.length() == 0) return (int)parseCodes::NOT_FOUND;
+
+    while (line.length() > 0) {
+        if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+            line.pop_back();
+        else
+            break;
     }
 
     size_t pos = line.find(token);
@@ -323,8 +379,11 @@ template<> int BOVCollection::_findToken<DC::XType>(const std::string &token, st
             value = DC::FLOAT;
         else if (format == _doubleFormatString)
             value = DC::DOUBLE;
-        else
+        else {
             value = DC::INVALID;
+            _invalidFormatError(token);
+            return (int)parseCodes::PARSE_ERROR;
+        }
 
         if (verbose) { std::cout << std::setw(20) << token << " " << value << std::endl; }
         return (int)parseCodes::FOUND;
@@ -339,10 +398,17 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
     for (size_t i = 0; i < line.length(); i++) {
         if (line[i] == '#') {
             line.erase(line.begin() + i, line.end());
-            if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
-                line.pop_back();
             break;
         }
+    }
+
+    if (line.length() == 0) return (int)parseCodes::NOT_FOUND;
+
+    while (line.length() > 0) {
+        if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+            line.pop_back();
+        else
+            break;
     }
 
     size_t pos = line.find(token);
@@ -357,17 +423,9 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 
         if (verbose) { std::cout << std::setw(20) << token << " " << value << std::endl; }
 
-        if (ss.fail()) {
-            std::string message = "Invalid value for " + token + " in BOV header file.";
-            SetErrMsg(message.c_str());
-            return (int)parseCodes::PARSE_ERROR;
-        }
-
-        if (ss.eof() == 0) {
-            std::string message = "The keyword " + token + " should only contain one value.";
-            SetErrMsg(message.c_str());
-            return (int)parseCodes::PARSE_ERROR;
-        }
+        if (ss.fail()) { return (int)parseCodes::PARSE_ERROR; }
+        // If there is more than one value, throw error
+        if (ss.eof() == false) return (int)parseCodes::PARSE_ERROR;
 
         return (int)parseCodes::FOUND;
     }
@@ -381,10 +439,17 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
     for (size_t i = 0; i < line.length(); i++) {
         if (line[i] == '#') {
             line.erase(line.begin() + i, line.end());
-            if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
-                line.pop_back();
             break;
         }
+    }
+
+    if (line.length() == 0) return (int)parseCodes::NOT_FOUND;
+
+    while (line.length() > 0) {
+        if (line[line.length() - 1] == ' ')    // If last char is a space, pop it
+            line.pop_back();
+        else
+            break;
     }
 
     size_t pos = line.find(token);
@@ -395,14 +460,13 @@ template<typename T> int BOVCollection::_findToken(const std::string &token, std
 
         for (int i = 0; i < value.size(); i++) {
             lineStream >> lineValue;
+            if (lineStream.fail()) return (int)parseCodes::PARSE_ERROR;
+
             value[i] = lineValue;
         }
 
-        if (lineStream.bad()) {
-            std::string message = "Invalid value for " + token + " in BOV header file.";
-            SetErrMsg(message.c_str());
-            return (int)parseCodes::PARSE_ERROR;
-        }
+        // If there are more than 3 values, throw error
+        if (!lineStream.eof()) return (int)parseCodes::PARSE_ERROR;
 
         if (verbose) {
             std::cout << std::setw(20) << token << " ";
@@ -436,22 +500,6 @@ int BOVCollection::_sizeOfFormat(DC::XType type) const
     }
 }
 
-void BOVCollection::_swapBytes(void *vptr, size_t size, size_t n) const
-{
-    unsigned char *ucptr = (unsigned char *)vptr;
-    unsigned char  uc;
-    size_t         i, j;
-
-    for (j = 0; j < n; j++) {
-        for (i = 0; i < size / 2; i++) {
-            uc = ucptr[i];
-            ucptr[i] = ucptr[size - i - 1];
-            ucptr[size - i - 1] = uc;
-        }
-        ucptr += size;
-    }
-}
-
 template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region)
 {
     float       time = _times[ts];
@@ -473,18 +521,12 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
         return -1;
     }
 
-    size_t numValues = _gridSize[0] * _gridSize[1] * _gridSize[2];
-
-    int  n = 1;
-    bool systemLittleEndian = *(char *)&n == 1 ? true : false;
-    bool dataLittleEndian = _dataEndian == "LITTLE" ? true : false;
-    bool needSwap = systemLittleEndian != dataLittleEndian ? true : false;
-
     // Read a "pencil" of data along the X axis, one row at a time
     size_t count = max[0] - min[0] + 1;
     // Note: allocate buffer once and reuse for many times, so repeated allocation is avoided.
     std::vector<unsigned char> vReadBuffer(count * formatSize);
     unsigned char *            readBuffer = vReadBuffer.data();
+
     for (size_t k = min[2]; k <= max[2]; k++) {
         size_t zOffset = _gridSize[0] * _gridSize[1] * k;
         for (size_t j = min[1]; j <= max[1]; j++) {
@@ -492,10 +534,14 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
             size_t yOffset = _gridSize[0] * j;
             size_t offset = formatSize * (xOffset + yOffset + zOffset) + _byteOffset;
 
-            fseek(fp, offset, SEEK_SET);
-            size_t rc = fread(readBuffer, formatSize, count, fp);
+            int rc = fseek(fp, offset, SEEK_SET);
+            if (rc != 0) {
+                MyBase::SetErrMsg("Unable to seek on file: %M");
+                return -1;
+            }
 
-            if (rc != count) {
+            size_t fread_rc = fread(readBuffer, formatSize, count, fp);
+            if (fread_rc != count) {
                 if (ferror(fp) != 0) {
                     MyBase::SetErrMsg("Error reading input file: %M");
                 } else {
@@ -504,8 +550,6 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
                 fclose(fp);
                 return -1;
             }
-
-            if (needSwap) { _swapBytes(readBuffer, formatSize, numValues); }
 
             if (_dataFormat == DC::XType::INT32) {
                 int *castBuffer = (int *)readBuffer;

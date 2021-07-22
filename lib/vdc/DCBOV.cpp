@@ -36,6 +36,7 @@ DCBOV::~DCBOV()
 
 int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
+    if (_bovCollection != nullptr) delete _bovCollection;
     _bovCollection = new BOVCollection();
     int rc = _bovCollection->Initialize(paths);
     if (rc < 0) {

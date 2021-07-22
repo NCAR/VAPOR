@@ -24,11 +24,12 @@ public:
     DC::XType                  GetDataFormat() const;
     std::array<double, 3>      GetBrickOrigin() const;
     std::array<double, 3>      GetBrickSize() const;
-    std::string                GetDataEndian() const;
 
     template<class T> int ReadRegion(std::string varname, size_t ts, const std::vector<size_t> &min, const std::vector<size_t> &max, T region);
 
 private:
+    std::string _currentFilePath;
+
     float                    _time;
     std::vector<float>       _times;
     std::string              _dataFile;
@@ -37,21 +38,22 @@ private:
     DC::XType                _dataFormat;
     std::string              _variable;
     std::vector<std::string> _variables;
-    std::string              _dataEndian;
-    std::string              _centering;
     std::array<double, 3>    _brickOrigin;
     std::array<double, 3>    _brickSize;
     size_t                   _byteOffset;
-    bool                     _divideBrick;
-    std::array<size_t, 3>    _dataBricklets;
-    int                      _dataComponents;
+
+    // These values are currently parsed and assigned, but are unimplemented (not used)
+    bool                  _divideBrick;
+    std::string           _dataEndian;
+    std::string           _centering;
+    int                   _dataComponents;
+    std::array<size_t, 3> _dataBricklets;
 
     // Placeholder variables to store values read from BOV descriptor files.
     // These values must be consistent among BOV files, and are validated before
     // assigning to "actual" values such as _gridSize, declaired above.
     std::array<size_t, 3> _tmpGridSize;
     DC::XType             _tmpDataFormat;
-    std::string           _tmpDataEndian;
     std::array<double, 3> _tmpBrickOrigin;
     std::array<double, 3> _tmpBrickSize;
     size_t                _tmpByteOffset;
@@ -60,7 +62,6 @@ private:
     bool _formatAssigned;
     bool _brickOriginAssigned;
     bool _brickSizeAssigned;
-    bool _dataEndianAssigned;
     bool _byteOffsetAssigned;
 
     // _dataFileMap allows us to access binary data files with a
@@ -79,26 +80,30 @@ private:
 
     void _findTokenValue(std::string &line) const;
 
-    int  _sizeOfFormat(DC::XType) const;
-    void _swapBytes(void *vptr, size_t size, size_t n) const;
+    int _sizeOfFormat(DC::XType) const;
 
-    int _invalidDimensionError(std::string token) const;
-    int _invalidFormatError(std::string token) const;
-    int _failureToReadError(std::string token) const;
-    int _inconsistentValueError(std::string token) const;
-    int _invalidValueError(std::string token) const;
-    int _missingValueError(std::string token) const;
+    int _invalidVarNameError() const;
+    int _invalidFileSizeError(size_t numElements) const;
+    int _invalidFileError() const;
+    int _invalidDimensionError(const std::string &token) const;
+    int _invalidFormatError(const std::string &token) const;
+    int _failureToReadError(const std::string &token) const;
+    int _inconsistentValueError(const std::string &token) const;
+    int _invalidValueError(const std::string &token) const;
+    int _missingValueError(const std::string &token) const;
 
     static const std::string TIME_TOKEN;
     static const std::string DATA_FILE_TOKEN;
     static const std::string GRID_SIZE_TOKEN;
     static const std::string FORMAT_TOKEN;
     static const std::string VARIABLE_TOKEN;
-    static const std::string ENDIAN_TOKEN;
-    static const std::string CENTERING_TOKEN;
     static const std::string ORIGIN_TOKEN;
     static const std::string BRICK_SIZE_TOKEN;
     static const std::string OFFSET_TOKEN;
+
+    // These tokens are currently parsed but are not used
+    static const std::string ENDIAN_TOKEN;
+    static const std::string CENTERING_TOKEN;
     static const std::string DIVIDE_BRICK_TOKEN;
     static const std::string DATA_BRICKLETS_TOKEN;
     static const std::string DATA_COMPONENTS_TOKEN;
@@ -107,15 +112,17 @@ private:
     static const std::string           _defaultFile;
     static const DC::XType             _defaultFormat;
     static const std::string           _defaultVar;
-    static const std::string           _defaultEndian;
-    static const std::string           _defaultCentering;
     static const size_t                _defaultByteOffset;
-    static const size_t                _defaultComponents;
-    static const bool                  _defaultDivBrick;
     static const std::array<double, 3> _defaultOrigin;
     static const std::array<double, 3> _defaultBrickSize;
     static const std::array<size_t, 3> _defaultGridSize;
+
+    // These defaults are currently unimplemented in the BOV reader logic
+    static const std::string           _defaultEndian;
+    static const std::string           _defaultCentering;
+    static const bool                  _defaultDivBrick;
     static const std::array<size_t, 3> _defaultBricklets;
+    static const size_t                _defaultComponents;
 
     static const std::string _xDim;
     static const std::string _yDim;
