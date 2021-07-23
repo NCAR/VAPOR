@@ -799,10 +799,10 @@ int PyEngine::_checkOutVars(const vector<string> &outputVarNames) const
     for (int i = 0; i < outputVarNames.size(); i++) {
         string vname = outputVarNames[i];
 
-		if (! XmlNode::IsValidXMLElement(vname)) {
-			SetErrMsg("Invalid variable name: %s ", vname.c_str());
-			return (-1);
-		}
+        if (!XmlNode::IsValidXMLElement(vname)) {
+            SetErrMsg("Invalid variable name: %s ", vname.c_str());
+            return (-1);
+        }
 
         if (!_validOutputVar(outputVarNames[i])) {
             SetErrMsg("Invalid derived variable name %s. Already in use.", vname.c_str());

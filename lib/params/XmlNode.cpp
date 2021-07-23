@@ -912,4 +912,3 @@ bool XmlParser::_isDataElement(string tag, map<string, string> myattrs, type &dt
 
     return (false);
 }
-
