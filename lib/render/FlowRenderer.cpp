@@ -1213,18 +1213,14 @@ int FlowRenderer::_updateAdvectionPeriodicity(flow::Advection *advc)
     return 0;
 }
 
-void FlowRenderer::_printFlowStatus(const std::string &prefix, FlowStatus stat) const
+void FlowRenderer::_printNonZero( int         rtn,
+                                  const char* file,
+                                  const char* func,
+                                  int         line )
 {
-    std::cout << prefix << " :  ";
-    if (stat == FlowStatus::SIMPLE_OUTOFDATE)
-        std::cout << "simple out-of-date";
-    else if (stat == FlowStatus::TIME_STEP_OOD)
-        std::cout << "time step out-of-date";
-    else if (stat == FlowStatus::UPTODATE)
-        std::cout << "up to date";
-    std::cout << std::endl;
-}
-
-#ifndef WIN32
-double FlowRenderer::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const { return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0); }
+#ifndef NDEBUG
+    if( rtn != 0 ) {
+        printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line);
+    }
 #endif
+}
