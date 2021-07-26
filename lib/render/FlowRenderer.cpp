@@ -1231,7 +1231,7 @@ int FlowRenderer::_updateAdvectionPeriodicity(flow::Advection *advc)
 void FlowRenderer::_printNonZero(int rtn, const char *file, const char *func, int line)
 {
 #ifndef NDEBUG
-    if (rtn != 0) { // only print non-zero values
+    if (rtn != 0) {    // only print non-zero values
         printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line);
     }
 #endif
