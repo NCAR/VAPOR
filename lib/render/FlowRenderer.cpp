@@ -322,8 +322,9 @@ int FlowRenderer::_paintGL(bool fast)
 
     if (params->GetValueLong("old_render", 0)) {
         _renderFromAnAdvectionLegacy(&_advection, params, fast);
-        /* If the advection is bi-directional */
-        if (_2ndAdvection) { _renderFromAnAdvectionLegacy(_2ndAdvection.get(), params, fast); }
+        if (_2ndAdvection) {    // If the advection is bi-directional
+            _renderFromAnAdvectionLegacy(_2ndAdvection.get(), params, fast);
+        }
     } else {
         // Workaround for how bi-directional was implemented.
         // The rendering caches the flow data on the GPU however it
@@ -1230,6 +1231,8 @@ int FlowRenderer::_updateAdvectionPeriodicity(flow::Advection *advc)
 void FlowRenderer::_printNonZero(int rtn, const char *file, const char *func, int line)
 {
 #ifndef NDEBUG
-    if (rtn != 0) { printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line); }
+    if (rtn != 0) { // only print non-zero values
+        printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line);
+    }
 #endif
 }

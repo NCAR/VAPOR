@@ -244,8 +244,7 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
             }
             if (rv != 0) {    // Advection wasn't successful for some reason...
                 break;
-            } else    // Advection successful, keep the new particle.
-            {
+            } else {    // Advection successful, keep the new particle.
                 happened = true;
                 s.push_back(p1);
                 p0 = std::move(p1);
