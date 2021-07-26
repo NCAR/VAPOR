@@ -94,10 +94,10 @@ private:
     //
     // Member functions
     //
-    int  _genSeedsRakeUniform(std::vector<flow::Particle> &seeds) const;
-    int  _genSeedsRakeRandom(std::vector<flow::Particle> &seeds) const;
-    int  _genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) const;
-    int  _genSeedsFromList(std::vector<flow::Particle> &seeds) const;
+    int _genSeedsRakeUniform(std::vector<flow::Particle> &seeds) const;
+    int _genSeedsRakeRandom(std::vector<flow::Particle> &seeds) const;
+    int _genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) const;
+    int _genSeedsFromList(std::vector<flow::Particle> &seeds) const;
 
     int       _renderFromAnAdvectionLegacy(const flow::Advection *, FlowParams *, bool fast);
     int       _renderAdvection(const flow::Advection *adv);
@@ -116,14 +116,11 @@ private:
     int _outputFlowLines();
 
     void _dupSeedsNewTime(std::vector<flow::Particle> &seeds,
-                          size_t                       firstN,          // First N particles to duplicate
-                          double                       newTime) const;  // New time to assign to particles
+                          size_t                       firstN,    // First N particles to duplicate
+                          double                       newTime) const;                  // New time to assign to particles
 
     // Print return code if it's non-zero and compiled in debug mode.
-    void _printNonZero( int         rtn,
-                        const char* file,
-                        const char* func,
-                        int         line );
+    void _printNonZero(int rtn, const char *file, const char *func, int line);
 
 };    // End of class FlowRenderer
 

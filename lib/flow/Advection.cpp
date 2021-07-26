@@ -181,7 +181,7 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
 
     bool   happened = false;
     size_t streamIdx = 0;
-    size_t maxSteps  = 10000;
+    size_t maxSteps = 10000;
     for (auto &s : _streams)    // Process one stream at a time
     {
         Particle p0 = s.back();    // Start from the last particle in this stream
@@ -242,7 +242,7 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
             case ADVECTION_METHOD::EULER: rv = _advectEuler(velocity, p0, dt, p1); break;
             case ADVECTION_METHOD::RK4: rv = _advectRK4(velocity, p0, dt, p1); break;
             }
-            if (rv != 0) {  // Advection wasn't successful for some reason...
+            if (rv != 0) {    // Advection wasn't successful for some reason...
                 break;
             } else    // Advection successful, keep the new particle.
             {
@@ -254,8 +254,8 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
             // Another termination criterion: when advecting at least 10,000 steps and
             // more than 10X more than the previous max num of steps.
             //
-            if( ++thisStep == maxSteps ) {
-                thisStep =  maxSteps / 10;
+            if (++thisStep == maxSteps) {
+                thisStep = maxSteps / 10;
                 break;
             }
         }    // Finish advecting one particle

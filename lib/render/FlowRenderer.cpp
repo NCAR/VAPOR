@@ -172,7 +172,7 @@ int FlowRenderer::_paintGL(bool fast)
     }
 
     rv = _updateFlowCacheAndStates(params);
-    if( rv != 0) {
+    if (rv != 0) {
         _printNonZero(rv, __FILE__, __func__, __LINE__);
         MyBase::SetErrMsg("Parameters not ready!");
         return flow::PARAMS_ERROR;
@@ -323,9 +323,7 @@ int FlowRenderer::_paintGL(bool fast)
     if (params->GetValueLong("old_render", 0)) {
         _renderFromAnAdvectionLegacy(&_advection, params, fast);
         /* If the advection is bi-directional */
-        if (_2ndAdvection) {
-            _renderFromAnAdvectionLegacy(_2ndAdvection.get(), params, fast);
-        }
+        if (_2ndAdvection) { _renderFromAnAdvectionLegacy(_2ndAdvection.get(), params, fast); }
     } else {
         // Workaround for how bi-directional was implemented.
         // The rendering caches the flow data on the GPU however it
@@ -1229,14 +1227,9 @@ int FlowRenderer::_updateAdvectionPeriodicity(flow::Advection *advc)
     return 0;
 }
 
-void FlowRenderer::_printNonZero( int         rtn,
-                                  const char* file,
-                                  const char* func,
-                                  int         line )
+void FlowRenderer::_printNonZero(int rtn, const char *file, const char *func, int line)
 {
 #ifndef NDEBUG
-    if( rtn != 0 ) {
-        printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line);
-    }
+    if (rtn != 0) { printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line); }
 #endif
 }
