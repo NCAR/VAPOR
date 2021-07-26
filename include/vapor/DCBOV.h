@@ -16,7 +16,7 @@ namespace VAPoR {
 
 class BOVCollection;
 
-// Example BOV header file, bovA1.bov
+// Example BOV header file, bovA1.bov.
 //
 // # TIME is a floating point value specifying the timestep being read in DATA_FILE
 // TIME: 1.1
@@ -24,7 +24,7 @@ class BOVCollection;
 // # DATA_FILE points to a binary data file.  It can be a full file path, or a path relative to the BOV header.
 // DATA_FILE: bovA1.bin
 //
-// # The data size corresponds to NX,NY,NZ in the above example code.  It must contain three values
+// # The data size corresponds to NX,NY,NZ in the above example code.  It must contain three values that are greather than 1.
 // DATA_SIZE: 10 10 10
 //
 // # Allowable values for DATA_FORMAT are: INT,FLOAT,DOUBLE
