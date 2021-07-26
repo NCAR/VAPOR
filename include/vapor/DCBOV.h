@@ -70,6 +70,7 @@ class BOVCollection;
 //! - DATA_BRICKLETS
 //! - DATA_COMPONENTS
 //!
+//! If multiple files specify a single TIME value for a single variable, the first-read file will be used for that variable at that timestep.
 //! If duplicate key/value pairs exist in a BOV header, the value closest to the bottom of the file will be used.
 //! If duplicate values exist for whatever reason, all entries must be valid (except for DATA_FILE, which gets validated after parsing)
 //! Scientific notation is supported for floating point values like BRICK_ORIGIN and BRICK_SIZE.
