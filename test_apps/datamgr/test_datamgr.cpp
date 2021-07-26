@@ -182,14 +182,13 @@ void test_get_value(Grid *g)
 
     g->SetInterpolationOrder(1);
 
-    const float epsilon = 0.000001;
-
     float t0 = GetTime();
 
     auto   tmp = g->GetDimensions();
     auto   tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
     size_t n = VProduct(tmp2);
 
+    size_t count = 0;
     size_t ecount = 0;
 #if defined(_OPENMP)
     int requested_num_threads = get_num_ompthreads();
@@ -208,26 +207,25 @@ void test_get_value(Grid *g)
         Grid::ConstCoordItr c_itr = g->ConstCoordBegin() + istart;
 
         for (size_t i = istart; i < iend; i++, ++itr, ++c_itr) {
+
             float v0 = *itr;
 
             float v1 = g->GetValue(*c_itr);
 
-            if (v0 != v1) {
-                if (v0 == 0.0) {
-                    if (abs(v1) > epsilon) { my_ecount++; }
-                } else {
-                    if (abs((v1 - v0) / v0) > epsilon) { my_ecount++; }
-                }
+
+            if (! Wasp::NearlyEqual(v0, v1)) {
+                my_ecount++; 
             }
             my_count++;
         }
 #pragma omp critical
         {
+            count += my_count;
             ecount += my_ecount;
         }
     }
 
-    cout << "error count: " << ecount << endl;
+    cout << "error count: " << ecount << " out of " << count << endl;
     cout << "time: " << GetTime() - t0 << endl;
     cout << endl;
 }
