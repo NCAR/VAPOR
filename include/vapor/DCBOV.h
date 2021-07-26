@@ -51,16 +51,16 @@ class BOVCollection;
 //! following VisIt document: https://github.com/NCAR/VAPOR/files/6341067/GettingDataIntoVisIt2.0.0.pdf
 //!
 //! The following BOV tags are mandatory for Vapor to ingest data:
-//! - DATA_FILE
-//! - DATA_SIZE
-//! - DATA_FORMAT
+//! - DATA_FILE    (type: string)
+//! - DATA_SIZE    (type: three integer values that are >1)
+//! - DATA_FORMAT  (type: string of either INT, FLOAT, or DOUBLE)
 //!
 //! The following BOV tags are optional:
-//! - BRICK_ORIGIN (default: 0., 0., 0.)
-//! - BRICK_SIZE   (default: 1., 1., 1.)
-//! - TIME         (default: 0.)
-//! - VARIABLE     (default: "brickVar")
-//! - BYTE_OFFSET  (default: 0)
+//! - BRICK_ORIGIN (type: three floating point values,   default: 0., 0., 0.)
+//! - BRICK_SIZE   (type: three floating point values,   default: 1., 1., 1.)
+//! - TIME         (type: one floating point value,      default: 0.)
+//! - VARIABLE     (type: one alphanumeric string value, default: "brickVar")
+//! - BYTE_OFFSET  (type: one integer value,             default: 0)
 //!
 //! The following BOV tags are currently unsupported.  They can be included in a BOV header,
 //! but they will be unused.
