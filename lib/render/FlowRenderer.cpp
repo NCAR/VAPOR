@@ -167,10 +167,13 @@ int FlowRenderer::_paintGL(bool fast)
     if (params->GetNeedFlowlineOutput()) {
         rv = _outputFlowLines();
         params->SetNeedFlowlineOutput(false);
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         if (rv != 0) return rv;
     }
 
-    if (_updateFlowCacheAndStates(params) != 0) {
+    rv = _updateFlowCacheAndStates(params);
+    if( rv != 0) {
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         MyBase::SetErrMsg("Parameters not ready!");
         return flow::PARAMS_ERROR;
     }
@@ -200,6 +203,7 @@ int FlowRenderer::_paintGL(bool fast)
             MyBase::SetErrMsg("The velocity field seems to contain only invalid values!");
             return flow::PARAMS_ERROR;
         } else if (rv != 0) {
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
             MyBase::SetErrMsg("Update deltaT failed!");
             return rv;
         }
@@ -216,6 +220,7 @@ int FlowRenderer::_paintGL(bool fast)
             rv = _genSeedsFromList(seeds);
 
         if (rv != 0) {
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
             MyBase::SetErrMsg("Generating seeds failed!");
             return flow::NO_SEED_PARTICLE_YET;
         }
@@ -226,6 +231,7 @@ int FlowRenderer::_paintGL(bool fast)
         _advection.UseSeedParticles(seeds);
         rv = _updateAdvectionPeriodicity(&_advection);
         if (rv != 0) {
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
             MyBase::SetErrMsg("Update Advection Periodicity failed!");
             return flow::GRID_ERROR;
         }
@@ -234,6 +240,7 @@ int FlowRenderer::_paintGL(bool fast)
             _2ndAdvection->UseSeedParticles(seeds);
             rv = _updateAdvectionPeriodicity(_2ndAdvection.get());
             if (rv != 0) {
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
                 MyBase::SetErrMsg("Update Advection Periodicity failed!");
                 return flow::GRID_ERROR;
             }
@@ -288,7 +295,10 @@ int FlowRenderer::_paintGL(bool fast)
         // Advection scheme 2: advect to a certain timestamp.
         // This scheme is used for unsteady flow
         else {
-            for (int i = 1; i <= _cache_currentTS; i++) { rv = _advection.AdvectTillTime(&_velocityField, _timestamps.at(i - 1), deltaT, _timestamps.at(i)); }
+            for (int i = 1; i <= _cache_currentTS; i++) {
+                rv = _advection.AdvectTillTime(&_velocityField, _timestamps.at(i - 1), deltaT, _timestamps.at(i));
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
+            }
         }
 
         _advectionComplete = true;
@@ -296,8 +306,10 @@ int FlowRenderer::_paintGL(bool fast)
 
     if (!_coloringComplete) {
         rv = _advection.CalculateParticleValues(&_colorField, true);
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         if (_2ndAdvection)    // bi-directional advection
             rv = _2ndAdvection->CalculateParticleValues(&_colorField, true);
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         _coloringComplete = true;
     }
 
@@ -311,7 +323,9 @@ int FlowRenderer::_paintGL(bool fast)
     if (params->GetValueLong("old_render", 0)) {
         _renderFromAnAdvectionLegacy(&_advection, params, fast);
         /* If the advection is bi-directional */
-        if (_2ndAdvection) _renderFromAnAdvectionLegacy(_2ndAdvection.get(), params, fast);
+        if (_2ndAdvection) {
+            _renderFromAnAdvectionLegacy(_2ndAdvection.get(), params, fast);
+        }
     } else {
         // Workaround for how bi-directional was implemented.
         // The rendering caches the flow data on the GPU however it
@@ -321,10 +335,12 @@ int FlowRenderer::_paintGL(bool fast)
         if (_2ndAdvection) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
 
         rv |= _renderAdvection(&_advection);
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         /* If the advection is bi-directional */
         if (_2ndAdvection) {
             _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
             rv |= _renderAdvection(_2ndAdvection.get());
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
         }
     }
 

@@ -181,11 +181,14 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
 
     bool   happened = false;
     size_t streamIdx = 0;
+    size_t maxSteps  = 10000;
     for (auto &s : _streams)    // Process one stream at a time
     {
         Particle p0 = s.back();    // Start from the last particle in this stream
         if (p0.time < startT)      // Skip this stream if it didn't advance to startT
             continue;
+
+        size_t thisStep = 0;
 
         while (p0.time < targetT) {
             // Check if the particle is inside of the volume.
@@ -239,8 +242,7 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
             case ADVECTION_METHOD::EULER: rv = _advectEuler(velocity, p0, dt, p1); break;
             case ADVECTION_METHOD::RK4: rv = _advectRK4(velocity, p0, dt, p1); break;
             }
-            if (rv != 0)    // Advection wasn't successful for some reason...
-            {
+            if (rv != 0) {  // Advection wasn't successful for some reason...
                 break;
             } else    // Advection successful, keep the new particle.
             {
@@ -248,11 +250,21 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
                 s.push_back(p1);
                 p0 = std::move(p1);
             }
-        }    // Finish the while loop to advect one particle to a time
+
+            // Another termination criterion: when advecting at least 10,000 steps and
+            // more than 10X more than the previous max num of steps.
+            //
+            if( ++thisStep == maxSteps ) {
+                thisStep =  maxSteps / 10;
+                break;
+            }
+        }    // Finish advecting one particle
+
+        maxSteps = std::max(maxSteps, thisStep * 10);
 
         streamIdx++;
 
-    }    // Finish the for loop to advect all particles to a time
+    }    // Finish advecting all particles
 
     if (happened)
         return ADVECT_HAPPENED;
