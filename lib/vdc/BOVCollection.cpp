@@ -556,13 +556,13 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
 
             if (_dataFormat == DC::XType::INT32) {
                 int *castBuffer = (int *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
+                for (size_t i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
             } else if (_dataFormat == DC::XType::FLOAT) {
                 float *castBuffer = (float *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
+                for (size_t i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
             } else if (_dataFormat == DC::XType::DOUBLE) {
                 double *castBuffer = (double *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
+                for (size_t i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
             }
         }
     }
