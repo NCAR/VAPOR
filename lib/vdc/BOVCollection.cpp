@@ -128,7 +128,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 
             rc = _populateDataFileMap();
             if (rc < 0) {
-                SetErrMsg("Duplicate time entries found in BOV files.  Each file must uniquely describe one variable, at one timestep.");
+                SetErrMsg("Problem indexing data files.");
                 return -1;
             }
         } else {
@@ -273,7 +273,10 @@ int BOVCollection::_validateParsedValues()
 
 int BOVCollection::_populateDataFileMap()
 {
-    if (_dataFileMap[_variable].count(_time)) return -1;    // Duplicate time entries were found for this variable
+    if (_dataFileMap[_variable].count(_time)) {
+        SetErrMsg("Duplicate time entries found in BOV files.  Each file must uniquely describe one variable, at one timestep.");
+        return -1;
+    }
 
     _variables.push_back(_variable);
 
