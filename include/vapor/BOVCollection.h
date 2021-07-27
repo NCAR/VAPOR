@@ -19,7 +19,7 @@ public:
     std::string                GetTimeDimension() const;
     std::vector<float>         GetUserTimes() const;
     float                      GetUserTime(size_t ts) const { return GetUserTimes()[ts]; };
-    std::array<int, 3>         GetDataSize() const;
+    std::array<size_t, 3>      GetDataSize() const;
     std::array<std::string, 3> GetSpatialDimensions() const;
     DC::XType                  GetDataFormat() const;
     std::array<double, 3>      GetBrickOrigin() const;
@@ -34,7 +34,7 @@ private:
     std::vector<float>       _times;
     std::string              _dataFile;
     std::vector<std::string> _dataFiles;
-    std::array<int, 3>       _gridSize;
+    std::array<size_t, 3>    _gridSize;
     DC::XType                _dataFormat;
     std::string              _variable;
     std::vector<std::string> _variables;
@@ -52,11 +52,32 @@ private:
     // Placeholder variables to store values read from BOV descriptor files.
     // These values must be consistent among BOV files, and are validated before
     // assigning to "actual" values such as _gridSize, declaired above.
-    std::array<int, 3>    _tmpGridSize;
     DC::XType             _tmpDataFormat;
     std::array<double, 3> _tmpBrickOrigin;
     std::array<double, 3> _tmpBrickSize;
     size_t                _tmpByteOffset;
+
+    // Note - _tmpGridSize is an array of int type
+    //      - _gridSize is of type size_t
+    //      The reason for this is when we caluclate data indices like so...
+    //
+    //      int xSize = INT_MAX
+    //      int ySize = INT_MAX
+    //      int zSize = INT_MAX
+    //      size_t index = xSize*ySize*zSize;
+    //
+    //      ...the rvalue causes integer overflow.
+    //
+    //      _tmpGridSize cannot be an array of size_t because users may write
+    //      negative values.  The parser uses std::stringstream to convert
+    //      strings to different datatypes.  Unfortunately it does not fail when
+    //      converting negative string values such as "-10" to a size_t.  Rather,
+    //      it converts "-10" to a large positive value".
+    //
+    //      Therefore, we read the values in with _tmpGridSize as integers,
+    //      and then assign the integers to _gridSize if validation passes.
+    //      (Validation in this case: ensure non-negative values, and consistency across files)
+    std::array<int, 3> _tmpGridSize;
 
     bool _gridSizeAssigned;
     bool _formatAssigned;
@@ -115,7 +136,7 @@ private:
     static const size_t                _defaultByteOffset;
     static const std::array<double, 3> _defaultOrigin;
     static const std::array<double, 3> _defaultBrickSize;
-    static const std::array<int, 3>    _defaultGridSize;
+    static const std::array<size_t, 3> _defaultGridSize;
 
     // These defaults are currently unimplemented in the BOV reader logic
     static const std::string           _defaultEndian;

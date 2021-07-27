@@ -36,7 +36,7 @@ const std::string BOVCollection::DATA_COMPONENTS_TOKEN = "DATA_COMPONENTS";
 
 const std::array<double, 3> BOVCollection::_defaultOrigin = {0., 0., 0.};
 const std::array<double, 3> BOVCollection::_defaultBrickSize = {1., 1., 1.};
-const std::array<int, 3>    BOVCollection::_defaultGridSize = {0, 0, 0};
+const std::array<size_t, 3> BOVCollection::_defaultGridSize = {0, 0, 0};
 const DC::XType             BOVCollection::_defaultFormat = DC::XType::INVALID;
 const std::string           BOVCollection::_defaultFile = "";
 const std::string           BOVCollection::_defaultVar = "brickVar";
@@ -76,7 +76,9 @@ BOVCollection::BOVCollection()
     _dataFiles.clear();
     _times.clear();
     _gridSize = _defaultGridSize;
-    _tmpGridSize = _defaultGridSize;
+    _tmpGridSize[0] = (int)_defaultGridSize[0];
+    _tmpGridSize[1] = (int)_defaultGridSize[1];
+    _tmpGridSize[2] = (int)_defaultGridSize[2];
     _brickOrigin = _defaultOrigin;
     _tmpBrickOrigin = _defaultOrigin;
     _brickSize = _defaultBrickSize;
@@ -218,10 +220,12 @@ int BOVCollection::_validateParsedValues()
     // Validate grid dimensions
     if (_tmpGridSize[0] < 1 || _tmpGridSize[1] < 1 || _tmpGridSize[2] < 1)
         return _invalidDimensionError(GRID_SIZE_TOKEN);
-    else if (_tmpGridSize != _gridSize && _gridSizeAssigned == true)
+    else if ((_tmpGridSize[0] != _gridSize[0] || _tmpGridSize[1] != _gridSize[1] || _tmpGridSize[2] != _gridSize[2]) && _gridSizeAssigned == true)
         return _inconsistentValueError(GRID_SIZE_TOKEN);
     else {
-        _gridSize = _tmpGridSize;
+        _gridSize[0] = (size_t)_tmpGridSize[0];
+        _gridSize[1] = (size_t)_tmpGridSize[1];
+        _gridSize[2] = (size_t)_tmpGridSize[2];
         _gridSizeAssigned = true;
     }
 
@@ -344,7 +348,7 @@ std::string BOVCollection::GetTimeDimension() const { return _timeDimension; }
 
 std::vector<float> BOVCollection::GetUserTimes() const { return _times; }
 
-std::array<int, 3> BOVCollection::GetDataSize() const { return _gridSize; }
+std::array<size_t, 3> BOVCollection::GetDataSize() const { return _gridSize; }
 
 DC::XType BOVCollection::GetDataFormat() const { return _dataFormat; }
 
