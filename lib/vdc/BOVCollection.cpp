@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <type_traits>
+#include <float.h>
 #include "vapor/VAssert.h"
 #include "vapor/utils.h"
 #include "vapor/FileUtils.h"
@@ -40,7 +41,7 @@ const std::array<size_t, 3> BOVCollection::_defaultGridSize = {0, 0, 0};
 const DC::XType             BOVCollection::_defaultFormat = DC::XType::INVALID;
 const std::string           BOVCollection::_defaultFile = "";
 const std::string           BOVCollection::_defaultVar = "brickVar";
-const double                BOVCollection::_defaultTime = 0.;
+const double                BOVCollection::_defaultTime = FLT_MIN;
 const size_t                BOVCollection::_defaultByteOffset = 0;
 
 // Currently unused in ReadRegion() logic
@@ -123,8 +124,13 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
             if (_dataFile == _defaultFile) { return _missingValueError(DATA_FILE_TOKEN); }
             if (_dataFormat == _defaultFormat) { return _missingValueError(FORMAT_TOKEN); }
             if (_gridSize == _defaultGridSize) { return _missingValueError(GRID_SIZE_TOKEN); }
+            if (_time == _defaultTime) { return _missingValueError(TIME_TOKEN); }
 
-            _populateDataFileMap();
+            rc = _populateDataFileMap();
+            if (rc < 0) {
+                SetErrMsg("Problem indexing data files.");
+                return -1;
+            }
         } else {
             SetErrMsg(("Failed to open BOV file " + paths[0]).c_str());
             return -1;
@@ -225,6 +231,7 @@ int BOVCollection::_validateParsedValues()
         _gridSizeAssigned = true;
     }
 
+
     // Validate data format
     if (_tmpDataFormat == DC::INVALID)
         return _invalidFormatError(FORMAT_TOKEN);
@@ -264,14 +271,21 @@ int BOVCollection::_validateParsedValues()
     return 0;
 }
 
-void BOVCollection::_populateDataFileMap()
+int BOVCollection::_populateDataFileMap()
 {
+    if (_dataFileMap[_variable].count(_time)) {
+        SetErrMsg("Duplicate time entries found in BOV files.  Each file must uniquely describe one variable, at one timestep.");
+        return -1;
+    }
+
     _variables.push_back(_variable);
 
     if (std::find(_times.begin(), _times.end(), _time) == _times.end()) _times.push_back(_time);
+
     std::sort(_times.begin(), _times.end());
 
     _dataFileMap[_variable][_time] = _dataFile;
+    return 0;
 }
 
 int BOVCollection::_invalidVarNameError() const
