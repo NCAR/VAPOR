@@ -2,10 +2,6 @@
 #define FLOWRENDERER_H
 
 #include "vapor/glutil.h"
-#ifndef WIN32
-    #include <sys/time.h>
-#endif
-
 #include "vapor/Renderer.h"
 #include "vapor/FlowParams.h"
 #include "vapor/GLManager.h"
@@ -98,11 +94,10 @@ private:
     //
     // Member functions
     //
-    void _printFlowStatus(const std::string &prefix, FlowStatus stat) const;
-    int  _genSeedsRakeUniform(std::vector<flow::Particle> &seeds) const;
-    int  _genSeedsRakeRandom(std::vector<flow::Particle> &seeds) const;
-    int  _genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) const;
-    int  _genSeedsFromList(std::vector<flow::Particle> &seeds) const;
+    int _genSeedsRakeUniform(std::vector<flow::Particle> &seeds) const;
+    int _genSeedsRakeRandom(std::vector<flow::Particle> &seeds) const;
+    int _genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) const;
+    int _genSeedsFromList(std::vector<flow::Particle> &seeds) const;
 
     int       _renderFromAnAdvectionLegacy(const flow::Advection *, FlowParams *, bool fast);
     int       _renderAdvection(const flow::Advection *adv);
@@ -124,9 +119,8 @@ private:
                           size_t                       firstN,    // First N particles to duplicate
                           double                       newTime) const;                  // New time to assign to particles
 
-#ifndef WIN32
-    double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
-#endif
+    // Print return code if it's non-zero and compiled in debug mode.
+    void _printNonZero(int rtn, const char *file, const char *func, int line);
 
 };    // End of class FlowRenderer
 
