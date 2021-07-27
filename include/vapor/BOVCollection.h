@@ -73,7 +73,7 @@ private:
     std::string                _timeDimension;
 
     int  _parseHeader(std::ifstream &header);
-    void _populateDataFileMap();
+    int  _populateDataFileMap();
 
     template<typename T> int _findToken(const std::string &token, std::string &line, T &value, bool verbose = false);
     template<typename T> int _findToken(const std::string &token, std::string &line, std::array<T, 3> &value, bool verbose = false);

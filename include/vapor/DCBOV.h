@@ -51,16 +51,16 @@ class BOVCollection;
 //! following VisIt document: https://github.com/NCAR/VAPOR/files/6341067/GettingDataIntoVisIt2.0.0.pdf
 //!
 //! The following BOV tags are mandatory for Vapor to ingest data:
-//! - DATA_FILE
-//! - DATA_SIZE
-//! - DATA_FORMAT
+//! - DATA_FILE    (type: string)
+//! - DATA_SIZE    (type: three integer values that are >1)
+//! - DATA_FORMAT  (type: string of either INT, FLOAT, or DOUBLE)
+//! - TIME         (type: one floating point value.  May not be equal to FLT_MIN)
 //!
 //! The following BOV tags are optional:
-//! - BRICK_ORIGIN (default: 0., 0., 0.)
-//! - BRICK_SIZE   (default: 1., 1., 1.)
-//! - TIME         (default: 0.)
-//! - VARIABLE     (default: "brickVar")
-//! - BYTE_OFFSET  (default: 0)
+//! - BRICK_ORIGIN (type: three floating point values,   default: 0., 0., 0.)
+//! - BRICK_SIZE   (type: three floating point values,   default: 1., 1., 1.)
+//! - VARIABLE     (type: one alphanumeric string value, default: "brickVar")
+//! - BYTE_OFFSET  (type: one integer value,             default: 0)
 //!
 //! The following BOV tags are currently unsupported.  They can be included in a BOV header,
 //! but they will be unused.
@@ -70,12 +70,12 @@ class BOVCollection;
 //! - DATA_BRICKLETS
 //! - DATA_COMPONENTS
 //!
+//! Each .bov file can only refer to a single data file for a single variable, at a single timestep.
 //! If duplicate key/value pairs exist in a BOV header, the value closest to the bottom of the file will be used.
 //! If duplicate values exist for whatever reason, all entries must be valid (except for DATA_FILE, which gets validated after parsing)
 //! Scientific notation is supported for floating point values like BRICK_ORIGIN and BRICK_SIZE.
 //! Scientific notation is not supported for integer values like DATA_SIZE.
 //! Wild card characters are not currently supported in the DATA_FILE token.
-//! Each .bov file can only refer to a single data file.
 //! VARIABLE must be alphanumeric (abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-)
 //!
 //! \author Scott Pearse
