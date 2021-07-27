@@ -218,7 +218,7 @@ int BOVCollection::_parseHeader(std::ifstream &header)
 int BOVCollection::_validateParsedValues()
 {
     // Validate grid dimensions
-    if (_tmpGridSize[0] < 1 || _tmpGridSize[1] < 1 || _tmpGridSize[2] < 1)
+    if (_tmpGridSize[0] < 2 || _tmpGridSize[1] < 2 || _tmpGridSize[2] < 2)
         return _invalidDimensionError(GRID_SIZE_TOKEN);
     else if ((_tmpGridSize[0] != _gridSize[0] || _tmpGridSize[1] != _gridSize[1] || _tmpGridSize[2] != _gridSize[2]) && _gridSizeAssigned == true)
         return _inconsistentValueError(GRID_SIZE_TOKEN);
@@ -252,7 +252,7 @@ int BOVCollection::_validateParsedValues()
         return _inconsistentValueError(BRICK_SIZE_TOKEN);
     else {
         for (size_t i = 0; i < _tmpBrickSize.size(); i++) {
-            if (_tmpBrickSize[i] < 0) return _invalidValueError(BRICK_SIZE_TOKEN);
+            if (_tmpBrickSize[i] < 0.) return _invalidValueError(BRICK_SIZE_TOKEN);
         }
         _brickSize = _tmpBrickSize;
         _brickSizeAssigned = true;

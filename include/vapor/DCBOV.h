@@ -74,6 +74,7 @@ class BOVCollection;
 //! If duplicate values exist for whatever reason, all entries must be valid (except for DATA_FILE, which gets validated after parsing)
 //! Scientific notation is supported for floating point values like BRICK_ORIGIN and BRICK_SIZE.
 //! Scientific notation is not supported for integer values like DATA_SIZE.
+//! DATA_SIZE must contain three values greater than 1.
 //! Wild card characters are not currently supported in the DATA_FILE token.
 //! Each .bov file can only refer to a single data file.
 //! VARIABLE must be alphanumeric (abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-)
