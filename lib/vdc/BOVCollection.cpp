@@ -36,7 +36,7 @@ const std::string BOVCollection::DATA_COMPONENTS_TOKEN = "DATA_COMPONENTS";
 
 const std::array<double, 3> BOVCollection::_defaultOrigin = {0., 0., 0.};
 const std::array<double, 3> BOVCollection::_defaultBrickSize = {1., 1., 1.};
-const std::array<size_t, 3> BOVCollection::_defaultGridSize = {0, 0, 0};
+const std::array<int, 3>    BOVCollection::_defaultGridSize = {0, 0, 0};
 const DC::XType             BOVCollection::_defaultFormat = DC::XType::INVALID;
 const std::string           BOVCollection::_defaultFile = "";
 const std::string           BOVCollection::_defaultVar = "brickVar";
@@ -247,6 +247,9 @@ int BOVCollection::_validateParsedValues()
     if (_tmpBrickSize != _brickSize && _brickSizeAssigned == true)
         return _inconsistentValueError(BRICK_SIZE_TOKEN);
     else {
+        for (size_t i = 0; i < _tmpBrickSize.size(); i++) {
+            if (_tmpBrickSize[i] < 0) return _invalidValueError(BRICK_SIZE_TOKEN);
+        }
         _brickSize = _tmpBrickSize;
         _brickSizeAssigned = true;
     }
@@ -341,7 +344,7 @@ std::string BOVCollection::GetTimeDimension() const { return _timeDimension; }
 
 std::vector<float> BOVCollection::GetUserTimes() const { return _times; }
 
-std::array<size_t, 3> BOVCollection::GetDataSize() const { return _gridSize; }
+std::array<int, 3> BOVCollection::GetDataSize() const { return _gridSize; }
 
 DC::XType BOVCollection::GetDataFormat() const { return _dataFormat; }
 

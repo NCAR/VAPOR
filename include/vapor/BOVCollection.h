@@ -19,7 +19,7 @@ public:
     std::string                GetTimeDimension() const;
     std::vector<float>         GetUserTimes() const;
     float                      GetUserTime(size_t ts) const { return GetUserTimes()[ts]; };
-    std::array<size_t, 3>      GetDataSize() const;
+    std::array<int, 3>         GetDataSize() const;
     std::array<std::string, 3> GetSpatialDimensions() const;
     DC::XType                  GetDataFormat() const;
     std::array<double, 3>      GetBrickOrigin() const;
@@ -34,7 +34,7 @@ private:
     std::vector<float>       _times;
     std::string              _dataFile;
     std::vector<std::string> _dataFiles;
-    std::array<size_t, 3>    _gridSize;
+    std::array<int, 3>       _gridSize;
     DC::XType                _dataFormat;
     std::string              _variable;
     std::vector<std::string> _variables;
@@ -52,7 +52,7 @@ private:
     // Placeholder variables to store values read from BOV descriptor files.
     // These values must be consistent among BOV files, and are validated before
     // assigning to "actual" values such as _gridSize, declaired above.
-    std::array<size_t, 3> _tmpGridSize;
+    std::array<int, 3>    _tmpGridSize;
     DC::XType             _tmpDataFormat;
     std::array<double, 3> _tmpBrickOrigin;
     std::array<double, 3> _tmpBrickSize;
@@ -115,7 +115,7 @@ private:
     static const size_t                _defaultByteOffset;
     static const std::array<double, 3> _defaultOrigin;
     static const std::array<double, 3> _defaultBrickSize;
-    static const std::array<size_t, 3> _defaultGridSize;
+    static const std::array<int, 3>    _defaultGridSize;
 
     // These defaults are currently unimplemented in the BOV reader logic
     static const std::string           _defaultEndian;
