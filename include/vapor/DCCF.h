@@ -34,6 +34,8 @@ public:
     virtual ~DCCF();
 
 protected:
+    NetCDFCFCollection *_ncdfc;
+
     //! Initialize the DCCF class
     //!
     //! Prepare a CF data set for reading. This method prepares
@@ -165,7 +167,6 @@ protected:
 
 
 private:
-    NetCDFCFCollection *_ncdfc;
     VAPoR::UDUnits      _udunits;
 
     string                                      _proj4String;

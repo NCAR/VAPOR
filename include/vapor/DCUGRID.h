@@ -28,7 +28,16 @@ namespace VAPoR {
 class VDF_API DCUGRID : public VAPoR::DCCF {
 public:
 
+    int OpenVariableRead(size_t ts, string varname, int level = 0, int lod = 0) override;
+
+    int Read(int fd, int *data) override;
+    int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *data) override;
+
+    int CloseVariable(int fd) override;
+
 protected:
+
+    int initialize(const vector<string> &paths, const std::vector<string> &options) override;
 
     int initAuxilliaryVars(NetCDFCFCollection *ncdfc, std::map<string, DC::AuxVar> &auxVarsMap) override;
 
@@ -56,6 +65,9 @@ private:
     };
     std::map<string, uGridMeshType> _uGridMeshMap;
 
+    std::map<string, vector <int> > _faceNodeConnectivityMap;
+    std::map<int, string> _openConnectivityMaps;
+
     string _getLayeredVerticalCoordVar(NetCDFCFCollection *ncdfc, string varName) const;
 
     void _getUGridMeshFromFile(NetCDFCFCollection *ncdfc, string meshVarName, uGridMeshType &m);
@@ -67,6 +79,8 @@ private:
     size_t _getMeshMaxNodesPerFace(NetCDFCFCollection *ncdf, const uGridMeshType &m) const;
 
     bool _getVarTimeCoords(NetCDFCFCollection *ncdfc, string varName, string &coordName) const;
+
+    int _initFaceNodeConnectivityMap(NetCDFCFCollection *ncdfc);
 
 
 };

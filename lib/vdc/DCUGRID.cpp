@@ -36,7 +36,7 @@ const string meshAttName = "mesh";
 const string locationAttName = "location";
 
 
-template<class T> int _xgetVar(NetCDFCFCollection *ncdfc, size_t ts, string varname, T *buf)
+template<class T> int getVar(NetCDFCFCollection *ncdfc, size_t ts, string varname, T *buf)
 {
     int fd = ncdfc->OpenRead(ts, varname);
     if (fd < 0) return (fd);
@@ -73,6 +73,47 @@ bool isUGridDummyVar(NetCDFCFCollection *ncdfc, string varName)
     string v;
     getAttString(ncdfc, varName, cfRoleAttName, v);
     return(v == cfRoleValueName);
+}
+
+void unzipLongitude(vector <int> &connVar, size_t numFaces, size_t maxNodes, const vector <float> &lonVar, int missingNode) {
+
+    VAssert(connVar.size() == numFaces * maxNodes);
+
+	for (size_t j=0; j<numFaces; j++) {
+
+		// Sanitize the connectivity array
+		//
+		for (size_t i=0; i < maxNodes; i++) {
+			int nodeIdx = connVar[j*maxNodes + i];
+			if (nodeIdx < 0 || nodeIdx >= lonVar.size()) {
+				connVar[j*maxNodes + i] = missingNode;
+			}
+		}
+
+
+		// Find first valid node
+		//
+		size_t i = 0;
+		for (; i < maxNodes; i++) {
+			int nodeIdx = connVar[j*maxNodes + i];
+			if (nodeIdx != missingNode) {
+				break;
+			}
+		}
+
+		float p0 = 0.0;
+		if (i < maxNodes) {
+				int nodeIdx = connVar[j*maxNodes + i];
+				p0 = lonVar[nodeIdx];
+				i++;
+		}
+		for(; i<maxNodes; i++) {
+			int nodeIdx = connVar[j*maxNodes + i];
+			if (nodeIdx == missingNode || (std::abs(p0 - lonVar[nodeIdx])) > 180.0) {
+				connVar[j*maxNodes + i] = -2;
+			}
+		}
+	}
 }
 
 };    // namespace
@@ -225,6 +266,96 @@ bool DCUGRID::_getVarTimeCoords(NetCDFCFCollection *ncdfc, string varName, strin
 
 }
 
+
+int DCUGRID::_initFaceNodeConnectivityMap(NetCDFCFCollection *ncdfc) {
+    _faceNodeConnectivityMap.clear();
+
+    // We need to synthesize the node-on-face connectivity map for each
+    // mesh, splitting
+    // faces that straddle the min and max longitude extent
+    //
+    vector <string> meshNames = GetMeshNames();
+    for (auto mName : meshNames) {
+        DC::Mesh mesh;
+
+        bool ok = GetMesh(mName, mesh);
+        VAssert(ok);
+
+        string connVarName = mesh.GetFaceNodeVar();
+
+        // Get the longitude coordinate variable name for this mesh
+        //
+        string lonVarName;
+        vector <string> coordVarNames = mesh.GetCoordVars();
+        for (auto coordVarName : coordVarNames) {
+            DC::CoordVar cvar;
+
+            ok = GetCoordVarInfo(coordVarName, cvar);
+            VAssert(ok);
+
+            if (cvar.GetAxis() == 0) {
+                lonVarName = coordVarName;
+                break;
+            }
+        }
+        if (lonVarName.empty()) {
+            SetErrMsg("Invalid mesh %s : No longitude variable", mName.c_str());
+            return(-1);
+        }
+
+        // If a connection variable has a Fill Value attribute it indicates
+        // missing nodes from a face. I.e. faces that less than the maximum
+        // number of nodes.
+        //
+        int missingNode = -1;
+        vector <long> atts;
+        ok = GetAtt(connVarName, "_FillValue", atts);
+        if (ok && atts.size() > 0) missingNode = atts[0];
+      
+
+        vector <size_t> connVarDims;
+        GetDimLens(connVarName, connVarDims);
+        VAssert(connVarDims.size() == 2);
+
+        vector <size_t> lonVarDims;
+        GetDimLens(lonVarName, lonVarDims);
+        VAssert(lonVarDims.size() == 1);
+
+		// Allocate space for the synthetic variable
+        //
+        _faceNodeConnectivityMap[connVarName] = vector <int> (connVarDims[0]*connVarDims[1], 0);
+
+        vector <int> &connVar = _faceNodeConnectivityMap[connVarName];
+        int rc = getVar(ncdfc, 0, connVarName, connVar.data());
+        if (rc<0) {
+            SetErrMsg("Unable to read connectivity variable %s", connVarName.c_str());
+            return(rc);
+        }
+
+        // N.B. Can't call DC::GetVar because this class overrides it
+        //
+        vector <float> lonVar(lonVarDims[0], 0);
+        rc = getVar(ncdfc, 0, lonVarName, lonVar.data());
+        if (rc<0) {
+            SetErrMsg("Unable to read longitude coordinate variable %s", lonVarName.c_str());
+            return(rc);
+        }
+
+        unzipLongitude(connVar, connVarDims[1], connVarDims[0], lonVar, missingNode);
+
+    }
+
+    return(0);
+}
+
+int DCUGRID::initialize(const vector<string> &paths, const std::vector<string> &options) {
+
+    int rc = DCCF::initialize(paths, options);
+    if (rc<0) return(rc);
+
+    return(_initFaceNodeConnectivityMap(_ncdfc));
+
+}
 
 int DCUGRID::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMap)   
 {
@@ -455,4 +586,84 @@ int DCUGRID::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVa
     }
 
     return (0);
+}
+
+int DCUGRID::OpenVariableRead(size_t ts, string varname, int level, int lod) {
+
+    // Pass through normal open operation if this is not a synthesized 
+    // connectivity variable
+    //
+    if (_faceNodeConnectivityMap.find(varname) == _faceNodeConnectivityMap.end()) {
+        return(DC::OpenVariableRead(ts, varname, level, lod));
+    }
+
+    FileTable::FileObject *f = new FileTable::FileObject(ts, varname);
+    return (_fileTable.AddEntry(f));
+}
+
+int DCUGRID::Read(int fd, int *data) {
+
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    // Pass through normal read operation if this is not a synthesized 
+    // connectivity variable
+    //
+    if (_faceNodeConnectivityMap.find(f->GetVarname()) == _faceNodeConnectivityMap.end()) {
+        return(DC::Read(fd, data));
+    }
+
+    const vector <int> &connVar = _faceNodeConnectivityMap[f->GetVarname()];
+    std::copy_n(connVar.data(), connVar.size(), data);
+    return(0);
+}
+
+int DCUGRID::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *data)
+{
+
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    if (_faceNodeConnectivityMap.find(f->GetVarname()) == _faceNodeConnectivityMap.end()) {
+        return(DC::ReadRegion(fd, min, max, data));
+    }
+    VAssert(min.size() == max.size());
+
+    size_t n = 1;
+    for (int i=0; i<min.size(); i++) {
+        VAssert(min[i] == 0);
+        n *= max[i]+1;
+    }
+
+    const vector <int> &connVar = _faceNodeConnectivityMap[f->GetVarname()];
+    VAssert(n == connVar.size());
+    std::copy_n(connVar.data(), connVar.size(), data);
+    return(0);
+}
+
+int DCUGRID::CloseVariable(int fd) {
+
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    if (_faceNodeConnectivityMap.find(f->GetVarname()) == _faceNodeConnectivityMap.end()) {
+        return(DC::CloseVariable(fd));
+    }
+
+    _fileTable.RemoveEntry(fd);
+    delete f;
+
+    return(0);
 }
