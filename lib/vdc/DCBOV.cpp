@@ -287,7 +287,7 @@ template<class T> void DCBOV::_generateCoordinates(int dim, const vector<size_t>
     std::array<double, 3> brickSize = _bovCollection->GetBrickSize();
 
     double denom = (dataSize[dim] - 1);
-    double increment = denom == 0 ? 0 : brickSize[dim] / denom;
+    double increment = denom == 0. ? 0. : brickSize[dim] / denom;
     double start = origin[dim] + min[0] * increment;
     size_t steps = max[0] - min[0];
 
