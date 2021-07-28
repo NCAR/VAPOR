@@ -52,11 +52,32 @@ private:
     // Placeholder variables to store values read from BOV descriptor files.
     // These values must be consistent among BOV files, and are validated before
     // assigning to "actual" values such as _gridSize, declaired above.
-    std::array<size_t, 3> _tmpGridSize;
     DC::XType             _tmpDataFormat;
     std::array<double, 3> _tmpBrickOrigin;
     std::array<double, 3> _tmpBrickSize;
     size_t                _tmpByteOffset;
+
+    // Note - _tmpGridSize is an array of int type
+    //      - _gridSize is of type size_t
+    //      The reason for this is when we caluclate data indices like so...
+    //
+    //      int xSize = INT_MAX
+    //      int ySize = INT_MAX
+    //      int zSize = INT_MAX
+    //      size_t index = xSize*ySize*zSize;
+    //
+    //      ...the rvalue causes integer overflow.
+    //
+    //      _tmpGridSize cannot be an array of size_t because users may write
+    //      negative values.  The parser uses std::stringstream to convert
+    //      strings to different datatypes.  Unfortunately it does not fail when
+    //      converting negative string values such as "-10" to a size_t.  Rather,
+    //      it converts "-10" to a large positive value".
+    //
+    //      Therefore, we read the values in with _tmpGridSize as integers,
+    //      and then assign the integers to _gridSize if validation passes.
+    //      (Validation in this case: ensure non-negative values, and consistency across files)
+    std::array<int, 3> _tmpGridSize;
 
     bool _gridSizeAssigned;
     bool _formatAssigned;
