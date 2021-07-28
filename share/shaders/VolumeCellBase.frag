@@ -19,7 +19,7 @@ uniform sampler2DArray boxMaxs;
 uniform isampler2D levelDims;
 
 // Temporary workaround
-ivec3 skipCellWhenSearchingForInit = ivec3(-1);
+// ivec3 skipCellWhenSearchingForInit = ivec3(-1);
 
 #define DEBUG 0
 #define DEBUG_SHOW_CELL_INDEX 0
@@ -427,23 +427,23 @@ bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
     return dot(d, n) < 0;
 }
 
-vec3 GetCellNonHexahedralFaceNormalAtIntersection(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face)
-{
-    float t;
-    vec3 v0, v1, v2, v3, uvw;
-    GetFaceVertices(cellIndex, face, v0, v1, v2, v3);
-    
-    if (TRI_INSTERSECT_ROUTINE(o, d, 0, v0, v1, v2, t, uvw))
-        return GetTriangleNormal(v0, v1, v2);
-    else
-        return GetTriangleNormal(v0, v2, v3);
-}
-
-bool IsRayEnteringNonHexahedralCell(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face)
-{
-    vec3 n = GetCellNonHexahedralFaceNormalAtIntersection(o, d, cellIndex, face);
-    return dot(d, n) < 0;
-}
+// vec3 GetCellNonHexahedralFaceNormalAtIntersection(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face)
+// {
+//     float t;
+//     vec3 v0, v1, v2, v3, uvw;
+//     GetFaceVertices(cellIndex, face, v0, v1, v2, v3);
+//     
+//     if (TRI_INSTERSECT_ROUTINE(o, d, 0, v0, v1, v2, t, uvw))
+//         return GetTriangleNormal(v0, v1, v2);
+//     else
+//         return GetTriangleNormal(v0, v2, v3);
+// }
+// 
+// bool IsRayEnteringNonHexahedralCell(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face)
+// {
+//     vec3 n = GetCellNonHexahedralFaceNormalAtIntersection(o, d, cellIndex, face);
+//     return dot(d, n) < 0;
+// }
 
 void GetSideCellBBox(ivec3 cellIndex, int sideID, int fastDim, int slowDim, OUT vec3 bmin, OUT vec3 bmax)
 {
@@ -519,14 +519,14 @@ float DistToCellEdge(vec3 o, vec3 d, float t, ivec3 cell, ivec3 face)
 
 bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 index, ivec3 side, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
-    if (index == skipCellWhenSearchingForInit)
-        return false;
+    // if (index == skipCellWhenSearchingForInit) return false;
     float tFace;
     vec3 null;
     if (IntersectRayCellFace(origin, dir, t0, index, side, tFace, null)) {
-        if (IsRayEnteringNonHexahedralCell(origin, dir, index, side)) {
+        if (IsRayEnteringCell(dir, index, side)) {
             // Only update initial cell values if this is the closest cell
-            if (tFace > t0 && tFace < t1) {
+            // if (tFace > t0 && tFace < t1) {
+            if (tFace < t1) {
                 cellIndex = index;
                 entranceFace = side;
                 t1 = tFace;
@@ -653,7 +653,7 @@ void main(void)
         int i = 0;
         do {
             intersections = FindInitialCell(eye, dir, t0, initialCell, entranceFace, t1);
-            skipCellWhenSearchingForInit = initialCell;
+            // skipCellWhenSearchingForInit = initialCell;
             
             if (intersections > 0) {
                 vec4 color = Traverse(eye, dir, rayLightingNormal, tMin, tMax, t1, initialCell, entranceFace, t1);
@@ -661,14 +661,15 @@ void main(void)
             }
             
             // Failsafe to prevent infinite recursion due to float precision error
-            if (i++ > 8) {
+            // if (i++ > 8) {
+            if (i++ > 8 || t1-t0 <= EPSILON) {
                 break;
             }
-            if (t1-t0 <= EPSILON) {
-                float unitDistanceScaled = unitDistance / length(dir * scales);
-                float step = unitDistanceScaled/7.f/samplingRateMultiplier * GetSamplingNoise();
-                t1 = t0 + step;
-            }
+            // if (t1-t0 <= EPSILON) {
+            //     float unitDistanceScaled = unitDistance / length(dir * scales);
+            //     float step = unitDistanceScaled/7.f/samplingRateMultiplier * GetSamplingNoise();
+            //     t1 = t0 + step;
+            // }
 
 
 			if (accum.a > ALPHA_BREAK)
