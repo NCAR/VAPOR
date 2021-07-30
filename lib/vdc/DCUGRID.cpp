@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 
+#include <vapor/GeoUtil.h>
 #include <vapor/DCUtils.h>
 #include <vapor/DCUGRID.h>
 #include <vapor/VAssert.h>
@@ -340,6 +341,7 @@ int DCUGRID::_initFaceNodeConnectivityMap(NetCDFCFCollection *ncdfc) {
             SetErrMsg("Unable to read longitude coordinate variable %s", lonVarName.c_str());
             return(rc);
         }
+        GeoUtil::ShiftLon(lonVar.begin(), lonVar.end());
 
         unzipLongitude(connVar, connVarDims[1], connVarDims[0], lonVar, missingNode);
 

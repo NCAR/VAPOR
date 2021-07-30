@@ -294,7 +294,7 @@ int GeoImageGeoTiff::_getGTIFInfo(TIFF *tif, size_t width, size_t height, double
         ostringstream oss;
         oss.precision(12);
         oss << " +lon_0=" << lon_0 << " +lat_0=" << lat_0;
-        proj4String = "+proj=eqc +ellps=WGS84" + oss.str();
+        proj4String = "+proj=eqc +over +ellps=WGS84" + oss.str();
         int rc = proj4API.Initialize("", proj4String);
         if (rc < 0) return (-1);
 

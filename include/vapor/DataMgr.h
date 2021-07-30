@@ -857,6 +857,8 @@ private:
         return (_hasVerticalXForm(meshname, standard_name, formula_terms));
     }
 
+    bool _isCoordVarInUse(string varName) const;
+
     // Hide public DC::GetDimLensAtLevel by making it private
     //
     virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts) const;

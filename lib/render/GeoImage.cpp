@@ -5,7 +5,6 @@
 #include <cmath>
 #include <cstdio>
 #include <sys/stat.h>
-#include <vapor/GeoUtil.h>
 #include <vapor/Proj4API.h>
 
 #include "vapor/GeoImage.h"
@@ -254,62 +253,11 @@ int GeoImage::CornerExtents(const double srccoords[4], double dstcoords[4], stri
     int      rc = proj4API.Initialize(proj4src, "");
     if (rc < 0) return (-1);
 
-#ifdef VAPOR3_0_0_ALPHA
-    double corners[8] = {
-        srccoords[0],    // llx
-        srccoords[1],    // lly
-        srccoords[0],    // ulx
-        srccoords[3],    // uly
-        srccoords[2],    // urx
-        srccoords[3],    // ury
-        srccoords[2],    // lrx
-        srccoords[1]     // lry
-    };
-
-    int     nsamples = 16;
-    int     ntotal = 2 * nsamples + 2 * nsamples;
-    double *xsamples = new double[2 * ntotal];
-    double *ysamples = xsamples + ntotal;
-    double *xptr = xsamples;
-    double *yptr = ysamples;
-
-    // Walk along each boundary
-    //
-    double deltax = (corners[2] - corners[0]) / (double)(nsamples - 1);
-    double deltay = (corners[3] - corners[1]) / (double)(nsamples - 1);
-    for (int i = 0; i < nsamples; i++) {
-        *xptr++ = corners[0] + (i * deltax);
-        *yptr++ = corners[1] + (i * deltay);
-    }
-
-    deltax = (corners[4] - corners[2]) / (double)(nsamples - 1);
-    deltay = (corners[5] - corners[3]) / (double)(nsamples - 1);
-    for (int i = 0; i < nsamples; i++) {
-        *xptr++ = corners[2] + (i * deltax);
-        *yptr++ = corners[3] + (i * deltay);
-    }
-
-    deltax = (corners[6] - corners[4]) / (double)(nsamples - 1);
-    deltay = (corners[7] - corners[5]) / (double)(nsamples - 1);
-    for (int i = 0; i < nsamples; i++) {
-        *xptr++ = corners[4] + (i * deltax);
-        *yptr++ = corners[5] + (i * deltay);
-    }
-
-    deltax = (corners[0] - corners[6]) / (double)(nsamples - 1);
-    deltay = (corners[1] - corners[7]) / (double)(nsamples - 1);
-    for (int i = 0; i < nsamples; i++) {
-        *xptr++ = corners[6] + (i * deltax);
-        *yptr++ = corners[7] + (i * deltay);
-    }
-
-#else
-
-    int     nx = 256;
-    int     ny = 256;
-    int     ntotal = nx * ny;
-    double *xsamples = new double[2 * ntotal];
-    double *ysamples = xsamples + ntotal;
+    size_t     nx = 256;
+    size_t     ny = 256;
+    size_t     ntotal = nx * ny;
+    std::vector <double> xsamples(ntotal);
+    std::vector <double> ysamples(ntotal);
 
     double deltax = (srccoords[2] - srccoords[0]) / (double)(nx - 1);
     double deltay = (srccoords[3] - srccoords[1]) / (double)(ny - 1);
@@ -321,22 +269,15 @@ int GeoImage::CornerExtents(const double srccoords[4], double dstcoords[4], stri
         }
     }
 
-#endif
-
-    proj4API.Transform(xsamples, ysamples, ntotal, 1);
-
-    double minx = xsamples[0];
-    double maxx = xsamples[0];
-    double miny = ysamples[0];
-    double maxy = ysamples[0];
+    proj4API.Transform(xsamples.data(), ysamples.data(), ntotal, 1);
 
     // Find the extents the extents of the
     // entire enclosed region
     //
-    GeoUtil::LonExtents(xsamples, nx, ny, minx, maxx);
-    GeoUtil::LatExtents(ysamples, nx, ny, miny, maxy);
-
-    delete[] xsamples;
+    double minx = *(std::min_element(xsamples.begin(), xsamples.end()));
+    double maxx = *(std::max_element(xsamples.begin(), xsamples.end()));
+    double miny = *(std::min_element(ysamples.begin(), ysamples.end()));
+    double maxy = *(std::max_element(ysamples.begin(), ysamples.end()));
 
     // still needed?
     //

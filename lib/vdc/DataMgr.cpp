@@ -7,7 +7,6 @@
 #include <vector>
 #include <map>
 #include <type_traits>
-#include <vapor/GeoUtil.h>
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCWRF.h>
 #include <vapor/DCCF.h>
@@ -583,6 +582,7 @@ int DataMgr::_parseOptions(vector<string> &options)
     }
     return (0);
 }
+
 
 int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &options)
 {
@@ -2253,6 +2253,22 @@ bool DataMgr::_hasVerticalXForm(string meshname, string &standard_name, string &
     return (false);
 }
 
+bool DataMgr::_isCoordVarInUse(string varName) const {
+
+    std::vector <string> dataVars = GetDataVarNames();
+
+    for (auto dataVar : dataVars) {
+		std::vector <string> coordVars;
+		bool ok = GetVarCoordVars(dataVar, false, coordVars);
+		if (!ok) continue;
+
+        if (find(coordVars.begin(), coordVars.end(), varName) != coordVars.end()) {
+            return(true);
+        }
+    }
+    return(false);
+}
+
 template<typename C> string DataMgr::VarInfoCache<C>::_make_hash(string key, size_t ts, vector<string> varnames, int level, int lod)
 {
     ostringstream oss;
@@ -2492,7 +2508,19 @@ int DataMgr::_initTimeCoord()
 {
     _timeCoordinates.clear();
 
-    vector<string> vars = _dc->GetTimeCoordVarNames();
+
+    // A data collection can have multiple time variables, but 
+    // the DataMgr currently can only handle one. If there are
+    // multiple time coordinate variables figure out how many 
+    // are actually in use.
+    //
+    vector<string> vars;
+    for (auto varName : _dc->GetTimeCoordVarNames()) {
+        if (_isCoordVarInUse(varName)) {
+            vars.push_back(varName);
+        }
+    }
+    
     if (vars.size() > 1) {
         SetErrMsg("Data set contains more than one time coordinate");
         return (-1);
@@ -3150,32 +3178,17 @@ int DataMgr::_getLatlonExtents(string varname, bool lonflag, float &min, float &
         return (-1);
     }
 
-    float *buf = new float[VProduct(dims)];
+    vector <float> buf(VProduct(dims));
 
-    rc = _getVar(0, varname, 0, 0, buf);
+    rc = _getVar(0, varname, 0, 0, buf.data());
     if (rc < 0) return (-1);
 
-    //
-    // Precondition longitude coordinates so that there are no
-    // discontinuities (e.g. jumping 360 to 0, or -180 to 180)
-    //
-    if (lonflag) {
-        if (dims.size() == 2) {
-            GeoUtil::ShiftLon(buf, dims[0], dims[1], buf);
-            GeoUtil::LonExtents(buf, dims[0], dims[1], min, max);
-        } else {
-            GeoUtil::ShiftLon(buf, dims[0], buf);
-            GeoUtil::LonExtents(buf, dims[0], min, max);
-        }
-    } else {
-        if (dims.size() == 2) {
-            GeoUtil::LatExtents(buf, dims[0], dims[1], min, max);
-        } else {
-            GeoUtil::LatExtents(buf, dims[0], min, max);
-        }
-    }
 
-    delete[] buf;
+    std::vector<float>::iterator itr = std::min_element(buf.begin(), buf.end());
+    min = *itr;
+
+    itr = std::max_element(buf.begin(), buf.end());
+    max = *itr;
 
     return (0);
 }
@@ -3228,7 +3241,7 @@ int DataMgr::_initProj4StringDefault()
     float         lat_0 = (latmin + latmax) / 2.0;
     ostringstream oss;
     oss << " +lon_0=" << lon_0 << " +lat_0=" << lat_0;
-    _proj4StringDefault = "+proj=eqc +ellps=WGS84" + oss.str();
+    _proj4StringDefault = "+proj=eqc +over +ellps=WGS84" + oss.str();
 
     return (0);
 }
