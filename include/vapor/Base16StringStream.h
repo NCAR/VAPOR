@@ -4,7 +4,7 @@
 #include <ostream>
 #include <istream>
 #include <memory>
-
+#include <vapor/common.h>
 
 
 //! \class Base16StreamBuf
@@ -13,7 +13,7 @@
 //!
 //! \author Stanislaw Jaroszynski
 
-class Base16StreamBuf : public std::streambuf {
+class COMMON_API Base16StreamBuf : public std::streambuf {
 public:
     std::string      _string;
     int              _i = 0;
@@ -27,7 +27,7 @@ public:
 //!
 //! \author Stanislaw Jaroszynski
 
-class Base16StringStream : public std::ostream {
+class COMMON_API Base16StringStream : public std::ostream {
     Base16StreamBuf _buf;
 
 public:
@@ -43,7 +43,7 @@ public:
 //!
 //! \author Stanislaw Jaroszynski
 
-class Base16DecoderStream : public std::istream {
+class COMMON_API Base16DecoderStream : public std::istream {
     struct MemBuf : std::streambuf {
         MemBuf(char *buf, size_t size) { this->setg(buf, buf, buf + size); }
     };

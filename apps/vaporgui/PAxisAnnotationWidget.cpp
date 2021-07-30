@@ -10,7 +10,7 @@
 #include "AnimationParams.h"
 #include "ErrorReporter.h"
 
-PAxisAnnotationWidget::PAxisAnnotationWidget(VAPoR::ControlExec *controlExec) : PWidget("", _group = new VGroup)
+PAxisAnnotationWidget::PAxisAnnotationWidget(VAPoR::ControlExec *controlExec) : PWidget("", _group = new VGroup())
 {
     _controlExec = controlExec;
 

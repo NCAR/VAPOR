@@ -36,6 +36,7 @@ DCBOV::~DCBOV()
 
 int DCBOV::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
+    if (_bovCollection != nullptr) delete _bovCollection;
     _bovCollection = new BOVCollection();
     int rc = _bovCollection->Initialize(paths);
     if (rc < 0) {
@@ -285,7 +286,8 @@ template<class T> void DCBOV::_generateCoordinates(int dim, const vector<size_t>
     std::array<double, 3> origin = _bovCollection->GetBrickOrigin();
     std::array<double, 3> brickSize = _bovCollection->GetBrickSize();
 
-    double increment = brickSize[dim] / (dataSize[dim] - 1);
+    double denom = (dataSize[dim] - 1);
+    double increment = denom == 0. ? 0. : brickSize[dim] / denom;
     double start = origin[dim] + min[0] * increment;
     size_t steps = max[0] - min[0];
 
