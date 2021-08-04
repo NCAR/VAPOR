@@ -17,6 +17,22 @@ August 4, 2021
 
 `Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
 
+Vapor's release cycle is accelerating, and now 3.5.0 is live.
+New improvements include:
+    - New particle data reader: Data Collection Particles (DCP)
+    - New raw data reader: Brick of Values (BOV)- Bookmarks 
+    - Easily, and visually save your state
+    - Further improvements that streamline Vapor's GUI- Faster data access with OpenMP 
+
+As well as many other reported issues, including the 1/4 canvas bug on BigSur.  Thanks to users ViggoHanst and Fortran for reporting this.
+
+Thank you to everyone who has helped steer us by filling out our survey for 3.6 features.  The survey is still live, so please fill it out if you have 5 minutes.
+
+Please `engage us on our forum<https://vapor.discourse.group/>`_.
+
+Thank you!
+-The Vapor Team
+
 We need your feedback!
 ======================
 
@@ -48,16 +64,16 @@ Version 3.4 is Vapor's first usability-focused release.  See some of the new fea
     <iframe width="560" height="315" src="https://www.youtube.com/embed/8FabwuxxbDo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 Major usability improvements include:
-- Improved algorithm for the Flow renderer's random seeding bias variable
-- Data-independent settings (e.g. Cache size) can now be modified before data is loaded
-- Restructuring of Vapor's top-level tabs
-- New and improved Colorbars
-- Improved functionality of the Geometry tab
-- Better space management of the Renderer Table
+    - Improved algorithm for the Flow renderer's random seeding bias variable
+    - Data-independent settings (e.g. Cache size) can now be modified before data is loaded
+    - Restructuring of Vapor's top-level tabs
+    - New and improved Colorbars
+    - Improved functionality of the Geometry tab
+    - Better space management of the Renderer Table
 
 Other notable issues include:
-- Addition of clang-format linter, and git pre-push hook
-- Fixed weekly builds on all platforms
+    - Addition of clang-format linter, and git pre-push hook
+    - Fixed weekly builds on all platforms
 
 A comprehensive list of fixes can be viewed in `the 3_4_0 release milestone. <https://github.com/NCAR/VAPOR/issues?q=is%3Aissue+milestone%3A%223_4_0+release%22+is%3Aclosed>`_
 
