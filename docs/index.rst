@@ -75,7 +75,7 @@ VAPOR is a product of the National Center for Atmospheric Research’s Computati
 
    downloads
    quickStartGuide
-   gettingDataIntoVapor
+   data/gettingDataIntoVapor
    data/gettingDataIntoVapor2
    usage
    YouTube Channel <https://www.youtube.com/channel/UCpf-d1GDO1sotzjJ2t_QkDw>

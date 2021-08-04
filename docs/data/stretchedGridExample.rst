@@ -3,7 +3,7 @@
 Stretched Grids
 ---------------
 
-Here we demonstrate how to use *xarray* to apply the CF Conventions to a basic NetCDF file (`simple.nc <https://drive.google.com/file/d/18CFrtFxvHwfL30Xd91TNU38J_z-Kgywm/view?usp=sharing>`_) to define it on a stretched grid, for ingesting into Vapor.  You can download this Python script ***NEED LINK*** that replicates the steps below.
+Here we demonstrate how to use *xarray* to apply the CF Conventions to a basic NetCDF file (`simple.nc <https://drive.google.com/file/d/18CFrtFxvHwfL30Xd91TNU38J_z-Kgywm/view?usp=sharing>`_) to define it on a stretched grid, for ingesting into Vapor.  You can download `this Python script <https://github.com/NCAR/VAPOR/blob/readTheDocs/docs/data/stretchedToCF.py>`_ that replicates the steps below.
 
 Our simple.nc file only defines X, Y, and Z spatial dimensions, a time dimension, and one scalar variable named temperature.  To make it comply with the CF Conventions, we need to do the following:
 
