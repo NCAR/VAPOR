@@ -10,6 +10,13 @@
 .. |
 .. |
 
+Vapor 3.5.0 is now Live!
+========================
+
+August 4, 2021
+
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+
 We need your feedback!
 ======================
 
@@ -76,7 +83,6 @@ VAPOR is a product of the National Center for Atmospheric Research’s Computati
    downloads
    quickStartGuide
    data/gettingDataIntoVapor
-   data/gettingDataIntoVapor2
    usage
    YouTube Channel <https://www.youtube.com/channel/UCpf-d1GDO1sotzjJ2t_QkDw>
    Get Help on Our Forum <https://vapor.discourse.group>
