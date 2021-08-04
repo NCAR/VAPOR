@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <sys/stat.h>
 #include <vapor/Proj4API.h>
+#include <vapor/GeoUtil.h>
 
 #include "vapor/GeoImage.h"
 #ifdef WIN32
@@ -272,12 +273,18 @@ int GeoImage::CornerExtents(const double srccoords[4], double dstcoords[4], stri
     proj4API.Transform(xsamples.data(), ysamples.data(), ntotal, 1);
 
     // Find the extents the extents of the
-    // entire enclosed region
+    // entire enclosed region. The inverse Proj4 transform does not prevent
+    // wraparound
     //
-    double minx = *(std::min_element(xsamples.begin(), xsamples.end()));
-    double maxx = *(std::max_element(xsamples.begin(), xsamples.end()));
-    double miny = *(std::min_element(ysamples.begin(), ysamples.end()));
-    double maxy = *(std::max_element(ysamples.begin(), ysamples.end()));
+	for (size_t j=0; j<ny; j++) {
+		GeoUtil::UnwrapLongitude(xsamples.begin()+(j*nx), xsamples.begin()+(j*nx)+nx);
+		GeoUtil::ShiftLon(xsamples.begin()+(j*nx), xsamples.begin()+(j*nx)+nx);
+
+    }
+	double minx = *(std::min_element(xsamples.begin(), xsamples.end()));
+	double maxx = *(std::max_element(xsamples.begin(), xsamples.end()));
+	double miny = *(std::min_element(ysamples.begin(), ysamples.end()));
+	double maxy = *(std::max_element(ysamples.begin(), ysamples.end()));
 
     // still needed?
     //

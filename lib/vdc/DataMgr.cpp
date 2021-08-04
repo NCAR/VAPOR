@@ -20,6 +20,7 @@
 #endif
 #include <vapor/DCUGRID.h>
 #include <vapor/DataMgr.h>
+#include <vapor/GeoUtil.h>
 #ifdef WIN32
     #include <float.h>
 #endif
@@ -3165,43 +3166,87 @@ int DataMgr::_getVar(size_t ts, string varname, int level, int lod, float *data)
     return (0);
 }
 
-int DataMgr::_getLatlonExtents(string varname, bool lonflag, float &min, float &max, long ts)
+void DataMgr::_getLonExtents(vector <float> & lons, vector <size_t> dims, float &min, float &max) const
 {
-    vector<size_t> dims, dummy;
-    int            rc = _dc->GetDimLensAtLevel(varname, 0, dims, dummy, ts);
-    if (rc < 0) {
-        SetErrMsg("Invalid variable reference : %s", varname.c_str());
-        return (-1);
+    min = max = 0.0;
+    VAssert(dims.size() == 1 || dims.size() == 2);
+
+    if (! lons.size()) return;
+
+	size_t nx = dims[0];
+	size_t ny = dims.size() > 1 ? dims[1] : 1;
+	for (size_t j=0; j<dims[1]; j++) {
+
+		GeoUtil::UnwrapLongitude(lons.begin()+(j*nx), lons.begin()+(j*nx)+nx);
+		GeoUtil::ShiftLon(lons.begin()+(j*nx), lons.begin()+(j*nx)+nx);
+	}
+	min = *(std::min_element(lons.begin(), lons.end()));
+	max = *(std::max_element(lons.begin(), lons.end()));
+
+}
+
+void DataMgr::_getLatExtents(vector <float> & lats, vector <size_t> dims, float &min, float &max) const
+{
+    min = max = 0.0;
+    VAssert(dims.size() == 1 || dims.size() == 2);
+
+    if (! lats.size()) return;
+
+    if (dims.size() == 1) {
+        min = lats[0], max = lats[lats.size() - 1];
     }
-    if (!(dims.size() == 1 || dims.size() == 2)) {
-        SetErrMsg("Unsupported variable dimension for variable \"%s\"", varname.c_str());
-        return (-1);
+    else {
+        
+        // Search only the top and bottom row
+        //
+        size_t nx = dims[0];
+        size_t ny = dims[1];
+        min = *(std::min_element(lats.begin(), lats.begin()+nx));
+        max = *(std::max_element(lats.begin(), lats.begin()+nx));
+
+        min = std::min(min, *(std::min_element(lats.begin()+((ny-1)*nx), lats.begin()+(ny*nx)-1)));
+        max = std::max(max, *(std::max_element(lats.begin()+((ny-1)*nx), lats.begin()+(ny*nx)-1)));
     }
-
-    vector <float> buf(VProduct(dims));
-
-    rc = _getVar(0, varname, 0, 0, buf.data());
-    if (rc < 0) return (-1);
-
-
-    std::vector<float>::iterator itr = std::min_element(buf.begin(), buf.end());
-    min = *itr;
-
-    itr = std::max_element(buf.begin(), buf.end());
-    max = *itr;
-
-    return (0);
 }
 
 int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax, long ts)
 {
     lonmin = lonmax = latmin = latmax = 0.0;
 
-    int rc = _getLatlonExtents(lon, true, lonmin, lonmax, ts);
+    vector<size_t> dims, dummy;
+    int            rc = _dc->GetDimLensAtLevel(lon, 0, dims, dummy, ts);
+    if (rc < 0) {
+        SetErrMsg("Invalid variable reference : %s", lon.c_str());
+        return (-1);
+    }
+    if (!(dims.size() == 1 || dims.size() == 2)) {
+        SetErrMsg("Unsupported variable dimension for variable \"%s\"", lon.c_str());
+        return (-1);
+    }
+
+    vector <float> buf(VProduct(dims));
+
+    rc = _getVar(0, lon, 0, 0, buf.data());
     if (rc < 0) return (-1);
 
-    rc = _getLatlonExtents(lat, false, latmin, latmax, ts);
+    _getLonExtents(buf, dims, lonmin, lonmax);
+
+    rc = _dc->GetDimLensAtLevel(lat, 0, dims, dummy, ts);
+    if (rc < 0) {
+        SetErrMsg("Invalid variable reference : %s", lat.c_str());
+        return (-1);
+    }
+    if (!(dims.size() == 1 || dims.size() == 2)) {
+        SetErrMsg("Unsupported variable dimension for variable \"%s\"", lat.c_str());
+        return (-1);
+    }
+
+    buf.resize(VProduct(dims));
+
+    rc = _getVar(0, lat, 0, 0, buf.data());
     if (rc < 0) return (-1);
+
+    _getLatExtents(buf, dims, latmin, latmax);
 
     return (0);
 }
@@ -3241,7 +3286,7 @@ int DataMgr::_initProj4StringDefault()
     float         lat_0 = (latmin + latmax) / 2.0;
     ostringstream oss;
     oss << " +lon_0=" << lon_0 << " +lat_0=" << lat_0;
-    _proj4StringDefault = "+proj=eqc +over +ellps=WGS84" + oss.str();
+    _proj4StringDefault = "+proj=eqc +ellps=WGS84" + oss.str();
 
     return (0);
 }

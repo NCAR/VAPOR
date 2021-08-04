@@ -837,7 +837,9 @@ private:
 
     int _getVar(size_t ts, string varname, int level, int lod, float *data);
 
-    int _getLatlonExtents(string varname, bool lonflag, float &min, float &max, long ts);
+    void _getLonExtents(std::vector <float> & lons, std::vector <size_t> dims, float &min, float &max) const;
+
+    void _getLatExtents(std::vector <float> & lons, std::vector <size_t> dims, float &min, float &max) const;
 
     int _getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax, long ts);
 

@@ -45,6 +45,8 @@ protected:
 
     int initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMap) override;
 
+    string getMapProjection() const override { return ("+proj=eqc +ellps=WGS84 +lon_0=0.0 +lat_0=0.0"); }
+
 private:
 
     // Struct to contain the most general form of UGRID mesh

@@ -189,7 +189,6 @@ unsigned char *GeoImageTMS::GetImage(size_t ts, const double pcsExtentsReq[4], s
         double        lon_0 = (myGeoExtentsData[0] + myGeoExtentsData[2]) / 2.0;
         ostringstream oss;
         oss.precision(12);
-        oss << " +over";	// extents outside -180.0 .. 180.0
         oss << " +lon_0=" << lon_0;
         string::size_type first = proj4StringImg.find("+lon_0");
         if (first == string::npos) {

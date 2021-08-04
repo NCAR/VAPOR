@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include <vapor/GeoUtil.h>
 
 using namespace std;
@@ -17,17 +18,52 @@ template<class T> void _minmax(const T *a, int n, int stride, T &min, T &max)
 }
 //
 // Shift 1D array of longitudes, if needed, such that values
-// are in the range [-180.0..180.0)
+// are in the range [-360.0..360.0)
 //
 template<class ForwardIt>
 void shiftLonTemplate(ForwardIt first, ForwardIt last)
 { 
-    for (auto itr = first; itr != last; ++itr) {
-        while (*itr < -180.0) { 
-            *itr += 360;
+
+    auto min = *(std::min_element(first, last));
+    auto max = *(std::max_element(first, last));
+
+    if (max > 360.0) {
+        double delta = 0.0;
+        while (max > 360.0) {
+            max -= 360.0;
+            delta += 360.0;
         }
-        while (*itr >= 180.0) { 
-            *itr -= 360;
+        for (auto itr = first; itr != last; ++itr) {
+            *itr -= delta;
+        }
+    }
+    if (min < -360.0) {
+        double delta = 0.0;
+        while (min < -360.0) {
+            min += 360.0;
+            delta -= 360.0;
+        }
+        for (auto itr = first; itr != last; ++itr) {
+            *itr -= delta;
+        }
+    }
+}
+
+//
+// Make longitude values monotonically increasing 
+//
+template<class ForwardIt>
+void unwrapLongitudeTemplate(ForwardIt first, ForwardIt last)
+{ 
+    auto itr = first;
+    if (itr == last) return;
+
+    auto startValue = *itr;
+    ++itr;
+
+    for (; itr != last; ++itr) {
+        while (*itr < startValue) { 
+            *itr += 360.0;
         }
     }
 }
@@ -48,7 +84,11 @@ template<class T> void _ExtractBoundaryTemplate(const T *a, int nx, int ny, T *b
 
 void GeoUtil::ShiftLon(vector <float>::iterator first, vector <float>::iterator last) { shiftLonTemplate(first, last); }
 void GeoUtil::ShiftLon(vector <double>::iterator first, vector <double>::iterator last) { shiftLonTemplate(first, last); }
+void GeoUtil::ShiftLon(float *first, float *last) { shiftLonTemplate(first, last); }
 
+void GeoUtil::UnwrapLongitude(vector <float>::iterator first, vector <float>::iterator last) { unwrapLongitudeTemplate(first, last); }
+void GeoUtil::UnwrapLongitude(vector <double>::iterator first, vector <double>::iterator last) { unwrapLongitudeTemplate(first, last); }
+void GeoUtil::UnwrapLongitude(float *first, float *last) { unwrapLongitudeTemplate(first, last); }
 
 
 void GeoUtil::ExtractBoundary(const float *a, int nx, int ny, float *bdry) { _ExtractBoundaryTemplate(a, nx, ny, bdry); }
