@@ -254,11 +254,11 @@ int GeoImage::CornerExtents(const double srccoords[4], double dstcoords[4], stri
     int      rc = proj4API.Initialize(proj4src, "");
     if (rc < 0) return (-1);
 
-    size_t     nx = 256;
-    size_t     ny = 256;
-    size_t     ntotal = nx * ny;
-    std::vector <double> xsamples(ntotal);
-    std::vector <double> ysamples(ntotal);
+    size_t              nx = 256;
+    size_t              ny = 256;
+    size_t              ntotal = nx * ny;
+    std::vector<double> xsamples(ntotal);
+    std::vector<double> ysamples(ntotal);
 
     double deltax = (srccoords[2] - srccoords[0]) / (double)(nx - 1);
     double deltay = (srccoords[3] - srccoords[1]) / (double)(ny - 1);
@@ -276,15 +276,14 @@ int GeoImage::CornerExtents(const double srccoords[4], double dstcoords[4], stri
     // entire enclosed region. The inverse Proj4 transform does not prevent
     // wraparound
     //
-	for (size_t j=0; j<ny; j++) {
-		GeoUtil::UnwrapLongitude(xsamples.begin()+(j*nx), xsamples.begin()+(j*nx)+nx);
-		GeoUtil::ShiftLon(xsamples.begin()+(j*nx), xsamples.begin()+(j*nx)+nx);
-
+    for (size_t j = 0; j < ny; j++) {
+        GeoUtil::UnwrapLongitude(xsamples.begin() + (j * nx), xsamples.begin() + (j * nx) + nx);
+        GeoUtil::ShiftLon(xsamples.begin() + (j * nx), xsamples.begin() + (j * nx) + nx);
     }
-	double minx = *(std::min_element(xsamples.begin(), xsamples.end()));
-	double maxx = *(std::max_element(xsamples.begin(), xsamples.end()));
-	double miny = *(std::min_element(ysamples.begin(), ysamples.end()));
-	double maxy = *(std::max_element(ysamples.begin(), ysamples.end()));
+    double minx = *(std::min_element(xsamples.begin(), xsamples.end()));
+    double maxx = *(std::max_element(xsamples.begin(), xsamples.end()));
+    double miny = *(std::min_element(ysamples.begin(), ysamples.end()));
+    double maxy = *(std::max_element(ysamples.begin(), ysamples.end()));
 
     // still needed?
     //

@@ -207,15 +207,12 @@ void test_get_value(Grid *g)
         Grid::ConstCoordItr c_itr = g->ConstCoordBegin() + istart;
 
         for (size_t i = istart; i < iend; i++, ++itr, ++c_itr) {
-
             float v0 = *itr;
 
             float v1 = g->GetValue(*c_itr);
 
 
-            if (! Wasp::NearlyEqual(v0, v1)) {
-                my_ecount++; 
-            }
+            if (!Wasp::NearlyEqual(v0, v1)) { my_ecount++; }
             my_count++;
         }
 #pragma omp critical

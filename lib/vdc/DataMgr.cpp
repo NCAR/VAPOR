@@ -2254,20 +2254,18 @@ bool DataMgr::_hasVerticalXForm(string meshname, string &standard_name, string &
     return (false);
 }
 
-bool DataMgr::_isCoordVarInUse(string varName) const {
-
-    std::vector <string> dataVars = GetDataVarNames();
+bool DataMgr::_isCoordVarInUse(string varName) const
+{
+    std::vector<string> dataVars = GetDataVarNames();
 
     for (auto dataVar : dataVars) {
-		std::vector <string> coordVars;
-		bool ok = GetVarCoordVars(dataVar, false, coordVars);
-		if (!ok) continue;
+        std::vector<string> coordVars;
+        bool                ok = GetVarCoordVars(dataVar, false, coordVars);
+        if (!ok) continue;
 
-        if (find(coordVars.begin(), coordVars.end(), varName) != coordVars.end()) {
-            return(true);
-        }
+        if (find(coordVars.begin(), coordVars.end(), varName) != coordVars.end()) { return (true); }
     }
-    return(false);
+    return (false);
 }
 
 template<typename C> string DataMgr::VarInfoCache<C>::_make_hash(string key, size_t ts, vector<string> varnames, int level, int lod)
@@ -2510,18 +2508,16 @@ int DataMgr::_initTimeCoord()
     _timeCoordinates.clear();
 
 
-    // A data collection can have multiple time variables, but 
+    // A data collection can have multiple time variables, but
     // the DataMgr currently can only handle one. If there are
-    // multiple time coordinate variables figure out how many 
+    // multiple time coordinate variables figure out how many
     // are actually in use.
     //
     vector<string> vars;
     for (auto varName : _dc->GetTimeCoordVarNames()) {
-        if (_isCoordVarInUse(varName)) {
-            vars.push_back(varName);
-        }
+        if (_isCoordVarInUse(varName)) { vars.push_back(varName); }
     }
-    
+
     if (vars.size() > 1) {
         SetErrMsg("Data set contains more than one time coordinate");
         return (-1);
@@ -3166,46 +3162,42 @@ int DataMgr::_getVar(size_t ts, string varname, int level, int lod, float *data)
     return (0);
 }
 
-void DataMgr::_getLonExtents(vector <float> & lons, vector <size_t> dims, float &min, float &max) const
+void DataMgr::_getLonExtents(vector<float> &lons, vector<size_t> dims, float &min, float &max) const
 {
     min = max = 0.0;
     VAssert(dims.size() == 1 || dims.size() == 2);
 
-    if (! lons.size()) return;
+    if (!lons.size()) return;
 
-	size_t nx = dims[0];
-	size_t ny = dims.size() > 1 ? dims[1] : 1;
-	for (size_t j=0; j<dims[1]; j++) {
-
-		GeoUtil::UnwrapLongitude(lons.begin()+(j*nx), lons.begin()+(j*nx)+nx);
-		GeoUtil::ShiftLon(lons.begin()+(j*nx), lons.begin()+(j*nx)+nx);
-	}
-	min = *(std::min_element(lons.begin(), lons.end()));
-	max = *(std::max_element(lons.begin(), lons.end()));
-
+    size_t nx = dims[0];
+    size_t ny = dims.size() > 1 ? dims[1] : 1;
+    for (size_t j = 0; j < dims[1]; j++) {
+        GeoUtil::UnwrapLongitude(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
+        GeoUtil::ShiftLon(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
+    }
+    min = *(std::min_element(lons.begin(), lons.end()));
+    max = *(std::max_element(lons.begin(), lons.end()));
 }
 
-void DataMgr::_getLatExtents(vector <float> & lats, vector <size_t> dims, float &min, float &max) const
+void DataMgr::_getLatExtents(vector<float> &lats, vector<size_t> dims, float &min, float &max) const
 {
     min = max = 0.0;
     VAssert(dims.size() == 1 || dims.size() == 2);
 
-    if (! lats.size()) return;
+    if (!lats.size()) return;
 
     if (dims.size() == 1) {
         min = lats[0], max = lats[lats.size() - 1];
-    }
-    else {
-        
+    } else {
         // Search only the top and bottom row
         //
         size_t nx = dims[0];
         size_t ny = dims[1];
-        min = *(std::min_element(lats.begin(), lats.begin()+nx));
-        max = *(std::max_element(lats.begin(), lats.begin()+nx));
+        min = *(std::min_element(lats.begin(), lats.begin() + nx));
+        max = *(std::max_element(lats.begin(), lats.begin() + nx));
 
-        min = std::min(min, *(std::min_element(lats.begin()+((ny-1)*nx), lats.begin()+(ny*nx)-1)));
-        max = std::max(max, *(std::max_element(lats.begin()+((ny-1)*nx), lats.begin()+(ny*nx)-1)));
+        min = std::min(min, *(std::min_element(lats.begin() + ((ny - 1) * nx), lats.begin() + (ny * nx) - 1)));
+        max = std::max(max, *(std::max_element(lats.begin() + ((ny - 1) * nx), lats.begin() + (ny * nx) - 1)));
     }
 }
 
@@ -3224,7 +3216,7 @@ int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &
         return (-1);
     }
 
-    vector <float> buf(VProduct(dims));
+    vector<float> buf(VProduct(dims));
 
     rc = _getVar(0, lon, 0, 0, buf.data());
     if (rc < 0) return (-1);

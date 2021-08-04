@@ -19,12 +19,11 @@ namespace VAPoR {
 //!
 class VDF_API GeoUtil : public Wasp::MyBase {
 public:
-
     //! Shift a container of longitude values so that all
     //! values are in the range [-180.0..180.0)
     //
-    static void ShiftLon(vector <float>::iterator first, vector <float>::iterator last);
-    static void ShiftLon(vector <double>::iterator first, vector <double>::iterator last);
+    static void ShiftLon(vector<float>::iterator first, vector<float>::iterator last);
+    static void ShiftLon(vector<double>::iterator first, vector<double>::iterator last);
     static void ShiftLon(float *first, float *last);
 
     //! Unwrap any wrapped longitued values
@@ -32,8 +31,8 @@ public:
     //! Iteratively adds 360.0 to each value in a container that is less than
     //! the first value until the new value is greater than the first.
     //
-    static void UnwrapLongitude(vector <float>::iterator first, vector <float>::iterator last);
-    static void UnwrapLongitude(vector <double>::iterator first, vector <double>::iterator last);
+    static void UnwrapLongitude(vector<float>::iterator first, vector<float>::iterator last);
+    static void UnwrapLongitude(vector<double>::iterator first, vector<double>::iterator last);
     static void UnwrapLongitude(float *first, float *last);
 
     //! Extract boundary points from a 2D grid
