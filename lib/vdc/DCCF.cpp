@@ -94,20 +94,20 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
     }
 
     //
-    // Identify auxilliary variables. 
+    // Identify auxilliary variables.
     //
     rc = initAuxilliaryVars(ncdfc, _auxVarsMap);
     if (rc < 0) return (-1);
 
     //
-    // Identify meshes. 
+    // Identify meshes.
     //
     rc = initMesh(ncdfc, _meshMap);
     if (rc < 0) return (-1);
 
 
     //
-    // Identify data variables. 
+    // Identify data variables.
     //
     rc = initDataVars(ncdfc, _dataVarsMap);
     if (rc < 0) return (-1);
@@ -456,7 +456,7 @@ int DCCF::initCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordV
     int rc = _initHorizontalCoordinates(ncdfc, coordVarsMap);
     if (rc < 0) { return (-1); }
 
-    // Set up the vertical coordinate variables. 
+    // Set up the vertical coordinate variables.
     //
     rc = _initVerticalCoordinates(ncdfc, coordVarsMap);
     if (rc < 0) { return (-1); }
@@ -466,16 +466,16 @@ int DCCF::initCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordV
     rc = _initTimeCoordinates(ncdfc, coordVarsMap);
     if (rc < 0) { return (-1); }
 
-    return(0);
+    return (0);
 }
 
 int DCCF::_initHorizontalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap)
 {
-    vector <string> latVars = ncdfc->GetLatCoordVars();
-    int rc = addCoordvars(ncdfc, latVars, coordVarsMap);
+    vector<string> latVars = ncdfc->GetLatCoordVars();
+    int            rc = addCoordvars(ncdfc, latVars, coordVarsMap);
     if (rc < 0) return (-1);
 
-    vector <string> lonVars = ncdfc->GetLonCoordVars();
+    vector<string> lonVars = ncdfc->GetLonCoordVars();
     rc = addCoordvars(ncdfc, lonVars, coordVarsMap);
     if (rc < 0) return (-1);
 
@@ -486,8 +486,8 @@ int DCCF::_initHorizontalCoordinates(NetCDFCFCollection *ncdfc, std::map<string,
 //
 int DCCF::_initVerticalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap)
 {
-    vector <string> vertVars = ncdfc->GetVertCoordVars();
-    int rc = addCoordvars(ncdfc, vertVars, coordVarsMap);
+    vector<string> vertVars = ncdfc->GetVertCoordVars();
+    int            rc = addCoordvars(ncdfc, vertVars, coordVarsMap);
 
     return (rc);
 }
@@ -528,7 +528,6 @@ int DCCF::initDimensions(NetCDFCFCollection *ncdfc, std::map<string, DC::Dimensi
     // with coordinates that is supported by COARDS.
     //
     for (int i = 0; i < dimnames.size(); i++) {
-
         Dimension dim(dimnames[i], dimlens[i]);
         dimsMap[dimnames[i]] = dim;
     }
@@ -595,11 +594,10 @@ int DCCF::getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<st
     return (0);
 }
 
-// Initialize the meshMap 
+// Initialize the meshMap
 //
 int DCCF::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMap)
 {
-
     //
     // Get names of variables  in the CF data set that have 0 to 3
     // spatial dimensions
@@ -635,7 +633,7 @@ int DCCF::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMa
         // createone if it doesn't ready exist
         //
         meshMap[mesh.GetName()] = mesh;
-	}
+    }
 
     return (0);
 }
@@ -643,7 +641,7 @@ int DCCF::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMa
 int DCCF::initAuxilliaryVars(NetCDFCFCollection *ncdfc, std::map<string, DC::AuxVar> &auxVarsMap)
 {
     auxVarsMap.clear();
-    return(0);
+    return (0);
 }
 
 
@@ -652,7 +650,6 @@ int DCCF::initAuxilliaryVars(NetCDFCFCollection *ncdfc, std::map<string, DC::Aux
 //
 int DCCF::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> &dataVarsMap)
 {
-
     vector<bool> periodic(3, false);
     //
     // Get names of variables  in the CF data set that have 0 to 3

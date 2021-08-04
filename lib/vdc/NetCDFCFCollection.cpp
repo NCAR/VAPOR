@@ -15,14 +15,15 @@ using namespace Wasp;
 using namespace std;
 
 namespace {
-vector <string> make_unique(vector <string> v) {
+vector<string> make_unique(vector<string> v)
+{
     sort(v.begin(), v.end());
     vector<string>::iterator last2;
     last2 = unique(v.begin(), v.end());
     v.erase(last2, v.end());
-    return(v);
+    return (v);
 }
-};
+};    // namespace
 
 NetCDFCFCollection::NetCDFCFCollection() : NetCDFCollection()
 {
@@ -121,11 +122,11 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
     }
 
 
-    // Now find all coordinate variables that can be identified 
+    // Now find all coordinate variables that can be identified
     // by their units, standard name, etc.
     //
     vars.clear();
-    for (int i=1; i<4; i++) {
+    for (int i = 1; i < 4; i++) {
         vector<string> v = NetCDFCollection::GetVariableNames(i, false);
         vars.insert(vars.end(), v.begin(), v.end());
     }
@@ -153,13 +154,13 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
     // attribute is an "auxilliary" coordinate variable
     //
     vars.clear();
-    for (int i=0; i<4; i++) {
+    for (int i = 0; i < 4; i++) {
         vector<string> v = NetCDFCollection::GetVariableNames(1, false);
         vars.insert(vars.end(), v.begin(), v.end());
     }
 
     for (auto varName : vars) {
-        string timeDimName;
+        string                 timeDimName;
         NetCDFSimple::Variable varinfo;
         (void)NetCDFCollection::GetVariableInfo(varName, varinfo);
 
@@ -171,11 +172,9 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
         for (int j = 0; j < coordattr.size(); j++) {
             //
             // Make sure the auxiliary coordinate variable
-            // actually exists in the data collection 
+            // actually exists in the data collection
             //
-            if (NetCDFCollection::VariableExists(coordattr[j])) {
-                _auxCoordinateVars.push_back(coordattr[j]);
-            }
+            if (NetCDFCollection::VariableExists(coordattr[j])) { _auxCoordinateVars.push_back(coordattr[j]); }
         }
     }
 
@@ -200,7 +199,7 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
     _vertCoordVars = make_unique(_vertCoordVars);
     _timeCoordVars = make_unique(_timeCoordVars);
 
-#ifdef	DEAD
+#ifdef DEAD
     //
     // If a time dimension exists but no time coordinate variable
     // we derive one. The is messed up. The base class, NetCDFCollection,
@@ -695,10 +694,9 @@ void NetCDFCFCollection::InstallDerivedCoordVar(string varname, DerivedVar *deri
     if (derivedVar->TimeVarying()) { dims.insert(dims.begin(), derivedVar->GetTimeDimName()); }
 
     if (dims.size() == 1 && dims[0] == varname) {
-    	_coordinateVars.push_back(varname);
-    }
-    else {
-    	_auxCoordinateVars.push_back(varname);
+        _coordinateVars.push_back(varname);
+    } else {
+        _auxCoordinateVars.push_back(varname);
     }
 
     switch (axis) {
@@ -1001,7 +999,7 @@ bool NetCDFCFCollection::_IsVertCoordVar(const NetCDFSimple::Variable &varinfo) 
     if (_camZ3Exists(vector<string>(1, varinfo.GetName()))) return (true);
 
     varinfo.GetAtt("positive", s);
-    if ((StrCmpNoCase(s, "up") == 0) || (StrCmpNoCase(s, "down") == 0)) return(true);
+    if ((StrCmpNoCase(s, "up") == 0) || (StrCmpNoCase(s, "down") == 0)) return (true);
 
     string unit;
     varinfo.GetAtt("units", unit);

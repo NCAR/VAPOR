@@ -329,9 +329,7 @@ size_t DC::Mesh::GetTopologyDim() const
     }
 }
 
-string DC::Mesh::MakeMeshName(std::vector<string> s) {
-    return(join(s, "x"));
-}
+string DC::Mesh::MakeMeshName(std::vector<string> s) { return (join(s, "x")); }
 
 DC::DC() {}
 

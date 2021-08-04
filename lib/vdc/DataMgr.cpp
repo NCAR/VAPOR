@@ -2650,11 +2650,13 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
         VAssert(status);
         faceOffset = auxvar.GetOffset();
     }
-#ifdef	DEAD
-    } else {
-        VAssert(!"NodeFaceVar Required");
-        faceOffset = 0;
-    }
+#ifdef DEAD
+}
+else
+{
+    VAssert(!"NodeFaceVar Required");
+    faceOffset = 0;
+}
 #endif
 }
 
