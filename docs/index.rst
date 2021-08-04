@@ -28,7 +28,7 @@ As well as many other reported issues, including the 1/4 canvas bug on BigSur. 
 
 Thank you to everyone who has helped steer us by filling out our survey for 3.6 features.  The survey is still live, so please fill it out if you have 5 minutes.
 
-Please `engage us on our forum<https://vapor.discourse.group>`_.
+Please `engage us on our forum <https://vapor.discourse.group/>`_.
 
 Thank you!
 -The Vapor Team
