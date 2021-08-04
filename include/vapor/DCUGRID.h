@@ -46,22 +46,21 @@ protected:
     string getMapProjection() const override { return ("+proj=eqc +ellps=WGS84 +lon_0=0.0 +lat_0=0.0"); }
 
 private:
-
     // Struct to contain the most general form of UGRID mesh
     //
     struct uGridMeshType {
-        int topology;
-        vector <string> nodeCoordinates;
-        string faceNodeConnectivity;
-        string faceDimension;
-        string edgeNodeConnectivity;
-        string edgeDimension;
-        string faceEdgeConnectivity;
-        string faceFaceConnectivity;
-        string edgeFaceConnectivity;
-        string boundaryNodeConnectivity;
-        vector <string> faceCoordinates;
-        vector <string> edgeCoordinates;
+        int            topology;
+        vector<string> nodeCoordinates;
+        string         faceNodeConnectivity;
+        string         faceDimension;
+        string         edgeNodeConnectivity;
+        string         edgeDimension;
+        string         faceEdgeConnectivity;
+        string         faceFaceConnectivity;
+        string         edgeFaceConnectivity;
+        string         boundaryNodeConnectivity;
+        vector<string> faceCoordinates;
+        vector<string> edgeCoordinates;
     };
     std::map<string, uGridMeshType> _uGridMeshMap;
 
@@ -83,4 +82,3 @@ private:
     int _initFaceNodeConnectivityMap(NetCDFCFCollection *ncdfc);
 };
 };    // namespace VAPoR
-

@@ -167,14 +167,14 @@ protected:
 
 
 private:
-    VAPoR::UDUnits      _udunits;
+    VAPoR::UDUnits _udunits;
 
     string                                      _proj4String;
     std::map<string, DC::Dimension>             _dimsMap;
     std::map<string, DC::CoordVar>              _coordVarsMap;
     std::map<string, DC::Mesh>                  _meshMap;
     std::map<string, DC::DataVar>               _dataVarsMap;
-    std::map<string, DC::AuxVar>    _auxVarsMap;
+    std::map<string, DC::AuxVar>                _auxVarsMap;
     std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
 
     int _initHorizontalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);

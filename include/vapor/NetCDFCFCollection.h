@@ -75,13 +75,11 @@ public:
 
     //! Return boolean indicating whether the named variable is a
     //! NetCDF CF "coordinate" variable or a "auxilliary" coordinate
-    //! variable. 
+    //! variable.
     //!
     //! \sa IsAuxCoordVarCF(), IsCoordVarCF()
     //
-    virtual bool IsCoordinateVar(string varName) const {
-        return(IsCoordVarCF(varName) || IsAuxCoordVarCF(varName));
-    }
+    virtual bool IsCoordinateVar(string varName) const { return (IsCoordVarCF(varName) || IsAuxCoordVarCF(varName)); }
 
 
 
