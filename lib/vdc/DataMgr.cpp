@@ -6,6 +6,7 @@
 #include <cfloat>
 #include <vector>
 #include <map>
+#include <algorithm>
 #include <type_traits>
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCWRF.h>
@@ -3171,7 +3172,7 @@ void DataMgr::_getLonExtents(vector<float> &lons, vector<size_t> dims, float &mi
 
     size_t nx = dims[0];
     size_t ny = dims.size() > 1 ? dims[1] : 1;
-    for (size_t j = 0; j < dims[1]; j++) {
+    for (size_t j = 0; j < ny; j++) {
         GeoUtil::UnwrapLongitude(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
         GeoUtil::ShiftLon(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
     }

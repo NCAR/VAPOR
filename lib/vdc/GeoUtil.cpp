@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 #include <vapor/GeoUtil.h>
 
 using namespace std;

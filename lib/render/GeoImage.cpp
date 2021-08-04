@@ -4,6 +4,7 @@
 #include "vapor/VAssert.h"
 #include <cmath>
 #include <cstdio>
+#include <algorithm>
 #include <sys/stat.h>
 #include <vapor/Proj4API.h>
 #include <vapor/GeoUtil.h>
