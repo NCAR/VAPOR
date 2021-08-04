@@ -77,7 +77,9 @@ BOVCollection::BOVCollection()
     _dataFiles.clear();
     _times.clear();
     _gridSize = _defaultGridSize;
-    _tmpGridSize = _defaultGridSize;
+    _tmpGridSize[0] = (int)_defaultGridSize[0];
+    _tmpGridSize[1] = (int)_defaultGridSize[1];
+    _tmpGridSize[2] = (int)_defaultGridSize[2];
     _brickOrigin = _defaultOrigin;
     _tmpBrickOrigin = _defaultOrigin;
     _brickSize = _defaultBrickSize;
@@ -222,12 +224,14 @@ int BOVCollection::_parseHeader(std::ifstream &header)
 int BOVCollection::_validateParsedValues()
 {
     // Validate grid dimensions
-    if (_tmpGridSize[0] < 1 || _tmpGridSize[1] < 1 || _tmpGridSize[2] < 1)
+    if (_tmpGridSize[0] < 2 || _tmpGridSize[1] < 2 || _tmpGridSize[2] < 2)
         return _invalidDimensionError(GRID_SIZE_TOKEN);
-    else if (_tmpGridSize != _gridSize && _gridSizeAssigned == true)
+    else if ((_tmpGridSize[0] != _gridSize[0] || _tmpGridSize[1] != _gridSize[1] || _tmpGridSize[2] != _gridSize[2]) && _gridSizeAssigned == true)
         return _inconsistentValueError(GRID_SIZE_TOKEN);
     else {
-        _gridSize = _tmpGridSize;
+        _gridSize[0] = (size_t)_tmpGridSize[0];
+        _gridSize[1] = (size_t)_tmpGridSize[1];
+        _gridSize[2] = (size_t)_tmpGridSize[2];
         _gridSizeAssigned = true;
     }
 
@@ -254,6 +258,9 @@ int BOVCollection::_validateParsedValues()
     if (_tmpBrickSize != _brickSize && _brickSizeAssigned == true)
         return _inconsistentValueError(BRICK_SIZE_TOKEN);
     else {
+        for (size_t i = 0; i < _tmpBrickSize.size(); i++) {
+            if (_tmpBrickSize[i] < 0.) return _invalidValueError(BRICK_SIZE_TOKEN);
+        }
         _brickSize = _tmpBrickSize;
         _brickSizeAssigned = true;
     }
@@ -567,13 +574,13 @@ template<class T> int BOVCollection::ReadRegion(std::string varname, size_t ts, 
 
             if (_dataFormat == DC::XType::INT32) {
                 int *castBuffer = (int *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
+                for (size_t i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
             } else if (_dataFormat == DC::XType::FLOAT) {
                 float *castBuffer = (float *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
+                for (size_t i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
             } else if (_dataFormat == DC::XType::DOUBLE) {
                 double *castBuffer = (double *)readBuffer;
-                for (int i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
+                for (size_t i = 0; i < count; i++) { *region++ = (typename std::remove_pointer<T>::type)castBuffer[i]; }
             }
         }
     }
