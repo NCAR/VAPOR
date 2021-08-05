@@ -895,7 +895,7 @@ void MainForm::_createFileMenu()
     _dataImportUGRID_Action = new QAction(this);
     _dataImportUGRID_Action->setText(tr("UGRID"));
     _dataImportUGRID_Action->setToolTip("Specify one or more UGRID formatted files to import into "
-                                      "the current session");
+                                        "the current session");
 
     _fileOpenAction = new QAction(this);
     _fileOpenAction->setEnabled(true);
