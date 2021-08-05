@@ -54,9 +54,9 @@ int getAttInt(NetCDFCFCollection *ncdfc, string varName, string attName)
 {
     vector<long> values;
     ncdfc->GetAtt(varName, attName, values);
-    if (values.size()) { return(values[0]); }
+    if (values.size()) { return (values[0]); }
 
-    return(0);
+    return (0);
 }
 
 // Read a netcdf attribute of type string
@@ -65,7 +65,7 @@ string getAttString(NetCDFCFCollection *ncdfc, string varName, string attName)
 {
     string v;
     ncdfc->GetAtt(varName, attName, v);
-    return(v);
+    return (v);
 }
 
 bool isUGridDummyVar(NetCDFCFCollection *ncdfc, string varName)
@@ -504,7 +504,7 @@ int DCUGRID::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVa
 
         // variable must have valid mesh attribute
         //
-        string meshName =  getAttString(ncdfc, varName, meshAttName);
+        string meshName = getAttString(ncdfc, varName, meshAttName);
 
         if (meshName.empty()) { continue; }
 
