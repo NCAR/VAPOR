@@ -50,26 +50,27 @@ template<class T> int getVar(NetCDFCFCollection *ncdfc, size_t ts, string varnam
 
 // Read a netcdf attribute of type int
 //
-void getAttInt(NetCDFCFCollection *ncdfc, string varName, string attName, int &v)
+int getAttInt(NetCDFCFCollection *ncdfc, string varName, string attName)
 {
-    v = 0;
     vector<long> values;
     ncdfc->GetAtt(varName, attName, values);
-    if (values.size()) { v = values[0]; }
+    if (values.size()) { return(values[0]); }
+
+    return(0);
 }
 
 // Read a netcdf attribute of type string
 //
-void getAttString(NetCDFCFCollection *ncdfc, string varName, string attName, string &v)
+string getAttString(NetCDFCFCollection *ncdfc, string varName, string attName)
 {
-    v = "";
+    string v;
     ncdfc->GetAtt(varName, attName, v);
+    return(v);
 }
 
 bool isUGridDummyVar(NetCDFCFCollection *ncdfc, string varName)
 {
-    string v;
-    getAttString(ncdfc, varName, cfRoleAttName, v);
+    string v = getAttString(ncdfc, varName, cfRoleAttName);
     return (v == cfRoleValueName);
 }
 
@@ -129,8 +130,7 @@ string DCUGRID::_getLayeredVerticalCoordVar(NetCDFCFCollection *ncdfc, string va
     // "coordinates" attribute names a vertical coordinate. I.e. look
     // for what the CF conventions call an "auxilliary" variable
     //
-    string meshName;
-    getAttString(ncdfc, varName, meshAttName, meshName);
+    string meshName = getAttString(ncdfc, varName, meshAttName);
 
     if (meshName.empty() || (_uGridMeshMap.find(meshName) == _uGridMeshMap.end())) { return (""); }
 
@@ -166,24 +166,24 @@ void DCUGRID::_getUGridMeshFromFile(NetCDFCFCollection *ncdfc, string meshVarNam
 
     string s;
 
-    getAttInt(ncdfc, meshVarName, topologyAttName, m.topology);
+    m.topology = getAttInt(ncdfc, meshVarName, topologyAttName);
 
-    getAttString(ncdfc, meshVarName, nodeCoordinatesAttName, s);
+    s = getAttString(ncdfc, meshVarName, nodeCoordinatesAttName);
     Wasp::StrToWordVec(s, m.nodeCoordinates);
 
-    getAttString(ncdfc, meshVarName, faceNodeConnectivityAttName, m.faceNodeConnectivity);
-    getAttString(ncdfc, meshVarName, faceDimensionAttName, m.faceDimension);
-    getAttString(ncdfc, meshVarName, edgeNodeConnectivityAttName, m.edgeNodeConnectivity);
-    getAttString(ncdfc, meshVarName, edgeDimensionAttName, m.edgeDimension);
-    getAttString(ncdfc, meshVarName, faceEdgeConnectivityAttName, m.faceEdgeConnectivity);
-    getAttString(ncdfc, meshVarName, faceFaceConnectivityAttName, m.faceFaceConnectivity);
-    getAttString(ncdfc, meshVarName, edgeFaceConnectivityAttName, m.edgeFaceConnectivity);
-    getAttString(ncdfc, meshVarName, boundaryNodeConnectivityAttName, m.boundaryNodeConnectivity);
+    m.faceNodeConnectivity = getAttString(ncdfc, meshVarName, faceNodeConnectivityAttName);
+    m.faceDimension = getAttString(ncdfc, meshVarName, faceDimensionAttName);
+    m.edgeNodeConnectivity = getAttString(ncdfc, meshVarName, edgeNodeConnectivityAttName);
+    m.edgeDimension = getAttString(ncdfc, meshVarName, edgeDimensionAttName);
+    m.faceEdgeConnectivity = getAttString(ncdfc, meshVarName, faceEdgeConnectivityAttName);
+    m.faceFaceConnectivity = getAttString(ncdfc, meshVarName, faceFaceConnectivityAttName);
+    m.edgeFaceConnectivity = getAttString(ncdfc, meshVarName, edgeFaceConnectivityAttName);
+    m.boundaryNodeConnectivity = getAttString(ncdfc, meshVarName, boundaryNodeConnectivityAttName);
 
-    getAttString(ncdfc, meshVarName, faceCoordinatesAttName, s);
+    s = getAttString(ncdfc, meshVarName, faceCoordinatesAttName);
     Wasp::StrToWordVec(s, m.faceCoordinates);
 
-    getAttString(ncdfc, meshVarName, edgeCoordinatesAttName, s);
+    s = getAttString(ncdfc, meshVarName, edgeCoordinatesAttName);
     Wasp::StrToWordVec(s, m.edgeCoordinates);
 }
 
@@ -375,8 +375,7 @@ int DCUGRID::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &mes
         int type = ncdfc->GetXType(varName);
         if (!(NetCDFSimple::IsNCTypeFloat(type) || NetCDFSimple::IsNCTypeInt(type))) continue;
 
-        string meshName;
-        getAttString(ncdfc, varName, meshAttName, meshName);
+        string meshName = getAttString(ncdfc, varName, meshAttName);
 
         if (meshName.empty() || (_uGridMeshMap.find(meshName) == _uGridMeshMap.end())) { continue; }
 
@@ -505,8 +504,7 @@ int DCUGRID::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVa
 
         // variable must have valid mesh attribute
         //
-        string meshName;
-        getAttString(ncdfc, varName, meshAttName, meshName);
+        string meshName =  getAttString(ncdfc, varName, meshAttName);
 
         if (meshName.empty()) { continue; }
 
@@ -524,8 +522,7 @@ int DCUGRID::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVa
 
         // Only node-centered variables supported currently
         //
-        string locationName;
-        getAttString(ncdfc, varName, locationAttName, locationName);
+        string locationName = getAttString(ncdfc, varName, locationAttName);
 
         if (locationName != "node") {
             SetDiagMsg("Only node-centered data supported for variable named %s", varName.c_str());

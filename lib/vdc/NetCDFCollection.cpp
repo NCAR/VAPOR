@@ -14,7 +14,7 @@ namespace {
 
 const string derivedTimeDimName = "derivedTimeDim";
 
-template<class T> vector<T> make_unique(vector<T> v)
+template<class T> vector<T> make_container_unique(vector<T> v)
 {
     sort(v.begin(), v.end());
     auto last2 = unique(v.begin(), v.end());
@@ -931,7 +931,7 @@ int NetCDFCollection::_InitializeTimesMap(const vector<string> &files, const vec
     //
     // sort and remove duplicates
     //
-    times = make_unique(times);
+    times = make_container_unique(times);
 
     if (times.empty()) { times.push_back(0.0); }
 
@@ -1060,7 +1060,7 @@ int NetCDFCollection::_InitializeTimesMapCase2(const vector<string> &files, cons
 
     for (auto itr : timeDimTimes) {
         vector<double> &ref = itr.second;
-        ref = make_unique(ref);
+        ref = make_container_unique(ref);
         timeDimLens[itr.first] = ref.size();
     }
     return (0);
@@ -1145,7 +1145,7 @@ int NetCDFCollection::_InitializeTimesMapCase3(const vector<string> &files, cons
 
     for (auto itr : timeDimTimes) {
         vector<double> &ref = itr.second;
-        ref = make_unique(ref);
+        ref = make_container_unique(ref);
         timeDimLens[itr.first] = ref.size();
     }
 
