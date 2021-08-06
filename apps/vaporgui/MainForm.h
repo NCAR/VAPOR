@@ -142,11 +142,6 @@ private:
 
     // Data menu
     //
-    QAction *_dataImportWRF_Action;
-    QAction *_dataImportCF_Action;
-    QAction *_dataImportMPAS_Action;
-    QAction *_dataImportBOV_Action;
-    QAction *_dataImportUGRID_Action;
     QAction *_dataLoad_MetafileAction;
     QAction *_dataClose_MetafileAction;
     QAction *_fileNew_SessionAction;
@@ -345,11 +340,6 @@ private slots:
     void helpAbout();
     void loadData(string fileName = "");
     void closeData(string fileName = "");
-    void importWRFData();
-    void importCFData();
-    void importMPASData();
-    void importBOVData();
-    void importUGRIDData();
     void sessionNew();
     void captureJpegSequence();
     void captureTiffSequence();

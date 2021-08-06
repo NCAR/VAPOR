@@ -209,10 +209,6 @@ void MainForm::_initMembers()
     _installCLIToolsAction = NULL;
     _webDocumentationAction = NULL;
 
-    _dataImportWRF_Action = NULL;
-    _dataImportCF_Action = NULL;
-    _dataImportMPAS_Action = NULL;
-    _dataImportUGRID_Action = NULL;
     _dataLoad_MetafileAction = NULL;
     _dataClose_MetafileAction = NULL;
     _plotAction = NULL;
@@ -877,26 +873,6 @@ void MainForm::_createFileMenu()
     _dataClose_MetafileAction->setText(tr("Close VDC"));
     _dataClose_MetafileAction->setToolTip("Specify a VDC data set to close in current session");
 
-    _dataImportWRF_Action = new QAction(this);
-    _dataImportWRF_Action->setText(tr("WRF-ARW"));
-    _dataImportWRF_Action->setToolTip("Specify one or more WRF-ARW output files to import into "
-                                      "the current session");
-
-    _dataImportCF_Action = new QAction(this);
-    _dataImportCF_Action->setText(tr("NetCDF-CF"));
-    _dataImportCF_Action->setToolTip("Specify one or more NetCDF Climate Forecast (CF) convention "
-                                     "output files to import into the current session");
-
-    _dataImportMPAS_Action = new QAction(this);
-    _dataImportMPAS_Action->setText(tr("MPAS"));
-    _dataImportMPAS_Action->setToolTip("Specify one or more MPAS output files to import into the "
-                                       "current session");
-
-    _dataImportUGRID_Action = new QAction(this);
-    _dataImportUGRID_Action->setText(tr("UGRID"));
-    _dataImportUGRID_Action->setToolTip("Specify one or more UGRID formatted files to import into "
-                                        "the current session");
-
     _fileOpenAction = new QAction(this);
     _fileOpenAction->setEnabled(true);
     _fileSaveAction = new QAction(this);
@@ -935,12 +911,12 @@ void MainForm::_createFileMenu()
     //
 
     _importMenu = _File->addMenu("Import");
-    _importMenu->addAction(_dataImportWRF_Action);
-    _importMenu->addAction(_dataImportCF_Action);
-    _importMenu->addAction(_dataImportMPAS_Action);
+    _importMenu->addAction("WRF-ARW", this, [this]() { loadDataHelper("", {}, "WRF-ARW files", "", "wrf", true, DatasetExistsAction::Prompt); });
+    _importMenu->addAction("NetCDF-CF", this, [this]() { loadDataHelper("", {}, "NetCDF Climate Forecast (CF) convention files", "", "cf", true, DatasetExistsAction::Prompt); });
+    _importMenu->addAction("MPAS", this, [this]() { loadDataHelper("", {}, "MPAS files", "", "mpas", true, DatasetExistsAction::Prompt); });
     _importMenu->addAction("Brick of Values (BOV)", this, [this]() { loadDataHelper("", {}, "BOV files", "", "bov", true, DatasetExistsAction::Prompt); });
     _importMenu->addAction("Data Collection Particles (DCP)", this, [this]() { loadDataHelper("", {}, "DCP files", "", "dcp", true, DatasetExistsAction::Prompt); });
-    _importMenu->addAction(_dataImportUGRID_Action);
+    _importMenu->addAction("Unstructured Grid (UGRID)", this, [this]() { loadDataHelper("", {}, "UGRID files", "", "ugrid", true, DatasetExistsAction::Prompt); });
     _File->addSeparator();
 
     // _File->addAction(createTextSeparator(" Session"));
@@ -952,11 +928,6 @@ void MainForm::_createFileMenu()
     _File->addAction(_fileExitAction);
 
     connect(_dataLoad_MetafileAction, SIGNAL(triggered()), this, SLOT(loadData()));
-    connect(_dataImportWRF_Action, SIGNAL(triggered()), this, SLOT(importWRFData()));
-    connect(_dataImportCF_Action, SIGNAL(triggered()), this, SLOT(importCFData()));
-    connect(_dataImportMPAS_Action, SIGNAL(triggered()), this, SLOT(importMPASData()));
-    connect(_dataImportUGRID_Action, SIGNAL(triggered()), this, SLOT(importUGRIDData()));
-
     connect(_fileNew_SessionAction, SIGNAL(triggered()), this, SLOT(sessionNew()));
     connect(_fileOpenAction, SIGNAL(triggered()), this, SLOT(sessionOpen()));
     connect(_fileSaveAction, SIGNAL(triggered()), this, SLOT(fileSave()));
@@ -1763,38 +1734,6 @@ void MainForm::closeData(string fileName)
     _controlExec->UndoRedoClear();
 
     if (!_controlExec->GetDataNames().size()) { sessionNew(); }
-}
-
-// import WRF data into current session
-//
-void MainForm::importWRFData()
-{
-    vector<string> files;
-    loadDataHelper("", files, "WRF-ARW NetCDF files", "", "wrf", true);
-}
-
-void MainForm::importCFData()
-{
-    vector<string> files;
-    loadDataHelper("", files, "NetCDF CF files", "", "cf", true);
-}
-
-void MainForm::importMPASData()
-{
-    vector<string> files;
-    loadDataHelper("", files, "MPAS files", "", "mpas", true);
-}
-
-void MainForm::importUGRIDData()
-{
-    vector<string> files;
-    loadDataHelper("", files, "UGRID files", "", "ugrid", true);
-}
-
-void MainForm::importBOVData()
-{
-    vector<string> files;
-    loadDataHelper("", files, "BOV files", "", "bov", false);
 }
 
 bool MainForm::doesQStringContainNonASCIICharacter(const QString &s)
