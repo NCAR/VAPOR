@@ -199,20 +199,6 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
     _vertCoordVars = make_unique(_vertCoordVars);
     _timeCoordVars = make_unique(_timeCoordVars);
 
-#ifdef DEAD
-    //
-    // If a time dimension exists but no time coordinate variable
-    // we derive one. The is messed up. The base class, NetCDFCollection,
-    // may not contain a NetCDF time coordinate variable, but it does
-    // sythesize a list of user times
-    //
-    if (_timeCoordVars.empty() && !timeDimName.empty()) {
-        DerivedVarTimeFromMem *derived_var = new DerivedVarTimeFromMem(timeDimName, "seconds", timeDimName, GetTimes());
-
-        NetCDFCFCollection::InstallDerivedCoordVar(timeDimName, derived_var, 3);
-    }
-#endif
-
     string mvattname;
     _GetMissingValueMap(_missingValueMap, mvattname);
 

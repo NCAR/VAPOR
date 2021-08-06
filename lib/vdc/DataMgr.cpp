@@ -1506,15 +1506,6 @@ int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &d
     }
     if (rc < 0) return (-1);
 
-#ifdef DEAD
-    // If data are not blocked (i.e. if all elements of bs_at_level
-    // are 1) set the block size to the dimension size. This forces
-    // non-blocked data to be read as a single block, avoiding the
-    // need to block the data into some arbitrary size, but at the same
-    // time prevening non-blocked data from being subset :-(
-    //
-    if (std::all_of(bs_at_level.cbegin(), bs_at_level.cend(), [](size_t i) { return i == 1; })) { bs_at_level = dims_at_level; }
-#endif
 
     return (0);
 }
@@ -2650,14 +2641,6 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
         VAssert(status);
         faceOffset = auxvar.GetOffset();
     }
-#ifdef DEAD
-}
-else
-{
-    VAssert(!"NodeFaceVar Required");
-    faceOffset = 0;
-}
-#endif
 }
 
 string DataMgr::_get_grid_type(string varname) const
