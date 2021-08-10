@@ -10,5 +10,5 @@ foo
 .. toctree::
    :maxdepth: 1
 
-   regularGridExample
-   stretchedGridExample
+   netCDF/regularGridExample
+   netCDF/stretchedGridExample
