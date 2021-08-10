@@ -1,4 +1,4 @@
-.. _gettingDataIntoVapor2:
+.. _gettingDataIntoVapor:
 
 |
 
