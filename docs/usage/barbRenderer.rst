@@ -17,7 +17,7 @@ The Barb Renderer displays an array of arrows with the users domain, with custom
 Basic Controls
 --------------
 
-This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appear    anceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.
+This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appearanceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.
 
 The Barb Renderer can operate on either two-dimensional, or three-dimensional field variables.  This is defined in the Variables tab.
 
