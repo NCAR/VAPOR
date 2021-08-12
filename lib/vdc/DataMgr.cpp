@@ -3172,9 +3172,9 @@ void DataMgr::_getLatExtents(vector<float> &lats, vector<size_t> dims, float &mi
 
     if (!lats.size()) return;
 
-	auto minmaxitr = std::minmax_element(lats.begin(), lats.end());
-	min = *(minmaxitr.first);
-	max = *(minmaxitr.second);
+    auto minmaxitr = std::minmax_element(lats.begin(), lats.end());
+    min = *(minmaxitr.first);
+    max = *(minmaxitr.second);
 }
 
 int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax, long ts)
