@@ -551,23 +551,23 @@ workflows:
 #    jobs:
 #      - check_leaks
 
-  weekly:
-    triggers:
-      - schedule:
+#  weekly:
+#    triggers:
+#      - schedule:
 #           cron: "30 13 * * 5" #weekly cron job on Friday @ 6:30am MST
-           cron: "* 16 * * 3" #weekly cron job on Wednesday @ 12:00am MST
-           filters:
-             branches:
-               only:
-                 - main
-    jobs:
-      - build_ubuntu18_installer
-      - build_centos7_installer
-      - build_osx_installer
-      - build_win10_installer
-      - release_on_github:
-          requires:
-            - build_ubuntu18_installer
-            - build_centos7_installer
-            - build_osx_installer
-            - build_win10_installer
+#           cron: "* 16 * * 3" #weekly cron job on Wednesday @ 12:00am MST
+#           filters:
+#             branches:
+#               only:
+#                 - main
+#    jobs:
+#      - build_ubuntu18_installer
+#      - build_centos7_installer
+#      - build_osx_installer
+#      - build_win10_installer
+#      - release_on_github:
+#          requires:
+#            - build_ubuntu18_installer
+#            - build_centos7_installer
+#            - build_osx_installer
+#            - build_win10_installer
