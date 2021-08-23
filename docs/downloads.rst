@@ -13,8 +13,33 @@ Vapor builds installers on a weekly basis.  These have new features that have no
 
 `Download here <https://github.com/NCAR/VAPOR/releases/tag/Weekly>`_
 
-Current Stable Release: Vapor 3.4.0
------------------------------------
+Vapor 3.5.0 is now Live!
+------------------------
+
+August 4, 2021
+
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+
+Vapor's release cycle is accelerating, and now 3.5.0 is live.
+New improvements include:
+- New particle data reader: Data Collection Particles (DCP)
+- New raw data reader: Brick of Values (BOV)
+- Easily, and visually save your state with the new Bookmarks feature
+- Further improvements that streamline Vapor's GUI
+- Faster data access with OpenMP
+
+As well as many other reported issues, including the 1/4 canvas bug on BigSur.  Thanks to users ViggoHanst and Fortran for reporting this.
+
+Thank you to everyone who has helped steer us by filling out our survey for 3.6 features.  The survey is still live, so please fill it out if you have 5 minutes.
+
+Please `engage us on our forum <https://vapor.discourse.group/>`_.
+
+Thank you!
+
+-The Vapor Team
+
+Vapor 3.4.0
+-----------
 
 `Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
 

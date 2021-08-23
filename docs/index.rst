@@ -19,10 +19,11 @@ August 4, 2021
 
 Vapor's release cycle is accelerating, and now 3.5.0 is live.
 New improvements include:
-    - New particle data reader: Data Collection Particles (DCP)
-    - New raw data reader: Brick of Values (BOV)- Bookmarks 
-    - Easily, and visually save your state
-    - Further improvements that streamline Vapor's GUI- Faster data access with OpenMP 
+- New particle data reader: Data Collection Particles (DCP)
+- New raw data reader: Brick of Values (BOV) 
+- Easily, and visually save your state with the new Bookmarks feature
+- Further improvements that streamline Vapor's GUI
+- Faster data access with OpenMP 
 
 As well as many other reported issues, including the 1/4 canvas bug on BigSur.  Thanks to users ViggoHanst and Fortran for reporting this.
 
@@ -31,6 +32,7 @@ Thank you to everyone who has helped steer us by filling out our survey for 3.6 
 Please `engage us on our forum <https://vapor.discourse.group/>`_.
 
 Thank you!
+
 -The Vapor Team
 
 We need your feedback!
