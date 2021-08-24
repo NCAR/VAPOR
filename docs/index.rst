@@ -18,6 +18,11 @@ August 4, 2021
 `Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
 
 Vapor's release cycle is accelerating, and now 3.5.0 is live.
+
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/WPRpeXVXedM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 New improvements include:
 - New particle data reader: Data Collection Particles (DCP)
 - New raw data reader: Brick of Values (BOV) 
