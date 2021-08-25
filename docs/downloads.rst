@@ -7,8 +7,10 @@ Downloads
 Follow the table of contents below to find where to download Vapor's most recent release.  You can also find installation instructions, and sample data.
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     downloads/officialReleases.rst
     downloads/installationInstructions.rst
     downloads/sampleData.rst
+
+.. include:: announcements/3.5.0.rst

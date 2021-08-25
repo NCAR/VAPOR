@@ -1,11 +1,11 @@
 .. _3.3.0:
 
-Vapor 3.3.0
-===========
+3.3.0
+-----
 
 December 17, 2020
 
-`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`__
 
 Release notes for VAPOR-3.3.0
 

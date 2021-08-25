@@ -1,7 +1,7 @@
 .. _officialReleases:
 
 Official Releases
------------------
+=================
 
 .. include:: ../announcements/3.5.0.rst
 
