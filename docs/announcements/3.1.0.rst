@@ -1,0 +1,21 @@
+.. _3.1.0:
+
+Vapor 3.1.0
+===========
+
+July 5, 2019
+
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+
+Release notes for VAPOR-3.1.0
+
+    New Features:
+
+    - 3D Variable Support
+    - Direct Volume Renderer
+    - Isosurfaces
+    - Slice Renderer
+    - Wireframe Renderer
+    - Python variable engine
+    - Geotiff creation from Vapor renderings
+    - Support for MPAS-A and MOM6 models

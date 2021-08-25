@@ -1,0 +1,22 @@
+.. _3.2.0:
+
+Vapor 3.2.0
+===========
+
+February 3, 2020
+
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+
+Release notes for VAPOR-3.2.0
+
+    New Features:
+
+    - Flow Renderer
+    - Model Renderer
+    - New Transfer Function Editor
+    - Off screen rendering
+    - Performance optimization to Vapor's DataMgr class
+    - Added support for stretched grids to vdccreate
+    - Added ability to color Volume Renderings with a secondary variable
+    - Increased Volume Rendering sampling rate maximum setting
+    - Updated 3rd party libraries

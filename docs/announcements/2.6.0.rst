@@ -1,0 +1,10 @@
+.. _2.6.0:
+
+Vapor 2.6.0
+===========
+
+Vapor's most recent legacy version 2.6 can be downloaded `here <https://forms.gle/ZLX7oZ7LYAVEEBH4A>`_.  
+
+Documentation can be found `here <https://ncar.github.io/vapor2website/index.html>`_.
+
+Support for Vapor 2 is deprecated and we strongly encourage users to upgrade to the most recent version of Vapor 3.
