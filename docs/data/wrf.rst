@@ -5,6 +5,8 @@ WRF-ARW
 
 Vapor supports WRF-ARW model output, so it can be :ref:`directly imported <importData>`.
 
+.. include:: importData.rst
+
 The two tools for converting WRF-ARW into VDC are ``wrfvdccreate`` and ``wrf2vdc``.  If either of these commands are issued by themselves, advanced options will be listed to the terminal.  These advanced options are usually not necessary.
 
 Step 1: Create .vdc metadata file
