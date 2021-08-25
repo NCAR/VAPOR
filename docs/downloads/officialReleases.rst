@@ -13,6 +13,6 @@ Official Releases
 
 .. include:: ../announcements/3.1.0.rst
 
-.. include:: ../announcements/weekly.rst
-
 .. include:: ../announcements/2.6.0.rst
+
+.. include:: ../announcements/weekly.rst
