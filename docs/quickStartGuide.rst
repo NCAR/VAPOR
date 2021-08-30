@@ -9,7 +9,7 @@ Install the version of Vapor3 for your computer's operating system from our :ref
 If you don't have :ref:`data that's supported <gettingDataIntoVapor>` by Vapor3 yet, you can :ref:`download a sample <sampleData>` to get started with.
 
 Start Vapor3
-````````````
+------------
 
 After following the :ref:`installation instructions <installationInstructions>` for Vapor3, run the application by doing the following:
 
@@ -29,8 +29,8 @@ After following the :ref:`installation instructions <installationInstructions>` 
 
         user@localhost:/vaporInstallDir$ bin/vapor
 
-Import or Load Data
-```````````````````
+Load Data
+---------
 
 There are two ways to get data into Vapor3.  Once you've loaded data, we can create your first :ref:`Renderer <Renderers>`.
 
@@ -49,7 +49,8 @@ To load data, do one of the following from the ``File`` menu:
 +------------------------------------------------+----+-------------------------------------------------+
 
 Creating a Renderer
-```````````````````
+-------------------
+
 Now that we've loaded some data to visualize, we can create a new :ref:`Renderer <Renderers>`.
 
 Vapor3 displays all of your renderers in a table in the upper left corner of the application.  Next to this table are controls that  let you create ``New`` renderers, ``Delete`` renderers, or ``Duplicate`` existing renderers.  
