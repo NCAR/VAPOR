@@ -98,7 +98,7 @@ html_logo = "_images/vaporLogoWhite2.png"
 html_favicon = "_images/vaporVLogo.png"
 
 html_theme_options = {
-    'navigation_depth': 3,
+    'navigation_depth': 4,
 }
 
 # Theme options are theme-specific and customize the look and feel of a theme

@@ -1,3 +1,5 @@
+.. _osxInstallation:
+
 OSX
 ---
 

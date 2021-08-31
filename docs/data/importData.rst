@@ -5,7 +5,7 @@ ______________
 
 This data format can be imported through Vapor's ``File`` menu.
 
-.. figure:: ../_images/importData.png
+.. figure:: /_images/importData.png
     :width: 400
     :align: center
     :figclass: align-center

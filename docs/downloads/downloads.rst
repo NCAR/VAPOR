@@ -14,9 +14,9 @@ Installation Instructions
 .. toctree::
     :maxdepth: 1
 
-    installationInstructions/osx.rst
-    installationInstructions/linux.rst
-    installationInstructions/windows.rst
+    installationInstructions/osxInstallation.rst
+    installationInstructions/linuxInstallation.rst
+    installationInstructions/windowsInstallation.rst
 
 .. include:: ../installationInstructions.rst
 

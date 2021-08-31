@@ -3,45 +3,15 @@ _____________________
 
 Vapor's Brick of Values (BOV) file support was inspired by the VisIt project at the Lawerence Livermore National Laboratory.
 
-When your data is output as a series of binary files that have values of type float (single or double precision) or int, you can use this data importer as long as:
+When your data is output as a series of binary files that have values of type float, double, or int, you can use this data importer as long as:
 
     1) Each data file contains values for a single variable, at a single timestep
 
-    2) You've written BOV header files that individually describe the structure of corresponding data files
+    2) You've written a BOV header files that describes the structure of a corresponding data file
 
     3) Your data is on a 3D rectilinear grid
 
 The BOV header files that describe the structure of your data are just a list of key/value pairs.  Some keys are mandatory, and some are optional.  See below for descriptions of these keys, special rules that pertain to the keys and their values, and an example file.
-
-The following BOV tags are mandatory for Vapor to ingest data:
-    - DATA_FILE    (type: string)
-    - DATA_SIZE    (type: three integer values that are >1)
-    - DATA_FORMAT  (type: string of either INT, FLOAT, or DOUBLE)
-    - TIME         (type: one floating point value.  May not be equal to FLT_MIN)
-
-The following BOV tags are optional:
-    - BRICK_ORIGIN (type: three floating point values,   default: 0., 0., 0.)
-    - BRICK_SIZE   (type: three floating point values,   default: 1., 1., 1.)
-    - VARIABLE     (type: one alphanumeric string value, default: "brickVar")
-    - BYTE_OFFSET  (type: one integer value,             default: 0)
-
-The following BOV tags are currently unsupported.  They can be included in a BOV header,
-but they will be unused.
-    - DATA_ENDIAN
-    - CENTERING
-    - DIVIDE_BRICK
-    - DATA_BRICKLETS
-    - DATA_COMPONENTS
-
-Special rules:
-    - Each .bov file can only refer to a single data file for a single variable, at a single timestep
-    - If duplicate key/value pairs exist in a BOV header, the value closest to the bottom of the file will be used
-    - If duplicate values exist for whatever reason, all entries must be valid (except for DATA_FILE, which gets validated after parsing)
-    - Scientific notation is supported for floating point values like BRICK_ORIGIN and BRICK_SIZE
-    - Scientific notation is not supported for integer values like DATA_SIZE
-    - DATA_SIZE must contain three values greater than 1
-    - Wild card characters are not currently supported in the DATA_FILE token
-    - VARIABLE must be alphanumeric, only containing the following characters: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-
 
 Example BOV header file
 -----------------------
@@ -72,5 +42,35 @@ Example BOV header file
    # BYTE_OFFSET is optional and lets you specify some number of
    # bytes to skip at the front of the file. This can be useful for # skipping the 4-byte header that Fortran tends to write to files. # If your file does not have a header the
    BYTE_OFFSET. BYTE_OFFSET: 4
+
+The following BOV tags are mandatory for Vapor to ingest data:
+    - DATA_FILE    (type: string)
+    - DATA_SIZE    (type: three integer values that are >1)
+    - DATA_FORMAT  (type: string of either INT, FLOAT, or DOUBLE)
+    - TIME         (type: one floating point value.  May not be equal to FLT_MIN)
+
+The following BOV tags are optional:
+    - BRICK_ORIGIN (type: three floating point values,   default: 0., 0., 0.)
+    - BRICK_SIZE   (type: three floating point values,   default: 1., 1., 1.)
+    - VARIABLE     (type: one alphanumeric string value, default: "brickVar")
+    - BYTE_OFFSET  (type: one integer value,             default: 0)
+
+The following BOV tags are currently unsupported.  They can be included in a BOV header,
+but they will be unused.
+    - DATA_ENDIAN
+    - CENTERING
+    - DIVIDE_BRICK
+    - DATA_BRICKLETS
+    - DATA_COMPONENTS
+
+Special rules:
+    - Each .bov file can only refer to a single data file for a single variable, at a single timestep
+    - If duplicate key/value pairs exist in a BOV header, the value closest to the bottom of the file will be used
+    - If duplicate values exist for whatever reason, all entries must be valid (except for DATA_FILE, which gets validated after parsing)
+    - Scientific notation is supported for floating point values like BRICK_ORIGIN and BRICK_SIZE
+    - Scientific notation is not supported for integer values like DATA_SIZE
+    - DATA_SIZE must contain three values greater than 1
+    - Wild card characters are not currently supported in the DATA_FILE token
+    - VARIABLE must be alphanumeric, only containing the following characters: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-
 
 .. include:: ./importData.rst

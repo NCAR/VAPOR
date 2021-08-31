@@ -1,7 +1,9 @@
+.. _linuxInstallation:
+
 Linux
 -----
 
-Run the downloaded .sh script in a terminal window.  It will prompt you as to where the binaries will be installed. For example:
+For Ubuntu and CentOS installers, run the downloaded .sh script in a terminal window.  It will prompt you as to where the binaries will be installed. For example:
 
 ::
 
