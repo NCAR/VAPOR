@@ -7,7 +7,7 @@ When your data is output as a series of binary files that have values of type fl
 
     1) Each data file contains values for a single variable, at a single timestep
 
-    2) You've written a BOV header files that describes the structure of a corresponding data file
+    2) You've written a BOV header file that describes the structure of a corresponding data file
 
     3) Your data is on a 3D rectilinear grid
 

@@ -13,6 +13,8 @@ Vapor's release cycle is accelerating, and now 3.5.0 is live.
 
     <iframe width="560" height="315" src="https://www.youtube.com/embed/WPRpeXVXedM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
+|
+
 New improvements include:
     - New particle data reader: Data Collection Particles (DCP)
     - New raw data reader: Brick of Values (BOV)
@@ -22,7 +24,7 @@ New improvements include:
 
 As well as many other reported issues, including the 1/4 canvas bug on BigSur.  Thanks to users ViggoHanst and Fortran for reporting this.
 
-Thank you to everyone who has helped steer us by filling out our survey for 3.6 features.  The survey is still live, so please fill it out if you h
+Thank you to everyone who has helped steer us by filling out our survey for 3.6 features.  The survey is still live, so please `fill it out <https://docs.google.com/forms/d/e/1FAIpQLSeZWvuAXaRiWyFrQ16zO25bfy8AANp8C8HpVXeMk83uQPdTLA/viewform?usp=sf_link>`_ if you have 5 minutes to spare.
 
 Please `engage us on our forum <https://vapor.discourse.group/>`_.
 
