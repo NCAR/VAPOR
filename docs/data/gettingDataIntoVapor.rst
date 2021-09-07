@@ -8,6 +8,7 @@ Getting Data into Vapor
 Vapor can directly import the datasets listed below.
 
 .. toctree::
+   :maxdepth: 1
 
    wrf
    netCDF/netCDF
