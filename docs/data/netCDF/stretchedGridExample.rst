@@ -1,7 +1,7 @@
 .. _stretchedGridExample:
 
 Stretched Grid Example in Python
---------------------------------
+================================
 
 .. raw:: html
 

@@ -1,7 +1,7 @@
 .. _regularGridExample:
 
 Regular Grid Example in Python
-------------------------------
+==============================
 
 .. raw:: html
 

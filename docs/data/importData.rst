@@ -1,8 +1,5 @@
 .. _importData:
 
-Importing data 
-______________
-
 This data format can be imported through Vapor's ``File`` menu.
 
 .. figure:: /_images/importData.png
