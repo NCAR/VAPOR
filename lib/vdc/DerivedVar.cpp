@@ -7,6 +7,7 @@
 #include <vapor/utils.h>
 #include <vapor/WASP.h>
 #include <vapor/DerivedVar.h>
+#include <vapor/GeoUtil.h>
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -571,9 +572,8 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelperCylindrical(DC::FileTable::F
     string varname = f->GetVarname();
     int    lod = f->GetLOD();
 
-    size_t nElements = max[0] - min[0] + 1;
-    float *buf = new float[nElements];
-    for (int i = 0; i < nElements; i++) { buf[i] = 0.0; }
+    size_t        nElements = max[0] - min[0] + 1;
+    vector<float> buf(nElements, 0.0);
 
     string geoCoordVar;
     if (_lonFlag) {
@@ -583,18 +583,17 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelperCylindrical(DC::FileTable::F
     }
 
     int rc = _getVar(_dc, ts, geoCoordVar, -1, lod, min, max, region);
-    if (rc < 0) {
-        delete[] buf;
-        return (rc);
-    }
+    if (rc < 0) { return (rc); }
 
     if (_lonFlag) {
-        rc = _proj4API.Transform(region, buf, nElements);
+        if (_proj4API.IsCylindrical()) {
+            GeoUtil::UnwrapLongitude(region, region + nElements);
+            GeoUtil::ShiftLon(region, region + nElements);
+        }
+        rc = _proj4API.Transform(region, buf.data(), nElements);
     } else {
-        rc = _proj4API.Transform(buf, region, nElements);
+        rc = _proj4API.Transform(buf.data(), region, nElements);
     }
-
-    delete[] buf;
 
     return (rc);
 }
@@ -608,8 +607,8 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper1D(DC::FileTable::FileObject
     // Need temporary buffer space for the X or Y coordinate
     // NOT being returned (we still need to calculate it)
     //
-    size_t nElements = numElements(min, max);
-    float *buf = new float[nElements];
+    size_t        nElements = numElements(min, max);
+    vector<float> buf(nElements);
 
     vector<size_t> roidims;
     for (int i = 0; i < min.size(); i++) { roidims.push_back(max[i] - min[i] + 1); }
@@ -620,9 +619,9 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper1D(DC::FileTable::FileObject
     float *latBufPtr;
     if (_lonFlag) {
         lonBufPtr = region;
-        latBufPtr = buf;
+        latBufPtr = buf.data();
     } else {
-        lonBufPtr = buf;
+        lonBufPtr = buf.data();
         latBufPtr = region;
     }
 
@@ -631,26 +630,28 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper1D(DC::FileTable::FileObject
     vector<size_t> lonMin = {min[0]};
     vector<size_t> lonMax = {max[0]};
     int            rc = _getVar(_dc, ts, _lonName, -1, lod, lonMin, lonMax, lonBufPtr);
-    if (rc < 0) {
-        delete[] buf;
-        return (rc);
-    }
+    if (rc < 0) { return (rc); }
 
     vector<size_t> latMin = {min[1]};
     vector<size_t> latMax = {max[1]};
     rc = _getVar(_dc, ts, _latName, -1, lod, latMin, latMax, latBufPtr);
-    if (rc < 0) {
-        delete[] buf;
-        return (rc);
-    }
+    if (rc < 0) { return (rc); }
 
     // Combine the 2 1D arrays into a 2D array
     //
     make2D(lonBufPtr, latBufPtr, roidims);
 
-    rc = _proj4API.Transform(lonBufPtr, latBufPtr, vproduct(roidims));
 
-    delete[] buf;
+    if (_proj4API.IsCylindrical()) {
+        size_t nx = max[0] - min[0] + 1;
+        size_t ny = max[1] - min[1] + 1;
+        for (size_t j = 0; j < ny; j++) {
+            GeoUtil::UnwrapLongitude(lonBufPtr + (j * nx), lonBufPtr + (j * nx) + nx);
+            GeoUtil::ShiftLon(lonBufPtr + (j * nx), lonBufPtr + (j * nx) + nx);
+        }
+    }
+
+    rc = _proj4API.Transform(lonBufPtr, latBufPtr, vproduct(roidims));
 
     return (rc);
 }
@@ -664,8 +665,8 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper2D(DC::FileTable::FileObject
     // Need temporary buffer space for the X or Y coordinate
     // NOT being returned (we still need to calculate it)
     //
-    size_t nElements = numElements(min, max);
-    float *buf = new float[nElements];
+    size_t        nElements = numElements(min, max);
+    vector<float> buf(nElements);
 
     // Assign temporary buffer 'buf' as appropriate
     //
@@ -673,27 +674,29 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper2D(DC::FileTable::FileObject
     float *latBufPtr;
     if (_lonFlag) {
         lonBufPtr = region;
-        latBufPtr = buf;
+        latBufPtr = buf.data();
     } else {
-        lonBufPtr = buf;
+        lonBufPtr = buf.data();
         latBufPtr = region;
     }
 
     int rc = _getVar(_dc, ts, _lonName, -1, lod, min, max, lonBufPtr);
-    if (rc < 0) {
-        delete[] buf;
-        return (rc);
+    if (rc < 0) { return (rc); }
+
+    if (_proj4API.IsCylindrical()) {
+        size_t nx = max[0] - min[0] + 1;
+        size_t ny = max[1] - min[1] + 1;
+        for (size_t j = 0; j < ny; j++) {
+            GeoUtil::UnwrapLongitude(lonBufPtr + (j * nx), lonBufPtr + (j * nx) + nx);
+            GeoUtil::ShiftLon(lonBufPtr + (j * nx), lonBufPtr + (j * nx) + nx);
+        }
     }
 
     rc = _getVar(_dc, ts, _latName, -1, lod, min, max, latBufPtr);
-    if (rc < 0) {
-        delete[] buf;
-        return (rc);
-    }
+    if (rc < 0) { return (rc); }
 
     rc = _proj4API.Transform(lonBufPtr, latBufPtr, nElements);
 
-    delete[] buf;
 
     return (rc);
 }

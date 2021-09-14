@@ -19,58 +19,21 @@ namespace VAPoR {
 //!
 class VDF_API GeoUtil : public Wasp::MyBase {
 public:
-    static void ShiftLon(const float *srclon, int nx, float *dstlon);
-    static void ShiftLon(const double *srclon, int nx, double *dstlon);
-    static void ShiftLon(const float *srclon, int nx, int ny, float *dstlon);
-    static void ShiftLon(const double *srclon, int nx, int ny, double *dstlon);
-
-    //! Calculate west-most and east-most extents for a grid of
-    //! longitudinal values
-    //!
-    //! \note If the input values wrap (cross 0 if coordinates run from 0 to 360,
-    //! or cross 180 if coordinates run from -180 to 180) the returned
-    //! values may be shifted by 360 degrees such that \p lonwest < \p loneast
-    //!
-    //! \param[in] lon	A structured 2D grid of longitude coordintes in degrees
-    //! \param[in] nx	dimension of fastest moving coordinate
-    //! \param[in] ny	dimension of slowest moving coordinate
-    //! \param[out] lonwest west-most longitude coordinate
-    //! \param[out] loneast east-most longitude coordinate
+    //! Shift a container of longitude values so that all
+    //! values are in the range [-180.0..180.0)
     //
-    static void LonExtents(const float *lon, int nx, int ny, float &lonwest, float &loneast);
-    static void LonExtents(const double *lon, int nx, int ny, double &lonwest, double &loneast);
+    static void ShiftLon(vector<float>::iterator first, vector<float>::iterator last);
+    static void ShiftLon(vector<double>::iterator first, vector<double>::iterator last);
+    static void ShiftLon(float *first, float *last);
 
-    //! Calculate west-most and east-most extents for a grid of
-    //! longitudinal values
+    //! Unwrap any wrapped longitued values
     //!
-    //! \note If the input values wrap (cross 0 if coordinates run from 0 to 360,
-    //! or cross 180 if coordinates run from -180 to 180) the returned
-    //! values may be shifted by 360 degrees such that \p lonwest < \p loneast
-    //!
-    //! \param[in] lon	A 1D grid of longitude coordintes in degrees
-    //! \param[in] nx	dimension of grid
-    //! \param[out] lonwest west-most longitude coordinate
-    //! \param[out] loneast east-most longitude coordinate
+    //! Iteratively adds 360.0 to each value in a container that is less than
+    //! the first value until the new value is greater than the first.
     //
-    static void LonExtents(const float *lon, int nx, float &lonwest, float &loneast);
-    static void LonExtents(const double *lon, int nx, double &lonwest, double &loneast);
-
-    //! Calculate south-most and nort-most extents for a grid of
-    //! latitude values
-    //!
-    //! \note Assumes valid coordinates are in the range -180 to 180
-    //!
-    //! \param[in] lon	A structured 2D grid of latitude coordintes in degrees
-    //! \param[in] nx	dimension of fastest moving coordinate
-    //! \param[in] ny	dimension of slowest moving coordinate
-    //! \param[out] latsouth south-most latitude coordinate
-    //! \param[out] latnorth north-most latitude coordinate
-    //
-    static void LatExtents(const float *lon, int nx, int ny, float &latsouth, float &latnorth);
-    static void LatExtents(const double *lon, int nx, int ny, double &latsouth, double &latnorth);
-
-    static void LatExtents(const float *lon, int ny, float &latsouth, float &latnorth);
-    static void LatExtents(const double *lon, int ny, double &latsouth, double &latnorth);
+    static void UnwrapLongitude(vector<float>::iterator first, vector<float>::iterator last);
+    static void UnwrapLongitude(vector<double>::iterator first, vector<double>::iterator last);
+    static void UnwrapLongitude(float *first, float *last);
 
     //! Extract boundary points from a 2D grid
     //!

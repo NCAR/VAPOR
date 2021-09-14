@@ -367,7 +367,7 @@ UnstructuredGrid2D *GridHelper::_make_grid_unstructured2d(size_t ts, int level, 
     VAssert(dims.size() == bmax.size());
     VAssert(blkvec.size() == 3);
 
-    VAssert(conn_blkvec.size() >= 2);
+    VAssert(conn_blkvec.size() >= 1);
 
     // block pointers for data
     //
@@ -409,8 +409,8 @@ UnstructuredGrid2D *GridHelper::_make_grid_unstructured2d(size_t ts, int level, 
     // N.B. assumes blkvec contains contiguous blocks :-(
     //
     const int *vertexOnFace = conn_blkvec[0];
-    const int *faceOnVertex = conn_blkvec[1];
-    const int *faceOnFace = conn_blkvec.size() == 3 ? conn_blkvec[2] : NULL;
+    const int *faceOnVertex = conn_blkvec.size() > 1 ? conn_blkvec[1] : NULL;
+    const int *faceOnFace = conn_blkvec.size() > 2 ? conn_blkvec[2] : NULL;
 
     UnstructuredGridCoordless xug(vertexDims, faceDims, edgeDims, bs, xcblkptrs, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
 
@@ -455,7 +455,7 @@ UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(size_t ts, 
     VAssert(dims.size() == bmax.size());
     VAssert(blkvec.size() == 4);
 
-    VAssert(conn_blkvec.size() >= 2);
+    VAssert(conn_blkvec.size() >= 1);
 
     // block pointers for data
     //

@@ -34,6 +34,8 @@ public:
     virtual ~DCCF();
 
 protected:
+    NetCDFCFCollection *_ncdfc;
+
     //! Initialize the DCCF class
     //!
     //! Prepare a CF data set for reading. This method prepares
@@ -78,7 +80,7 @@ protected:
 
     //! \copydoc DC::GetAuxVarInfo()
     //!
-    virtual bool getAuxVarInfo(string varname, DC::AuxVar &var) const { return (false); }
+    virtual bool getAuxVarInfo(string varname, DC::AuxVar &var) const;
 
     //! \copydoc DC::GetBaseVarInfo()
     //
@@ -88,7 +90,7 @@ protected:
     //!
     virtual std::vector<string> getDataVarNames() const;
 
-    virtual std::vector<string> getAuxVarNames() const { return (vector<string>()); }
+    virtual std::vector<string> getAuxVarNames() const;
 
     //! \copydoc DC::GetCoordVarNames()
     //!
@@ -149,41 +151,42 @@ protected:
     //!
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
+    virtual int initDimensions(NetCDFCFCollection *ncdfc, std::map<string, DC::Dimension> &dimsMap);
+
+    virtual int initCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
+
+    virtual int addCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars, std::map<string, DC::CoordVar> &coordVarsMap);
+
+    virtual int initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> &dataVarsMap);
+
+    virtual int initAuxilliaryVars(NetCDFCFCollection *ncdfc, std::map<string, DC::AuxVar> &auxVarsMap);
+
+    virtual int initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &_meshMap);
+
+    virtual int getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<string> &sdimnames, vector<string> &scoordvars, string &time_dim_name, string &time_coordvar) const;
+
+
 private:
-    NetCDFCFCollection *_ncdfc;
-    VAPoR::UDUnits      _udunits;
+    VAPoR::UDUnits _udunits;
 
     string                                      _proj4String;
     std::map<string, DC::Dimension>             _dimsMap;
     std::map<string, DC::CoordVar>              _coordVarsMap;
     std::map<string, DC::Mesh>                  _meshMap;
     std::map<string, DC::DataVar>               _dataVarsMap;
-    std::map<string, string>                    _coordVarKeys;
+    std::map<string, DC::AuxVar>                _auxVarsMap;
     std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
 
-    int _get_vertical_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar);
+    int _initHorizontalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
 
-    int _get_time_coordvar(NetCDFCFCollection *ncdfc, string dvar, string &cvar);
+    int _initVerticalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
 
-    int _get_latlon_coordvars(NetCDFCFCollection *ncdfc, string dvar, string &loncvar, string &latcvar) const;
-
-    int _AddCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars);
+    int _initTimeCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
 
     // Return true if a 1D variable has uniform, absolute deltas between elements
     //
     bool _isUniform(NetCDFCFCollection *ncdfc, string varname);
 
-    int _InitHorizontalCoordinates(NetCDFCFCollection *ncdfc);
-
-    int _InitVerticalCoordinates(NetCDFCFCollection *ncdfc);
-
-    int _InitTimeCoordinates(NetCDFCFCollection *ncdfc);
-
-    int _InitDimensions(NetCDFCFCollection *ncdfc);
-
-    int _GetVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<string> &sdimnames, vector<string> &scoordvars, string &time_dim_name, string &time_coordvar);
-
-    int _InitVars(NetCDFCFCollection *ncdfc);
 
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 

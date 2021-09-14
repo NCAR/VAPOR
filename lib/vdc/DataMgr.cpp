@@ -6,8 +6,8 @@
 #include <cfloat>
 #include <vector>
 #include <map>
+#include <algorithm>
 #include <type_traits>
-#include <vapor/GeoUtil.h>
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCWRF.h>
 #include <vapor/DCCF.h>
@@ -19,7 +19,9 @@
 #if DCP_ENABLE_PARTICLE_DENSITY
     #include <vapor/DerivedParticleDensity.h>
 #endif
+#include <vapor/DCUGRID.h>
 #include <vapor/DataMgr.h>
+#include <vapor/GeoUtil.h>
 #ifdef WIN32
     #include <float.h>
 #endif
@@ -583,6 +585,7 @@ int DataMgr::_parseOptions(vector<string> &options)
     return (0);
 }
 
+
 int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &options)
 {
     vector<string> deviceOptions = options;
@@ -610,6 +613,8 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         _dc = new DCBOV();
     } else if (_format.compare("dcp") == 0) {
         _dc = new DCP();
+    } else if (_format.compare("ugrid") == 0) {
+        _dc = new DCUGRID();
 #ifdef BUILD_DC_MELANIE
     } else if (_format.compare("melanie") == 0) {
         _dc = new DCMelanie();
@@ -1501,15 +1506,6 @@ int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &d
     }
     if (rc < 0) return (-1);
 
-#ifdef DEAD
-    // If data are not blocked (i.e. if all elements of bs_at_level
-    // are 1) set the block size to the dimension size. This forces
-    // non-blocked data to be read as a single block, avoiding the
-    // need to block the data into some arbitrary size, but at the same
-    // time prevening non-blocked data from being subset :-(
-    //
-    if (std::all_of(bs_at_level.cbegin(), bs_at_level.cend(), [](size_t i) { return i == 1; })) { bs_at_level = dims_at_level; }
-#endif
 
     return (0);
 }
@@ -2250,6 +2246,20 @@ bool DataMgr::_hasVerticalXForm(string meshname, string &standard_name, string &
     return (false);
 }
 
+bool DataMgr::_isCoordVarInUse(string varName) const
+{
+    std::vector<string> dataVars = GetDataVarNames();
+
+    for (auto dataVar : dataVars) {
+        std::vector<string> coordVars;
+        bool                ok = GetVarCoordVars(dataVar, false, coordVars);
+        if (!ok) continue;
+
+        if (find(coordVars.begin(), coordVars.end(), varName) != coordVars.end()) { return (true); }
+    }
+    return (false);
+}
+
 template<typename C> string DataMgr::VarInfoCache<C>::_make_hash(string key, size_t ts, vector<string> varnames, int level, int lod)
 {
     ostringstream oss;
@@ -2489,7 +2499,17 @@ int DataMgr::_initTimeCoord()
 {
     _timeCoordinates.clear();
 
-    vector<string> vars = _dc->GetTimeCoordVarNames();
+
+    // A data collection can have multiple time variables, but
+    // the DataMgr currently can only handle one. If there are
+    // multiple time coordinate variables figure out how many
+    // are actually in use.
+    //
+    vector<string> vars;
+    for (auto varName : _dc->GetTimeCoordVarNames()) {
+        if (_isCoordVarInUse(varName)) { vars.push_back(varName); }
+    }
+
     if (vars.size() > 1) {
         SetErrMsg("Data set contains more than one time coordinate");
         return (-1);
@@ -2620,9 +2640,6 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
         status = _dc->GetAuxVarInfo(node_face_var, auxvar);
         VAssert(status);
         faceOffset = auxvar.GetOffset();
-    } else {
-        VAssert(!"NodeFaceVar Required");
-        faceOffset = 0;
     }
 }
 
@@ -3131,58 +3148,73 @@ int DataMgr::_getVar(size_t ts, string varname, int level, int lod, float *data)
     return (0);
 }
 
-int DataMgr::_getLatlonExtents(string varname, bool lonflag, float &min, float &max, long ts)
+void DataMgr::_getLonExtents(vector<float> &lons, vector<size_t> dims, float &min, float &max) const
 {
-    vector<size_t> dims, dummy;
-    int            rc = _dc->GetDimLensAtLevel(varname, 0, dims, dummy, ts);
-    if (rc < 0) {
-        SetErrMsg("Invalid variable reference : %s", varname.c_str());
-        return (-1);
+    min = max = 0.0;
+    VAssert(dims.size() == 1 || dims.size() == 2);
+
+    if (!lons.size()) return;
+
+    size_t nx = dims[0];
+    size_t ny = dims.size() > 1 ? dims[1] : 1;
+    for (size_t j = 0; j < ny; j++) {
+        GeoUtil::UnwrapLongitude(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
+        GeoUtil::ShiftLon(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
     }
-    if (!(dims.size() == 1 || dims.size() == 2)) {
-        SetErrMsg("Unsupported variable dimension for variable \"%s\"", varname.c_str());
-        return (-1);
-    }
+    auto minmaxitr = std::minmax_element(lons.begin(), lons.end());
+    min = *(minmaxitr.first);
+    max = *(minmaxitr.second);
+}
 
-    float *buf = new float[VProduct(dims)];
+void DataMgr::_getLatExtents(vector<float> &lats, vector<size_t> dims, float &min, float &max) const
+{
+    min = max = 0.0;
 
-    rc = _getVar(0, varname, 0, 0, buf);
-    if (rc < 0) return (-1);
+    if (!lats.size()) return;
 
-    //
-    // Precondition longitude coordinates so that there are no
-    // discontinuities (e.g. jumping 360 to 0, or -180 to 180)
-    //
-    if (lonflag) {
-        if (dims.size() == 2) {
-            GeoUtil::ShiftLon(buf, dims[0], dims[1], buf);
-            GeoUtil::LonExtents(buf, dims[0], dims[1], min, max);
-        } else {
-            GeoUtil::ShiftLon(buf, dims[0], buf);
-            GeoUtil::LonExtents(buf, dims[0], min, max);
-        }
-    } else {
-        if (dims.size() == 2) {
-            GeoUtil::LatExtents(buf, dims[0], dims[1], min, max);
-        } else {
-            GeoUtil::LatExtents(buf, dims[0], min, max);
-        }
-    }
-
-    delete[] buf;
-
-    return (0);
+    auto minmaxitr = std::minmax_element(lats.begin(), lats.end());
+    min = *(minmaxitr.first);
+    max = *(minmaxitr.second);
 }
 
 int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax, long ts)
 {
     lonmin = lonmax = latmin = latmax = 0.0;
 
-    int rc = _getLatlonExtents(lon, true, lonmin, lonmax, ts);
+    vector<size_t> dims, dummy;
+    int            rc = _dc->GetDimLensAtLevel(lon, 0, dims, dummy, ts);
+    if (rc < 0) {
+        SetErrMsg("Invalid variable reference : %s", lon.c_str());
+        return (-1);
+    }
+    if (!(dims.size() == 1 || dims.size() == 2)) {
+        SetErrMsg("Unsupported variable dimension for variable \"%s\"", lon.c_str());
+        return (-1);
+    }
+
+    vector<float> buf(VProduct(dims));
+
+    rc = _getVar(0, lon, 0, 0, buf.data());
     if (rc < 0) return (-1);
 
-    rc = _getLatlonExtents(lat, false, latmin, latmax, ts);
+    _getLonExtents(buf, dims, lonmin, lonmax);
+
+    rc = _dc->GetDimLensAtLevel(lat, 0, dims, dummy, ts);
+    if (rc < 0) {
+        SetErrMsg("Invalid variable reference : %s", lat.c_str());
+        return (-1);
+    }
+    if (!(dims.size() == 1 || dims.size() == 2)) {
+        SetErrMsg("Unsupported variable dimension for variable \"%s\"", lat.c_str());
+        return (-1);
+    }
+
+    buf.resize(VProduct(dims));
+
+    rc = _getVar(0, lat, 0, 0, buf.data());
     if (rc < 0) return (-1);
+
+    _getLatExtents(buf, dims, latmin, latmax);
 
     return (0);
 }
