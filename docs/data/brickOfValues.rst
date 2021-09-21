@@ -1,3 +1,5 @@
+.. _brickOfValues:
+
 Brick of Values (BOV)
 _____________________
 

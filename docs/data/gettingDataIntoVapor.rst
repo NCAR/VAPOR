@@ -12,4 +12,4 @@ Vapor supports some data formats natively.  Other data formats are semi-supporte
 
    nativelySupportedDataFormats
    semiSupportedDataFormats
-   dealingWithLargeDataVDC
+   vdc
