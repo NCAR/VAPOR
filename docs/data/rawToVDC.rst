@@ -1,3 +1,5 @@
+.. _rawToVDC:
+
 Converting raw binary data into VDC
 -----------------------------------
 

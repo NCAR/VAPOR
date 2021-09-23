@@ -9,6 +9,12 @@ Regular Grid Example in Python
 
 |
 
+.. note::
+
+   Download this example as a .py file `here <https://drive.google.com/file/d/1s75gTNVkgvxPhjtzaYjkBM7nS3BD9pvX/view?usp=sharing>`_.
+
+   Download this example as a jupyter .ipynb file `here <https://drive.google.com/file/d/1q4GSYzRKkq1DJU2Gy-XPjdsyvkOXnynU/view?usp=sharing>`_.
+
 Here we demonstrate how to use *xarray* to apply the CF Conventions to a basic NetCDF file (`simple.nc <https://drive.google.com/file/d/18CFrtFxvHwfL30Xd91TNU38J_z-Kgywm/view?usp=sharing>`_) to define it on a regular, rectilinar grid for ingesting into Vapor.  You can download `this Python script <https://github.com/NCAR/VAPOR/blob/readTheDocs/docs/data/regularToCF.py>`_ that replicates the steps below.
 
 Our simple.nc file only defines X, Y, and Z spatial dimensions, a time dimension, and one scalar variable named temperature.  To make it comply with the CF Conventions, we need to do the following:
