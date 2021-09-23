@@ -1,6 +1,6 @@
 .. _nativelySupportedDataFormats:
 
-Natively supported data formats
+Natively Supported Data Formats
 _______________________________
 
 Some data formats can be easily loaded into Vapor through the File->Import menu.

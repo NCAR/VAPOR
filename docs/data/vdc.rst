@@ -3,7 +3,7 @@
 Vapor Data Collection (VDC)
 ```````````````````````````
 
-In most cases, directly importing data is sufficient for an interactive user experience.  However, if rendering times keep the application from being interactive, users may want to consider using the VDC data foramt.
+If you import a very large dataset, you may experience performance issues.  In this case, you should consider the Vapor Data Collection (VDC).
 
 The VDC data format allows users to render their data at different levels of compression.  Viewing compressed data reduces the time a rendering takes to complete, improving interactivity.  
 
