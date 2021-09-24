@@ -13,7 +13,8 @@ class ParamsMgr;
 struct GLManager;
 class Framebuffer;
 class ViewpointParams;
-} using namespace VAPoR;
+}    // namespace VAPoR
+using namespace VAPoR;
 class GUIStateParams;
 class AnimationParams;
 

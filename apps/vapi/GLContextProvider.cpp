@@ -8,14 +8,15 @@
 
 GLContext *GLContextProvider::CreateContext()
 {
-#define returnIfSupportedContext(ctxProvider) {\
-    GLContext *ctx = ctxProvider::CreateContext(); \
-    if (isContextOk(ctx)) return ctx; \
-}
+#define returnIfSupportedContext(ctxProvider)          \
+    {                                                  \
+        GLContext *ctx = ctxProvider::CreateContext(); \
+        if (isContextOk(ctx)) return ctx;              \
+    }
 #if MacOS
     returnIfSupportedContext(GLContextProviderMacOS);
 #endif
-    
+
 #if Linux
     returnIfSupportedContext(GLContextProviderNvidia);
     returnIfSupportedContext(GLContextProviderEGL);
@@ -23,7 +24,7 @@ GLContext *GLContextProvider::CreateContext()
     LogWarning("Falling back to software rendering");
     returnIfSupportedContext(GLContextProviderMesa);
 #endif
-    
+
     return nullptr;
 }
 

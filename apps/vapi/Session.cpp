@@ -19,7 +19,7 @@ Session::Session()
     vector<string> myRenParams;
     _controlExec = new ControlExec(myParams, myRenParams);
     _renderManager = new RenderManager(_controlExec);
-    
+
     Reset();
 }
 
@@ -38,9 +38,7 @@ void Session::CloseDataset(String name)
 void Session::CloseAllDatasets()
 {
     auto datasetNames = _controlExec->GetDataNames();
-    for (auto &name : datasetNames) {
-        CloseDataset(name);
-    }
+    for (auto &name : datasetNames) { CloseDataset(name); }
 }
 
 int Session::OpenDataset(String name, String format, const vector<String> &files, const vector<String> &options)
@@ -52,15 +50,13 @@ int Session::OpenDataset(String name, String format, const vector<String> &files
     }
 
     GUIStateParams *p = getGUIStateParams();
-    DataStatus *ds = _controlExec->GetDataStatus();
-    bool isFirstDataset = p->GetOpenDataSetNames().empty();
+    DataStatus *    ds = _controlExec->GetDataStatus();
+    bool            isFirstDataset = p->GetOpenDataSetNames().empty();
     p->SetProjectionString(ds->GetMapProjection());
     p->InsertOpenDateSet(name, format, files);
-    
-    if (isFirstDataset) {
-        NavigationUtils::ViewAll(_controlExec);
-    }
-    
+
+    if (isFirstDataset) { NavigationUtils::ViewAll(_controlExec); }
+
     _controlExec->UndoRedoClear();
     return 0;
 }
@@ -68,18 +64,17 @@ int Session::OpenDataset(String name, String format, const vector<String> &files
 int Session::OpenDataset(String format, const vector<String> &files, String name)
 {
     GUIStateParams *p = getGUIStateParams();
-    vector<String> options = {"-project_to_pcs", "-vertical_xform"};
+    vector<String>  options = {"-project_to_pcs", "-vertical_xform"};
     // TODO: autostretch
-//    if (GetSettingsParams()->GetAutoStretchEnabled()) options.push_back("-auto_stretch_z");
+    //    if (GetSettingsParams()->GetAutoStretchEnabled()) options.push_back("-auto_stretch_z");
 
     if (!p->GetProjectionString().empty()) {
         options.push_back("-proj4");
         options.push_back(p->GetProjectionString());
     }
-    
-    if (name.empty())
-        name = ControlExec::MakeStringConformant(FileUtils::Basename(files[0]));
-    
+
+    if (name.empty()) name = ControlExec::MakeStringConformant(FileUtils::Basename(files[0]));
+
     OpenDataset(name, format, files, options);
     return -1;
 }
@@ -87,20 +82,18 @@ int Session::OpenDataset(String format, const vector<String> &files, String name
 int Session::Load(String path)
 {
     Reset();
-    
+
     int rc = _controlExec->LoadState(path);
     if (rc < 0) {
         LogWarning("Session '%s' failed to load", path.c_str());
         return rc;
     }
-    
+
     auto dataSetNames = _controlExec->GetParamsMgr()->GetDataMgrNames();
-    for (auto d : dataSetNames) {
-        printf("Dataset: '%s'\n", d.c_str());
-    }
-    
+    for (auto d : dataSetNames) { printf("Dataset: '%s'\n", d.c_str()); }
+
     loadAllParamsDatasets();
-    
+
     _controlExec->UndoRedoClear();
     return 0;
 }
@@ -109,32 +102,28 @@ void Session::Reset()
 {
     CloseAllDatasets();
     _controlExec->LoadState();
-//    _controlExec->NewVisualizer("viz_1");
+    //    _controlExec->NewVisualizer("viz_1");
 }
 
 int Session::Render(String imagePath)
 {
-    if (!_controlExec->GetParamsMgr()->GetDataMgrNames().size())
-    {
+    if (!_controlExec->GetParamsMgr()->GetDataMgrNames().size()) {
         LogWarning("Nothing to render");
         return -1;
     }
-    
+
     return _renderManager->Render(imagePath);
 }
 
-void Session::SetTimestep(int ts)
-{
-    NavigationUtils::SetTimestep(_controlExec, ts);
-}
+void Session::SetTimestep(int ts) { NavigationUtils::SetTimestep(_controlExec, ts); }
 
 void Session::loadAllParamsDatasets()
 {
     auto dataSetNames = _controlExec->GetParamsMgr()->GetDataMgrNames();
 
     for (int i = 0; i < dataSetNames.size(); i++) {
-        string name = dataSetNames[i];
-        string format;
+        string         name = dataSetNames[i];
+        string         format;
         vector<string> paths;
         getParamsDatasetInfo(name, &format, &paths);
         if (std::all_of(paths.begin(), paths.end(), FileUtils::Exists)) {
@@ -160,12 +149,6 @@ void Session::getParamsDatasetInfo(String name, String *type, vector<String> *fi
     *files = gsp->GetOpenDataSetPaths(name);
 }
 
-GUIStateParams *Session::getGUIStateParams() const
-{
-    return ((GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-}
+GUIStateParams *Session::getGUIStateParams() const { return ((GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType())); }
 
-AnimationParams *Session::getAnimationParams() const
-{
-    return ((AnimationParams *)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType()));
-}
+AnimationParams *Session::getAnimationParams() const { return ((AnimationParams *)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType())); }

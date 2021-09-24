@@ -8,17 +8,17 @@
 //! \author Stas Jaroszynski
 
 class GLContextProviderMacOS {
-    
     class GLContextMacOS : public GLContext {
         void *_ctx = nullptr;
+
     public:
         GLContextMacOS(void *ctx);
         virtual ~GLContextMacOS() override;
         virtual void MakeCurrent() override;
-        
+
         friend class GLContextProviderMacOS;
     };
-    
+
 public:
     static GLContext *CreateContext();
 };

@@ -12,14 +12,11 @@ void Log::printc(const char *format, ...)
     va_end(args);
 }
 
-void Log::fatal()
-{
-    exit(1);
-}
+void Log::fatal() { exit(1); }
 
 String Log::AddLocationToFormat(const String &fmt, const char *file, int line)
 {
     const char *base = strrchr(file, '/');
-    base = base ? base+1 : file;
+    base = base ? base + 1 : file;
     return "[" + String(base) + ":" + std::to_string(line) + "] " + fmt;
 }

@@ -14,16 +14,16 @@ Session *_session;
 int main(int argc, char **argv)
 {
     Wasp::MyBase::SetErrMsgFilePtr(stderr);
-    
+
     auto ctx = GLContextProvider::CreateContext();
     VAssert(ctx);
     ctx->MakeCurrent();
     LogMessage("Context: %s", glGetString(GL_VERSION));
-    
+
     _session = new Session;
-    
+
     _session->Load("session.vs3");
     _session->Render("out.png");
-    
+
     return 0;
 }

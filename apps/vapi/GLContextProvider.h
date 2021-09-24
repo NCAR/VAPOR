@@ -10,7 +10,8 @@
 class GLContextProvider {
 public:
     static GLContext *CreateContext();
-    static bool IsCurrentOpenGLVersionSupported();
+    static bool       IsCurrentOpenGLVersionSupported();
+
 private:
     static bool isContextOk(GLContext *ctx);
 };

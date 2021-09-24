@@ -17,7 +17,7 @@ int Framebuffer::Generate()
 
     GLint savedId;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &savedId);
-    
+
     glGenFramebuffers(1, &_id);
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
 
@@ -41,10 +41,7 @@ bool Framebuffer::IsComplete() const { return Initialized() && GetStatus() == GL
 
 int Framebuffer::GetStatus() const { return glCheckFramebufferStatus(GL_FRAMEBUFFER); }
 
-const char *Framebuffer::GetStatusString() const
-{
-    return GetStatusString(GetStatus());
-}
+const char *Framebuffer::GetStatusString() const { return GetStatusString(GetStatus()); }
 
 const char *Framebuffer::GetStatusString(int status)
 {

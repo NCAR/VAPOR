@@ -11,5 +11,5 @@ class GLContext {
 public:
     virtual ~GLContext() {}
     virtual void MakeCurrent() = 0;
-    String GetVersion();
+    String       GetVersion();
 };

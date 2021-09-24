@@ -16,18 +16,14 @@
 
 using namespace VAPoR;
 
-RenderManager::RenderManager(ControlExec *ce)
-: _controlExec(ce) {}
+RenderManager::RenderManager(ControlExec *ce) : _controlExec(ce) {}
 
-RenderManager::~RenderManager()
-{
-    delete _glManager;
-}
+RenderManager::~RenderManager() { delete _glManager; }
 
 void RenderManager::getNearFarDist(const double posVec[3], const double dirVec[3], double &boxNear, double &boxFar)
 {
     String _winName = getWinName();
-    
+
     // First check full box
     double wrk[3], cor[3], boxcor[3];
     double camPosBox[3], dvdir[3];
@@ -43,7 +39,7 @@ void RenderManager::getNearFarDist(const double posVec[3], const double dirVec[3
     ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
 
     AnimationParams *ap = ((AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType()));
-    size_t ts = ap->GetCurrentTimestep();
+    size_t           ts = ap->GetCurrentTimestep();
 
     vector<double> minExts, maxExts;
     dataStatus->GetActiveExtents(paramsMgr, _winName, ts, minExts, maxExts);
@@ -104,8 +100,8 @@ void RenderManager::setUpProjMatrix()
 
     size_t width, height;
     vParams->GetWindowSize(width, height);
-//    width *= QApplication::desktop()->devicePixelRatio();
-//    height *= QApplication::desktop()->devicePixelRatio();
+    //    width *= QApplication::desktop()->devicePixelRatio();
+    //    height *= QApplication::desktop()->devicePixelRatio();
     int wWidth = width;
     int wHeight = height;
 
@@ -156,7 +152,7 @@ void RenderManager::setUpProjMatrix()
 
     if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
         Trackball trackball;
-        double center[3];
+        double    center[3];
         vParams->GetRotationCenter(center);
         trackball.setFromFrame(posvec, dirvec, upvec, center, true);
         float s = trackball.GetOrthoSize();
@@ -182,7 +178,6 @@ void RenderManager::setUpProjMatrix()
 
 void RenderManager::setUpModelViewMatrix()
 {
-
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(getWinName());
 
@@ -195,26 +190,26 @@ void RenderManager::setUpModelViewMatrix()
 
 int RenderManager::Render(String imagePath)
 {
-//    GL_ERR_BREAK();
+    //    GL_ERR_BREAK();
     if (!_glManager) _glManager = new GLManager;
-    
+
     static bool temp = false;
     if (!temp) {
         _controlExec->InitializeViz(getWinName(), _glManager);
         temp = true;
         // TODO: REMOVE TEMP
     }
-    
+
     Framebuffer defaultFB;
     defaultFB.Generate();
     defaultFB.SetSize(600, 480);
     defaultFB.MakeRenderTarget();
-    
+
     getViewpointParams()->SetWindowSize(600, 480);
-//    getViewpointParams()->SetValueLong(ViewpointParams::UseCustomFramebufferTag, "", true);
-//    getViewpointParams()->SetValueLong(ViewpointParams::CustomFramebufferWidthTag, "", 600);
-//    getViewpointParams()->SetValueLong(ViewpointParams::CustomFramebufferHeightTag, "", 480);
-    
+    //    getViewpointParams()->SetValueLong(ViewpointParams::UseCustomFramebufferTag, "", true);
+    //    getViewpointParams()->SetValueLong(ViewpointParams::CustomFramebufferWidthTag, "", 600);
+    //    getViewpointParams()->SetValueLong(ViewpointParams::CustomFramebufferHeightTag, "", 480);
+
     _glManager->matrixManager->MatrixModeProjection();
     _glManager->matrixManager->PushMatrix();
     setUpProjMatrix();
@@ -230,7 +225,7 @@ int RenderManager::Render(String imagePath)
     _glManager->matrixManager->PopMatrix();
     _glManager->matrixManager->MatrixModeModelView();
     _glManager->matrixManager->PopMatrix();
-    
+
     return rc;
 }
 
@@ -241,7 +236,4 @@ String RenderManager::getWinName() const
     return winName;
 }
 
-VAPoR::ViewpointParams *RenderManager::getViewpointParams() const
-{
-    return _controlExec->GetParamsMgr()->GetViewpointParams(getWinName());
-}
+VAPoR::ViewpointParams *RenderManager::getViewpointParams() const { return _controlExec->GetParamsMgr()->GetViewpointParams(getWinName()); }

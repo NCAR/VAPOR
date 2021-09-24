@@ -1,10 +1,7 @@
 #include "GLUtil.h"
 #include "GLInclude.h"
 
-String GLUtil::GetGLVersion()
-{
-    return String((const char *)glGetString(GL_VERSION));
-}
+String GLUtil::GetGLVersion() { return String((const char *)glGetString(GL_VERSION)); }
 
 void GLUtil::GetGLVersion(int *major, int *minor)
 {

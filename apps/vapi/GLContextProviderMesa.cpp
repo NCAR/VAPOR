@@ -1,10 +1,9 @@
 #include "GLContextProviderMesa.h"
 
 #if Linux
-#include <GL/osmesa.h>
+    #include <GL/osmesa.h>
 
-GLContextProviderMesa::GLContextMesa::GLContextMesa(void *ctx)
-: _ctx(ctx) {}
+GLContextProviderMesa::GLContextMesa::GLContextMesa(void *ctx) : _ctx(ctx) {}
 
 GLContextProviderMesa::GLContextMesa::~GLContextMesa()
 {
@@ -15,7 +14,7 @@ GLContextProviderMesa::GLContextMesa::~GLContextMesa()
 void GLContextProviderMesa::GLContextMesa::MakeCurrent()
 {
     OSMesaContext ctx = (OSMesaContext)_ctx;
-    bool success = OSMesaMakeCurrent(ctx, _dummyBuffer, GL_UNSIGNED_BYTE, 4, 4);
+    bool          success = OSMesaMakeCurrent(ctx, _dummyBuffer, GL_UNSIGNED_BYTE, 4, 4);
     assert(success);
 }
 
@@ -32,22 +31,18 @@ GLContext *GLContextProviderMesa::CreateContext()
     //  OSMESA_CONTEXT_MINOR_VERSION  0+
     //
     //  Note: * = default value
-    int attrs[] = {
-        OSMESA_FORMAT, OSMESA_RGB,
-        OSMESA_PROFILE, OSMESA_CORE_PROFILE,
-        0
-    };
-    
+    int attrs[] = {OSMESA_FORMAT, OSMESA_RGB, OSMESA_PROFILE, OSMESA_CORE_PROFILE, 0};
+
     OSMesaContext ctx = OSMesaCreateContextAttribs(attrs, NULL);
     if (!ctx) {
         LogWarning("Failed to create context\n");
         return nullptr;
     }
-    
+
     GLContextMesa *glContext = new GLContextMesa(ctx);
-    
+
     LogInfo("Created context: %s", glContext->GetVersion().c_str());
-    
+
     return glContext;
 }
 

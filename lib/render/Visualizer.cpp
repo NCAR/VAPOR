@@ -179,7 +179,7 @@ int Visualizer::paintEvent(bool fast)
         fbHeight = vp->GetValueLong(ViewpointParams::CustomFramebufferHeightTag, 0);
     }
     _framebuffer.SetSize(fbWidth, fbHeight);
-    
+
     GLint destFbId;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &destFbId);
     _framebuffer.MakeRenderTarget();

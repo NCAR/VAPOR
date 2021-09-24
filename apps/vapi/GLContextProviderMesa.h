@@ -8,16 +8,16 @@
 //! \author Stas Jaroszynski
 
 class GLContextProviderMesa {
-    
     class GLContextMesa : public GLContext {
         void *_ctx = nullptr;
-        char _dummyBuffer[4*4*3];
+        char  _dummyBuffer[4 * 4 * 3];
+
     public:
         GLContextMesa(void *ctx);
         virtual ~GLContextMesa() override;
         virtual void MakeCurrent() override;
     };
-    
+
 public:
     static GLContext *CreateContext();
 };
