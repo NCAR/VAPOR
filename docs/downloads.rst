@@ -211,8 +211,10 @@ Release notes for VAPOR-3.1.0
 Vapor 2
 ```````
 
-If you are interested in using Vapor 2, it can be `downloaded after filling out a short survey <https://forms.gle/ZLX7oZ7LYAVEEBH4A>`_.
-
 Vapor 2 is deprecated, and we strongly encourage users to download the currently supported releases of Vapor 3.
 
-`Legacy documentation for Vapor 2 can be found here <https://ncar.github.io/vapor2website/index.html>`_.  Please note that this website is no longer supported, and some links may be broken.  Use at your own discretion.
+If you are interested in using Vapor 2, it can be `downloaded after filling out a short survey <https://forms.gle/ZLX7oZ7LYAVEEBH4A>`_.
+
+Legacy documentation for Vapor 2 can be found `here <https://ncar.github.io/vapor2website/index.html>`_.  Please note that this website is no longer supported, and some links may be broken.  Use at your own discretion.
+
+Vapor 2 source code can be found `here <https://sourceforge.net/projects/vapor/>`_.
