@@ -218,3 +218,10 @@ If you are interested in using Vapor 2, it can be `downloaded after filling out 
 Legacy documentation for Vapor 2 can be found `here <https://ncar.github.io/vapor2website/index.html>`_.  Please note that this website is no longer supported, and some links may be broken.  Use at your own discretion.
 
 Vapor 2 source code can be found `here <https://sourceforge.net/projects/vapor/>`_.
+
+.. raw:: html
+
+    <div class="sphx-glr-download sphx-glr-download-python docutils container"><p><a class="reference download internal" download="" href="foo.cpp"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">foo.cpp</span></code></a></p></div>
+
+Download python example :download:`here <foo.cpp>`
+
