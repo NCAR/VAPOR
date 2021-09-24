@@ -7,7 +7,7 @@
 #include "V3DInput.h"
 #include "V3DIntInput.h"
 #include "VLineItem.h"
-#include "AnimationParams.h"
+#include <vapor/AnimationParams.h>
 #include "ErrorReporter.h"
 
 PAxisAnnotationWidget::PAxisAnnotationWidget(VAPoR::ControlExec *controlExec) : PWidget("", _group = new VGroup())

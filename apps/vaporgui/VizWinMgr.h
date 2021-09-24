@@ -27,8 +27,8 @@ class QWidget;
 #include <vapor/common.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/ViewpointParams.h>
-#include "AnimationParams.h"
-#include "GUIStateParams.h"
+#include <vapor/AnimationParams.h>
+#include <vapor/GUIStateParams.h>
 
 class VizWin;
 class Trackball;

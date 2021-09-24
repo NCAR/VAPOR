@@ -2,7 +2,7 @@
 #include "PWidgets.h"
 #include <vapor/ViewpointParams.h>
 #include <vapor/ControlExecutive.h>
-#include "NavigationUtils.h"
+#include <vapor/NavigationUtils.h>
 
 
 typedef VAPoR::ViewpointParams VP;

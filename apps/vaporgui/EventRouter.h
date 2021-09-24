@@ -25,9 +25,9 @@
 #include <QLineEdit>
 #include <QSlider>
 #include "vapor/ControlExecutive.h"
-#include "GUIStateParams.h"
+#include <vapor/GUIStateParams.h>
 #include "SettingsParams.h"
-#include "AnimationParams.h"
+#include <vapor/AnimationParams.h>
 
 #ifdef WIN32
     // Annoying unreferenced formal parameter warning
