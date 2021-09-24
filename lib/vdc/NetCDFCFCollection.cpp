@@ -14,6 +14,17 @@ using namespace VAPoR;
 using namespace Wasp;
 using namespace std;
 
+namespace {
+vector<string> make_unique(vector<string> v)
+{
+    sort(v.begin(), v.end());
+    vector<string>::iterator last2;
+    last2 = unique(v.begin(), v.end());
+    v.erase(last2, v.end());
+    return (v);
+}
+};    // namespace
+
 NetCDFCFCollection::NetCDFCFCollection() : NetCDFCollection()
 {
     _coordinateVars.clear();
@@ -95,12 +106,8 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
     if (rc < 0) return (-1);
 
     //
-    // Identify all of the coordinate variables and
-    // auxiliary coordinate variables. Not sure if we need to
-    // make a distinction between "coordinate variable" and
-    // "auxiliary coordinate variable".
-    //
-    // First look for "coordinate variables", which are 1D in space
+    // Identify all of the CF "coordinate" variables first,
+    // which are 1D in space
     // or 1D in time and have
     // the same name as their one dimension
     //
@@ -114,27 +121,50 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
         if (_IsCoordinateVar(varinfo)) { _coordinateVars.push_back(vars[i]); }
     }
 
+
+    // Now find all coordinate variables that can be identified
+    // by their units, standard name, etc.
     //
-    // Get all the 1D, 2D 3D, and 4D variables
     vars.clear();
-    vector<string> v = NetCDFCollection::GetVariableNames(1, false);
-    vars.insert(vars.end(), v.begin(), v.end());
+    for (int i = 1; i < 4; i++) {
+        vector<string> v = NetCDFCollection::GetVariableNames(i, false);
+        vars.insert(vars.end(), v.begin(), v.end());
+    }
 
-    v = NetCDFCollection::GetVariableNames(2, false);
-    vars.insert(vars.end(), v.begin(), v.end());
-
-    v = NetCDFCollection::GetVariableNames(3, false);
-    vars.insert(vars.end(), v.begin(), v.end());
-
-    v = NetCDFCollection::GetVariableNames(4, false);
-    vars.insert(vars.end(), v.begin(), v.end());
-
-    string timeDimName;
-    for (int i = 0; i < vars.size(); i++) {
+    for (auto varName : vars) {
         NetCDFSimple::Variable varinfo;
-        (void)NetCDFCollection::GetVariableInfo(vars[i], varinfo);
+        (void)NetCDFCollection::GetVariableInfo(varName, varinfo);
 
-        if (!GetTimeDimName(vars[i]).empty()) timeDimName = GetTimeDimName(vars[i]);
+        if (_IsLonCoordVar(varinfo)) {
+            _lonCoordVars.push_back(varName);
+            _auxCoordinateVars.push_back(varName);
+        } else if (_IsLatCoordVar(varinfo)) {
+            _latCoordVars.push_back(varName);
+            _auxCoordinateVars.push_back(varName);
+        } else if (_IsVertCoordVar(varinfo)) {
+            _vertCoordVars.push_back(varName);
+            _auxCoordinateVars.push_back(varName);
+        } else if (_IsTimeCoordVar(varinfo)) {
+            _timeCoordVars.push_back(varName);
+            _auxCoordinateVars.push_back(varName);
+        }
+    }
+
+    // Finally, any variable that is identified by a "coordinate" variable
+    // attribute is an "auxilliary" coordinate variable
+    //
+    vars.clear();
+    for (int i = 0; i < 4; i++) {
+        vector<string> v = NetCDFCollection::GetVariableNames(1, false);
+        vars.insert(vars.end(), v.begin(), v.end());
+    }
+
+    for (auto varName : vars) {
+        string                 timeDimName;
+        NetCDFSimple::Variable varinfo;
+        (void)NetCDFCollection::GetVariableInfo(varName, varinfo);
+
+        if (!GetTimeDimName(varName).empty()) timeDimName = GetTimeDimName(varName);
 
         vector<string> coordattr = _GetCoordAttrs(varinfo);
         if (!coordattr.size()) continue;
@@ -142,12 +172,9 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
         for (int j = 0; j < coordattr.size(); j++) {
             //
             // Make sure the auxiliary coordinate variable
-            // actually exists in the data collection and has not
-            // already been identified as a 1D "coordinate variable".
+            // actually exists in the data collection
             //
-            if (NetCDFCollection::VariableExists(coordattr[j]) && (find(_coordinateVars.begin(), _coordinateVars.end(), coordattr[j]) == _coordinateVars.end())) {
-                _auxCoordinateVars.push_back(coordattr[j]);
-            }
+            if (NetCDFCollection::VariableExists(coordattr[j])) { _auxCoordinateVars.push_back(coordattr[j]); }
         }
     }
 
@@ -163,46 +190,14 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
     }
 
     //
-    // sort and remove duplicate auxiliary coordinate variables
+    // sort and remove duplicate coordinate variables
     //
-    sort(_auxCoordinateVars.begin(), _auxCoordinateVars.end());
-    vector<string>::iterator lasts;
-    lasts = unique(_auxCoordinateVars.begin(), _auxCoordinateVars.end());
-    _auxCoordinateVars.erase(lasts, _auxCoordinateVars.end());
-
-    //
-    // Lastly, determine the type of coordinate variable (lat, lon,
-    // vertical, or time)
-    //
-    vector<string> cvars = _coordinateVars;
-    cvars.insert(cvars.end(), _auxCoordinateVars.begin(), _auxCoordinateVars.end());
-
-    for (int i = 0; i < cvars.size(); i++) {
-        NetCDFSimple::Variable varinfo;
-        (void)NetCDFCollection::GetVariableInfo(cvars[i], varinfo);
-
-        if (_IsLonCoordVar(varinfo)) {
-            _lonCoordVars.push_back(cvars[i]);
-        } else if (_IsLatCoordVar(varinfo)) {
-            _latCoordVars.push_back(cvars[i]);
-        } else if (_IsVertCoordVar(varinfo)) {
-            _vertCoordVars.push_back(cvars[i]);
-        } else if (_IsTimeCoordVar(varinfo)) {
-            _timeCoordVars.push_back(cvars[i]);
-        }
-    }
-
-    //
-    // If a time dimension exists but no time coordinate variable
-    // we derive one. The is messed up. The base class, NetCDFCollection,
-    // may not contain a NetCDF time coordinate variable, but it does
-    // sythesize a list of user times
-    //
-    if (_timeCoordVars.empty() && !timeDimName.empty()) {
-        DerivedVarTimeFromMem *derived_var = new DerivedVarTimeFromMem(timeDimName, "seconds", timeDimName, GetTimes());
-
-        NetCDFCFCollection::InstallDerivedCoordVar(timeDimName, derived_var, 3);
-    }
+    _coordinateVars = make_unique(_coordinateVars);
+    _auxCoordinateVars = make_unique(_auxCoordinateVars);
+    _lonCoordVars = make_unique(_lonCoordVars);
+    _latCoordVars = make_unique(_latCoordVars);
+    _vertCoordVars = make_unique(_vertCoordVars);
+    _timeCoordVars = make_unique(_timeCoordVars);
 
     string mvattname;
     _GetMissingValueMap(_missingValueMap, mvattname);
@@ -221,7 +216,7 @@ vector<string> NetCDFCFCollection::GetDataVariableNames(int ndim, bool spatial) 
         //
         // Strip off any coordinate variables
         //
-        if (IsCoordVarCF(tmp[i]) || IsAuxCoordVarCF(tmp[i])) continue;
+        if (IsCoordVarCF(tmp[i])) continue;
 
         vector<string> cvars;
         bool           enable = EnableErrMsg(false);
@@ -684,9 +679,6 @@ void NetCDFCFCollection::InstallDerivedCoordVar(string varname, DerivedVar *deri
     vector<string> dims = derivedVar->GetSpatialDimNames();
     if (derivedVar->TimeVarying()) { dims.insert(dims.begin(), derivedVar->GetTimeDimName()); }
 
-    // Is the derived variable a CF "coordinate variable" or an "auxilliary
-    // coordinate" variable?
-    //
     if (dims.size() == 1 && dims[0] == varname) {
         _coordinateVars.push_back(varname);
     } else {
@@ -722,11 +714,11 @@ void NetCDFCFCollection::RemoveDerivedVar(string varname)
     itr = find(_timeCoordVars.begin(), _timeCoordVars.end(), varname);
     if (itr != _timeCoordVars.end()) _timeCoordVars.erase(itr);
 
-    itr = find(_auxCoordinateVars.begin(), _auxCoordinateVars.end(), varname);
-    if (itr != _auxCoordinateVars.end()) _auxCoordinateVars.erase(itr);
-
     itr = find(_coordinateVars.begin(), _coordinateVars.end(), varname);
     if (itr != _coordinateVars.end()) _coordinateVars.erase(itr);
+
+    itr = find(_auxCoordinateVars.begin(), _auxCoordinateVars.end(), varname);
+    if (itr != _auxCoordinateVars.end()) _auxCoordinateVars.erase(itr);
 }
 
 bool NetCDFCFCollection::GetMapProjectionProj4(string varname, string &proj4string) const
@@ -835,10 +827,6 @@ std::ostream &operator<<(std::ostream &o, const NetCDFCFCollection &ncdfcfc)
     o << "NetCDFCFCollection" << endl;
     o << " _coordinateVars : ";
     for (int i = 0; i < ncdfcfc._coordinateVars.size(); i++) { o << ncdfcfc._coordinateVars[i] << " "; }
-    o << endl;
-
-    o << " _auxCoordinateVars : ";
-    for (int i = 0; i < ncdfcfc._auxCoordinateVars.size(); i++) { o << ncdfcfc._auxCoordinateVars[i] << " "; }
     o << endl;
 
     o << " _lonCoordVars : ";
@@ -995,6 +983,9 @@ bool NetCDFCFCollection::_IsVertCoordVar(const NetCDFSimple::Variable &varinfo) 
     // Check for CAM Z3 Geopotential height variable
     //
     if (_camZ3Exists(vector<string>(1, varinfo.GetName()))) return (true);
+
+    varinfo.GetAtt("positive", s);
+    if ((StrCmpNoCase(s, "up") == 0) || (StrCmpNoCase(s, "down") == 0)) return (true);
 
     string unit;
     varinfo.GetAtt("units", unit);

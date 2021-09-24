@@ -131,7 +131,6 @@ int SliceRenderer::_resetDataCache()
 
     _textureSideSize = _cacheParams.textureSampleRate;
     if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
-
     _resetBoxCache();
     _resetColormapCache();
 
@@ -234,7 +233,7 @@ void SliceRenderer::_populateDataXY(float *dataValues, Grid *grid) const
 {
     std::vector<double> deltas = _calculateDeltas();
     float               varValue, missingValue;
-    std::vector<double> coords(3, 0.0);
+    std::array<double, 3> coords = {0.0, 0.0, 0.0};
     coords[X] = _cacheParams.domainMin[X] + deltas[X] / 2.f;
     coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] / 2.f;
     coords[Z] = _cacheParams.boxMin[Z];
@@ -264,7 +263,7 @@ void SliceRenderer::_populateDataXZ(float *dataValues, Grid *grid) const
 {
     std::vector<double> deltas = _calculateDeltas();
     float               varValue, missingValue;
-    std::vector<double> coords(3, 0.0);
+    std::array<double, 3> coords = {0.0, 0.0, 0.0};
     coords[X] = _cacheParams.domainMin[X];
     coords[Y] = _cacheParams.boxMin[Y];
     coords[Z] = _cacheParams.domainMin[Z];
@@ -294,7 +293,7 @@ void SliceRenderer::_populateDataYZ(float *dataValues, Grid *grid) const
 {
     std::vector<double> deltas = _calculateDeltas();
     float               varValue, missingValue;
-    std::vector<double> coords(3, 0.0);
+    std::array<double, 3> coords = {0.0, 0.0, 0.0};
     coords[X] = _cacheParams.boxMin[X];
     coords[Y] = _cacheParams.domainMin[Y];
     coords[Z] = _cacheParams.domainMin[Z];

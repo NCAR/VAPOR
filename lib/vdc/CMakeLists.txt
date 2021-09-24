@@ -39,6 +39,7 @@ set (SRC
 	VDC_c.cpp
 	DCUtils.cpp
 	QuadTreeRectangleP.cpp
+    DCUGRID.cpp
 )
 
 set (HEADERS
@@ -83,6 +84,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/QuadTreeRectangle.hpp
 	${PROJECT_SOURCE_DIR}/include/vapor/QuadTreeRectangleP.h
 	${PROJECT_SOURCE_DIR}/include/vapor/OpenMPSupport.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DCUGRID.h
 )
 
 add_library (vdc SHARED ${SRC} ${HEADERS})
