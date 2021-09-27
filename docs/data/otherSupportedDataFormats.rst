@@ -10,9 +10,9 @@ ___________________________
     :align: center
     :figclass: align-center
 
-    Vapor will need some extra information for some files.  See below for tutorials.
+    Vapor will need some extra information for some data types.  See below for tutorials.
 
-Other supported formats:
+Other supported formats include the following:
  
 .. toctree::
    :maxdepth: 1

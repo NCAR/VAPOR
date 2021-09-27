@@ -9,11 +9,9 @@ Stretched Grid Example in Python
 
 |
 
-.. note::
+Download python example :download:`here <stretchedToCF.py>`
 
-   Download this example as a .py file `here <https://drive.google.com/file/d/1MyWsFhWZt7Pbaa8iFeMjzGxmaXc3CQX7/view?usp=sharing>`_.
-
-   Download this example as a jupyter .ipynb file `here <https://drive.google.com/file/d/1reZUy1G8hRl3rEV7nNyp2Q0ptDScipxX/view?usp=sharing>`_.
+Download jupyter notebook example :download:`here <stretchedToCF.ipynb>`
 
 Here we demonstrate how to use *xarray* to apply the CF Conventions to a basic NetCDF file (`simple.nc <https://drive.google.com/file/d/18CFrtFxvHwfL30Xd91TNU38J_z-Kgywm/view?usp=sharing>`_) to define it on a stretched grid, for ingesting into Vapor.  You can download `this Python script <https://github.com/NCAR/VAPOR/blob/readTheDocs/docs/data/stretchedToCF.py>`_ that replicates the steps below.
 
