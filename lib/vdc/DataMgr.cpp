@@ -3161,30 +3161,20 @@ void DataMgr::_getLonExtents(vector<float> &lons, vector<size_t> dims, float &mi
         GeoUtil::UnwrapLongitude(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
         GeoUtil::ShiftLon(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
     }
-    min = *(std::min_element(lons.begin(), lons.end()));
-    max = *(std::max_element(lons.begin(), lons.end()));
+    auto minmaxitr = std::minmax_element(lons.begin(), lons.end());
+    min = *(minmaxitr.first);
+    max = *(minmaxitr.second);
 }
 
 void DataMgr::_getLatExtents(vector<float> &lats, vector<size_t> dims, float &min, float &max) const
 {
     min = max = 0.0;
-    VAssert(dims.size() == 1 || dims.size() == 2);
 
     if (!lats.size()) return;
 
-    if (dims.size() == 1) {
-        min = lats[0], max = lats[lats.size() - 1];
-    } else {
-        // Search only the top and bottom row
-        //
-        size_t nx = dims[0];
-        size_t ny = dims[1];
-        min = *(std::min_element(lats.begin(), lats.begin() + nx));
-        max = *(std::max_element(lats.begin(), lats.begin() + nx));
-
-        min = std::min(min, *(std::min_element(lats.begin() + ((ny - 1) * nx), lats.begin() + (ny * nx) - 1)));
-        max = std::max(max, *(std::max_element(lats.begin() + ((ny - 1) * nx), lats.begin() + (ny * nx) - 1)));
-    }
+    auto minmaxitr = std::minmax_element(lats.begin(), lats.end());
+    min = *(minmaxitr.first);
+    max = *(minmaxitr.second);
 }
 
 int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax, long ts)

@@ -101,6 +101,7 @@ struct opt_t {
     std::vector<float>       extents;
     double                   minValue;
     double                   maxValue;
+    OptionParser::Boolean_T  silenceTime;
     OptionParser::Boolean_T  help;
 } opt;
 
@@ -118,6 +119,7 @@ OptionParser::OptDescRec_T set_opts[] = {{"grids", 1, "Regular:Stretched:Layered
                                           "(X0:Y0:Z0:X1:Y1:Z1)"},
                                          {"minValue", 1, "0", "The minimum data value to be assigned to cells in synthetic grids"},
                                          {"maxValue", 1, "1", "The maximum data value to be assigned to cells in synthetic grids"},
+                                         {"silenceTime", 0, "", "Do not print elapsed time for tests"},
                                          {"help", 0, "", "Print this message and exit"},
                                          {nullptr}};
 
@@ -128,6 +130,7 @@ OptionParser::Option_T get_options[] = {{"grids", Wasp::CvtToStrVec, &opt.grids,
                                         {"extents", Wasp::CvtToFloatVec, &opt.extents, sizeof(opt.extents)},
                                         {"minValue", Wasp::CvtToDouble, &opt.minValue, sizeof(opt.minValue)},
                                         {"maxValue", Wasp::CvtToDouble, &opt.maxValue, sizeof(opt.maxValue)},
+                                        {"silenceTime", Wasp::CvtToBoolean, &opt.silenceTime, sizeof(opt.silenceTime)},
                                         {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
                                         {nullptr}};
 
@@ -171,6 +174,13 @@ int main(int argc, char **argv)
 
     OptionParser op;
     InitializeOptions(argc, argv, op);
+
+    //for (int i=0; i<argc; i++) 
+    //    std::cout << argv[i] << std::endl;
+    std::cout << "                              HELP         " << opt.help << std::endl;
+    std::cout << "                              SILENCE TIME " << opt.silenceTime << std::endl;
+
+    //exit(0);
 
     std::cout << std::fixed << std::showpoint;
     std::cout << std::setprecision(4);
@@ -271,7 +281,7 @@ int main(int argc, char **argv)
     }
 
     double t1 = Wasp::GetTime();
-    cout << "Elapsed time: " << t1 - t0 << endl;
+    if (!opt.silenceTime) cout << "Elapsed time: " << t1 - t0 << endl;
 
     DeleteHeap();
 
