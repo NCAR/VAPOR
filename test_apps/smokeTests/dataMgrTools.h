@@ -18,4 +18,4 @@ void PrintCompressionInfo(const VAPoR::DataMgr &dataMgr, const std::string &varn
 
 void TestVariables(VAPoR::DataMgr &dataMgr);
 
-int TestDataMgr(const std::string &fileType, size_t memsize, size_t nthreads, const std::vector<std::string> &files, const std::vector<std::string> &options);
+int TestDataMgr(const std::string &fileType, size_t memsize, size_t nthreads, const std::vector<std::string> &files, const std::vector<std::string> &options, bool silenceTime);

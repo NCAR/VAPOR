@@ -13,7 +13,7 @@ import argparse
 parser = argparse.ArgumentParser(
     "A test driver for the DataMgr and Grid classes"
 )
-parser.add_argument( 
+'''parser.add_argument( 
     '--makeBaseline', 
     nargs=1,
     type=str,
@@ -21,6 +21,15 @@ parser.add_argument(
     required=False,
     metavar='false',
     help='Boolean that makes these test results the baseline on which future'
+    + ' tests will be compared.  If no baseline file exists, this will automatically '
+    + ' be set to true.'
+)'''
+parser.add_argument( 
+    '--makeBaseline', 
+    default=False,
+    dest='makeBaseline',
+    action='store_true',
+    help='This flag makes these test results the baseline on which future'
     + ' tests will be compared.  If no baseline file exists, this will automatically '
     + ' be set to true.'
 )
@@ -51,7 +60,22 @@ parser.add_argument(
     metavar='/path/to/write/results/to',
     help='Directory where test results are stored.'
 )
-args = parser.parse_args()
+'''parser.add_argument( 
+    '--silenceTime', 
+    nargs=1,
+    type=bool,
+    default=False, 
+    required=False,
+    help='Boolean (0, 1, true, or false) that sliences the elapsed time from the printed results.'
+)'''
+parser.add_argument( 
+    '--silenceTime',
+    default=False,
+    dest='silenceTime',
+    action='store_true',
+    help='This flag sliences the elapsed time from the printed results.'
+)
+args = vars(parser.parse_args())
 
 #
 #  Default directories and test data
@@ -69,22 +93,25 @@ gridSizes = [
     "8x8x8"
 ]
 
-resultsDir = "".join( args.resultsDir )
+resultsDir = "".join( args['resultsDir'] )
 if (resultsDir[-1] != r'/'):
     resultsDir += r'/'
 
-testDataRoot = "".join( args.testDataRoot )
+testDataRoot = "".join( args['testDataRoot'] )
 if (testDataRoot[-1] != r'/'):
     testDataRoot += r'/'
 
-binaryRoot = "".join( args.binaryRoot )
+binaryRoot = "".join( args['binaryRoot'] )
 if (binaryRoot[-1] != r'/'):
     binaryRoot += r'/'
 
+if( args['silenceTime'] ): silenceTime = "-silenceTime"
+else: silenceTime = ""
 
 print("resultsDir " + resultsDir )
-print("testDAtaRoot " + testDataRoot)
+print("testDataRoot " + testDataRoot)
 print("binaryRoot " + binaryRoot )
+print("silenceTime " + str(silenceTime))
 
 dataMgrs = {
     #"mpas" : (testDataRoot + "hist.mpas-o.0001-01-01_00.00.00.nc")
@@ -102,25 +129,28 @@ dataMgrResultsFile = resultsDir + "dataMgrResults.txt"
 #  Tests
 #
 
-
 def testGrid( grid ):
 
     rc = 0
 
     print( "Testing " + grid + " grid" )
 
-    print( "  Command: " + gridProgram + " -dims " + grid )
+    print("  Command: " + gridProgram + " -dims " + grid + " " + silenceTime )
     programOutput  = subprocess.run( 
-        [ gridProgram, "-dims", grid ], 
+        [ gridProgram, "-dims", grid, silenceTime ], 
         stdout=subprocess.PIPE,  
         universal_newlines=True 
     )
 
     outputFileName = resultsDir + grid + ".txt"
-    outputFile = open( outputFileName, "w" )
-    outputFile.write( programOutput.stdout )
-    outputFile.close()
-    print( "  " + outputFileName + " written" )
+    try:
+        with open( outputFileName, "w" ) as outputFile:
+            outputFile.write( programOutput.stdout )
+            outputFile.close()
+            print( "  " + outputFileName + " written" )
+    except IOError:
+        print( "Unable to write to file " + outputFileName )
+        sys.exit(-1)
 
     if ( programOutput.returncode != 0 ):
         rc = 1
@@ -132,7 +162,11 @@ def testGrid( grid ):
 
 def testDataMgr( dataMgrType, dataMgr, makeBaseline=False ):
     print( "Testing " + dataMgrType + " with " + dataMgr )
-    command = [ dataMgrProgram, "-fileType", dataMgrType, dataMgr ]
+    command = []
+    if( silenceTime != "" ):
+        command = [ dataMgrProgram, silenceTime, "-fileType", dataMgrType, dataMgr ]
+    else:
+        command = [ dataMgrProgram, "-fileType", dataMgrType, dataMgr ]
     print( "  Command: " + " ".join(command) )
     programOutput = subprocess.check_output( command )
     
@@ -141,19 +175,24 @@ def testDataMgr( dataMgrType, dataMgr, makeBaseline=False ):
     else:
         outputFileName = resultsDir + dataMgrType + ".txt"
 
-    outputFile = open( outputFileName, "w" )
-    outputFile.write( programOutput.decode("utf-8") )
-    outputFile.close()
+    try:
+        with open( outputFileName, "w" ) as outputFile:
+            outputFile = open( outputFileName, "w" )
+            outputFile.write( programOutput.decode("utf-8") )
+            outputFile.close()
+            print( "  " + outputFileName + " written\n" )
+    except IOError:
+        print( "Unable to write to file " + outputFileName )
+        sys.exit(-1)
     
-    print( "  " + outputFileName + " written\n" )
-
     return outputFileName
 
 def testDataMgrs( makeBaseline ):
-    if ( makeBaseline ):
-        diff = open( dataMgrResultsFile, "w" )
-    else:
-        diff = open( dataMgrResultsFile, "a" )
+    #if ( makeBaseline ):
+    #    diff = open( dataMgrResultsFile, "w" )
+    #else:
+    #    diff = open( dataMgrResultsFile, "a" )
+    diff = open( dataMgrResultsFile, "w" )
     
     mismatches = 0
 
@@ -195,16 +234,16 @@ def testDataMgrs( makeBaseline ):
         return 0
         
 def main():
-    print()
-    makeBaseline = args.makeBaseline
+    makeBaseline = args['makeBaseline']
 
     rc = 0
 
-    if ( args.makeBaseline == False and makeBaseline == True ): 
-        print( "    Warning: Some or all baseline files for running DataMgr testswere missing.  "
+    #if ( args.makeBaseline == False and makeBaseline == True ): 
+    if ( makeBaseline == True ): 
+        print( "    Warning: Some or all baseline files for running DataMgr tests were missing.  "
                "    These files are needed as comparisons for the results of the current series "
                "    of tests, versus a known working build (the baseline).\n"
-               "       Setting --makeBaseline to True.\n"
+               "       Generating baseline files in the results directory....\n"
         )
 
     if ( os.path.isdir( resultsDir ) == False ):    

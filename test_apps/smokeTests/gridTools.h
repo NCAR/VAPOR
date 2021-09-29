@@ -33,13 +33,13 @@ bool TestIterator(VAPoR::Grid *g, size_t &count, size_t &expectedCount, size_t &
 // Returns the expected node count for Grid::ConstCoordIterator
 bool TestConstCoordItr(const VAPoR::Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time);
 
-void PrintGridIteratorResults(std::string &gridType, std::string itrType, size_t count, size_t expectedCount, size_t disagreements, double time);
+void PrintGridIteratorResults(std::string &gridType, std::string itrType, size_t count, size_t expectedCount, size_t disagreements, double time, bool silenceTime);
 
-void PrintStats(double rms, size_t numMissingValues, size_t disagreements, double time);
+void PrintStats(double rms, size_t numMissingValues, size_t disagreements, double time, bool silenceTime);
 
-bool RunTest(VAPoR::Grid *grid);
+bool RunTest(VAPoR::Grid *grid, bool silenceTime);
 
-bool RunTests(VAPoR::Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal);
+bool RunTests(VAPoR::Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal, bool silenceTime);
 
 VAPoR::StretchedGrid *MakeStretchedGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu);
 
