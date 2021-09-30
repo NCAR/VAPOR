@@ -217,7 +217,7 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
-        DimsType            ijk3 = {0, 0, 0};
+        DimsType ijk3 = {0, 0, 0};
         Wasp::VectorizeCoords(count, dims.data(), ijk3.data(), dims.size());
 
         double itrData = g->GetValueAtIndex(*itr);
@@ -284,7 +284,7 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
     for (; itr != enditr; ++itr) {
         DimsType ijk;
         Wasp::VectorizeCoords(count, dims.data(), ijk.data(), dims.size());
-        CoordType           coords;
+        CoordType coords;
 
         bool disagree = false;
         g->GetUserCoordinates(ijk, coords);
@@ -307,8 +307,7 @@ void PrintStats(double rms, size_t numMissingValues, size_t disagreements, doubl
     cout << "    RMS error:                                           " << rms << endl;
     cout << "    Missing value count:                                 " << numMissingValues << endl;
     cout << "    GetValueAtIndex() vs GetValue() disagreement count:  " << disagreements << endl;
-    if ( !silenceTime )
-        cout << "    Time:                                                " << time << endl;
+    if (!silenceTime) cout << "    Time:                                                " << time << endl;
     cout << endl;
 }
 
@@ -383,7 +382,6 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
 
         grid->SetInterpolationOrder(nearestNeighbor);
         if (RunTest(grid, silenceTime) == false) { rc = false; }
-
     }
 
     if (std::find(tests.begin(), tests.end(), "Triangle") != tests.end()) {
@@ -430,8 +428,7 @@ void PrintGridIteratorResults(std::string &gridType, std::string itrType, size_t
     cout << "  Expected Count:       " << expectedCount << endl;
     cout << "  Value Disagreements:  " << disagreements << endl;
 
-    if (!silenceTime)
-        cout << "  Time:                 " << time << endl;
+    if (!silenceTime) cout << "  Time:                 " << time << endl;
 
     cout << endl;
 }
