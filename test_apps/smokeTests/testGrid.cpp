@@ -175,13 +175,6 @@ int main(int argc, char **argv)
     OptionParser op;
     InitializeOptions(argc, argv, op);
 
-    //for (int i=0; i<argc; i++) 
-    //    std::cout << argv[i] << std::endl;
-    //std::cout << "                              HELP         " << opt.help << std::endl;
-    //std::cout << "                              SILENCE TIME " << opt.silenceTime << std::endl;
-
-    //exit(0);
-
     std::cout << std::fixed << std::showpoint;
     std::cout << std::setprecision(4);
 

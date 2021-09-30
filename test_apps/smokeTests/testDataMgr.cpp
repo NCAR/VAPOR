@@ -113,8 +113,6 @@ int main(int argc, char **argv)
     std::vector<string> options;
     InitializeOptions(argc, argv, op, files, options);
 
-    //std::cout << "                   SILENCE " << opt.silenceTime<< std::endl;
-
     for (int i = 0; i < files.size(); i++) {
         std::string fileName = files[i];
         fileName = fileName.substr(fileName.find_last_of("\\/") + 1);

@@ -13,19 +13,8 @@ import argparse
 parser = argparse.ArgumentParser(
     "A test driver for the DataMgr and Grid classes"
 )
-'''parser.add_argument( 
-    '--makeBaseline', 
-    nargs=1,
-    type=str,
-    default=False, 
-    required=False,
-    metavar='false',
-    help='Boolean that makes these test results the baseline on which future'
-    + ' tests will be compared.  If no baseline file exists, this will automatically '
-    + ' be set to true.'
-)'''
 parser.add_argument( 
-    '--makeBaseline', 
+    '-makeBaseline', 
     default=False,
     dest='makeBaseline',
     action='store_true',
@@ -34,7 +23,7 @@ parser.add_argument(
     + ' be set to true.'
 )
 parser.add_argument( 
-    '--testDataRoot', 
+    '-testDataRoot', 
     nargs=1,
     type=str,
     default="/Users/pearse/Data/smokeTestData", 
@@ -43,7 +32,7 @@ parser.add_argument(
     help='Directory where DataMgr test data is stored.'
 )
 parser.add_argument( 
-    '--binaryRoot', 
+    '-binaryRoot', 
     nargs=1,
     type=str,
     default="/Users/pearse/VAPOR/build/bin", 
@@ -52,7 +41,7 @@ parser.add_argument(
     help='Directory where binary test programs (testGrid, testDataMgr) are stored.'
 )
 parser.add_argument( 
-    '--resultsDir', 
+    '-resultsDir', 
     nargs=1,
     type=str,
     default="/Users/pearse/VAPOR/test_apps/smokeTests/testResults", 
@@ -60,16 +49,8 @@ parser.add_argument(
     metavar='/path/to/write/results/to',
     help='Directory where test results are stored.'
 )
-'''parser.add_argument( 
-    '--silenceTime', 
-    nargs=1,
-    type=bool,
-    default=False, 
-    required=False,
-    help='Boolean (0, 1, true, or false) that sliences the elapsed time from the printed results.'
-)'''
 parser.add_argument( 
-    '--silenceTime',
+    '-silenceTime',
     default=False,
     dest='silenceTime',
     action='store_true',
@@ -188,10 +169,6 @@ def testDataMgr( dataMgrType, dataMgr, makeBaseline=False ):
     return outputFileName
 
 def testDataMgrs( makeBaseline ):
-    #if ( makeBaseline ):
-    #    diff = open( dataMgrResultsFile, "w" )
-    #else:
-    #    diff = open( dataMgrResultsFile, "a" )
     diff = open( dataMgrResultsFile, "w" )
     
     mismatches = 0
@@ -238,7 +215,6 @@ def main():
 
     rc = 0
 
-    #if ( args.makeBaseline == False and makeBaseline == True ): 
     if ( makeBaseline == True ): 
         print( "    Warning: Some or all baseline files for running DataMgr tests were missing.  "
                "    These files are needed as comparisons for the results of the current series "
