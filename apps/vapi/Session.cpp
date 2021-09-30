@@ -126,8 +126,7 @@ void Session::loadAllParamsDatasets()
         vector<string> paths;
         getParamsDatasetInfo(name, &format, &paths);
         if (std::all_of(paths.begin(), paths.end(), FileUtils::Exists)) {
-            if (OpenDataset(format, paths, name) < 0)
-                getGUIStateParams()->RemoveOpenDateSet(name);
+            if (OpenDataset(format, paths, name) < 0) getGUIStateParams()->RemoveOpenDateSet(name);
         } else {
             getGUIStateParams()->RemoveOpenDateSet(name);
 
