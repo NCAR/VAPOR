@@ -3,6 +3,8 @@
 #include <OpenGL/CGLContext.h>
 #include "VPCommon.h"
 
+// This uses the macOS native libraries which are written in Objective-C.
+
 GLContextProviderMacOS::GLContextMacOS::GLContextMacOS(void *ctx)
 : _ctx(ctx) {}
 

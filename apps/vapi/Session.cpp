@@ -45,7 +45,7 @@ int Session::OpenDataset(String name, String format, const vector<String> &files
 {
     int rc = _controlExec->OpenData(files, options, name, format);
     if (rc < 0) {
-        LogWarning("Failed to load data");
+        LogWarning("Failed to load data '%s'", files.empty() ? name.c_str() : files[0].c_str());
         return rc;
     }
 
@@ -75,8 +75,7 @@ int Session::OpenDataset(String format, const vector<String> &files, String name
 
     if (name.empty()) name = ControlExec::MakeStringConformant(FileUtils::Basename(files[0]));
 
-    OpenDataset(name, format, files, options);
-    return -1;
+    return OpenDataset(name, format, files, options);
 }
 
 int Session::Load(String path)
@@ -127,7 +126,8 @@ void Session::loadAllParamsDatasets()
         vector<string> paths;
         getParamsDatasetInfo(name, &format, &paths);
         if (std::all_of(paths.begin(), paths.end(), FileUtils::Exists)) {
-            OpenDataset(format, paths, name);
+            if (OpenDataset(format, paths, name) < 0)
+                getGUIStateParams()->RemoveOpenDateSet(name);
         } else {
             getGUIStateParams()->RemoveOpenDateSet(name);
 

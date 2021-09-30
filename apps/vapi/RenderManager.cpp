@@ -18,7 +18,7 @@ using namespace VAPoR;
 
 RenderManager::RenderManager(ControlExec *ce) : _controlExec(ce) {}
 
-RenderManager::~RenderManager() { delete _glManager; }
+RenderManager::~RenderManager() { if (_glManager) delete _glManager; }
 
 void RenderManager::getNearFarDist(const double posVec[3], const double dirVec[3], double &boxNear, double &boxFar)
 {
