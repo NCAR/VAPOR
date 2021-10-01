@@ -53,6 +53,7 @@ struct {
     std::string             fileType;
     int                     memsize;
     int                     nthreads;
+    OptionParser::Boolean_T silenceTime;
     OptionParser::Boolean_T nogeoxform;
     OptionParser::Boolean_T novertxform;
 } opt;
@@ -62,6 +63,7 @@ OptionParser::OptDescRec_T set_opts[] = {{"fileType", 1, "vdc", "data set type (
                                          {"nthreads", 1, "0",
                                           "Specify number of execution threads "
                                           "0 => use number of cores"},
+                                         {"silenceTime", 0, "", "Do not print elapsed time for tests"},
                                          {"nogeoxform", 0, "", "Do not apply geographic transform (projection to PCS"},
                                          {"novertxform", 0, "", "Do not apply to convert pressure, etc. to meters"},
                                          {nullptr}};
@@ -69,6 +71,7 @@ OptionParser::OptDescRec_T set_opts[] = {{"fileType", 1, "vdc", "data set type (
 OptionParser::Option_T get_options[] = {{"fileType", Wasp::CvtToCPPStr, &opt.fileType, sizeof(opt.fileType)},
                                         {"memsize", Wasp::CvtToInt, &opt.memsize, sizeof(opt.memsize)},
                                         {"nthreads", Wasp::CvtToInt, &opt.nthreads, sizeof(opt.nthreads)},
+                                        {"silenceTime", Wasp::CvtToBoolean, &opt.silenceTime, sizeof(opt.silenceTime)},
                                         {"nogeoxform", Wasp::CvtToBoolean, &opt.nogeoxform, sizeof(opt.nogeoxform)},
                                         {"novertxform", Wasp::CvtToBoolean, &opt.novertxform, sizeof(opt.novertxform)},
                                         {nullptr}};
@@ -116,9 +119,9 @@ int main(int argc, char **argv)
         cout << fileName << endl;
     }
 
-    int rc = TestDataMgr(opt.fileType, opt.memsize, opt.nthreads, files, options);
+    int rc = TestDataMgr(opt.fileType, opt.memsize, opt.nthreads, files, options, opt.silenceTime);
 
-    cout << "Elapsed time: " << Wasp::GetTime() - t0 << endl;
+    if (!opt.silenceTime) cout << "Elapsed time: " << Wasp::GetTime() - t0 << endl;
 
     return rc;
 }

@@ -101,6 +101,7 @@ struct opt_t {
     std::vector<float>       extents;
     double                   minValue;
     double                   maxValue;
+    OptionParser::Boolean_T  silenceTime;
     OptionParser::Boolean_T  help;
 } opt;
 
@@ -118,6 +119,7 @@ OptionParser::OptDescRec_T set_opts[] = {{"grids", 1, "Regular:Stretched:Layered
                                           "(X0:Y0:Z0:X1:Y1:Z1)"},
                                          {"minValue", 1, "0", "The minimum data value to be assigned to cells in synthetic grids"},
                                          {"maxValue", 1, "1", "The maximum data value to be assigned to cells in synthetic grids"},
+                                         {"silenceTime", 0, "", "Do not print elapsed time for tests"},
                                          {"help", 0, "", "Print this message and exit"},
                                          {nullptr}};
 
@@ -128,6 +130,7 @@ OptionParser::Option_T get_options[] = {{"grids", Wasp::CvtToStrVec, &opt.grids,
                                         {"extents", Wasp::CvtToFloatVec, &opt.extents, sizeof(opt.extents)},
                                         {"minValue", Wasp::CvtToDouble, &opt.minValue, sizeof(opt.minValue)},
                                         {"maxValue", Wasp::CvtToDouble, &opt.maxValue, sizeof(opt.maxValue)},
+                                        {"silenceTime", Wasp::CvtToBoolean, &opt.silenceTime, sizeof(opt.silenceTime)},
                                         {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
                                         {nullptr}};
 
@@ -203,8 +206,8 @@ int main(int argc, char **argv)
         std::vector<float *> rgBlks = AllocateBlocks(opt.bs, opt.dims);
         RegularGrid *        regularGrid = new RegularGrid(opt.dims, opt.bs, rgBlks, minu, maxu);
         double               t1 = Wasp::GetTime() - t0;
-        cout << "RegularGrid() time: " << t1 << endl;
-        regularRC = RunTests(regularGrid, opt.arrangements, opt.minValue, opt.maxValue);
+        if (!opt.silenceTime) cout << "RegularGrid() time: " << t1 << endl;
+        regularRC = RunTests(regularGrid, opt.arrangements, opt.minValue, opt.maxValue, opt.silenceTime);
         delete regularGrid;
     }
 
@@ -213,8 +216,8 @@ int main(int argc, char **argv)
         double         t0 = Wasp::GetTime();
         StretchedGrid *stretchedGrid = MakeStretchedGrid(opt.dims, opt.bs, minu, maxu);
         double         t1 = Wasp::GetTime() - t0;
-        cout << "MakeStretchedGrid() time: " << t1 << endl;
-        stretchedRC = RunTests(stretchedGrid, opt.arrangements, opt.minValue, opt.maxValue);
+        if (!opt.silenceTime) cout << "MakeStretchedGrid() time: " << t1 << endl;
+        stretchedRC = RunTests(stretchedGrid, opt.arrangements, opt.minValue, opt.maxValue, opt.silenceTime);
         delete stretchedGrid;
     }
 
@@ -223,8 +226,8 @@ int main(int argc, char **argv)
         double       t0 = Wasp::GetTime();
         LayeredGrid *layeredGrid = MakeLayeredGrid(opt.dims, opt.bs, minu, maxu);
         double       t1 = Wasp::GetTime() - t0;
-        cout << "MakeLayeredGrid() time: " << t1 << endl;
-        layeredRC = RunTests(layeredGrid, opt.arrangements, opt.minValue, opt.maxValue);
+        if (!opt.silenceTime) cout << "MakeLayeredGrid() time: " << t1 << endl;
+        layeredRC = RunTests(layeredGrid, opt.arrangements, opt.minValue, opt.maxValue, opt.silenceTime);
         delete layeredGrid;
     }
 
@@ -234,8 +237,8 @@ int main(int argc, char **argv)
         CurvilinearGrid *curvilinearGrid;
         curvilinearGrid = MakeCurvilinearTerrainGrid(opt.bs, minu, maxu, opt.dims);
         double t1 = Wasp::GetTime() - t0;
-        cout << "MakeCurvilinearTerrainGrid() time: " << t1 << endl;
-        curvilinearRC = RunTests(curvilinearGrid, opt.arrangements, opt.minValue, opt.maxValue);
+        if (!opt.silenceTime) cout << "MakeCurvilinearTerrainGrid() time: " << t1 << endl;
+        curvilinearRC = RunTests(curvilinearGrid, opt.arrangements, opt.minValue, opt.maxValue, opt.silenceTime);
         delete curvilinearGrid;
     }
 
@@ -244,8 +247,8 @@ int main(int argc, char **argv)
         double              t0 = Wasp::GetTime();
         UnstructuredGrid2D *g = MakeUnstructuredGrid2D(opt.dims, opt.bs, minu, maxu);
         double              t1 = Wasp::GetTime() - t0;
-        cout << "MakeUnstructuredGrid2D() time: " << t1 << endl;
-        unstructured2DRC = RunTests(g, opt.arrangements, opt.minValue, opt.maxValue);
+        if (!opt.silenceTime) cout << "MakeUnstructuredGrid2D() time: " << t1 << endl;
+        unstructured2DRC = RunTests(g, opt.arrangements, opt.minValue, opt.maxValue, opt.silenceTime);
         delete g;
     }
 
@@ -271,7 +274,7 @@ int main(int argc, char **argv)
     }
 
     double t1 = Wasp::GetTime();
-    cout << "Elapsed time: " << t1 - t0 << endl;
+    if (!opt.silenceTime) cout << "Elapsed time: " << t1 - t0 << endl;
 
     DeleteHeap();
 

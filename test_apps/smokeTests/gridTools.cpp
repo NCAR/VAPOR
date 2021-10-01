@@ -217,7 +217,7 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
     for (auto dim : dims) expectedCount *= dim;
 
     for (; itr != enditr; ++itr) {
-        DimsType            ijk3 = {0, 0, 0};
+        DimsType ijk3 = {0, 0, 0};
         Wasp::VectorizeCoords(count, dims.data(), ijk3.data(), dims.size());
 
         double itrData = g->GetValueAtIndex(*itr);
@@ -284,7 +284,7 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
     for (; itr != enditr; ++itr) {
         DimsType ijk;
         Wasp::VectorizeCoords(count, dims.data(), ijk.data(), dims.size());
-        CoordType           coords;
+        CoordType coords;
 
         bool disagree = false;
         g->GetUserCoordinates(ijk, coords);
@@ -302,16 +302,16 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
     return rc;
 }
 
-void PrintStats(double rms, size_t numMissingValues, size_t disagreements, double time)
+void PrintStats(double rms, size_t numMissingValues, size_t disagreements, double time, bool silenceTime)
 {
     cout << "    RMS error:                                           " << rms << endl;
     cout << "    Missing value count:                                 " << numMissingValues << endl;
     cout << "    GetValueAtIndex() vs GetValue() disagreement count:  " << disagreements << endl;
-    cout << "    Time:                                                " << time << endl;
+    if (!silenceTime) cout << "    Time:                                                " << time << endl;
     cout << endl;
 }
 
-bool RunTest(Grid *grid)
+bool RunTest(Grid *grid, bool silenceTime)
 {
     bool   rc = true;
     double rms;
@@ -329,7 +329,7 @@ bool RunTest(Grid *grid)
 
     double time = Wasp::GetTime() - t0;
 
-    PrintStats(rms, numMissingValues, disagreements, time);
+    PrintStats(rms, numMissingValues, disagreements, time, silenceTime);
 
     if (rc == false) {
         cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
@@ -340,7 +340,7 @@ bool RunTest(Grid *grid)
     return rc;
 }
 
-bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal)
+bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal, bool silenceTime)
 {
     auto   dims = grid->GetDimensions();
     size_t nDims = grid->GetNumDimensions();
@@ -357,10 +357,10 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
         MakeConstantField(grid, maxVal);
 
         grid->SetInterpolationOrder(linear);
-        if (RunTest(grid) == false) { rc = false; }
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
 
         grid->SetInterpolationOrder(nearestNeighbor);
-        if (RunTest(grid) == false) { rc = false; }
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
     }
 
     if (std::find(tests.begin(), tests.end(), "Ramp") != tests.end()) {
@@ -368,20 +368,20 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
         MakeRamp(grid, minVal, maxVal);
 
         grid->SetInterpolationOrder(linear);
-        if (RunTest(grid) == false) { rc = false; }
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
 
         grid->SetInterpolationOrder(nearestNeighbor);
-        if (RunTest(grid) == false) { rc = false; }
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
     }
 
     if (std::find(tests.begin(), tests.end(), "RampOnAxis") != tests.end()) {
         cout << type << " " << x << "x" << y << "x" << z << " Ramp up on Z axis:" << endl;
         MakeRampOnAxis(grid, minVal, maxVal, Z);
         grid->SetInterpolationOrder(linear);
-        if (RunTest(grid) == false) { rc = false; }
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
 
         grid->SetInterpolationOrder(nearestNeighbor);
-        if (RunTest(grid) == false) { rc = false; }
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
     }
 
     if (std::find(tests.begin(), tests.end(), "Triangle") != tests.end()) {
@@ -389,11 +389,11 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
         MakeTriangle(grid, minVal, maxVal);
 
         grid->SetInterpolationOrder(linear);
-        if (RunTest(grid) == false) { rc = false; }
-        RunTest(grid);
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
+        RunTest(grid, silenceTime);
 
         grid->SetInterpolationOrder(nearestNeighbor);
-        if (RunTest(grid) == false) { rc = false; }
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
     }
 
     // Iterator tests
@@ -405,32 +405,31 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
 
     if (TestIterator(grid, count, expectedCount, disagreements, time) == false) { rc = false; }
 
-    PrintGridIteratorResults(type, "Iterator", count, expectedCount, disagreements, time);
+    PrintGridIteratorResults(type, "Iterator", count, expectedCount, disagreements, time, silenceTime);
 
     if (TestConstCoordItr(grid, count, expectedCount, disagreements, time) == false) { rc = false; }
 
-    PrintGridIteratorResults(type, "ConstCoordIterator", count, expectedCount, disagreements, time);
+    PrintGridIteratorResults(type, "ConstCoordIterator", count, expectedCount, disagreements, time, silenceTime);
 
     if (TestConstNodeIterator(grid, count, expectedCount, disagreements, time) == false) { rc = false; }
 
-    PrintGridIteratorResults(type, "ConstNodeIterator", count, expectedCount, disagreements, time);
+    PrintGridIteratorResults(type, "ConstNodeIterator", count, expectedCount, disagreements, time, silenceTime);
 
     return rc;
 }
 
-void PrintGridIteratorResults(std::string &gridType, std::string itrType, size_t count, size_t expectedCount, size_t disagreements, double time)
+void PrintGridIteratorResults(std::string &gridType, std::string itrType, size_t count, size_t expectedCount, size_t disagreements, double time, bool silenceTime)
 {
     std::string passFail = " --- PASS";
     if (count != expectedCount || disagreements > 0) { passFail = " --- FAIL"; }
 
     cout << gridType << " Grid::" << itrType << passFail << endl;
     cout << "  Count:                " << count << endl;
-    ;
     cout << "  Expected Count:       " << expectedCount << endl;
-    ;
     cout << "  Value Disagreements:  " << disagreements << endl;
-    ;
-    cout << "  Time:                 " << time << endl;
+
+    if (!silenceTime) cout << "  Time:                 " << time << endl;
+
     cout << endl;
 }
 

@@ -93,7 +93,7 @@ void PrintVariables(const VAPoR::DataMgr &dataMgr, bool verbose, bool testVars)
     }
 }
 
-void TestVariables(VAPoR::DataMgr &dataMgr)
+void TestVariables(VAPoR::DataMgr &dataMgr, bool silenceTime)
 {
     vector<string> vars;
     for (int d = 1; d < 4; d++) {
@@ -129,12 +129,12 @@ void TestVariables(VAPoR::DataMgr &dataMgr)
             cout << "    Dimension Lengths:  " << s << endl;
             cout << "    Topology Dimension: " << dataMgr.GetVarTopologyDim(varName) << endl;
             cout << endl;
-            PrintStats(rms, numMissingValues, disagreements, 0.0);
+            PrintStats(rms, numMissingValues, disagreements, 0.0, silenceTime);
         }
     }
 }
 
-int TestDataMgr(const std::string &fileType, size_t memsize, size_t nthreads, const std::vector<std::string> &files, const std::vector<std::string> &options)
+int TestDataMgr(const std::string &fileType, size_t memsize, size_t nthreads, const std::vector<std::string> &files, const std::vector<std::string> &options, bool silenceTime)
 {
     VAPoR::DataMgr dataMgr(fileType, memsize, nthreads);
     int            rc = dataMgr.Initialize(files, options);
@@ -146,7 +146,7 @@ int TestDataMgr(const std::string &fileType, size_t memsize, size_t nthreads, co
     PrintDimensions(dataMgr);
     PrintMeshes(dataMgr);
     PrintVariables(dataMgr);
-    TestVariables(dataMgr);
+    TestVariables(dataMgr, silenceTime);
     PrintCoordVariables(dataMgr);
     PrintTimeCoordinates(dataMgr);
 
