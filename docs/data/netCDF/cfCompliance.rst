@@ -41,7 +41,6 @@ A coordinate variable is a variable that defines where your grid nodes exist in 
 The axis attribute
 ******************
 
-
 Each coordinate variable must have an ``axis`` attribute as follows:
 
     - ``X`` coordinate variables must contain an ``axis`` attribute that is equal to ``0`` or ``X``.
