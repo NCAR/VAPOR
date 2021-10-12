@@ -9,7 +9,7 @@ ___________________________
     :width: 400
     :align: center
 
-     
+    Binary data and NetCDF data can be loaded into Vapor with a few extra steps. 
 
 If your data is organized as a collection of RAW files that are sampled on a `regular grid <https://en.wikipedia.org/wiki/Regular_grid>`_
 you may want to use BOV. 
