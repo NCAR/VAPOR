@@ -5,7 +5,7 @@
 Other Supported Data Formats
 ___________________________
 
-.. figure:: /_images/otherSupportedDataFormats.png
+.. image:: /_images/otherSupportedDataFormats.png
     :width: 400
     :align: center
 
