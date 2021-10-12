@@ -13,11 +13,11 @@ This means that a given NetCDF file aheres to the `CF Conventions <https://cfcon
 
     Examples in Python:
 
-    * `Dealing with regular grids <regularGridExample>`_
+    * :ref:`Dealing with regular grids <regularGridExample>`
 
-    * `Dealing with stretched grids <stretchedGridExample>`_
+    * :ref:`Dealing with stretched grids <stretchedGridExample>`
 
-    You can read more about Vapor's CF requirements `here. <convertToCF>`_
+    You can read more about Vapor's CF requirements :ref:`here. <convertToCF>`
 
 .. _whatDoesVaporNeed:
 
