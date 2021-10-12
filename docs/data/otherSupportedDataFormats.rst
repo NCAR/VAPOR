@@ -10,16 +10,16 @@ ___________________________
     :align: center
 
 If your data is organized as a collection of RAW files that are sampled on a `regular grid <https://en.wikipedia.org/wiki/Regular_grid>`_
-you may want to use BOV. 
+you may want to use Vapor's BOV format. 
+
+If your data are RAW files on a rectilinear or curvilinar grid, VAPOR can read your data after converting it to VDC with the :ref:`vdccreate <vdccreate>` and raw2vdc command line tools that are bundled with your installation.
+
+For rectilinear or curvilinear grids you'll need to use the more flexible NetCDF-CF.  If your data are already in the NetCDF format but are not CF compliant, then NetCDF-CF is probably your best choice.
 
 .. figure:: /_images/grids.png
     :align: center
 
     From left to right: Regular, Rectilinear, and Curvilinear grids examples.
-
-If your data are RAW files on a rectilinear or curvilinar grid, VAPOR can read your data after converting it to VDC with the :ref:`vdccreate <vdccreate>` and raw2vdc command line tools that are bundled with your installation.
-
-If your data are on a rectilinear or curvilinear grid you'll need to use the more flexible NetCDF-CF.  If your data are already in the NetCDF format but are not CF compliant, then NetCDF-CF is probably your best choice.
 
 ..
     This table can help you choose the best data format for your usage of Vapor.
