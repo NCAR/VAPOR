@@ -20,7 +20,7 @@ you may want to use BOV.
 
 If your data are RAW files on a rectilinear or curvilinar grid, VAPOR can read your data after converting it to VDC with the :ref:`vdccreate <vdccreate>` and raw2vdc command line tools that are bundled with your installation.
 
-If your data are on a rectilinear or curvilinear grid you'll need to use the more flexible NetCDF-CF. If your data are already in the NetCDF format but are not CF compliant, then NetCDF-CF is probably your best choice.
+If your data are on a rectilinear or curvilinear grid you'll need to use the more flexible NetCDF-CF.  If your data are already in the NetCDF format but are not CF compliant, then NetCDF-CF is probably your best choice.
 
 ..
     This table can help you choose the best data format for your usage of Vapor.
