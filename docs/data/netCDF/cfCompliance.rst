@@ -17,7 +17,7 @@ Examples in Python:
 
 * :ref:`Dealing with stretched grids <stretchedGridExample>`
 
-You can read more about Vapor's CF requirements :ref:`here. <convertToCF>`
+You can read more about Vapor's CF requirements :ref:`here. <cfComplianceFull>`
 
 .. _whatDoesVaporNeed:
 
