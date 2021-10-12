@@ -1,11 +1,11 @@
-.. _otherSupportedDataFormats:
+.. _importingUnsupportedData:
 
 |
 
-Other Supported Data Formats
-___________________________
+Importing unsupported data
+__________________________
 
-.. image:: /_images/otherSupportedDataFormats.png
+.. image:: /_images/importingUnsupportedData.png
     :width: 400
     :align: center
 
