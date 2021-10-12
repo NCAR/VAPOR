@@ -8,7 +8,6 @@ ___________________________
 .. figure:: /_images/otherSupportedDataFormats.png
     :width: 400
     :align: center
-    :figclass: align-center
 
 If your data is organized as a collection of RAW files that are sampled on a `regular grid <https://en.wikipedia.org/wiki/Regular_grid>`_
 you may want to use BOV. 
