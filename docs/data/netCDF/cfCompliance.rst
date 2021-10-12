@@ -11,13 +11,13 @@ This means that a given NetCDF file aheres to the `CF Conventions <https://cfcon
 
     Below, you can find examples to make your data CF-Compliant, as well as documentation on what these examples are doing.  If you have trouble, contact us `on our forum <https://vapor.discourse.group/>`_.
 
-    Examples in Python:
+Examples in Python:
 
-    * :ref:`Dealing with regular grids <regularGridExample>`
+* :ref:`Dealing with regular grids <regularGridExample>`
 
-    * :ref:`Dealing with stretched grids <stretchedGridExample>`
+* :ref:`Dealing with stretched grids <stretchedGridExample>`
 
-    You can read more about Vapor's CF requirements :ref:`here. <convertToCF>`
+You can read more about Vapor's CF requirements :ref:`here. <convertToCF>`
 
 .. _whatDoesVaporNeed:
 
