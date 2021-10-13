@@ -61,6 +61,7 @@ Basic NetCDF File
 This is an example of a NetCDF file containing 2 particles with time-varying position and particle speed data.
 
 .. code-block:: c
+
    netcdf particles_000 {
    dimensions:
    	P = 2 ;
