@@ -9,6 +9,8 @@
 
 class GLContextProvider {
 public:
+    //! Creates an OpenGL context. The returned pointer is optional for managing
+    //! multiple contexts.
     static GLContext *CreateContext();
     static bool       IsCurrentOpenGLVersionSupported();
 
