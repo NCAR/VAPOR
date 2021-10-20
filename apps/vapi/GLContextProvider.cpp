@@ -11,8 +11,10 @@ GLContext *GLContextProvider::CreateContext()
 #define returnIfSupportedContext(ctxProvider)          \
     {                                                  \
         GLContext *ctx = ctxProvider::CreateContext(); \
-        if (isContextOk(ctx)) return ctx;              \
-        else if (ctx) delete ctx;                      \
+        if (isContextOk(ctx))                          \
+            return ctx;                                \
+        else if (ctx)                                  \
+            delete ctx;                                \
     }
 #if MacOS
     returnIfSupportedContext(GLContextProviderMacOS);
