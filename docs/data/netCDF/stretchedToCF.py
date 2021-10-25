@@ -8,7 +8,7 @@ from pathlib import Path
 # Acquire sample data
 home = str(Path.home())
 simpleNC = home + "/simple.nc"
-dataFile = "https://raw.github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc"
+dataFile = "https://github.com/NCAR/VAPOR-Data/raw/main/netCDF/simple.nc"
 response = requests.get(dataFile)
 with open(simpleNC, "wb") as file:
   file.write(response.content)

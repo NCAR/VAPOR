@@ -8,10 +8,12 @@ from pathlib import Path
 # Acquire sample data
 home = str(Path.home())
 simpleNC = home + "/simple.nc"
-dataFile = "https://raw.github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc"
-response = requests.get(dataFile)
+dataFile = "https://github.com/NCAR/VAPOR-Data/raw/main/netCDF/simple.nc"
+response = requests.get(dataFile, stream=True)
 with open(simpleNC, "wb") as file:
-  file.write(response.content)
+  for chunk in response.iter_content(chunk_size=1024):
+    if chunk:
+      file.write(chunk)
 
 ds = xr.open_dataset(simpleNC)
 
