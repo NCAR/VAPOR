@@ -17,8 +17,6 @@ Examples in Python:
 
 * :ref:`Dealing with stretched grids <stretchedGridExample>`
 
-You can read more about Vapor's CF requirements :ref:`here. <cfComplianceFull>`
-
 .. _whatDoesVaporNeed:
 
 What does Vapor need in a CF-Compliant file?
@@ -37,9 +35,9 @@ If your data is on a rectilinear grid, these variables should be 1D arrays that 
     :align: center
     :figclass: align-center
 
-    A CF Compliant netCDF header with 1D coordinate variables, named the same as their dimension. 
+    A CF Compliant netCDF header with 1D coordinate variables (x, y, and z), named the same as their dimension. 
 
-If your grid is curvilinear, coordinate variables are not sufficient to describe the 2D physical coordinates of your grid.  For this case, the CF Conventions define ``auxiliary coordinate variables``, which do not have the same name as their dimension(s).  ``auxiliary coordinate variables`` must still have an ``axis`` and ``units`` attribute, and must additionally be specified by variables that use them.  A variable may specify its ``auxiliary coordinate variables`` by using the ``coordinates`` attribute.  
+If your grid is curvilinear, coordinate variables are not sufficient to describe the 2D physical coordinates of your grid.  In this case, the CF Conventions define ``auxiliary coordinate variables``, which do not have the same name as their dimensions.  ``auxiliary coordinate variables`` must have an ``axis`` and ``units`` attribute.  Additionally, any variable that is mapped to these coordinates must specify a ``coordinates`` attribute that points the their ``auxiallary coordinate variables``.  For example:
 
 .. figure:: /_images/curvilinearCompliant.png
     :align: center
