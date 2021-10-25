@@ -29,14 +29,20 @@ First import xarray.
 
   import xarray as xr
   import numpy as np
+  import requests
   from pathlib import Path
 
 Open our dataset with xarray.  Download `simple.nc <https://github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc>`_ here, and point the following file path to your downloaded location.
 
 .. jupyter-execute::
 
+  # Acquire sample data
   home = str(Path.home())
   simpleNC = home + "/simple.nc"
+  dataFile = "https://raw.github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc"
+  response = requests.get(dataFile)
+  with open(simpleNC, "wb") as file:
+    file.write(response.content)
   
   ds = xr.open_dataset(simpleNC)
 

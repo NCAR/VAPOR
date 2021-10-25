@@ -2,17 +2,16 @@
 
 import xarray as xr
 import numpy as np
-
-# These are to download the sample data
+import requests
 from pathlib import Path
-from google_drive_downloader import GoogleDriveDownloader as gdd
-  
-# Download the sample data from google drive
+
+# Acquire sample data
 home = str(Path.home())
-simpleNC = home + "/simple1.nc"
-gdd.download_file_from_google_drive(file_id='18CFrtFxvHwfL30Xd91TNU38J_z-Kgywm',
-                                     dest_path=simpleNC,
-                                     unzip=False)    
+simpleNC = home + "/simple.nc"
+dataFile = "https://raw.github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc"
+response = requests.get(dataFile)
+with open(simpleNC, "wb") as file:
+  file.write(response.content)
   
 ds = xr.open_dataset(simpleNC)
 
