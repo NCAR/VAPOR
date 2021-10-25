@@ -19,4 +19,4 @@ Vapor supports some data formats natively.  Other data formats are semi-supporte
 
    nativelySupportedDataFormats
    importingUnsupportedData
-   Converting Large Data to VDC <vdc>
+   Converting large data to VDC <vdc>

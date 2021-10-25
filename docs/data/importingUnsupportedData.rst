@@ -43,4 +43,6 @@ For rectilinear or curvilinear grids you'll need to use the more flexible NetCDF
 
 .. note::
 
-    *The multi-resolution feature of the VDC Allows you to render large datasets with or without lossy compression.  Viewing compressed data can dramatically increase the interactivity for your visualizations if your computer's resources are constrained by the size of the data being rendered.  When you're done with exploring compressed data and ready for a final rendering, you can render an image or animation sequence with lossless compression.
+    *The multi-resolution feature of the VDC Allows you to render large datasets with or without lossy compression.  Viewing compressed data can dramatically increase the interactivity for your visualizations if your computer's resources are constrained by the size of your data.  
+
+    When you're done with exploring compressed data and ready for a final rendering, you can render an image or animation sequence with lossless compression.
