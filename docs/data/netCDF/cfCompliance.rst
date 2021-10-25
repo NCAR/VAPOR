@@ -26,27 +26,43 @@ What does Vapor need in a CF-Compliant file?
 
 .. _coordinateVariables:
 
-Coordinate Variables
+Coordinate variables
 ********************
 
-What is a "Coordinate Variable"?  From the CF1.X Definition:
+Vapor requires variables that describe the physical coordinates of netCDF data.  
 
-*We use this term precisely as it is defined in section 2.3.1 of the NUG.  It is a one- dimensional va
-riable with the same name as its dimension [e.g., time(time)], and it is defined as a numeric data type with values that are ordered monotonically. Missing values are not allowed in coordinate variables.*
+If your data is on a rectilinear grid, these variables should be 1D arrays that specifiy monotonically increasing grid points along an axis.  These variables are referred to as ``coordinate variables`` if their names match the dimension they refer to.
 
-A coordinate variable is a variable that defines where your grid nodes exist in space.  It usually has the same name as the dimension it is describing.  See the Python examples for guidance on how to generate coordinate variables if your NetCDF files do not contain them.
+.. figure:: /_images/rectilinearCompliant.png
+    :align: center
+    :figclass: align-center
+
+    A CF Compliant netCDF header with 1D coordinate variables, named the same as their dimension. 
+
+If your grid is curvilinear, coordinate variables are not sufficient to describe the 2D physical coordinates of your grid.  For this case, the CF Conventions define ``auxiliary coordinate variables``, which do not have the same name as their dimension(s).  ``auxiliary coordinate variables`` must still have an ``axis`` and ``units`` attribute, and must additionally be specified by variables that use them.  A variable may specify its ``auxiliary coordinate variables`` by using the ``coordinates`` attribute.  
+
+.. figure:: /_images/curvilinearCompliant.png
+    :align: center
+    :figclass: align-center
+
+    A 8x8x8 curvilinear grid, with physical coordinates defined as 2D auxiliary coordinate variables.  Note that the sphere variable specifies its auxiliary coordinate variables "X_Coord Y_Coord "Z_Coord" with the coordinates attribute.
+    
 
 .. _theAxisAttribute:
 
 The axis attribute
 ******************
 
-Each coordinate variable must have an ``axis`` attribute as follows:
+We strongly recommend that each coordinate variable have ``axis`` attribute as follows:
 
     - ``X`` coordinate variables must contain an ``axis`` attribute that is equal to ``0`` or ``X``.
     - ``Y`` coordinate variables must contain an ``axis`` attribute that is equal to ``1`` or ``Y``.
     - ``Z`` coordinate variables must contain an ``axis`` attribute that is equal to ``2`` or ``Z``.
     - ``Time`` coordinate variables must contain an ``axis`` attribute that is equal to ``3`` or ``T``.
+
+.. note::
+
+    Coordinate variables do not require an ``axis`` attribute if its axis can be inferred by a ``units`` attribute.  For example, a coordinate variable with a ``units`` attribute of ``degreesEast`` would infer that it's aligned with the with X axis, and no ``axis`` attribute is needed.
 
 .. _theUnitsAttribute:
 

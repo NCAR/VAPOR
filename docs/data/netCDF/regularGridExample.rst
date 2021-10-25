@@ -9,11 +9,13 @@ Regular Grid Example in Python
 
 |
 
-Download python example :download:`here <regularToCF.py>`
+Download this example in python :download:`here <regularToCF.py>`
 
-Download jupyter notebook example :download:`here <regularToCF.ipynb>`
+Download this example as a jupyter notebook :download:`here <regularToCF.ipynb>`
 
-Here we demonstrate how to use *xarray* to apply the CF Conventions to a basic NetCDF file (`simple.nc <https://drive.google.com/file/d/18CFrtFxvHwfL30Xd91TNU38J_z-Kgywm/view?usp=sharing>`_) to define it on a regular, rectilinar grid for ingesting into Vapor.  You can download `this Python script <https://github.com/NCAR/VAPOR/blob/readTheDocs/docs/data/regularToCF.py>`_ that replicates the steps below.
+The example data can be found :download:`here <https://github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc>`
+
+Here we demonstrate how to use *xarray* to apply the CF Conventions to a basic NetCDF file (`simple.nc <https://github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc>`_) to define it on a regular, rectilinar grid for ingesting into Vapor.  You can download `this Python script <https://github.com/NCAR/VAPOR/blob/readTheDocs/docs/data/regularToCF.py>`_ that replicates the steps below.
 
 Our simple.nc file only defines X, Y, and Z spatial dimensions, a time dimension, and one scalar variable named temperature.  To make it comply with the CF Conventions, we need to do the following:
 
@@ -27,24 +29,16 @@ First import xarray.
 
   import xarray as xr
   import numpy as np
+  from pathlib import Path
 
-Open our dataset with xarray.  Download `simple.nc <https://drive.google.com/file/d/18CFrtFxvHwfL30Xd91TNU38J_z-Kgywm/view?usp=sharing>`_, and point the following file path to your downloaded location.
+Open our dataset with xarray.  Download :download:`simple.nc <https://github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc>`_, and point the following file path to your downloaded location.
 
 .. jupyter-execute::
 
-  # These are to download the sample data
-  from pathlib import Path
-  from google_drive_downloader import GoogleDriveDownloader as gdd
-
-  # Download the sample data from google drive
   home = str(Path.home())
-  simpleNC = home + "/simple1.nc"
-  gdd.download_file_from_google_drive(file_id='18CFrtFxvHwfL30Xd91TNU38J_z-Kgywm',
-                                     dest_path=simpleNC,
-                                     unzip=False)
+  simpleNC = home + "/simple.nc"
 
   ds = xr.open_dataset(simpleNC)
-  #ds = xr.open_dataset("/Users/pearse/CFConventions/data/simple.nc")
 
 Now look at our simple.nc file, which defines X, Y, and Z spatial dimensions, a time dimension, and our scalar variable named temperature.  Note that our dataset is a 48x48x24 grid, with one timestep.
 

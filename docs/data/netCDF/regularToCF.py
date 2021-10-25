@@ -2,17 +2,10 @@
 
 import xarray as xr
 import numpy as np
-
-# These are to download the sample data
 from pathlib import Path
-from google_drive_downloader import GoogleDriveDownloader as gdd
 
-# Download the sample data from google drive
 home = str(Path.home())
-simpleNC = home + "/simple1.nc"
-gdd.download_file_from_google_drive(file_id='18CFrtFxvHwfL30Xd91TNU38J_z-Kgywm',
-                                     dest_path=simpleNC,
-                                     unzip=False)
+simpleNC = home + "/simple.nc"
 
 ds = xr.open_dataset(simpleNC)
 
