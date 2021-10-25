@@ -39,11 +39,13 @@ Open our dataset with xarray.  Download `simple.nc <https://github.com/NCAR/VAPO
   # Acquire sample data
   home = str(Path.home())
   simpleNC = home + "/simple.nc"
-  dataFile = "https://raw.github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc"
-  response = requests.get(dataFile)
+  dataFile = "https://github.com/NCAR/VAPOR-Data/raw/main/netCDF/simple.nc"
+  response = requests.get(dataFile, stream=True)
   with open(simpleNC, "wb") as file:
-    file.write(response.content)
-  
+    for chunk in response.iter_content(chunk_size=1024):
+      if chunk:
+        file.write(chunk)
+
   ds = xr.open_dataset(simpleNC)
 
 Now look at our simple.nc file, which defines X, Y, and Z spatial dimensions, a time dimension, and our scalar variable named temperature.  Note that our dataset is a 48x48x24 grid, with one timestep.
