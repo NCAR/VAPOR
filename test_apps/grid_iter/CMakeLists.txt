@@ -1,3 +1,4 @@
 add_executable (test_grid_iter test_grid_iter.cpp)
+set_target_properties(test_grid_iter PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test_binaries")
 
 target_link_libraries (test_grid_iter common vdc wasp)

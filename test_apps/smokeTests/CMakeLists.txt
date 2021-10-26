@@ -4,6 +4,7 @@ add_executable (
     gridTools.cpp 
     gridTools.h
 )
+set_target_properties(testGrid PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test_binaries")
 
 add_executable (
     testDataMgr 
@@ -13,6 +14,7 @@ add_executable (
     gridTools.cpp
     gridTools.h
 )
+set_target_properties(testDataMgr PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test_binaries")
 
 target_link_libraries (testGrid common vdc wasp)
 target_link_libraries (testDataMgr common vdc wasp)
