@@ -20,6 +20,9 @@ using namespace VAPoR;
 
 const string SliceParams::_sampleRateTag = "SampleRate";
 const string SliceParams::SampleLocationTag = "SampleLocationTag";
+const string SliceParams::XRotationTag = "XRotation";
+const string SliceParams::YRotationTag = "YRotation";
+const string SliceParams::ZRotationTag = "ZRotation";
 
 //
 // Register class with object factory!!!
@@ -63,7 +66,7 @@ int SliceParams::Initialize()
     _initialized = true;
 
     Box *box = GetBox();
-    box->SetOrientation(XY);
+    box->SetOrientation(Box::XYZ);
 
     std::vector<double> minExt, maxExt;
     box->GetExtents(minExt, maxExt);

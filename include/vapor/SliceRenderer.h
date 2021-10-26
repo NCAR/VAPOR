@@ -36,6 +36,9 @@ private:
         int                 compressionLevel;
         int                 textureSampleRate;
         int                 orientation;
+        double              xRotation;
+        double              yRotation;
+        double              zRotation;
         std::vector<float>  tf_lut;
         std::vector<double> tf_minMax;
         std::vector<double> boxMin, boxMax;

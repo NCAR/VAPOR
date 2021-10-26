@@ -9,7 +9,6 @@ namespace VAPoR {
 
 //! \class SliceParams
 //! \brief Class that supports drawing Barbs based on 2D or 3D vector field
-//! \author Alan Norton
 //! \version 3.0
 class PARAMS_API SliceParams : public RenderParams {
 public:
@@ -52,6 +51,9 @@ public:
 
     static const string _sampleRateTag;
     static const string SampleLocationTag;
+    static const string XRotationTag;
+    static const string YRotationTag;
+    static const string ZRotationTag;
 
 private:
     bool _initialized = false;

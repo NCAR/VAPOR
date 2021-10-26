@@ -27,6 +27,9 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     
     AddGeometrySubtab(new PGroup({
         new PSection("Slice", {
+            (new PDoubleSliderEdit( SliceParams::XRotationTag, "X Rotation"))->SetRange(-90.,90.),
+            (new PDoubleSliderEdit( SliceParams::YRotationTag, "Y Rotation"))->SetRange(-90.,90.),
+            (new PDoubleSliderEdit( SliceParams::ZRotationTag, "Z Rotation"))->SetRange(-90.,90.),
             new POrientationSelector,
             new PSliceSampleLocationSelector,
         }),
@@ -35,6 +38,17 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
+}
+
+void SliceEventRouter::updateTab() {
+    ParamsBase *p = GetActiveParams();
+    double xr = p->GetValueDouble( SliceParams::XRotationTag, 0. );
+    double yr = p->GetValueDouble( SliceParams::YRotationTag, 0. );
+    double zr = p->GetValueDouble( SliceParams::ZRotationTag, 0. );
+
+    std::cout << "R: " << xr << " " << yr << " " << zr << std::endl;
+    
+    RenderEventRouter::updateTab();
 }
 
 string SliceEventRouter::_getDescription() const
