@@ -24,6 +24,8 @@
 #include <vapor/Viewpoint.h>
 #include <vapor/Transform.h>
 
+#include <memory>
+
 namespace VAPoR {
 
 //! \class ViewpointParams
@@ -270,7 +272,7 @@ public:
 
 private:
     ParamsContainer *m_VPs;
-    ParamsContainer *_transforms;
+    std::unique_ptr<ParamsContainer> _transforms = {nullptr};
 
     static const string _viewPointsTag;
     static const string _transformsTag;
