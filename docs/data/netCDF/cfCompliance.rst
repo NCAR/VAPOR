@@ -5,7 +5,7 @@ CF Compliance
 
 Vapor can read NetCDF data that is CF-Compliant.
 
-This means that a given NetCDF file aheres to the `CF Conventions <https://cfconventions.org/>`_.  These conventions exist to provide a common description for what data each variable represents in a NetCDF file.
+This means that a given NetCDF file adheres to the `CF Conventions <https://cfconventions.org/>`_.  These conventions exist to provide a common description for what data each variable represents in a NetCDF file.
 
 .. note::
 
@@ -29,7 +29,7 @@ Coordinate variables
 
 Vapor requires variables that describe the physical coordinates of netCDF data.  
 
-If your data is on a rectilinear grid, these variables should be 1D arrays that specifiy monotonically increasing grid points along an axis.  These variables are referred to as ``coordinate variables`` if their names match the dimension they refer to.
+If your data is on a rectilinear grid, these variables should be 1D arrays that specify monotonically increasing grid points along an axis.  These variables are referred to as ``coordinate variables`` if their names match the dimension they refer to.
 
 .. figure:: /_images/rectilinearCompliant.png
     :align: center

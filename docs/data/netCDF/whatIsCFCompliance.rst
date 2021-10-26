@@ -5,7 +5,7 @@ CF Compliance
 
 Vapor can read NetCDF data that is CF-Compliant.
 
-This means that a given NetCDF file aheres to the `CF Conventions <https://cfconventions.org/>`_.  These conventions exist to provide a common description for what data each variable represents in a NetCDF file.
+This means that a given NetCDF file adheres to the `CF Conventions <https://cfconventions.org/>`_.  These conventions exist to provide a common description for what data each variable represents in a NetCDF file.
 
 .. note::
 

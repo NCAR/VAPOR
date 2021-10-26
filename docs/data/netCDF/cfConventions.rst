@@ -8,7 +8,7 @@
 NetCDF CF-Conventions
 _____________________
 
-The following examples show how to make NetCDF data compmly with the CF-Conventions using Python.  If your data does not fit these Python examples, the documentation below gives an overview of what Vapor needs in order to read your NetCDF data.  If you still have trouble, contact us `on our forum <https://vapor.discourse.group/>`_.
+The following examples show how to make NetCDF data comply with the CF-Conventions using Python.  If your data does not fit these Python examples, the documentation below gives an overview of what Vapor needs in order to read your NetCDF data.  If you still have trouble, contact us `on our forum <https://vapor.discourse.group/>`_.
 
 .. toctree::
    :maxdepth: 1

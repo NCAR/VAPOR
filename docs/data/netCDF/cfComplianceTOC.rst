@@ -1,4 +1,4 @@
-.. _cfComplianceFull:
+.. _cfComplianceTOC:
 
 .. figure:: /_images/cfCompliance.png
     :width: 400

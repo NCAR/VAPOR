@@ -3,7 +3,7 @@
 Sample Data
 -----------
 
-The following datasets are povided for user experimentation.
+The following datasets are provided for user experimentation.
 
 +--------------+-------+-------------------+-----------+
 | Dataset      | Model | Grid Resolution   | File Size |

@@ -39,7 +39,7 @@ For rectilinear or curvilinear grids you'll need to use the more flexible NetCDF
    :maxdepth: 1
 
    rawData
-   Non CF-Compliant NetCDF <netCDF/cfComplianceFull>
+   Non CF-Compliant NetCDF <netCDF/cfComplianceTOC>
 
 .. note::
 
