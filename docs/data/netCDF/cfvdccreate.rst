@@ -1,4 +1,4 @@
-The two tools for converting :ref:`CF-Compliant <cfConventions>` NetCDF into VDC are ``cfvdccreate`` and ``cf2vdc``.  Advanced options can be seen at the bottom of this page, or by issuing the commands without any arguments.
+The two tools for converting :ref:`CF-Compliant <cfCompliance>` NetCDF into VDC are ``cfvdccreate`` and ``cf2vdc``.  Advanced options can be seen at the bottom of this page, or by issuing the commands without any arguments.
 
 Converting NetCDF data into VDC
 -------------------------------
