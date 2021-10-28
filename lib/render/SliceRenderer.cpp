@@ -11,7 +11,7 @@
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
 #include <glm/gtx/string_cast.hpp>
-#include "ConvexHullAlgorithm.h"
+#include <vapor/ConvexHullAlgorithm.h>
 
 #define X  0
 #define Y  1

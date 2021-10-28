@@ -116,6 +116,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/OSPRay.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ColorbarRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ParticleRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ConvexHullAlgorithm.h
 )
 
 if(BUILD_OSP)
