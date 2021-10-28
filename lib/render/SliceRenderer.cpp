@@ -10,6 +10,8 @@
 #include <vapor/GLManager.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
+#include <glm/gtx/string_cast.hpp>
+#include "ConvexHullAlgorithm.h"
 
 #define X  0
 #define Y  1
@@ -116,6 +118,32 @@ void SliceRenderer::_initVertexVBO()
     glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _vertexCoords.data(), GL_STATIC_DRAW);
 }
 
+
+// https://pastebin.com/fAFp6NnN
+glm::vec3 SliceRenderer::_rotateVector(glm::vec3 value, glm::quat rotation) const
+{
+    glm::vec3 vector;
+    float num12 = rotation.x + rotation.x;
+    float num2 = rotation.y + rotation.y;
+    float num = rotation.z + rotation.z;
+    float num11 = rotation.w * num12;
+    float num10 = rotation.w * num2;
+    float num9 = rotation.w * num;
+    float num8 = rotation.x * num12;
+    float num7 = rotation.x * num2;
+    float num6 = rotation.x * num;
+    float num5 = rotation.y * num2;
+    float num4 = rotation.y * num;
+    float num3 = rotation.z * num;
+    float num15 = ((value.x * ((1. - num5) - num3)) + (value.y * (num7 - num9))) + (value.z * (num6 + num10));
+    float num14 = ((value.x * (num7 + num9)) + (value.y * ((1. - num8) - num3))) + (value.z * (num4 - num11));
+    float num13 = ((value.x * (num6 - num10)) + (value.y * (num4 + num11))) + (value.z * ((1. - num8) - num5));
+    vector.x = num15;
+    vector.y = num14;
+    vector.z = num13;
+    return vector;
+}
+
 int SliceRenderer::_resetDataCache()
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
@@ -128,6 +156,10 @@ int SliceRenderer::_resetDataCache()
     _cacheParams.compressionLevel = p->GetCompressionLevel();
     _cacheParams.textureSampleRate = p->GetSampleRate();
     _cacheParams.orientation = p->GetBox()->GetOrientation();
+
+    _cacheParams.xRotation = p->GetValueDouble(SliceParams::XRotationTag,0);
+    _cacheParams.yRotation = p->GetValueDouble(SliceParams::YRotationTag,0);
+    _cacheParams.zRotation = p->GetValueDouble(SliceParams::ZRotationTag,0);
 
     _textureSideSize = _cacheParams.textureSampleRate;
     if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
@@ -182,18 +214,88 @@ int SliceRenderer::_resetBoxCache()
     return rc;
 }
 
+void SliceRenderer::_rotate()
+{
+    std::vector<double> boxMin = _cacheParams.boxMin;
+    std::vector<double> boxMax = _cacheParams.boxMax;
+
+    //std::vector<double> boxOrigin = {boxMax[X]-boxMin[X], boxMax[Y]-boxMin[Y], boxMax[Z]-boxMin[Z]};
+    std::vector<double> origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
+                                  (boxMax[Y]-boxMin[Y])/2. + boxMin[Y], 
+                                  (boxMax[Z]-boxMin[Z])/2. + boxMin[Z]};
+
+    glm::vec3 angles( M_PI*_cacheParams.xRotation/180., M_PI*_cacheParams.yRotation/180., M_PI*_cacheParams.zRotation/180. );
+    glm::quat q = glm::quat( angles );
+    glm::vec3 normal = q * glm::vec3(0,0,1);
+    //glm::vec3 sliceNormal = _rotateVector(glm::vec3(0,0,1), q);
+    std::cout << "normal " << glm::to_string(normal) << std::endl;
+
+    // a(x-xo) + b(y-yo) + c(z-zo) = 0
+
+    //normal.x*(x-origin.x) + normal.y*(y-origin.y) + normal.z*(z-origin.z) = 0
+    
+    std::vector< glm::vec3 > vertices;
+ 
+    auto zIntercept = [&](float x, float y) {
+        if(normal.z==0) return;
+        double z = (normal.x*origin[X] + normal.y*origin[Y] + normal.z*origin[Z] - normal.x*x - normal.y*y) / normal.z;
+        //std::cout << "z/normal.z: " << z << " " << normal.z << std::endl;
+        if (z >= boxMin[Z] && z <= boxMax[Z]) {
+            vertices.push_back( glm::vec3(x,y,z) );
+            std::cout << "Z hit " << x << " " << y << " " << z << std::endl;
+        }
+    };
+    auto yIntercept = [&](float x, float z) {
+        if(normal.y==0) return;
+        double y = (normal.x*origin[X] + normal.y*origin[Y] + normal.z*origin[Z] - normal.x*x - normal.z*z) / normal.y;
+        //std::cout << "y/normal.y: " << z << " " << normal.z << std::endl;
+        if (y >= boxMin[Z] && y <= boxMax[Z]) {
+            vertices.push_back( glm::vec3(x,y,z) );
+            std::cout << "Y hit " << x << " " << y << " " << z << std::endl;
+        }
+    };
+    auto xIntercept = [&](float y, float z) {
+        if(normal.x==0) return;
+        double x = (normal.x*origin[X] + normal.y*origin[Y] + normal.z*origin[Z] - normal.y*y - normal.z*z) / normal.x;
+        //std::cout << "y/normal.y: " << z << " " << normal.z << std::endl;
+        if (x >= boxMin[Z] && x <= boxMax[Z]) {
+            vertices.push_back( glm::vec3(x,y,z) );
+            std::cout << "X hit " << x << " " << y << " " << z << std::endl;
+        }
+    };
+
+    // Find any vertices that exist on the Z edges of the box
+    zIntercept(boxMin[X], boxMin[Y]);
+    zIntercept(boxMax[X], boxMax[Y]);
+    zIntercept(boxMin[X], boxMax[Y]);
+    zIntercept(boxMax[X], boxMin[Y]);
+    // Find any vertices that exist on the Y edges of the box
+    yIntercept(boxMin[X], boxMin[Z]);
+    yIntercept(boxMax[X], boxMax[Z]);
+    yIntercept(boxMin[X], boxMax[Z]);
+    yIntercept(boxMax[X], boxMin[Z]);
+    // Find any vertices that exist on the X edges of the box
+    xIntercept(boxMin[Y], boxMin[Z]);
+    xIntercept(boxMax[Y], boxMax[Z]);
+    xIntercept(boxMin[Y], boxMax[Z]);
+    xIntercept(boxMax[Y], boxMin[Z]);
+}
+
 void SliceRenderer::_resetTextureCoordinates()
 {
+    _rotate();
+
     float texMinX, texMinY, texMaxX, texMaxY;
 
     std::vector<double> boxMin = _cacheParams.boxMin;
     std::vector<double> boxMax = _cacheParams.boxMax;
     std::vector<double> domainMin = _cacheParams.domainMin;
     std::vector<double> domainMax = _cacheParams.domainMax;
-
     int xAxis, yAxis;
-    int orientation = _cacheParams.orientation;
-    if (orientation == XY) {
+
+    xAxis = X;
+    yAxis = Y;
+    /*if (orientation == XY) {
         xAxis = X;
         yAxis = Y;
     } else if (orientation == XZ) {
@@ -202,7 +304,7 @@ void SliceRenderer::_resetTextureCoordinates()
     } else {    // (orientation = YZ)
         xAxis = Y;
         yAxis = Z;
-    }
+    }*/
 
     texMinX = (boxMin[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
     texMaxX = (boxMax[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
@@ -338,14 +440,15 @@ int SliceRenderer::_saveTextureData()
     int    textureSize = 2 * _textureSideSize * _textureSideSize;
     float *dataValues = new float[textureSize];
 
-    if (_cacheParams.orientation == XY)
+    _populateDataXY(dataValues, grid);
+    /*if (_cacheParams.orientation == XY)
         _populateDataXY(dataValues, grid);
     else if (_cacheParams.orientation == XZ)
         _populateDataXZ(dataValues, grid);
     else if (_cacheParams.orientation == YZ)
         _populateDataYZ(dataValues, grid);
     else
-        VAssert(0);
+        VAssert(0);*/
 
     _createDataTexture(dataValues);
 
@@ -382,6 +485,10 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.ts != p->GetCurrentTimestep()) return true;
     if (_cacheParams.refinementLevel != p->GetRefinementLevel()) return true;
     if (_cacheParams.compressionLevel != p->GetCompressionLevel()) return true;
+
+    if (_cacheParams.xRotation != p->GetValueDouble(SliceParams::XRotationTag,0)) return true;
+    if (_cacheParams.yRotation != p->GetValueDouble(SliceParams::YRotationTag,0)) return true;
+    if (_cacheParams.zRotation != p->GetValueDouble(SliceParams::ZRotationTag,0)) return true;
 
     if (_cacheParams.textureSampleRate != p->GetSampleRate()) return true;
 
@@ -438,7 +545,9 @@ void SliceRenderer::_getModifiedExtents(vector<double> &min, vector<double> &max
 
     vector<double> sampleLocation = p->GetValueDoubleVec(p->SampleLocationTag);
     VAssert(sampleLocation.size() == 3);
-    switch (box->GetOrientation()) {
+    //min[Z] = sampleLocation[Z];
+    //max[Z] = sampleLocation[Z];
+    /*switch (box->GetOrientation()) {
     case XY:
         min[Z] = sampleLocation[Z];
         max[Z] = sampleLocation[Z];
@@ -452,7 +561,7 @@ void SliceRenderer::_getModifiedExtents(vector<double> &min, vector<double> &max
         max[X] = sampleLocation[X];
         break;
     default: VAssert(0);
-    }
+    }*/
 }
 
 int SliceRenderer::_paintGL(bool fast)
@@ -566,13 +675,14 @@ void SliceRenderer::_setVertexPositions()
         trimmedMax[i] = min(_cacheParams.boxMax[i], _cacheParams.domainMax[i]);
     }
 
-    int orientation = _cacheParams.orientation;
-    if (orientation == XY)
+    //int orientation = _cacheParams.orientation;
+    _setXYVertexPositions(trimmedMin, trimmedMax);
+    /*if (orientation == XY)
         _setXYVertexPositions(trimmedMin, trimmedMax);
     else if (orientation == XZ)
         _setXZVertexPositions(trimmedMin, trimmedMax);
     else if (orientation == YZ)
-        _setYZVertexPositions(trimmedMin, trimmedMax);
+        _setYZVertexPositions(trimmedMin, trimmedMax);*/
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _vertexCoords.data());
@@ -605,10 +715,11 @@ void SliceRenderer::_setYZVertexPositions(std::vector<double> min, std::vector<d
 
 int SliceRenderer::_getConstantAxis() const
 {
-    if (_cacheParams.orientation == XY)
+    return Z;
+    /*if (_cacheParams.orientation == XY)
         return Z;
     else if (_cacheParams.orientation == XZ)
         return Y;
     else    // (_cacheParams.orientation == XY )
-        return X;
+        return X;*/
 }

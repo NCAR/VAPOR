@@ -9,6 +9,7 @@
     #include <GL/gl.h>
 #endif
 
+#include <glm/glm.hpp>
 #include <vapor/DataMgr.h>
 #include <vapor/utils.h>
 #include <vapor/Renderer.h>
@@ -46,6 +47,7 @@ private:
         std::vector<double> sampleLocation;
     } _cacheParams;
 
+    void _rotate();
     void _initVAO();
     void _initTexCoordVBO();
     void _initVertexVBO();
@@ -64,6 +66,7 @@ private:
     void _populateDataXY(float *dataValues, Grid *grid) const;
     void _populateDataXZ(float *dataValues, Grid *grid) const;
     void _populateDataYZ(float *dataValues, Grid *grid) const;
+    glm::vec3 _rotateVector(glm::vec3 vector, glm::quat rotation) const;
 
     double _newWaySeconds;
     double _newWayInlineSeconds;

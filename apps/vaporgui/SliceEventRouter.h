@@ -17,8 +17,6 @@ public:
     bool          Supports2DVariables() const { return false; }
     bool          Supports3DVariables() const { return true; }
 
-    void updateTab() override;
-
 protected:
     string _getDescription() const;
     string _getSmallIconImagePath() const { return "Slice_small.png"; }
