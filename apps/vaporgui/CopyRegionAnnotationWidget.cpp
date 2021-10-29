@@ -4,7 +4,7 @@
 #include "vapor/Renderer.h"
 #include "vapor/ParamsMgr.h"
 #include "vapor/RenderParams.h"
-#include "AnimationParams.h"
+#include <vapor/AnimationParams.h>
 #include "vapor/DataMgrUtils.h"
 #include <vapor/ControlExecutive.h>
 #include "CopyRegionAnnotationWidget.h"

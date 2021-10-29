@@ -55,6 +55,7 @@ std::string FileUtils::HomeDir()
 #ifdef WIN32
     return string(getenv("USERPROFILE"));
 #else
+    if (getenv("HOME")) return string(getenv("HOME"));
     const struct passwd *pw = getpwuid(getuid());
     const char *         homeDir = pw->pw_dir;
     return string(homeDir);

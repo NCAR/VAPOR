@@ -57,7 +57,7 @@ void PTrackballWidget::cameraChanged() { NavigationUtils::SetAllCameras(_ce, _po
 
 
 #include "VComboBox.h"
-#include "GUIStateParams.h"
+#include <vapor/GUIStateParams.h>
 
 
 const string PCameraProjectionWidget::Perspective = "Perspective";

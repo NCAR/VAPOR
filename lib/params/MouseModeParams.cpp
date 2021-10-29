@@ -28,7 +28,7 @@
 
 #include "../../apps/vaporgui/images/wheel.xpm"
 #include "../../apps/vaporgui/images/cube.xpm"
-#include "MouseModeParams.h"
+#include <vapor/MouseModeParams.h>
 
 const std::string MouseModeParams::_currentMouseModeTag = "CurrentMouseModeTag";
 

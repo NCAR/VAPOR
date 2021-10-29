@@ -55,6 +55,8 @@ set (SRC
 	OSPRay.cpp
     ColorbarRenderer.cpp
     ParticleRenderer.cpp
+    TrackBall.cpp
+    NavigationUtils.cpp
 )
 
 set (HEADERS
@@ -116,6 +118,8 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/OSPRay.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ColorbarRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ParticleRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/TrackBall.h
+	${PROJECT_SOURCE_DIR}/include/vapor/NavigationUtils.h
 )
 
 if(BUILD_OSP)

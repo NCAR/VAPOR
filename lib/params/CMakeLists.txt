@@ -30,6 +30,10 @@ set (SRC
 	VolumeIsoParams.cpp
 	ModelParams.cpp
 	ParticleParams.cpp
+    AnimationParams.cpp
+    MouseModeParams.cpp
+    BookmarkParams.cpp
+    GUIStateParams.cpp
 )
 
 set (HEADERS
@@ -64,6 +68,10 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ModelParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ParticleParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Transform.h
+	${PROJECT_SOURCE_DIR}/include/vapor/AnimationParams.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/MouseModeParams.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/BookmarkParams.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/GUIStateParams.h
 )
 
 add_library (params SHARED ${SRC} ${HEADERS})
