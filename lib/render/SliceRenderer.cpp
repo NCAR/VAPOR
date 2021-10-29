@@ -11,7 +11,7 @@
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
 #include <glm/gtx/string_cast.hpp>
-#include <vapor/ConvexHullAlgorithm.h>
+#include <vapor/ConvexHull.h>
 
 #define X  0
 #define Y  1
@@ -220,7 +220,8 @@ void SliceRenderer::_rotate()
     std::vector<double> boxMax = _cacheParams.boxMax;
 
     //std::vector<double> boxOrigin = {boxMax[X]-boxMin[X], boxMax[Y]-boxMin[Y], boxMax[Z]-boxMin[Z]};
-    std::vector<double> origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
+    //std::vector<double> origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
+    glm::vec3 origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
                                   (boxMax[Y]-boxMin[Y])/2. + boxMin[Y], 
                                   (boxMax[Z]-boxMin[Z])/2. + boxMin[Z]};
 
@@ -228,39 +229,44 @@ void SliceRenderer::_rotate()
     glm::quat q = glm::quat( angles );
     glm::vec3 normal = q * glm::vec3(0,0,1);
     //glm::vec3 sliceNormal = _rotateVector(glm::vec3(0,0,1), q);
-    std::cout << "normal " << glm::to_string(normal) << std::endl;
 
     // a(x-xo) + b(y-yo) + c(z-zo) = 0
 
     //normal.x*(x-origin.x) + normal.y*(y-origin.y) + normal.z*(z-origin.z) = 0
     
-    std::vector< glm::vec3 > vertices;
+    //std::vector< glm::vec3 > vertices;
+    std::vector< _point > vertices;
  
     auto zIntercept = [&](float x, float y) {
         if(normal.z==0) return;
-        double z = (normal.x*origin[X] + normal.y*origin[Y] + normal.z*origin[Z] - normal.x*x - normal.y*y) / normal.z;
-        //std::cout << "z/normal.z: " << z << " " << normal.z << std::endl;
+        //double z = (normal.x*origin[X] + normal.y*origin[Y] + normal.z*origin[Z] - normal.x*x - normal.y*y) / normal.z;
+        double z = (normal.x*origin.x+ normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.y*y) / normal.z;
         if (z >= boxMin[Z] && z <= boxMax[Z]) {
-            vertices.push_back( glm::vec3(x,y,z) );
-            std::cout << "Z hit " << x << " " << y << " " << z << std::endl;
+            //vertices.push_back( glm::vec3(x,y,z) );
+            _point p = { glm::vec3(x,y,z), glm::vec2() };
+            vertices.push_back(p);
+            //vertices.push_back( glm::vec3(x,y,z) );
+            std::cout << "Z hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
         }
     };
     auto yIntercept = [&](float x, float z) {
         if(normal.y==0) return;
-        double y = (normal.x*origin[X] + normal.y*origin[Y] + normal.z*origin[Z] - normal.x*x - normal.z*z) / normal.y;
-        //std::cout << "y/normal.y: " << z << " " << normal.z << std::endl;
+        double y = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.z*z) / normal.y;
         if (y >= boxMin[Z] && y <= boxMax[Z]) {
-            vertices.push_back( glm::vec3(x,y,z) );
-            std::cout << "Y hit " << x << " " << y << " " << z << std::endl;
+            //vertices.push_back( glm::vec3(x,y,z) );
+            _point p = { glm::vec3(x,y,z), glm::vec2() };
+            vertices.push_back(p);
+            std::cout << "Y hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
         }
     };
     auto xIntercept = [&](float y, float z) {
         if(normal.x==0) return;
-        double x = (normal.x*origin[X] + normal.y*origin[Y] + normal.z*origin[Z] - normal.y*y - normal.z*z) / normal.x;
-        //std::cout << "y/normal.y: " << z << " " << normal.z << std::endl;
+        double x = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.y*y - normal.z*z) / normal.x;
         if (x >= boxMin[Z] && x <= boxMax[Z]) {
-            vertices.push_back( glm::vec3(x,y,z) );
-            std::cout << "X hit " << x << " " << y << " " << z << std::endl;
+            //vertices.push_back( glm::vec3(x,y,z) );
+            _point p = { glm::vec3(x,y,z), glm::vec2() };
+            vertices.push_back(p);
+            std::cout << "X hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
         }
     };
 
@@ -279,6 +285,41 @@ void SliceRenderer::_rotate()
     xIntercept(boxMax[Y], boxMax[Z]);
     xIntercept(boxMin[Y], boxMax[Z]);
     xIntercept(boxMax[Y], boxMin[Z]);
+
+    // Project our polygon into 2D space for convex hull algorithm to find edges
+    glm::vec3 axis1 = _getOrthogonal( normal );
+    //std::cout << "axis1  " << glm::to_string(axis1) << std::endl;
+    //glm::vec3 axis2 = glm::perp( normal, axis1 );
+    glm::vec3 axis2 = glm::cross( normal, axis1 );
+    
+    std::cout << "normal " << glm::to_string(normal) << std::endl;
+    std::cout << "axis1  " << glm::to_string(axis1) << std::endl;
+    std::cout << "axis2  " << glm::to_string(axis2) << std::endl;
+
+    // Generate 2D coordinates for vertices
+    for (auto vertex : vertices) {
+        double x = glm::dot(axis1, vertex.threeD-origin);
+        double y = glm::dot(axis2, vertex.threeD-origin);
+        vertex.twoD = {x, y};
+        std::cout << "x " << x << std::endl;
+        std::cout << "y " << y << std::endl;
+    }
+
+    
+}
+
+// Huges-Moller algorithm
+// https://blog.selfshadow.com/2011/10/17/perp-vectors/
+glm::vec3 SliceRenderer::_getOrthogonal(const glm::vec3 u) const {
+    glm::vec3 a = abs(u);
+    glm::vec3 v;
+    if (a.x <= a.y && a.x <= a.z)
+        v = glm::vec3(0, -u.z, u.y);
+    else if (a.y <= a.x && a.y <= a.z)
+        v = glm::vec3(-u.z, 0, u.x);
+    else
+        v = glm::vec3(-u.y, u.x, 0);
+    return v;
 }
 
 void SliceRenderer::_resetTextureCoordinates()

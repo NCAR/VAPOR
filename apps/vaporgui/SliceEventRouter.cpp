@@ -26,12 +26,12 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     }));
     
     AddGeometrySubtab(new PGroup({
-        new PSection("Slice", {
-            (new PDoubleSliderEdit( SliceParams::XRotationTag, "X Rotation"))->SetRange(-90.,180.),
+        new PSection("Slice Rotation", {
+            (new PDoubleSliderEdit( SliceParams::XRotationTag, "X Rotation"))->SetRange(-90.,90.),
             (new PDoubleSliderEdit( SliceParams::YRotationTag, "Y Rotation"))->SetRange(-90.,90.),
             (new PDoubleSliderEdit( SliceParams::ZRotationTag, "Z Rotation"))->SetRange(-90.,90.),
-            new POrientationSelector,
-            new PSliceSampleLocationSelector,
+            //new POrientationSelector,
+            //new PSliceSampleLocationSelector,
         }),
         new PGeometrySubtab,
     }));
