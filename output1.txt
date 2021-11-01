@@ -140,6 +140,8 @@ shaomeng@cisl-vapor:build$ valgrind --leak-check=full --track-origins=yes ./bin/
 ==4859==    by 0x1FE671EE: ca_context_play_full (in /usr/lib/x86_64-linux-gnu/libcanberra.so.0.2.5)
 ==4859==    by 0x6247647: ca_gtk_play_for_widget (in /usr/lib/x86_64-linux-gnu/libcanberra-gtk3.so.0.1.9)
 ==4859== 
+
+GITHUB ISSUE 2890
 ==4859== Invalid read of size 4
 ==4859==    at 0x6063E74: VAPoR::DCCF::_isUniform(VAPoR::NetCDFCFCollection*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) (DCCF.cpp:395)
 ==4859==    by 0x6064559: VAPoR::DCCF::addCoordvars(VAPoR::NetCDFCFCollection*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > const&, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, VAPoR::DC::CoordVar, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, VAPoR::DC::CoordVar> > >&) (DCCF.cpp:436)
