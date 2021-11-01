@@ -213,6 +213,7 @@ GITHUB ISSUE 2890
 ==4859==    by 0xD348ED8: H5G__dense_iterate (in /usr/local/VAPOR-Deps/2019-Aug/lib/libhdf5.so.103.1.0)
 ==4859==    by 0xD35976D: H5G__obj_iterate (in /usr/local/VAPOR-Deps/2019-Aug/lib/libhdf5.so.103.1.0)
 ==4859== 
+GITHUB ISSUE 2891 regarding Py_Initialize() not paired up with a Py_Finalize().
 ==4859== Invalid read of size 4
 ==4859==    at 0x57434D6: address_in_range (obmalloc.c:1218)
 ==4859==    by 0x57434D6: _PyObject_Free (obmalloc.c:1486)
@@ -1007,6 +1008,7 @@ GITHUB ISSUE 2890
 ==4859==    by 0x3239CB: VDoubleRangeMenu::VDoubleRangeMenu(QWidget*, bool, double, double, double, bool) (VDoubleRangeMenu.cpp:5)
 ==4859==    by 0x32078F: VDoubleSliderEdit::_makeContextMenu() (VDoubleSliderEdit.cpp:36)
 ==4859==    by 0x32063B: VDoubleSliderEdit::VDoubleSliderEdit(double, double, double, bool) (VDoubleSliderEdit.cpp:25)
+BREAK
 ==4859== 
 ==4859== Invalid read of size 4
 ==4859==    at 0x57434D6: address_in_range (obmalloc.c:1218)
