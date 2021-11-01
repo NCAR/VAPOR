@@ -392,6 +392,8 @@ bool DCCF::_isUniform(NetCDFCFCollection *ncdfc, string varname)
     EnableErrMsg(enabled);
 
     float epsilon = 0.0001;
+    if( buf.size() < 2 )
+      printf("will attempt to read 2 values from a container that doesn't have 2 values.\n");
     float delta = buf[1] - buf[0];
     for (int i = 1; i < buf.size() - 1; i++) {
         if (!Wasp::NearlyEqual((buf[i + 1] - buf[i]), delta, epsilon)) { return (false); }
