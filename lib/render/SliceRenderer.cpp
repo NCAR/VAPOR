@@ -290,10 +290,6 @@ void SliceRenderer::_rotate()
     glm::vec3 axis1 = _getOrthogonal( normal );
     glm::vec3 axis2 = glm::cross( normal, axis1 );
     
-    //std::cout << "normal " << glm::to_string(normal) << std::endl;
-    //std::cout << "axis1  " << glm::to_string(axis1) << std::endl;
-    //std::cout << "axis2  " << glm::to_string(axis2) << std::endl;
-
     // https://stackoverflow.com/questions/23472048/projecting-3d-points-to-2d-plane
     glm::vec2 points[vertices.size()];
     int count=0;
@@ -301,34 +297,13 @@ void SliceRenderer::_rotate()
         double x = glm::dot(axis1, vertex.threeD-origin);
         double y = glm::dot(axis2, vertex.threeD-origin);
         vertex.twoD = {x, y};
-        //std::cout << "2dx " << vertex.twoD.x << std::endl;
-        //std::cout << "2dy " << vertex.twoD.y << std::endl;
-        //std::cout << "3dx " << vertex.threeD.x << std::endl;
-        //std::cout << "3dy " << vertex.threeD.y << std::endl;
-        //std::cout << "3dz " << vertex.threeD.z << std::endl << std::endl;
-        /*std::cout << vertex.twoD.x << std::endl;
-        std::cout << vertex.twoD.y << std::endl;
-        std::cout << vertex.threeD.x << std::endl;
-        std::cout << vertex.threeD.y << std::endl;
-        std::cout << vertex.threeD.z << std::endl << std::endl;*/
         points[count].x = vertex.twoD.x;
         points[count].y = vertex.twoD.y;
-        //std::cout << count << " " << points[count].x << " " << points[count].y << std::endl;
         count++;
     }
 
     // Perform convex hull on our list of points that have been projected into 2D space.
     // These points define the edges of our polygon.
-    /*glm::vec2 points2[] = {glm::vec2(0, 3),
-                            glm::vec2(1, 1),
-                            glm::vec2(2, 2),
-                            glm::vec2(4, 4),
-                            glm::vec2(0, 0),
-                            glm::vec2(1, 2),
-                            glm::vec2(3, 1),
-                            glm::vec2(3, 3)};
-    stack<glm::vec2> orderedTwoDPoints2 = convexHull(points2, sizeof(points2)/sizeof(points2[0]));*/
-    //for (int i=0; i<sizeof(points)/sizeof(points[0]); i++) std::cout << "CH " << points[i].x << " " << points[i].y << std::endl;
     stack<glm::vec2> orderedTwoDPoints = convexHull(points, sizeof(points)/sizeof(points[0]));
     std::cout << std::endl;
 
@@ -339,7 +314,6 @@ void SliceRenderer::_rotate()
     // Each 2D point maps to its corresponding 3D point.
     //std::vector<glm::vec3> orderedVertices;
     orderedVertices.clear();
-    //for(auto& twoDPoint : orderedTwoDPoints ) {
     while(!orderedTwoDPoints.empty()) {
         glm::vec2 twoDPoint = orderedTwoDPoints.top();
         for(auto& vertex : vertices) {
@@ -351,9 +325,6 @@ void SliceRenderer::_rotate()
             }
         }
     }
-
-    //for(auto vertex : orderedVertices)
-    //    std::cout << "3D " << glm::to_string(vertex) << std::endl;
 
     // Find minimum and maximum extents of our square in 3D space
     glm::vec3 firstVertex = orderedVertices[0];
@@ -389,7 +360,6 @@ void SliceRenderer::_rotate()
 
     glm::vec3 longest[2] = {v1, v2};
     double length = sqrt( pow(v1.x-v2.x,2) + pow(v1.y-v2.y,2) + pow(v1.z-v2.z,2) );
-    //std::cout << "fir length " << length << " " << glm::to_string(v1) << " " << glm::to_string(v2) << std::endl;
     for(int i = 0; i<orderedVertices.size()-2; i++) {
         v1 = orderedVertices[i];
         v2 = orderedVertices[i+1];
