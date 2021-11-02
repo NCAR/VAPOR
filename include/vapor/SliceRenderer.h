@@ -27,6 +27,7 @@ public:
 
     std::vector<glm::vec3> orderedVertices;
     std::vector<glm::vec3> square;
+    std::vector<glm::vec2> square2D;
 
     void getVecs(glm::vec3& vec1,glm::vec3& vec2,glm::vec3& vec3,glm::vec3& vec4) {
         vec1=v1;
