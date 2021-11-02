@@ -649,6 +649,18 @@ void AnnotationRenderer::_drawAxes(std::vector<double> min, std::vector<double> 
     lgl->Vertex3f(origin[0], origin[1], max[2]);
     lgl->End();
     glDisable(GL_LINE_SMOOTH);
+
+    /*LegacyGL *lgl = _glManager->legacy;
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    glBegin(GL_LINES);
+        glVertex3f(v1.x,v1.y,v1.z);
+        glVertex3f(v2.x,v2.y,v2.z);
+        glVertex3f(v4.x,v4.y,v4.z);
+    glEnd();
+    lgl->End();
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);*/
 }
 
 void AnnotationRenderer::_drawTic(double startPosn[], double endPosn[], double width, std::vector<double> color)

@@ -35,6 +35,7 @@
 #include <vapor/ViewpointParams.h>
 #include <vapor/regionparams.h>
 #include <vapor/Renderer.h>
+#include <vapor/SliceRenderer.h>
 #include <vapor/DataStatus.h>
 #include <vapor/Visualizer.h>
 #include <vapor/FileUtils.h>
@@ -193,6 +194,30 @@ int Visualizer::paintEvent(bool fast)
 
     // Draw the domain frame and other in-scene features
     _vizFeatures->InScenePaint(_getCurrentTimestep());
+
+    /*SliceRenderer* r = dynamic_cast<SliceRenderer*>(_renderers[0]);
+    if(r != nullptr) {
+        glm::vec3 v1, v2, v3, v4;
+        r->getVecs(v1, v2, v3, v4);
+        _vizFeatures->InScenePaint(_getCurrentTimestep(), v1, v2, v3, v4);
+
+        LegacyGL *lgl = _glManager->legacy;
+        glDepthMask(GL_TRUE);
+        glEnable(GL_DEPTH_TEST);
+        glBegin(GL_LINES);
+            glVertex3f(v1.x,v1.y,v1.z);
+            glVertex3f(v2.x,v2.y,v2.z);
+            glVertex3f(v4.x,v4.y,v4.z);
+        glEnd();
+        lgl->End();
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+    }
+    else {
+        // Draw the domain frame and other in-scene features
+        _vizFeatures->InScenePaint(_getCurrentTimestep());
+    }*/
+
     GL_ERR_BREAK();
 
     _deleteFlaggedRenderers();

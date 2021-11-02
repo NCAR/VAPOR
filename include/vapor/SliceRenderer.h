@@ -13,6 +13,7 @@
 #include <vapor/DataMgr.h>
 #include <vapor/utils.h>
 #include <vapor/Renderer.h>
+//#include <vapor/ConvexHull.h>
 
 namespace VAPoR {
 
@@ -23,6 +24,15 @@ public:
     static string GetClassType() { return ("Slice"); }
 
     virtual ~SliceRenderer();
+
+    std::vector<glm::vec3> orderedVertices;
+
+    void getVecs(glm::vec3& vec1,glm::vec3& vec2,glm::vec3& vec3,glm::vec3& vec4) {
+        vec1=v1;
+        vec2=v2;
+        vec3=v3;
+        vec4=v4;
+    }
 
 protected:
     virtual int _initializeGL();
@@ -104,6 +114,8 @@ private:
     GLuint _VAO;
     GLuint _vertexVBO;
     GLuint _texCoordVBO;
+
+    glm::vec3 v1, v2, v3, v4;
 
     int _colorMapSize;
 
