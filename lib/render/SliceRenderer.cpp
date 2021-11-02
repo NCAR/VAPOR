@@ -246,7 +246,7 @@ void SliceRenderer::_rotate()
             _point p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
             //vertices.push_back( glm::vec3(x,y,z) );
-            std::cout << "Z hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
+            //std::cout << "Z hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
         }
     };
     auto yIntercept = [&](float x, float z) {
@@ -256,7 +256,7 @@ void SliceRenderer::_rotate()
             //vertices.push_back( glm::vec3(x,y,z) );
             _point p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
-            std::cout << "Y hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
+            //std::cout << "Y hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
         }
     };
     auto xIntercept = [&](float y, float z) {
@@ -266,7 +266,7 @@ void SliceRenderer::_rotate()
             //vertices.push_back( glm::vec3(x,y,z) );
             _point p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
-            std::cout << "X hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
+            //std::cout << "X hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
         }
     };
 
@@ -333,15 +333,7 @@ void SliceRenderer::_rotate()
     std::cout << std::endl;
 
     stack<glm::vec2> s = orderedTwoDPoints;
-    if( s.size() != vertices.size() ) {
-        for (int i=0; i<s.size(); i++ ) {
-            std::cout << "OTDP: " << glm::to_string(s.top()) << std::endl;
-            s.pop();
-        }
-        for (int i=0; i<vertices.size(); i++ )
-            std::cout << "VRTS: " << vertices[i].threeD.x << " " << vertices[i].threeD.y << " " << vertices[i].threeD.z << std::endl;
-    }
-    //VAssert( orderedTwoDPoints.size() == vertices.size() );
+    VAssert( orderedTwoDPoints.size() == vertices.size() );
   
     // Use the edge-defining list of 2D points to create an edge-defining list of 3D points.
     // Each 2D point maps to its corresponding 3D point.
@@ -363,7 +355,31 @@ void SliceRenderer::_rotate()
     //for(auto vertex : orderedVertices)
     //    std::cout << "3D " << glm::to_string(vertex) << std::endl;
 
-    std::cout << std::endl;
+    // Find minimum and maximum extents of our square in 3D space
+    glm::vec3 firstVertex = orderedVertices[0];
+
+          // Point 1      2            3            4
+    square={ firstVertex, firstVertex, firstVertex, firstVertex };
+    for(auto& vertex : orderedVertices) {
+        if(vertex.x < square[0].x) square[0].x = vertex.x;
+        if(vertex.y < square[0].y) square[0].y = vertex.y;
+        if(vertex.z < square[0].z) square[0].z = vertex.z;
+
+        if(vertex.x > square[2].x) square[2].x = vertex.x;
+        if(vertex.y > square[2].y) square[2].y = vertex.y;
+        if(vertex.z > square[2].z) square[2].z = vertex.z;
+    }
+    for(auto& vertex:square) {
+        //std::cout << "Square " << glm::to_string(vertex) << std::endl;
+    }
+
+    square[1].x = square[2].x;
+    square[1].y = square[0].y;
+    square[1].z = square[0].z;
+
+    square[3].x = square[0].x;
+    square[3].y = square[2].y;
+    square[3].z = square[2].z;
 
     // Parallelogram axis 1
     // Find the longest edge of our polyhedron to serve as the first axis of our paralellogram
@@ -389,8 +405,8 @@ void SliceRenderer::_rotate()
     // Parallelogram axis 2
     // Find the longest edge that's adjacent to the previously found longest edge to use
     // as the second axis of our parallelogram
-    glm::vec3 v3(std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
-    glm::vec3 v4(std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
+    v3 = glm::vec3(std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
+    v4 = glm::vec3(std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
     for(int i=0; i<orderedVertices.size(); i++) {
         glm::vec3 vertex = orderedVertices[i];
 
@@ -406,7 +422,7 @@ void SliceRenderer::_rotate()
 
         if (length1 > length2) v3 = neighbor1;
         else v4 = neighbor2;
-        std::cout << (vertex==v1) << std::endl;
+        //std::cout << (vertex==v1) << std::endl;
     }
 
     // Now solve for either v3 or v4
@@ -852,7 +868,8 @@ int SliceRenderer::_paintGL(bool fast)
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     LegacyGL *lgl = _glManager->legacy;    
-    lgl->Color4f(0, 1., 0, 1.);
+
+    /*lgl->Color4f(0, 1., 0, 1.);
     lgl->Begin(GL_LINES);
         if (orderedVertices.size()) {
             for (int i=0; i<orderedVertices.size()-1; i++) {
@@ -861,12 +878,54 @@ int SliceRenderer::_paintGL(bool fast)
                 lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
                 lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
             }
-            lgl->Color4f(1., 1., 0, 1.);
+            lgl->Color4f(0, 1., 0, 1.);
             glm::vec3 vert1 = orderedVertices[orderedVertices.size()-1];
             glm::vec3 vert2 = orderedVertices[0];
             lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
             lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
         }
+    lgl->End();*/
+
+    lgl = _glManager->legacy;
+    lgl->Begin(GL_LINES);
+        std::cout << std::endl;
+        std::cout << "v1 " << glm::to_string(v1) << std::endl;
+        std::cout << "v2 " << glm::to_string(v2) << std::endl;
+        std::cout << "v4 " << glm::to_string(v4) << std::endl;
+        lgl->Color4f(1., 1., 0, 1.);
+        lgl->Vertex3f(v1.x,v1.y,v1.z);
+        lgl->Vertex3f(v2.x,v2.y,v2.z);
+
+        lgl->Color4f(.5, .5, .5, 1.);
+        lgl->Vertex3f(v1.x,v1.y,v1.z);
+        lgl->Vertex3f(v4.x,v4.y,v4.z);
+        //lgl->Vertex3f(v3.x,v3.y,v3.z);
+
+        //lgl->Vertex3f(v3.x,v3.y,v3.z);
+        //lgl->Vertex3f(v4.x,v4.y,v4.z);
+
+        //lgl->Vertex3f(v4.x,v4.y,v4.z);
+        //lgl->Vertex3f(v1.x,v1.y,v1.z);
+
+        /*double foo=0.;
+        lgl->Color4f(1., 1., 0, 1.);
+        if(square.size()) {
+            for (int i=0; i<square.size()-1; i++) {
+                lgl->Color4f(1., 1., foo, 1.);
+                foo=foo+.25;
+                glm::vec3 vert1 = square[i];
+                glm::vec3 vert2 = square[i+1];
+                lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
+                lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
+            }
+            lgl->Color4f(1., 1., foo, 1.);
+            glm::vec3 vert1 = square[orderedVertices.size()-1];
+            glm::vec3 vert2 = square[0];
+            lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
+            lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
+        
+        }*/
+
         //lgl->Vertex3f(v1.x,v1.y,v1.z);
         //lgl->Vertex3f(v2.x,v2.y,v2.z);
         //lgl->Vertex3f(v2.x,v2.y,v2.z);
