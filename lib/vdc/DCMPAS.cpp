@@ -242,6 +242,9 @@ DCMPAS::~DCMPAS()
 
 int DCMPAS::initialize(const vector<string> &files, const std::vector<string> &options)
 {
+    if (_ncdfc) delete _ncdfc;
+    _ncdfc = nullptr;
+
     // Use UDUnits for unit conversion
     //
     int rc = _udunits.Initialize();
