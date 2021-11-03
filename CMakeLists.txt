@@ -92,6 +92,9 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+set (test_output_dir ${CMAKE_BINARY_DIR}/test_binaries)
+set (debug_output_dir ${CMAKE_BINARY_DIR}/debug_binaries)
+
 set (QTDIR )
 set (OSPRAYDIR )
 set (PYTHONDIR )
