@@ -79,6 +79,12 @@ DCWRF::~DCWRF()
 
 int DCWRF::initialize(const vector<string> &files, const std::vector<string> &options)
 {
+    if (_ncdfc) delete _ncdfc;
+    _ncdfc = nullptr;
+
+    if (_derivedTime) delete _ncdfc;
+    _derivedTime = nullptr;
+
     NetCDFCollection *ncdfc = new NetCDFCollection();
 
     // Initialize the NetCDFCollection class. Need to specify the name
