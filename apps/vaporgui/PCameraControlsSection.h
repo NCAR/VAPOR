@@ -7,7 +7,7 @@
 
 
 #include "PWidget.h"
-#include "NavigationUtils.h"
+#include <vapor/NavigationUtils.h>
 
 class VGroup;
 class V3DInput;

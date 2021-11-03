@@ -3,7 +3,7 @@
 #include <vapor/ParamsBase.h>
 #include <vapor/ParamsMgr.h>
 #include <QVBoxLayout>
-#include "GUIStateParams.h"
+#include <vapor/GUIStateParams.h>
 
 #include "PGroup.h"
 #include "PSection.h"

@@ -1,13 +1,12 @@
-#include "NavigationUtils.h"
+#include <vapor/NavigationUtils.h>
 #include <vapor/DataStatus.h>
 #include <vapor/ParamsMgr.h>
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
-#include "TrackBall.h"
-#include "ErrorReporter.h"
-#include "AnimationParams.h"
-#include "GUIStateParams.h"
-#include "AnimationParams.h"
+#include <vapor/TrackBall.h>
+#include <vapor/AnimationParams.h>
+#include <vapor/GUIStateParams.h>
+#include <vapor/AnimationParams.h>
 #include <cassert>
 #include <cfloat>
 
@@ -179,7 +178,7 @@ void NavigationUtils::SetAllCameras(ControlExec *ce, const double position[3], c
     Trackball trackball;
     bool      ok = trackball.setFromFrame(position, direction, up, origin, true);
     if (!ok) {
-        MSG_ERR("Invalid camera settings");
+        MyBase::SetErrMsg("Invalid camera settings");
         return;
     }
 

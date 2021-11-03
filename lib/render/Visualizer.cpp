@@ -166,7 +166,9 @@ int Visualizer::paintEvent(bool fast)
     if (viewport[2] <= 0) return 0;
     if (viewport[3] <= 0) return 0;
 
+    assert(_framebuffer.IsComplete());
     _clearActiveFramebuffer(0.3, 0.3, 0.3);
+    GL_ERR_BREAK();
 
     int fbWidth = viewport[2];
     int fbHeight = viewport[3];
@@ -177,7 +179,11 @@ int Visualizer::paintEvent(bool fast)
         fbHeight = vp->GetValueLong(ViewpointParams::CustomFramebufferHeightTag, 0);
     }
     _framebuffer.SetSize(fbWidth, fbHeight);
+
+    GLint destFbId;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &destFbId);
     _framebuffer.MakeRenderTarget();
+    GL_ERR_BREAK();
 
     double clr[3];
     getActiveAnnotationParams()->GetBackgroundColor(clr);
@@ -245,6 +251,7 @@ int Visualizer::paintEvent(bool fast)
     if (CheckGLError()) return -1;
 
     _framebuffer.UnBind();
+    glBindFramebuffer(GL_FRAMEBUFFER, destFbId);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     glBindVertexArray(_screenQuadVAO);
     SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("Framebuffer");
