@@ -272,7 +272,7 @@ public:
 
 private:
     ParamsContainer *m_VPs;
-    std::unique_ptr<ParamsContainer> _transforms = {nullptr};
+    std::unique_ptr<ParamsContainer> _transforms = nullptr;
 
     static const string _viewPointsTag;
     static const string _transformsTag;
