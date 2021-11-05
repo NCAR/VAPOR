@@ -19,7 +19,7 @@ namespace VAPoR {
 class RENDER_API VolumeOSPRay : public VolumeAlgorithm {
 public:
     enum WindingOrder { CCW, CW, INVALID };
-    
+
     VolumeOSPRay(GLManager *gl, VolumeRenderer *renderer);
     ~VolumeOSPRay();
 

@@ -777,7 +777,7 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     long added[32] = {0};
     long skipped[32] = {0};
 
-//    int maxCells = std::max(5, std::min((int)nCells, (int)GetParams()->GetValueLong("osp_max_cells", 1)));
+    //    int maxCells = std::max(5, std::min((int)nCells, (int)GetParams()->GetValueLong("osp_max_cells", 1)));
 
     auto cellIt = grid->ConstCellBegin();
     Progress::Start("Loading Grid", nCells, true);
@@ -808,7 +808,7 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
             cellStarts.push_back(cellIndices.size());
             cellTypes.push_back(OSP_HEXAHEDRON);
             added[numNodes]++;
-            
+
             for (int i = 0; i < 8; i++) cellIndices.push_back(nodes[i][0] + nodes[i][1] * nodeDims[0]);
         } else if (numNodes == 12) {    // Hexagonal Prism
 #define add(i) cellIndices.push_back(nodes[i][0] + nodes[i][1] * nodeDims[0]);
@@ -891,10 +891,8 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
             //            }
         } else if (type == OSP_HEXAHEDRON) {
             auto windingBottom = getWindingOrderRespectToZ(coords[cellIndices[start + 0]], coords[cellIndices[start + 1]], coords[cellIndices[start + 2]]);
-            auto windingTop    = getWindingOrderRespectToZ(coords[cellIndices[start + 4]], coords[cellIndices[start + 5]], coords[cellIndices[start + 6]]);
-            if (INVALID == windingBottom ||
-                INVALID == windingTop ||
-                windingTop != windingBottom) {
+            auto windingTop = getWindingOrderRespectToZ(coords[cellIndices[start + 4]], coords[cellIndices[start + 5]], coords[cellIndices[start + 6]]);
+            if (INVALID == windingBottom || INVALID == windingTop || windingTop != windingBottom) {
                 erase[i] = true;
                 continue;
             }
@@ -902,14 +900,14 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
                 std::swap(cellIndices[start + 0 + 1], cellIndices[start + 0 + 3]);
                 std::swap(cellIndices[start + 4 + 1], cellIndices[start + 4 + 3]);
             }
-            
+
             vec3 min = coords[cellIndices[start]];
             vec3 max = coords[cellIndices[start]];
             for (int i = 1; i < 8; i++) {
-                min = glm::min(min, coords[cellIndices[start+i]]);
-                max = glm::max(max, coords[cellIndices[start+i]]);
+                min = glm::min(min, coords[cellIndices[start + i]]);
+                max = glm::max(max, coords[cellIndices[start + i]]);
             }
-            vec3 bbSizes = max-min;
+            vec3  bbSizes = max - min;
             float bbVolume = bbSizes.x * bbSizes.y * bbSizes.z;
             if (bbVolume <= FLT_EPSILON) {
                 erase[i] = true;
@@ -936,22 +934,22 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     //    Progress::Finish();
     //    printf("done\n");
 
-//        int testCell = std::min(cellStarts.size()-1, (size_t)maxCells-1);
-//        if (testCell >= 0) {
-//            int testCellNodes = cellTypes[testCell] == OSP_TETRAHEDRON ? 4 : cellTypes[testCell] == OSP_HEXAHEDRON ? 8 : 6;
-//            printf("Test Cell[%i].nodes = %i\n", testCell, testCellNodes);
-//            vec3 testCellCoords[testCellNodes];
-//            for (int i = 0; i < testCellNodes; i++) {
-//                int idx = cellIndices[cellStarts[testCell]+i];
-//                testCellCoords[i] = coords[idx];
-//                printf("\tCells[%i].vert[%i] = coords[%i] = (%f, %f, %f)\n", testCell, i, idx, coords[idx].x, coords[idx].y, coords[idx].z);
-//            }
-//            printf("\tWinding bottom = %s\n", C(getWindingOrderRespectToZ(testCellCoords[0], testCellCoords[1], testCellCoords[2])));
-//            if (testCellNodes == 6)
-//                printf("\tWinding top = %s\n", C(getWindingOrderRespectToZ(testCellCoords[3], testCellCoords[4], testCellCoords[5])));
-//            if (testCellNodes == 8)
-//                printf("\tWinding top = %s\n", C(getWindingOrderRespectToZ(testCellCoords[4], testCellCoords[5], testCellCoords[6])));
-//        }
+    //        int testCell = std::min(cellStarts.size()-1, (size_t)maxCells-1);
+    //        if (testCell >= 0) {
+    //            int testCellNodes = cellTypes[testCell] == OSP_TETRAHEDRON ? 4 : cellTypes[testCell] == OSP_HEXAHEDRON ? 8 : 6;
+    //            printf("Test Cell[%i].nodes = %i\n", testCell, testCellNodes);
+    //            vec3 testCellCoords[testCellNodes];
+    //            for (int i = 0; i < testCellNodes; i++) {
+    //                int idx = cellIndices[cellStarts[testCell]+i];
+    //                testCellCoords[i] = coords[idx];
+    //                printf("\tCells[%i].vert[%i] = coords[%i] = (%f, %f, %f)\n", testCell, i, idx, coords[idx].x, coords[idx].y, coords[idx].z);
+    //            }
+    //            printf("\tWinding bottom = %s\n", C(getWindingOrderRespectToZ(testCellCoords[0], testCellCoords[1], testCellCoords[2])));
+    //            if (testCellNodes == 6)
+    //                printf("\tWinding top = %s\n", C(getWindingOrderRespectToZ(testCellCoords[3], testCellCoords[4], testCellCoords[5])));
+    //            if (testCellNodes == 8)
+    //                printf("\tWinding top = %s\n", C(getWindingOrderRespectToZ(testCellCoords[4], testCellCoords[5], testCellCoords[6])));
+    //        }
 
     Progress::Start("Sanity Checks", 5, false);
     for (auto i : cellIndices) VAssert(i < nVerts);
