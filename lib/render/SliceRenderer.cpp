@@ -221,13 +221,13 @@ void SliceRenderer::_rotate()
 
     //std::vector<double> boxOrigin = {boxMax[X]-boxMin[X], boxMax[Y]-boxMin[Y], boxMax[Z]-boxMin[Z]};
     //std::vector<double> origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
-    glm::vec3 origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
+    origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
                         (boxMax[Y]-boxMin[Y])/2. + boxMin[Y], 
                         (boxMax[Z]-boxMin[Z])/2. + boxMin[Z]};
 
     glm::vec3 angles( M_PI*_cacheParams.xRotation/180., M_PI*_cacheParams.yRotation/180., M_PI*_cacheParams.zRotation/180. );
     glm::quat q = glm::quat( angles );
-    glm::vec3 normal = q * glm::vec3(0,0,1);
+    normal = q * glm::vec3(0,0,1);
     //glm::vec3 sliceNormal = _rotateVector(glm::vec3(0,0,1), q);
 
     // a(x-xo) + b(y-yo) + c(z-zo) = 0
@@ -287,8 +287,8 @@ void SliceRenderer::_rotate()
     xIntercept(boxMax[Y], boxMin[Z]);
 
     // Project our polygon into 2D space for convex hull algorithm to find edges
-    glm::vec3 axis1 = _getOrthogonal( normal );
-    glm::vec3 axis2 = glm::cross( normal, axis1 );
+    axis1 = _getOrthogonal( normal );
+    axis2 = glm::cross( normal, axis1 );
    
     std::cout << "norm " << glm::to_string(normal) << " " << sqrt(pow(normal.x,2) + pow(normal.y,2) + pow(normal.z,2)) << endl;
     std::cout << "axi1 " << glm::to_string(axis1) << " " << sqrt(pow(axis1.x,2) + pow(axis1.y,2) + pow(axis1.z,2)) << endl;
@@ -496,12 +496,69 @@ void SliceRenderer::_resetTextureCoordinates()
 std::vector<double> SliceRenderer::_calculateDeltas() const
 {
     int    sampleRate = _textureSideSize;
-    double dx = (_cacheParams.domainMax[X] - _cacheParams.domainMin[X]) / (1 + sampleRate);
-    double dy = (_cacheParams.domainMax[Y] - _cacheParams.domainMin[Y]) / (1 + sampleRate);
-    double dz = (_cacheParams.domainMax[Z] - _cacheParams.domainMin[Z]) / (1 + sampleRate);
+    double dx = (square[2].x - square[0].x) / (1 + sampleRate);
+    double dy = (square[2].y - square[0].y) / (1 + sampleRate);
+    double dz = (square[2].z - square[0].z) / (1 + sampleRate);
+    
+    //double dx = (_cacheParams.domainMax[X] - _cacheParams.domainMin[X]) / (1 + sampleRate);
+    //double dy = (_cacheParams.domainMax[Y] - _cacheParams.domainMin[Y]) / (1 + sampleRate);
+    //double dz = (_cacheParams.domainMax[Z] - _cacheParams.domainMin[Z]) / (1 + sampleRate);
 
     std::vector<double> deltas = {dx, dy, dz};
     return deltas;
+}
+
+void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
+    std::vector<double> deltas = _calculateDeltas();
+    float               varValue, missingValue;
+    
+    glm::vec3 samplePoint = square[0];
+    //coords[X] = _cacheParams.domainMin[X] + deltas[X] / 2.f;
+    //coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] / 2.f;
+    //coords[Z] = _cacheParams.boxMin[Z];
+
+    int tss = 10;
+
+    auto inverseProjection = [&](float x, float y) {
+        glm::vec3 point;
+        point = origin + x*axis1 + y*axis2;
+        return point;
+    };
+
+    glm::vec2 delta = (square2D[2]-square2D[0]);//_textureSideSize;
+    delta.x = delta.x/tss;
+    delta.y = delta.y/tss;
+    int index = 0;
+    //for (int j = 0; j < _textureSideSize; j++) {
+    for (int j = 0; j < tss; j++) {
+        //coords[X] = _cacheParams.domainMin[X];
+
+        //for (int i = 0; i < _textureSideSize; i++) {
+        for (int i = 0; i < tss; i++) {
+            std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
+            //varValue = grid->GetValue( p );
+            std::cout << samplePoint.x << " " << samplePoint.y << " " << samplePoint.z << " " << varValue << std::endl;
+            //varValue = (float)(j)/(float)(_textureSideSize*_textureSideSize);
+            missingValue = grid->GetMissingValue();
+            if (varValue == missingValue)
+                dataValues[index + 1] = 1.f;
+            else
+                dataValues[index + 1] = 0.f;
+
+            dataValues[index] = varValue;
+
+            index += 2;
+
+            //std::cout << i*delta.x << " " << j*delta.y << std::endl;
+            std::cout << delta.x << " " << delta.y << std::endl;
+            samplePoint = inverseProjection(i*delta.x,j*delta.y);
+            //samplePoint.x += deltas[X];
+            //samplePoint.y += deltas[Y];
+            //samplePoint.z += deltas[Z];
+            //coords[X] += deltas[X];
+        }
+        //coords[Y] += deltas[Y];
+    }
 }
 
 void SliceRenderer::_populateDataXY(float *dataValues, Grid *grid) const
@@ -613,7 +670,7 @@ int SliceRenderer::_saveTextureData()
     int    textureSize = 2 * _textureSideSize * _textureSideSize;
     float *dataValues = new float[textureSize];
 
-    _populateDataXY(dataValues, grid);
+    _populateData(dataValues, grid);
     /*if (_cacheParams.orientation == XY)
         _populateDataXY(dataValues, grid);
     else if (_cacheParams.orientation == XZ)
@@ -745,7 +802,29 @@ int SliceRenderer::_paintGL(bool fast)
     glEnable(GL_DEPTH_TEST);
     LegacyGL *lgl = _glManager->legacy;    
 
-    // Green polygon
+
+    if (square.size()) {    
+        lgl->Begin(GL_LINES);
+        lgl->Color4f(1, 0., 0, 1.);
+        lgl->Vertex3f(square[0].x, square[0].y, square[0].z);
+        lgl->Vertex3f(square[1].x, square[1].y, square[1].z);
+        lgl->End();
+
+        lgl->Begin(GL_LINES);
+        lgl->Color4f(0, 0., 1, 1.);
+        lgl->Vertex3f(square[3].x, square[3].y, square[3].z);
+        lgl->Vertex3f(square[1].x, square[1].y, square[1].z);
+        lgl->End();
+
+        lgl->Begin(GL_LINES);
+        lgl->Color4f(0, 1., 0, 1.);
+        lgl->Vertex3f(square[2].x, square[2].y, square[2].z);
+        lgl->Vertex3f(square[1].x, square[1].y, square[1].z);
+        lgl->End();
+    }
+
+   /* 
+    // Green polygon - where the slice should render
     lgl->Color4f(0, 1., 0, 1.);
     lgl->Begin(GL_LINES);
         if (orderedVertices.size()) {
@@ -761,31 +840,13 @@ int SliceRenderer::_paintGL(bool fast)
             lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
             lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
         }
-    lgl->End();
+    lgl->End();*/
 
+    /*
+    // 3D yellow enclosing rectangle
     lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
-        //std::cout << std::endl;
-        /*std::cout << "v1 " << glm::to_string(v1) << std::endl;
-        std::cout << "v2 " << glm::to_string(v2) << std::endl;
-        std::cout << "v4 " << glm::to_string(v4) << std::endl;*/
-        //lgl->Color4f(1., 1., 0, 1.);
-        //lgl->Vertex3f(v1.x,v1.y,v1.z);
-        //lgl->Vertex3f(v2.x,v2.y,v2.z);
-
-        //lgl->Color4f(.5, .5, .5, 1.);
-        //lgl->Vertex3f(v1.x,v1.y,v1.z);
-        //lgl->Vertex3f(v4.x,v4.y,v4.z);
-        //lgl->Vertex3f(v3.x,v3.y,v3.z);
-
-        //lgl->Vertex3f(v3.x,v3.y,v3.z);
-        //lgl->Vertex3f(v4.x,v4.y,v4.z);
-
-        //lgl->Vertex3f(v4.x,v4.y,v4.z);
-        //lgl->Vertex3f(v1.x,v1.y,v1.z);
-
         double foo=0.;
-        // 3D enclosing rectangle
         if(square.size()) {
             for (int i=0; i<square.size()-1; i++) {
                 lgl->Color4f(1., 1., foo, 1.);
@@ -809,6 +870,8 @@ int SliceRenderer::_paintGL(bool fast)
         //lgl->Vertex3f(v2.x,v2.y,v2.z);
         //lgl->Vertex3f(v4.x,v4.y,v4.z);
     lgl->End();
+    */
+
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
 
@@ -909,24 +972,47 @@ void SliceRenderer::_resetState()
 
 void SliceRenderer::_setVertexPositions()
 {
-    std::vector<double> trimmedMin(3, 0.f);
-    std::vector<double> trimmedMax(3, 1.f);
+    //std::vector<double> trimmedMin(3, 0.f);
+    //std::vector<double> trimmedMax(3, 1.f);
 
     // If the box is outside of our domain, trim the vertex coordinates to be within
     // the domain.
-    for (int i = 0; i < _cacheParams.boxMax.size(); i++) {
+    /*for (int i = 0; i < _cacheParams.boxMax.size(); i++) {
         trimmedMin[i] = max(_cacheParams.boxMin[i], _cacheParams.domainMin[i]);
         trimmedMax[i] = min(_cacheParams.boxMax[i], _cacheParams.domainMax[i]);
-    }
+    }*/
 
     //int orientation = _cacheParams.orientation;
-    _setXYVertexPositions(trimmedMin, trimmedMax);
     /*if (orientation == XY)
         _setXYVertexPositions(trimmedMin, trimmedMax);
     else if (orientation == XZ)
         _setXZVertexPositions(trimmedMin, trimmedMax);
     else if (orientation == YZ)
         _setYZVertexPositions(trimmedMin, trimmedMax);*/
+
+    if (square.empty() ) return;
+    /*std::vector<double> temp = 
+                    {square[0].x, square[0].y, square[0].z,
+                     square[1].x, square[1].y, square[1].z,
+                     square[3].x, square[3].y, square[3].z,
+                     square[1].x, square[1].y, square[1].z,
+                     square[2].x, square[2].y, square[2].z,
+                     square[3].x, square[3].y, square[3].z};*/
+    /*std::vector<double> temp = 
+                    {square[0].x, square[0].y, square[0].z,
+                     square[1].x, square[1].y, square[1].z,
+                     square[3].x, square[3].y, square[3].z,
+                     square[1].x, square[1].y, square[1].z,
+                     square[2].x, square[2].y, square[2].z,
+                     square[3].x, square[3].y, square[3].z};*/
+    std::vector<double> temp = 
+                    {square[1].x, square[1].y, square[1].z,
+                     square[2].x, square[2].y, square[2].z,
+                     square[0].x, square[0].y, square[0].z,
+                     square[2].x, square[2].y, square[2].z,
+                     square[3].x, square[3].y, square[3].z,
+                     square[0].x, square[0].y, square[0].z};
+    _vertexCoords = temp;
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _vertexCoords.data());
@@ -936,7 +1022,12 @@ void SliceRenderer::_setXYVertexPositions(std::vector<double> min, std::vector<d
 {
     double zCoord = min[Z];
 
-    std::vector<double> temp = {min[X], min[Y], zCoord, max[X], min[Y], zCoord, min[X], max[Y], zCoord, max[X], min[Y], zCoord, max[X], max[Y], zCoord, min[X], max[Y], zCoord};
+    std::vector<double> temp = {min[X], min[Y], zCoord, 
+                                max[X], min[Y], zCoord, 
+                                min[X], max[Y], zCoord, 
+                                max[X], min[Y], zCoord, 
+                                max[X], max[Y], zCoord, 
+                                min[X], max[Y], zCoord};
 
     _vertexCoords = temp;
 }

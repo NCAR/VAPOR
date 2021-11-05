@@ -25,6 +25,7 @@ public:
 
     virtual ~SliceRenderer();
 
+    glm::vec3 axis1, axis2, normal, origin;
     std::vector<glm::vec3> orderedVertices;
     std::vector<glm::vec3> square;
     std::vector<glm::vec2> square2D;
@@ -80,6 +81,7 @@ private:
     void _initTextures();
     void _createDataTexture(float *dataValues);
     int  _saveTextureData();
+    void _populateData(float *dataValues, Grid *grid) const;
     void _populateDataXY(float *dataValues, Grid *grid) const;
     void _populateDataXZ(float *dataValues, Grid *grid) const;
     void _populateDataYZ(float *dataValues, Grid *grid) const;
