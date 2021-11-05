@@ -107,7 +107,9 @@ private:
     void _setYZVertexPositions(std::vector<double> min, std::vector<double> max);
 
     bool _initialized;
-    glm::ivec2 _textureSideSize;
+    int  _textureSideSize;
+    int  _xSamples;
+    int  _ySamples;
 
     GLuint _colorMapTextureID;
     GLuint _dataValueTextureID;

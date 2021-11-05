@@ -290,9 +290,9 @@ void SliceRenderer::_rotate()
     axis1 = _getOrthogonal( normal );
     axis2 = glm::cross( normal, axis1 );
    
-    std::cout << "norm " << glm::to_string(normal) << " " << sqrt(pow(normal.x,2) + pow(normal.y,2) + pow(normal.z,2)) << endl;
-    std::cout << "axi1 " << glm::to_string(axis1) << " " << sqrt(pow(axis1.x,2) + pow(axis1.y,2) + pow(axis1.z,2)) << endl;
-    std::cout << "axi2 " << glm::to_string(axis2) << " " << sqrt(pow(axis2.x,2) + pow(axis2.y,2) + pow(axis2.z,2)) << endl;
+    //std::cout << "norm " << glm::to_string(normal) << " " << sqrt(pow(normal.x,2) + pow(normal.y,2) + pow(normal.z,2)) << endl;
+    //std::cout << "axi1 " << glm::to_string(axis1) << " " << sqrt(pow(axis1.x,2) + pow(axis1.y,2) + pow(axis1.z,2)) << endl;
+    //std::cout << "axi2 " << glm::to_string(axis2) << " " << sqrt(pow(axis2.x,2) + pow(axis2.y,2) + pow(axis2.z,2)) << endl;
     
     // Project 3D points onto a 2D plane 
     // https://stackoverflow.com/questions/23472048/projecting-3d-points-to-2d-plane
@@ -344,10 +344,10 @@ void SliceRenderer::_rotate()
         }
     }
 
-    for (int i=0; i<orderedVertices.size(); i++){
+    /*for (int i=0; i<orderedVertices.size(); i++){
         std::cout << "3D/2D: " << glm::to_string(orderedVertices[i]) << " " << glm::to_string(s2.top()) << std::endl;
         s2.pop();
-    }
+    }*/
 
     
     // Find minimum and maximum extents of our square in 3D space
@@ -387,8 +387,8 @@ void SliceRenderer::_rotate()
     square[1] = inverseProjection( square2D[1].x, square2D[0].y );
     square[2] = inverseProjection( square2D[1].x, square2D[1].y );
     square[3] = inverseProjection( square2D[0].x, square2D[1].y );
-    for (int i=0; i<square.size(); i++)
-        std::cout << "square: " << glm::to_string(square[i]) << std::endl;
+    //for (int i=0; i<square.size(); i++)
+    //    std::cout << "square: " << glm::to_string(square[i]) << std::endl;
     
 
     // Parallelogram axis 1
@@ -526,20 +526,20 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
     };
 
     glm::vec2 delta = (square2D[1]-square2D[0]);//_textureSideSize;
-    delta.x = delta.x/_textureSideSize;
-    delta.y = delta.y/_textureSideSize;
+    delta.x = delta.x/_xSamples;
+    delta.y = delta.y/_ySamples;
     //delta.x = delta.x/tss;
     //delta.y = delta.y/tss;
     int index = 0;
-    for (int j = 0; j < _textureSideSize; j++) {
+    for (int j = 0; j < _ySamples; j++) {
     //for (int j = 0; j < tss; j++) {
         //coords[X] = _cacheParams.domainMin[X];
 
-        for (int i = 0; i < _textureSideSize; i++) {
+        for (int i = 0; i < _xSamples; i++) {
         //for (int i = 0; i < tss; i++) {
             std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue( p );
-            std::cout << samplePoint.x << " " << samplePoint.y << " " << samplePoint.z << " " << varValue << std::endl;
+            //std::cout << samplePoint.x << " " << samplePoint.y << " " << samplePoint.z << " " << varValue << std::endl;
             //varValue = (float)(j)/(float)(_textureSideSize*_textureSideSize);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue)
@@ -669,7 +669,23 @@ int SliceRenderer::_saveTextureData()
 
     _setVertexPositions();
 
-    int    textureSize = 2 * _textureSideSize * _textureSideSize;
+    float dx = (square2D[1].x-square2D[0].x);
+    float dy = (square2D[1].y-square2D[0].y);
+    float xyRatio = dx/dy;
+    if(xyRatio >= 1) {
+        //_xSamples = _textureSideSize;
+        //_ySamples = _textureSideSize/xyRatio;
+        _xSamples = _textureSideSize/xyRatio;
+        _ySamples = _textureSideSize;
+    }
+    else {
+        //_xSamples = _textureSideSize/xyRatio;
+        //_ySamples = _textureSideSize;
+        _xSamples = _textureSideSize;
+        _ySamples = _textureSideSize/xyRatio;
+    }
+    
+    int    textureSize = 2 * _xSamples * _ySamples;
     float *dataValues = new float[textureSize];
 
     _populateData(dataValues, grid);
@@ -704,7 +720,7 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _xSamples, _ySamples, 0, GL_RG, GL_FLOAT, dataValues);
 }
 
 bool SliceRenderer::_isDataCacheDirty() const
@@ -804,7 +820,7 @@ int SliceRenderer::_paintGL(bool fast)
     glEnable(GL_DEPTH_TEST);
     LegacyGL *lgl = _glManager->legacy;    
 
-    /*
+    
     // Edges of square2D
     if (square.size()) {    
         lgl->Begin(GL_LINES);
@@ -824,9 +840,9 @@ int SliceRenderer::_paintGL(bool fast)
         lgl->Vertex3f(square[2].x, square[2].y, square[2].z);
         lgl->Vertex3f(square[1].x, square[1].y, square[1].z);
         lgl->End();
-    }*/
+    }
 
-    
+    /*
     // Green polygon - where the slice should render
     lgl->Color4f(0, 1., 0, 1.);
     lgl->Begin(GL_LINES);
@@ -844,6 +860,7 @@ int SliceRenderer::_paintGL(bool fast)
             lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
         }
     lgl->End();
+    */
 
     /*
     // 3D yellow enclosing rectangle
