@@ -18,6 +18,8 @@ namespace VAPoR {
 #ifdef BUILD_OSPRAY
 class RENDER_API VolumeOSPRay : public VolumeAlgorithm {
 public:
+    enum WindingOrder { CCW, CW, INVALID };
+    
     VolumeOSPRay(GLManager *gl, VolumeRenderer *renderer);
     ~VolumeOSPRay();
 
@@ -78,7 +80,6 @@ private:
     OSPVolume _loadVolumeUnstructured(const Grid *grid);
     OSPVolume _loadVolumeTest(const Grid *grid);
 
-    enum WindingOrder { CCW, CW, INVALID };
     static WindingOrder getWindingOrderRespectToZ(const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c);
     static WindingOrder getWindingOrderTetra(const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c, const glm::vec3 &d);
     static const char * windingOrderToString(WindingOrder o);
