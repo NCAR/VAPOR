@@ -383,10 +383,14 @@ void SliceRenderer::_rotate()
         return point;
     };
     square = { glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3() };
-    square[0] = inverseProjection( square2D[0].x, square2D[0].y );
+    /*square[0] = inverseProjection( square2D[0].x, square2D[0].y );
     square[1] = inverseProjection( square2D[1].x, square2D[0].y );
     square[2] = inverseProjection( square2D[1].x, square2D[1].y );
-    square[3] = inverseProjection( square2D[0].x, square2D[1].y );
+    square[3] = inverseProjection( square2D[0].x, square2D[1].y );*/
+    square[3] = inverseProjection( square2D[0].x, square2D[0].y );
+    square[0] = inverseProjection( square2D[1].x, square2D[0].y );
+    square[1] = inverseProjection( square2D[1].x, square2D[1].y );
+    square[2] = inverseProjection( square2D[0].x, square2D[1].y );
     //for (int i=0; i<square.size(); i++)
     //    std::cout << "square: " << glm::to_string(square[i]) << std::endl;
     
@@ -513,9 +517,6 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
     float               varValue, missingValue;
     
     glm::vec3 samplePoint = square[0];
-    //coords[X] = _cacheParams.domainMin[X] + deltas[X] / 2.f;
-    //coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] / 2.f;
-    //coords[Z] = _cacheParams.boxMin[Z];
 
     //int tss = 10;
 
@@ -1012,26 +1013,19 @@ void SliceRenderer::_setVertexPositions()
 
     if (square.empty() ) return;
     /*std::vector<double> temp = 
-                    {square[0].x, square[0].y, square[0].z,
-                     square[1].x, square[1].y, square[1].z,
-                     square[3].x, square[3].y, square[3].z,
-                     square[1].x, square[1].y, square[1].z,
-                     square[2].x, square[2].y, square[2].z,
-                     square[3].x, square[3].y, square[3].z};*/
-    /*std::vector<double> temp = 
-                    {square[0].x, square[0].y, square[0].z,
-                     square[1].x, square[1].y, square[1].z,
-                     square[3].x, square[3].y, square[3].z,
-                     square[1].x, square[1].y, square[1].z,
-                     square[2].x, square[2].y, square[2].z,
-                     square[3].x, square[3].y, square[3].z};*/
-    std::vector<double> temp = 
                     {square[1].x, square[1].y, square[1].z,
                      square[2].x, square[2].y, square[2].z,
                      square[0].x, square[0].y, square[0].z,
                      square[2].x, square[2].y, square[2].z,
                      square[3].x, square[3].y, square[3].z,
-                     square[0].x, square[0].y, square[0].z};
+                     square[0].x, square[0].y, square[0].z};*/
+    std::vector<double> temp = 
+                    {square[0].x, square[0].y, square[0].z,
+                     square[1].x, square[1].y, square[1].z,
+                     square[3].x, square[3].y, square[3].z,
+                     square[1].x, square[1].y, square[1].z,
+                     square[2].x, square[2].y, square[2].z,
+                     square[3].x, square[3].y, square[3].z};
     _vertexCoords = temp;
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
