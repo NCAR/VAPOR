@@ -517,7 +517,7 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
     //coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] / 2.f;
     //coords[Z] = _cacheParams.boxMin[Z];
 
-    int tss = 10;
+    //int tss = 10;
 
     auto inverseProjection = [&](float x, float y) {
         glm::vec3 point;
@@ -525,18 +525,20 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
         return point;
     };
 
-    glm::vec2 delta = (square2D[2]-square2D[0]);//_textureSideSize;
-    delta.x = delta.x/tss;
-    delta.y = delta.y/tss;
+    glm::vec2 delta = (square2D[1]-square2D[0]);//_textureSideSize;
+    delta.x = delta.x/_textureSideSize;
+    delta.y = delta.y/_textureSideSize;
+    //delta.x = delta.x/tss;
+    //delta.y = delta.y/tss;
     int index = 0;
-    //for (int j = 0; j < _textureSideSize; j++) {
-    for (int j = 0; j < tss; j++) {
+    for (int j = 0; j < _textureSideSize; j++) {
+    //for (int j = 0; j < tss; j++) {
         //coords[X] = _cacheParams.domainMin[X];
 
-        //for (int i = 0; i < _textureSideSize; i++) {
-        for (int i = 0; i < tss; i++) {
+        for (int i = 0; i < _textureSideSize; i++) {
+        //for (int i = 0; i < tss; i++) {
             std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
-            //varValue = grid->GetValue( p );
+            varValue = grid->GetValue( p );
             std::cout << samplePoint.x << " " << samplePoint.y << " " << samplePoint.z << " " << varValue << std::endl;
             //varValue = (float)(j)/(float)(_textureSideSize*_textureSideSize);
             missingValue = grid->GetMissingValue();
@@ -551,7 +553,7 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
 
             //std::cout << i*delta.x << " " << j*delta.y << std::endl;
             std::cout << delta.x << " " << delta.y << std::endl;
-            samplePoint = inverseProjection(i*delta.x,j*delta.y);
+            samplePoint = inverseProjection(square2D[0].x+i*delta.x,square2D[0].y+j*delta.y);
             //samplePoint.x += deltas[X];
             //samplePoint.y += deltas[Y];
             //samplePoint.z += deltas[Z];
@@ -802,7 +804,8 @@ int SliceRenderer::_paintGL(bool fast)
     glEnable(GL_DEPTH_TEST);
     LegacyGL *lgl = _glManager->legacy;    
 
-
+    /*
+    // Edges of square2D
     if (square.size()) {    
         lgl->Begin(GL_LINES);
         lgl->Color4f(1, 0., 0, 1.);
@@ -821,9 +824,9 @@ int SliceRenderer::_paintGL(bool fast)
         lgl->Vertex3f(square[2].x, square[2].y, square[2].z);
         lgl->Vertex3f(square[1].x, square[1].y, square[1].z);
         lgl->End();
-    }
+    }*/
 
-   /* 
+    
     // Green polygon - where the slice should render
     lgl->Color4f(0, 1., 0, 1.);
     lgl->Begin(GL_LINES);
@@ -840,7 +843,7 @@ int SliceRenderer::_paintGL(bool fast)
             lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
             lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
         }
-    lgl->End();*/
+    lgl->End();
 
     /*
     // 3D yellow enclosing rectangle
