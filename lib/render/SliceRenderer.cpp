@@ -483,13 +483,22 @@ void SliceRenderer::_resetTextureCoordinates()
         yAxis = Z;
     }*/
 
-    texMinX = (boxMin[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
-    texMaxX = (boxMax[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
-    texMinY = (boxMin[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
-    texMaxY = (boxMax[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
+    //texMinX = (boxMin[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
+    //texMaxX = (boxMax[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
+    //texMinY = (boxMin[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
+    //texMaxY = (boxMax[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
+    texMinX = 0;
+    texMaxX = 1;
+    texMinY = 0;
+    texMaxY = 1;
 
     _texCoords.clear();
-    _texCoords = {texMinX, texMinY, texMaxX, texMinY, texMinX, texMaxY, texMaxX, texMinY, texMaxX, texMaxY, texMinX, texMaxY};
+    _texCoords = {texMinX, texMinY, 
+                  texMaxX, texMinY, 
+                  texMinX, texMaxY, 
+                  texMaxX, texMinY, 
+                  texMaxX, texMaxY, 
+                  texMinX, texMaxY};
 
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * _texCoords.size(),
@@ -516,7 +525,6 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
     std::vector<double> deltas = _calculateDeltas();
     float               varValue, missingValue;
     
-    glm::vec3 samplePoint = square[0];
 
     //int tss = 10;
 
@@ -527,34 +535,48 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
     };
 
     glm::vec2 delta = (square2D[1]-square2D[0]);//_textureSideSize;
-    delta.x = delta.x/_xSamples;
-    delta.y = delta.y/_ySamples;
-    //delta.x = delta.x/tss;
-    //delta.y = delta.y/tss;
+    delta.x = delta.x/(_xSamples+1);
+    delta.y = delta.y/(_ySamples+1);
+    double offset = delta.x/2.;
+    //glm::vec3 samplePoint = square[0];
+    glm::vec3 samplePoint = inverseProjection( offset+square2D[0].x, square2D[0].y+offset );
+
     int index = 0;
-    for (int j = 0; j < _ySamples; j++) {
+    for (int j = 1; j <= _ySamples; j++) {
     //for (int j = 0; j < tss; j++) {
         //coords[X] = _cacheParams.domainMin[X];
 
-        for (int i = 0; i < _xSamples; i++) {
+        for (int i = 1; i <= _xSamples; i++) {
         //for (int i = 0; i < tss; i++) {
             std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue( p );
             //std::cout << samplePoint.x << " " << samplePoint.y << " " << samplePoint.z << " " << varValue << std::endl;
             //varValue = (float)(j)/(float)(_textureSideSize*_textureSideSize);
             missingValue = grid->GetMissingValue();
-            if (varValue == missingValue)
+            if (varValue == missingValue ||
+                samplePoint.x > _cacheParams.boxMax[X] ||
+                samplePoint.y > _cacheParams.boxMax[Y] ||
+                samplePoint.z > _cacheParams.boxMax[Z] ||
+                samplePoint.x < _cacheParams.boxMin[X] ||
+                samplePoint.y < _cacheParams.boxMin[Y] ||
+                samplePoint.z < _cacheParams.boxMin[Z]
+                )
                 dataValues[index + 1] = 1.f;
             else
                 dataValues[index + 1] = 0.f;
+
+            if(i==1) {
+                std::cout << glm::to_string(samplePoint) << " " << varValue << std::endl;
+                dataValues[index+1] = 1.f;
+            }
 
             dataValues[index] = varValue;
 
             index += 2;
 
             //std::cout << i*delta.x << " " << j*delta.y << std::endl;
-            std::cout << delta.x << " " << delta.y << std::endl;
-            samplePoint = inverseProjection(square2D[0].x+i*delta.x,square2D[0].y+j*delta.y);
+            //std::cout << delta.x << " " << delta.y << std::endl;
+            samplePoint = inverseProjection(offset+square2D[0].x+i*delta.x,square2D[0].y+offset+j*delta.y);
             //samplePoint.x += deltas[X];
             //samplePoint.y += deltas[Y];
             //samplePoint.z += deltas[Z];
@@ -674,16 +696,16 @@ int SliceRenderer::_saveTextureData()
     float dy = (square2D[1].y-square2D[0].y);
     float xyRatio = dx/dy;
     if(xyRatio >= 1) {
-        //_xSamples = _textureSideSize;
-        //_ySamples = _textureSideSize/xyRatio;
-        _xSamples = _textureSideSize/xyRatio;
-        _ySamples = _textureSideSize;
-    }
-    else {
-        //_xSamples = _textureSideSize/xyRatio;
-        //_ySamples = _textureSideSize;
         _xSamples = _textureSideSize;
         _ySamples = _textureSideSize/xyRatio;
+        //_xSamples = _textureSideSize/xyRatio;
+        //_ySamples = _textureSideSize;
+    }
+    else {
+        _xSamples = _textureSideSize*xyRatio;
+        _ySamples = _textureSideSize;
+        //_xSamples = _textureSideSize;
+        //_ySamples = _textureSideSize/xyRatio;
     }
     
     int    textureSize = 2 * _xSamples * _ySamples;
@@ -716,8 +738,10 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glGenTextures(1, &_dataValueTextureID);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -823,7 +847,7 @@ int SliceRenderer::_paintGL(bool fast)
 
     
     // Edges of square2D
-    if (square.size()) {    
+    /*if (square.size()) {    
         lgl->Begin(GL_LINES);
         lgl->Color4f(1, 0., 0, 1.);
         lgl->Vertex3f(square[0].x, square[0].y, square[0].z);
@@ -841,7 +865,7 @@ int SliceRenderer::_paintGL(bool fast)
         lgl->Vertex3f(square[2].x, square[2].y, square[2].z);
         lgl->Vertex3f(square[1].x, square[1].y, square[1].z);
         lgl->End();
-    }
+    }*/
 
     /*
     // Green polygon - where the slice should render
@@ -863,7 +887,7 @@ int SliceRenderer::_paintGL(bool fast)
     lgl->End();
     */
 
-    /*
+    
     // 3D yellow enclosing rectangle
     lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
@@ -891,7 +915,7 @@ int SliceRenderer::_paintGL(bool fast)
         //lgl->Vertex3f(v2.x,v2.y,v2.z);
         //lgl->Vertex3f(v4.x,v4.y,v4.z);
     lgl->End();
-    */
+    
 
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
@@ -1012,20 +1036,37 @@ void SliceRenderer::_setVertexPositions()
         _setYZVertexPositions(trimmedMin, trimmedMax);*/
 
     if (square.empty() ) return;
+    // wrong winding
     /*std::vector<double> temp = 
-                    {square[1].x, square[1].y, square[1].z,
-                     square[2].x, square[2].y, square[2].z,
-                     square[0].x, square[0].y, square[0].z,
-                     square[2].x, square[2].y, square[2].z,
-                     square[3].x, square[3].y, square[3].z,
-                     square[0].x, square[0].y, square[0].z};*/
-    std::vector<double> temp = 
                     {square[0].x, square[0].y, square[0].z,
                      square[1].x, square[1].y, square[1].z,
                      square[3].x, square[3].y, square[3].z,
                      square[1].x, square[1].y, square[1].z,
                      square[2].x, square[2].y, square[2].z,
-                     square[3].x, square[3].y, square[3].z};
+                     square[3].x, square[3].y, square[3].z};*/
+    /*std::vector<double> temp = 
+                    {square[].x, square[].y, square[].z,
+                     square[].x, square[].y, square[].z,
+                     square[].x, square[].y, square[].z,
+                     square[].x, square[].y, square[].z,
+                     square[].x, square[].y, square[].z,
+                     square[].x, square[].y, square[].z};*/
+    /*std::vector<double> temp = 
+                    {square[0].x, square[0].y, square[0].z,
+                     square[1].x, square[1].y, square[1].z,
+                     square[2].x, square[2].y, square[2].z,
+                     square[3].x, square[3].y, square[3].z,
+                     square[0].x, square[0].y, square[0].z,
+                     square[2].x, square[2].y, square[2].z};*/
+    std::vector<double> temp = 
+                    {square[3].x, square[3].y, square[3].z,
+                     square[0].x, square[0].y, square[0].z,
+                     square[2].x, square[2].y, square[2].z,
+                     square[0].x, square[0].y, square[0].z,
+                     square[1].x, square[1].y, square[1].z,
+                     square[2].x, square[2].y, square[2].z};
+    
+    
     _vertexCoords = temp;
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
