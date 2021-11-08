@@ -534,24 +534,22 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
         return point;
     };
 
-    glm::vec2 delta = (square2D[1]-square2D[0]);//_textureSideSize;
+    glm::vec2 delta = (square2D[1]-square2D[0]);
     delta.x = delta.x/(_xSamples+1);
     delta.y = delta.y/(_ySamples+1);
     double offset = delta.x/2.;
-    //glm::vec3 samplePoint = square[0];
-    glm::vec3 samplePoint = inverseProjection( offset+square2D[0].x, square2D[0].y+offset );
+    //glm::vec3 samplePoint = inverseProjection( square2D[0].x+offset, square2D[0].y+offset );
 
     int index = 0;
-    for (int j = 1; j <= _ySamples; j++) {
-    //for (int j = 0; j < tss; j++) {
+    //for (int j = 1; j <= _ySamples; j++) {
+    for (int j = 0; j < _ySamples; j++) {
         //coords[X] = _cacheParams.domainMin[X];
 
-        for (int i = 1; i <= _xSamples; i++) {
-        //for (int i = 0; i < tss; i++) {
+        //for (int i = 1; i <= _xSamples; i++) {
+        for (int i = 0; i < _xSamples; i++) {
+            glm::vec3 samplePoint = inverseProjection( offset+square2D[0].x+i*delta.x, square2D[0].y+offset+j*delta.y );
             std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue( p );
-            //std::cout << samplePoint.x << " " << samplePoint.y << " " << samplePoint.z << " " << varValue << std::endl;
-            //varValue = (float)(j)/(float)(_textureSideSize*_textureSideSize);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue ||
                 samplePoint.x > _cacheParams.boxMax[X] ||
@@ -565,18 +563,12 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
             else
                 dataValues[index + 1] = 0.f;
 
-            if(i==1) {
-                std::cout << glm::to_string(samplePoint) << " " << varValue << std::endl;
-                dataValues[index+1] = 1.f;
-            }
-
             dataValues[index] = varValue;
 
             index += 2;
 
             //std::cout << i*delta.x << " " << j*delta.y << std::endl;
             //std::cout << delta.x << " " << delta.y << std::endl;
-            samplePoint = inverseProjection(offset+square2D[0].x+i*delta.x,square2D[0].y+offset+j*delta.y);
             //samplePoint.x += deltas[X];
             //samplePoint.y += deltas[Y];
             //samplePoint.z += deltas[Z];
