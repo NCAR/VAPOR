@@ -309,6 +309,7 @@ void Box::calcRotatedBoxExtents(double *bigBoxExtents) const
 
 bool Box::cropToBox(const double bxExts[6])
 {
+    std::cout << "cropToBox" << std::endl;
     // 0.  Initially need a startPoint that is in the box and on the probe center plane.
     // 1.  Check if probe center works.  If not call intersectRotatedBox() to get another startPoint (on middle plane) inside box.
     // 2.  Using the new startPoint, construct x-direction line.  Find its first two intersections (+ and -) with box.  Reset the start point to be the

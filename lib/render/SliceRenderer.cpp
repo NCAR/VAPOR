@@ -219,8 +219,6 @@ void SliceRenderer::_rotate()
     std::vector<double> boxMin = _cacheParams.boxMin;
     std::vector<double> boxMax = _cacheParams.boxMax;
 
-    //std::vector<double> boxOrigin = {boxMax[X]-boxMin[X], boxMax[Y]-boxMin[Y], boxMax[Z]-boxMin[Z]};
-    //std::vector<double> origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
     origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
                         (boxMax[Y]-boxMin[Y])/2. + boxMin[Y], 
                         (boxMax[Z]-boxMin[Z])/2. + boxMin[Z]};
@@ -228,74 +226,60 @@ void SliceRenderer::_rotate()
     glm::vec3 angles( M_PI*_cacheParams.xRotation/180., M_PI*_cacheParams.yRotation/180., M_PI*_cacheParams.zRotation/180. );
     glm::quat q = glm::quat( angles );
     normal = q * glm::vec3(0,0,1);
-    //glm::vec3 sliceNormal = _rotateVector(glm::vec3(0,0,1), q);
 
+    // Plane equations
     // a(x-xo) + b(y-yo) + c(z-zo) = 0
-
-    //normal.x*(x-origin.x) + normal.y*(y-origin.y) + normal.z*(z-origin.z) = 0
+    // normal.x*(x-origin.x) + normal.y*(y-origin.y) + normal.z*(z-origin.z) = 0
     
-    //std::vector< glm::vec3 > vertices;
     std::vector< _point > vertices;
- 
+
+    // Lambdas for finding intercepts on the XYZ edges of the Box 
     auto zIntercept = [&](float x, float y) {
         if(normal.z==0) return;
-        //double z = (normal.x*origin[X] + normal.y*origin[Y] + normal.z*origin[Z] - normal.x*x - normal.y*y) / normal.z;
         double z = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.y*y) / normal.z;
         if (z >= boxMin[Z] && z <= boxMax[Z]) {
-            //vertices.push_back( glm::vec3(x,y,z) );
             _point p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
-            //vertices.push_back( glm::vec3(x,y,z) );
-            //std::cout << "Z hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
         }
     };
     auto yIntercept = [&](float x, float z) {
         if(normal.y==0) return;
         double y = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.z*z) / normal.y;
         if (y >= boxMin[Y] && y <= boxMax[Y]) {
-            //vertices.push_back( glm::vec3(x,y,z) );
             _point p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
-            //std::cout << "Y hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
         }
     };
     auto xIntercept = [&](float y, float z) {
         if(normal.x==0) return;
         double x = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.y*y - normal.z*z) / normal.x;
         if (x >= boxMin[X] && x <= boxMax[X]) {
-            //vertices.push_back( glm::vec3(x,y,z) );
             _point p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
-            //std::cout << "X hit " << p.threeD.x << " " << p.threeD.y << " " << p.threeD.z << std::endl;
         }
     };
 
-    // Find any vertices that exist on the Z edges of the box
+    // Find any vertices that exist on the Z edges of the Box
     zIntercept(boxMin[X], boxMin[Y]);
     zIntercept(boxMax[X], boxMax[Y]);
     zIntercept(boxMin[X], boxMax[Y]);
     zIntercept(boxMax[X], boxMin[Y]);
-    // Find any vertices that exist on the Y edges of the box
+    // Find any vertices that exist on the Y edges of the Box
     yIntercept(boxMin[X], boxMin[Z]);
     yIntercept(boxMax[X], boxMax[Z]);
     yIntercept(boxMin[X], boxMax[Z]);
     yIntercept(boxMax[X], boxMin[Z]);
-    // Find any vertices that exist on the X edges of the box
+    // Find any vertices that exist on the X edges of the Box
     xIntercept(boxMin[Y], boxMin[Z]);
     xIntercept(boxMax[Y], boxMax[Z]);
     xIntercept(boxMin[Y], boxMax[Z]);
     xIntercept(boxMax[Y], boxMin[Z]);
 
-    // Project our polygon into 2D space for convex hull algorithm to find edges
+    // Define a basis function to project our polygon into 2D space for finding edges w/ Convex Hull
     axis1 = _getOrthogonal( normal );
     axis2 = glm::cross( normal, axis1 );
    
-    //std::cout << "norm " << glm::to_string(normal) << " " << sqrt(pow(normal.x,2) + pow(normal.y,2) + pow(normal.z,2)) << endl;
-    //std::cout << "axi1 " << glm::to_string(axis1) << " " << sqrt(pow(axis1.x,2) + pow(axis1.y,2) + pow(axis1.z,2)) << endl;
-    //std::cout << "axi2 " << glm::to_string(axis2) << " " << sqrt(pow(axis2.x,2) + pow(axis2.y,2) + pow(axis2.z,2)) << endl;
-    
-    // Project 3D points onto a 2D plane 
-    // https://stackoverflow.com/questions/23472048/projecting-3d-points-to-2d-plane
+    // Project our 3D points onto a 2D plane using basis function
     glm::vec2 points[vertices.size()];
     int count=0;
     for (auto& vertex : vertices) {
@@ -307,10 +291,9 @@ void SliceRenderer::_rotate()
         count++;
     }
 
-    // Perform convex hull on our list of points that have been projected into 2D space.
-    // These points define the edges of our polygon.
+    // Perform convex hull on our list of 2D points.
+    // This gives us the edges of our polygon
     stack<glm::vec2> orderedTwoDPoints = convexHull(points, sizeof(points)/sizeof(points[0]));
-    VAssert( orderedTwoDPoints.size() == vertices.size() );
 
     stack<glm::vec2> s2 = orderedTwoDPoints;
 
@@ -319,128 +302,38 @@ void SliceRenderer::_rotate()
     square2D={ glm::vec2(), glm::vec2() };
     while(!s.empty()) {
         glm::vec2 vertex = s.top();
-        //std::cout << vertex.x << " " << vertex.y << std::endl;
         if(vertex.x < square2D[0].x) square2D[0].x = vertex.x;
         if(vertex.y < square2D[0].y) square2D[0].y = vertex.y;
         if(vertex.x > square2D[1].x) square2D[1].x = vertex.x;
         if(vertex.y > square2D[1].y) square2D[1].y = vertex.y;
         s.pop(); 
     }
-    //std::cout << "square2D " << glm::to_string(square2D[0]) << " " << glm::to_string(square2D[1]) << std::endl;
-  
-    // Use the edge-defining list of 2D points to create an edge-defining list of 3D points.
-    // Each 2D point maps to its corresponding 3D point.
-    //std::vector<glm::vec3> orderedVertices;
+ 
+    // Map our 2D edges back into 3D space.  We now have an ordered list of edges/vertices in 3D space. 
     orderedVertices.clear();
     while(!orderedTwoDPoints.empty()) {
         glm::vec2 twoDPoint = orderedTwoDPoints.top();
         for(auto& vertex : vertices) {
             if( twoDPoint.x == vertex.twoD.x && twoDPoint.y == vertex.twoD.y ) {
                 orderedVertices.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
-                //std::cout << "2D " << glm::to_string(twoDPoint) << std::endl;
                 orderedTwoDPoints.pop();
                 continue;
             }
         }
     }
 
-    /*for (int i=0; i<orderedVertices.size(); i++){
-        std::cout << "3D/2D: " << glm::to_string(orderedVertices[i]) << " " << glm::to_string(s2.top()) << std::endl;
-        s2.pop();
-    }*/
-
-    
-    // Find minimum and maximum extents of our square in 3D space
-    glm::vec3 firstVertex3d = orderedVertices[0];
-
-          // Point 1      2            3            4
-    /*square={ firstVertex3d, firstVertex3d, firstVertex3d, firstVertex3d };
-    for(auto& vertex : orderedVertices) {
-        if(vertex.x < square[0].x) square[0].x = vertex.x;
-        if(vertex.y < square[0].y) square[0].y = vertex.y;
-        if(vertex.z < square[0].z) square[0].z = vertex.z;
-
-        if(vertex.x > square[2].x) square[2].x = vertex.x;
-        if(vertex.y > square[2].y) square[2].y = vertex.y;
-        if(vertex.z > square[2].z) square[2].z = vertex.z;
-    }
-    for(auto& vertex:square) {
-        //std::cout << "Square " << glm::to_string(vertex) << std::endl;
-    }
-
-    square[1].x = square[2].x;
-    square[1].y = square[0].y;
-    square[1].z = square[0].z;
-
-    square[3].x = square[0].x;
-    square[3].y = square[2].y;
-    square[3].z = square[2].z;
-    */
-
+    // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
+    // rectangle to generate our 2D texture.
     auto inverseProjection = [&](float x, float y) {
         glm::vec3 point;
         point = origin + x*axis1 + y*axis2;
         return point;
     };
     square = { glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3() };
-    /*square[0] = inverseProjection( square2D[0].x, square2D[0].y );
-    square[1] = inverseProjection( square2D[1].x, square2D[0].y );
-    square[2] = inverseProjection( square2D[1].x, square2D[1].y );
-    square[3] = inverseProjection( square2D[0].x, square2D[1].y );*/
     square[3] = inverseProjection( square2D[0].x, square2D[0].y );
     square[0] = inverseProjection( square2D[1].x, square2D[0].y );
     square[1] = inverseProjection( square2D[1].x, square2D[1].y );
     square[2] = inverseProjection( square2D[0].x, square2D[1].y );
-    //for (int i=0; i<square.size(); i++)
-    //    std::cout << "square: " << glm::to_string(square[i]) << std::endl;
-    
-
-    // Parallelogram axis 1
-    // Find the longest edge of our polyhedron to serve as the first axis of our paralellogram
-    //
-    v1 = orderedVertices[orderedVertices.size()-1];
-    v2 = orderedVertices[0];
-
-    glm::vec3 longest[2] = {v1, v2};
-    double length = sqrt( pow(v1.x-v2.x,2) + pow(v1.y-v2.y,2) + pow(v1.z-v2.z,2) );
-    for(int i = 0; i<orderedVertices.size()-2; i++) {
-        v1 = orderedVertices[i];
-        v2 = orderedVertices[i+1];
-        double newLength = sqrt( pow(v1.x-v2.x,2) + pow(v1.y-v2.y,2) + pow(v1.z-v2.z,2) );
-        if ( newLength > length ) {
-            length = newLength;
-            //std::cout << "new length " << length << " " << glm::to_string(v1) << " " << glm::to_string(v2) << std::endl;
-            longest[0] = v1;
-            longest[1] = v2;
-        }
-    }
-
-    // Parallelogram axis 2
-    // Find the longest edge that's adjacent to the previously found longest edge to use
-    // as the second axis of our parallelogram
-    v3 = glm::vec3(std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
-    v4 = glm::vec3(std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
-    for(int i=0; i<orderedVertices.size(); i++) {
-        glm::vec3 vertex = orderedVertices[i];
-
-        glm::vec3 neighbor1;
-        if (i==0) neighbor1 = orderedVertices[orderedVertices.size()-1];
-        else neighbor1 = orderedVertices[i-1];
-        double length1 = sqrt( pow(vertex.x-neighbor1.x,2) + pow(vertex.y-neighbor1.y,2) + pow(vertex.z-neighbor1.z,2) );
-        
-        glm::vec3 neighbor2;
-        if (i==orderedVertices.size()-1) neighbor2 = orderedVertices[0];
-        else neighbor2 = orderedVertices[i+1];
-        double length2 = sqrt( pow(neighbor1.x-neighbor2.x,2) + pow(neighbor1.y-neighbor2.y,2) + pow(neighbor1.z-neighbor2.z,2) );
-
-        if (length1 > length2) v3 = neighbor1;
-        else v4 = neighbor2;
-        //std::cout << (vertex==v1) << std::endl;
-    }
-
-    // Now solve for either v3 or v4
-
-    //std::cout << "vertices " << glm::to_string(v1) << " " << glm::to_string(v2) << " " << glm::to_string(v3) << " " << glm::to_string(v4) << std::endl;
 }
 
 // Huges-Moller algorithm
@@ -462,35 +355,10 @@ void SliceRenderer::_resetTextureCoordinates()
 {
     _rotate();
 
-    float texMinX, texMinY, texMaxX, texMaxY;
-
-    std::vector<double> boxMin = _cacheParams.boxMin;
-    std::vector<double> boxMax = _cacheParams.boxMax;
-    std::vector<double> domainMin = _cacheParams.domainMin;
-    std::vector<double> domainMax = _cacheParams.domainMax;
-    int xAxis, yAxis;
-
-    xAxis = X;
-    yAxis = Y;
-    /*if (orientation == XY) {
-        xAxis = X;
-        yAxis = Y;
-    } else if (orientation == XZ) {
-        xAxis = X;
-        yAxis = Z;
-    } else {    // (orientation = YZ)
-        xAxis = Y;
-        yAxis = Z;
-    }*/
-
-    //texMinX = (boxMin[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
-    //texMaxX = (boxMax[xAxis] - domainMin[xAxis]) / (domainMax[xAxis] - domainMin[xAxis]);
-    //texMinY = (boxMin[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
-    //texMaxY = (boxMax[yAxis] - domainMin[yAxis]) / (domainMax[yAxis] - domainMin[yAxis]);
-    texMinX = 0;
-    texMaxX = 1;
-    texMinY = 0;
-    texMaxY = 1;
+    float texMinX = 0;
+    float texMaxX = 1;
+    float texMinY = 0;
+    float texMaxY = 1;
 
     _texCoords.clear();
     _texCoords = {texMinX, texMinY, 
@@ -501,9 +369,7 @@ void SliceRenderer::_resetTextureCoordinates()
                   texMinX, texMaxY};
 
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * _texCoords.size(),
-                    _texCoords.data()    //&_texCoords[0]
-    );
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * _texCoords.size(), _texCoords.data());
 }
 
 std::vector<double> SliceRenderer::_calculateDeltas() const
@@ -534,20 +400,13 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
         return point;
     };
 
-    glm::vec2 delta = (square2D[1]-square2D[0]);
-    delta.x = delta.x/(_xSamples+1);
-    delta.y = delta.y/(_ySamples+1);
-    double offset = delta.x/2.;
-    //glm::vec3 samplePoint = inverseProjection( square2D[0].x+offset, square2D[0].y+offset );
+    double delta = (square2D[1].x-square2D[0].x)/_xSamples;
+    double offset = delta/2.;
 
     int index = 0;
-    //for (int j = 1; j <= _ySamples; j++) {
     for (int j = 0; j < _ySamples; j++) {
-        //coords[X] = _cacheParams.domainMin[X];
-
-        //for (int i = 1; i <= _xSamples; i++) {
         for (int i = 0; i < _xSamples; i++) {
-            glm::vec3 samplePoint = inverseProjection( offset+square2D[0].x+i*delta.x, square2D[0].y+offset+j*delta.y );
+            glm::vec3 samplePoint = inverseProjection( offset+square2D[0].x+i*delta, square2D[0].y+offset+j*delta );
             std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue( p );
             missingValue = grid->GetMissingValue();
@@ -566,15 +425,7 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
             dataValues[index] = varValue;
 
             index += 2;
-
-            //std::cout << i*delta.x << " " << j*delta.y << std::endl;
-            //std::cout << delta.x << " " << delta.y << std::endl;
-            //samplePoint.x += deltas[X];
-            //samplePoint.y += deltas[Y];
-            //samplePoint.z += deltas[Z];
-            //coords[X] += deltas[X];
         }
-        //coords[Y] += deltas[Y];
     }
 }
 
