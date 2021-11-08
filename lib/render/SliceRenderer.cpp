@@ -372,27 +372,8 @@ void SliceRenderer::_resetTextureCoordinates()
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * _texCoords.size(), _texCoords.data());
 }
 
-std::vector<double> SliceRenderer::_calculateDeltas() const
-{
-    int    sampleRate = _textureSideSize;
-    double dx = (square[2].x - square[0].x) / (1 + sampleRate);
-    double dy = (square[2].y - square[0].y) / (1 + sampleRate);
-    double dz = (square[2].z - square[0].z) / (1 + sampleRate);
-    
-    //double dx = (_cacheParams.domainMax[X] - _cacheParams.domainMin[X]) / (1 + sampleRate);
-    //double dy = (_cacheParams.domainMax[Y] - _cacheParams.domainMin[Y]) / (1 + sampleRate);
-    //double dz = (_cacheParams.domainMax[Z] - _cacheParams.domainMin[Z]) / (1 + sampleRate);
-
-    std::vector<double> deltas = {dx, dy, dz};
-    return deltas;
-}
-
 void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
-    std::vector<double> deltas = _calculateDeltas();
     float               varValue, missingValue;
-    
-
-    //int tss = 10;
 
     auto inverseProjection = [&](float x, float y) {
         glm::vec3 point;
@@ -400,16 +381,21 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
         return point;
     };
 
-    double delta = (square2D[1].x-square2D[0].x)/_xSamples;
-    double offset = delta/2.;
+    glm::vec2 delta = (square2D[1]-square2D[0]);
+    delta.x = delta.x/_xSamples;
+    delta.y = delta.y/_ySamples;
+    glm::vec2 offset = {delta.x/2., delta.y/2.};
 
     int index = 0;
     for (int j = 0; j < _ySamples; j++) {
         for (int i = 0; i < _xSamples; i++) {
-            glm::vec3 samplePoint = inverseProjection( offset+square2D[0].x+i*delta, square2D[0].y+offset+j*delta );
+            glm::vec3 samplePoint = inverseProjection( offset.x+square2D[0].x+i*delta.x, square2D[0].y+offset.y+j*delta.y );
             std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue( p );
             missingValue = grid->GetMissingValue();
+            if (samplePoint.x > _cacheParams.boxMax[X] ||
+                samplePoint.x < _cacheParams.boxMin[X])
+                std::cout << "shouldn't be here " << glm::to_string(samplePoint) << std::endl;
             if (varValue == missingValue ||
                 samplePoint.x > _cacheParams.boxMax[X] ||
                 samplePoint.y > _cacheParams.boxMax[Y] ||
@@ -426,96 +412,6 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
 
             index += 2;
         }
-    }
-}
-
-void SliceRenderer::_populateDataXY(float *dataValues, Grid *grid) const
-{
-    std::vector<double> deltas = _calculateDeltas();
-    float               varValue, missingValue;
-    std::array<double, 3> coords = {0.0, 0.0, 0.0};
-    coords[X] = _cacheParams.domainMin[X] + deltas[X] / 2.f;
-    coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] / 2.f;
-    coords[Z] = _cacheParams.boxMin[Z];
-
-    int index = 0;
-    for (int j = 0; j < _textureSideSize; j++) {
-        coords[X] = _cacheParams.domainMin[X];
-
-        for (int i = 0; i < _textureSideSize; i++) {
-            varValue = grid->GetValue(coords);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue)
-                dataValues[index + 1] = 1.f;
-            else
-                dataValues[index + 1] = 0.f;
-
-            dataValues[index] = varValue;
-
-            index += 2;
-            coords[X] += deltas[X];
-        }
-        coords[Y] += deltas[Y];
-    }
-}
-
-void SliceRenderer::_populateDataXZ(float *dataValues, Grid *grid) const
-{
-    std::vector<double> deltas = _calculateDeltas();
-    float               varValue, missingValue;
-    std::array<double, 3> coords = {0.0, 0.0, 0.0};
-    coords[X] = _cacheParams.domainMin[X];
-    coords[Y] = _cacheParams.boxMin[Y];
-    coords[Z] = _cacheParams.domainMin[Z];
-
-    int index = 0;
-    for (int j = 0; j < _textureSideSize; j++) {
-        coords[X] = _cacheParams.domainMin[X];
-
-        for (int i = 0; i < _textureSideSize; i++) {
-            varValue = grid->GetValue(coords);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue)
-                dataValues[index + 1] = 1.f;
-            else
-                dataValues[index + 1] = 0.f;
-
-            dataValues[index] = varValue;
-
-            index += 2;
-            coords[X] += deltas[X];
-        }
-        coords[Z] += deltas[Z];
-    }
-}
-
-void SliceRenderer::_populateDataYZ(float *dataValues, Grid *grid) const
-{
-    std::vector<double> deltas = _calculateDeltas();
-    float               varValue, missingValue;
-    std::array<double, 3> coords = {0.0, 0.0, 0.0};
-    coords[X] = _cacheParams.boxMin[X];
-    coords[Y] = _cacheParams.domainMin[Y];
-    coords[Z] = _cacheParams.domainMin[Z];
-
-    int index = 0;
-    for (int j = 0; j < _textureSideSize; j++) {
-        coords[Y] = _cacheParams.domainMin[Y];
-
-        for (int i = 0; i < _textureSideSize; i++) {
-            varValue = grid->GetValue(coords);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue)
-                dataValues[index + 1] = 1.f;
-            else
-                dataValues[index + 1] = 0.f;
-
-            dataValues[index] = varValue;
-
-            index += 2;
-            coords[Y] += deltas[Y];
-        }
-        coords[Z] += deltas[Z];
     }
 }
 
@@ -555,14 +451,6 @@ int SliceRenderer::_saveTextureData()
     float *dataValues = new float[textureSize];
 
     _populateData(dataValues, grid);
-    /*if (_cacheParams.orientation == XY)
-        _populateDataXY(dataValues, grid);
-    else if (_cacheParams.orientation == XZ)
-        _populateDataXZ(dataValues, grid);
-    else if (_cacheParams.orientation == YZ)
-        _populateDataYZ(dataValues, grid);
-    else
-        VAssert(0);*/
 
     _createDataTexture(dataValues);
 
@@ -860,47 +748,7 @@ void SliceRenderer::_resetState()
 
 void SliceRenderer::_setVertexPositions()
 {
-    //std::vector<double> trimmedMin(3, 0.f);
-    //std::vector<double> trimmedMax(3, 1.f);
-
-    // If the box is outside of our domain, trim the vertex coordinates to be within
-    // the domain.
-    /*for (int i = 0; i < _cacheParams.boxMax.size(); i++) {
-        trimmedMin[i] = max(_cacheParams.boxMin[i], _cacheParams.domainMin[i]);
-        trimmedMax[i] = min(_cacheParams.boxMax[i], _cacheParams.domainMax[i]);
-    }*/
-
-    //int orientation = _cacheParams.orientation;
-    /*if (orientation == XY)
-        _setXYVertexPositions(trimmedMin, trimmedMax);
-    else if (orientation == XZ)
-        _setXZVertexPositions(trimmedMin, trimmedMax);
-    else if (orientation == YZ)
-        _setYZVertexPositions(trimmedMin, trimmedMax);*/
-
     if (square.empty() ) return;
-    // wrong winding
-    /*std::vector<double> temp = 
-                    {square[0].x, square[0].y, square[0].z,
-                     square[1].x, square[1].y, square[1].z,
-                     square[3].x, square[3].y, square[3].z,
-                     square[1].x, square[1].y, square[1].z,
-                     square[2].x, square[2].y, square[2].z,
-                     square[3].x, square[3].y, square[3].z};*/
-    /*std::vector<double> temp = 
-                    {square[].x, square[].y, square[].z,
-                     square[].x, square[].y, square[].z,
-                     square[].x, square[].y, square[].z,
-                     square[].x, square[].y, square[].z,
-                     square[].x, square[].y, square[].z,
-                     square[].x, square[].y, square[].z};*/
-    /*std::vector<double> temp = 
-                    {square[0].x, square[0].y, square[0].z,
-                     square[1].x, square[1].y, square[1].z,
-                     square[2].x, square[2].y, square[2].z,
-                     square[3].x, square[3].y, square[3].z,
-                     square[0].x, square[0].y, square[0].z,
-                     square[2].x, square[2].y, square[2].z};*/
     std::vector<double> temp = 
                     {square[3].x, square[3].y, square[3].z,
                      square[0].x, square[0].y, square[0].z,
@@ -908,7 +756,6 @@ void SliceRenderer::_setVertexPositions()
                      square[0].x, square[0].y, square[0].z,
                      square[1].x, square[1].y, square[1].z,
                      square[2].x, square[2].y, square[2].z};
-    
     
     _vertexCoords = temp;
 
