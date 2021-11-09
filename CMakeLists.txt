@@ -91,8 +91,6 @@ endif ()
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test_binaries)
-set (CMAKE_DEBUG_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/debug_binaries)
 
 set (test_output_dir ${CMAKE_BINARY_DIR}/test_binaries)
 set (debug_output_dir ${CMAKE_BINARY_DIR}/debug_binaries)
