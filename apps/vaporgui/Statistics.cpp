@@ -20,7 +20,7 @@
     #pragma warning(disable : 4100)
 #endif
 #include "Statistics.h"
-#include "GUIStateParams.h"
+#include <vapor/GUIStateParams.h>
 #include "ErrorReporter.h"
 #include "Flags.h"
 

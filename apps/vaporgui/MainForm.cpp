@@ -96,8 +96,8 @@
 
 #include <vapor/XmlNode.h>
 #include <vapor/Base16StringStream.h>
-#include "BookmarkParams.h"
-#include "NavigationUtils.h"
+#include <vapor/BookmarkParams.h>
+#include <vapor/NavigationUtils.h>
 
 #include <memory>
 

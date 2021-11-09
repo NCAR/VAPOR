@@ -66,6 +66,7 @@ endif ()
 
 option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
+option (BUILD_PYTHON "Build Vapor Python Library" OFF)
 option (BUILD_OSP "Build OSPRay" ON)
 option (BUILD_UTL "Build conversion and utility applications" ${DEFAULT_BUILD_UTILITIES})
 option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
@@ -92,6 +93,9 @@ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test_binaries)
 set (CMAKE_DEBUG_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/debug_binaries)
+
+set (test_output_dir ${CMAKE_BINARY_DIR}/test_binaries)
+set (debug_output_dir ${CMAKE_BINARY_DIR}/debug_binaries)
 
 set (QTDIR )
 set (OSPRAYDIR )

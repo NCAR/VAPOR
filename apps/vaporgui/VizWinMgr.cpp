@@ -37,9 +37,9 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/DataStatus.h>
 
-#include "AnimationParams.h"
-#include "MouseModeParams.h"
-#include "TrackBall.h"
+#include <vapor/AnimationParams.h>
+#include <vapor/MouseModeParams.h>
+#include <vapor/TrackBall.h>
 #include "VizWin.h"
 #include "VizWinMgr.h"
 #include "ErrorReporter.h"

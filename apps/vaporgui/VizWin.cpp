@@ -34,10 +34,10 @@
 #include <vapor/Viewpoint.h>
 #include <vapor/debug.h>
 #include <vapor/ImageParams.h>
-#include "TrackBall.h"
-#include "GUIStateParams.h"
-#include "MouseModeParams.h"
-#include "AnimationParams.h"
+#include <vapor/TrackBall.h>
+#include <vapor/GUIStateParams.h>
+#include <vapor/MouseModeParams.h>
+#include <vapor/AnimationParams.h>
 #include "qdatetime.h"
 #include "ErrorReporter.h"
 #include "RenderEventRouterGUI.h"

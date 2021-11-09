@@ -59,6 +59,9 @@ DCCF::~DCCF()
 
 int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
+    if (_ncdfc) delete _ncdfc;
+    _ncdfc = nullptr;
+
     NetCDFCFCollection *ncdfc = new NetCDFCFCollection();
 
     // Initialize the NetCDFCFCollection class.

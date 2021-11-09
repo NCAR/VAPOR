@@ -70,7 +70,7 @@ ViewpointParams::ViewpointParams(ParamsBase::StateSave *ssave) : ParamsBase(ssav
     Viewpoint currentVP(ssave);
     m_VPs->Insert(&currentVP, _currentViewTag);
 
-    _transforms = new ParamsContainer(ssave, _transformsTag);
+    _transforms.reset(new ParamsContainer(ssave, _transformsTag));
     _transforms->SetParent(this);
 }
 
@@ -86,11 +86,11 @@ ViewpointParams::ViewpointParams(ParamsBase::StateSave *ssave, XmlNode *node) : 
     }
 
     if (node->HasChild(_transformsTag)) {
-        _transforms = new ParamsContainer(ssave, node->GetChild(_transformsTag));
+        _transforms.reset(new ParamsContainer(ssave, node->GetChild(_transformsTag)));
     } else {
         // Node doesn't contain a transforms container
         //
-        _transforms = new ParamsContainer(ssave, _transformsTag);
+        _transforms.reset(new ParamsContainer(ssave, _transformsTag));
         _transforms->SetParent(this);
     }
 }
@@ -98,7 +98,7 @@ ViewpointParams::ViewpointParams(ParamsBase::StateSave *ssave, XmlNode *node) : 
 ViewpointParams::ViewpointParams(const ViewpointParams &rhs) : ParamsBase(rhs)
 {
     m_VPs = new ParamsContainer(*(rhs.m_VPs));
-    _transforms = new ParamsContainer(*(rhs._transforms));
+    _transforms.reset(new ParamsContainer(*(rhs._transforms)));
 }
 
 ViewpointParams &ViewpointParams::operator=(const ViewpointParams &rhs)
@@ -108,7 +108,7 @@ ViewpointParams &ViewpointParams::operator=(const ViewpointParams &rhs)
     ParamsBase::operator=(rhs);
 
     m_VPs = new ParamsContainer(*(rhs.m_VPs));
-    _transforms = new ParamsContainer(*(rhs._transforms));
+    _transforms.reset(new ParamsContainer(*(rhs._transforms)));
 
     return (*this);
 }
@@ -123,10 +123,6 @@ ViewpointParams::~ViewpointParams()
     if (m_VPs) {
         delete m_VPs;
         m_VPs = NULL;
-    }
-    if (_transforms) {
-        delete _transforms;
-        _transforms = NULL;
     }
 }
 
