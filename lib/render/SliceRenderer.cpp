@@ -22,6 +22,8 @@
 
 #define MAX_TEXTURE_SIZE 2000
 
+//#define DEBUG 1
+
 using namespace VAPoR;
 
 static RendererRegistrar<SliceRenderer> registrar(SliceRenderer::GetClassType(), SliceParams::GetClassType());
@@ -118,33 +120,7 @@ void SliceRenderer::_initVertexVBO()
     glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _vertexCoords.data(), GL_STATIC_DRAW);
 }
 
-
-// https://pastebin.com/fAFp6NnN
-glm::vec3 SliceRenderer::_rotateVector(glm::vec3 value, glm::quat rotation) const
-{
-    glm::vec3 vector;
-    float num12 = rotation.x + rotation.x;
-    float num2 = rotation.y + rotation.y;
-    float num = rotation.z + rotation.z;
-    float num11 = rotation.w * num12;
-    float num10 = rotation.w * num2;
-    float num9 = rotation.w * num;
-    float num8 = rotation.x * num12;
-    float num7 = rotation.x * num2;
-    float num6 = rotation.x * num;
-    float num5 = rotation.y * num2;
-    float num4 = rotation.y * num;
-    float num3 = rotation.z * num;
-    float num15 = ((value.x * ((1. - num5) - num3)) + (value.y * (num7 - num9))) + (value.z * (num6 + num10));
-    float num14 = ((value.x * (num7 + num9)) + (value.y * ((1. - num8) - num3))) + (value.z * (num4 - num11));
-    float num13 = ((value.x * (num6 - num10)) + (value.y * (num4 + num11))) + (value.z * ((1. - num8) - num5));
-    vector.x = num15;
-    vector.y = num14;
-    vector.z = num13;
-    return vector;
-}
-
-int SliceRenderer::_resetDataCache()
+int SliceRenderer::_resetDataCache(bool fast)
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);
@@ -161,18 +137,27 @@ int SliceRenderer::_resetDataCache()
     _cacheParams.yRotation = p->GetValueDouble(SliceParams::YRotationTag,0);
     _cacheParams.zRotation = p->GetValueDouble(SliceParams::ZRotationTag,0);
 
-    _textureSideSize = _cacheParams.textureSampleRate;
+    if (fast) {
+        _textureSideSize = 50;
+        std::cout << "_resetDataCache fast " << _textureSideSize << std::endl;
+    }
+    else {
+        _textureSideSize = _cacheParams.textureSampleRate;
+        std::cout << "_resetDataCache slow " << _textureSideSize << std::endl;
+    }
     if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
+     
     _resetBoxCache();
     _resetColormapCache();
 
     int rc;
     rc = _saveTextureData();
+    
     if (rc < 0) {
         SetErrMsg("Unable to acquire data for Slice texture");
         return rc;
     }
-
+    
     return rc;
 }
 
@@ -210,7 +195,6 @@ int SliceRenderer::_resetBoxCache()
     }
 
     _setVertexPositions();
-    _resetTextureCoordinates();
     return rc;
 }
 
@@ -223,22 +207,21 @@ void SliceRenderer::_rotate()
                         (boxMax[Y]-boxMin[Y])/2. + boxMin[Y], 
                         (boxMax[Z]-boxMin[Z])/2. + boxMin[Z]};
 
+    // Rotate the XY plane using a quaternion
     glm::vec3 angles( M_PI*_cacheParams.xRotation/180., M_PI*_cacheParams.yRotation/180., M_PI*_cacheParams.zRotation/180. );
     glm::quat q = glm::quat( angles );
     normal = q * glm::vec3(0,0,1);
 
-    // Plane equations
-    // a(x-xo) + b(y-yo) + c(z-zo) = 0
-    // normal.x*(x-origin.x) + normal.y*(y-origin.y) + normal.z*(z-origin.z) = 0
-    
-    std::vector< _point > vertices;
+    std::vector< _vertex > vertices;
 
     // Lambdas for finding intercepts on the XYZ edges of the Box 
+    // Plane equation: 
+    //     normal.x*(x-origin.x) + normal.y*(y-origin.y) + normal.z*(z-origin.z) = 0
     auto zIntercept = [&](float x, float y) {
         if(normal.z==0) return;
         double z = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.y*y) / normal.z;
         if (z >= boxMin[Z] && z <= boxMax[Z]) {
-            _point p = { glm::vec3(x,y,z), glm::vec2() };
+            _vertex p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
         }
     };
@@ -246,7 +229,7 @@ void SliceRenderer::_rotate()
         if(normal.y==0) return;
         double y = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.z*z) / normal.y;
         if (y >= boxMin[Y] && y <= boxMax[Y]) {
-            _point p = { glm::vec3(x,y,z), glm::vec2() };
+            _vertex p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
         }
     };
@@ -254,12 +237,12 @@ void SliceRenderer::_rotate()
         if(normal.x==0) return;
         double x = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.y*y - normal.z*z) / normal.x;
         if (x >= boxMin[X] && x <= boxMax[X]) {
-            _point p = { glm::vec3(x,y,z), glm::vec2() };
+            _vertex p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
         }
     };
 
-    // Find any vertices that exist on the Z edges of the Box
+    // Find vertices that exist on the Z edges of the Box
     zIntercept(boxMin[X], boxMin[Y]);
     zIntercept(boxMax[X], boxMax[Y]);
     zIntercept(boxMin[X], boxMax[Y]);
@@ -275,11 +258,17 @@ void SliceRenderer::_rotate()
     xIntercept(boxMin[Y], boxMax[Z]);
     xIntercept(boxMax[Y], boxMin[Z]);
 
-    // Define a basis function to project our polygon into 2D space for finding edges w/ Convex Hull
+    // We now have a set of vertices that define where our slice exists in space, but we don't
+    // know their connectivity.  To find their connectivity, we use an implementation of Convex Hull.
+    // Convex hull is more complex in 3D than in 2D, so we will use a 2D implementation.  To do this,
+    // we must project our coplanar 3D vertices into 2D space.
+
+    // Define a basis function of three orthogonal vectors (normal, axis1, axis2) 
+    // to project our polygon into 2D space
     axis1 = _getOrthogonal( normal );
     axis2 = glm::cross( normal, axis1 );
    
-    // Project our 3D points onto a 2D plane using basis function
+    // Project our 3D points onto the 2D plane using our basis function
     glm::vec2 points[vertices.size()];
     int count=0;
     for (auto& vertex : vertices) {
@@ -317,7 +306,7 @@ void SliceRenderer::_rotate()
             if( twoDPoint.x == vertex.twoD.x && twoDPoint.y == vertex.twoD.y ) {
                 orderedVertices.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
                 orderedTwoDPoints.pop();
-                continue;
+                break;
             }
         }
     }
@@ -351,27 +340,6 @@ glm::vec3 SliceRenderer::_getOrthogonal(const glm::vec3 u) const {
     return v;
 }
 
-void SliceRenderer::_resetTextureCoordinates()
-{
-    _rotate();
-
-    float texMinX = 0;
-    float texMaxX = 1;
-    float texMinY = 0;
-    float texMaxY = 1;
-
-    _texCoords.clear();
-    _texCoords = {texMinX, texMinY, 
-                  texMaxX, texMinY, 
-                  texMinX, texMaxY, 
-                  texMaxX, texMinY, 
-                  texMaxX, texMaxY, 
-                  texMinX, texMaxY};
-
-    glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * _texCoords.size(), _texCoords.data());
-}
-
 void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
     float               varValue, missingValue;
 
@@ -393,9 +361,6 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
             std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue( p );
             missingValue = grid->GetMissingValue();
-            if (samplePoint.x > _cacheParams.boxMax[X] ||
-                samplePoint.x < _cacheParams.boxMin[X])
-                std::cout << "shouldn't be here " << glm::to_string(samplePoint) << std::endl;
             if (varValue == missingValue ||
                 samplePoint.x > _cacheParams.boxMax[X] ||
                 samplePoint.y > _cacheParams.boxMax[Y] ||
@@ -429,6 +394,7 @@ int SliceRenderer::_saveTextureData()
 
     grid->SetInterpolationOrder(1);
 
+    _rotate();
     _setVertexPositions();
 
     float dx = (square2D[1].x-square2D[0].x);
@@ -437,18 +403,17 @@ int SliceRenderer::_saveTextureData()
     if(xyRatio >= 1) {
         _xSamples = _textureSideSize;
         _ySamples = _textureSideSize/xyRatio;
-        //_xSamples = _textureSideSize/xyRatio;
-        //_ySamples = _textureSideSize;
     }
     else {
         _xSamples = _textureSideSize*xyRatio;
         _ySamples = _textureSideSize;
-        //_xSamples = _textureSideSize;
-        //_ySamples = _textureSideSize/xyRatio;
     }
-    
+   
+    std::cout << "x y tss " << _xSamples << " " << _ySamples << " " << _textureSideSize << std::endl;
+ 
     int    textureSize = 2 * _xSamples * _ySamples;
     float *dataValues = new float[textureSize];
+    //std::shared_ptr<float[]> dataValues(new float[textureSize]);
 
     _populateData(dataValues, grid);
 
@@ -549,77 +514,50 @@ void SliceRenderer::_getModifiedExtents(vector<double> &min, vector<double> &max
 
     vector<double> sampleLocation = p->GetValueDoubleVec(p->SampleLocationTag);
     VAssert(sampleLocation.size() == 3);
-    //min[Z] = sampleLocation[Z];
-    //max[Z] = sampleLocation[Z];
-    /*switch (box->GetOrientation()) {
-    case XY:
-        min[Z] = sampleLocation[Z];
-        max[Z] = sampleLocation[Z];
-        break;
-    case XZ:
-        min[Y] = sampleLocation[Y];
-        max[Y] = sampleLocation[Y];
-        break;
-    case YZ:
-        min[X] = sampleLocation[X];
-        max[X] = sampleLocation[X];
-        break;
-    default: VAssert(0);
-    }*/
 }
 
 int SliceRenderer::_paintGL(bool fast)
 {
     int rc = 0;
 
+    //size_t textureSideSizeBackup = _textureSideSize;
+    if (fast) {
+        //_textureSideSize = 20;
+        std::cout << "fast " << _textureSideSize << std::endl;
+    }
+    else std::cout << "slow " << _textureSideSize << std::endl;
+
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
-    LegacyGL *lgl = _glManager->legacy;    
 
-    
-    // Edges of square2D
-    /*if (square.size()) {    
-        lgl->Begin(GL_LINES);
-        lgl->Color4f(1, 0., 0, 1.);
-        lgl->Vertex3f(square[0].x, square[0].y, square[0].z);
-        lgl->Vertex3f(square[1].x, square[1].y, square[1].z);
-        lgl->End();
+   
+    //if (fast)
+        
 
-        lgl->Begin(GL_LINES);
-        lgl->Color4f(0, 0., 1, 1.);
-        lgl->Vertex3f(square[3].x, square[3].y, square[3].z);
-        lgl->Vertex3f(square[1].x, square[1].y, square[1].z);
-        lgl->End();
-
-        lgl->Begin(GL_LINES);
+    if (fast) {
+        // 3D green polygon that shows where we should see data
+        LegacyGL *lgl = _glManager->legacy;    
         lgl->Color4f(0, 1., 0, 1.);
-        lgl->Vertex3f(square[2].x, square[2].y, square[2].z);
-        lgl->Vertex3f(square[1].x, square[1].y, square[1].z);
-        lgl->End();
-    }*/
-
-    /*
-    // Green polygon - where the slice should render
-    lgl->Color4f(0, 1., 0, 1.);
-    lgl->Begin(GL_LINES);
-        if (orderedVertices.size()) {
-            for (int i=0; i<orderedVertices.size()-1; i++) {
-                glm::vec3 vert1 = orderedVertices[i];
-                glm::vec3 vert2 = orderedVertices[i+1];
+        lgl->Begin(GL_LINES);
+            if (orderedVertices.size()) {
+                for (int i=0; i<orderedVertices.size()-1; i++) {
+                    glm::vec3 vert1 = orderedVertices[i];
+                    glm::vec3 vert2 = orderedVertices[i+1];
+                    lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
+                    lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
+                }
+                lgl->Color4f(0, 1., 0, 1.);
+                glm::vec3 vert1 = orderedVertices[orderedVertices.size()-1];
+                glm::vec3 vert2 = orderedVertices[0];
                 lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
                 lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
             }
-            lgl->Color4f(0, 1., 0, 1.);
-            glm::vec3 vert1 = orderedVertices[orderedVertices.size()-1];
-            glm::vec3 vert2 = orderedVertices[0];
-            lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
-            lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
-        }
-    lgl->End();
-    */
+        lgl->End();
+    }
 
-    
-    // 3D yellow enclosing rectangle
+#ifdef DEBUG 
+    // 3D yellow enclosing rectangle that defines the perimeter of our texture
+    // This can and often will extend beyond the Box
     lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
         double foo=0.;
@@ -633,29 +571,25 @@ int SliceRenderer::_paintGL(bool fast)
                 foo=foo+.33;
             }
             lgl->Color4f(1., 1., foo, 1.);
-            //glm::vec3 vert1 = square[orderedVertices.size()-1];
             glm::vec3 vert1 = square[3];
             glm::vec3 vert2 = square[0];
             lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
             lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
         
         }
-
-        //lgl->Vertex3f(v1.x,v1.y,v1.z);
-        //lgl->Vertex3f(v2.x,v2.y,v2.z);
-        //lgl->Vertex3f(v2.x,v2.y,v2.z);
-        //lgl->Vertex3f(v4.x,v4.y,v4.z);
     lgl->End();
-    
-
+#endif 
+      
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
 
     _initializeState();
 
     if (_isDataCacheDirty()) {
-        rc = _resetDataCache(); if (rc < 0) {
+        rc = _resetDataCache(fast); 
+        if (rc < 0) {
             _resetState();
+            //_textureSideSize = textureSideSizeBackup;
             return rc;    // error message already set by _resetDataCache()
         }
     } else {
@@ -665,15 +599,16 @@ int SliceRenderer::_paintGL(bool fast)
             rc = _resetBoxCache();
             if (rc < 0) {
                 _resetState();
+                //_textureSideSize = textureSideSizeBackup;
                 return rc;    // error message already set by _resetBoxCache()
             }
         }
     }
     
-
     _configureShader();
     if (CheckGLError() != 0) {
         _resetState();
+        //_textureSideSize = textureSideSizeBackup;
         return -1;
     }
 
@@ -688,7 +623,10 @@ int SliceRenderer::_paintGL(bool fast)
 
     _resetState();
 
+    //_textureSideSize = textureSideSizeBackup;
+
     if (CheckGLError() != 0) { return -1; }
+    
     return rc;
 }
 
@@ -761,45 +699,4 @@ void SliceRenderer::_setVertexPositions()
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _vertexCoords.data());
-}
-
-void SliceRenderer::_setXYVertexPositions(std::vector<double> min, std::vector<double> max)
-{
-    double zCoord = min[Z];
-
-    std::vector<double> temp = {min[X], min[Y], zCoord, 
-                                max[X], min[Y], zCoord, 
-                                min[X], max[Y], zCoord, 
-                                max[X], min[Y], zCoord, 
-                                max[X], max[Y], zCoord, 
-                                min[X], max[Y], zCoord};
-
-    _vertexCoords = temp;
-}
-
-void SliceRenderer::_setXZVertexPositions(std::vector<double> min, std::vector<double> max)
-{
-    double              yCoord = min[Y];
-    std::vector<double> temp = {min[X], yCoord, min[Z], max[X], yCoord, min[Z], min[X], yCoord, max[Z], max[X], yCoord, min[Z], max[X], yCoord, max[Z], min[X], yCoord, max[Z]};
-
-    _vertexCoords = temp;
-}
-
-void SliceRenderer::_setYZVertexPositions(std::vector<double> min, std::vector<double> max)
-{
-    double              xCoord = min[X];
-    std::vector<double> temp = {xCoord, min[Y], min[Z], xCoord, max[Y], min[Z], xCoord, min[Y], max[Z], xCoord, max[Y], min[Z], xCoord, max[Y], max[Z], xCoord, min[Y], max[Z]};
-
-    _vertexCoords = temp;
-}
-
-int SliceRenderer::_getConstantAxis() const
-{
-    return Z;
-    /*if (_cacheParams.orientation == XY)
-        return Z;
-    else if (_cacheParams.orientation == XZ)
-        return Y;
-    else    // (_cacheParams.orientation == XY )
-        return X;*/
 }

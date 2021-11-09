@@ -60,10 +60,12 @@ private:
         std::vector<double> sampleLocation;
     } _cacheParams;
 
-    struct _point {
+    struct _vertex {
         glm::vec3 threeD;
         glm::vec2 twoD;
     }; 
+
+    void _renderFast() const;
 
     void _rotate();
     void _initVAO();
@@ -77,7 +79,7 @@ private:
     int  _saveCacheParams();
     void _resetColormapCache();
     int  _resetBoxCache();
-    int  _resetDataCache();
+    int  _resetDataCache(bool fast);
     void _initTextures();
     void _createDataTexture(float *dataValues);
     int  _saveTextureData();
@@ -94,12 +96,8 @@ private:
     void _configureShader();
     void _resetState();
     void _initializeState();
-    void _resetTextureCoordinates();
 
     void _setVertexPositions();
-    void _setXYVertexPositions(std::vector<double> min, std::vector<double> max);
-    void _setXZVertexPositions(std::vector<double> min, std::vector<double> max);
-    void _setYZVertexPositions(std::vector<double> min, std::vector<double> max);
 
     bool _initialized;
     int  _textureSideSize;
