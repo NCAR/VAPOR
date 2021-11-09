@@ -777,7 +777,9 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     long added[32] = {0};
     long skipped[32] = {0};
 
-    //    int maxCells = std::max(5, std::min((int)nCells, (int)GetParams()->GetValueLong("osp_max_cells", 1)));
+#ifdef VAPOR_3_5_0
+    int maxCells = std::max(5, std::min((int)nCells, (int)GetParams()->GetValueLong("osp_max_cells", 1)));
+#endif
 
     auto cellIt = grid->ConstCellBegin();
     Progress::Start("Loading Grid", nCells, true);
@@ -828,24 +830,27 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
             skipped[numNodes]++;
         }
 
-        //        if (cellCounter >= maxCells-1) {
-        //            printf("WARNING BREAKING EARLY\n");
-        //            break;
-        //        }
+#ifdef VAPOR_3_5_0
+        if (cellCounter >= maxCells-1) {
+            printf("WARNING BREAKING EARLY\n");
+            break;
+        }
+#endif
     }
     Progress::Finish();
-    //    printf("done\n");
 
-    //    long totalAdded=0, totalSkipped=0;
-    //    for (int i = 0; i < 32; i++) {
-    //        if (added[i] > 0) printf("\tAdded[%i] = %li\n", i, added[i]);
-    //        if (skipped[i] > 0) printf("\tSkipped[%i] = %li\n", i, skipped[i]);
-    //        totalAdded += added[i];
-    //        totalSkipped += skipped[i];
-    //    }
-    //    printf("\tTotal Added = %li\n", totalAdded);
-    //    printf("\tTotal Skipped = %li\n", totalSkipped);
-    //    printf("# Coords = %li\n", nVerts);
+#ifdef VAPOR_3_5_0
+    long totalAdded=0, totalSkipped=0;
+    for (int i = 0; i < 32; i++) {
+        if (added[i] > 0) printf("\tAdded[%i] = %li\n", i, added[i]);
+        if (skipped[i] > 0) printf("\tSkipped[%i] = %li\n", i, skipped[i]);
+        totalAdded += added[i];
+        totalSkipped += skipped[i];
+    }
+    printf("\tTotal Added = %li\n", totalAdded);
+    printf("\tTotal Skipped = %li\n", totalSkipped);
+    printf("# Coords = %li\n", nVerts);
+#endif
 
     vec3 *       coords = (vec3 *)cdata;
     vector<bool> erase(cellStarts.size(), false);
@@ -881,14 +886,16 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
                 continue;
             }
             VAssert(CCW == getWindingOrderTetra(coords[cellIndices[start + 0]], coords[cellIndices[start + 1]], coords[cellIndices[start + 2]], coords[cellIndices[start + 3]]));
-            //            if (CCW != GetWindingOrderTetra(coords[cellIndices[start+0]], coords[cellIndices[start+1]], coords[cellIndices[start+2]], coords[cellIndices[start+3]])) {
-            //                PrintVec3(coords[cellIndices[start+0]]);
-            //                PrintVec3(coords[cellIndices[start+1]]);
-            //                PrintVec3(coords[cellIndices[start+2]]);
-            //                PrintVec3(coords[cellIndices[start+3]]);
-            //                printf("Winding = %s\n", to_string(GetWindingOrderTetra(coords[cellIndices[start+0]], coords[cellIndices[start+1]], coords[cellIndices[start+2]],
-            //                coords[cellIndices[start+3]]))); assert(0);
-            //            }
+#ifdef VAPOR_3_5_0
+            if (CCW != GetWindingOrderTetra(coords[cellIndices[start+0]], coords[cellIndices[start+1]], coords[cellIndices[start+2]], coords[cellIndices[start+3]])) {
+                PrintVec3(coords[cellIndices[start+0]]);
+                PrintVec3(coords[cellIndices[start+1]]);
+                PrintVec3(coords[cellIndices[start+2]]);
+                PrintVec3(coords[cellIndices[start+3]]);
+                printf("Winding = %s\n", to_string(GetWindingOrderTetra(coords[cellIndices[start+0]], coords[cellIndices[start+1]], coords[cellIndices[start+2]],
+                coords[cellIndices[start+3]]))); assert(0);
+            }
+#endif
         } else if (type == OSP_HEXAHEDRON) {
             auto windingBottom = getWindingOrderRespectToZ(coords[cellIndices[start + 0]], coords[cellIndices[start + 1]], coords[cellIndices[start + 2]]);
             auto windingTop = getWindingOrderRespectToZ(coords[cellIndices[start + 4]], coords[cellIndices[start + 5]], coords[cellIndices[start + 6]]);
@@ -931,25 +938,24 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
         cellTypes = cellTypesNew;
     }
 
-    //    Progress::Finish();
-    //    printf("done\n");
-
-    //        int testCell = std::min(cellStarts.size()-1, (size_t)maxCells-1);
-    //        if (testCell >= 0) {
-    //            int testCellNodes = cellTypes[testCell] == OSP_TETRAHEDRON ? 4 : cellTypes[testCell] == OSP_HEXAHEDRON ? 8 : 6;
-    //            printf("Test Cell[%i].nodes = %i\n", testCell, testCellNodes);
-    //            vec3 testCellCoords[testCellNodes];
-    //            for (int i = 0; i < testCellNodes; i++) {
-    //                int idx = cellIndices[cellStarts[testCell]+i];
-    //                testCellCoords[i] = coords[idx];
-    //                printf("\tCells[%i].vert[%i] = coords[%i] = (%f, %f, %f)\n", testCell, i, idx, coords[idx].x, coords[idx].y, coords[idx].z);
-    //            }
-    //            printf("\tWinding bottom = %s\n", C(getWindingOrderRespectToZ(testCellCoords[0], testCellCoords[1], testCellCoords[2])));
-    //            if (testCellNodes == 6)
-    //                printf("\tWinding top = %s\n", C(getWindingOrderRespectToZ(testCellCoords[3], testCellCoords[4], testCellCoords[5])));
-    //            if (testCellNodes == 8)
-    //                printf("\tWinding top = %s\n", C(getWindingOrderRespectToZ(testCellCoords[4], testCellCoords[5], testCellCoords[6])));
-    //        }
+#ifdef VAPOR_3_5_0
+    int testCell = std::min(cellStarts.size()-1, (size_t)maxCells-1);
+    if (testCell >= 0) {
+        int testCellNodes = cellTypes[testCell] == OSP_TETRAHEDRON ? 4 : cellTypes[testCell] == OSP_HEXAHEDRON ? 8 : 6;
+        printf("Test Cell[%i].nodes = %i\n", testCell, testCellNodes);
+        vec3 testCellCoords[testCellNodes];
+        for (int i = 0; i < testCellNodes; i++) {
+            int idx = cellIndices[cellStarts[testCell]+i];
+            testCellCoords[i] = coords[idx];
+            printf("\tCells[%i].vert[%i] = coords[%i] = (%f, %f, %f)\n", testCell, i, idx, coords[idx].x, coords[idx].y, coords[idx].z);
+        }
+        printf("\tWinding bottom = %s\n", C(getWindingOrderRespectToZ(testCellCoords[0], testCellCoords[1], testCellCoords[2])));
+        if (testCellNodes == 6)
+            printf("\tWinding top = %s\n", C(getWindingOrderRespectToZ(testCellCoords[3], testCellCoords[4], testCellCoords[5])));
+        if (testCellNodes == 8)
+            printf("\tWinding top = %s\n", C(getWindingOrderRespectToZ(testCellCoords[4], testCellCoords[5], testCellCoords[6])));
+    }
+#endif
 
     Progress::Start("Sanity Checks", 5, false);
     for (auto i : cellIndices) VAssert(i < nVerts);
