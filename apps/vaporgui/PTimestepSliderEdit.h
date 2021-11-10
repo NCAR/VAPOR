@@ -12,7 +12,7 @@ class ControlExec;
 //! Creates a timestep slider input
 
 class PTimestepSliderEdit : public PLineItem {
-    VIntSliderEdit *_sliderEdit;
+    VIntSliderEdit *    _sliderEdit;
     VAPoR::ControlExec *_ce;
 
 public:
