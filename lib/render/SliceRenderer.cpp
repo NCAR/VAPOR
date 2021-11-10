@@ -137,15 +137,16 @@ int SliceRenderer::_resetDataCache(bool fast)
     _cacheParams.yRotation = p->GetValueDouble(SliceParams::YRotationTag,0);
     _cacheParams.zRotation = p->GetValueDouble(SliceParams::ZRotationTag,0);
 
-    if (fast) {
+    /*if (fast) {
         _textureSideSize = 50;
         std::cout << "_resetDataCache fast " << _textureSideSize << std::endl;
     }
     else {
         _textureSideSize = _cacheParams.textureSampleRate;
         std::cout << "_resetDataCache slow " << _textureSideSize << std::endl;
-    }
-    if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
+    }*/
+    //_textureSideSize = _cacheParams.textureSampleRate;
+    //if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
      
     _resetBoxCache();
     _resetColormapCache();
@@ -213,8 +214,9 @@ void SliceRenderer::_rotate()
     normal = q * glm::vec3(0,0,1);
 
     std::vector< _vertex > vertices;
+    _findIntercepts(origin, normal, vertices, 0);
 
-    // Lambdas for finding intercepts on the XYZ edges of the Box 
+    /*// Lambdas for finding intercepts on the XYZ edges of the Box 
     // Plane equation: 
     //     normal.x*(x-origin.x) + normal.y*(y-origin.y) + normal.z*(z-origin.z) = 0
     auto zIntercept = [&](float x, float y) {
@@ -256,7 +258,7 @@ void SliceRenderer::_rotate()
     xIntercept(boxMin[Y], boxMin[Z]);
     xIntercept(boxMax[Y], boxMax[Z]);
     xIntercept(boxMin[Y], boxMax[Z]);
-    xIntercept(boxMax[Y], boxMin[Z]);
+    xIntercept(boxMax[Y], boxMin[Z]);*/
 
     // We now have a set of vertices that define where our slice exists in space, but we don't
     // know their connectivity.  To find their connectivity, we use an implementation of Convex Hull.
@@ -323,6 +325,52 @@ void SliceRenderer::_rotate()
     square[0] = inverseProjection( square2D[1].x, square2D[0].y );
     square[1] = inverseProjection( square2D[1].x, square2D[1].y );
     square[2] = inverseProjection( square2D[0].x, square2D[1].y );
+}
+
+void SliceRenderer::_findIntercepts(glm::vec3& origin, glm::vec3& normal, std::vector<_vertex>& vertices, bool stretch) const {
+    // Lambdas for finding intercepts on the XYZ edges of the Box 
+    // Plane equation: 
+    //     normal.x*(x-origin.x) + normal.y*(y-origin.y) + normal.z*(z-origin.z) = 0
+    auto zIntercept = [&](float x, float y) {
+        if(normal.z==0) return;
+        double z = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.y*y) / normal.z;
+        if (z >= _cacheParams.boxMin[Z] && z <= _cacheParams.boxMax[Z]) {
+            _vertex p = { glm::vec3(x,y,z), glm::vec2() };
+            vertices.push_back(p);
+        }
+    };
+    auto yIntercept = [&](float x, float z) {
+        if(normal.y==0) return;
+        double y = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.z*z) / normal.y;
+        if (y >= _cacheParams.boxMin[Y] && y <= _cacheParams.boxMax[Y]) {
+            _vertex p = { glm::vec3(x,y,z), glm::vec2() };
+            vertices.push_back(p);
+        }
+    };
+    auto xIntercept = [&](float y, float z) {
+        if(normal.x==0) return;
+        double x = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.y*y - normal.z*z) / normal.x;
+        if (x >= _cacheParams.boxMin[X] && x <= _cacheParams.boxMax[X]) {
+            _vertex p = { glm::vec3(x,y,z), glm::vec2() };
+            vertices.push_back(p);
+        }
+    };
+
+    // Find vertices that exist on the Z edges of the Box
+    zIntercept(_cacheParams.boxMin[X], _cacheParams.boxMin[Y]);
+    zIntercept(_cacheParams.boxMax[X], _cacheParams.boxMax[Y]);
+    zIntercept(_cacheParams.boxMin[X], _cacheParams.boxMax[Y]);
+    zIntercept(_cacheParams.boxMax[X], _cacheParams.boxMin[Y]);
+    // Find any vertices that exist on the Y edges of the Box
+    yIntercept(_cacheParams.boxMin[X], _cacheParams.boxMin[Z]);
+    yIntercept(_cacheParams.boxMax[X], _cacheParams.boxMax[Z]);
+    yIntercept(_cacheParams.boxMin[X], _cacheParams.boxMax[Z]);
+    yIntercept(_cacheParams.boxMax[X], _cacheParams.boxMin[Z]);
+    // Find any vertices that exist on the X edges of the Box
+    xIntercept(_cacheParams.boxMin[Y], _cacheParams.boxMin[Z]);
+    xIntercept(_cacheParams.boxMax[Y], _cacheParams.boxMax[Z]);
+    xIntercept(_cacheParams.boxMin[Y], _cacheParams.boxMax[Z]);
+    xIntercept(_cacheParams.boxMax[Y], _cacheParams.boxMin[Z]);
 }
 
 // Huges-Moller algorithm
@@ -397,23 +445,26 @@ int SliceRenderer::_saveTextureData()
     _rotate();
     _setVertexPositions();
 
+    std::vector<double> stretch = GetViewpointParams()->GetStretchFactors();
     float dx = (square2D[1].x-square2D[0].x);
     float dy = (square2D[1].y-square2D[0].y);
     float xyRatio = dx/dy;
     if(xyRatio >= 1) {
         _xSamples = _textureSideSize;
         _ySamples = _textureSideSize/xyRatio;
+        //_ySamples = _ySamples*stretch[2];
     }
     else {
         _xSamples = _textureSideSize*xyRatio;
+        //_xSamples = _xSamples*stretch[2];
+        std::cout << "xSamples " << _xSamples << " " << stretch[2] << std::endl;
         _ySamples = _textureSideSize;
     }
-   
-    std::cout << "x y tss " << _xSamples << " " << _ySamples << " " << _textureSideSize << std::endl;
+  
+    std::cout << "xsamples ysamples " << _xSamples << " " << _ySamples <<std::endl;
  
     int    textureSize = 2 * _xSamples * _ySamples;
     float *dataValues = new float[textureSize];
-    //std::shared_ptr<float[]> dataValues(new float[textureSize]);
 
     _populateData(dataValues, grid);
 
@@ -520,13 +571,6 @@ int SliceRenderer::_paintGL(bool fast)
 {
     int rc = 0;
 
-    //size_t textureSideSizeBackup = _textureSideSize;
-    if (fast) {
-        //_textureSideSize = 20;
-        std::cout << "fast " << _textureSideSize << std::endl;
-    }
-    else std::cout << "slow " << _textureSideSize << std::endl;
-
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
 
@@ -585,11 +629,19 @@ int SliceRenderer::_paintGL(bool fast)
 
     _initializeState();
 
-    if (_isDataCacheDirty()) {
+    // If we're in fast mode, degrade the quality of the slice for better interactivity
+    if (fast) {
+        _textureSideSize = 50;
+    }
+    else {
+        _textureSideSize = _cacheParams.textureSampleRate;
+    }
+    if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
+
+    if (_isDataCacheDirty() || !fast) {
         rc = _resetDataCache(fast); 
         if (rc < 0) {
             _resetState();
-            //_textureSideSize = textureSideSizeBackup;
             return rc;    // error message already set by _resetDataCache()
         }
     } else {
@@ -599,7 +651,6 @@ int SliceRenderer::_paintGL(bool fast)
             rc = _resetBoxCache();
             if (rc < 0) {
                 _resetState();
-                //_textureSideSize = textureSideSizeBackup;
                 return rc;    // error message already set by _resetBoxCache()
             }
         }
@@ -608,7 +659,6 @@ int SliceRenderer::_paintGL(bool fast)
     _configureShader();
     if (CheckGLError() != 0) {
         _resetState();
-        //_textureSideSize = textureSideSizeBackup;
         return -1;
     }
 
@@ -622,8 +672,6 @@ int SliceRenderer::_paintGL(bool fast)
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     _resetState();
-
-    //_textureSideSize = textureSideSizeBackup;
 
     if (CheckGLError() != 0) { return -1; }
     
