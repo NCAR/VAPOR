@@ -55,7 +55,7 @@ template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, co
     }
 
     void *tmp = std::malloc(sizeof(T) * nblocks * block_size);
-    T    *buf = static_cast<T *>(tmp);
+    T *   buf = static_cast<T *>(tmp);
 
     Heap.push_back(tmp);
 
@@ -151,9 +151,9 @@ void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X)
 // This function iterates across all nodes in a grid; making comparisons between the
 // data values returned by the functions GetValueAtIndex() and GetValue().
 bool CompareIndexToCoords(VAPoR::Grid *grid,
-                          double      &rms,                 // Root Mean Square error
-                          size_t      &numMissingValues,    // Counter for receiving MissingValue upon query
-                          size_t      &disagreements        // Counter for when GetValueAtIndex() and GetValue() disagree
+                          double &     rms,                 // Root Mean Square error
+                          size_t &     numMissingValues,    // Counter for receiving MissingValue upon query
+                          size_t &     disagreements        // Counter for when GetValueAtIndex() and GetValue() disagree
 )
 {
     bool rc = true;
@@ -442,19 +442,19 @@ VAPoR::CurvilinearGrid *MakeCurvilinearTerrainGrid(const std::vector<size_t> &bs
     std::vector<double> maxu2d = {maxu[X], maxu[Y]};
 
     std::vector<float *> xblks = AllocateBlocks(bs2d, dims2d);
-    RegularGrid         *xrg = new RegularGrid(dims2d, bs2d, xblks, minu2d, maxu2d);
+    RegularGrid *        xrg = new RegularGrid(dims2d, bs2d, xblks, minu2d, maxu2d);
     MakeRampOnAxis(xrg, minu[X], maxu[X], X);
 
     std::vector<float *> yblks = AllocateBlocks(bs2d, dims2d);
-    RegularGrid         *yrg = new RegularGrid(dims2d, bs2d, yblks, minu2d, maxu2d);
+    RegularGrid *        yrg = new RegularGrid(dims2d, bs2d, yblks, minu2d, maxu2d);
     MakeRampOnAxis(yrg, minu[Y], maxu[Y], Y);
 
     std::vector<float *> zblks = AllocateBlocks(bs, dims);
-    RegularGrid         *zrg = new RegularGrid(dims, bs, zblks, minu, maxu);
+    RegularGrid *        zrg = new RegularGrid(dims, bs, zblks, minu, maxu);
     MakeRampOnAxis(zrg, minu[Z], maxu[Z], Z);
 
     std::vector<float *> blks = AllocateBlocks(bs, dims);
-    CurvilinearGrid     *cg = new CurvilinearGrid(dims, bs, blks, *xrg, *yrg, *zrg, NULL);
+    CurvilinearGrid *    cg = new CurvilinearGrid(dims, bs, blks, *xrg, *yrg, *zrg, NULL);
 
     return (cg);
 }
@@ -477,7 +477,7 @@ LayeredGrid *MakeLayeredGrid(const vector<size_t> &dims, const vector<size_t> &b
     for (int i = 0; i < dims[Y]; i++) { ycoords.push_back(minu[1] + (i * deltay)); }
 
     std::vector<float *> dataBlocks = AllocateBlocks(bs, dims);
-    LayeredGrid         *lg = new LayeredGrid(dims, bs, dataBlocks, xcoords, ycoords, rg);
+    LayeredGrid *        lg = new LayeredGrid(dims, bs, dataBlocks, xcoords, ycoords, rg);
 
     return (lg);
 }
@@ -511,7 +511,7 @@ VAPoR::StretchedGrid *MakeStretchedGrid(const vector<size_t> &dims, const vector
     }
 
     vector<float *> blocks = AllocateBlocks(bs, dims);
-    StretchedGrid  *sg = new StretchedGrid(dims, bs, blocks, xCoords, yCoords, zCoords);
+    StretchedGrid * sg = new StretchedGrid(dims, bs, blocks, xCoords, yCoords, zCoords);
     return sg;
 }
 
