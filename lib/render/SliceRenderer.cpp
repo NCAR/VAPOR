@@ -236,26 +236,25 @@ void SliceRenderer::_rotate()
     // Find a rectangle that encompasses our 3D polygon by finding the min/max bounds along our 2D points.
     // We will sample along the X/Y axes of this rectangle.
     stack<glm::vec2> s = orderedTwoDPoints;
-    _makeRectangle2D( vertices, s );
+    _rectangle2D = _makeRectangle2D( vertices, s );
  
     // Map our rectangle's 2D edges back into 3D space, to get an 
     // ordered list of vertices for our data-enclosing rectangle. 
-    /*_orderedVertices.clear();
+    /*_polygon3D.clear();
     while(!orderedTwoDPoints.empty()) {
         glm::vec2 twoDPoint = orderedTwoDPoints.top();
         for(auto& vertex : vertices) {
             if( twoDPoint.x == vertex.twoD.x && twoDPoint.y == vertex.twoD.y ) {
-                _orderedVertices.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
+                _polygon3D.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
                 orderedTwoDPoints.pop();
                 break;
             }
         }
     }*/
-    _makeRectangle3D( vertices, orderedTwoDPoints );
 
     // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
     // rectangle to generate our 2D texture.
-    auto inverseProjection = [&](float x, float y) {
+    /*auto inverseProjection = [&](float x, float y) {
         glm::vec3 point;
         point = _origin + x*_axis1 + y*_axis2;
         return point;
@@ -264,7 +263,10 @@ void SliceRenderer::_rotate()
     _rectangle3D[3] = inverseProjection( _rectangle2D[0].x, _rectangle2D[0].y );
     _rectangle3D[0] = inverseProjection( _rectangle2D[1].x, _rectangle2D[0].y );
     _rectangle3D[1] = inverseProjection( _rectangle2D[1].x, _rectangle2D[1].y );
-    _rectangle3D[2] = inverseProjection( _rectangle2D[0].x, _rectangle2D[1].y );
+    _rectangle3D[2] = inverseProjection( _rectangle2D[0].x, _rectangle2D[1].y );*/
+    s = orderedTwoDPoints;
+    _polygon3D = _makePolygon3D( vertices, s);
+    _rectangle3D = _makeRectangle3D( vertices, orderedTwoDPoints );
 }
 
 void SliceRenderer::_findIntercepts(glm::vec3& _origin, glm::vec3& _normal, std::vector<_vertex>& vertices, bool stretch) const {
@@ -336,31 +338,66 @@ stack<glm::vec2> SliceRenderer::_2DConvexHull( std::vector<_vertex>& vertices ) 
     return orderedTwoDPoints;
 }
 
-void SliceRenderer::_makeRectangle2D( const std::vector<_vertex>& vertices, stack<glm::vec2>& orderedTwoDPoints ) {
-    //stack<glm::vec2> s = orderedTwoDPoints;
-    _rectangle2D={ glm::vec2(), glm::vec2() };
+std::vector<glm::vec2> SliceRenderer::_makeRectangle2D( const std::vector<_vertex>& vertices, stack<glm::vec2>& orderedTwoDPoints ) const {
+    std::vector<glm::vec2> rectangle2D={ glm::vec2(), glm::vec2() };
     while(!orderedTwoDPoints.empty()) {
         glm::vec2 vertex = orderedTwoDPoints.top();
-        if(vertex.x < _rectangle2D[0].x) _rectangle2D[0].x = vertex.x;
-        if(vertex.y < _rectangle2D[0].y) _rectangle2D[0].y = vertex.y;
-        if(vertex.x > _rectangle2D[1].x) _rectangle2D[1].x = vertex.x;
-        if(vertex.y > _rectangle2D[1].y) _rectangle2D[1].y = vertex.y;
+        if(vertex.x < rectangle2D[0].x) rectangle2D[0].x = vertex.x;
+        if(vertex.y < rectangle2D[0].y) rectangle2D[0].y = vertex.y;
+        if(vertex.x > rectangle2D[1].x) rectangle2D[1].x = vertex.x;
+        if(vertex.y > rectangle2D[1].y) rectangle2D[1].y = vertex.y;
         orderedTwoDPoints.pop(); 
     }
+    return rectangle2D;
 }
 
-void SliceRenderer::_makeRectangle3D( const std::vector<_vertex>& vertices, stack<glm::vec2& orderedTwoDPoints ) {
-    _orderedVertices.clear();
-    while(!orderedTwoDPoints.empty()) {
-        glm::vec2 twoDPoint = orderedTwoDPoints.top();
+// Map our rectangle's 2D edges back into 3D space, to get an 
+// ordered list of vertices for our data-enclosing polygon. 
+std::vector<glm::vec3> SliceRenderer::_makePolygon3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& polygon2D ) const {
+    //_polygon3D.clear();
+    std::vector<glm::vec3> polygon3D;
+    while(!polygon2D.empty()) {
+        glm::vec2 twoDPoint = polygon2D.top();
         for(auto& vertex : vertices) {
             if( twoDPoint.x == vertex.twoD.x && twoDPoint.y == vertex.twoD.y ) {
-                _orderedVertices.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
-                orderedTwoDPoints.pop();
+                polygon3D.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
+                polygon2D.pop();
                 break;
             }
         }
     }
+    return polygon3D;
+}
+
+//std::vector<glm::vec3> SliceRenderer::_makeRectangle3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& orderedTwoDPoints ) {
+std::vector<glm::vec3> SliceRenderer::_makeRectangle3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& polygon2D ) const {
+    /*_polygon3D.clear();
+    while(!orderedTwoDPoints.empty()) {
+        glm::vec2 twoDPoint = orderedTwoDPoints.top();
+        for(auto& vertex : vertices) {
+            if( twoDPoint.x == vertex.twoD.x && twoDPoint.y == vertex.twoD.y ) {
+                _polygon3D.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
+                orderedTwoDPoints.pop();
+                break;
+            }
+        }
+    }*/
+    
+    // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
+    // rectangle to generate our 2D texture.
+    std::vector<glm::vec3> rectangle3D = { glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3() };
+    auto inverseProjection = [&](float x, float y) {
+        glm::vec3 point;
+        point = _origin + x*_axis1 + y*_axis2;
+        return point;
+    };
+    rectangle3D = { glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3() };
+    rectangle3D[3] = inverseProjection( _rectangle2D[0].x, _rectangle2D[0].y );
+    rectangle3D[0] = inverseProjection( _rectangle2D[1].x, _rectangle2D[0].y );
+    rectangle3D[1] = inverseProjection( _rectangle2D[1].x, _rectangle2D[1].y );
+    rectangle3D[2] = inverseProjection( _rectangle2D[0].x, _rectangle2D[1].y );
+
+    return rectangle3D;
 }
 
 // Huges-Moller algorithm
@@ -571,16 +608,16 @@ int SliceRenderer::_paintGL(bool fast)
         LegacyGL *lgl = _glManager->legacy;    
         lgl->Color4f(0, 1., 0, 1.);
         lgl->Begin(GL_LINES);
-            if (_orderedVertices.size()) {
-                for (int i=0; i<_orderedVertices.size()-1; i++) {
-                    glm::vec3 vert1 = _orderedVertices[i];
-                    glm::vec3 vert2 = _orderedVertices[i+1];
+            if (_polygon3D.size()) {
+                for (int i=0; i<_polygon3D.size()-1; i++) {
+                    glm::vec3 vert1 = _polygon3D[i];
+                    glm::vec3 vert2 = _polygon3D[i+1];
                     lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
                     lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
                 }
                 lgl->Color4f(0, 1., 0, 1.);
-                glm::vec3 vert1 = _orderedVertices[_orderedVertices.size()-1];
-                glm::vec3 vert2 = _orderedVertices[0];
+                glm::vec3 vert1 = _polygon3D[_polygon3D.size()-1];
+                glm::vec3 vert2 = _polygon3D[0];
                 lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
                 lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
             }

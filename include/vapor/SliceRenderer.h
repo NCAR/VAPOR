@@ -26,7 +26,7 @@ public:
     virtual ~SliceRenderer();
 
     glm::vec3 _axis1, _axis2, _normal, _origin;
-    std::vector<glm::vec3> _orderedVertices;
+    std::vector<glm::vec3> _polygon3D;
     std::vector<glm::vec3> _rectangle3D;
     std::vector<glm::vec2> _rectangle2D;
 
@@ -70,8 +70,9 @@ private:
     void _rotate();
     void _findIntercepts( glm::vec3& origin, glm::vec3& normal, std::vector<_vertex>& vertices, bool stretch) const;
     stack<glm::vec2> _2DConvexHull( std::vector<_vertex>& vertices ) const;
-    void _makeRectangle2D( const std::vector<_vertex>& vertices, stack<glm::vec2>& orderedTwoDPoints );
-    void _makeRectangle3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& orderedTwoDPoints );
+    std::vector<glm::vec2> _makeRectangle2D( const std::vector<_vertex>& vertices, stack<glm::vec2>& polygon2D ) const;
+    std::vector<glm::vec3> _makeRectangle3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& polygon2D ) const;
+    std::vector<glm::vec3> _makePolygon3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& polygon2D ) const;
     
     void _initVAO();
     void _initTexCoordVBO();
