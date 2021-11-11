@@ -25,10 +25,10 @@ public:
 
     virtual ~SliceRenderer();
 
-    glm::vec3 axis1, axis2, normal, origin;
-    std::vector<glm::vec3> orderedVertices;
-    std::vector<glm::vec3> square;
-    std::vector<glm::vec2> square2D;
+    glm::vec3 _axis1, _axis2, _normal, _origin;
+    std::vector<glm::vec3> _orderedVertices;
+    std::vector<glm::vec3> _rectangle3D;
+    std::vector<glm::vec2> _rectangle2D;
 
     void getVecs(glm::vec3& vec1,glm::vec3& vec2,glm::vec3& vec3,glm::vec3& vec4) {
         vec1=v1;
@@ -70,6 +70,7 @@ private:
     void _rotate();
     void _findIntercepts( glm::vec3& origin, glm::vec3& normal, std::vector<_vertex>& vertices, bool stretch) const;
     stack<glm::vec2> _2DConvexHull( std::vector<_vertex>& vertices ) const;
+    void _makeRectangle2D( const std::vector<_vertex>& vertices, stack<glm::vec2>& orderedTwoDPoints );
     
     void _initVAO();
     void _initTexCoordVBO();

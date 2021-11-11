@@ -204,71 +204,58 @@ void SliceRenderer::_rotate()
     std::vector<double> boxMin = _cacheParams.boxMin;
     std::vector<double> boxMax = _cacheParams.boxMax;
 
-    origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
+    _origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
                         (boxMax[Y]-boxMin[Y])/2. + boxMin[Y], 
                         (boxMax[Z]-boxMin[Z])/2. + boxMin[Z]};
 
-    // Define a basis function of three orthogonal vectors (normal, axis1, axis2) 
     // which we will use to project our polygon into 2D space.  First rotate XY plane with quaternion.
     glm::vec3 angles( M_PI*_cacheParams.xRotation/180., M_PI*_cacheParams.yRotation/180., M_PI*_cacheParams.zRotation/180. );
     glm::quat q = glm::quat( angles );
-    // Now define basis function
-    normal = q * glm::vec3(0,0,1);
-    axis1 = _getOrthogonal( normal );
-    axis2 = glm::cross( normal, axis1 );
 
-    // Each _vertex in vertices holds a glm::vec3 representing a point 3D space, 
+    // We will sample the slice in 2D coordinates.  
+    // So we first define a basis function of three orthogonal vectors (_normal, _axis1, _axis2).
+    _normal = q * glm::vec3(0,0,1);
+    _axis1 = _getOrthogonal( _normal );
+    _axis2 = glm::cross( _normal, _axis1 );
+
+    // Next we define a polygon that defines our slice.  To do this we
+    // find where our plane intercepts the X, Y, and Z edges of our Box extents.
+    // 
+    // Each _vertex in 'vertices' holds a glm::vec3 representing a point 3D space, 
     // and a glm::vec2 storing its location in 2D according to our basis function.
     std::vector< _vertex > vertices;
-    // Find where our plane intercepts the X, Y, and Z edges of our Box extents
-    _findIntercepts(origin, normal, vertices, false);
+    _findIntercepts(_origin, _normal, vertices, false);
 
+    // Use Convex Hull to get an ordered list of vertices
     stack<glm::vec2> orderedTwoDPoints = _2DConvexHull( vertices );
-/*
-    // We now have a set of vertices along the Box's XYZ intercepts.  The edges of these vertices define where 
-    // the user should see data.  To find the connectivity/edges of these vertices, we project them into a 2D
-    // coordinate system using our basis function and performing Convex Hull.
 
-    // Project our 3D points onto the 2D plane using our basis function (normal, axis1, and axis2)
-    glm::vec2 unorderedTwoDPoints[vertices.size()];
-    int count=0;
-    for (auto& vertex : vertices) {
-        double x = glm::dot(axis1, vertex.threeD-origin);  // Find 3D point's projected X coordinate
-        double y = glm::dot(axis2, vertex.threeD-origin);  // Find 3D point's projected Y coordinate
-        vertex.twoD = {x, y};
-        unorderedTwoDPoints[count].x = vertex.twoD.x;
-        unorderedTwoDPoints[count].y = vertex.twoD.y;
-        count++;
-    }
+    // At this point, 'vertices' has a vector<glm::vec3> that describe the 3D points of our polygon,
+    // and a vector<glm::vec2> that describe the 2D points of our polygon.
+    // The 3D and 2D values map to eachother.  IE - 3D element 0 corresponds the the coordinates of 2D element 0.
 
-    // Perform convex hull on our list of 2D points,
-    // which defines the outer edges of our polygon
-    stack<glm::vec2> orderedTwoDPoints = convexHull( unorderedTwoDPoints, sizeof(unorderedTwoDPoints)/sizeof(unorderedTwoDPoints[0]) );
-*/
-
-    // Find a rectangle that enclompasses our 3D polygon.  We will sample along the X/Y axes of this rectangle.
-    stack<glm::vec2> s2 = orderedTwoDPoints;
-
-    // Find the min/max bounds of our 2D points
-    stack<glm::vec2> s = orderedTwoDPoints;
-    square2D={ glm::vec2(), glm::vec2() };
+    // Find a rectangle that encompasses our 3D polygon by finding the min/max bounds along our 2D points.
+    // We will sample along the X/Y axes of this rectangle.
+    /*stack<glm::vec2> s = orderedTwoDPoints;
+    _rectangle2D={ glm::vec2(), glm::vec2() };
     while(!s.empty()) {
         glm::vec2 vertex = s.top();
-        if(vertex.x < square2D[0].x) square2D[0].x = vertex.x;
-        if(vertex.y < square2D[0].y) square2D[0].y = vertex.y;
-        if(vertex.x > square2D[1].x) square2D[1].x = vertex.x;
-        if(vertex.y > square2D[1].y) square2D[1].y = vertex.y;
+        if(vertex.x < _rectangle2D[0].x) _rectangle2D[0].x = vertex.x;
+        if(vertex.y < _rectangle2D[0].y) _rectangle2D[0].y = vertex.y;
+        if(vertex.x > _rectangle2D[1].x) _rectangle2D[1].x = vertex.x;
+        if(vertex.y > _rectangle2D[1].y) _rectangle2D[1].y = vertex.y;
         s.pop(); 
-    }
+    }*/
+    stack<glm::vec2> s = orderedTwoDPoints;
+    _makeRectangle2D( vertices, s );
  
     // Map our rectangle's 2D edges back into 3D space, to get an 
     // ordered list of vertices for our data-enclosing rectangle. 
-    orderedVertices.clear();
+    _orderedVertices.clear();
     while(!orderedTwoDPoints.empty()) {
         glm::vec2 twoDPoint = orderedTwoDPoints.top();
         for(auto& vertex : vertices) {
             if( twoDPoint.x == vertex.twoD.x && twoDPoint.y == vertex.twoD.y ) {
-                orderedVertices.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
+                _orderedVertices.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
                 orderedTwoDPoints.pop();
                 break;
             }
@@ -279,39 +266,39 @@ void SliceRenderer::_rotate()
     // rectangle to generate our 2D texture.
     auto inverseProjection = [&](float x, float y) {
         glm::vec3 point;
-        point = origin + x*axis1 + y*axis2;
+        point = _origin + x*_axis1 + y*_axis2;
         return point;
     };
-    square = { glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3() };
-    square[3] = inverseProjection( square2D[0].x, square2D[0].y );
-    square[0] = inverseProjection( square2D[1].x, square2D[0].y );
-    square[1] = inverseProjection( square2D[1].x, square2D[1].y );
-    square[2] = inverseProjection( square2D[0].x, square2D[1].y );
+    _rectangle3D = { glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3() };
+    _rectangle3D[3] = inverseProjection( _rectangle2D[0].x, _rectangle2D[0].y );
+    _rectangle3D[0] = inverseProjection( _rectangle2D[1].x, _rectangle2D[0].y );
+    _rectangle3D[1] = inverseProjection( _rectangle2D[1].x, _rectangle2D[1].y );
+    _rectangle3D[2] = inverseProjection( _rectangle2D[0].x, _rectangle2D[1].y );
 }
 
-void SliceRenderer::_findIntercepts(glm::vec3& origin, glm::vec3& normal, std::vector<_vertex>& vertices, bool stretch) const {
+void SliceRenderer::_findIntercepts(glm::vec3& _origin, glm::vec3& _normal, std::vector<_vertex>& vertices, bool stretch) const {
     // Lambdas for finding intercepts on the XYZ edges of the Box 
     // Plane equation: 
-    //     normal.x*(x-origin.x) + normal.y*(y-origin.y) + normal.z*(z-origin.z) = 0
+    //     _normal.x*(x-_origin.x) + _normal.y*(y-_origin.y) + _normal.z*(z-_origin.z) = 0
     auto zIntercept = [&](float x, float y) {
-        if(normal.z==0) return;
-        double z = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.y*y) / normal.z;
+        if(_normal.z==0) return;
+        double z = (_normal.x*_origin.x + _normal.y*_origin.y + _normal.z*_origin.z - _normal.x*x - _normal.y*y) / _normal.z;
         if (z >= _cacheParams.boxMin[Z] && z <= _cacheParams.boxMax[Z]) {
             _vertex p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
         }
     };
     auto yIntercept = [&](float x, float z) {
-        if(normal.y==0) return;
-        double y = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.z*z) / normal.y;
+        if(_normal.y==0) return;
+        double y = (_normal.x*_origin.x + _normal.y*_origin.y + _normal.z*_origin.z - _normal.x*x - _normal.z*z) / _normal.y;
         if (y >= _cacheParams.boxMin[Y] && y <= _cacheParams.boxMax[Y]) {
             _vertex p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
         }
     };
     auto xIntercept = [&](float y, float z) {
-        if(normal.x==0) return;
-        double x = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.y*y - normal.z*z) / normal.x;
+        if(_normal.x==0) return;
+        double x = (_normal.x*_origin.x + _normal.y*_origin.y + _normal.z*_origin.z - _normal.y*y - _normal.z*z) / _normal.x;
         if (x >= _cacheParams.boxMin[X] && x <= _cacheParams.boxMax[X]) {
             _vertex p = { glm::vec3(x,y,z), glm::vec2() };
             vertices.push_back(p);
@@ -340,12 +327,12 @@ stack<glm::vec2> SliceRenderer::_2DConvexHull( std::vector<_vertex>& vertices ) 
     // the user should see data.  To find the connectivity/edges of these vertices, we project them into a 2D
     // coordinate system using our basis function and performing Convex Hull.
 
-    // Project our 3D points onto the 2D plane using our basis function (normal, axis1, and axis2)
+    // Project our 3D points onto the 2D plane using our basis function (_normal, _axis1, and _axis2)
     glm::vec2 unorderedTwoDPoints[vertices.size()];
     int count=0;
     for (auto& vertex : vertices) {
-        double x = glm::dot(axis1, vertex.threeD-origin);  // Find 3D point's projected X coordinate
-        double y = glm::dot(axis2, vertex.threeD-origin);  // Find 3D point's projected Y coordinate
+        double x = glm::dot(_axis1, vertex.threeD-_origin);  // Find 3D point's projected X coordinate
+        double y = glm::dot(_axis2, vertex.threeD-_origin);  // Find 3D point's projected Y coordinate
         vertex.twoD = {x, y};
         unorderedTwoDPoints[count].x = vertex.twoD.x;
         unorderedTwoDPoints[count].y = vertex.twoD.y;
@@ -356,6 +343,19 @@ stack<glm::vec2> SliceRenderer::_2DConvexHull( std::vector<_vertex>& vertices ) 
     // which defines the outer edges of our polygon
     stack<glm::vec2> orderedTwoDPoints = convexHull( unorderedTwoDPoints, sizeof(unorderedTwoDPoints)/sizeof(unorderedTwoDPoints[0]) );
     return orderedTwoDPoints;
+}
+
+void SliceRenderer::_makeRectangle2D( const std::vector<_vertex>& vertices, stack<glm::vec2>& orderedTwoDPoints ) {
+    //stack<glm::vec2> s = orderedTwoDPoints;
+    _rectangle2D={ glm::vec2(), glm::vec2() };
+    while(!orderedTwoDPoints.empty()) {
+        glm::vec2 vertex = orderedTwoDPoints.top();
+        if(vertex.x < _rectangle2D[0].x) _rectangle2D[0].x = vertex.x;
+        if(vertex.y < _rectangle2D[0].y) _rectangle2D[0].y = vertex.y;
+        if(vertex.x > _rectangle2D[1].x) _rectangle2D[1].x = vertex.x;
+        if(vertex.y > _rectangle2D[1].y) _rectangle2D[1].y = vertex.y;
+        orderedTwoDPoints.pop(); 
+    }
 }
 
 // Huges-Moller algorithm
@@ -378,11 +378,11 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
 
     auto inverseProjection = [&](float x, float y) {
         glm::vec3 point;
-        point = origin + x*axis1 + y*axis2;
+        point = _origin + x*_axis1 + y*_axis2;
         return point;
     };
 
-    glm::vec2 delta = (square2D[1]-square2D[0]);
+    glm::vec2 delta = (_rectangle2D[1]-_rectangle2D[0]);
     delta.x = delta.x/_xSamples;
     delta.y = delta.y/_ySamples;
     glm::vec2 offset = {delta.x/2., delta.y/2.};
@@ -390,7 +390,7 @@ void SliceRenderer::_populateData( float* dataValues, Grid* grid ) const {
     int index = 0;
     for (int j = 0; j < _ySamples; j++) {
         for (int i = 0; i < _xSamples; i++) {
-            glm::vec3 samplePoint = inverseProjection( offset.x+square2D[0].x+i*delta.x, square2D[0].y+offset.y+j*delta.y );
+            glm::vec3 samplePoint = inverseProjection( offset.x+_rectangle2D[0].x+i*delta.x, _rectangle2D[0].y+offset.y+j*delta.y );
             std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue( p );
             missingValue = grid->GetMissingValue();
@@ -431,8 +431,8 @@ int SliceRenderer::_saveTextureData()
     _setVertexPositions();
 
     std::vector<double> stretch = GetViewpointParams()->GetStretchFactors();
-    float dx = (square2D[1].x-square2D[0].x);
-    float dy = (square2D[1].y-square2D[0].y);
+    float dx = (_rectangle2D[1].x-_rectangle2D[0].x);
+    float dy = (_rectangle2D[1].y-_rectangle2D[0].y);
     float xyRatio = dx/dy;
     if(xyRatio >= 1) {
         _xSamples = _textureSideSize;
@@ -566,16 +566,16 @@ int SliceRenderer::_paintGL(bool fast)
         LegacyGL *lgl = _glManager->legacy;    
         lgl->Color4f(0, 1., 0, 1.);
         lgl->Begin(GL_LINES);
-            if (orderedVertices.size()) {
-                for (int i=0; i<orderedVertices.size()-1; i++) {
-                    glm::vec3 vert1 = orderedVertices[i];
-                    glm::vec3 vert2 = orderedVertices[i+1];
+            if (_orderedVertices.size()) {
+                for (int i=0; i<_orderedVertices.size()-1; i++) {
+                    glm::vec3 vert1 = _orderedVertices[i];
+                    glm::vec3 vert2 = _orderedVertices[i+1];
                     lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
                     lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
                 }
                 lgl->Color4f(0, 1., 0, 1.);
-                glm::vec3 vert1 = orderedVertices[orderedVertices.size()-1];
-                glm::vec3 vert2 = orderedVertices[0];
+                glm::vec3 vert1 = _orderedVertices[_orderedVertices.size()-1];
+                glm::vec3 vert2 = _orderedVertices[0];
                 lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
                 lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
             }
@@ -588,18 +588,18 @@ int SliceRenderer::_paintGL(bool fast)
     lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
         double foo=0.;
-        if(square.size()) {
-            for (int i=0; i<square.size()-1; i++) {
+        if(_rectangle3D.size()) {
+            for (int i=0; i<_rectangle3D.size()-1; i++) {
                 lgl->Color4f(1., 1., foo, 1.);
-                glm::vec3 vert1 = square[i];
-                glm::vec3 vert2 = square[i+1];
+                glm::vec3 vert1 = _rectangle3D[i];
+                glm::vec3 vert2 = _rectangle3D[i+1];
                 lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
                 lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
                 foo=foo+.33;
             }
             lgl->Color4f(1., 1., foo, 1.);
-            glm::vec3 vert1 = square[3];
-            glm::vec3 vert2 = square[0];
+            glm::vec3 vert1 = _rectangle3D[3];
+            glm::vec3 vert2 = _rectangle3D[0];
             lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
             lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
         
@@ -717,14 +717,14 @@ void SliceRenderer::_resetState()
 
 void SliceRenderer::_setVertexPositions()
 {
-    if (square.empty() ) return;
+    if (_rectangle3D.empty() ) return;
     std::vector<double> temp = 
-                    {square[3].x, square[3].y, square[3].z,
-                     square[0].x, square[0].y, square[0].z,
-                     square[2].x, square[2].y, square[2].z,
-                     square[0].x, square[0].y, square[0].z,
-                     square[1].x, square[1].y, square[1].z,
-                     square[2].x, square[2].y, square[2].z};
+                    {_rectangle3D[3].x, _rectangle3D[3].y, _rectangle3D[3].z,
+                     _rectangle3D[0].x, _rectangle3D[0].y, _rectangle3D[0].z,
+                     _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z,
+                     _rectangle3D[0].x, _rectangle3D[0].y, _rectangle3D[0].z,
+                     _rectangle3D[1].x, _rectangle3D[1].y, _rectangle3D[1].z,
+                     _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z};
     
     _vertexCoords = temp;
 
