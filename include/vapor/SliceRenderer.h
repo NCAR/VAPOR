@@ -69,6 +69,8 @@ private:
 
     void _rotate();
     void _findIntercepts( glm::vec3& origin, glm::vec3& normal, std::vector<_vertex>& vertices, bool stretch) const;
+    stack<glm::vec2> _2DConvexHull( std::vector<_vertex>& vertices ) const;
+    
     void _initVAO();
     void _initTexCoordVBO();
     void _initVertexVBO();

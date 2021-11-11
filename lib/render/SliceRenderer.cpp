@@ -208,84 +208,45 @@ void SliceRenderer::_rotate()
                         (boxMax[Y]-boxMin[Y])/2. + boxMin[Y], 
                         (boxMax[Z]-boxMin[Z])/2. + boxMin[Z]};
 
-    // Rotate the XY plane using a quaternion
+    // Define a basis function of three orthogonal vectors (normal, axis1, axis2) 
+    // which we will use to project our polygon into 2D space.  First rotate XY plane with quaternion.
     glm::vec3 angles( M_PI*_cacheParams.xRotation/180., M_PI*_cacheParams.yRotation/180., M_PI*_cacheParams.zRotation/180. );
     glm::quat q = glm::quat( angles );
+    // Now define basis function
     normal = q * glm::vec3(0,0,1);
-
-    std::vector< _vertex > vertices;
-    _findIntercepts(origin, normal, vertices, 0);
-
-    /*// Lambdas for finding intercepts on the XYZ edges of the Box 
-    // Plane equation: 
-    //     normal.x*(x-origin.x) + normal.y*(y-origin.y) + normal.z*(z-origin.z) = 0
-    auto zIntercept = [&](float x, float y) {
-        if(normal.z==0) return;
-        double z = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.y*y) / normal.z;
-        if (z >= boxMin[Z] && z <= boxMax[Z]) {
-            _vertex p = { glm::vec3(x,y,z), glm::vec2() };
-            vertices.push_back(p);
-        }
-    };
-    auto yIntercept = [&](float x, float z) {
-        if(normal.y==0) return;
-        double y = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.x*x - normal.z*z) / normal.y;
-        if (y >= boxMin[Y] && y <= boxMax[Y]) {
-            _vertex p = { glm::vec3(x,y,z), glm::vec2() };
-            vertices.push_back(p);
-        }
-    };
-    auto xIntercept = [&](float y, float z) {
-        if(normal.x==0) return;
-        double x = (normal.x*origin.x + normal.y*origin.y + normal.z*origin.z - normal.y*y - normal.z*z) / normal.x;
-        if (x >= boxMin[X] && x <= boxMax[X]) {
-            _vertex p = { glm::vec3(x,y,z), glm::vec2() };
-            vertices.push_back(p);
-        }
-    };
-
-    // Find vertices that exist on the Z edges of the Box
-    zIntercept(boxMin[X], boxMin[Y]);
-    zIntercept(boxMax[X], boxMax[Y]);
-    zIntercept(boxMin[X], boxMax[Y]);
-    zIntercept(boxMax[X], boxMin[Y]);
-    // Find any vertices that exist on the Y edges of the Box
-    yIntercept(boxMin[X], boxMin[Z]);
-    yIntercept(boxMax[X], boxMax[Z]);
-    yIntercept(boxMin[X], boxMax[Z]);
-    yIntercept(boxMax[X], boxMin[Z]);
-    // Find any vertices that exist on the X edges of the Box
-    xIntercept(boxMin[Y], boxMin[Z]);
-    xIntercept(boxMax[Y], boxMax[Z]);
-    xIntercept(boxMin[Y], boxMax[Z]);
-    xIntercept(boxMax[Y], boxMin[Z]);*/
-
-    // We now have a set of vertices that define where our slice exists in space, but we don't
-    // know their connectivity.  To find their connectivity, we use an implementation of Convex Hull.
-    // Convex hull is more complex in 3D than in 2D, so we will use a 2D implementation.  To do this,
-    // we must project our coplanar 3D vertices into 2D space.
-
-    // Define a basis function of three orthogonal vectors (normal, axis1, axis2) 
-    // to project our polygon into 2D space
     axis1 = _getOrthogonal( normal );
     axis2 = glm::cross( normal, axis1 );
-   
-    // Project our 3D points onto the 2D plane using our basis function
-    glm::vec2 points[vertices.size()];
+
+    // Each _vertex in vertices holds a glm::vec3 representing a point 3D space, 
+    // and a glm::vec2 storing its location in 2D according to our basis function.
+    std::vector< _vertex > vertices;
+    // Find where our plane intercepts the X, Y, and Z edges of our Box extents
+    _findIntercepts(origin, normal, vertices, false);
+
+    stack<glm::vec2> orderedTwoDPoints = _2DConvexHull( vertices );
+/*
+    // We now have a set of vertices along the Box's XYZ intercepts.  The edges of these vertices define where 
+    // the user should see data.  To find the connectivity/edges of these vertices, we project them into a 2D
+    // coordinate system using our basis function and performing Convex Hull.
+
+    // Project our 3D points onto the 2D plane using our basis function (normal, axis1, and axis2)
+    glm::vec2 unorderedTwoDPoints[vertices.size()];
     int count=0;
     for (auto& vertex : vertices) {
-        double x = glm::dot(axis1, vertex.threeD-origin);
-        double y = glm::dot(axis2, vertex.threeD-origin);
+        double x = glm::dot(axis1, vertex.threeD-origin);  // Find 3D point's projected X coordinate
+        double y = glm::dot(axis2, vertex.threeD-origin);  // Find 3D point's projected Y coordinate
         vertex.twoD = {x, y};
-        points[count].x = vertex.twoD.x;
-        points[count].y = vertex.twoD.y;
+        unorderedTwoDPoints[count].x = vertex.twoD.x;
+        unorderedTwoDPoints[count].y = vertex.twoD.y;
         count++;
     }
 
-    // Perform convex hull on our list of 2D points.
-    // This gives us the edges of our polygon
-    stack<glm::vec2> orderedTwoDPoints = convexHull(points, sizeof(points)/sizeof(points[0]));
+    // Perform convex hull on our list of 2D points,
+    // which defines the outer edges of our polygon
+    stack<glm::vec2> orderedTwoDPoints = convexHull( unorderedTwoDPoints, sizeof(unorderedTwoDPoints)/sizeof(unorderedTwoDPoints[0]) );
+*/
 
+    // Find a rectangle that enclompasses our 3D polygon.  We will sample along the X/Y axes of this rectangle.
     stack<glm::vec2> s2 = orderedTwoDPoints;
 
     // Find the min/max bounds of our 2D points
@@ -300,7 +261,8 @@ void SliceRenderer::_rotate()
         s.pop(); 
     }
  
-    // Map our 2D edges back into 3D space.  We now have an ordered list of edges/vertices in 3D space. 
+    // Map our rectangle's 2D edges back into 3D space, to get an 
+    // ordered list of vertices for our data-enclosing rectangle. 
     orderedVertices.clear();
     while(!orderedTwoDPoints.empty()) {
         glm::vec2 twoDPoint = orderedTwoDPoints.top();
@@ -371,6 +333,29 @@ void SliceRenderer::_findIntercepts(glm::vec3& origin, glm::vec3& normal, std::v
     xIntercept(_cacheParams.boxMax[Y], _cacheParams.boxMax[Z]);
     xIntercept(_cacheParams.boxMin[Y], _cacheParams.boxMax[Z]);
     xIntercept(_cacheParams.boxMax[Y], _cacheParams.boxMin[Z]);
+}
+
+stack<glm::vec2> SliceRenderer::_2DConvexHull( std::vector<_vertex>& vertices ) const {
+    // We now have a set of vertices along the Box's XYZ intercepts.  The edges of these vertices define where 
+    // the user should see data.  To find the connectivity/edges of these vertices, we project them into a 2D
+    // coordinate system using our basis function and performing Convex Hull.
+
+    // Project our 3D points onto the 2D plane using our basis function (normal, axis1, and axis2)
+    glm::vec2 unorderedTwoDPoints[vertices.size()];
+    int count=0;
+    for (auto& vertex : vertices) {
+        double x = glm::dot(axis1, vertex.threeD-origin);  // Find 3D point's projected X coordinate
+        double y = glm::dot(axis2, vertex.threeD-origin);  // Find 3D point's projected Y coordinate
+        vertex.twoD = {x, y};
+        unorderedTwoDPoints[count].x = vertex.twoD.x;
+        unorderedTwoDPoints[count].y = vertex.twoD.y;
+        count++;
+    }
+
+    // Perform convex hull on our list of 2D points,
+    // which defines the outer edges of our polygon
+    stack<glm::vec2> orderedTwoDPoints = convexHull( unorderedTwoDPoints, sizeof(unorderedTwoDPoints)/sizeof(unorderedTwoDPoints[0]) );
+    return orderedTwoDPoints;
 }
 
 // Huges-Moller algorithm
@@ -452,11 +437,9 @@ int SliceRenderer::_saveTextureData()
     if(xyRatio >= 1) {
         _xSamples = _textureSideSize;
         _ySamples = _textureSideSize/xyRatio;
-        //_ySamples = _ySamples*stretch[2];
     }
     else {
         _xSamples = _textureSideSize*xyRatio;
-        //_xSamples = _xSamples*stretch[2];
         std::cout << "xSamples " << _xSamples << " " << stretch[2] << std::endl;
         _ySamples = _textureSideSize;
     }
