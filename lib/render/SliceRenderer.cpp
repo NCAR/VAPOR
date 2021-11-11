@@ -22,7 +22,7 @@
 
 #define MAX_TEXTURE_SIZE 2000
 
-//#define DEBUG 1
+#define DEBUG 1
 
 using namespace VAPoR;
 
@@ -227,7 +227,7 @@ void SliceRenderer::_rotate()
     _findIntercepts(_origin, _normal, vertices, false);
 
     // Use Convex Hull to get an ordered list of vertices
-    stack<glm::vec2> orderedTwoDPoints = _2DConvexHull( vertices );
+    stack<glm::vec2> polygon2D = _2DConvexHull( vertices );
 
     // At this point, 'vertices' has a vector<glm::vec3> that describe the 3D points of our polygon,
     // and a vector<glm::vec2> that describe the 2D points of our polygon.
@@ -235,17 +235,17 @@ void SliceRenderer::_rotate()
 
     // Find a rectangle that encompasses our 3D polygon by finding the min/max bounds along our 2D points.
     // We will sample along the X/Y axes of this rectangle.
-    stack<glm::vec2> s = orderedTwoDPoints;
+    stack<glm::vec2> s = polygon2D;
     _rectangle2D = _makeRectangle2D( vertices, s );
  
     // Map our rectangle's 2D edges back into 3D space, to get an 
     // ordered list of vertices for our data-enclosing rectangle. 
-    s = orderedTwoDPoints;
+    s = polygon2D;
     _polygon3D = _makePolygon3D( vertices, s);
 
     // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
     // rectangle to generate our 2D texture.
-    _rectangle3D = _makeRectangle3D( vertices, orderedTwoDPoints );
+    _rectangle3D = _makeRectangle3D( vertices, polygon2D );
 }
 
 void SliceRenderer::_findIntercepts(glm::vec3& _origin, glm::vec3& _normal, std::vector<_vertex>& vertices, bool stretch) const {
@@ -556,28 +556,26 @@ int SliceRenderer::_paintGL(bool fast)
     //if (fast)
         
 
-    if (fast) {
-        // 3D green polygon that shows where we should see data
-        LegacyGL *lgl = _glManager->legacy;    
-        lgl->Color4f(0, 1., 0, 1.);
-        lgl->Begin(GL_LINES);
-            if (_polygon3D.size()) {
-                for (int i=0; i<_polygon3D.size()-1; i++) {
-                    glm::vec3 vert1 = _polygon3D[i];
-                    glm::vec3 vert2 = _polygon3D[i+1];
-                    lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
-                    lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
-                }
-                lgl->Color4f(0, 1., 0, 1.);
-                glm::vec3 vert1 = _polygon3D[_polygon3D.size()-1];
-                glm::vec3 vert2 = _polygon3D[0];
+#ifdef DEBUG 
+    // 3D green polygon that shows where we should see data
+    LegacyGL *lgl = _glManager->legacy;    
+    lgl->Color4f(0, 1., 0, 1.);
+    lgl->Begin(GL_LINES);
+        if (_polygon3D.size()) {
+            for (int i=0; i<_polygon3D.size()-1; i++) {
+                glm::vec3 vert1 = _polygon3D[i];
+                glm::vec3 vert2 = _polygon3D[i+1];
                 lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
                 lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
             }
-        lgl->End();
-    }
+            lgl->Color4f(0, 1., 0, 1.);
+            glm::vec3 vert1 = _polygon3D[_polygon3D.size()-1];
+            glm::vec3 vert2 = _polygon3D[0];
+            lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
+            lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
+        }
+    lgl->End();
 
-#ifdef DEBUG 
     // 3D yellow enclosing rectangle that defines the perimeter of our texture
     // This can and often will extend beyond the Box
     lgl = _glManager->legacy;
