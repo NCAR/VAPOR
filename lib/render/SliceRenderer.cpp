@@ -240,32 +240,11 @@ void SliceRenderer::_rotate()
  
     // Map our rectangle's 2D edges back into 3D space, to get an 
     // ordered list of vertices for our data-enclosing rectangle. 
-    /*_polygon3D.clear();
-    while(!orderedTwoDPoints.empty()) {
-        glm::vec2 twoDPoint = orderedTwoDPoints.top();
-        for(auto& vertex : vertices) {
-            if( twoDPoint.x == vertex.twoD.x && twoDPoint.y == vertex.twoD.y ) {
-                _polygon3D.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
-                orderedTwoDPoints.pop();
-                break;
-            }
-        }
-    }*/
+    s = orderedTwoDPoints;
+    _polygon3D = _makePolygon3D( vertices, s);
 
     // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
     // rectangle to generate our 2D texture.
-    /*auto inverseProjection = [&](float x, float y) {
-        glm::vec3 point;
-        point = _origin + x*_axis1 + y*_axis2;
-        return point;
-    };
-    _rectangle3D = { glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3() };
-    _rectangle3D[3] = inverseProjection( _rectangle2D[0].x, _rectangle2D[0].y );
-    _rectangle3D[0] = inverseProjection( _rectangle2D[1].x, _rectangle2D[0].y );
-    _rectangle3D[1] = inverseProjection( _rectangle2D[1].x, _rectangle2D[1].y );
-    _rectangle3D[2] = inverseProjection( _rectangle2D[0].x, _rectangle2D[1].y );*/
-    s = orderedTwoDPoints;
-    _polygon3D = _makePolygon3D( vertices, s);
     _rectangle3D = _makeRectangle3D( vertices, orderedTwoDPoints );
 }
 
@@ -369,20 +348,7 @@ std::vector<glm::vec3> SliceRenderer::_makePolygon3D( const std::vector<_vertex>
     return polygon3D;
 }
 
-//std::vector<glm::vec3> SliceRenderer::_makeRectangle3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& orderedTwoDPoints ) {
 std::vector<glm::vec3> SliceRenderer::_makeRectangle3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& polygon2D ) const {
-    /*_polygon3D.clear();
-    while(!orderedTwoDPoints.empty()) {
-        glm::vec2 twoDPoint = orderedTwoDPoints.top();
-        for(auto& vertex : vertices) {
-            if( twoDPoint.x == vertex.twoD.x && twoDPoint.y == vertex.twoD.y ) {
-                _polygon3D.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
-                orderedTwoDPoints.pop();
-                break;
-            }
-        }
-    }*/
-    
     // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
     // rectangle to generate our 2D texture.
     std::vector<glm::vec3> rectangle3D = { glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3() };
@@ -536,19 +502,6 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.zRotation != p->GetValueDouble(SliceParams::ZRotationTag,0)) return true;
 
     if (_cacheParams.textureSampleRate != p->GetSampleRate()) return true;
-
-    vector<double> min, max;
-    Box *          box = p->GetBox();
-    int            orientation = box->GetOrientation();
-    if (_cacheParams.orientation != orientation) return true;
-    // Special case: if our plane shifts its position along its orthognal axis,
-    // then we will need to return true and resample our data.  If its extents
-    // change along its perimeter, then we will just reconfigure the texture
-    // coordinates via _resetBoxCache in our _paintGL routine.
-    _getModifiedExtents(min, max);
-
-    if (min != _cacheParams.boxMin) return true;
-    if (max != _cacheParams.boxMax) return true;
 
     return false;
 }
