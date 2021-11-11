@@ -71,6 +71,7 @@ private:
     void _findIntercepts( glm::vec3& origin, glm::vec3& normal, std::vector<_vertex>& vertices, bool stretch) const;
     stack<glm::vec2> _2DConvexHull( std::vector<_vertex>& vertices ) const;
     void _makeRectangle2D( const std::vector<_vertex>& vertices, stack<glm::vec2>& orderedTwoDPoints );
+    void _makeRectangle3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& orderedTwoDPoints );
     
     void _initVAO();
     void _initTexCoordVBO();

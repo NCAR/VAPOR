@@ -235,22 +235,12 @@ void SliceRenderer::_rotate()
 
     // Find a rectangle that encompasses our 3D polygon by finding the min/max bounds along our 2D points.
     // We will sample along the X/Y axes of this rectangle.
-    /*stack<glm::vec2> s = orderedTwoDPoints;
-    _rectangle2D={ glm::vec2(), glm::vec2() };
-    while(!s.empty()) {
-        glm::vec2 vertex = s.top();
-        if(vertex.x < _rectangle2D[0].x) _rectangle2D[0].x = vertex.x;
-        if(vertex.y < _rectangle2D[0].y) _rectangle2D[0].y = vertex.y;
-        if(vertex.x > _rectangle2D[1].x) _rectangle2D[1].x = vertex.x;
-        if(vertex.y > _rectangle2D[1].y) _rectangle2D[1].y = vertex.y;
-        s.pop(); 
-    }*/
     stack<glm::vec2> s = orderedTwoDPoints;
     _makeRectangle2D( vertices, s );
  
     // Map our rectangle's 2D edges back into 3D space, to get an 
     // ordered list of vertices for our data-enclosing rectangle. 
-    _orderedVertices.clear();
+    /*_orderedVertices.clear();
     while(!orderedTwoDPoints.empty()) {
         glm::vec2 twoDPoint = orderedTwoDPoints.top();
         for(auto& vertex : vertices) {
@@ -260,7 +250,8 @@ void SliceRenderer::_rotate()
                 break;
             }
         }
-    }
+    }*/
+    _makeRectangle3D( vertices, orderedTwoDPoints );
 
     // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
     // rectangle to generate our 2D texture.
@@ -355,6 +346,20 @@ void SliceRenderer::_makeRectangle2D( const std::vector<_vertex>& vertices, stac
         if(vertex.x > _rectangle2D[1].x) _rectangle2D[1].x = vertex.x;
         if(vertex.y > _rectangle2D[1].y) _rectangle2D[1].y = vertex.y;
         orderedTwoDPoints.pop(); 
+    }
+}
+
+void SliceRenderer::_makeRectangle3D( const std::vector<_vertex>& vertices, stack<glm::vec2& orderedTwoDPoints ) {
+    _orderedVertices.clear();
+    while(!orderedTwoDPoints.empty()) {
+        glm::vec2 twoDPoint = orderedTwoDPoints.top();
+        for(auto& vertex : vertices) {
+            if( twoDPoint.x == vertex.twoD.x && twoDPoint.y == vertex.twoD.y ) {
+                _orderedVertices.push_back( glm::vec3( vertex.threeD.x, vertex.threeD.y, vertex.threeD.z ) );
+                orderedTwoDPoints.pop();
+                break;
+            }
+        }
     }
 }
 
