@@ -658,15 +658,15 @@ private:
     std::vector<double> _timeCoordinates;
     string              _proj4String;
     string              _proj4StringDefault;
-    std::vector<size_t> _bs;
+    DimsType _bs;
 
     typedef struct {
         size_t              ts;
         string              varname;
         int                 level;
         int                 lod;
-        std::vector<size_t> bmin;
-        std::vector<size_t> bmax;
+        DimsType bmin;
+        DimsType bmax;
         int                 lock_counter;
         void *              blks;
     } region_t;
@@ -712,78 +712,78 @@ private:
 
     int _get_default_projection(string &projection);
 
-    VAPoR::RegularGrid *_make_grid_regular(const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin,
-                                           const std::vector<size_t> &bmax) const;
+    VAPoR::RegularGrid *_make_grid_regular(const DimsType &dims, const std::vector<float *> &blkvec, DimsType &bs, DimsType &bmin,
+                                           const DimsType &bmax) const;
 
-    VAPoR::StretchedGrid *_make_grid_stretched(const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin,
-                                               const std::vector<size_t> &bmax) const;
+    VAPoR::StretchedGrid *_make_grid_stretched(const DimsType &dims, const std::vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin,
+                                               const DimsType &bmax) const;
 
-    VAPoR::LayeredGrid *_make_grid_layered(const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin,
-                                           const std::vector<size_t> &bmax) const;
+    VAPoR::LayeredGrid *_make_grid_layered(const DimsType &dims, const std::vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin,
+                                           const DimsType &bmax) const;
 
-    VAPoR::CurvilinearGrid *_make_grid_curvilinear(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const std::vector<size_t> &dims, const std::vector<float *> &blkvec,
-                                                   const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax);
+    VAPoR::CurvilinearGrid *_make_grid_curvilinear(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const DimsType &dims, const std::vector<float *> &blkvec,
+                                                   const DimsType &bs, const DimsType &bmin, const DimsType &bmax);
 
     void _ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDims, std::vector<size_t> &faceDims, std::vector<size_t> &edgeDims,
                       UnstructuredGrid::Location &location,    // node,face, edge
                       size_t &maxVertexPerFace, size_t &maxFacePerVertex, long &vertexOffset, long &faceOffset, long ts) const;
 
-    UnstructuredGrid2D *_make_grid_unstructured2d(size_t ts, int level, int lod, const DC::DataVar &dvarinfo, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims,
-                                                  const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<int *> &conn_blkvec,
-                                                  const vector<size_t> &conn_bs, const vector<size_t> &conn_bmin, const vector<size_t> &conn_bmax);
+    UnstructuredGrid2D *_make_grid_unstructured2d(size_t ts, int level, int lod, const DC::DataVar &dvarinfo, const vector<DC::CoordVar> &cvarsinfo, const DimsType,
+                                                  const vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax, const vector<int *> &conn_blkvec,
+                                                  const DimsType &conn_bs, const DimsType &conn_bmin, const DimsType &conn_bmax);
 
-    VAPoR::Grid *_make_grid(size_t ts, int level, int lod, const VAPoR::DC::DataVar &var, const std::vector<size_t> &roi_dims, const std::vector<size_t> &dims, const std::vector<float *> &blkvec,
-                            const std::vector<std::vector<size_t>> &bsvec, const std::vector<std::vector<size_t>> &bminvec, const std::vector<std::vector<size_t>> &bmaxvec,
-                            const vector<int *> &conn_blkvec, const vector<vector<size_t>> &conn_bsvec, const vector<vector<size_t>> &conn_bminvec, const vector<vector<size_t>> &conn_bmaxvec);
+    VAPoR::Grid *_make_grid(size_t ts, int level, int lod, const VAPoR::DC::DataVar &var, const DimsType &roi_dims, const DimsType &dims, const std::vector<float *> &blkvec,
+                            const std::vector<DimsType> &bsvec, const std::vector<DimsType> &bminvec, const std::vector<DimsType> &bmaxvec,
+                            const vector<int *> &conn_blkvec, const vector<DimsType> &conn_bsvec, const vector<DimsType> &conn_bminvec, const vector<DimsType> &conn_bmaxvec);
 
     string _get_grid_type(string varname) const;
 
     int _find_bounding_grid(size_t ts, string varname, int level, int lod, CoordType min, CoordType max, DimsType &min_ui, DimsType &max_ui);
 
-    void _setupCoordVecsHelper(string data_varname, const vector<size_t> &data_dimlens, const vector<size_t> &data_bmin, const vector<size_t> &data_bmax, string coord_varname, int order,
-                               vector<size_t> &coord_dimlens, vector<size_t> &coord_bmin, vector<size_t> &coord_bmax, bool structured, long ts) const;
+    void _setupCoordVecsHelper(string data_varname, const DimsType &data_dimlens, const DimsType &data_bmin, const DimsType &data_bmax, string coord_varname, int order,
+                               DimsType &coord_dimlens, DimsType &coord_bmin, DimsType &coord_bmax, bool structured, long ts) const;
 
-    int _setupCoordVecs(size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, vector<string> &varnames, vector<size_t> &roi_dims,
-                        vector<vector<size_t>> &dimsvec, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bminvec, vector<vector<size_t>> &bmaxvec, bool structured) const;
+    int _setupCoordVecs(size_t ts, string varname, int level, int lod, const DimsType &min, const DimsType &max, vector<string> &varnames, DimsType &roi_dims,
+                        vector<DimsType> &dimsvec, vector<DimsType> &bsvec, vector<DimsType> &bminvec, vector<DimsType> &bmaxvec, bool structured) const;
 
-    int _setupConnVecs(size_t ts, string varname, int level, int lod, vector<string> &varnames, vector<vector<size_t>> &dimsvec, vector<vector<size_t>> &bsvec, vector<vector<size_t>> &bminvec,
-                       vector<vector<size_t>> &bmaxvec) const;
+    int _setupConnVecs(size_t ts, string varname, int level, int lod, vector<string> &varnames, vector<DimsType> &dimsvec, vector<DimsType> &bsvec, vector<DimsType> &bminvec,
+                       vector<DimsType> &bmaxvec) const;
 
     VAPoR::Grid *_getVariable(size_t ts, string varname, int level, int lod, bool lock, bool dataless);
 
-    VAPoR::Grid *_getVariable(size_t ts, string varname, int level, int lod, std::vector<size_t> min, std::vector<size_t> max, bool lock, bool dataless);
+    VAPoR::Grid *_getVariable(size_t ts, string varname, int level, int lod, DimsType min, DimsType max, bool lock, bool dataless);
 
     int _parseOptions(vector<string> &options);
 
-    template<typename T> T *_get_region_from_cache(size_t ts, string varname, int level, int lod, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax, bool lock);
+    template<typename T> T *_get_region_from_cache(size_t ts, string varname, int level, int lod, const DimsType &bmin, const DimsType &bmax, bool lock);
 
     template<typename T>
-    int _get_unblocked_region_from_fs(size_t ts, string varname, int level, int lod, const vector<size_t> &grid_dims, const vector<size_t> &grid_bs, const vector<size_t> &grid_min,
-                                      const vector<size_t> &grid_max, T *blks);
+    int _get_unblocked_region_from_fs(size_t ts, string varname, int level, int lod, const DimsType &grid_dims, const DimsType &grid_bs, const DimsType &grid_min,
+                                      const DimsType &grid_max, T *blks);
 
     template<typename T>
-    int _get_blocked_region_from_fs(size_t ts, string varname, int level, int lod, const vector<size_t> &file_bs, const vector<size_t> &file_dims, const vector<size_t> &grid_dims,
-                                    const vector<size_t> &grid_bs, const vector<size_t> &grid_min, const vector<size_t> &grid_max, T *blks);
+    int _get_blocked_region_from_fs(size_t ts, string varname, int level, int lod, const DimsType &file_bs, const DimsType &file_dims, const DimsType &grid_dims,
+                                    const DimsType &grid_bs, const DimsType &grid_min, const DimsType &grid_max, T *blks);
 
     template<typename T>
-    T *_get_region_from_fs(size_t ts, string varname, int level, int lod, const std::vector<size_t> &grid_dims, const std::vector<size_t> &grid_bs, const std::vector<size_t> &grid_bmin,
-                           const std::vector<size_t> &grid_bmax, bool lock);
+    T *_get_region_from_fs(size_t ts, string varname, int level, int lod, const DimsType &grid_dims, const DimsType &grid_bs, const DimsType &grid_bmin,
+                           const DimsType &grid_bmax, bool lock);
 
     template<typename T>
-    T *_get_region(size_t ts, string varname, int level, int lod, int nlods, const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<size_t> &bmin,
-                   const std::vector<size_t> &bmax, bool lock);
+    T *_get_region(size_t ts, string varname, int level, int lod, int nlods, const DimsType &dims, const DimsType &bs, const DimsType &bmin,
+                   const DimsType &bmax, bool lock);
 
     template<typename T>
-    int _get_regions(size_t ts, const std::vector<string> &varnames, int level, int lod, bool lock, const std::vector<std::vector<size_t>> &dimsvec, const std::vector<std::vector<size_t>> &bsvec,
-                     const std::vector<std::vector<size_t>> &bminvec, const std::vector<std::vector<size_t>> &bmaxvec, std::vector<T *> &blkvec);
+    int _get_regions(size_t ts, const std::vector<string> &varnames, int level, int lod, bool lock, const std::vector<DimsType> &dimsvec, const std::vector<DimsType> &bsvec,
+                     const std::vector<DimsType> &bminvec, const std::vector<DimsType> &bmaxvec, std::vector<T *> &blkvec);
 
     void _unlock_blocks(const void *blks);
 
     std::vector<string> _get_native_variables() const;
 
-    void *_alloc_region(size_t ts, string varname, int level, int lod, std::vector<size_t> bmin, std::vector<size_t> bmax, std::vector<size_t> bs, int element_sz, bool lock, bool fill);
+    void *_alloc_region(size_t ts, string varname, int level, int lod, DimsType bmin, DimsType bmax, DimsType bs, int element_sz, bool lock, bool fill);
 
-    void _free_region(size_t ts, string varname, int level, int lod, std::vector<size_t> bmin, std::vector<size_t> bmax, bool forceFlag = false);
+    void _free_region(size_t ts, string varname, int level, int lod, DimsType bmin, DimsType bmax, bool forceFlag = false);
 
     bool _free_lru();
     void _free_var(string varname);
@@ -829,17 +829,17 @@ private:
 
     int _openVariableRead(size_t ts, string varname, int level, int lod);
 
-    template<class T> int _readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
-    template<class T> int _readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
+    template<class T> int _readRegionBlock(int fd, const DimsType &min, const DimsType &max, T *region);
+    template<class T> int _readRegion(int fd, const DimsType &min, const DimsType &max, T *region);
     int                   _closeVariable(int fd);
 
     int _getVar(string varname, int level, int lod, float *data);
 
     int _getVar(size_t ts, string varname, int level, int lod, float *data);
 
-    void _getLonExtents(std::vector<float> &lons, std::vector<size_t> dims, float &min, float &max) const;
+    void _getLonExtents(std::vector<float> &lons, DimsType dims, float &min, float &max) const;
 
-    void _getLatExtents(std::vector<float> &lons, std::vector<size_t> dims, float &min, float &max) const;
+    void _getLatExtents(std::vector<float> &lons, DimsType dims, float &min, float &max) const;
 
     int _getCoordPairExtents(string lon, string lat, float &lonmin, float &lonmax, float &latmin, float &latmax, long ts);
 

@@ -736,7 +736,7 @@ public:
     //! \note The value of returned is not used within the Grid class
     //! and any value can be stored here using SetMinAbs().
     //!
-    virtual std::vector<size_t> GetMinAbs() const { return (_minAbs); }
+    virtual DimsType GetMinAbs() const { return (_minAbs); }
 
     //! Set the absolute minimum grid coordinate
     //!
@@ -745,9 +745,8 @@ public:
     //! the offset to the first grid point in the mesh. The default is the
     //! zero vector
     //
-    virtual void SetMinAbs(const std::vector<size_t> &minAbs)
+    virtual void SetMinAbs(const DimsType &minAbs)
     {
-        VAssert(minAbs.size() == this->GetNumDimensions());
         _minAbs = minAbs;
     }
 
@@ -1271,7 +1270,7 @@ private:
     std::vector<size_t>  _bdimsDeprecated;        // legacy API
     std::vector<float *> _blks;
     std::vector<bool>    _periodic;    // periodicity of boundaries
-    std::vector<size_t>  _minAbs;      // Offset to start of grid
+    DimsType  _minAbs;      // Offset to start of grid
     size_t               _topologyDimension = 0;
     float                _missingValue = std::numeric_limits<float>::infinity();
     bool                 _hasMissing = false;

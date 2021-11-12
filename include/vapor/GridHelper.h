@@ -38,15 +38,15 @@ public:
     //  bminvec: ROI offsets in blocks, full domain, data and coordinates
     //  bmaxvec: ROI offsets in blocks, full domain, data and coordinates
     //
-    StructuredGrid *MakeGridStructured(string gridType, size_t ts, int level, int lod, const DC::DataVar &var, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<size_t> &roi_dims,
-                                       const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<std::vector<size_t>> &bsvec,
-                                       const std::vector<std::vector<size_t>> &bminvec, const std::vector<std::vector<size_t>> &bmaxvec);
+    StructuredGrid *MakeGridStructured(string gridType, size_t ts, int level, int lod, const DC::DataVar &var, const std::vector<DC::CoordVar> &cvarsinfo, const DimsType &roi_dims,
+                                       const DimsType &dims, const std::vector<float *> &blkvec, const std::vector<DimsType> &bsvec,
+                                       const std::vector<DimsType> &bminvec, const std::vector<DimsType> &bmaxvec);
 
-    UnstructuredGrid *MakeGridUnstructured(string gridType, size_t ts, int level, int lod, const DC::DataVar &var, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<size_t> &roi_dims,
-                                           const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<std::vector<size_t>> &bsvec,
-                                           const std::vector<std::vector<size_t>> &bminvec, const std::vector<std::vector<size_t>> &bmaxvec, const std::vector<int *> &conn_blkvec,
-                                           const std::vector<std::vector<size_t>> &conn_bsvec, const std::vector<std::vector<size_t>> &conn_bminvec,
-                                           const std::vector<std::vector<size_t>> &conn_bmaxvec, const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims,
+    UnstructuredGrid *MakeGridUnstructured(string gridType, size_t ts, int level, int lod, const DC::DataVar &var, const std::vector<DC::CoordVar> &cvarsinfo, const DimsType &roi_dims,
+                                           const DimsType &dims, const std::vector<float *> &blkvec, const std::vector<DimsType> &bsvec,
+                                           const std::vector<DimsType> &bminvec, const std::vector<DimsType> &bmaxvec, const std::vector<int *> &conn_blkvec,
+                                           const std::vector<DimsType> &conn_bsvec, const std::vector<DimsType> &conn_bminvec,
+                                           const std::vector<DimsType> &conn_bmaxvec, const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims,
                                            const std::vector<size_t> &edgeDims, UnstructuredGrid::Location location, size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset,
                                            long faceOffset);
 
@@ -116,40 +116,40 @@ private:
 
     lru_cache<string, std::shared_ptr<const QuadTreeRectangleP>> _qtrCache;
 
-    RegularGrid *_make_grid_regular(const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax
+    RegularGrid *_make_grid_regular(const DimsType &dims, const std::vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax
 
     ) const;
 
-    StretchedGrid *_make_grid_stretched(const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin,
-                                        const std::vector<size_t> &bmax) const;
+    StretchedGrid *_make_grid_stretched(const DimsType &dims, const std::vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin,
+                                        const DimsType &bmax) const;
 
-    LayeredGrid *_make_grid_layered(const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin,
-                                    const std::vector<size_t> &bmax) const;
+    LayeredGrid *_make_grid_layered(const DimsType &dims, const std::vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin,
+                                    const DimsType &bmax) const;
 
-    CurvilinearGrid *_make_grid_curvilinear(size_t ts, int level, int lod, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<size_t> &dims, const std::vector<float *> &blkvec,
-                                            const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax);
+    CurvilinearGrid *_make_grid_curvilinear(size_t ts, int level, int lod, const std::vector<DC::CoordVar> &cvarsinfo, const DimsType &dims, const std::vector<float *> &blkvec,
+                                            const DimsType &bs, const DimsType &bmin, const DimsType &bmax);
 
-    UnstructuredGrid2D *_make_grid_unstructured2d(size_t ts, int level, int lod, const DC::DataVar &var, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<size_t> &dims,
-                                                  const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax,
-                                                  const std::vector<int *> &conn_blkvec, const std::vector<size_t> &conn_bs, const std::vector<size_t> &conn_bmin, const std::vector<size_t> &conn_bmax,
+    UnstructuredGrid2D *_make_grid_unstructured2d(size_t ts, int level, int lod, const DC::DataVar &var, const std::vector<DC::CoordVar> &cvarsinfo, const DimsType &dims,
+                                                  const std::vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax,
+                                                  const std::vector<int *> &conn_blkvec, const DimsType &conn_bs, const DimsType &conn_bmin, const DimsType &conn_bmax,
                                                   const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, UnstructuredGrid::Location location,
                                                   size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset, long faceOffset);
 
-    UnstructuredGridLayered *_make_grid_unstructured_layered(size_t ts, int level, int lod, const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims,
-                                                             const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax,
-                                                             const vector<int *> &conn_blkvec, const vector<size_t> &conn_bs, const vector<size_t> &conn_bmin, const vector<size_t> &conn_bmax,
+    UnstructuredGridLayered *_make_grid_unstructured_layered(size_t ts, int level, int lod, const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo, const DimsType &dims,
+                                                             const vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax,
+                                                             const vector<int *> &conn_blkvec, const DimsType &conn_bs, const DimsType &conn_bmin, const DimsType &conn_bmax,
                                                              const vector<size_t> &vertexDims, const vector<size_t> &faceDims, const vector<size_t> &edgeDims, UnstructuredGrid::Location location,
                                                              size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset, long faceOffset);
 
-    UnstructuredGrid3D *_make_grid_unstructured_3d(size_t ts, int level, int lod, const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims,
-                                                   const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<int *> &conn_blkvec,
-                                                   const vector<size_t> &conn_bs, const vector<size_t> &conn_bmin, const vector<size_t> &conn_bmax, const vector<size_t> &vertexDims,
+    UnstructuredGrid3D *_make_grid_unstructured_3d(size_t ts, int level, int lod, const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo, const DimsType &dims,
+                                                   const vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax, const vector<int *> &conn_blkvec,
+                                                   const DimsType &conn_bs, const DimsType &conn_bmin, const DimsType &conn_bmax, const vector<size_t> &vertexDims,
                                                    const vector<size_t> &faceDims, const vector<size_t> &edgeDims, UnstructuredGrid::Location location, size_t maxVertexPerFace,
                                                    size_t maxFacePerVertex, long vertexOffset, long faceOffset);
 
-    void _makeGridHelper(const DC::DataVar &var, const std::vector<size_t> &roi_dims, const std::vector<size_t> &dims, Grid *g) const;
+    void _makeGridHelper(const DC::DataVar &var, const DimsType &roi_dims, const DimsType &dims, Grid *g) const;
 
-    string _getQuadTreeRectangleKey(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &bmin, const vector<size_t> &bmax) const;
+    string _getQuadTreeRectangleKey(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const DimsType &bmin, const DimsType &bmax) const;
 };
 
 };    // namespace VAPoR
