@@ -19,7 +19,7 @@ PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
     Add(_xSlider);
     Add(_ySlider);
     Add(_zSlider);
-    Add(new PLabel("Slice origin is shown as yellow crosshair"));
+    Add(new PLabel("Slice origin is shown in-scene as a yellow crosshair"));
 }
 
 void PSliceOriginSelector::updateGUI() const
