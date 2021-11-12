@@ -10,7 +10,6 @@
 #include <vapor/GLManager.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
-#include <glm/gtx/string_cast.hpp>
 #include <vapor/ConvexHull.h>
 
 #define X  0
