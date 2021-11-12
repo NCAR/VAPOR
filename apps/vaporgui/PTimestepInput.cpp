@@ -1,7 +1,7 @@
 #include "PTimestepInput.h"
-#include "NavigationUtils.h"
+#include <vapor/NavigationUtils.h>
 #include "VIntSpinBox.h"
-#include "AnimationParams.h"
+#include <vapor/AnimationParams.h>
 
 
 PTimestepInput::PTimestepInput(VAPoR::ControlExec *ce) : PWidget("", _input = new VIntSpinBox(0, 1)), _ce(ce) { connect(_input, &VIntSpinBox::ValueChanged, this, &PTimestepInput::inputChanged); }

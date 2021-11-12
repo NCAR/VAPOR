@@ -12,7 +12,7 @@
 //			National Center for Atmospheric Research
 //			PO 3000, Boulder, Colorado
 
-#include "BookmarkParams.h"
+#include <vapor/BookmarkParams.h>
 
 using namespace VAPoR;
 

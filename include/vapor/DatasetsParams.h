@@ -9,6 +9,8 @@ namespace VAPoR {
 //
 // A collection of Dataset params
 //
+// These are not the dataset params. These are the python script generated var params.
+//
 class PARAMS_API DatasetsParams : public ParamsBase {
 public:
     DatasetsParams(ParamsBase::StateSave *ssave);

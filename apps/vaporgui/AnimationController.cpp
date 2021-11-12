@@ -1,7 +1,7 @@
 #include "AnimationController.h"
 #include <vapor/ControlExecutive.h>
-#include "AnimationParams.h"
-#include "NavigationUtils.h"
+#include <vapor/AnimationParams.h>
+#include <vapor/NavigationUtils.h>
 
 using namespace VAPoR;
 

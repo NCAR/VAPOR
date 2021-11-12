@@ -21,9 +21,6 @@ set (SRCS
 	BarbEventRouter.cpp
 	BarbEventRouter.h
 	BannerGUI.cpp
-	AnimationParams.cpp
-	GUIStateParams.cpp
-	MouseModeParams.cpp
 	SettingsParams.cpp
 	main.cpp
 	MainForm.cpp
@@ -31,7 +28,6 @@ set (SRCS
     VizWin.cpp
 	VizWinMgr.cpp
 	TabManager.cpp
-	TrackBall.cpp
 	ImageEventRouter.cpp
 	ImageEventRouter.h
 	ContourEventRouter.cpp
@@ -251,12 +247,8 @@ set (SRCS
     PCornerSelector.h
     RenderEventRouterGUI.cpp
     RenderEventRouterGUI.h
-    BookmarkParams.cpp
-    BookmarkParams.h
     CheckForUpdate.cpp
     CheckForUpdate.h
-    NavigationUtils.cpp
-    NavigationUtils.h
     PDatasetTransformWidget.cpp
     PDatasetTransformWidget.h
     PCameraControlsSection.cpp
@@ -302,9 +294,7 @@ set (SRCS
 	GLWidget.h
 	VizWin.h
 	Core3_2_context.h
-	TrackBall.h
     Manip.h 
-	AnimationParams.h
 	AnnotationEventRouter.h
 	BannerGUI.h
 	FlowEventRouter.h
@@ -312,8 +302,6 @@ set (SRCS
 	CopyRegionWidget.h
 	CopyRegionAnnotationWidget.h
 	FileOperationChecker.h
-	GUIStateParams.h
-	MouseModeParams.h
 	PlotParams.h
     PythonVariablesParams.h
 	QIntValidatorWithFixup.h

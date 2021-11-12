@@ -7,7 +7,7 @@
 #include <qtableview.h>
 #include <vapor/MyBase.h>
 #include <QMessageBox>
-#include "GUIStateParams.h"
+#include <vapor/GUIStateParams.h>
 #include "ui_LeftPanel.h"
 #include "ui_NewRendererDialog.h"
 #include "VaporTable.h"

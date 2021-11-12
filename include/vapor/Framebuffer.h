@@ -36,6 +36,7 @@ public:
     bool        IsComplete() const;
     int         GetStatus() const;
     const char *GetStatusString() const;
+    static const char *GetStatusString(int status);
     void        Bind();
     void        UnBind();
     void        SetSize(int width, int height);

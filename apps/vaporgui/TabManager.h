@@ -27,8 +27,8 @@
 #include <vapor/ParamsMgr.h>
 #include <AnimationTab.h>
 #include <ViewpointTab.h>
-#include "GUIStateParams.h"
-#include "NavigationUtils.h"
+#include <vapor/GUIStateParams.h>
+#include <vapor/NavigationUtils.h>
 class RenderHolder;
 class EventRouter;
 class RenderEventRouter;

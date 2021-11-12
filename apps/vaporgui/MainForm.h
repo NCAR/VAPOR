@@ -37,9 +37,9 @@
 #include <QWidgetAction>
 #include <chrono>
 #include <vapor/ControlExecutive.h>
-#include "GUIStateParams.h"
+#include <vapor/GUIStateParams.h>
 #include "SettingsParams.h"
-#include "AnimationParams.h"
+#include <vapor/AnimationParams.h>
 #include "AnimationController.h"
 //#include "MiscParams.h"
 #include "TabManager.h"
