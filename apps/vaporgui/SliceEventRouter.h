@@ -20,9 +20,9 @@ public:
     bool          Supports3DVariables() const { return true; }
 
 protected:
-    PDoubleSliderEdit* _xOrigin;
-    PDoubleSliderEdit* _yOrigin;
-    PDoubleSliderEdit* _zOrigin;
+    PDoubleSliderEdit *_xOrigin;
+    PDoubleSliderEdit *_yOrigin;
+    PDoubleSliderEdit *_zOrigin;
 
     string _getDescription() const;
     string _getSmallIconImagePath() const { return "Slice_small.png"; }

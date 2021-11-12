@@ -25,11 +25,12 @@ public:
 
     virtual ~SliceRenderer();
 
-    void getVecs(glm::vec3& vec1,glm::vec3& vec2,glm::vec3& vec3,glm::vec3& vec4) {
-        vec1=v1;
-        vec2=v2;
-        vec3=v3;
-        vec4=v4;
+    void getVecs(glm::vec3 &vec1, glm::vec3 &vec2, glm::vec3 &vec3, glm::vec3 &vec4)
+    {
+        vec1 = v1;
+        vec2 = v2;
+        vec3 = v3;
+        vec4 = v4;
     }
 
 protected:
@@ -61,34 +62,34 @@ private:
     struct _vertex {
         glm::vec3 threeD;
         glm::vec2 twoD;
-    }; 
+    };
 
     void _renderFast() const;
 
-    void _rotate();
-    void _findIntercepts( glm::vec3& origin, glm::vec3& normal, std::vector<_vertex>& vertices, bool stretch) const;
-    stack<glm::vec2> _2DConvexHull( std::vector<_vertex>& vertices ) const;
-    std::vector<glm::vec2> _makeRectangle2D( const std::vector<_vertex>& vertices, stack<glm::vec2>& polygon2D ) const;
-    std::vector<glm::vec3> _makeRectangle3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& polygon2D ) const;
-    std::vector<glm::vec3> _makePolygon3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& polygon2D ) const;
-    
+    void                   _rotate();
+    void                   _findIntercepts(glm::vec3 &origin, glm::vec3 &normal, std::vector<_vertex> &vertices, bool stretch) const;
+    stack<glm::vec2>       _2DConvexHull(std::vector<_vertex> &vertices) const;
+    std::vector<glm::vec2> _makeRectangle2D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
+    std::vector<glm::vec3> _makeRectangle3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
+    std::vector<glm::vec3> _makePolygon3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
+
     void _initVAO();
     void _initTexCoordVBO();
     void _initVertexVBO();
 
-    bool _isColormapCacheDirty() const;
-    bool _isDataCacheDirty() const;
-    bool _isBoxCacheDirty() const;
-    void _getModifiedExtents(vector<double> &min, vector<double> &max) const;
-    int  _saveCacheParams();
-    void _resetColormapCache();
-    int  _resetBoxCache();
-    int  _resetDataCache(bool fast);
-    void _initTextures();
-    void _createDataTexture(float *dataValues);
-    int  _saveTextureData();
-    void _populateData(float *dataValues, Grid *grid) const;
-    glm::vec3 _getOrthogonal( const glm::vec3 u ) const;
+    bool      _isColormapCacheDirty() const;
+    bool      _isDataCacheDirty() const;
+    bool      _isBoxCacheDirty() const;
+    void      _getModifiedExtents(vector<double> &min, vector<double> &max) const;
+    int       _saveCacheParams();
+    void      _resetColormapCache();
+    int       _resetBoxCache();
+    int       _resetDataCache(bool fast);
+    void      _initTextures();
+    void      _createDataTexture(float *dataValues);
+    int       _saveTextureData();
+    void      _populateData(float *dataValues, Grid *grid) const;
+    glm::vec3 _getOrthogonal(const glm::vec3 u) const;
     glm::vec3 _rotateVector(glm::vec3 vector, glm::quat rotation) const;
 
     double _newWaySeconds;
@@ -103,7 +104,7 @@ private:
 
     void _setVertexPositions();
 
-    glm::vec3 _axis1, _axis2, _normal, _origin;
+    glm::vec3              _axis1, _axis2, _normal, _origin;
     std::vector<glm::vec3> _polygon3D;
     std::vector<glm::vec3> _rectangle3D;
     std::vector<glm::vec2> _rectangle2D;

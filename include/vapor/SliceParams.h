@@ -39,10 +39,10 @@ public:
             return GetVariableName();
     }
 
-    int GetSampleRate() const;
-    void SetSampleRate(int rate);
-    int GetDefaultSampleRate() const;
-    void SetCachedValues(std::vector<double> values);
+    int                 GetSampleRate() const;
+    void                SetSampleRate(int rate);
+    int                 GetDefaultSampleRate() const;
+    void                SetCachedValues(std::vector<double> values);
     std::vector<double> GetCachedValues() const;
 
     static const string _sampleRateTag;

@@ -78,7 +78,7 @@ int SliceParams::Initialize()
     for (int i = 0; i < 3; i++) sampleLocation[i] = (minExt[i] + maxExt[i]) / 2.0;
     SetValueDoubleVec(OriginTag, "", sampleLocation);
 
-    std::cout << "SliceParams::Initialize " << sampleLocation[0] << " " <<sampleLocation[1] << " " << sampleLocation[2] << std::endl;
+    std::cout << "SliceParams::Initialize " << sampleLocation[0] << " " << sampleLocation[1] << " " << sampleLocation[2] << std::endl;
 
     SetValueDouble(XOriginTag, "", sampleLocation[0]);
     SetValueDouble(YOriginTag, "", sampleLocation[1]);

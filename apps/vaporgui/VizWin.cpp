@@ -649,9 +649,7 @@ void VizWin::_renderHelper(bool fast)
 
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
-        if ( dynamic_cast<VAPoR::SliceParams*>(_getRenderParams()) != nullptr ) {
-            _updateSliceOriginGlyph();
-        }
+        if (dynamic_cast<VAPoR::SliceParams *>(_getRenderParams()) != nullptr) { _updateSliceOriginGlyph(); }
     } else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
 #ifndef WIN32
         _glManager->PixelCoordinateSystemPush();
@@ -863,15 +861,16 @@ void VizWin::updateManip(bool initialize)
     GL_ERR_BREAK();
 }
 
-void VizWin::_updateSliceOriginGlyph() {
-    VAPoR::SliceParams* sp = dynamic_cast<VAPoR::SliceParams*>(_getRenderParams());
+void VizWin::_updateSliceOriginGlyph()
+{
+    VAPoR::SliceParams *sp = dynamic_cast<VAPoR::SliceParams *>(_getRenderParams());
     if (sp == nullptr) return;
 
-    double xOrigin = sp->GetValueDouble(SliceParams::XOriginTag,0.);
-    double yOrigin = sp->GetValueDouble(SliceParams::YOriginTag,0.);
-    double zOrigin = sp->GetValueDouble(SliceParams::ZOriginTag,0.);
+    double xOrigin = sp->GetValueDouble(SliceParams::XOriginTag, 0.);
+    double yOrigin = sp->GetValueDouble(SliceParams::YOriginTag, 0.);
+    double zOrigin = sp->GetValueDouble(SliceParams::ZOriginTag, 0.);
 
-    std::vector<double> scales  = _getDataMgrTransform()->GetScales();
+    std::vector<double> scales = _getDataMgrTransform()->GetScales();
     std::vector<double> scales2 = sp->GetTransform()->GetScales();
     scales[0] *= scales2[0];
     scales[1] *= scales2[1];
@@ -892,27 +891,27 @@ void VizWin::_updateSliceOriginGlyph() {
 
     std::vector<double> min, max;
     dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, min, max);
-    double p = .03;
-    std::vector<double> width = {(max[0]-min[0])*p, (max[1]-min[1])*p, (max[2]-min[2])*p};
+    double              p = .03;
+    std::vector<double> width = {(max[0] - min[0]) * p, (max[1] - min[1]) * p, (max[2] - min[2]) * p};
 
 
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
-    LegacyGL *lgl = _glManager->legacy;    
-    lgl->Color4f(1.,1.,0.,1.);
+    LegacyGL *lgl = _glManager->legacy;
+    lgl->Color4f(1., 1., 0., 1.);
 
     lgl->Begin(GL_LINES);
-    lgl->Vertex3f( xOrigin, yOrigin, zOrigin-width[2] );
-    lgl->Vertex3f( xOrigin, yOrigin, zOrigin+width[2] );
+    lgl->Vertex3f(xOrigin, yOrigin, zOrigin - width[2]);
+    lgl->Vertex3f(xOrigin, yOrigin, zOrigin + width[2]);
     lgl->End();
-    
+
     lgl->Begin(GL_LINES);
-    lgl->Vertex3f( xOrigin-width[0], yOrigin, zOrigin );
-    lgl->Vertex3f( xOrigin+width[0], yOrigin, zOrigin );
+    lgl->Vertex3f(xOrigin - width[0], yOrigin, zOrigin);
+    lgl->Vertex3f(xOrigin + width[0], yOrigin, zOrigin);
     lgl->End();
-    
+
     lgl->Begin(GL_LINES);
-    lgl->Vertex3f( xOrigin, yOrigin-width[1], zOrigin );
-    lgl->Vertex3f( xOrigin, yOrigin+width[1], zOrigin );
+    lgl->Vertex3f(xOrigin, yOrigin - width[1], zOrigin);
+    lgl->Vertex3f(xOrigin, yOrigin + width[1], zOrigin);
     lgl->End();
 }
