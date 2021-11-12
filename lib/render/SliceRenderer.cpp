@@ -137,6 +137,9 @@ int SliceRenderer::_resetDataCache(bool fast)
     _cacheParams.yRotation = p->GetValueDouble(SliceParams::YRotationTag,0);
     _cacheParams.zRotation = p->GetValueDouble(SliceParams::ZRotationTag,0);
 
+    _cacheParams.xOrigin = p->GetValueDouble(SliceParams::XOriginTag,0);
+    _cacheParams.yOrigin = p->GetValueDouble(SliceParams::YOriginTag,0);
+    _cacheParams.zOrigin = p->GetValueDouble(SliceParams::ZOriginTag,0);
     /*if (fast) {
         _textureSideSize = 50;
         std::cout << "_resetDataCache fast " << _textureSideSize << std::endl;
@@ -203,10 +206,18 @@ void SliceRenderer::_rotate()
 {
     std::vector<double> boxMin = _cacheParams.boxMin;
     std::vector<double> boxMax = _cacheParams.boxMax;
+    double xMid = (boxMax[X]-boxMin[X])/2. + boxMin[X];
+    double yMid = (boxMax[Y]-boxMin[Y])/2. + boxMin[Y];
+    double zMid = (boxMax[Z]-boxMin[Z])/2. + boxMin[Z];
+    
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    _origin = { p->GetValueDouble(SliceParams::XOriginTag, xMid),
+                p->GetValueDouble(SliceParams::YOriginTag, yMid),
+                p->GetValueDouble(SliceParams::ZOriginTag, zMid)};
 
-    _origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
-                        (boxMax[Y]-boxMin[Y])/2. + boxMin[Y], 
-                        (boxMax[Z]-boxMin[Z])/2. + boxMin[Z]};
+    //_origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
+    //                    (boxMax[Y]-boxMin[Y])/2. + boxMin[Y], 
+    //                    (boxMax[Z]-boxMin[Z])/2. + boxMin[Z]};
 
     // which we will use to project our polygon into 2D space.  First rotate XY plane with quaternion.
     glm::vec3 angles( M_PI*_cacheParams.xRotation/180., M_PI*_cacheParams.yRotation/180., M_PI*_cacheParams.zRotation/180. );
@@ -438,8 +449,16 @@ int SliceRenderer::_saveTextureData()
     _rotate();
     _setVertexPositions();
 
-    std::vector<double> stretch = GetViewpointParams()->GetStretchFactors();
-    float dx = (_rectangle2D[1].x-_rectangle2D[0].x);
+    //std::vector<double> stretch = GetViewpointParams()->GetStretchFactors();
+    /*std::vector<double> stretch = _controlExec->GetDataStatus()->getStretchFactors();
+    std::vector<glm::vec3> stretchedRectangle3D = _rectangle3D;
+    for (auto& vertex : stretchedRectangle3D) {
+        vertex.x *= stretch[X];
+        vertex.y *= stretch[Y];
+        vertex.z *= stretch[Z];
+    }*/
+    //std::vector<glm::vec2> stretchedRectangle2D =  
+    /*float dx = (_rectangle2D[1].x-_rectangle2D[0].x);
     float dy = (_rectangle2D[1].y-_rectangle2D[0].y);
     float xyRatio = dx/dy;
     if(xyRatio >= 1) {
@@ -448,9 +467,10 @@ int SliceRenderer::_saveTextureData()
     }
     else {
         _xSamples = _textureSideSize*xyRatio;
-        std::cout << "xSamples " << _xSamples << " " << stretch[2] << std::endl;
         _ySamples = _textureSideSize;
-    }
+    }*/
+    _xSamples = _textureSideSize;
+    _ySamples = _textureSideSize;
   
     std::cout << "xsamples ysamples " << _xSamples << " " << _ySamples <<std::endl;
  
@@ -501,6 +521,10 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.yRotation != p->GetValueDouble(SliceParams::YRotationTag,0)) return true;
     if (_cacheParams.zRotation != p->GetValueDouble(SliceParams::ZRotationTag,0)) return true;
 
+    if (_cacheParams.xOrigin != p->GetValueDouble(SliceParams::XOriginTag,0)) return true;
+    if (_cacheParams.yOrigin != p->GetValueDouble(SliceParams::YOriginTag,0)) return true;
+    if (_cacheParams.zOrigin != p->GetValueDouble(SliceParams::ZOriginTag,0)) return true;
+
     if (_cacheParams.textureSampleRate != p->GetSampleRate()) return true;
 
     return false;
@@ -541,8 +565,8 @@ void SliceRenderer::_getModifiedExtents(vector<double> &min, vector<double> &max
     VAssert(min.size() == 3);
     VAssert(max.size() == 3);
 
-    vector<double> sampleLocation = p->GetValueDoubleVec(p->SampleLocationTag);
-    VAssert(sampleLocation.size() == 3);
+    //vector<double> sampleLocation = p->GetValueDoubleVec(p->OriginTag);
+    //VAssert(sampleLocation.size() == 3);
 }
 
 int SliceRenderer::_paintGL(bool fast)
@@ -580,23 +604,19 @@ int SliceRenderer::_paintGL(bool fast)
     // This can and often will extend beyond the Box
     lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
-        double foo=0.;
-        if(_rectangle3D.size()) {
-            for (int i=0; i<_rectangle3D.size()-1; i++) {
-                lgl->Color4f(1., 1., foo, 1.);
-                glm::vec3 vert1 = _rectangle3D[i];
-                glm::vec3 vert2 = _rectangle3D[i+1];
-                lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
-                lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
-                foo=foo+.33;
-            }
-            lgl->Color4f(1., 1., foo, 1.);
-            glm::vec3 vert1 = _rectangle3D[3];
-            glm::vec3 vert2 = _rectangle3D[0];
+    lgl->Color4f(1., 1., 0., 1.);
+    if(_rectangle3D.size()) {
+        for (int i=0; i<_rectangle3D.size()-1; i++) {
+            glm::vec3 vert1 = _rectangle3D[i];
+            glm::vec3 vert2 = _rectangle3D[i+1];
             lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
             lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
-        
         }
+        glm::vec3 vert1 = _rectangle3D[3];
+        glm::vec3 vert2 = _rectangle3D[0];
+        lgl->Vertex3f(vert1.x,vert1.y,vert1.z);
+        lgl->Vertex3f(vert2.x,vert2.y,vert2.z);
+    }
     lgl->End();
 #endif 
       

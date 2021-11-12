@@ -9,6 +9,8 @@
 //! \brief Defines the Slice Renderer GUI
 //! \author Stas Jaroszynski
 
+class PDoubleSliderEdit;
+
 class SliceEventRouter : public RenderEventRouterGUI {
 public:
     SliceEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
@@ -18,6 +20,10 @@ public:
     bool          Supports3DVariables() const { return true; }
 
 protected:
+    PDoubleSliderEdit* _xOrigin;
+    PDoubleSliderEdit* _yOrigin;
+    PDoubleSliderEdit* _zOrigin;
+
     string _getDescription() const;
     string _getSmallIconImagePath() const { return "Slice_small.png"; }
     string _getIconImagePath() const { return "Slice.png"; }

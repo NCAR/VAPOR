@@ -53,6 +53,9 @@ private:
         double              xRotation;
         double              yRotation;
         double              zRotation;
+        double              xOrigin;
+        double              yOrigin;
+        double              zOrigin;
         std::vector<float>  tf_lut;
         std::vector<double> tf_minMax;
         std::vector<double> boxMin, boxMax;

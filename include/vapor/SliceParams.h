@@ -40,20 +40,25 @@ public:
     }
 
     int GetSampleRate() const;
-
     void SetSampleRate(int rate);
-
     int GetDefaultSampleRate() const;
-
     void SetCachedValues(std::vector<double> values);
-
     std::vector<double> GetCachedValues() const;
+    double GetXOrigin() const;
+    double GetYOrigin() const;
+    double GetZOrigin() const;
+    void SetXOrigin(double o);
+    void SetYOrigin(double o);
+    void SetZOrigin(double o);
 
     static const string _sampleRateTag;
-    static const string SampleLocationTag;
+    static const string OriginTag;
     static const string XRotationTag;
     static const string YRotationTag;
     static const string ZRotationTag;
+    static const string XOriginTag;
+    static const string YOriginTag;
+    static const string ZOriginTag;
 
 private:
     bool _initialized = false;

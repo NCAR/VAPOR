@@ -19,10 +19,13 @@ using namespace VAPoR;
 #define MIN_DEFAULT_SAMPLERATE 200
 
 const string SliceParams::_sampleRateTag = "SampleRate";
-const string SliceParams::SampleLocationTag = "SampleLocationTag";
+const string SliceParams::OriginTag = "OriginTag";
 const string SliceParams::XRotationTag = "XRotation";
 const string SliceParams::YRotationTag = "YRotation";
 const string SliceParams::ZRotationTag = "ZRotation";
+const string SliceParams::XOriginTag = "XOrigin";
+const string SliceParams::YOriginTag = "YOrigin";
+const string SliceParams::ZOriginTag = "ZOrigin";
 
 //
 // Register class with object factory!!!
@@ -73,7 +76,13 @@ int SliceParams::Initialize()
 
     std::vector<double> sampleLocation(3);
     for (int i = 0; i < 3; i++) sampleLocation[i] = (minExt[i] + maxExt[i]) / 2.0;
-    SetValueDoubleVec(SampleLocationTag, "", sampleLocation);
+    SetValueDoubleVec(OriginTag, "", sampleLocation);
+
+    std::cout << "SliceParams::Initialize " << sampleLocation[0] << " " <<sampleLocation[1] << " " << sampleLocation[2] << std::endl;
+
+    SetValueDouble(XOriginTag, "", sampleLocation[0]);
+    SetValueDouble(YOriginTag, "", sampleLocation[1]);
+    SetValueDouble(ZOriginTag, "", sampleLocation[2]);
 
     SetSampleRate(MIN_DEFAULT_SAMPLERATE);
 
@@ -108,3 +117,39 @@ void SliceParams::SetCachedValues(std::vector<double> values)
 }
 
 std::vector<double> SliceParams::GetCachedValues() const { return _cachedValues; }
+
+double SliceParams::GetXOrigin() const {
+    return GetValueDouble(XOriginTag,0.);
+}
+
+double SliceParams::GetYOrigin() const {
+    return GetValueDouble(YOriginTag,0.);
+}
+
+double SliceParams::GetZOrigin() const {
+    return GetValueDouble(ZOriginTag,0.);
+}
+
+void SliceParams::SetXOrigin(double o) {
+    std::vector<double> minExt, maxExt;
+    GetBox()->GetExtents(minExt, maxExt);
+    if (o < minExt[0]) o = minExt[0];
+    if (o > maxExt[0]) o = maxExt[0];
+    SetValueDouble( XOriginTag, "Set slice X origin", o );
+}
+
+void SliceParams::SetYOrigin(double o) {
+    std::vector<double> minExt, maxExt;
+    GetBox()->GetExtents(minExt, maxExt);
+    if (o < minExt[1]) o = minExt[1];
+    if (o > maxExt[1]) o = maxExt[1];
+    SetValueDouble( YOriginTag, "Set slice Y origin", o );
+}
+
+void SliceParams::SetZOrigin(double o) {
+    std::vector<double> minExt, maxExt;
+    GetBox()->GetExtents(minExt, maxExt);
+    if (o < minExt[2]) o = minExt[2];
+    if (o > maxExt[2]) o = maxExt[2];
+    SetValueDouble( ZOriginTag, "Set slice Z origin", o );
+}
