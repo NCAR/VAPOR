@@ -162,6 +162,8 @@ public:
         if (!_nodes[_rootidx].intersects(rectangle)) return (false);
 
         float ar = rectangle.hAspectRatio();
+        if (! (std::isfinite(ar))) return(false);
+
         if (ar <= maxAspectRatio && ar >= (1.0 / maxAspectRatio)) {
             return (node_t::insert(_nodes, _rootidx, rectangle, payload, _maxDepth));
         } else if (ar >= maxAspectRatio) {
