@@ -46,7 +46,6 @@ public:
     std::vector<double> GetCachedValues() const;
 
     static const string _sampleRateTag;
-    static const string OriginTag;
     static const string XRotationTag;
     static const string YRotationTag;
     static const string ZRotationTag;

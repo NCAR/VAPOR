@@ -19,7 +19,6 @@ using namespace VAPoR;
 #define MIN_DEFAULT_SAMPLERATE 200
 
 const string SliceParams::_sampleRateTag = "SampleRate";
-const string SliceParams::OriginTag = "OriginTag";
 const string SliceParams::XRotationTag = "XRotation";
 const string SliceParams::YRotationTag = "YRotation";
 const string SliceParams::ZRotationTag = "ZRotation";
@@ -76,9 +75,6 @@ int SliceParams::Initialize()
 
     std::vector<double> sampleLocation(3);
     for (int i = 0; i < 3; i++) sampleLocation[i] = (minExt[i] + maxExt[i]) / 2.0;
-    SetValueDoubleVec(OriginTag, "", sampleLocation);
-
-    std::cout << "SliceParams::Initialize " << sampleLocation[0] << " " << sampleLocation[1] << " " << sampleLocation[2] << std::endl;
 
     SetValueDouble(XOriginTag, "", sampleLocation[0]);
     SetValueDouble(YOriginTag, "", sampleLocation[1]);

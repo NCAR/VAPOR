@@ -187,18 +187,18 @@ private:
     const QObject *                                    _disableUserInputForAllExcept = nullptr;
     bool                                               _insideMessedUpQtEventLoop = false;
 
-    Statistics *         _stats;
-    Plot *               _plot;
-    PythonVariables *    _pythonVariables;
-    AppSettingsMenu *    _appSettingsMenu;
-    BannerGUI *          _banner;
-    VizSelectCombo *     _windowSelector;
-    VAPoR::ControlExec * _controlExec;
-    VAPoR::ParamsMgr *   _paramsMgr;
-    TabManager *         _tabMgr;
+    Statistics *        _stats;
+    Plot *              _plot;
+    PythonVariables *   _pythonVariables;
+    AppSettingsMenu *   _appSettingsMenu;
+    BannerGUI *         _banner;
+    VizSelectCombo *    _windowSelector;
+    VAPoR::ControlExec *_controlExec;
+    VAPoR::ParamsMgr *  _paramsMgr;
+    TabManager *        _tabMgr;
     AnimationController *_animationController;
-    VizWinMgr *          _vizWinMgr;
-    string               _capturingAnimationVizName;
+    VizWinMgr *         _vizWinMgr;
+    string              _capturingAnimationVizName;
 
     bool _stateChangeFlag;
     bool _sessionNewFlag;

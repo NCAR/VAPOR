@@ -29,11 +29,11 @@
 #include <vapor/DataMgrUtils.h>
 #include "vapor/GLManager.h"
 #include "vapor/FontManager.h"
+#include "vapor/LegacyGL.h"
 #include "vapor/TextLabel.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <vapor/ColorbarRenderer.h>
 #include <vapor/VolumeIsoParams.h>
-#include <vapor/SliceRenderer.h>
 
 #include <vapor/ViewpointParams.h>
 
