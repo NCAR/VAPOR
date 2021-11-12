@@ -37,7 +37,7 @@ std::vector<void *> Heap;
 
 void DeleteHeap()
 {
-    for (size_t i = 0; i < Heap.size(); i++) ::operator delete(Heap[i]);
+    for (size_t i = 0; i < Heap.size(); i++) std::free(Heap[i]);
 }
 
 template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, const vector<size_t> &dims)
@@ -54,9 +54,10 @@ template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, co
         nblocks *= nb;
     }
 
-    T *buf = new T[nblocks * block_size];
+    void *tmp = std::malloc(sizeof(T) * nblocks * block_size);
+    T *   buf = static_cast<T *>(tmp);
 
-    Heap.push_back(buf);
+    Heap.push_back(tmp);
 
     std::vector<T *> blks;
     for (size_t i = 0; i < nblocks; i++) { blks.push_back(buf + i * block_size); }
