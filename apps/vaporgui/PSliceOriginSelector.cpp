@@ -1,5 +1,6 @@
 #include "PSliceOriginSelector.h"
 #include "PSliderEdit.h"
+#include "PLabel.h"
 #include <vapor/SliceParams.h>
 #include <assert.h>
 
@@ -7,9 +8,9 @@ using namespace VAPoR;
 
 PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
 {
-    _xSlider = new PDoubleSliderEdit( SliceParams::XOriginTag, "X Origin");//)->EnableDynamicUpdate();
-    _ySlider = new PDoubleSliderEdit( SliceParams::YOriginTag, "Y Origin");//)->EnableDynamicUpdate();
-    _zSlider = new PDoubleSliderEdit( SliceParams::ZOriginTag, "Z Origin");//)->EnableDynamicUpdate();
+    _xSlider = new PDoubleSliderEdit( SliceParams::XOriginTag, "X Origin");
+    _ySlider = new PDoubleSliderEdit( SliceParams::YOriginTag, "Y Origin");
+    _zSlider = new PDoubleSliderEdit( SliceParams::ZOriginTag, "Z Origin");
     
     _xSlider->EnableDynamicUpdate();
     _ySlider->EnableDynamicUpdate();
@@ -18,6 +19,7 @@ PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
     Add(_xSlider);
     Add(_ySlider);
     Add(_zSlider);
+    Add( new PLabel("Slice origin is shown as yellow crosshair") );
 }
 
 void PSliceOriginSelector::updateGUI() const

@@ -877,9 +877,6 @@ void VizWin::_updateSliceOriginGlyph() {
     scales[1] *= scales2[1];
     scales[2] *= scales2[2];
 
-    std::cout << "void VizWin::_updateSliceOriginGlyph() { " << xOrigin << " " << yOrigin << " " << zOrigin << std::endl;
-    std::cout << "                                         " << scales[0] << " " << scales[1] << " " << scales[2]<< std::endl;
-
     int            refLevel = sp->GetRefinementLevel();
     int            lod = sp->GetCompressionLevel();
     string         varName = sp->GetVariableName();

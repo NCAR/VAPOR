@@ -25,11 +25,6 @@ public:
 
     virtual ~SliceRenderer();
 
-    glm::vec3 _axis1, _axis2, _normal, _origin;
-    std::vector<glm::vec3> _polygon3D;
-    std::vector<glm::vec3> _rectangle3D;
-    std::vector<glm::vec2> _rectangle2D;
-
     void getVecs(glm::vec3& vec1,glm::vec3& vec2,glm::vec3& vec3,glm::vec3& vec4) {
         vec1=v1;
         vec2=v2;
@@ -107,6 +102,11 @@ private:
     void _initializeState();
 
     void _setVertexPositions();
+
+    glm::vec3 _axis1, _axis2, _normal, _origin;
+    std::vector<glm::vec3> _polygon3D;
+    std::vector<glm::vec3> _rectangle3D;
+    std::vector<glm::vec2> _rectangle2D;
 
     bool _initialized;
     int  _textureSideSize;
