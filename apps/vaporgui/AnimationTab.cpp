@@ -3,6 +3,7 @@
 #include "PWidgets.h"
 #include "PTimestepInput.h"
 #include "PTotalTimestepsDisplay.h"
+#include "PTimestepSliderEdit.h"
 
 using namespace VAPoR;
 
@@ -12,7 +13,7 @@ AnimationTab::AnimationTab(QWidget *parent, ControlExec *ce) : QWidget(parent), 
     _g = new PGroup({
         new PSection("Timestep",
                      {
-                         new PLineItem("Current Timestep", new PTimestepInput(_controlExec)),
+                         new PTimestepSliderEdit(_controlExec),
                          new PTotalTimestepsDisplay(_controlExec),
                      }),
         new PSection("Animation",

@@ -273,6 +273,8 @@ set (SRCS
     NoticeBoard.h
     ParticleEventRouter.cpp
     ParticleEventRouter.h
+    PTimestepSliderEdit.cpp
+    PTimestepSliderEdit.h
 
 	# Need to include all files that request .ui files
 	Statistics.h
