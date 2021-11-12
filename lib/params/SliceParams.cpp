@@ -117,39 +117,3 @@ void SliceParams::SetCachedValues(std::vector<double> values)
 }
 
 std::vector<double> SliceParams::GetCachedValues() const { return _cachedValues; }
-
-double SliceParams::GetXOrigin() const {
-    return GetValueDouble(XOriginTag,0.);
-}
-
-double SliceParams::GetYOrigin() const {
-    return GetValueDouble(YOriginTag,0.);
-}
-
-double SliceParams::GetZOrigin() const {
-    return GetValueDouble(ZOriginTag,0.);
-}
-
-void SliceParams::SetXOrigin(double o) {
-    std::vector<double> minExt, maxExt;
-    GetBox()->GetExtents(minExt, maxExt);
-    if (o < minExt[0]) o = minExt[0];
-    if (o > maxExt[0]) o = maxExt[0];
-    SetValueDouble( XOriginTag, "Set slice X origin", o );
-}
-
-void SliceParams::SetYOrigin(double o) {
-    std::vector<double> minExt, maxExt;
-    GetBox()->GetExtents(minExt, maxExt);
-    if (o < minExt[1]) o = minExt[1];
-    if (o > maxExt[1]) o = maxExt[1];
-    SetValueDouble( YOriginTag, "Set slice Y origin", o );
-}
-
-void SliceParams::SetZOrigin(double o) {
-    std::vector<double> minExt, maxExt;
-    GetBox()->GetExtents(minExt, maxExt);
-    if (o < minExt[2]) o = minExt[2];
-    if (o > maxExt[2]) o = maxExt[2];
-    SetValueDouble( ZOriginTag, "Set slice Z origin", o );
-}

@@ -44,12 +44,6 @@ public:
     int GetDefaultSampleRate() const;
     void SetCachedValues(std::vector<double> values);
     std::vector<double> GetCachedValues() const;
-    double GetXOrigin() const;
-    double GetYOrigin() const;
-    double GetZOrigin() const;
-    void SetXOrigin(double o);
-    void SetYOrigin(double o);
-    void SetZOrigin(double o);
 
     static const string _sampleRateTag;
     static const string OriginTag;

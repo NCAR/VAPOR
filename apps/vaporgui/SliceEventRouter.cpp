@@ -31,14 +31,9 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
             (new PDoubleSliderEdit( SliceParams::YRotationTag, "Y"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
             (new PDoubleSliderEdit( SliceParams::ZRotationTag, "Z"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
         }),
-        new PSection("Slice Origin", {
+        //new PSection("Slice Origin", {
         new PSliceOriginSelector,
-        }),
-//        new PSection("Slice Origin", {
-//            _xOriginSlider = (new PDoubleSliderEdit( SliceParams::XOriginTag, "X Origin"))->EnableDynamicUpdate(),
-//            _yOriginSlider = (new PDoubleSliderEdit( SliceParams::YOriginTag, "Y Origin"))->EnableDynamicUpdate(),
-//            _zOriginSlider = (new PDoubleSliderEdit( SliceParams::ZOriginTag, "Z Origin"))->EnableDynamicUpdate(),
-//        }),
+        //}),
         new PGeometrySubtab,
     }));
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
@@ -48,7 +43,7 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
 
 string SliceEventRouter::_getDescription() const
 {
-    return ("Displays an axis-aligned slice or cutting plane through"
+    return ("Displays a slice or cutting plane through"
             "a 3D variable.  Slices are sampled along the plane's axes according"
             " to a sampling rate define by the user.\n\n");
 }
