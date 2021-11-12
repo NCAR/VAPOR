@@ -73,10 +73,16 @@ int HelloRenderer::_paintGL(bool)
     // Determine the data extents.
     // The extents of data needed are determined by the end points.
     // Get the end points from the Params:
-    vector<double> point1 = rParams->GetPoint1();
-    vector<double> point2 = rParams->GetPoint2();
-    VAssert(point1.size() == point2.size());
-    VAssert(point1.size() >= 2 && point1.size() <= 3);
+    vector<double> point1Vec = rParams->GetPoint1();
+    vector<double> point2Vec = rParams->GetPoint2();
+    VAssert(point1Vec.size() == point2Vec.size());
+    VAssert(point1Vec.size() >= 2 && point1Vec.size() <= 3);
+
+    CoordType point1 = {0.0, 0.0, 0.0};
+    CoordType point2 = {0.0, 0.0, 0.0};
+    Grid::CopyToArr3(point1Vec, point1);
+    Grid::CopyToArr3(point2Vec, point2);
+    
 
     cout << "helloParams point: " << endl;
     cout << "point1: " << point1[0] << " " << point1[1] << " " << point1[2] << endl;
@@ -146,13 +152,6 @@ int HelloRenderer::_paintGL(bool)
     }
     glColor3fv(fcolor);
     // glLineWidth(width);
-
-    if (point1.size() != 3) {
-        point1.push_back(0.0);
-        point2.push_back(0.0);
-        minPoint.push_back(0.0);
-        maxPoint.push_back(0.0);
-    }
 
     // Calculate the normal vector as orthogonal to the line and projected to the viewer direction
     // To do this, take the cross product of the line direction with the viewer direction,

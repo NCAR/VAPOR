@@ -124,7 +124,7 @@ int RenderParams::Initialize()
 {
     if (_classInitialized) return (0);
 
-    vector<double> minExt, maxExt;
+    CoordType minExt, maxExt;
 
     //
     // Initialize box with bounds of a single variable. First check
@@ -133,8 +133,12 @@ int RenderParams::Initialize()
     //
     string varname = GetVariableName();
     size_t ts = 0;
+    int ndim = _maxDim;
     if (!_dataMgr->VariableExists(ts, varname, 0, 0)) {
-        for (int ndim = 3; ndim > 0; ndim--) {
+
+        // Probably should have a _minDim here..
+        //
+        for (; ndim > 0; ndim--) {
             bool ok = DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, ndim, varname, ts);
             if (ok)
                 break;
@@ -148,16 +152,20 @@ int RenderParams::Initialize()
     int rc = _dataMgr->GetVariableExtents(ts, varname, 0, 0, minExt, maxExt);
     if (rc < 0) return (-1);
 
-    VAssert(minExt.size() == maxExt.size() && (minExt.size() == 2 || minExt.size() == 3));
-
-    bool planar = minExt.size() == 2;
+    // Configure box as planar or volumetric. 
+    //
+    // N.B.Not handling case where ndim == 1!!!
+    //
+    bool planar = ndim == 2;
     if (planar) {
         _Box->SetOrientation(VAPoR::Box::XY);
     } else {
         _Box->SetOrientation(VAPoR::Box::XYZ);
     }
 
-    _Box->SetExtents(minExt, maxExt);
+    vector <double> minExtVec = {minExt[0], minExt[1], minExt[2]};
+    vector <double> maxExtVec = {maxExt[0], maxExt[1], maxExt[2]};
+    _Box->SetExtents(minExtVec, maxExtVec);
     _Box->SetPlanar(planar);
 
     vector<double> origin(minExt.size());
@@ -370,7 +378,7 @@ MapperFunction *RenderParams::GetMapperFunc(string varname)
     int    level = 0;
     int    lod = 0;
     if (_dataMgr->VariableExists(ts, varname, level, lod)) {
-        vector<double> minExt, maxExt;
+        CoordType minExt, maxExt;
         _Box->GetExtents(minExt, maxExt);
 
         vector<double> range;

@@ -55,10 +55,8 @@ void NavigationUtils::ViewAll(ControlExec *ce)
     ParamsMgr * paramsMgr = ce->GetParamsMgr();
     size_t      ts = GetCurrentTimeStep(ce);
 
-    vector<double> minExts, maxExts;
+    CoordType minExts, maxExts;
     dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
-    VAssert(minExts.size() == 3);
-    VAssert(maxExts.size() == 3);
 
     double maxSide = max(maxExts[2] - minExts[2], max(maxExts[1] - minExts[1], maxExts[0] - minExts[0]));
 

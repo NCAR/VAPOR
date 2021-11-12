@@ -42,7 +42,7 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::s
 
     if (_needToSetDefaultAlgorithm()) {
         VolumeParams * vp = (VolumeParams *)GetActiveParams();
-        vector<double> minExt, maxExt;
+        CoordType minExt, maxExt;
         vp->GetBox()->GetExtents(minExt, maxExt);
 
         Grid *grid = _dataMgr->GetVariable(vp->GetCurrentTimestep(), vp->GetVariableName(), vp->GetRefinementLevel(), vp->GetCompressionLevel(), minExt, maxExt);
@@ -322,19 +322,23 @@ int VolumeRenderer::_initializeAlgorithm()
 int VolumeRenderer::_loadData()
 {
     VolumeParams * RP = (VolumeParams *)GetActiveParams();
-    vector<double> minExt, maxExt;
-    RP->GetBox()->GetExtents(minExt, maxExt);
+    vector<double> minExtVec, maxExtVec;
+    RP->GetBox()->GetExtents(minExtVec, maxExtVec);
 
     CheckCache(_cache.var, RP->GetVariableName());
     CheckCache(_cache.ts, RP->GetCurrentTimestep());
     CheckCache(_cache.refinement, RP->GetRefinementLevel());
     CheckCache(_cache.compression, RP->GetCompressionLevel());
-    CheckCache(_cache.minExt, minExt);
-    CheckCache(_cache.maxExt, maxExt);
+    CheckCache(_cache.minExt, minExtVec);
+    CheckCache(_cache.maxExt, maxExtVec);
     CheckCache(_cache.ospMaxCells, RP->GetValueLong("osp_max_cells", 1));
     if (!_cache.needsUpdate) return 0;
 
-    Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression, _cache.minExt, _cache.maxExt);
+    CoordType minExt, maxExt;
+    Grid::CopyToArr3(_cache.minExt, minExt);
+    Grid::CopyToArr3(_cache.maxExt, maxExt);
+
+    Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression, minExt, maxExt);
     if (!grid) return -1;
 
     if (dynamic_cast<const UnstructuredGrid *>(grid) && !dynamic_cast<VolumeOSPRay *>(_algorithm)) {
@@ -369,7 +373,11 @@ int VolumeRenderer::_loadSecondaryData()
     if (!_cache.needsUpdate) return 0;
 
     if (_cache.useColorMapVar) {
-        Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.colorMapVar, _cache.refinement, _cache.compression, _cache.minExt, _cache.maxExt);
+        CoordType minExt, maxExt;
+        Grid::CopyToArr3(_cache.minExt, minExt);
+        Grid::CopyToArr3(_cache.maxExt, maxExt);
+
+        Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.colorMapVar, _cache.refinement, _cache.compression, minExt, maxExt);
         if (!grid) return -1;
         int ret = _algorithm->LoadSecondaryData(grid);
         delete grid;

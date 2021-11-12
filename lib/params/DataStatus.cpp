@@ -36,7 +36,7 @@ using namespace VAPoR;
 using namespace Wasp;
 
 namespace {
-void print_extents(string header, const vector<double> &minExts, const vector<double> &maxExts)
+void print_extents(string header, const CoordType &minExts, const CoordType &maxExts)
 {
 #ifdef DEBUG
     VAssert(minExts.size() == maxExts.size());
@@ -139,10 +139,10 @@ vector<string> DataStatus::GetDataMgrNames() const
     return (names);
 }
 
-void DataStatus::_getExtents(size_t ts, const map<string, vector<var_info_t>> &varMap, vector<double> &minExts, vector<double> &maxExts) const
+void DataStatus::_getExtents(size_t ts, const map<string, vector<var_info_t>> &varMap, CoordType &minExts, CoordType &maxExts) const
 {
-    minExts.resize(3, 0.0);
-    maxExts.resize(3, 1.0);
+    minExts = {0.0, 0.0, 0.0};
+    maxExts = {0.0, 0.0, 0.0};
 
     if (varMap.empty()) return;
 
@@ -163,18 +163,18 @@ void DataStatus::_getExtents(size_t ts, const map<string, vector<var_info_t>> &v
         for (auto it = variables.begin(); it != variables.end(); ++it) {
             const var_info_t &var = *it;
 
-            vector<double> minVExts, maxVExts;
+            CoordType minVExts, maxVExts;
             vector<int>    axes;
             bool           status = DataMgrUtils::GetExtents(dataMgr, local_ts, var.varnames, var.refLevel, var.compLevel, minVExts, maxVExts, axes);
             if (!status) continue;
 
-            if (minVExts.size() == 2) {
+            if (axes.size() == 2) {
                 bool has3D = !dataMgr->GetDataVarNames(3).empty();
 
                 if (has3D) {
                     double z = DataMgrUtils::Get2DRendererDefaultZ(dataMgr, ts, var.refLevel, var.compLevel);
-                    minVExts.push_back(z);
-                    maxVExts.push_back(z);
+                    minVExts[2] = z;
+                    maxVExts[2] = z;
                     axes.push_back(2);
                 }
             }
@@ -224,7 +224,7 @@ map<string, vector<DataStatus::var_info_t>> DataStatus::_getFirstVar(string data
     return (defaultVars);
 }
 
-void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, string dataSetName, size_t ts, vector<double> &minExts, vector<double> &maxExts) const
+void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, string dataSetName, size_t ts, CoordType &minExts, CoordType &maxExts) const
 {
     map<string, vector<var_info_t>> varMap;
 
@@ -272,15 +272,17 @@ void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, st
     _getExtents(ts, varMap, minExts, maxExts);
 }
 
-void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, size_t ts, vector<double> &minExts, vector<double> &maxExts) const
+void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, size_t ts, CoordType &minExts, CoordType &maxExts) const
 {
-    minExts.resize(3, std::numeric_limits<double>::max());
-    maxExts.resize(3, std::numeric_limits<double>::lowest());
+    for (int i=0; i<minExts.size(); i++) {
+        minExts[i] =  std::numeric_limits<double>::max();
+        maxExts[i] =  std::numeric_limits<double>::lowest();
+    }
 
     vector<string> dataSetNames = GetDataMgrNames();
 
     for (int i = 0; i < dataSetNames.size(); i++) {
-        vector<double> minWExts, maxWExts;
+        CoordType minWExts, maxWExts;
         GetActiveExtents(paramsMgr, winName, dataSetNames[i], ts, minWExts, maxWExts);
 
         for (int j = 0; j < minWExts.size(); j++) {
@@ -290,15 +292,17 @@ void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, si
     }
 }
 
-void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, vector<double> &minExts, vector<double> &maxExts) const
+void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, CoordType &minExts, CoordType &maxExts) const
 {
-    minExts.resize(3, std::numeric_limits<double>::max());
-    maxExts.resize(3, std::numeric_limits<double>::lowest());
+    for (int i=0; i<minExts.size(); i++) {
+        minExts[i] =  std::numeric_limits<double>::max();
+        maxExts[i] =  std::numeric_limits<double>::lowest();
+    }
 
     vector<string> winNames = paramsMgr->GetVisualizerNames();
 
     for (int i = 0; i < winNames.size(); i++) {
-        vector<double> minWExts, maxWExts;
+        CoordType minWExts, maxWExts;
         GetActiveExtents(paramsMgr, winNames[i], ts, minWExts, maxWExts);
 
         for (int j = 0; j < minWExts.size(); j++) {

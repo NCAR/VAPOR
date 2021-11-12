@@ -411,10 +411,8 @@ void AnnotationRenderer::_applyDataMgrCornerToDomain(std::vector<double> &domain
 //  1 0 1       5
 //  1 1 0       6
 //  1 1 1       7
-void AnnotationRenderer::_getDataMgrCorner(const int cornerNumber, glm::vec4 &dataMgrCorner, const std::vector<double> &minDataMgrExtents, const std::vector<double> &maxDataMgrExtents) const
+void AnnotationRenderer::_getDataMgrCorner(const int cornerNumber, glm::vec4 &dataMgrCorner, const CoordType &minDataMgrExtents, const CoordType &maxDataMgrExtents) const
 {
-    assert(minDataMgrExtents.size() == 3);
-    assert(maxDataMgrExtents.size() == 3);
     assert(cornerNumber >= 0 && cornerNumber <= 7);
 
     double xCoord, yCoord, zCoord;
@@ -436,12 +434,10 @@ void AnnotationRenderer::_getDataMgrCorner(const int cornerNumber, glm::vec4 &da
     dataMgrCorner = glm::vec4(xCoord, yCoord, zCoord, 1.f);
 }
 
-void AnnotationRenderer::_applyDataMgrToDomainExtents(std::vector<double> &domainExtents, const std::vector<double> &dataMgrMinExts, const std::vector<double> &dataMgrMaxExts,
+void AnnotationRenderer::_applyDataMgrToDomainExtents(std::vector<double> &domainExtents, const CoordType &dataMgrMinExts, const CoordType &dataMgrMaxExts,
                                                       const Transform *transform) const
 {
     assert(domainExtents.size() == 6);
-    assert(dataMgrMinExts.size() == 3);
-    assert(dataMgrMaxExts.size() == 3);
 
     glm::mat4 transformMatrix;
     _makeTransformMatrix(transform, transformMatrix);
@@ -460,11 +456,9 @@ void AnnotationRenderer::_calculateDomainExtents(std::vector<double> &domainExte
 
     vector<string> names = m_dataStatus->GetDataMgrNames();
     for (int i = 0; i < names.size(); i++) {
-        std::vector<double> dataMgrMinExts, dataMgrMaxExts;
+        CoordType dataMgrMinExts, dataMgrMaxExts;
 
         m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, names[i], _currentTimestep, dataMgrMinExts, dataMgrMaxExts);
-        VAssert(dataMgrMinExts.size() == 3);
-        VAssert(dataMgrMaxExts.size() == 3);
 
         ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
         Transform *      transform = vpParams->GetTransform(names[i]);
@@ -704,7 +698,7 @@ string AnnotationRenderer::getCurrentDataMgrName() const
 
 std::vector<double> AnnotationRenderer::getDomainExtents() const
 {
-    vector<double> minExts, maxExts;
+    CoordType minExts, maxExts;
 
     m_dataStatus->GetActiveExtents(m_paramsMgr, _currentTimestep, minExts, maxExts);
 

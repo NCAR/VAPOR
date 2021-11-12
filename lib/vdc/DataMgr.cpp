@@ -35,7 +35,7 @@ template<bool B, class T = void> using enable_if_t = typename std::enable_if<B, 
 
 // Format a vector as a space-separated element string
 //
-template<class T> string vector_to_string(vector<T> v)
+template<class T> string vector_to_string(T v)
 {
     ostringstream oss;
 
@@ -383,6 +383,19 @@ void map_blk_to_vox(const vector<size_t> &bs, const vector<size_t> &dims, const 
         vmax.push_back(bmax[i] * bs[i] + bs[i] - 1);
         if (vmin[i] >= dims[i]) vmin[i] = dims[i] - 1;
         if (vmax[i] >= dims[i]) vmax[i] = dims[i] - 1;
+    }
+}
+
+void map_vox_to_blk(DimsType bs, const DimsType &vcoord, DimsType &bcoord)
+{
+    for (int i = 0; i < bs.size(); i++) { bcoord[i] = (vcoord[i] / bs[i]); }
+}
+
+void map_blk_to_vox(DimsType bs, const DimsType &bmin, const DimsType &bmax, DimsType &vmin, DimsType &vmax)
+{
+    for (int i = 0; i < bs.size(); i++) {
+        vmin[i] = (bmin[i] * bs[i]);
+        vmax[i] = (bmax[i] * bs[i] + bs[i] - 1);
     }
 }
 
@@ -969,9 +982,8 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, bool l
     return (rg);
 }
 
-Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector<double> min, vector<double> max, bool lock)
+Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, CoordType min, CoordType max, bool lock)
 {
-    VAssert(min.size() == max.size());
 
     SetDiagMsg("DataMgr::GetVariable(%d, %s, %d, %d, %s, %s, %d)", ts, varname.c_str(), level, lod, vector_to_string(min).c_str(), vector_to_string(max).c_str(), lock);
 
@@ -986,11 +998,11 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
     // the axis aligned bounding box specified in user coordinates
     // by min and max
     //
-    vector<size_t> min_ui, max_ui;
+    DimsType min_ui, max_ui;
     rc = _find_bounding_grid(ts, varname, level, lod, min, max, min_ui, max_ui);
     if (rc < 0) return (NULL);
 
-    if (!min_ui.size()) {
+    if (rc == 1) {
         // Why not return NULL?
         //
         return (new RegularGrid());
@@ -1356,9 +1368,8 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
     return (rg);
 }
 
-Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector<size_t> min, vector<size_t> max, bool lock)
+Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, DimsType min, DimsType max, bool lock)
 {
-    VAssert(min.size() == max.size());
 
     SetDiagMsg("DataMgr::GetVariable(%d, %s, %d, %d, %s, %s, %d)", ts, varname.c_str(), level, lod, vector_to_string(min).c_str(), vector_to_string(max).c_str(), lock);
 
@@ -1374,12 +1385,14 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
     bool           ok = GetVarCoordVars(varname, true, coord_vars);
     VAssert(ok);
 
-    while (min.size() > coord_vars.size()) {
-        min.pop_back();
-        max.pop_back();
+    vector <size_t> min_vec;
+    vector <size_t> max_vec;
+    for (int i=0; i<coord_vars.size(); i++) {
+        min_vec.push_back(min[i]);
+        max_vec.push_back(max[i]);
     }
 
-    Grid *rg = _getVariable(ts, varname, level, lod, min, max, lock, false);
+    Grid *rg = _getVariable(ts, varname, level, lod, min_vec, max_vec, lock, false);
     if (!rg) {
         SetErrMsg("Failed to read variable \"%s\" at time step (%d), and\n"
                   "refinement level (%d) and level-of-detail (%d)",
@@ -1388,12 +1401,12 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
     return (rg);
 }
 
-int DataMgr::GetVariableExtents(size_t ts, string varname, int level, int lod, vector<double> &min, vector<double> &max)
+int DataMgr::GetVariableExtents(size_t ts, string varname, int level, int lod, CoordType &min, CoordType &max)
 {
     SetDiagMsg("DataMgr::GetVariableExtents(%d, %s, %d, %d)", ts, varname.c_str(), level, lod);
 
-    min.clear();
-    max.clear();
+    min = {0.0, 0.0, 0.0};
+    max = min;
 
     int rc = _lod_correction(varname, lod);
     if (rc < 0) return (-1);
@@ -1411,8 +1424,8 @@ int DataMgr::GetVariableExtents(size_t ts, string varname, int level, int lod, v
     if (_varInfoCacheDouble.Get(ts, cvars, level, lod, key, values)) {
         int n = values.size();
         for (int i = 0; i < n / 2; i++) {
-            min.push_back(values[i]);
-            max.push_back(values[i + (n / 2)]);
+            min[i] = values[i];
+            max[i] = values[i + (n / 2)];
         }
         return (0);
     }
@@ -1436,14 +1449,14 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
 {
     SetDiagMsg("DataMgr::GetDataRange(%d,%s)", ts, varname.c_str());
 
-    vector<double> min, max;
+    CoordType min, max;
     int            rc = GetVariableExtents(ts, varname, level, lod, min, max);
     if (rc < 0) return (-1);
 
     return (GetDataRange(ts, varname, level, lod, min, max, range));
 }
 
-int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<double> min, vector<double> max, vector<double> &range)
+int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, CoordType min, CoordType max, vector<double> &range)
 {
     SetDiagMsg("DataMgr::GetDataRange(%d,%s)", ts, varname.c_str());
 
@@ -1460,9 +1473,9 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
     // the axis aligned bounding box specified in user coordinates
     // by min and max
     //
-    vector<size_t> min_ui, max_ui;
+    DimsType min_ui, max_ui;
     rc = _find_bounding_grid(ts, varname, level, lod, min, max, min_ui, max_ui);
-    if (rc < 0) return (-1);
+    if (rc != 0) return (-1);
 
     // See if we've already cache'd it.
     //
@@ -2346,40 +2359,28 @@ template<typename C> void DataMgr::VarInfoCache<C>::Purge(vector<string> varname
     }
 }
 
-DataMgr::BlkExts::BlkExts()
+DataMgr::BlkExts::BlkExts(const DimsType &bmin, const DimsType &bmax)
 {
-    _bmin.clear();
-    _bmax.clear();
-    _mins.clear();
-    _maxs.clear();
-}
-
-DataMgr::BlkExts::BlkExts(const std::vector<size_t> &bmin, const std::vector<size_t> &bmax)
-{
-    VAssert(bmin.size() == bmax.size());
-    VAssert(bmin.size() >= 1 && bmax.size() <= 3);
 
     _bmin = bmin;
     _bmax = bmax;
 
-    size_t nelements = Wasp::LinearizeCoords(bmax, bmin, bmax) + 1;
+    size_t nelements = Wasp::LinearizeCoords(bmax.data(), bmin.data(), bmax.data(), bmin.size()) + 1;
 
     _mins.resize(nelements);
     _maxs.resize(nelements);
 }
 
-void DataMgr::BlkExts::Insert(const std::vector<size_t> &bcoord, const std::vector<double> &min, const std::vector<double> &max)
+void DataMgr::BlkExts::Insert(const DimsType &bcoord, const CoordType &min, const CoordType &max)
 {
-    size_t offset = Wasp::LinearizeCoords(bcoord, _bmin, _bmax);
+    size_t offset = Wasp::LinearizeCoords(bcoord.data(), _bmin.data(), _bmax.data(), bcoord.size());
 
     _mins[offset] = min;
     _maxs[offset] = max;
 }
 
-bool DataMgr::BlkExts::Intersect(const std::vector<double> &min, const std::vector<double> &max, std::vector<size_t> &bmin, std::vector<size_t> &bmax) const
+bool DataMgr::BlkExts::Intersect(const CoordType &min, const CoordType &max, DimsType &bmin, DimsType &bmax) const
 {
-    VAssert(_mins.size() >= 1);
-
     bmin = _bmax;
     bmax = _bmin;
 
@@ -2404,7 +2405,8 @@ bool DataMgr::BlkExts::Intersect(const std::vector<double> &min, const std::vect
         if (overlap) {
             intersection = true;    // at least one block intersects
 
-            vector<size_t> coord = Wasp::VectorizeCoords(offset, _bmin, _bmax);
+            DimsType coord;
+            Wasp::VectorizeCoords(offset, _bmin.data(), _bmax.data(), coord.data(), coord.size());
 
             for (int i = 0; i < coord.size(); i++) {
                 if (coord[i] < bmin[i]) bmin[i] = coord[i];
@@ -2673,23 +2675,16 @@ string DataMgr::_get_grid_type(string varname) const
 // Find the grid coordinates, in voxels, for the region containing
 // the axis aligned bounding box specified by min and max
 //
-int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, vector<double> min, vector<double> max, vector<size_t> &min_ui, vector<size_t> &max_ui)
+int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, CoordType min, CoordType max, DimsType &min_ui, DimsType &max_ui)
 {
-    min_ui.clear();
-    max_ui.clear();
+    min_ui = {0,0,0};
+    max_ui = {0,0,0};
 
     vector<string> scvars;
     string         tcvar;
 
     bool ok = _get_coord_vars(varname, scvars, tcvar);
     if (!ok) return (-1);
-
-    // Make sure variable dimensions match extents specification
-    //
-    while (min.size() > scvars.size()) {
-        min.pop_back();
-        max.pop_back();
-    }
 
     size_t hash_ts = 0;
     for (int i = 0; i < scvars.size(); i++) {
@@ -2708,14 +2703,14 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
     //
     if (_gridHelper.IsUnstructured(_get_grid_type(varname))) {
         for (int i = 0; i < dims_at_level.size(); i++) {
-            min_ui.push_back(0);
-            max_ui.push_back(dims_at_level[i] - 1);
+            min_ui[i] = 0;
+            max_ui[i] = dims_at_level[i] - 1;
         }
         return (0);
     }
 
-    vector<size_t> bs;
-    for (int i = 0; i < dims_at_level.size(); i++) { bs.push_back(_bs[i]); }
+    DimsType bs = {1,1,1};
+    for (int i = 0; i < dims_at_level.size(); i++) { bs[i] = _bs[i]; }
 
     // hash tag for block coordinate cache
     //
@@ -2737,12 +2732,14 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
 
         // Voxel and block min and max coordinates of entire grid
         //
-        vector<size_t> vmin, vmax;
-        vector<size_t> bmin, bmax;
+        DimsType vmin = {0,0,0};
+        DimsType vmax = {0,0,0};
+        DimsType bmin = {0,0,0};
+        DimsType bmax = {0,0,0};
 
         for (int i = 0; i < dims_at_level.size(); i++) {
-            vmin.push_back(0);
-            vmax.push_back(dims_at_level[i] - 1);
+            vmin[i] = 0;
+            vmax[i] = (dims_at_level[i] - 1);
         }
         map_vox_to_blk(bs, vmin, bmin);
         map_vox_to_blk(bs, vmax, bmax);
@@ -2753,14 +2750,15 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
         // box. Include a one-voxel halo region on all non-boundary
         // faces
         //
-        size_t nblocks = Wasp::LinearizeCoords(bmax, bmin, bmax) + 1;
+        size_t nblocks = Wasp::LinearizeCoords(bmax.data(), bmin.data(), bmax.data(),bmax.size()) + 1;
         for (size_t offset = 0; offset < nblocks; offset++) {
-            vector<double> my_min, my_max;
-            vector<size_t> my_vmin(vmin.size()), my_vmax(vmin.size());
+            CoordType my_min, my_max;
+            DimsType my_vmin, my_vmax;
 
             // Get coordinates for current block
             //
-            vector<size_t> bcoord = Wasp::VectorizeCoords(offset, bmin, bmax);
+            DimsType bcoord = {0,0,0};
+            Wasp::VectorizeCoords(offset, bmin.data(), bmax.data(), bcoord.data(), bmin.size());
 
             for (int i = 0; i < bcoord.size(); i++) {
                 my_vmin[i] = bcoord[i] * bs[i];
@@ -2795,20 +2793,16 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
 
     // Find block coordinates of region that contains the bounding volume
     //
-    vector<size_t> bmin, bmax;
+    DimsType bmin, bmax;
     ok = blkexts.Intersect(min, max, bmin, bmax);
     if (!ok) {
-        for (int i = 0; i < dims_at_level.size(); i++) {
-            min_ui.push_back(0);
-            max_ui.push_back(dims_at_level[i] - 1);
-        }
-        return (0);
+        return (1);
     }
 
     // Finally, map from block to voxel coordinates
     //
     map_blk_to_vox(bs, bmin, bmax, min_ui, max_ui);
-    for (int i = 0; i < max_ui.size(); i++) {
+    for (int i = 0; i < dims_at_level.size(); i++) {
         if (max_ui[i] >= dims_at_level[i]) { max_ui[i] = dims_at_level[i] - 1; }
     }
 

@@ -120,10 +120,13 @@ VDF_API int ConvertLonLatToPCS(string projString, double coords[], int npoints =
 //! memory until released by an explicit call to UnlockGrids()
 //
 template<typename T>
-VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<T> &minExtsReq, const vector<T> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const T &minExtsReq, const T &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
                      std::vector<Grid *> &grids, bool lock = false);
 
-VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr,
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, const CoordType &minExtsReq, const CoordType &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr,
+                     bool lock = false);
+
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, const DimsType &minExtsReq, const DimsType &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr,
                      bool lock = false);
 
 VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, bool useLowerAccuracy, int *refLevel, int *lod, std::vector<Grid *> &grids, bool lock = false);
@@ -168,7 +171,7 @@ bool GetAxes(const DataMgr *dataMgr, string varname, vector<int> &axes);
 //!
 //! \sa GetAxes()
 //
-VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, int refLevel, int lod, vector<double> &minExts, vector<double> &maxExts);
+VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, int refLevel, int lod, CoordType &minExts, CoordType &maxExts);
 
 //! Get coordinate extents for one or more variables.
 //!
@@ -193,7 +196,7 @@ VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, string varname, int r
 //!
 //! \sa GetAxes()
 //
-VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> &varnames, int refLevel, int lod, vector<double> &minExts, vector<double> &maxExts, vector<int> &axes);
+VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> &varnames, int refLevel, int lod, CoordType &minExts, CoordType &maxExts, vector<int> &axes);
 
 //! Used by the histo for calculating some meta data.
 VDF_API int GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname, int refinementLevel);

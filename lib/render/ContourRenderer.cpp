@@ -105,10 +105,15 @@ int ContourRenderer::_buildCache()
     if (cParams->GetVariableName().empty()) { return 0; }
     vector<double> contours = cParams->GetContourValues(_cacheParams.varName);
 
-    Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
+    CoordType boxMin = {0.0, 0.0, 0.0};
+    CoordType boxMax = {0.0, 0.0, 0.0};
+    Grid::CopyToArr3(_cacheParams.boxMin, boxMin);
+    Grid::CopyToArr3(_cacheParams.boxMax, boxMax);
+
+    Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax);
     Grid *heightGrid = NULL;
     if (!_cacheParams.heightVarName.empty()) {
-        heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
+        heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax);
     }
 
     if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) { return -1; }
@@ -116,7 +121,7 @@ int ContourRenderer::_buildCache()
     double mv = grid->GetMissingValue();
     float  Z0 = GetDefaultZ(_dataMgr, _cacheParams.ts);
 
-    Grid::ConstCellIterator it = grid->ConstCellBegin(_cacheParams.boxMin, _cacheParams.boxMax);
+    Grid::ConstCellIterator it = grid->ConstCellBegin(boxMin, boxMax);
 
     size_t           maxNodes = grid->GetMaxVertexPerCell();
     vector<DimsType> nodes(maxNodes);

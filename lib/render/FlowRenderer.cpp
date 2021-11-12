@@ -446,7 +446,7 @@ int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     bool  geom3d = rp->GetValueLong(FlowParams::RenderGeom3DTag, false);
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
-        vector<double> mind, maxd;
+	CoordType mind, maxd;
 
         // Need to find a non-empty variable from color mapping or velocity variables.
         std::string nonEmptyVarName = rp->GetColorMapVariableName();
@@ -1060,8 +1060,8 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     VAssert(_cache_rake.size() == 6 || _cache_rake.size() == 4);
     int dim = _cache_rake.size() / 2;
     for (int i = 0; i < dim; i++) VAssert(_cache_rake[i * 2 + 1] >= _cache_rake[i * 2]);
-    std::vector<double> rakeExtMin(dim, 0);
-    std::vector<double> rakeExtMax(dim, 0);
+    CoordType rakeExtMin = {0.0, 0.0, 0.0};
+    CoordType rakeExtMax = {0.0, 0.0, 0.0};
     for (int i = 0; i < dim; i++) {
         rakeExtMin[i] = _cache_rake[i * 2];
         rakeExtMax[i] = _cache_rake[i * 2 + 1];

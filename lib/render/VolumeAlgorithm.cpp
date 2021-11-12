@@ -29,7 +29,7 @@ void VolumeAlgorithm::GetExtents(glm::vec3 *dataMin_, glm::vec3 *dataMax_, glm::
     vector<double> minRendererExtents, maxRendererExtents;
     GetParams()->GetBox()->GetExtents(minRendererExtents, maxRendererExtents);
 
-    vector<double> minDataExtents, maxDataExtents;
+    CoordType minDataExtents, maxDataExtents;
     auto           p = GetParams();
     _renderer->_dataMgr->GetVariableExtents(p->GetCurrentTimestep(), p->GetVariableName(), p->GetRefinementLevel(), p->GetCompressionLevel(), minDataExtents, maxDataExtents);
 

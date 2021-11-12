@@ -101,7 +101,7 @@ void TestVariables(VAPoR::DataMgr &dataMgr, bool silenceTime)
         if (vars.size()) {
             std::string varName = vars[0];
             PrintCompressionInfo(dataMgr, varName);
-            std::vector<double> minExt, maxExt;
+            VAPoR::CoordType minExt, maxExt;
             dataMgr.GetVariableExtents(0, varName, -1, -1, minExt, maxExt);
 
             // Reduce extents to test

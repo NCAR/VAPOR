@@ -136,8 +136,8 @@ private:
     std::vector<double> _getScreenCoords(QMouseEvent *e) const;
     string              _getCurrentMouseMode() const;
     void                _setNewExtents();
-    void                _getActiveExtents(std::vector<double> &minExts, std::vector<double> &maxExts);
-    void   _getUnionOfFieldVarExtents(VAPoR::RenderParams *rParams, VAPoR::DataMgr *dataMgr, int timestep, int refLevel, int lod, std::vector<double> &minExts, std::vector<double> &maxExts);
+    void                _getActiveExtents(VAPoR::CoordType &minExts, VAPoR::CoordType &maxExts);
+    void   _getUnionOfFieldVarExtents(VAPoR::RenderParams *rParams, VAPoR::DataMgr *dataMgr, int timestep, int refLevel, int lod, VAPoR::CoordType &minExts, VAPoR::CoordType &maxExts);
     string _getCurrentDataMgrName() const;
     VAPoR::Transform *_getDataMgrTransform() const;
 

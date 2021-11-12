@@ -404,9 +404,9 @@ public:
     //! it is the caller's responsiblity to delete the returned object
     //! when it is no longer in use.
     //!
-    VAPoR::Grid *GetVariable(size_t ts, string varname, int level, int lod, std::vector<double> min, std::vector<double> max, bool lock = false);
+    VAPoR::Grid *GetVariable(size_t ts, string varname, int level, int lod, CoordType min, CoordType max, bool lock = false);
 
-    VAPoR::Grid *GetVariable(size_t ts, string varname, int level, int lod, std::vector<size_t> min, std::vector<size_t> max, bool lock = false);
+    VAPoR::Grid *GetVariable(size_t ts, string varname, int level, int lod, DimsType min, DimsType max, bool lock = false);
 
     //! Compute the coordinate extents of a variable
     //!
@@ -419,7 +419,7 @@ public:
     //! the variable(s) indicated by \p varname, and the given refinement level,
     //! \p level
     //!
-    int GetVariableExtents(size_t ts, string varname, int level, int lod, std::vector<double> &min, std::vector<double> &max);
+    int GetVariableExtents(size_t ts, string varname, int level, int lod, CoordType &min, CoordType &max);
 
     //! Compute the min and max value of a variable
     //!
@@ -439,7 +439,7 @@ public:
     //! Grid::GetRange() method on a grid returned by DataMgr::GetVariable
     //! using the same arguments provided here.
     //
-    int GetDataRange(size_t ts, string varname, int level, int lod, vector<double> min, vector<double> max, std::vector<double> &range);
+    int GetDataRange(size_t ts, string varname, int level, int lod, CoordType min, CoordType max, std::vector<double> &range);
 
     //! \copydoc DC::GetDimLensAtLevel()
     //!
@@ -579,20 +579,20 @@ public:
 
     class BlkExts {
     public:
-        BlkExts();
-        BlkExts(const std::vector<size_t> &bmin, const std::vector<size_t> &bmax);
+        BlkExts() {};
+        BlkExts(const DimsType &bmin, const DimsType &bmax);
 
-        void Insert(const std::vector<size_t> &bcoord, const std::vector<double> &min, const std::vector<double> &max);
+        void Insert(const DimsType &bcoord, const CoordType &min, const CoordType &max);
 
-        bool Intersect(const std::vector<double> &min, const std::vector<double> &max, std::vector<size_t> &bmin, std::vector<size_t> &bmax) const;
+        bool Intersect(const CoordType &min, const CoordType &max, DimsType &bmin, DimsType &bmax) const;
 
         friend std::ostream &operator<<(std::ostream &o, const BlkExts &b);
 
     private:
-        std::vector<size_t>              _bmin;
-        std::vector<size_t>              _bmax;
-        std::vector<std::vector<double>> _mins;
-        std::vector<std::vector<double>> _maxs;
+        DimsType                _bmin = {0,0,0};
+        DimsType                _bmax = {0,0,0};
+        std::vector<CoordType> _mins;
+        std::vector<CoordType> _maxs;
     };
 
 private:
@@ -738,7 +738,7 @@ private:
 
     string _get_grid_type(string varname) const;
 
-    int _find_bounding_grid(size_t ts, string varname, int level, int lod, std::vector<double> min, std::vector<double> max, std::vector<size_t> &min_ui, std::vector<size_t> &max_ui);
+    int _find_bounding_grid(size_t ts, string varname, int level, int lod, CoordType min, CoordType max, DimsType &min_ui, DimsType &max_ui);
 
     void _setupCoordVecsHelper(string data_varname, const vector<size_t> &data_dimlens, const vector<size_t> &data_bmin, const vector<size_t> &data_bmax, string coord_varname, int order,
                                vector<size_t> &coord_dimlens, vector<size_t> &coord_bmin, vector<size_t> &coord_bmax, bool structured, long ts) const;

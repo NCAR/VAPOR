@@ -22,7 +22,7 @@ void PRegionSelector1D::updateGUI() const
 {
     RenderParams *rp = getParams<RenderParams>();
 
-    vector<double> min, max;
+    VAPoR::CoordType min, max;
     size_t         ts = rp->GetCurrentTimestep();
     int            level = rp->GetRefinementLevel();
     int            lod = rp->GetCompressionLevel();

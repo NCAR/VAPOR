@@ -296,12 +296,17 @@ int WireFrameRenderer::_buildCache()
 
     if (rParams->GetVariableName().empty()) { return 0; }
 
-    Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
+    CoordType boxMin = {0.0, 0.0, 0.0};
+    CoordType boxMax = {0.0, 0.0, 0.0};
+    Grid::CopyToArr3(_cacheParams.boxMin, boxMin);
+    Grid::CopyToArr3(_cacheParams.boxMax, boxMax);
+
+    Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax);
     if (!grid) return (-1);
 
     Grid *heightGrid = NULL;
     if (!_cacheParams.heightVarName.empty()) {
-        heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
+        heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax);
         if (!heightGrid) {
             delete grid;
             return (-1);

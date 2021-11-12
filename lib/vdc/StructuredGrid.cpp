@@ -23,7 +23,6 @@ using namespace VAPoR;
 
 StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks) : Grid(dims, bs, blks, dims.size())
 {
-    VAssert(bs.size() == 2 || bs.size() == 3);
 
     _cellDims = Grid::GetDimensions();
     for (int i = 0; i < _cellDims.size(); i++) {
