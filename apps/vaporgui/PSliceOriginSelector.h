@@ -1,11 +1,9 @@
 #pragma once
 
 #include "PSection.h"
-#include "PLineItem.h"
 
 class PDoubleSliderEdit;
 
-//! \class PSliceOriginSelector
 class PSliceOriginSelector : public PSection {
 public:
     PSliceOriginSelector();

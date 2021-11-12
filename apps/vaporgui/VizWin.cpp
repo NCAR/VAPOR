@@ -52,6 +52,7 @@
 #include "vapor/FileUtils.h"
 #include "vapor/Visualizer.h"
 #include <vapor/FlowParams.h>
+#include <vapor/SliceParams.h>
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 #include "hide_std_error_util.h"
@@ -648,6 +649,9 @@ void VizWin::_renderHelper(bool fast)
 
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
+        if ( dynamic_cast<VAPoR::SliceParams*>(_getRenderParams()) != nullptr ) {
+            _updateSliceOriginGlyph();
+        }
     } else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
 #ifndef WIN32
         _glManager->PixelCoordinateSystemPush();
@@ -857,4 +861,61 @@ void VizWin::updateManip(bool initialize)
     if (!initialize) _manip->Render();
 
     GL_ERR_BREAK();
+}
+
+void VizWin::_updateSliceOriginGlyph() {
+    VAPoR::SliceParams* sp = dynamic_cast<VAPoR::SliceParams*>(_getRenderParams());
+    if (sp == nullptr) return;
+
+    double xOrigin = sp->GetValueDouble(SliceParams::XOriginTag,0.);
+    double yOrigin = sp->GetValueDouble(SliceParams::YOriginTag,0.);
+    double zOrigin = sp->GetValueDouble(SliceParams::ZOriginTag,0.);
+
+    std::vector<double> scales  = _getDataMgrTransform()->GetScales();
+    std::vector<double> scales2 = sp->GetTransform()->GetScales();
+    scales[0] *= scales2[0];
+    scales[1] *= scales2[1];
+    scales[2] *= scales2[2];
+
+    std::cout << "void VizWin::_updateSliceOriginGlyph() { " << xOrigin << " " << yOrigin << " " << zOrigin << std::endl;
+    std::cout << "                                         " << scales[0] << " " << scales[1] << " " << scales[2]<< std::endl;
+
+    int            refLevel = sp->GetRefinementLevel();
+    int            lod = sp->GetCompressionLevel();
+    string         varName = sp->GetVariableName();
+    vector<string> fieldVars = sp->GetFieldVariableNames();
+
+    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
+    AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
+    int              timeStep = aParams->GetCurrentTimestep();
+
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
+    string      dataMgrName = _getCurrentDataMgrName();
+    DataMgr *   dataMgr = dataStatus->GetDataMgr(dataMgrName);
+
+    std::vector<double> min, max;
+    dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, min, max);
+    double p = .03;
+    std::vector<double> width = {(max[0]-min[0])*p, (max[1]-min[1])*p, (max[2]-min[2])*p};
+
+
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    LegacyGL *lgl = _glManager->legacy;    
+    lgl->Color4f(1.,1.,0.,1.);
+
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3f( xOrigin, yOrigin, zOrigin-width[2] );
+    lgl->Vertex3f( xOrigin, yOrigin, zOrigin+width[2] );
+    lgl->End();
+    
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3f( xOrigin-width[0], yOrigin, zOrigin );
+    lgl->Vertex3f( xOrigin+width[0], yOrigin, zOrigin );
+    lgl->End();
+    
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3f( xOrigin, yOrigin-width[1], zOrigin );
+    lgl->Vertex3f( xOrigin, yOrigin+width[1], zOrigin );
+    lgl->End();
 }

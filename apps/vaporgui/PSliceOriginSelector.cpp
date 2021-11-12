@@ -10,6 +10,10 @@ PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
     _xSlider = new PDoubleSliderEdit( SliceParams::XOriginTag, "X Origin");//)->EnableDynamicUpdate();
     _ySlider = new PDoubleSliderEdit( SliceParams::YOriginTag, "Y Origin");//)->EnableDynamicUpdate();
     _zSlider = new PDoubleSliderEdit( SliceParams::ZOriginTag, "Z Origin");//)->EnableDynamicUpdate();
+    
+    _xSlider->EnableDynamicUpdate();
+    _ySlider->EnableDynamicUpdate();
+    _zSlider->EnableDynamicUpdate();
 
     Add(_xSlider);
     Add(_ySlider);

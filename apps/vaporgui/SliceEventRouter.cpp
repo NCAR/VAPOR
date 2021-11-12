@@ -31,9 +31,7 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
             (new PDoubleSliderEdit( SliceParams::YRotationTag, "Y"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
             (new PDoubleSliderEdit( SliceParams::ZRotationTag, "Z"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
         }),
-        //new PSection("Slice Origin", {
         new PSliceOriginSelector,
-        //}),
         new PGeometrySubtab,
     }));
     AddAnnotationSubtab(new PAnnotationColorbarWidget);

@@ -22,7 +22,7 @@
 
 #define MAX_TEXTURE_SIZE 2000
 
-#define DEBUG 1
+//#define DEBUG 1
 
 using namespace VAPoR;
 
@@ -140,16 +140,6 @@ int SliceRenderer::_resetDataCache(bool fast)
     _cacheParams.xOrigin = p->GetValueDouble(SliceParams::XOriginTag,0);
     _cacheParams.yOrigin = p->GetValueDouble(SliceParams::YOriginTag,0);
     _cacheParams.zOrigin = p->GetValueDouble(SliceParams::ZOriginTag,0);
-    /*if (fast) {
-        _textureSideSize = 50;
-        std::cout << "_resetDataCache fast " << _textureSideSize << std::endl;
-    }
-    else {
-        _textureSideSize = _cacheParams.textureSampleRate;
-        std::cout << "_resetDataCache slow " << _textureSideSize << std::endl;
-    }*/
-    //_textureSideSize = _cacheParams.textureSampleRate;
-    //if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
      
     _resetBoxCache();
     _resetColormapCache();
@@ -215,10 +205,6 @@ void SliceRenderer::_rotate()
                 p->GetValueDouble(SliceParams::YOriginTag, yMid),
                 p->GetValueDouble(SliceParams::ZOriginTag, zMid)};
 
-    //_origin = {(boxMax[X]-boxMin[X])/2. + boxMin[X], 
-    //                    (boxMax[Y]-boxMin[Y])/2. + boxMin[Y], 
-    //                    (boxMax[Z]-boxMin[Z])/2. + boxMin[Z]};
-
     // which we will use to project our polygon into 2D space.  First rotate XY plane with quaternion.
     glm::vec3 angles( M_PI*_cacheParams.xRotation/180., M_PI*_cacheParams.yRotation/180., M_PI*_cacheParams.zRotation/180. );
     glm::quat q = glm::quat( angles );
@@ -263,6 +249,7 @@ void SliceRenderer::_findIntercepts(glm::vec3& _origin, glm::vec3& _normal, std:
     // Lambdas for finding intercepts on the XYZ edges of the Box 
     // Plane equation: 
     //     _normal.x*(x-_origin.x) + _normal.y*(y-_origin.y) + _normal.z*(z-_origin.z) = 0
+
     auto zIntercept = [&](float x, float y) {
         if(_normal.z==0) return;
         double z = (_normal.x*_origin.x + _normal.y*_origin.y + _normal.z*_origin.z - _normal.x*x - _normal.y*y) / _normal.z;
@@ -307,8 +294,8 @@ void SliceRenderer::_findIntercepts(glm::vec3& _origin, glm::vec3& _normal, std:
 
 stack<glm::vec2> SliceRenderer::_2DConvexHull( std::vector<_vertex>& vertices ) const {
     // We now have a set of vertices along the Box's XYZ intercepts.  The edges of these vertices define where 
-    // the user should see data.  To find the connectivity/edges of these vertices, we project them into a 2D
-    // coordinate system using our basis function and performing Convex Hull.
+    // the user should see data.  To find the connectivity/edges of these vertices, we will first project them into a 2D
+    // coordinate system using our basis function, and then perform Convex Hull on those 2D coordinates.
 
     // Project our 3D points onto the 2D plane using our basis function (_normal, _axis1, and _axis2)
     glm::vec2 unorderedTwoDPoints[vertices.size()];
@@ -344,7 +331,6 @@ std::vector<glm::vec2> SliceRenderer::_makeRectangle2D( const std::vector<_verte
 // Map our rectangle's 2D edges back into 3D space, to get an 
 // ordered list of vertices for our data-enclosing polygon. 
 std::vector<glm::vec3> SliceRenderer::_makePolygon3D( const std::vector<_vertex>& vertices, stack<glm::vec2>& polygon2D ) const {
-    //_polygon3D.clear();
     std::vector<glm::vec3> polygon3D;
     while(!polygon2D.empty()) {
         glm::vec2 twoDPoint = polygon2D.top();
@@ -377,7 +363,7 @@ std::vector<glm::vec3> SliceRenderer::_makeRectangle3D( const std::vector<_verte
     return rectangle3D;
 }
 
-// Huges-Moller algorithm
+// Huges-Moller algorithm to get an orthogonal vector
 // https://blog.selfshadow.com/2011/10/17/perp-vectors/
 glm::vec3 SliceRenderer::_getOrthogonal(const glm::vec3 u) const {
     glm::vec3 a = abs(u);
@@ -449,31 +435,9 @@ int SliceRenderer::_saveTextureData()
     _rotate();
     _setVertexPositions();
 
-    //std::vector<double> stretch = GetViewpointParams()->GetStretchFactors();
-    /*std::vector<double> stretch = _controlExec->GetDataStatus()->getStretchFactors();
-    std::vector<glm::vec3> stretchedRectangle3D = _rectangle3D;
-    for (auto& vertex : stretchedRectangle3D) {
-        vertex.x *= stretch[X];
-        vertex.y *= stretch[Y];
-        vertex.z *= stretch[Z];
-    }*/
-    //std::vector<glm::vec2> stretchedRectangle2D =  
-    /*float dx = (_rectangle2D[1].x-_rectangle2D[0].x);
-    float dy = (_rectangle2D[1].y-_rectangle2D[0].y);
-    float xyRatio = dx/dy;
-    if(xyRatio >= 1) {
-        _xSamples = _textureSideSize;
-        _ySamples = _textureSideSize/xyRatio;
-    }
-    else {
-        _xSamples = _textureSideSize*xyRatio;
-        _ySamples = _textureSideSize;
-    }*/
     _xSamples = _textureSideSize;
     _ySamples = _textureSideSize;
   
-    std::cout << "xsamples ysamples " << _xSamples << " " << _ySamples <<std::endl;
- 
     int    textureSize = 2 * _xSamples * _ySamples;
     float *dataValues = new float[textureSize];
 
@@ -496,10 +460,8 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glGenTextures(1, &_dataValueTextureID);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -564,9 +526,6 @@ void SliceRenderer::_getModifiedExtents(vector<double> &min, vector<double> &max
     box->GetExtents(min, max);
     VAssert(min.size() == 3);
     VAssert(max.size() == 3);
-
-    //vector<double> sampleLocation = p->GetValueDoubleVec(p->OriginTag);
-    //VAssert(sampleLocation.size() == 3);
 }
 
 int SliceRenderer::_paintGL(bool fast)
@@ -577,9 +536,6 @@ int SliceRenderer::_paintGL(bool fast)
     glEnable(GL_DEPTH_TEST);
 
    
-    //if (fast)
-        
-
 #ifdef DEBUG 
     // 3D green polygon that shows where we should see data
     LegacyGL *lgl = _glManager->legacy;    
