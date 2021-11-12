@@ -109,9 +109,7 @@ std::stack<glm::vec2> convexHull(glm::vec2 points[], int n)
 
     // If modified array of points has less than 3 points,
     // convex hull is not possible
-    if (m < 3) {
-        return S;
-    }
+    if (m < 3) { return S; }
 
     // Create an empty stack and push first three points
     // to it.
