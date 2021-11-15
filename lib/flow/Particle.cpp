@@ -50,10 +50,10 @@ void Particle::SetSpecial(bool isSpecial)
     // Accidental assignment of nan to one of the two variables would not
     // render a "special state."
     if (isSpecial) {
-        time = std::nanf("1");
+        time = std::nan("1");
         value = std::nanf("1");
     } else {
-        time = 0.0f;
+        time = 0.0;
         value = 0.0f;
     }
 }
