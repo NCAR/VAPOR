@@ -351,16 +351,16 @@ std::vector<glm::vec3> SliceRenderer::_makeRectangle3D(const std::vector<_vertex
     // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
     // rectangle to generate our 2D texture.
     std::vector<glm::vec3> rectangle3D = {glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()};
-    auto                   inverseProjection = [&](float x, float y) {
+    /*auto                   inverseProjection = [&](float x, float y) {
         glm::vec3 point;
         point = _origin + x * _axis1 + y * _axis2;
         return point;
-    };
+    };*/
     rectangle3D = {glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()};
-    rectangle3D[3] = inverseProjection(_rectangle2D[0].x, _rectangle2D[0].y);
-    rectangle3D[0] = inverseProjection(_rectangle2D[1].x, _rectangle2D[0].y);
-    rectangle3D[1] = inverseProjection(_rectangle2D[1].x, _rectangle2D[1].y);
-    rectangle3D[2] = inverseProjection(_rectangle2D[0].x, _rectangle2D[1].y);
+    rectangle3D[3] = _inverseProjection(_rectangle2D[0].x, _rectangle2D[0].y);
+    rectangle3D[0] = _inverseProjection(_rectangle2D[1].x, _rectangle2D[0].y);
+    rectangle3D[1] = _inverseProjection(_rectangle2D[1].x, _rectangle2D[1].y);
+    rectangle3D[2] = _inverseProjection(_rectangle2D[0].x, _rectangle2D[1].y);
 
     return rectangle3D;
 }
@@ -381,15 +381,21 @@ glm::vec3 SliceRenderer::_getOrthogonal(const glm::vec3 u) const
     return v;
 }
 
+glm::vec3 SliceRenderer::_inverseProjection( float x, float y ) const {
+    glm::vec3 point;
+    point = _origin + x * _axis1 + y * _axis2;
+    return point;
+}
+
 void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
 {
     float varValue, missingValue;
 
-    auto inverseProjection = [&](float x, float y) {
+    /*auto inverseProjection = [&](float x, float y) {
         glm::vec3 point;
         point = _origin + x * _axis1 + y * _axis2;
         return point;
-    };
+    };*/
 
     glm::vec2 delta = (_rectangle2D[1] - _rectangle2D[0]);
     delta.x = delta.x / _xSamples;
@@ -399,7 +405,7 @@ void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
     int index = 0;
     for (int j = 0; j < _ySamples; j++) {
         for (int i = 0; i < _xSamples; i++) {
-            glm::vec3           samplePoint = inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
+            glm::vec3           samplePoint = _inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
             std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue(p);
             missingValue = grid->GetMissingValue();

@@ -876,6 +876,10 @@ void VizWin::_updateSliceOriginGlyph()
     scales[1] *= scales2[1];
     scales[2] *= scales2[2];
 
+    xOrigin *= scales[0];
+    yOrigin *= scales[1];
+    zOrigin *= scales[2];
+
     int            refLevel = sp->GetRefinementLevel();
     int            lod = sp->GetCompressionLevel();
     string         varName = sp->GetVariableName();
@@ -891,6 +895,10 @@ void VizWin::_updateSliceOriginGlyph()
 
     std::vector<double> min, max;
     dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, min, max);
+    for (int i=0; i<3; i++) {
+        min[i] *= scales[i];
+        max[i] *= scales[i];
+    }
     double              p = .03;
     std::vector<double> width = {(max[0] - min[0]) * p, (max[1] - min[1]) * p, (max[2] - min[2]) * p};
 
@@ -899,6 +907,8 @@ void VizWin::_updateSliceOriginGlyph()
     glEnable(GL_DEPTH_TEST);
     LegacyGL *lgl = _glManager->legacy;
     lgl->Color4f(1., 1., 0., 1.);
+
+    std::cout << "zOrigin " << zOrigin << " " << scales[0] << " " << scales[1] << " " << scales[2] << std::endl;
 
     lgl->Begin(GL_LINES);
     lgl->Vertex3f(xOrigin, yOrigin, zOrigin - width[2]);

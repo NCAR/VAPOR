@@ -6,10 +6,12 @@
 #include <stdlib.h>
 using namespace std;
 
-/*struct Point
+#ifdef BUILD_STANDALONE
+struct Point
 {
     double x, y;
-};*/
+};
+#endif
 
 // A global point needed for  sorting points with reference
 // to  the first point Used in compare function of qsort()
@@ -128,17 +130,20 @@ std::stack<glm::vec2> convexHull(glm::vec2 points[], int n)
 
     return S;
 
+#ifdef BUILD_STANDALONE
     // Now stack has the output points, print contents of stack
-    /*while (!S.empty())
+    while (!S.empty())
     {
         glm::vec2 p = S.top();
         cout << "(" << p.x << ", " << p.y <<")" << endl;
         S.pop();
-    }*/
+    }
+#endif
 }
 
+#ifdef BUILD_STANDALONE
 // Driver program to test above functions
-/*int main()
+int main()
 {
     //glm::vec2 points[] = {{0, 3}, {1, 1}, {2, 2}, {4, 4},
     //                  {0, 0}, {1, 2}, {3, 1}, {3, 3}};
@@ -149,4 +154,5 @@ std::stack<glm::vec2> convexHull(glm::vec2 points[], int n)
     int n = sizeof(points)/sizeof(points[0]);
     convexHull(points, n);
     return 0;
-}*/
+}
+#endif

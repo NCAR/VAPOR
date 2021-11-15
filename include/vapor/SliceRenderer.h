@@ -60,6 +60,7 @@ private:
     void                   _rotate();
     void                   _findIntercepts(glm::vec3 &origin, glm::vec3 &normal, std::vector<_vertex> &vertices, bool stretch) const;
     stack<glm::vec2>       _2DConvexHull(std::vector<_vertex> &vertices) const;
+    glm::vec3              _inverseProjection( float x, float y ) const;
     std::vector<glm::vec2> _makeRectangle2D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
     std::vector<glm::vec3> _makeRectangle3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
     std::vector<glm::vec3> _makePolygon3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
