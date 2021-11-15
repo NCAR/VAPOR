@@ -31,7 +31,6 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
 : Renderer(pm, winName, dataSetName, SliceParams::GetClassType(), SliceRenderer::GetClassType(), instanceName, dataMgr)
 {
     _initialized = false;
-    //_textureSideSize = 200;
 
     _vertexCoords = {0.0f, 0.0f, 0.f, 1.0f, 0.0f, 0.f, 0.0f, 1.0f, 0.f, 1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
 
@@ -124,7 +123,6 @@ void SliceRenderer::_initVertexVBO()
 
 int SliceRenderer::_resetDataCache()
 {
-    std::cout << "_resetDataCache()" << std::endl;
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);
 
@@ -134,7 +132,6 @@ int SliceRenderer::_resetDataCache()
     _cacheParams.refinementLevel = p->GetRefinementLevel();
     _cacheParams.compressionLevel = p->GetCompressionLevel();
     _cacheParams.textureSampleRate = p->GetSampleRate();
-    std::cout << "_resetDataCache() textureSampleRate " << _cacheParams.textureSampleRate << std::endl;
     _cacheParams.orientation = p->GetBox()->GetOrientation();
 
     _cacheParams.xRotation = p->GetValueDouble(SliceParams::XRotationTag, 0);
@@ -356,11 +353,6 @@ std::vector<glm::vec3> SliceRenderer::_makeRectangle3D(const std::vector<_vertex
     // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
     // rectangle to generate our 2D texture.
     std::vector<glm::vec3> rectangle3D = {glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()};
-    /*auto                   inverseProjection = [&](float x, float y) {
-        glm::vec3 point;
-        point = _origin + x * _axis1 + y * _axis2;
-        return point;
-    };*/
     rectangle3D = {glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()};
     rectangle3D[3] = _inverseProjection(_rectangle2D[0].x, _rectangle2D[0].y);
     rectangle3D[0] = _inverseProjection(_rectangle2D[1].x, _rectangle2D[0].y);
@@ -396,12 +388,6 @@ void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
 {
     float varValue, missingValue;
 
-    /*auto inverseProjection = [&](float x, float y) {
-        glm::vec3 point;
-        point = _origin + x * _axis1 + y * _axis2;
-        return point;
-    };*/
-
     glm::vec2 delta = (_rectangle2D[1] - _rectangle2D[0]);
     delta.x = delta.x / _xSamples;
     delta.y = delta.y / _ySamples;
@@ -411,7 +397,6 @@ void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
     for (int j = 0; j < _ySamples; j++) {
         for (int i = 0; i < _xSamples; i++) {
             glm::vec3           samplePoint = _inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
-            //std::vector<double> p = {samplePoint.x, samplePoint.y, samplePoint.z};
             CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue(p);
             missingValue = grid->GetMissingValue();
@@ -430,7 +415,6 @@ void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
 
 int SliceRenderer::_saveTextureData()
 {
-    std::cout << "    _saveTextureData() " << _textureSideSize << std::endl;
     Grid *grid = nullptr;
     int   rc =
         DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, _cacheParams.boxMin, _cacheParams.boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
@@ -471,10 +455,8 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glGenTextures(1, &_dataValueTextureID);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -597,21 +579,14 @@ int SliceRenderer::_paintGL(bool fast)
 
     // If we're in fast mode, degrade the quality of the slice for better interactivity
     if (fast) {
-        //_cacheParams.textureSampleRate = 50;
-        //_textureSideSize = _cacheParams.textureSampleRate;
         _textureSideSize = 50;
     } else {
         _textureSideSize = _cacheParams.textureSampleRate;
-        std::cout << "_textureSideSize = _cacheParams.textureSampleRate; " << _textureSideSize << std::endl;
     }
     if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
 
     bool dirty = _isDataCacheDirty();
-    std::cout << "Dirty/fast " << dirty << " " << fast << " " << (_fastMode!=fast) << " " << _textureSideSize << std::endl;
     if ( dirty || _fastMode != fast ) {
-    //if (_isDataCacheDirty() || fast) {
-    //if (_isDataCacheDirty() && !fast) {
-    //if (_isDataCacheDirty()) {
         _fastMode = fast;
         rc = _resetDataCache();
         if (rc < 0) {
