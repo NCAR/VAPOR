@@ -60,6 +60,7 @@ private:
     void                   _rotate();
     void                   _findIntercepts(glm::vec3 &origin, glm::vec3 &normal, std::vector<_vertex> &vertices, bool stretch) const;
     stack<glm::vec2>       _2DConvexHull(std::vector<_vertex> &vertices) const;
+    glm::vec3              _inverseProjection( float x, float y ) const;
     std::vector<glm::vec2> _makeRectangle2D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
     std::vector<glm::vec3> _makeRectangle3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
     std::vector<glm::vec3> _makePolygon3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
@@ -75,7 +76,7 @@ private:
     int       _saveCacheParams();
     void      _resetColormapCache();
     int       _resetBoxCache();
-    int       _resetDataCache(bool fast);
+    int       _resetDataCache();
     void      _initTextures();
     void      _createDataTexture(float *dataValues);
     int       _saveTextureData();
@@ -101,6 +102,7 @@ private:
     std::vector<glm::vec2> _rectangle2D;
 
     bool _initialized;
+    bool _fastMode;
     int  _textureSideSize;
     int  _xSamples;
     int  _ySamples;
