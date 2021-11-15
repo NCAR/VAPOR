@@ -2,6 +2,10 @@
 
 #include "PSection.h"
 
+//! \class PSliceOriginSelector
+//! \brief POrovides three sliders that control the origin of a slice.  Minimum and maximum values along each axis are recalculated on each updateGUI() call.
+//! \author Scott Pearse
+
 class PDoubleSliderEdit;
 
 class PSliceOriginSelector : public PSection {
