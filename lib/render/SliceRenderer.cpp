@@ -533,43 +533,7 @@ int SliceRenderer::_paintGL(bool fast)
 
 
 #ifdef DEBUG
-    // 3D green polygon that shows where we should see data
-    LegacyGL *lgl = _glManager->legacy;
-    lgl->Color4f(0, 1., 0, 1.);
-    lgl->Begin(GL_LINES);
-    if (_polygon3D.size()) {
-        for (int i = 0; i < _polygon3D.size() - 1; i++) {
-            glm::vec3 vert1 = _polygon3D[i];
-            glm::vec3 vert2 = _polygon3D[i + 1];
-            lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-            lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-        }
-        lgl->Color4f(0, 1., 0, 1.);
-        glm::vec3 vert1 = _polygon3D[_polygon3D.size() - 1];
-        glm::vec3 vert2 = _polygon3D[0];
-        lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-        lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-    }
-    lgl->End();
-
-    // 3D yellow enclosing rectangle that defines the perimeter of our texture
-    // This can and often will extend beyond the Box
-    lgl = _glManager->legacy;
-    lgl->Begin(GL_LINES);
-    lgl->Color4f(1., 1., 0., 1.);
-    if (_rectangle3D.size()) {
-        for (int i = 0; i < _rectangle3D.size() - 1; i++) {
-            glm::vec3 vert1 = _rectangle3D[i];
-            glm::vec3 vert2 = _rectangle3D[i + 1];
-            lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-            lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-        }
-        glm::vec3 vert1 = _rectangle3D[3];
-        glm::vec3 vert2 = _rectangle3D[0];
-        lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-        lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-    }
-    lgl->End();
+    _drawDebugPolygons();
 #endif
 
     glEnable(GL_DEPTH_TEST);
@@ -625,6 +589,46 @@ int SliceRenderer::_paintGL(bool fast)
     if (CheckGLError() != 0) { return -1; }
 
     return rc;
+}
+
+void SliceRenderer::_drawDebugPolygons() const {
+    // 3D green polygon that shows where we should see data
+    LegacyGL *lgl = _glManager->legacy;
+    lgl->Color4f(0, 1., 0, 1.);
+    lgl->Begin(GL_LINES);
+    if (_polygon3D.size()) {
+        for (int i = 0; i < _polygon3D.size() - 1; i++) {
+            glm::vec3 vert1 = _polygon3D[i];
+            glm::vec3 vert2 = _polygon3D[i + 1];
+            lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
+            lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
+        }
+        lgl->Color4f(0, 1., 0, 1.);
+        glm::vec3 vert1 = _polygon3D[_polygon3D.size() - 1];
+        glm::vec3 vert2 = _polygon3D[0];
+        lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
+        lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
+    }
+    lgl->End();
+
+    // 3D yellow enclosing rectangle that defines the perimeter of our texture
+    // This can and often will extend beyond the Box
+    lgl = _glManager->legacy;
+    lgl->Begin(GL_LINES);
+    lgl->Color4f(1., 1., 0., 1.);
+    if (_rectangle3D.size()) {
+        for (int i = 0; i < _rectangle3D.size() - 1; i++) {
+            glm::vec3 vert1 = _rectangle3D[i];
+            glm::vec3 vert2 = _rectangle3D[i + 1];
+            lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
+            lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
+        }
+        glm::vec3 vert1 = _rectangle3D[3];
+        glm::vec3 vert2 = _rectangle3D[0];
+        lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
+        lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
+    }
+    lgl->End();
 }
 
 void SliceRenderer::_configureShader()

@@ -64,6 +64,7 @@ private:
     std::vector<glm::vec2> _makeRectangle2D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
     std::vector<glm::vec3> _makeRectangle3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
     std::vector<glm::vec3> _makePolygon3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
+    void                   _drawDebugPolygons() const;
 
     void _initVAO();
     void _initTexCoordVBO();
@@ -102,10 +103,10 @@ private:
     std::vector<glm::vec2> _rectangle2D;
 
     bool _initialized;
-    bool _fastMode;
     int  _textureSideSize;
     int  _xSamples;
     int  _ySamples;
+    bool _fastMode;
 
     GLuint _colorMapTextureID;
     GLuint _dataValueTextureID;
