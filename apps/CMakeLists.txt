@@ -28,6 +28,10 @@ if (BUILD_GUI)
 	endif()
 endif()
 
+if (BUILD_PYTHON)
+    add_subdirectory (vapi)
+endif()
+ 
 if (UNIX AND NOT APPLE AND DIST_INSTALLER)
 	add_subdirectory (linuxlauncher)
 endif ()

@@ -11,7 +11,7 @@
 #include <vapor/ControlExecutive.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/ViewpointParams.h>
-#include "GUIStateParams.h"
+#include <vapor/GUIStateParams.h>
 #include "VLabel.h"
 
 using namespace VAPoR;

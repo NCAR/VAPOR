@@ -85,7 +85,7 @@
 #include <vapor/LegacyVectorMath.h>
 #include <vapor/VAssert.h>
 
-#include "TrackBall.h"
+#include <vapor/TrackBall.h>
 
 using namespace VAPoR;
 void Trackball::TrackballReset()

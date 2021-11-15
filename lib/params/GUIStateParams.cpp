@@ -21,11 +21,11 @@
 
 #include <iostream>
 #include <cassert>
-#include <QDir>
 
-#include "MouseModeParams.h"
-#include "GUIStateParams.h"
-#include "BookmarkParams.h"
+#include <vapor/FileUtils.h>
+#include <vapor/MouseModeParams.h>
+#include <vapor/GUIStateParams.h>
+#include <vapor/BookmarkParams.h>
 
 using namespace VAPoR;
 
@@ -162,7 +162,7 @@ void GUIStateParams::SetCurrentSessionFile(string path) { SetValueString(m_sessi
 
 //! method identifies the current session file
 //! \retval session file path
-string GUIStateParams::GetCurrentImagePath() const { return (GetValueString(m_imagePathTag, QDir::homePath().toStdString())); }
+string GUIStateParams::GetCurrentImagePath() const { return (GetValueString(m_imagePathTag, Wasp::FileUtils::HomeDir())); }
 
 //! method sets the current session path
 //! \param[in] path string
@@ -170,7 +170,7 @@ void GUIStateParams::SetCurrentImagePath(string path) { SetValueString(m_imagePa
 
 //! method identifies the current session file
 //! \retval session file path
-string GUIStateParams::GetCurrentImageSavePath() const { return (GetValueString(m_imageSavePathTag, QDir::homePath().toStdString())); }
+string GUIStateParams::GetCurrentImageSavePath() const { return (GetValueString(m_imageSavePathTag, Wasp::FileUtils::HomeDir())); }
 
 //! method sets the current session path
 //! \param[in] path string
@@ -178,7 +178,7 @@ void GUIStateParams::SetCurrentImageSavePath(string path) { SetValueString(m_ima
 
 //! method identifies the current session file
 //! \retval session file path
-string GUIStateParams::GetCurrentTFPath() { return (GetValueString(m_tfPathTag, QDir::homePath().toStdString())); }
+string GUIStateParams::GetCurrentTFPath() { return (GetValueString(m_tfPathTag, Wasp::FileUtils::HomeDir())); }
 
 //! method sets the current session path
 //! \param[in] path string
@@ -186,7 +186,7 @@ void GUIStateParams::SetCurrentTFPath(string path) { SetValueString(m_tfPathTag,
 
 //! method identifies the current session file
 //! \retval session file path
-string GUIStateParams::GetCurrentPythonPath() const { return (GetValueString(m_pythonPathTag, QDir::homePath().toStdString())); }
+string GUIStateParams::GetCurrentPythonPath() const { return (GetValueString(m_pythonPathTag, Wasp::FileUtils::HomeDir())); }
 
 //! method sets the current session path
 //! \param[in] path string
@@ -194,7 +194,7 @@ void GUIStateParams::SetCurrentPythonPath(string path) { SetValueString(m_python
 
 //! method identifies the current session file
 //! \retval session file path
-string GUIStateParams::GetCurrentFlowPath() const { return (GetValueString(m_flowPathTag, QDir::homePath().toStdString())); }
+string GUIStateParams::GetCurrentFlowPath() const { return (GetValueString(m_flowPathTag, Wasp::FileUtils::HomeDir())); }
 
 //! method sets the current session path
 //! \param[in] path string

@@ -42,6 +42,9 @@ static void ReplaceAll(string *s, char a, char b)
 
 int DCP::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
+    if (_ncdfc) delete _ncdfc;
+    _ncdfc = nullptr;
+
     NetCDFCollection *ncdfc = new NetCDFCollection();
     _ncdfc = ncdfc;
 

@@ -1,7 +1,7 @@
 #include "PDatasetTransformWidget.h"
 #include <vapor/ControlExecutive.h>
 #include <vapor/STLUtils.h>
-#include "GUIStateParams.h"
+#include <vapor/GUIStateParams.h>
 #include "VSection.h"
 #include "PStringDropdown.h"
 #include "PTransformWidget.h"

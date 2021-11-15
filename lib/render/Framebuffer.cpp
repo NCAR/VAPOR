@@ -15,6 +15,9 @@ int Framebuffer::Generate()
 {
     VAssert(!Initialized());
 
+    GLint savedId;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &savedId);
+
     glGenFramebuffers(1, &_id);
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
 
@@ -28,7 +31,7 @@ int Framebuffer::Generate()
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthBuffer._id, 0);
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, savedId);
     return 0;
 }
 
@@ -38,9 +41,11 @@ bool Framebuffer::IsComplete() const { return Initialized() && GetStatus() == GL
 
 int Framebuffer::GetStatus() const { return glCheckFramebufferStatus(GL_FRAMEBUFFER); }
 
-const char *Framebuffer::GetStatusString() const
+const char *Framebuffer::GetStatusString() const { return GetStatusString(GetStatus()); }
+
+const char *Framebuffer::GetStatusString(int status)
 {
-    switch (GetStatus()) {
+    switch (status) {
     case GL_FRAMEBUFFER_COMPLETE: return "GL_FRAMEBUFFER_COMPLETE";
     case GL_FRAMEBUFFER_UNDEFINED: return "GL_FRAMEBUFFER_UNDEFINED";
     case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: return "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
