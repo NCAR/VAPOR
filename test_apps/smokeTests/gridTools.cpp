@@ -456,6 +456,10 @@ VAPoR::CurvilinearGrid *MakeCurvilinearTerrainGrid(const std::vector<size_t> &bs
     std::vector<float *> blks = AllocateBlocks(bs, dims);
     CurvilinearGrid *    cg = new CurvilinearGrid(dims, bs, blks, *xrg, *yrg, *zrg, NULL);
 
+    delete xrg;
+    delete yrg;
+    delete zrg;
+
     return (cg);
 }
 
