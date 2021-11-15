@@ -451,7 +451,7 @@ VAPoR::CurvilinearGrid *MakeCurvilinearTerrainGrid(const std::vector<size_t> &bs
     MakeRampOnAxis(yrg.get(), minu[Y], maxu[Y], Y);
 
     std::vector<float *> zblks = AllocateBlocks(bs, dims);
-    auto                 zrg = std::make_unique<RegularGrid>(new RegularGrid(dims, bs, zblks, minu, maxu))
+    auto                 zrg = std::make_unique<RegularGrid>(new RegularGrid(dims, bs, zblks, minu, maxu));
     MakeRampOnAxis(zrg.get(), minu[Z], maxu[Z], Z);
 
     std::vector<float *> blks = AllocateBlocks(bs, dims);
