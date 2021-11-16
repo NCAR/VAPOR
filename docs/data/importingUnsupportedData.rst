@@ -31,7 +31,7 @@ Several data types can be adjusted for importing into Vapor.  The table below sh
 
 For example, if your data is organized as a collection of RAW files that are sampled on a `regular grid <https://en.wikipedia.org/wiki/Regular_grid>`_ you may want to use Vapor's BOV format. 
 
-If your data are RAW files on a rectilinear or curvilinar grid, VAPOR can read your data after converting it to VDC with the :ref:`vdccreate <vdccreate>` and raw2vdc command line tools that are bundled with your installation.
+If your data are sampled on a high resolution grid, and performance is a concern, you may want to consider VAPOR's multi-resolultion VDC file format. However, this format should only be considered if multi-resolution is required. For small to modest sized data sets, performance may be degraded by using the VDC.
 
 For rectilinear or curvilinear grids you'll need to use the more flexible NetCDF-CF.  If your data are already in the NetCDF format but are not CF compliant, then NetCDF-CF is probably your best choice.
 
