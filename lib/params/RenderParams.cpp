@@ -54,6 +54,10 @@ const string RenderParams::_currentTimestepTag = "CurrentTimestep";
 const string RenderParams::XOriginTag = "XOrigin";
 const string RenderParams::YOriginTag = "YOrigin";
 const string RenderParams::ZOriginTag = "ZOrigin";
+const string RenderParams::XRotationTag = "XRotation";
+const string RenderParams::YRotationTag = "YRotation";
+const string RenderParams::ZRotationTag = "ZRotation";
+const string RenderParams::SampleRateTag = "SampleRate";
 
 #define REQUIRED_SAMPLE_SIZE 1000000
 

@@ -21,15 +21,15 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     AddAppearanceSubtab(new PGroup({
         new PTFEditor,
         new PSection("Slice", {
-            (new PDoubleSliderEdit(SliceParams::_sampleRateTag, "N Samples"))->SetRange(32, 2000)
+            (new PDoubleSliderEdit(RenderParams::SampleRateTag, "N Samples"))->SetRange(32, 2000)
         })
     }));
     
     AddGeometrySubtab(new PGroup({
         new PSection("Slice Rotation", {
-            (new PDoubleSliderEdit( SliceParams::XRotationTag, "X"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit( SliceParams::YRotationTag, "Y"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit( SliceParams::ZRotationTag, "Z"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit( RenderParams::XRotationTag, "X"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit( RenderParams::YRotationTag, "Y"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit( RenderParams::ZRotationTag, "Z"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
         }),
         new PSliceOriginSelector,
         new PGeometrySubtab,

@@ -20,8 +20,6 @@ public:
 
     virtual int Initialize() override;
 
-    virtual void SetRefinementLevel(int level) override;
-
     // Get static string identifier for this params class
     //
     static string GetClassType() { return ("SliceParams"); }
@@ -39,17 +37,9 @@ public:
             return GetVariableName();
     }
 
-    int                 GetSampleRate() const;
-    void                SetSampleRate(int rate);
-    int                 GetDefaultSampleRate() const;
     void                SetCachedValues(std::vector<double> values);
     std::vector<double> GetCachedValues() const;
     bool                GetOrientable() const override;
-
-    static const string _sampleRateTag;
-    static const string XRotationTag;
-    static const string YRotationTag;
-    static const string ZRotationTag;
 
 private:
     bool _initialized = false;

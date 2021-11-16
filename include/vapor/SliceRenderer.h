@@ -106,7 +106,6 @@ private:
     int  _textureSideSize;
     int  _xSamples;
     int  _ySamples;
-    bool _fastMode;
 
     GLuint _colorMapTextureID;
     GLuint _dataValueTextureID;

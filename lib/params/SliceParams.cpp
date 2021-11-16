@@ -16,12 +16,7 @@ using namespace VAPoR;
 #define XZ 1
 #define YZ 2
 
-#define MIN_DEFAULT_SAMPLERATE 200
-
-const string SliceParams::_sampleRateTag = "SampleRate";
-const string SliceParams::XRotationTag = "XRotation";
-const string SliceParams::YRotationTag = "YRotation";
-const string SliceParams::ZRotationTag = "ZRotation";
+#define DEFAULT_SAMPLERATE 200
 
 //
 // Register class with object factory!!!
@@ -40,21 +35,11 @@ SliceParams::SliceParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode
 
 SliceParams::~SliceParams() { SetDiagMsg("SliceParams::~SliceParams() this=%p", this); }
 
-void SliceParams::SetRefinementLevel(int level)
-{
-    BeginGroup("SliceParams: Change refinement level and sample rate");
-    RenderParams::SetRefinementLevel(level);
-    SetSampleRate(GetDefaultSampleRate());
-    EndGroup();
-}
-
 void SliceParams::_init()
 {
     SetDiagMsg("SliceParams::_init()");
 
     SetFieldVariableNames(vector<string>());
-
-    SetSampleRate(MIN_DEFAULT_SAMPLERATE);
 }
 
 int SliceParams::Initialize()
@@ -76,32 +61,10 @@ int SliceParams::Initialize()
     SetValueDouble(RenderParams::XOriginTag, "", sampleLocation[0]);
     SetValueDouble(RenderParams::YOriginTag, "", sampleLocation[1]);
     SetValueDouble(RenderParams::ZOriginTag, "", sampleLocation[2]);
-
-    SetSampleRate(MIN_DEFAULT_SAMPLERATE);
+    SetValueDouble(RenderParams::SampleRateTag, "", DEFAULT_SAMPLERATE);
 
     return (0);
 }
-
-int SliceParams::GetDefaultSampleRate() const
-{
-    string         varName = GetVariableName();
-    int            refLevel = GetRefinementLevel();
-    vector<size_t> dimsAtLevel;
-    _dataMgr->GetDimLensAtLevel(varName, refLevel, dimsAtLevel, GetCurrentTimestep());
-    int sampleRate = *max_element(dimsAtLevel.begin(), dimsAtLevel.end());
-
-    if (sampleRate < MIN_DEFAULT_SAMPLERATE) sampleRate = MIN_DEFAULT_SAMPLERATE;
-
-    return sampleRate;
-}
-
-int SliceParams::GetSampleRate() const
-{
-    int rate = (int)GetValueDouble(_sampleRateTag, MIN_DEFAULT_SAMPLERATE);
-    return rate;
-}
-
-void SliceParams::SetSampleRate(int rate) { SetValueDouble(_sampleRateTag, "Set sample rate", (double)rate); }
 
 void SliceParams::SetCachedValues(std::vector<double> values)
 {

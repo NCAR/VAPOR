@@ -439,6 +439,10 @@ public:
     static const string XOriginTag;
     static const string YOriginTag;
     static const string ZOriginTag;
+    static const string XRotationTag;
+    static const string YRotationTag;
+    static const string ZRotationTag;
+    static const string SampleRateTag;
 };
 
 //////////////////////////////////////////////////////////////////////////

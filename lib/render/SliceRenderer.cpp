@@ -42,8 +42,6 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     _colorMapTextureID = 0;
     _dataValueTextureID = 0;
 
-    _fastMode = 0;
-
     _cacheParams.domainMin.resize(3, 0.f);
     _cacheParams.domainMax.resize(3, 1.f);
     _cacheParams.textureSampleRate = 200;
@@ -131,16 +129,17 @@ int SliceRenderer::_resetDataCache()
     _cacheParams.ts = p->GetCurrentTimestep();
     _cacheParams.refinementLevel = p->GetRefinementLevel();
     _cacheParams.compressionLevel = p->GetCompressionLevel();
-    _cacheParams.textureSampleRate = p->GetSampleRate();
     _cacheParams.orientation = p->GetBox()->GetOrientation();
 
-    _cacheParams.xRotation = p->GetValueDouble(SliceParams::XRotationTag, 0);
-    _cacheParams.yRotation = p->GetValueDouble(SliceParams::YRotationTag, 0);
-    _cacheParams.zRotation = p->GetValueDouble(SliceParams::ZRotationTag, 0);
+    _cacheParams.xRotation = p->GetValueDouble(RenderParams::XRotationTag, 0);
+    _cacheParams.yRotation = p->GetValueDouble(RenderParams::YRotationTag, 0);
+    _cacheParams.zRotation = p->GetValueDouble(RenderParams::ZRotationTag, 0);
 
     _cacheParams.xOrigin = p->GetValueDouble(RenderParams::XOriginTag, 0);
     _cacheParams.yOrigin = p->GetValueDouble(RenderParams::YOriginTag, 0);
     _cacheParams.zOrigin = p->GetValueDouble(RenderParams::ZOriginTag, 0);
+
+    _cacheParams.textureSampleRate = p->GetValueDouble(RenderParams::SampleRateTag, 200);
 
     _resetBoxCache();
     _resetColormapCache();
@@ -475,16 +474,16 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.refinementLevel != p->GetRefinementLevel()) return true;
     if (_cacheParams.compressionLevel != p->GetCompressionLevel()) return true;
 
-    if (_cacheParams.xRotation != p->GetValueDouble(SliceParams::XRotationTag, 0)) return true;
-    if (_cacheParams.yRotation != p->GetValueDouble(SliceParams::YRotationTag, 0)) return true;
-    if (_cacheParams.zRotation != p->GetValueDouble(SliceParams::ZRotationTag, 0)) return true;
+    if (_cacheParams.xRotation != p->GetValueDouble(RenderParams::XRotationTag, 0)) return true;
+    if (_cacheParams.yRotation != p->GetValueDouble(RenderParams::YRotationTag, 0)) return true;
+    if (_cacheParams.zRotation != p->GetValueDouble(RenderParams::ZRotationTag, 0)) return true;
 
     if (_cacheParams.xOrigin != p->GetValueDouble(RenderParams::XOriginTag, 0)) return true;
     if (_cacheParams.yOrigin != p->GetValueDouble(RenderParams::YOriginTag, 0)) return true;
     if (_cacheParams.zOrigin != p->GetValueDouble(RenderParams::ZOriginTag, 0)) return true;
 
     // if (_cacheParams.textureSampleRate != p->GetSampleRate()) return true;
-    if (_cacheParams.textureSampleRate != p->GetValueDouble(SliceParams::_sampleRateTag, 200)) return true;
+    if (_cacheParams.textureSampleRate != p->GetValueDouble(RenderParams::SampleRateTag, 200)) return true;
 
     return false;
 }
@@ -550,9 +549,7 @@ int SliceRenderer::_paintGL(bool fast)
     }
     if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
 
-    bool dirty = _isDataCacheDirty();
-    if (dirty || _fastMode != fast) {
-        _fastMode = fast;
+    if (_isDataCacheDirty()) {
         rc = _resetDataCache();
         if (rc < 0) {
             _resetState();
