@@ -9,7 +9,7 @@ __________________________
     :width: 400
     :align: center
 
-Several data types can be adjusted for importing into Vapor.  The table below shows these formats, along with the supported and unsupported features of each data type.
+If your data format is not currently supported by Vapor you may be able to convert your data from its native file format to one that is supported. Several of Vapor's supported formats are good candidates for conversion. The table below shows these formats, along with the supported and unsupported features of each data type.
 
     +--------------------+--------------------------------------------+----------------------------+------------------+
     |                    |  :ref:`CF Compliant netCDF <cfCompliance>` | :ref:`BOV <brickOfValues>` | :ref:`VDC <vdc>` |  
