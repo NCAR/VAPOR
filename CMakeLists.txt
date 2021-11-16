@@ -11,7 +11,7 @@ include (buildutils/UtilityFunctions.cmake)
 include (buildutils/GetGitRevisionDescription.cmake)
 include (buildutils/OpenMPInstaller.cmake)
 
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 11)
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
