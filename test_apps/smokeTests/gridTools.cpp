@@ -443,15 +443,15 @@ VAPoR::CurvilinearGrid *MakeCurvilinearTerrainGrid(const std::vector<size_t> &bs
     std::vector<double> maxu2d = {maxu[X], maxu[Y]};
 
     std::vector<float *> xblks = AllocateBlocks(bs2d, dims2d);
-    auto                 xrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims2d, bs2d, xblks, minu2d, maxu2d));
+    auto                 xrg = std::make_unique<RegularGrid>(dims2d, bs2d, xblks, minu2d, maxu2d);
     MakeRampOnAxis(xrg.get(), minu[X], maxu[X], X);
 
     std::vector<float *> yblks = AllocateBlocks(bs2d, dims2d);
-    auto                 yrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims2d, bs2d, yblks, minu2d, maxu2d));
+    auto                 yrg = std::make_unique<RegularGrid>(dims2d, bs2d, yblks, minu2d, maxu2d);
     MakeRampOnAxis(yrg.get(), minu[Y], maxu[Y], Y);
 
     std::vector<float *> zblks = AllocateBlocks(bs, dims);
-    auto                 zrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims, bs, zblks, minu, maxu));
+    auto                 zrg = std::make_unique<RegularGrid>(dims, bs, zblks, minu, maxu);
     MakeRampOnAxis(zrg.get(), minu[Z], maxu[Z], Z);
 
     std::vector<float *> blks = AllocateBlocks(bs, dims);
