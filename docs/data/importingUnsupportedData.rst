@@ -29,7 +29,7 @@ Several data types can be adjusted for importing into Vapor.  The table below sh
     | Complexity         |  Medium                                    | Low                        | High             |  
     +--------------------+--------------------------------------------+----------------------------+------------------+
 
-For example, if your data is organized as a collection of RAW files that are sampled on a `regular grid <https://en.wikipedia.org/wiki/Regular_grid>`_ you may want to use Vapor's BOV format. 
+For example, if your data is organized as a collection of RAW files that are sampled on a `regular grid <https://en.wikipedia.org/wiki/Regular_grid>`_ you may want to use Vapor's BOV format. This is the easiest way to import unsupported data because it involves only creating small, ASCII metadata files describing your actual data.
 
 If your data are sampled on a high resolution grid, and performance is a concern, you may want to consider VAPOR's multi-resolultion VDC file format. However, this format should only be considered if multi-resolution is required. For small to modest sized data sets, performance may be degraded by using the VDC.
 
