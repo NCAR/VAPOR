@@ -59,6 +59,8 @@
 
 using namespace VAPoR;
 
+#define ORIGIN_TIC_WIDTH .03
+
 /*
  *  Constructs a VizWindow as a child of 'parent', with the
  *  name 'name' and widget flags set to 'f'.
@@ -876,6 +878,10 @@ void VizWin::_updateSliceOriginGlyph()
     scales[1] *= scales2[1];
     scales[2] *= scales2[2];
 
+    xOrigin *= scales[0];
+    yOrigin *= scales[1];
+    zOrigin *= scales[2];
+
     int            refLevel = sp->GetRefinementLevel();
     int            lod = sp->GetCompressionLevel();
     string         varName = sp->GetVariableName();
@@ -891,10 +897,16 @@ void VizWin::_updateSliceOriginGlyph()
 
     std::vector<double> min, max;
     dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, min, max);
-    double              p = .03;
-    std::vector<double> width = {(max[0] - min[0]) * p, (max[1] - min[1]) * p, (max[2] - min[2]) * p};
-
-
+    for (int i=0; i<3; i++) {
+        min[i] *= scales[i];
+        max[i] *= scales[i];
+    }
+  
+    // Find the average magnitude of the X and Y axes.  3% of that magnitude will be the size of the
+    // origin marker's crosshairs.
+    double p = .03 * ((max[0]-min[0]) + (max[1]-min[1])) / 2;
+    std::vector<double> width = {p,p,p};
+ 
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     LegacyGL *lgl = _glManager->legacy;
