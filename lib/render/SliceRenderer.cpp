@@ -138,9 +138,9 @@ int SliceRenderer::_resetDataCache()
     _cacheParams.yRotation = p->GetValueDouble(SliceParams::YRotationTag, 0);
     _cacheParams.zRotation = p->GetValueDouble(SliceParams::ZRotationTag, 0);
 
-    _cacheParams.xOrigin = p->GetValueDouble(SliceParams::XOriginTag, 0);
-    _cacheParams.yOrigin = p->GetValueDouble(SliceParams::YOriginTag, 0);
-    _cacheParams.zOrigin = p->GetValueDouble(SliceParams::ZOriginTag, 0);
+    _cacheParams.xOrigin = p->GetValueDouble(RenderParams::XOriginTag, 0);
+    _cacheParams.yOrigin = p->GetValueDouble(RenderParams::YOriginTag, 0);
+    _cacheParams.zOrigin = p->GetValueDouble(RenderParams::ZOriginTag, 0);
 
     _resetBoxCache();
     _resetColormapCache();
@@ -202,7 +202,7 @@ void SliceRenderer::_rotate()
     double              zMid = (boxMax[Z] - boxMin[Z]) / 2. + boxMin[Z];
 
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
-    _origin = {p->GetValueDouble(SliceParams::XOriginTag, xMid), p->GetValueDouble(SliceParams::YOriginTag, yMid), p->GetValueDouble(SliceParams::ZOriginTag, zMid)};
+    _origin = {p->GetValueDouble(RenderParams::XOriginTag, xMid), p->GetValueDouble(RenderParams::YOriginTag, yMid), p->GetValueDouble(RenderParams::ZOriginTag, zMid)};
 
     // which we will use to project our polygon into 2D space.  First rotate XY plane with quaternion.
     glm::vec3 angles(M_PI * _cacheParams.xRotation / 180., M_PI * _cacheParams.yRotation / 180., M_PI * _cacheParams.zRotation / 180.);
@@ -478,9 +478,9 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.yRotation != p->GetValueDouble(SliceParams::YRotationTag, 0)) return true;
     if (_cacheParams.zRotation != p->GetValueDouble(SliceParams::ZRotationTag, 0)) return true;
 
-    if (_cacheParams.xOrigin != p->GetValueDouble(SliceParams::XOriginTag, 0)) return true;
-    if (_cacheParams.yOrigin != p->GetValueDouble(SliceParams::YOriginTag, 0)) return true;
-    if (_cacheParams.zOrigin != p->GetValueDouble(SliceParams::ZOriginTag, 0)) return true;
+    if (_cacheParams.xOrigin != p->GetValueDouble(RenderParams::XOriginTag, 0)) return true;
+    if (_cacheParams.yOrigin != p->GetValueDouble(RenderParams::YOriginTag, 0)) return true;
+    if (_cacheParams.zOrigin != p->GetValueDouble(RenderParams::ZOriginTag, 0)) return true;
 
     //if (_cacheParams.textureSampleRate != p->GetSampleRate()) return true;
     if (_cacheParams.textureSampleRate != p->GetValueDouble(SliceParams::_sampleRateTag, 200)) return true;

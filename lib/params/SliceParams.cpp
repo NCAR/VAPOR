@@ -22,9 +22,6 @@ const string SliceParams::_sampleRateTag = "SampleRate";
 const string SliceParams::XRotationTag = "XRotation";
 const string SliceParams::YRotationTag = "YRotation";
 const string SliceParams::ZRotationTag = "ZRotation";
-const string SliceParams::XOriginTag = "XOrigin";
-const string SliceParams::YOriginTag = "YOrigin";
-const string SliceParams::ZOriginTag = "ZOrigin";
 
 //
 // Register class with object factory!!!
@@ -76,9 +73,9 @@ int SliceParams::Initialize()
     std::vector<double> sampleLocation(3);
     for (int i = 0; i < 3; i++) sampleLocation[i] = (minExt[i] + maxExt[i]) / 2.0;
 
-    SetValueDouble(XOriginTag, "", sampleLocation[0]);
-    SetValueDouble(YOriginTag, "", sampleLocation[1]);
-    SetValueDouble(ZOriginTag, "", sampleLocation[2]);
+    SetValueDouble(RenderParams::XOriginTag, "", sampleLocation[0]);
+    SetValueDouble(RenderParams::YOriginTag, "", sampleLocation[1]);
+    SetValueDouble(RenderParams::ZOriginTag, "", sampleLocation[2]);
 
     SetSampleRate(MIN_DEFAULT_SAMPLERATE);
 
@@ -113,3 +110,5 @@ void SliceParams::SetCachedValues(std::vector<double> values)
 }
 
 std::vector<double> SliceParams::GetCachedValues() const { return _cachedValues; }
+
+bool SliceParams::GetOrientable() const { return true; }

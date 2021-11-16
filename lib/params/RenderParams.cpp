@@ -51,6 +51,9 @@ const string RenderParams::_RefinementLevelTag = "RefinementLevel";
 const string RenderParams::_transferFunctionsTag = "MapperFunctions";
 const string RenderParams::_stretchFactorsTag = "StretchFactors";
 const string RenderParams::_currentTimestepTag = "CurrentTimestep";
+const string RenderParams::XOriginTag = "XOrigin";
+const string RenderParams::YOriginTag = "YOrigin";
+const string RenderParams::ZOriginTag = "ZOrigin";
 
 #define REQUIRED_SAMPLE_SIZE 1000000
 
@@ -840,4 +843,8 @@ vector<string> RenParamsContainer::GetNames() const
     for (itr = _elements.begin(); itr != _elements.end(); ++itr) { names.push_back(itr->first); }
 
     return (names);
+}
+
+bool RenderParams::GetOrientable() const {
+    return false;
 }

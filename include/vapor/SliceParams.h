@@ -44,14 +44,12 @@ public:
     int                 GetDefaultSampleRate() const;
     void                SetCachedValues(std::vector<double> values);
     std::vector<double> GetCachedValues() const;
+    bool GetOrientable() const override;
 
     static const string _sampleRateTag;
     static const string XRotationTag;
     static const string YRotationTag;
     static const string ZRotationTag;
-    static const string XOriginTag;
-    static const string YOriginTag;
-    static const string ZOriginTag;
 
 private:
     bool _initialized = false;

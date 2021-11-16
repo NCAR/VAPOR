@@ -651,7 +651,7 @@ void VizWin::_renderHelper(bool fast)
 
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
-        if (dynamic_cast<VAPoR::SliceParams *>(_getRenderParams()) != nullptr) { _updateSliceOriginGlyph(); }
+        if (_getRenderParams()->GetOrientable()) { _updateOriginGlyph(); }
     } else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
 #ifndef WIN32
         _glManager->PixelCoordinateSystemPush();
@@ -863,17 +863,15 @@ void VizWin::updateManip(bool initialize)
     GL_ERR_BREAK();
 }
 
-void VizWin::_updateSliceOriginGlyph()
+void VizWin::_updateOriginGlyph()
 {
-    VAPoR::SliceParams *sp = dynamic_cast<VAPoR::SliceParams *>(_getRenderParams());
-    if (sp == nullptr) return;
-
-    double xOrigin = sp->GetValueDouble(SliceParams::XOriginTag, 0.);
-    double yOrigin = sp->GetValueDouble(SliceParams::YOriginTag, 0.);
-    double zOrigin = sp->GetValueDouble(SliceParams::ZOriginTag, 0.);
+    VAPoR::RenderParams *rp = _getRenderParams();
+    double xOrigin = rp->GetValueDouble(RenderParams::XOriginTag, 0.);
+    double yOrigin = rp->GetValueDouble(RenderParams::YOriginTag, 0.);
+    double zOrigin = rp->GetValueDouble(RenderParams::ZOriginTag, 0.);
 
     std::vector<double> scales = _getDataMgrTransform()->GetScales();
-    std::vector<double> scales2 = sp->GetTransform()->GetScales();
+    std::vector<double> scales2 = rp->GetTransform()->GetScales();
     scales[0] *= scales2[0];
     scales[1] *= scales2[1];
     scales[2] *= scales2[2];
@@ -882,10 +880,10 @@ void VizWin::_updateSliceOriginGlyph()
     yOrigin *= scales[1];
     zOrigin *= scales[2];
 
-    int            refLevel = sp->GetRefinementLevel();
-    int            lod = sp->GetCompressionLevel();
-    string         varName = sp->GetVariableName();
-    vector<string> fieldVars = sp->GetFieldVariableNames();
+    int            refLevel = rp->GetRefinementLevel();
+    int            lod = rp->GetCompressionLevel();
+    string         varName = rp->GetVariableName();
+    vector<string> fieldVars = rp->GetFieldVariableNames();
 
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());

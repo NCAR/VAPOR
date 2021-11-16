@@ -390,6 +390,9 @@ public:
     vector<double> GetIsoValues() { return GetIsoValues(GetVariableName()); }
     void           SetIsoValues(const vector<double> &values) { SetIsoValues(GetVariableName(), values); }
 
+    //! Return whether a renderer can be oriented - IE, can this renderer be rotated about an origin point?
+    virtual bool GetOrientable() const;
+
 protected:
     DataMgr *_dataMgr;
     int      _maxDim;
@@ -433,6 +436,9 @@ public:
     static const string _yFieldVariableNameTag;
     static const string _zFieldVariableNameTag;
     static const string _constantOpacityTag;
+    static const string XOriginTag;
+    static const string YOriginTag;
+    static const string ZOriginTag;
 };
 
 //////////////////////////////////////////////////////////////////////////
