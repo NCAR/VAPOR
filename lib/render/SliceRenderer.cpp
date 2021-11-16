@@ -378,7 +378,8 @@ glm::vec3 SliceRenderer::_getOrthogonal(const glm::vec3 u) const
     return v;
 }
 
-glm::vec3 SliceRenderer::_inverseProjection( float x, float y ) const {
+glm::vec3 SliceRenderer::_inverseProjection(float x, float y) const
+{
     glm::vec3 point;
     point = _origin + x * _axis1 + y * _axis2;
     return point;
@@ -396,7 +397,7 @@ void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
     int index = 0;
     for (int j = 0; j < _ySamples; j++) {
         for (int i = 0; i < _xSamples; i++) {
-            glm::vec3           samplePoint = _inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
+            glm::vec3 samplePoint = _inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
             CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue(p);
             missingValue = grid->GetMissingValue();
@@ -482,7 +483,7 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.yOrigin != p->GetValueDouble(RenderParams::YOriginTag, 0)) return true;
     if (_cacheParams.zOrigin != p->GetValueDouble(RenderParams::ZOriginTag, 0)) return true;
 
-    //if (_cacheParams.textureSampleRate != p->GetSampleRate()) return true;
+    // if (_cacheParams.textureSampleRate != p->GetSampleRate()) return true;
     if (_cacheParams.textureSampleRate != p->GetValueDouble(SliceParams::_sampleRateTag, 200)) return true;
 
     return false;
@@ -550,7 +551,7 @@ int SliceRenderer::_paintGL(bool fast)
     if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
 
     bool dirty = _isDataCacheDirty();
-    if ( dirty || _fastMode != fast ) {
+    if (dirty || _fastMode != fast) {
         _fastMode = fast;
         rc = _resetDataCache();
         if (rc < 0) {
@@ -591,7 +592,8 @@ int SliceRenderer::_paintGL(bool fast)
     return rc;
 }
 
-void SliceRenderer::_drawDebugPolygons() const {
+void SliceRenderer::_drawDebugPolygons() const
+{
     // 3D green polygon that shows where we should see data
     LegacyGL *lgl = _glManager->legacy;
     lgl->Color4f(0, 1., 0, 1.);

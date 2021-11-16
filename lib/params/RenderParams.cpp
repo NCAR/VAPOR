@@ -845,6 +845,4 @@ vector<string> RenParamsContainer::GetNames() const
     return (names);
 }
 
-bool RenderParams::GetOrientable() const {
-    return false;
-}
+bool RenderParams::GetOrientable() const { return false; }

@@ -7,8 +7,7 @@
 using namespace std;
 
 #ifdef BUILD_STANDALONE
-struct Point
-{
+struct Point {
     double x, y;
 };
 #endif
@@ -132,10 +131,9 @@ std::stack<glm::vec2> convexHull(glm::vec2 points[], int n)
 
 #ifdef BUILD_STANDALONE
     // Now stack has the output points, print contents of stack
-    while (!S.empty())
-    {
+    while (!S.empty()) {
         glm::vec2 p = S.top();
-        cout << "(" << p.x << ", " << p.y <<")" << endl;
+        cout << "(" << p.x << ", " << p.y << ")" << endl;
         S.pop();
     }
 #endif
@@ -145,13 +143,10 @@ std::stack<glm::vec2> convexHull(glm::vec2 points[], int n)
 // Driver program to test above functions
 int main()
 {
-    //glm::vec2 points[] = {{0, 3}, {1, 1}, {2, 2}, {4, 4},
+    // glm::vec2 points[] = {{0, 3}, {1, 1}, {2, 2}, {4, 4},
     //                  {0, 0}, {1, 2}, {3, 1}, {3, 3}};
-    glm::vec2 points[] = {
-                      {0.397329, -.5},      {-0.397329, .5},
-                      {-0.48774, -.5},     {0.48774,   .5},
-                      {0.625,    0.288675}, {-.625,     -0.288675}};
-    int n = sizeof(points)/sizeof(points[0]);
+    glm::vec2 points[] = {{0.397329, -.5}, {-0.397329, .5}, {-0.48774, -.5}, {0.48774, .5}, {0.625, 0.288675}, {-.625, -0.288675}};
+    int       n = sizeof(points) / sizeof(points[0]);
     convexHull(points, n);
     return 0;
 }
