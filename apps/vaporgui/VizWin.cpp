@@ -885,9 +885,7 @@ void VizWin::_updateOriginGlyph()
     string         varName = rp->GetVariableName();
     vector<string> fieldVars = rp->GetFieldVariableNames();
 
-    ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-    AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
-    int              timeStep = aParams->GetCurrentTimestep();
+    int              timeStep = rp->GetCurrentTimestep();
 
     DataStatus *dataStatus = _controlExec->GetDataStatus();
     string      dataMgrName = _getCurrentDataMgrName();
