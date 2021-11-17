@@ -57,6 +57,7 @@ set (SRC
     ParticleRenderer.cpp
     TrackBall.cpp
     NavigationUtils.cpp
+    ConvexHull.cpp
 )
 
 set (HEADERS
