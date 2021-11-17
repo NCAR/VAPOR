@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 using namespace std;
 
-//namespace {
+// namespace {
 
 #ifdef BUILD_STANDALONE
 struct Point {

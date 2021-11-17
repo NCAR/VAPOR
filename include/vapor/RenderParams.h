@@ -439,37 +439,37 @@ public:
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's
-    //! location on the X axis. 
+    //! location on the X axis.
     static const string XOriginTag;
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's
-    //! location on the Y axis. 
-    
+    //! location on the Y axis.
+
     static const string YOriginTag;
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's
-    //! location on the Z axis. 
+    //! location on the Z axis.
     static const string ZOriginTag;
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the rotation
-    //! about the X axis. 
+    //! about the X axis.
     static const string XRotationTag;
-    
+
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the rotation
-    //! about the Y axis. 
+    //! about the Y axis.
     static const string YRotationTag;
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the rotation
-    //! about the Z axis. 
+    //! about the Z axis.
     static const string ZRotationTag;
-   
+
     //! If a renderer samples data points along a vector,
     //! this string identifies the parameter for how many samples
-    //! to take along that vector. 
+    //! to take along that vector.
     static const string SampleRateTag;
 };
 
