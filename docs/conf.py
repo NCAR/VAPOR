@@ -198,3 +198,16 @@ epub_title = project
 
 
 # -- Extension configuration -------------------------------------------------
+
+
+# -- Download example data ---------------------------------------------------
+import requests
+from pathlib import Path
+home = str(Path.home())
+simpleNC = home + "/simple.nc"
+dataFile = "https://github.com/NCAR/VAPOR-Data/raw/main/netCDF/simple.nc"
+response = requests.get(dataFile, stream=True)
+with open(simpleNC, "wb") as file:
+  for chunk in response.iter_content(chunk_size=1024):
+    if chunk:
+      file.write(chunk)
