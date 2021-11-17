@@ -216,9 +216,9 @@ void SliceRenderer::_rotate()
     // Next we define a polygon that defines our slice.  To do this we
     // find where our plane intercepts the X, Y, and Z edges of our Box extents.
     //
-    // Each _vertex in 'vertices' holds a glm::vec3 representing a point 3D space,
+    // Each _vertexIn2dAnd3d in 'vertices' holds a glm::vec3 representing a point 3D space,
     // and a glm::vec2 storing its location in 2D according to our basis function.
-    std::vector<_vertex> vertices;
+    std::vector<_vertexIn2dAnd3d> vertices;
     _findIntercepts(_origin, _normal, vertices, false);
 
     // Use Convex Hull to get an ordered list of vertices
@@ -243,7 +243,7 @@ void SliceRenderer::_rotate()
     _rectangle3D = _makeRectangle3D(vertices, polygon2D);
 }
 
-void SliceRenderer::_findIntercepts(glm::vec3 &_origin, glm::vec3 &_normal, std::vector<_vertex> &vertices, bool stretch) const
+void SliceRenderer::_findIntercepts(glm::vec3 &_origin, glm::vec3 &_normal, std::vector<_vertexIn2dAnd3d> &vertices, bool stretch) const
 {
     // Lambdas for finding intercepts on the XYZ edges of the Box
     // Plane equation:
@@ -253,7 +253,7 @@ void SliceRenderer::_findIntercepts(glm::vec3 &_origin, glm::vec3 &_normal, std:
         if (_normal.z == 0) return;
         double z = (_normal.x * _origin.x + _normal.y * _origin.y + _normal.z * _origin.z - _normal.x * x - _normal.y * y) / _normal.z;
         if (z >= _cacheParams.boxMin[Z] && z <= _cacheParams.boxMax[Z]) {
-            _vertex p = {glm::vec3(x, y, z), glm::vec2()};
+            _vertexIn2dAnd3d p = {glm::vec3(x, y, z), glm::vec2()};
             vertices.push_back(p);
         }
     };
@@ -261,7 +261,7 @@ void SliceRenderer::_findIntercepts(glm::vec3 &_origin, glm::vec3 &_normal, std:
         if (_normal.y == 0) return;
         double y = (_normal.x * _origin.x + _normal.y * _origin.y + _normal.z * _origin.z - _normal.x * x - _normal.z * z) / _normal.y;
         if (y >= _cacheParams.boxMin[Y] && y <= _cacheParams.boxMax[Y]) {
-            _vertex p = {glm::vec3(x, y, z), glm::vec2()};
+            _vertexIn2dAnd3d p = {glm::vec3(x, y, z), glm::vec2()};
             vertices.push_back(p);
         }
     };
@@ -269,7 +269,7 @@ void SliceRenderer::_findIntercepts(glm::vec3 &_origin, glm::vec3 &_normal, std:
         if (_normal.x == 0) return;
         double x = (_normal.x * _origin.x + _normal.y * _origin.y + _normal.z * _origin.z - _normal.y * y - _normal.z * z) / _normal.x;
         if (x >= _cacheParams.boxMin[X] && x <= _cacheParams.boxMax[X]) {
-            _vertex p = {glm::vec3(x, y, z), glm::vec2()};
+            _vertexIn2dAnd3d p = {glm::vec3(x, y, z), glm::vec2()};
             vertices.push_back(p);
         }
     };
@@ -291,7 +291,7 @@ void SliceRenderer::_findIntercepts(glm::vec3 &_origin, glm::vec3 &_normal, std:
     xIntercept(_cacheParams.boxMax[Y], _cacheParams.boxMin[Z]);
 }
 
-stack<glm::vec2> SliceRenderer::_2DConvexHull(std::vector<_vertex> &vertices) const
+stack<glm::vec2> SliceRenderer::_2DConvexHull(std::vector<_vertexIn2dAnd3d> &vertices) const
 {
     // We now have a set of vertices along the Box's XYZ intercepts.  The edges of these vertices define where
     // the user should see data.  To find the connectivity/edges of these vertices, we will first project them into a 2D
@@ -315,7 +315,7 @@ stack<glm::vec2> SliceRenderer::_2DConvexHull(std::vector<_vertex> &vertices) co
     return orderedTwoDPoints;
 }
 
-std::vector<glm::vec2> SliceRenderer::_makeRectangle2D(const std::vector<_vertex> &vertices, stack<glm::vec2> &orderedTwoDPoints) const
+std::vector<glm::vec2> SliceRenderer::_makeRectangle2D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &orderedTwoDPoints) const
 {
     std::vector<glm::vec2> rectangle2D = {glm::vec2(), glm::vec2()};
     while (!orderedTwoDPoints.empty()) {
@@ -331,7 +331,7 @@ std::vector<glm::vec2> SliceRenderer::_makeRectangle2D(const std::vector<_vertex
 
 // Map our rectangle's 2D edges back into 3D space, to get an
 // ordered list of vertices for our data-enclosing polygon.
-std::vector<glm::vec3> SliceRenderer::_makePolygon3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const
+std::vector<glm::vec3> SliceRenderer::_makePolygon3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const
 {
     std::vector<glm::vec3> polygon3D;
     while (!polygon2D.empty()) {
@@ -347,7 +347,7 @@ std::vector<glm::vec3> SliceRenderer::_makePolygon3D(const std::vector<_vertex> 
     return polygon3D;
 }
 
-std::vector<glm::vec3> SliceRenderer::_makeRectangle3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const
+std::vector<glm::vec3> SliceRenderer::_makeRectangle3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const
 {
     // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
     // rectangle to generate our 2D texture.

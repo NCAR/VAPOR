@@ -50,7 +50,11 @@ private:
         std::vector<double> sampleLocation;
     } _cacheParams;
 
-    struct _vertex {
+    // The SliceRenderer calculates a series of vertices in 3D space that define
+    // the corners of a rectangle that we sample along.  These vertices need to
+    // be projected into 2D space for sampling.  This struct defines a vertex in
+    // 3D space, as well as its projection in 2D space.
+    struct _vertexIn2dAnd3d {
         glm::vec3 threeD;
         glm::vec2 twoD;
     };
@@ -58,12 +62,12 @@ private:
     void _renderFast() const;
 
     void                   _rotate();
-    void                   _findIntercepts(glm::vec3 &origin, glm::vec3 &normal, std::vector<_vertex> &vertices, bool stretch) const;
-    stack<glm::vec2>       _2DConvexHull(std::vector<_vertex> &vertices) const;
+    void                   _findIntercepts(glm::vec3 &origin, glm::vec3 &normal, std::vector<_vertexIn2dAnd3d> &vertices, bool stretch) const;
+    stack<glm::vec2>       _2DConvexHull(std::vector<_vertexIn2dAnd3d> &vertices) const;
     glm::vec3              _inverseProjection(float x, float y) const;
-    std::vector<glm::vec2> _makeRectangle2D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
-    std::vector<glm::vec3> _makeRectangle3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
-    std::vector<glm::vec3> _makePolygon3D(const std::vector<_vertex> &vertices, stack<glm::vec2> &polygon2D) const;
+    std::vector<glm::vec2> _makeRectangle2D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
+    std::vector<glm::vec3> _makeRectangle3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
+    std::vector<glm::vec3> _makePolygon3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
     void                   _drawDebugPolygons() const;
 
     void _initVAO();
