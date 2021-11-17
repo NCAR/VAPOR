@@ -440,8 +440,8 @@ public:
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's
     //! location on the X axis. 
-    
     static const string XOriginTag;
+
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's
     //! location on the Y axis. 
