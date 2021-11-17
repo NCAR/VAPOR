@@ -5,14 +5,10 @@ import numpy as np
 import requests
 from pathlib import Path
 
-# Acquire sample data
+# Open sample data as an xarray dataset
+# Modify the 'home' variable to point to the directory containing the sample data
 home = str(Path.home())
 simpleNC = home + "/simple.nc"
-dataFile = "https://github.com/NCAR/VAPOR-Data/raw/main/netCDF/simple.nc"
-response = requests.get(dataFile)
-with open(simpleNC, "wb") as file:
-  file.write(response.content)
-  
 ds = xr.open_dataset(simpleNC)
 
 ds.info()

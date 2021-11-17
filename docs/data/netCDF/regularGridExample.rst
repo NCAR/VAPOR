@@ -36,16 +36,10 @@ Open our dataset with xarray.  Download :download:`simple.nc <https://github.com
 
 .. jupyter-execute::
 
-  # Acquire sample data
+  # Open sample data as an xarray dataset
+  # Modify the 'home' variable to point to the directory containing the sample data
   home = str(Path.home())
   simpleNC = home + "/simple.nc"
-  dataFile = "https://github.com/NCAR/VAPOR-Data/raw/main/netCDF/simple.nc"
-  response = requests.get(dataFile, stream=True)
-  with open(simpleNC, "wb") as file:
-    for chunk in response.iter_content(chunk_size=1024):
-      if chunk:
-        file.write(chunk)
-
   ds = xr.open_dataset(simpleNC)
 
 Now look at our simple.nc file, which defines X, Y, and Z spatial dimensions, a time dimension, and our scalar variable named temperature.  Note that our dataset is a 48x48x24 grid, with one timestep.
