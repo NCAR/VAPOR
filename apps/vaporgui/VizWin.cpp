@@ -351,7 +351,7 @@ void VizWin::_mousePressEventManip(QMouseEvent *e)
     makeCurrent();
 
     std::vector<double> screenCoords = _getScreenCoords(e);
-    
+
     screenCoords[0] *= QApplication::desktop()->devicePixelRatio();
     screenCoords[1] *= QApplication::desktop()->devicePixelRatio();
 
@@ -439,10 +439,10 @@ void VizWin::_mouseReleaseEventManip(QMouseEvent *e)
     if (!_manipFlag) return;
 
     std::vector<double> screenCoords = _getScreenCoords(e);
-    
+
     screenCoords[0] *= QApplication::desktop()->devicePixelRatio();
     screenCoords[1] *= QApplication::desktop()->devicePixelRatio();
-    
+
     (void)_manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid, true);
     _setNewExtents();
 
@@ -500,7 +500,7 @@ void VizWin::_mouseMoveEventManip(QMouseEvent *e)
     if (!_manipFlag) return;
 
     std::vector<double> screenCoords = _getScreenCoords(e);
-    
+
     screenCoords[0] *= QApplication::desktop()->devicePixelRatio();
     screenCoords[1] *= QApplication::desktop()->devicePixelRatio();
 
