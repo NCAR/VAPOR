@@ -8,9 +8,9 @@ using namespace VAPoR;
 
 PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
 {
-    _xSlider = new PDoubleSliderEdit(RenderParams::XOriginTag, "X");
-    _ySlider = new PDoubleSliderEdit(RenderParams::YOriginTag, "Y");
-    _zSlider = new PDoubleSliderEdit(RenderParams::ZOriginTag, "Z");
+    _xSlider = new PDoubleSliderEdit(RenderParams::XSlicePlaneOriginTag, "X");
+    _ySlider = new PDoubleSliderEdit(RenderParams::YSlicePlaneOriginTag, "Y");
+    _zSlider = new PDoubleSliderEdit(RenderParams::ZSlicePlaneOriginTag, "Z");
 
     _xSlider->EnableDynamicUpdate();
     _ySlider->EnableDynamicUpdate();

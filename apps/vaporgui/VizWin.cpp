@@ -866,9 +866,9 @@ void VizWin::updateManip(bool initialize)
 void VizWin::_updateOriginGlyph()
 {
     VAPoR::RenderParams *rp = _getRenderParams();
-    double               xOrigin = rp->GetValueDouble(RenderParams::XOriginTag, 0.);
-    double               yOrigin = rp->GetValueDouble(RenderParams::YOriginTag, 0.);
-    double               zOrigin = rp->GetValueDouble(RenderParams::ZOriginTag, 0.);
+    double               xOrigin = rp->GetValueDouble(RenderParams::XSlicePlaneOriginTag, 0.);
+    double               yOrigin = rp->GetValueDouble(RenderParams::YSlicePlaneOriginTag, 0.);
+    double               zOrigin = rp->GetValueDouble(RenderParams::ZSlicePlaneOriginTag, 0.);
 
     std::vector<double> scales = _getDataMgrTransform()->GetScales();
     std::vector<double> scales2 = rp->GetTransform()->GetScales();

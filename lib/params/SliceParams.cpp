@@ -58,9 +58,9 @@ int SliceParams::Initialize()
     std::vector<double> sampleLocation(3);
     for (int i = 0; i < 3; i++) sampleLocation[i] = (minExt[i] + maxExt[i]) / 2.0;
 
-    SetValueDouble(RenderParams::XOriginTag, "", sampleLocation[0]);
-    SetValueDouble(RenderParams::YOriginTag, "", sampleLocation[1]);
-    SetValueDouble(RenderParams::ZOriginTag, "", sampleLocation[2]);
+    SetValueDouble(RenderParams::XSlicePlaneOriginTag, "", sampleLocation[0]);
+    SetValueDouble(RenderParams::YSlicePlaneOriginTag, "", sampleLocation[1]);
+    SetValueDouble(RenderParams::ZSlicePlaneOriginTag, "", sampleLocation[2]);
     SetValueDouble(RenderParams::SampleRateTag, "", DEFAULT_SAMPLERATE);
 
     return (0);

@@ -440,32 +440,32 @@ public:
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's
     //! location on the X axis.
-    static const string XOriginTag;
+    static const string XSlicePlaneOriginTag;
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's
     //! location on the Y axis.
 
-    static const string YOriginTag;
+    static const string YSlicePlaneOriginTag;
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's
     //! location on the Z axis.
-    static const string ZOriginTag;
+    static const string ZSlicePlaneOriginTag;
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the rotation
     //! about the X axis.
-    static const string XRotationTag;
+    static const string XSlicePlaneRotationTag;
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the rotation
     //! about the Y axis.
-    static const string YRotationTag;
+    static const string YSlicePlaneRotationTag;
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the rotation
     //! about the Z axis.
-    static const string ZRotationTag;
+    static const string ZSlicePlaneRotationTag;
 
     //! If a renderer samples data points along a vector,
     //! this string identifies the parameter for how many samples

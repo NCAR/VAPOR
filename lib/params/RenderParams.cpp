@@ -51,12 +51,12 @@ const string RenderParams::_RefinementLevelTag = "RefinementLevel";
 const string RenderParams::_transferFunctionsTag = "MapperFunctions";
 const string RenderParams::_stretchFactorsTag = "StretchFactors";
 const string RenderParams::_currentTimestepTag = "CurrentTimestep";
-const string RenderParams::XOriginTag = "XOrigin";
-const string RenderParams::YOriginTag = "YOrigin";
-const string RenderParams::ZOriginTag = "ZOrigin";
-const string RenderParams::XRotationTag = "XRotation";
-const string RenderParams::YRotationTag = "YRotation";
-const string RenderParams::ZRotationTag = "ZRotation";
+const string RenderParams::XSlicePlaneOriginTag = "XSlicePlaneOrigin";
+const string RenderParams::YSlicePlaneOriginTag = "YSlicePlaneOrigin";
+const string RenderParams::ZSlicePlaneOriginTag = "ZSlicePlaneOrigin";
+const string RenderParams::XSlicePlaneRotationTag = "XSlicePlaneRotation";
+const string RenderParams::YSlicePlaneRotationTag = "YSlicePlaneRotation";
+const string RenderParams::ZSlicePlaneRotationTag = "ZSlicePlaneRotation";
 const string RenderParams::SampleRateTag = "SampleRate";
 
 #define REQUIRED_SAMPLE_SIZE 1000000

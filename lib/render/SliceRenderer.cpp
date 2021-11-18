@@ -131,13 +131,13 @@ int SliceRenderer::_resetDataCache()
     _cacheParams.compressionLevel = p->GetCompressionLevel();
     _cacheParams.orientation = p->GetBox()->GetOrientation();
 
-    _cacheParams.xRotation = p->GetValueDouble(RenderParams::XRotationTag, 0);
-    _cacheParams.yRotation = p->GetValueDouble(RenderParams::YRotationTag, 0);
-    _cacheParams.zRotation = p->GetValueDouble(RenderParams::ZRotationTag, 0);
+    _cacheParams.xRotation = p->GetValueDouble(RenderParams::XSlicePlaneRotationTag, 0);
+    _cacheParams.yRotation = p->GetValueDouble(RenderParams::YSlicePlaneRotationTag, 0);
+    _cacheParams.zRotation = p->GetValueDouble(RenderParams::ZSlicePlaneRotationTag, 0);
 
-    _cacheParams.xOrigin = p->GetValueDouble(RenderParams::XOriginTag, 0);
-    _cacheParams.yOrigin = p->GetValueDouble(RenderParams::YOriginTag, 0);
-    _cacheParams.zOrigin = p->GetValueDouble(RenderParams::ZOriginTag, 0);
+    _cacheParams.xOrigin = p->GetValueDouble(RenderParams::XSlicePlaneOriginTag, 0);
+    _cacheParams.yOrigin = p->GetValueDouble(RenderParams::YSlicePlaneOriginTag, 0);
+    _cacheParams.zOrigin = p->GetValueDouble(RenderParams::ZSlicePlaneOriginTag, 0);
 
     _cacheParams.textureSampleRate = p->GetValueDouble(RenderParams::SampleRateTag, 200);
 
@@ -201,7 +201,7 @@ void SliceRenderer::_rotate()
     double              zMid = (boxMax[Z] - boxMin[Z]) / 2. + boxMin[Z];
 
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
-    _origin = {p->GetValueDouble(RenderParams::XOriginTag, xMid), p->GetValueDouble(RenderParams::YOriginTag, yMid), p->GetValueDouble(RenderParams::ZOriginTag, zMid)};
+    _origin = {p->GetValueDouble(RenderParams::XSlicePlaneOriginTag, xMid), p->GetValueDouble(RenderParams::YSlicePlaneOriginTag, yMid), p->GetValueDouble(RenderParams::ZSlicePlaneOriginTag, zMid)};
 
     // which we will use to project our polygon into 2D space.  First rotate XY plane with quaternion.
     glm::vec3 angles(M_PI * _cacheParams.xRotation / 180., M_PI * _cacheParams.yRotation / 180., M_PI * _cacheParams.zRotation / 180.);
@@ -474,15 +474,14 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.refinementLevel != p->GetRefinementLevel()) return true;
     if (_cacheParams.compressionLevel != p->GetCompressionLevel()) return true;
 
-    if (_cacheParams.xRotation != p->GetValueDouble(RenderParams::XRotationTag, 0)) return true;
-    if (_cacheParams.yRotation != p->GetValueDouble(RenderParams::YRotationTag, 0)) return true;
-    if (_cacheParams.zRotation != p->GetValueDouble(RenderParams::ZRotationTag, 0)) return true;
+    if (_cacheParams.xRotation != p->GetValueDouble(RenderParams::XSlicePlaneRotationTag, 0)) return true;
+    if (_cacheParams.yRotation != p->GetValueDouble(RenderParams::YSlicePlaneRotationTag, 0)) return true;
+    if (_cacheParams.zRotation != p->GetValueDouble(RenderParams::ZSlicePlaneRotationTag, 0)) return true;
 
-    if (_cacheParams.xOrigin != p->GetValueDouble(RenderParams::XOriginTag, 0)) return true;
-    if (_cacheParams.yOrigin != p->GetValueDouble(RenderParams::YOriginTag, 0)) return true;
-    if (_cacheParams.zOrigin != p->GetValueDouble(RenderParams::ZOriginTag, 0)) return true;
+    if (_cacheParams.xOrigin != p->GetValueDouble(RenderParams::XSlicePlaneOriginTag, 0)) return true;
+    if (_cacheParams.yOrigin != p->GetValueDouble(RenderParams::YSlicePlaneOriginTag, 0)) return true;
+    if (_cacheParams.zOrigin != p->GetValueDouble(RenderParams::ZSlicePlaneOriginTag, 0)) return true;
 
-    // if (_cacheParams.textureSampleRate != p->GetSampleRate()) return true;
     if (_cacheParams.textureSampleRate != p->GetValueDouble(RenderParams::SampleRateTag, 200)) return true;
 
     return false;

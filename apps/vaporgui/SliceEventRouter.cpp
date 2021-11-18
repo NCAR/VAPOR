@@ -27,9 +27,9 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     
     AddGeometrySubtab(new PGroup({
         new PSection("Slice Rotation", {
-            (new PDoubleSliderEdit( RenderParams::XRotationTag, "X"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit( RenderParams::YRotationTag, "Y"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit( RenderParams::ZRotationTag, "Z"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit( RenderParams::XSlicePlaneRotationTag, "X"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit( RenderParams::YSlicePlaneRotationTag, "Y"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit( RenderParams::ZSlicePlaneRotationTag, "Z"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
         }),
         new PSliceOriginSelector,
         new PGeometrySubtab,
