@@ -501,7 +501,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     rc = openDataHelper(true);
 
     _setDefaultOrigin(dataSetName);
-    
+
     if (STLUtils::Contains(options, string("-auto_stretch_z"))) _autoStretchExtents(dataSetName);
 
     UndoRedoClear();
@@ -974,14 +974,12 @@ void ControlExec::_setDefaultOrigin(string datasetName)
         bool skip = false;
         for (int i = 0; i < 3; i++)
             if (origin[i] != 0.f) skip = true;
-        if (skip)
-            continue;
+        if (skip) continue;
 
         size_t ts = 0;
         ds->GetActiveExtents(paramsMgr, winNames[i], datasetName, ts, minExt, maxExt);
-        
-        for (int i = 0; i < minExt.size(); i++)
-            origin[i] = (maxExt[i] + minExt[i]) / 2;
+
+        for (int i = 0; i < minExt.size(); i++) origin[i] = (maxExt[i] + minExt[i]) / 2;
 
         transform->SetOrigin(origin);
     }
