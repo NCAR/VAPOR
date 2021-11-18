@@ -52,11 +52,14 @@
 #include "vapor/FileUtils.h"
 #include "vapor/Visualizer.h"
 #include <vapor/FlowParams.h>
+#include <vapor/SliceParams.h>
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 #include "hide_std_error_util.h"
 
 using namespace VAPoR;
+
+#define ORIGIN_TIC_WIDTH .03
 
 /*
  *  Constructs a VizWindow as a child of 'parent', with the
@@ -648,6 +651,7 @@ void VizWin::_renderHelper(bool fast)
 
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
+        if (_getRenderParams()->GetOrientable()) { _updateOriginGlyph(); }
     } else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
 #ifndef WIN32
         _glManager->PixelCoordinateSystemPush();
@@ -857,4 +861,65 @@ void VizWin::updateManip(bool initialize)
     if (!initialize) _manip->Render();
 
     GL_ERR_BREAK();
+}
+
+void VizWin::_updateOriginGlyph()
+{
+    VAPoR::RenderParams *rp = _getRenderParams();
+    double               xOrigin = rp->GetValueDouble(RenderParams::XSlicePlaneOriginTag, 0.);
+    double               yOrigin = rp->GetValueDouble(RenderParams::YSlicePlaneOriginTag, 0.);
+    double               zOrigin = rp->GetValueDouble(RenderParams::ZSlicePlaneOriginTag, 0.);
+
+    std::vector<double> scales = _getDataMgrTransform()->GetScales();
+    std::vector<double> scales2 = rp->GetTransform()->GetScales();
+    scales[0] *= scales2[0];
+    scales[1] *= scales2[1];
+    scales[2] *= scales2[2];
+
+    xOrigin *= scales[0];
+    yOrigin *= scales[1];
+    zOrigin *= scales[2];
+
+    int            refLevel = rp->GetRefinementLevel();
+    int            lod = rp->GetCompressionLevel();
+    string         varName = rp->GetVariableName();
+    vector<string> fieldVars = rp->GetFieldVariableNames();
+
+    int timeStep = rp->GetCurrentTimestep();
+
+    DataStatus *dataStatus = _controlExec->GetDataStatus();
+    string      dataMgrName = _getCurrentDataMgrName();
+    DataMgr *   dataMgr = dataStatus->GetDataMgr(dataMgrName);
+
+    std::vector<double> min, max;
+    dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, min, max);
+    for (int i = 0; i < 3; i++) {
+        min[i] *= scales[i];
+        max[i] *= scales[i];
+    }
+
+    // Find the average magnitude of the X and Y axes.  3% of that magnitude will be the size of the
+    // origin marker's crosshairs.
+    double              p = .03 * ((max[0] - min[0]) + (max[1] - min[1])) / 2;
+    std::vector<double> width = {p, p, p};
+
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    LegacyGL *lgl = _glManager->legacy;
+    lgl->Color4f(1., 1., 0., 1.);
+
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3f(xOrigin, yOrigin, zOrigin - width[2]);
+    lgl->Vertex3f(xOrigin, yOrigin, zOrigin + width[2]);
+    lgl->End();
+
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3f(xOrigin - width[0], yOrigin, zOrigin);
+    lgl->Vertex3f(xOrigin + width[0], yOrigin, zOrigin);
+    lgl->End();
+
+    lgl->Begin(GL_LINES);
+    lgl->Vertex3f(xOrigin, yOrigin - width[1], zOrigin);
+    lgl->Vertex3f(xOrigin, yOrigin + width[1], zOrigin);
+    lgl->End();
 }

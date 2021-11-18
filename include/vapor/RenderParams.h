@@ -390,6 +390,9 @@ public:
     vector<double> GetIsoValues() { return GetIsoValues(GetVariableName()); }
     void           SetIsoValues(const vector<double> &values) { SetIsoValues(GetVariableName(), values); }
 
+    //! Return whether a renderer can be oriented - IE, can this renderer be rotated about an origin point?
+    virtual bool GetOrientable() const;
+
 protected:
     DataMgr *_dataMgr;
     int      _maxDim;
@@ -433,6 +436,41 @@ public:
     static const string _yFieldVariableNameTag;
     static const string _zFieldVariableNameTag;
     static const string _constantOpacityTag;
+
+    //! If a renderer supports rotation about a point of origin,
+    //! this string identifies the parameter for the origin's
+    //! location on the X axis.
+    static const string XSlicePlaneOriginTag;
+
+    //! If a renderer supports rotation about a point of origin,
+    //! this string identifies the parameter for the origin's
+    //! location on the Y axis.
+
+    static const string YSlicePlaneOriginTag;
+    //! If a renderer supports rotation about a point of origin,
+    //! this string identifies the parameter for the origin's
+    //! location on the Z axis.
+    static const string ZSlicePlaneOriginTag;
+
+    //! If a renderer supports rotation about a point of origin,
+    //! this string identifies the parameter for the rotation
+    //! about the X axis.
+    static const string XSlicePlaneRotationTag;
+
+    //! If a renderer supports rotation about a point of origin,
+    //! this string identifies the parameter for the rotation
+    //! about the Y axis.
+    static const string YSlicePlaneRotationTag;
+
+    //! If a renderer supports rotation about a point of origin,
+    //! this string identifies the parameter for the rotation
+    //! about the Z axis.
+    static const string ZSlicePlaneRotationTag;
+
+    //! If a renderer samples data points along a vector,
+    //! this string identifies the parameter for how many samples
+    //! to take along that vector.
+    static const string SampleRateTag;
 };
 
 //////////////////////////////////////////////////////////////////////////

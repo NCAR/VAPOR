@@ -215,8 +215,8 @@ set (SRCS
 	PCopyRegionAnnotationWidget.h
 	PCopyRegionWidget.cpp
 	PCopyRegionWidget.h
-	PSliceSampleLocationSelector.cpp
-	PSliceSampleLocationSelector.h
+	PSliceOriginSelector.cpp
+	PSliceOriginSelector.h
 	PAnnotationColorbarWidget.cpp
 	PAnnotationColorbarWidget.h
 	PStringInput.cpp
