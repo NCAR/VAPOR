@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <cfloat>
 
 #include <vapor/STLUtils.h>
 #include <vapor/ParamsMgr.h>
@@ -499,6 +500,8 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     //
     rc = openDataHelper(true);
 
+    _setDefaultOrigin(dataSetName);
+    
     if (STLUtils::Contains(options, string("-auto_stretch_z"))) _autoStretchExtents(dataSetName);
 
     UndoRedoClear();
@@ -905,8 +908,6 @@ string ControlExec::GetFunctionStdout(string scriptType, string dataSetName, str
 std::vector<string> ControlExec::GetFunctionNames(string scriptType, string dataSetName) const { return (_calcEngineMgr->GetFunctionNames(scriptType, dataSetName)); }
 
 
-#include <cfloat>
-
 // Function moved from old NavigationEventRouter.cpp
 void ControlExec::_autoStretchExtents(string dataSetName)
 {
@@ -951,5 +952,37 @@ void ControlExec::_autoStretchExtents(string dataSetName)
         }
 
         transform->SetScales(scale);
+    }
+}
+
+
+void ControlExec::_setDefaultOrigin(string datasetName)
+{
+    DataStatus *ds = GetDataStatus();
+
+    ParamsMgr *    paramsMgr = GetParamsMgr();
+    vector<string> winNames = paramsMgr->GetVisualizerNames();
+
+    vector<double> minExt, maxExt;
+
+    for (int i = 0; i < winNames.size(); i++) {
+        ViewpointParams *   vpParams = paramsMgr->GetViewpointParams(winNames[i]);
+        Transform *         transform = vpParams->GetTransform(datasetName);
+        std::vector<double> origin = transform->GetOrigin();
+
+        // Skip if not default
+        bool skip = false;
+        for (int i = 0; i < 3; i++)
+            if (origin[i] != 0.f) skip = true;
+        if (skip)
+            continue;
+
+        size_t ts = 0;
+        ds->GetActiveExtents(paramsMgr, winNames[i], datasetName, ts, minExt, maxExt);
+        
+        for (int i = 0; i < minExt.size(); i++)
+            origin[i] = (maxExt[i] + minExt[i]) / 2;
+
+        transform->SetOrigin(origin);
     }
 }
