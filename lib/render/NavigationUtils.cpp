@@ -87,7 +87,7 @@ void NavigationUtils::AlignView(ControlExec *ce, int axis)
 {
     // This fixes a bug in this legacy function where the up dir is occationally wrong
     if (axis != 3 && axis != 1) AlignView(ce, 3);
-    
+
     float axes[3][3] = {{1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, 1.f}};
 
     double dirvec[3] = {0.0, 0.0, 0.0};
