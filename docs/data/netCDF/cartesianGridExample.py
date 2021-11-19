@@ -15,6 +15,7 @@ The sample data for this script can be downloaded here:
 
 # sphinx_gallery_thumbnail_path = '_images/cartesian.png'
 
+
 ###############################################################################
 # Import packages:
 
