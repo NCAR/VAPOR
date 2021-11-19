@@ -3,3 +3,4 @@ xarray==0.18.2
 numpy==1.19.2
 netCDF4
 matplotlib
+sphinx_gallery

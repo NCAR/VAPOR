@@ -56,7 +56,6 @@ extensions = [
     'sphinx.ext.todo', 
     'sphinx.ext.autodoc',
     'jupyter_sphinx',
-    'sphinx_gallery',
     'sphinx_gallery.gen_gallery',
     #'jupyter_sphinx.execute'
     #'breathe'
@@ -240,28 +239,13 @@ warnings.filterwarnings("ignore",
                         ' version.')
 
 # Configure sphinx-gallery plugin
-#from sphinx_gallery.sorting import ExampleTitleSortKey
-
-'''sphinx_gallery_conf = {
-    'examples_dirs': ['../Plots', '../GeoCAT-comp-examples'
-                     ],  # path to your example scripts
-    'filename_pattern': '^((?!sgskip).)*$',
-    'gallery_dirs': ['gallery', 'gallery-geocat-comp'
-                    ],  # path to where to save gallery generated output
-    'within_subsection_order': ExampleTitleSortKey,
-    'matplotlib_animations': True,
-}'''
+from sphinx_gallery.sorting import ExampleTitleSortKey
 
 sphinx_gallery_conf = {
-    'examples_dirs': ['data/netCDF'
-                     ],  # path to your example scripts
-    #'gallery_dirs': ['gallery'
-    'gallery_dirs': ['data/netCDF/examples'
-    #'gallery_dirs': ['data/netCDF/'
-    #'gallery_dirs': ['foo'
-                    ],  # path to where to save gallery generated output
+    'examples_dirs': ['data/netCDF'],  # path to your example scripts
+    'gallery_dirs': ['data/netCDF/examples'],  # path to where to save gallery generated output
     'filename_pattern': 'GridExample.py',
     'ignore_pattern': 'ToCF',
-    #'within_subsection_order': ExampleTitleSortKey,
+    'within_subsection_order': ExampleTitleSortKey,
     'matplotlib_animations': True,
 }
