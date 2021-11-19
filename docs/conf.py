@@ -261,6 +261,6 @@ sphinx_gallery_conf = {
                     ],  # path to where to save gallery generated output
     'filename_pattern': 'GridExample.py',
     'ignore_pattern': 'ToCF',
-    'within_subsection_order': ExampleTitleSortKey,
+    #'within_subsection_order': ExampleTitleSortKey,
     'matplotlib_animations': True,
 }
