@@ -239,7 +239,7 @@ warnings.filterwarnings("ignore",
                         ' version.')
 
 # Configure sphinx-gallery plugin
-from sphinx_gallery.sorting import ExampleTitleSortKey
+#from sphinx_gallery.sorting import ExampleTitleSortKey
 
 '''sphinx_gallery_conf = {
     'examples_dirs': ['../Plots', '../GeoCAT-comp-examples'
