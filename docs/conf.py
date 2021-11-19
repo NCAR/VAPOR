@@ -254,9 +254,12 @@ from sphinx_gallery.sorting import ExampleTitleSortKey
 sphinx_gallery_conf = {
     'examples_dirs': ['data/netCDF'
                      ],  # path to your example scripts
-    'gallery_dirs': ['gallery'
+    #'gallery_dirs': ['gallery'
+    'gallery_dirs': ['data/netCDF/examples'
+    #'gallery_dirs': ['data/netCDF/'
+    #'gallery_dirs': ['foo'
                     ],  # path to where to save gallery generated output
-    'filename_pattern': 'fromJupyter.py',
+    'filename_pattern': 'GridExample.py',
     'ignore_pattern': 'ToCF',
     'within_subsection_order': ExampleTitleSortKey,
     'matplotlib_animations': True,

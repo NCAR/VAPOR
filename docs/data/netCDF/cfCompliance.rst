@@ -1,26 +1,29 @@
 .. _cfCompliance:
 
-CF Compliance
-`````````````
+NetCDF          
+------
 
-Vapor can read NetCDF data that is CF-Compliant.
+Vapor can read NetCDF data that is CF-Compliant.  This means that a given NetCDF file adheres to the `CF Conventions <https://cfconventions.org/>`_, which provide a common description for the data in a given NetCDF file.
 
-This means that a given NetCDF file adheres to the `CF Conventions <https://cfconventions.org/>`_.  These conventions exist to provide a common description for what data each variable represents in a NetCDF file.
+If you are unfamiliar with *CF-Compliance*, *Coordinate Variables*, and variable *Attributes*, you can read about these concepts below.
 
-.. note::
+If you are already familiar with these terms, you can refer to the Python examples below, which modify a simple NetCDF file so that Vapor can read it.
 
-    Below, you can find examples to make your data CF-Compliant, as well as documentation on what these examples are doing.  If you have trouble, contact us `on our forum <https://vapor.discourse.group/>`_.
+If you have trouble, contact us `on our forum <https://vapor.discourse.group/>`_.
 
-Examples in Python:
+Examples
+========
 
-* :ref:`Dealing with regular grids <regularGridExample>`
-
-* :ref:`Dealing with stretched grids <stretchedGridExample>`
+.. figure:: /_images/clickForNetcdfExamplesInPython.png
+    :width: 400
+    :align: center
+    :figclass: align-center
+    :target: examples/index.html
 
 .. _whatDoesVaporNeed:
 
-What does Vapor need in a CF-Compliant file?
-============================================
+Vapor's requirements for NetCDF
+===============================
 
 .. _coordinateVariables:
 
