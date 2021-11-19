@@ -13,7 +13,7 @@ The sample data for this script can be downloaded here:
     https://github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc
 """
 
-# sphinx_gallery_thumbnail_path = '_images/regular.png'
+# sphinx_gallery_thumbnail_path = '_images/cartesian.png'
 
 ###############################################################################
 # Import packages:
