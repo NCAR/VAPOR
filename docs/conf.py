@@ -55,7 +55,6 @@ extensions = [
     'sphinx.ext.imgmath', 
     'sphinx.ext.todo', 
     'sphinx.ext.autodoc',
-    'jupyter_sphinx',
     'sphinx_gallery.gen_gallery',
     #'jupyter_sphinx.execute'
     #'breathe'
