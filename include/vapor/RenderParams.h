@@ -436,6 +436,8 @@ public:
     static const string _yFieldVariableNameTag;
     static const string _zFieldVariableNameTag;
     static const string _constantOpacityTag;
+    static const string CustomHistogramDataTag;
+    static const string CustomHistogramRangeTag;
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's

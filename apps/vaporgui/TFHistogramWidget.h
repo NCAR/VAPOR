@@ -30,8 +30,6 @@ protected:
     //    void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
-    VAPoR::DataMgr *        _dataMgr = nullptr;
-    VAPoR::RenderParams *   _renderParams = nullptr;
     Histo                   _histo;
     ParamsDropdownMenuItem *_scalingMenu;
     bool                    _dynamicScaling = true;

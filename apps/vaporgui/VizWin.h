@@ -132,6 +132,7 @@ private:
     bool       _navigateFlag;
     bool       _manipFlag;
     bool       _manipFlowSeedFlag = false;
+    bool       _manipFlowIntegrationFlag = false;
     Trackball *_trackBall;
 
     std::vector<double> _getScreenCoords(QMouseEvent *e) const;

@@ -37,6 +37,7 @@ public:
     void  reset(int newNumBins = -1);
     void  reset(int newNumBins, float mnData, float mxData);
     void  addToBin(float val);
+    void  setBins(const vector<long> &bins);
     int   getMaxBinSize();
     int   getMaxBinSizeBetweenIndices(const int start, const int end) const;
     int   getNumBins() const;

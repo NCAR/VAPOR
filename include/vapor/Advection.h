@@ -38,7 +38,10 @@ public:
     //   If "skipNonZero" is true, then this function only overwrites zeros.
     //   Otherwise, it will overwrite values anyway.
     int CalculateParticleValues(Field *scalarField, bool skipNonZero);
+    int CalculateParticleIntegratedValues(Field *scalarField, const bool skipNonZero, const float distScale=1.f, const std::vector<double> &integrateWithinVolumeMin={-FLT_MAX,-FLT_MAX,-FLT_MAX}, const std::vector<double> &integrateWithinVolumeMax={FLT_MAX,FLT_MAX,FLT_MAX});
     int CalculateParticleProperties(Field *scalarField);
+    
+    void CalculateParticleHistogram(std::vector<double> &bounds, std::vector<long> &bins);
 
     // Reset all particle values to zero
     void ResetParticleValues();
@@ -100,6 +103,9 @@ private:
     // Adjust input "val" according to the bound specified by min and max.
     // Returns the value after adjustment.
     float _applyPeriodic(float val, float min, float max) const;
+    
+    void _calculateParticleIntegratedValue(Particle &p, const Particle &prev, const Field *scalarField, const bool skipNonZero, const float distScale, const std::vector<double> &integrateWithinVolumeMin, const std::vector<double> &integrateWithinVolumeMax) const;
+    static bool _isParticleInsideVolume(const Particle &p, const std::vector<double> &min, const std::vector<double> &max);
 };
 };    // namespace flow
 

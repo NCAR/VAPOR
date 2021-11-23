@@ -37,6 +37,9 @@ const std::string FlowParams::_xPeriodicTag = "PeriodicTag_X";
 const std::string FlowParams::_yPeriodicTag = "PeriodicTag_Y";
 const std::string FlowParams::_zPeriodicTag = "PeriodicTag_Z";
 const std::string FlowParams::_rakeTag = "RakeTag";
+const std::string FlowParams::_doIntegrationTag = "DoIntegrationTag";
+const std::string FlowParams::_integrationScalarTag = "IntegrationScalarTag";
+const std::string FlowParams::_integrationBoxTag = "IntegrationBoxTag";
 const std::string FlowParams::_rakeBiasVariable = "RakeBiasVariable";
 const std::string FlowParams::_rakeBiasStrength = "RakeBiasStrength";
 const std::string FlowParams::_pastNumOfTimeSteps = "PastNumOfTimeSteps";
@@ -94,6 +97,7 @@ FlowParams::~FlowParams()
 {
     SetDiagMsg("FlowParams::~FlowParams() this=%p", this);
     if (_fakeRakeBox) delete _fakeRakeBox;
+    if (_fakeIntegrationBox) delete _fakeIntegrationBox;
 }
 
 int FlowParams::Initialize()
@@ -116,6 +120,7 @@ int FlowParams::Initialize()
         floats[i * 2 + 1] = maxext[i];
     }
     this->SetRake(floats);
+    this->SetIntegrationVolume(floats);
 
     vector<float> rake;
     rake.push_back(minext[0]);
@@ -127,6 +132,7 @@ int FlowParams::Initialize()
         rake.push_back(maxext[2]);
     }
     SetRake(rake);
+    SetIntegrationVolume(rake);
 
     SetFlowDirection((int)FlowDir::FORWARD);
     SetSteadyNumOfSteps(100);
@@ -138,6 +144,8 @@ int FlowParams::Initialize()
     SetSeedInputFilename(Wasp::GetSharePath("examples/listOfSeeds.txt"));
     SetIsSteady(true);
     SetPastNumOfTimeSteps(std::max(_dataMgr->GetNumTimeSteps() - 1, 1));
+    SetValueLong(_doIntegrationTag, "", false);
+    SetValueDouble(_integrationScalarTag, "", 1.f);
 
     return (0);
 }
@@ -205,11 +213,36 @@ void FlowParams::SetPeriodic(const std::vector<bool> &bools)
     if (bools.size() == 3) SetValueLong(_zPeriodicTag, "", bools[2]);
 }
 
+void FakeRakeBox::Initialize(string tag)
+{
+    _tag = tag;
+    
+    vector<double> flowBox = parent->GetValueDoubleVec(tag);
+    if (flowBox.size() != 4 && flowBox.size() != 6) {
+        vector<double> min, max;
+        parent->GetBox()->GetExtents(min, max);
+        SetExtents(min, max);
+        flowBox = parent->GetValueDoubleVec(tag);
+    }
+    vector<double> min, max;
+
+    min.push_back(flowBox[0]);
+    max.push_back(flowBox[1]);
+    min.push_back(flowBox[2]);
+    max.push_back(flowBox[3]);
+    if (flowBox.size() == 6) {
+        min.push_back(flowBox[4]);
+        max.push_back(flowBox[5]);
+    }
+
+    Box::SetExtents(min, max);
+}
+
 void FakeRakeBox::SetExtents(const vector<double> &min, const vector<double> &max)
 {
     VAssert(parent);
 
-    vector<float> rake;
+    vector<double> rake;
     rake.push_back(min[0]);
     rake.push_back(max[0]);
     rake.push_back(min[1]);
@@ -219,7 +252,7 @@ void FakeRakeBox::SetExtents(const vector<double> &min, const vector<double> &ma
         rake.push_back(max[2]);
     }
 
-    parent->SetRake(rake);
+    parent->SetValueDoubleVec(_tag, "", rake);
 }
 
 Box *FlowParams::GetRakeBox()
@@ -233,23 +266,25 @@ Box *FlowParams::GetRakeBox()
     _fakeRakeBox->SetPlanar(extBox->IsPlanar());
     _fakeRakeBox->SetOrientation(extBox->GetOrientation());
 
-    const auto rake = GetRake();
-    const auto rakesize = rake.size();
-    VAssert(rakesize == 4 || rakesize == 6);
-    vector<double> min, max;
-
-    min.push_back(rake[0]);
-    max.push_back(rake[1]);
-    min.push_back(rake[2]);
-    max.push_back(rake[3]);
-    if (rakesize == 6) {
-        min.push_back(rake[4]);
-        max.push_back(rake[5]);
-    }
-
-    _fakeRakeBox->Box::SetExtents(min, max);
+    _fakeRakeBox->Initialize(_rakeTag);
 
     return _fakeRakeBox;
+}
+
+Box *FlowParams::GetIntegrationBox()
+{
+    if (!_fakeIntegrationBox) {
+        _fakeIntegrationBox = new FakeRakeBox(&_fakeRakeStateSave);
+        _fakeIntegrationBox->parent = this;
+    }
+
+    Box *extBox = GetBox();
+    _fakeIntegrationBox->SetPlanar(extBox->IsPlanar());
+    _fakeIntegrationBox->SetOrientation(extBox->GetOrientation());
+
+    _fakeIntegrationBox->Initialize(_integrationBoxTag);
+
+    return _fakeIntegrationBox;
 }
 
 std::vector<float> FlowParams::GetRake() const
@@ -274,6 +309,15 @@ void FlowParams::SetRake(const std::vector<float> &rake)
     std::vector<double> doubles(rakesize);
     std::copy(rake.cbegin(), rake.cend(), doubles.begin());
     SetValueDoubleVec(_rakeTag, "rake boundaries", doubles);
+}
+
+void FlowParams::SetIntegrationVolume(const std::vector<float> &rake)
+{
+    const auto rakesize = rake.size();
+    VAssert(rakesize == 4 || rakesize == 6);
+    std::vector<double> doubles(rakesize);
+    std::copy(rake.cbegin(), rake.cend(), doubles.begin());
+    SetValueDoubleVec(_integrationBoxTag, "", doubles);
 }
 
 std::vector<long> FlowParams::GetGridNumOfSeeds() const
