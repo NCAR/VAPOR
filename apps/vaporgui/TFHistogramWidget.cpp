@@ -46,7 +46,7 @@ void TFHistogramMap::paramsUpdate()
     if (rp->GetValueDoubleVec(RenderParams::CustomHistogramRangeTag).size()) {
         auto range = rp->GetValueDoubleVec(RenderParams::CustomHistogramRangeTag);
         auto bins = rp->GetValueLongVec(RenderParams::CustomHistogramDataTag);
-        int numBins = bins.size();
+        int  numBins = bins.size();
         _histo.reset(numBins, range[0], range[1]);
         _histo.setBins(bins);
     } else {

@@ -216,7 +216,7 @@ void FlowParams::SetPeriodic(const std::vector<bool> &bools)
 void FakeRakeBox::Initialize(string tag)
 {
     _tag = tag;
-    
+
     vector<double> flowBox = parent->GetValueDoubleVec(tag);
     if (flowBox.size() != 4 && flowBox.size() != 6) {
         vector<double> min, max;

@@ -304,7 +304,7 @@ int FlowRenderer::_paintGL(bool fast)
 
     if (!_coloringComplete) {
         bool integrate = params->GetValueLong(params->_doIntegrationTag, false);
-        
+
         if (integrate) {
             vector<double> integrationVolumeMin, integrationVolumeMax;
             params->GetIntegrationBox()->GetExtents(integrationVolumeMin, integrationVolumeMax);
@@ -313,11 +313,11 @@ int FlowRenderer::_paintGL(bool fast)
             _printNonZero(rv, __FILE__, __func__, __LINE__);
             if (_2ndAdvection)    // bi-directional advection
                 rv = _2ndAdvection->CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
-            
+
             vector<double> histoRange;
-            vector<long> histo(256);
+            vector<long>   histo(256);
             _advection.CalculateParticleHistogram(histoRange, histo);
-            
+
             params->SetValueLongVec(RenderParams::CustomHistogramDataTag, "", histo);
             params->SetValueDoubleVec(RenderParams::CustomHistogramRangeTag, "", histoRange);
         } else {
@@ -325,7 +325,7 @@ int FlowRenderer::_paintGL(bool fast)
             _printNonZero(rv, __FILE__, __func__, __LINE__);
             if (_2ndAdvection)    // bi-directional advection
                 rv = _2ndAdvection->CalculateParticleValues(&_colorField, true);
-            
+
             if (params->GetValueDoubleVec(RenderParams::CustomHistogramRangeTag).size()) {
                 params->SetValueLongVec(RenderParams::CustomHistogramDataTag, "", {});
                 params->SetValueDoubleVec(RenderParams::CustomHistogramRangeTag, "", {});
@@ -879,7 +879,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
         }
     }
-    
+
     const auto doIntegration = params->GetValueLong(params->_doIntegrationTag, false);
     const auto integrationDistScalar = params->GetValueDouble(params->_integrationScalarTag, false);
     const auto integrationVolume = params->GetValueDoubleVec(params->_integrationBoxTag);

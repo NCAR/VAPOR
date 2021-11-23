@@ -18,11 +18,12 @@ enum class FlowDir : int { FORWARD = 0, BACKWARD = 1, BI_DIR = 2 };
 class FlowParams;
 class PARAMS_API FakeRakeBox : public Box {
     string _tag;
+
 public:
     using Box::Box;
     FlowParams *parent = nullptr;
-    
-    void Initialize(string tag);
+
+    void        Initialize(string tag);
     void        SetExtents(const vector<double> &minExt, const vector<double> &maxExt) override;
 };
 
@@ -90,9 +91,9 @@ public:
     std::vector<float> GetRake() const;
     void               SetRake(const std::vector<float> &);
 
-    Box *              GetIntegrationBox();
-    void               SetIntegrationVolume(const std::vector<float> &);
-    
+    Box *GetIntegrationBox();
+    void SetIntegrationVolume(const std::vector<float> &);
+
     /*
      *This result vector could be of size 2 or 3.
      */

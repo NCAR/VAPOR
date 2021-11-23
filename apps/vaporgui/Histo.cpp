@@ -78,11 +78,10 @@ void Histo::reset(int newNumBins, float mnData, float mxData)
     _range = _maxMapData - _minMapData;
 }
 
-void  Histo::setBins(const vector<long> &bins)
+void Histo::setBins(const vector<long> &bins)
 {
     VAssert(bins.size() == _numBins);
-    for (int i = 0; i < _numBins; i++)
-        _binArray[i] = bins[i];
+    for (int i = 0; i < _numBins; i++) _binArray[i] = bins[i];
 }
 
 void Histo::addToBin(float val)

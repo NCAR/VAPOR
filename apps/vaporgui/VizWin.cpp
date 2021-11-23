@@ -545,9 +545,7 @@ string VizWin::_getCurrentMouseMode() const
     GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
 
     string activeTab = guiP->ActiveTab();
-    if (activeTab == RenderEventRouterGUI::GeometryTabName ||
-        activeTab == FlowEventRouter::SeedingTabName ||
-        activeTab == FlowEventRouter::IntegrationTabName)
+    if (activeTab == RenderEventRouterGUI::GeometryTabName || activeTab == FlowEventRouter::SeedingTabName || activeTab == FlowEventRouter::IntegrationTabName)
         return MouseModeParams::GetRegionModeName();
     else
         return MouseModeParams::GetNavigateModeName();
