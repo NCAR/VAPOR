@@ -34,7 +34,7 @@
 //! When this class is local, it controls the time-steps in one visualizer.
 //! The global (shared) AnimationParams controls the animation in any number of visualizers.
 
-class AnimationParams : public VAPoR::ParamsBase {
+class PARAMS_API AnimationParams : public VAPoR::ParamsBase {
 public:
     AnimationParams(ParamsBase::StateSave *ssave);
 

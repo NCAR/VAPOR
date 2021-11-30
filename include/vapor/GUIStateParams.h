@@ -24,7 +24,7 @@
 class MouseModeParams;
 class BookmarkParams;
 
-class GUIStateParams : public VAPoR::ParamsBase {
+class PARAMS_API GUIStateParams : public VAPoR::ParamsBase {
 public:
     GUIStateParams(VAPoR::ParamsBase::StateSave *ssave);
 

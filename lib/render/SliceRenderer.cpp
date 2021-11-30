@@ -298,7 +298,7 @@ stack<glm::vec2> SliceRenderer::_2DConvexHull(std::vector<_vertexIn2dAnd3d> &ver
     // coordinate system using our basis function, and then perform Convex Hull on those 2D coordinates.
 
     // Project our 3D points onto the 2D plane using our basis function (_normal, _axis1, and _axis2)
-    glm::vec2 unorderedTwoDPoints[vertices.size()];
+    std::shared_ptr<glm::vec2[]> unorderedTwoDPoints(new glm::vec2[vertices.size()]);
     int       count = 0;
     for (auto &vertex : vertices) {
         double x = glm::dot(_axis1, vertex.threeD - _origin);    // Find 3D point's projected X coordinate

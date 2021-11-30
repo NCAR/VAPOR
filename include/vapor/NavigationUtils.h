@@ -13,7 +13,7 @@ class ViewpointParams;
 //! \brief This class is just migrated legacy code to de-spaghetti other legacy code.
 //! (It is not written by me)
 
-class NavigationUtils : public Wasp::MyBase {
+class RENDER_API NavigationUtils : public Wasp::MyBase {
 public:
     static void SetHomeViewpoint(ControlExec *ce);
     static void UseHomeViewpoint(ControlExec *ce);

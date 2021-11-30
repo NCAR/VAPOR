@@ -56,7 +56,7 @@
 /* The Trackball package gives that nice 3D rotation interface.
  * A TrackBall class is needed for each rotated scene.
  */
-class Trackball {
+class RENDER_API Trackball {
 public:
     Trackball();
     Trackball(float scale[3]);

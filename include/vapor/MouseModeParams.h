@@ -32,7 +32,7 @@
 //! \version 3.0
 //! \date    April 2014
 //!
-class MouseModeParams : public VAPoR::ParamsBase {
+class PARAMS_API MouseModeParams : public VAPoR::ParamsBase {
 public:
     struct MouseMode {
         string             name;
