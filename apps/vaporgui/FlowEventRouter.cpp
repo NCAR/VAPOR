@@ -133,6 +133,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     AddSubtab(IntegrationTabName, new PGroup({
         new PSection("Integration Settings", {
             new PCheckbox(FP::_doIntegrationTag, "Integrate particle values along trajectory"),
+            (new PVariableSelector(RenderParams::_colorMapVariableNameTag, "Scalar to Integrate"))->EnableBasedOnParam(FP::_doIntegrationTag),
             (new PDoubleInput(FP::_integrationScalarTag, "Integration distance scale"))->EnableBasedOnParam(FP::_doIntegrationTag),
         }),
         (new PSection("Integration Region", {
