@@ -180,6 +180,7 @@ public:
     static const std::string _rakeTag;
     static const std::string _doIntegrationTag;
     static const std::string _integrationScalarTag;
+    static const std::string _integrationSetAllToFinalValueTag;
     static const std::string _integrationBoxTag;
     static const std::string _rakeBiasVariable;
     static const std::string _rakeBiasStrength;

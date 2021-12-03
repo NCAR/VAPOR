@@ -50,4 +50,6 @@ void main() {
 
 	color.rgb *= PhongLighting(t2);
     fragment = color;
+    
+    if (color.a < 0.05) discard;
 }

@@ -77,6 +77,7 @@ private:
     std::string        _cache_rakeBiasVariable;
     std::string        _cache_seedInputFilename;
     bool                _cache_doIntegration;
+    bool                _cache_integrationSetAllToFinalValue;
     float               _cache_integrationDistScalar;
     std::vector<double> _cache_integrationVolume;
 

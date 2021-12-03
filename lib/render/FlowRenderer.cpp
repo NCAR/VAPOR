@@ -304,6 +304,7 @@ int FlowRenderer::_paintGL(bool fast)
 
     if (!_coloringComplete) {
         bool integrate = params->GetValueLong(params->_doIntegrationTag, false);
+        bool setAllToFinalValue = params->GetValueLong(params->_integrationSetAllToFinalValueTag, false);
 
         if (integrate) {
             vector<double> integrationVolumeMin, integrationVolumeMax;
@@ -314,6 +315,12 @@ int FlowRenderer::_paintGL(bool fast)
             if (_2ndAdvection)    // bi-directional advection
                 rv = _2ndAdvection->CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
 
+            if (setAllToFinalValue) {
+                _advection.SetAllStreamValuesToFinalValue();
+                if (_2ndAdvection)
+                    _2ndAdvection->SetAllStreamValuesToFinalValue();
+            }
+            
             vector<double> histoRange;
             vector<long>   histo(256);
             _advection.CalculateParticleHistogram(histoRange, histo);
@@ -881,12 +888,14 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
     }
 
     const auto doIntegration = params->GetValueLong(params->_doIntegrationTag, false);
+    const auto integrationSetAllToFinalValue = params->GetValueLong(params->_integrationSetAllToFinalValueTag, false);
     const auto integrationDistScalar = params->GetValueDouble(params->_integrationScalarTag, false);
     const auto integrationVolume = params->GetValueDoubleVec(params->_integrationBoxTag);
-    if (doIntegration != _cache_doIntegration || integrationDistScalar != _cache_integrationDistScalar || integrationVolume != _cache_integrationVolume) {
+    if (doIntegration != _cache_doIntegration || integrationSetAllToFinalValue != _cache_integrationSetAllToFinalValue || integrationDistScalar != _cache_integrationDistScalar || integrationVolume != _cache_integrationVolume) {
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
     _cache_doIntegration = doIntegration;
+    _cache_integrationSetAllToFinalValue = integrationSetAllToFinalValue;
     _cache_integrationDistScalar = integrationDistScalar;
     _cache_integrationVolume = integrationVolume;
 

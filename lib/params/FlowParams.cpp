@@ -39,6 +39,7 @@ const std::string FlowParams::_zPeriodicTag = "PeriodicTag_Z";
 const std::string FlowParams::_rakeTag = "RakeTag";
 const std::string FlowParams::_doIntegrationTag = "DoIntegrationTag";
 const std::string FlowParams::_integrationScalarTag = "IntegrationScalarTag";
+const std::string FlowParams::_integrationSetAllToFinalValueTag = "IntegrationSetAllToFinalValueTag";
 const std::string FlowParams::_integrationBoxTag = "IntegrationBoxTag";
 const std::string FlowParams::_rakeBiasVariable = "RakeBiasVariable";
 const std::string FlowParams::_rakeBiasStrength = "RakeBiasStrength";
@@ -146,6 +147,7 @@ int FlowParams::Initialize()
     SetPastNumOfTimeSteps(std::max(_dataMgr->GetNumTimeSteps() - 1, 1));
     SetValueLong(_doIntegrationTag, "", false);
     SetValueDouble(_integrationScalarTag, "", 1.f);
+    SetValueLong(_integrationSetAllToFinalValueTag, "", false);
 
     return (0);
 }

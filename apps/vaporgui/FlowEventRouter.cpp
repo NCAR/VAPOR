@@ -90,7 +90,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     }));
     
     AddAppearanceSubtab(new PGroup({
-        (new PTFEditor(RenderParams::_colorMapVariableNameTag))->ShowOpacityBasedOnParam("NULL", 1),
+        (new PTFEditor(RenderParams::_colorMapVariableNameTag)),
         new PSection("Appearance", {
             new PConstantColorWidget,
             new PEnumDropdown(FP::RenderTypeTag, {"Tubes", "Samples", "KLGWTH"}, {FP::RenderTypeStream, FP::RenderTypeSamples, FP::RenderTypeDensity}, "Render Type"),
@@ -133,6 +133,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     AddSubtab(IntegrationTabName, new PGroup({
         new PSection("Integration Settings", {
             new PCheckbox(FP::_doIntegrationTag, "Integrate particle values along trajectory"),
+            new PCheckbox(FP::_integrationSetAllToFinalValueTag, "Set entire stream value to integrated total"),
             (new PVariableSelector(RenderParams::_colorMapVariableNameTag, "Scalar to Integrate"))->EnableBasedOnParam(FP::_doIntegrationTag),
             (new PDoubleInput(FP::_integrationScalarTag, "Integration distance scale"))->EnableBasedOnParam(FP::_doIntegrationTag),
         }),
