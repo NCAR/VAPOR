@@ -317,10 +317,9 @@ int FlowRenderer::_paintGL(bool fast)
 
             if (setAllToFinalValue) {
                 _advection.SetAllStreamValuesToFinalValue();
-                if (_2ndAdvection)
-                    _2ndAdvection->SetAllStreamValuesToFinalValue();
+                if (_2ndAdvection) _2ndAdvection->SetAllStreamValuesToFinalValue();
             }
-            
+
             vector<double> histoRange;
             vector<long>   histo(256);
             _advection.CalculateParticleHistogram(histoRange, histo);
@@ -891,7 +890,8 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
     const auto integrationSetAllToFinalValue = params->GetValueLong(params->_integrationSetAllToFinalValueTag, false);
     const auto integrationDistScalar = params->GetValueDouble(params->_integrationScalarTag, false);
     const auto integrationVolume = params->GetValueDoubleVec(params->_integrationBoxTag);
-    if (doIntegration != _cache_doIntegration || integrationSetAllToFinalValue != _cache_integrationSetAllToFinalValue || integrationDistScalar != _cache_integrationDistScalar || integrationVolume != _cache_integrationVolume) {
+    if (doIntegration != _cache_doIntegration || integrationSetAllToFinalValue != _cache_integrationSetAllToFinalValue || integrationDistScalar != _cache_integrationDistScalar
+        || integrationVolume != _cache_integrationVolume) {
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
     _cache_doIntegration = doIntegration;

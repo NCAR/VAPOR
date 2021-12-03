@@ -407,15 +407,12 @@ void Advection::SetAllStreamValuesToFinalValue()
     for (auto &s : _streams) {
         int start = 0;
         int sSize = s.size();
-        if (sSize && s[0].IsSpecial())
-            start = 1;
-        
-        for (int i = 0; i < sSize-1; i++) {
-            if (s[i+1].IsSpecial() || i == sSize-2) {
-                for (int j = start; j < i; j++) {
-                    s[j].value = s[i].value;
-                }
-                start = i+2;
+        if (sSize && s[0].IsSpecial()) start = 1;
+
+        for (int i = 0; i < sSize - 1; i++) {
+            if (s[i + 1].IsSpecial() || i == sSize - 2) {
+                for (int j = start; j < i; j++) { s[j].value = s[i].value; }
+                start = i + 2;
             }
         }
     }
