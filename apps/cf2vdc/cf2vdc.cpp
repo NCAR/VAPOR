@@ -66,7 +66,7 @@ size_t gcd(size_t n1, size_t n2)
 
 size_t lcm(size_t n1, size_t n2) { return ((n1 * n2) / gcd(n1, n2)); }
 
-int copyVarHelper(DC &dc, VDC &vdc, int fdr, int fdw, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, double mv,
+int copyVarHelper(DC &dc, VDCNetCDF &vdc, int fdr, int fdw, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, double mv,
                   float *buffer)
 {
     VAssert(buffer_dims.size() == src_hslice_dims.size());
@@ -116,7 +116,7 @@ int copyVarHelper(DC &dc, VDC &vdc, int fdr, int fdw, vector<size_t> &buffer_dim
     return (0);
 }
 
-int CopyVar2d3dMask(DC &dc, VDC &vdc, size_t ts, string varname, int lod)
+int CopyVar2d3dMask(DC &dc, VDCNetCDF &vdc, size_t ts, string varname, int lod)
 {
     // Only data variables can have masks
     //
