@@ -28,4 +28,4 @@ double orientation(glm::vec2 p, glm::vec2 q, glm::vec2 r);
 int compare(const void *vp1, const void *vp2);
 
 // Prints convex hull of a set of n points.
-std::stack<glm::vec2> convexHull(glm::vec2 points[], int n);
+std::stack<glm::vec2> convexHull(glm::vec2 *points, int n);

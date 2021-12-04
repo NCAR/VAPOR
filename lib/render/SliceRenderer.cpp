@@ -293,13 +293,15 @@ void SliceRenderer::_findIntercepts(glm::vec3 &_origin, glm::vec3 &_normal, std:
 
 stack<glm::vec2> SliceRenderer::_2DConvexHull(std::vector<_vertexIn2dAnd3d> &vertices) const
 {
+    VAssert(vertices.size() > 0);
+
     // We now have a set of vertices along the Box's XYZ intercepts.  The edges of these vertices define where
     // the user should see data.  To find the connectivity/edges of these vertices, we will first project them into a 2D
     // coordinate system using our basis function, and then perform Convex Hull on those 2D coordinates.
 
     // Project our 3D points onto the 2D plane using our basis function (_normal, _axis1, and _axis2)
-    glm::vec2 unorderedTwoDPoints[vertices.size()];
-    int       count = 0;
+    glm::vec2 *unorderedTwoDPoints = new glm::vec2[vertices.size()];
+    int        count = 0;
     for (auto &vertex : vertices) {
         double x = glm::dot(_axis1, vertex.threeD - _origin);    // Find 3D point's projected X coordinate
         double y = glm::dot(_axis2, vertex.threeD - _origin);    // Find 3D point's projected Y coordinate
@@ -312,6 +314,12 @@ stack<glm::vec2> SliceRenderer::_2DConvexHull(std::vector<_vertexIn2dAnd3d> &ver
     // Perform convex hull on our list of 2D points,
     // which defines the outer edges of our polygon
     stack<glm::vec2> orderedTwoDPoints = convexHull(unorderedTwoDPoints, sizeof(unorderedTwoDPoints) / sizeof(unorderedTwoDPoints[0]));
+
+    if (unorderedTwoDPoints != nullptr) {
+        delete[] unorderedTwoDPoints;
+        unorderedTwoDPoints = nullptr;
+    }
+
     return orderedTwoDPoints;
 }
 

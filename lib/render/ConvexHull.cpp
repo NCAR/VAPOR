@@ -71,7 +71,7 @@ int compare(const void *vp1, const void *vp2)
 //} // end anonymouse namespace
 
 // Prints convex hull of a set of n points.
-std::stack<glm::vec2> convexHull(glm::vec2 points[], int n)
+std::stack<glm::vec2> convexHull(glm::vec2 *points, int n)
 {
     // Find the bottommost point
     double ymin = points[0].y;
