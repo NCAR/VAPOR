@@ -145,7 +145,8 @@ int SliceRenderer::_resetDataCache()
     _resetColormapCache();
 
     int rc;
-    rc = _saveTextureData();
+    //rc = _saveTextureData();
+    rc = _saveTextureData2();
 
     if (rc < 0) {
         SetErrMsg("Unable to acquire data for Slice texture");
@@ -419,6 +420,41 @@ void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
             index += 2;
         }
     }
+}
+
+int SliceRenderer::_saveTextureData2()
+{
+    Grid *grid = nullptr;
+    int   rc =
+        DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, _cacheParams.boxMin, _cacheParams.boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
+
+    if (rc < 0) {
+        SetErrMsg("Unable to acquire Grid for Slice texture");
+        return (rc);
+    }
+    VAssert(grid);
+
+    grid->SetInterpolationOrder(1);
+
+    _rotate();
+    _setVertexPositions();
+
+    _xSamples = _textureSideSize;
+    _ySamples = _textureSideSize;
+
+    int    textureSize = 2 * _xSamples * _ySamples;
+    float *dataValues = new float[textureSize];
+
+    _populateData(dataValues, grid);
+
+    _createDataTexture(dataValues);
+
+    delete[] dataValues;
+    _dataMgr->UnlockGrid(grid);
+    delete grid;
+    grid = nullptr;
+
+    return rc;
 }
 
 int SliceRenderer::_saveTextureData()
