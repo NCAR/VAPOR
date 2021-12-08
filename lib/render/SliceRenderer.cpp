@@ -313,7 +313,7 @@ stack<glm::vec2> SliceRenderer::_2DConvexHull(std::vector<_vertexIn2dAnd3d> &ver
 
     // Perform convex hull on our list of 2D points,
     // which defines the outer edges of our polygon
-    stack<glm::vec2> orderedTwoDPoints = convexHull(unorderedTwoDPoints, sizeof(unorderedTwoDPoints) / sizeof(unorderedTwoDPoints[0]));
+    stack<glm::vec2> orderedTwoDPoints = convexHull(unorderedTwoDPoints, count);
 
     if (unorderedTwoDPoints != nullptr) {
         delete[] unorderedTwoDPoints;
