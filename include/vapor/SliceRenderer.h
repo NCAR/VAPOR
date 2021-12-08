@@ -59,8 +59,6 @@ private:
         glm::vec2 twoD;
     };
 
-    void _renderFast() const;
-
     void                   _rotate();
     void                   _findIntercepts(glm::vec3 &origin, glm::vec3 &normal, std::vector<_vertexIn2dAnd3d> &vertices, bool stretch) const;
     stack<glm::vec2>       _2DConvexHull(std::vector<_vertexIn2dAnd3d> &vertices) const;

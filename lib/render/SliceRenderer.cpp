@@ -188,7 +188,7 @@ int SliceRenderer::_resetBoxCache()
         return rc;
     }
 
-    _setVertexPositions();
+   _setVertexPositions();
     return rc;
 }
 
