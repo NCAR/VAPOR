@@ -24,9 +24,12 @@ public:
     RegularGrid* GetSlice( size_t sideSize );
 
     // The _windingOrder is the four vertices of our slice's enclosing rectangle,
-    // listed in the order that they need to be listed to draw our two triangles
+    // listed in the order that they need to be listed to correctly draw the two triangles
     // that comprise our texture.
     std::vector<double> GetWindingOrder() const;
+
+    // Returns a set of four vertices that comprise our rectangle
+    std::vector<double> GetTextureCoordinates() const;
 
 private:
     RenderParams* _renderParams;
@@ -46,13 +49,13 @@ private:
 
     // _rotate(), and its utility functions
     void                   _rotate();
-        glm::vec3                  _getOrthogonal(const glm::vec3 u) const;
-        void                       _findIntercepts(glm::vec3 &origin, glm::vec3 &normal, std::vector<_vertexIn2dAnd3d> &vertices, bool stretch) const;
-        stack<glm::vec2>           _2DConvexHull(std::vector<_vertexIn2dAnd3d> &vertices) const;
-        glm::vec3                  _inverseProjection(float x, float y) const;
-        std::vector<glm::vec2>     _makeRectangle2D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
-        std::vector<glm::vec3>     _makePolygon3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
-        std::vector<glm::vec3>     _makeRectangle3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
+    glm::vec3                  _getOrthogonal(const glm::vec3 u) const;
+    void                       _findIntercepts(glm::vec3 &origin, glm::vec3 &normal, std::vector<_vertexIn2dAnd3d> &vertices, bool stretch) const;
+    stack<glm::vec2>           _2DConvexHull(std::vector<_vertexIn2dAnd3d> &vertices) const;
+    glm::vec3                  _inverseProjection(float x, float y) const;
+    std::vector<glm::vec2>     _makeRectangle2D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
+    std::vector<glm::vec3>     _makePolygon3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
+    std::vector<glm::vec3>     _makeRectangle3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
 
     void _generateWindingOrder();
     void      _populateData(Grid *grid) const;
@@ -68,7 +71,7 @@ private:
     size_t _textureSideSize;
 
     std::vector<double> _windingOrder;
-    std::vector<float>  _texCoords;
+    std::vector<double>  _texCoords;
 };
 
 };    // namespace VAPoR

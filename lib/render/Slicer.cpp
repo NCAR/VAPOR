@@ -106,6 +106,10 @@ std::vector<double> Slicer::GetWindingOrder() const {
     return _windingOrder;
 }
 
+std::vector<double> Slicer::GetTextureCoordinates() const {
+    return _texCoords;
+}
+
 void Slicer::_updateParameters() {
     Box *box = _renderParams->GetBox();
     box->GetExtents(_boxMin, _boxMax);

@@ -385,35 +385,6 @@ glm::vec3 SliceRenderer::_inverseProjection(float x, float y) const
     return point;
 }
 
-void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
-{
-    float varValue, missingValue;
-
-    glm::vec2 delta = (_rectangle2D[1] - _rectangle2D[0]);
-    delta.x = delta.x / _textureSideSize;
-    delta.y = delta.y / _textureSideSize;
-    glm::vec2 offset = {delta.x / 2., delta.y / 2.};
-
-    int index = 0;
-    for (int j = 0; j < _textureSideSize; j++) {
-        for (int i = 0; i < _textureSideSize; i++) {
-            glm::vec3 samplePoint = _inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
-            CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
-            varValue = grid->GetValue(p);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue || samplePoint.x > _cacheParams.boxMax[X] || samplePoint.y > _cacheParams.boxMax[Y] || samplePoint.z > _cacheParams.boxMax[Z]
-                || samplePoint.x < _cacheParams.boxMin[X] || samplePoint.y < _cacheParams.boxMin[Y] || samplePoint.z < _cacheParams.boxMin[Z])
-                dataValues[index + 1] = 1.f;
-            else
-                dataValues[index + 1] = 0.f;
-
-            dataValues[index] = varValue;
-
-            index += 2;
-        }
-    }
-}
-
 void SliceRenderer::_regenerateSlice()
 {
     /*Grid *grid = nullptr;
@@ -428,14 +399,11 @@ void SliceRenderer::_regenerateSlice()
 
     grid->SetInterpolationOrder(1);
     */
-    _rotate();
-    _setVertexPositions();
+    //_rotate();
+    //_setVertexPositions();
 
     int    textureSize = 2 * _textureSideSize * _textureSideSize;
     float *textureValues = new float[textureSize];
-
-    //_populateData(dataValues2, grid);
-    //_createDataTexture(dataValues);
 
     RegularGrid* slice = _slicer->GetSlice( _textureSideSize );
     float* dataValues = slice->GetBlks()[0];
@@ -450,7 +418,10 @@ void SliceRenderer::_regenerateSlice()
         
         textureValues[i*2] = dataValues[i];
     }
- 
+
+    //_vertexCoords = _slicer->GetWindingOrder();
+    //_setVertexPositions();
+
     _createDataTexture(textureValues);
 
     delete slice;
@@ -470,8 +441,10 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _slicer->GetWindingOrder().data());
 }
 
 bool SliceRenderer::_isDataCacheDirty() const

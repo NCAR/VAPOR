@@ -87,7 +87,6 @@ private:
     void      _initTextures();
     void      _createDataTexture(float *dataValues);
     void      _regenerateSlice();
-    void      _populateData(float *dataValues, Grid *grid) const;
     glm::vec3 _getOrthogonal(const glm::vec3 u) const;
     glm::vec3 _rotateVector(glm::vec3 vector, glm::quat rotation) const;
 
