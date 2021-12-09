@@ -28,8 +28,11 @@ public:
     // that comprise our texture.
     std::vector<double> GetWindingOrder() const;
 
-    // Returns a set of four vertices that comprise our rectangle
-    std::vector<double> GetTextureCoordinates() const;
+    // Returns a polygon that encloses the slice
+    std::vector<glm::vec3> GetPolygon() const;
+
+    // Returns a rectangle that encloses the slice
+    std::vector<glm::vec3> GetRectangle() const;
 
 private:
     RenderParams* _renderParams;

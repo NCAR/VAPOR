@@ -53,7 +53,6 @@ Slicer::~Slicer()
 }
 
 RegularGrid* Slicer::GetSlice( size_t sideSize ) {
-    std::cout << "Get slice " << sideSize << std::endl;
     _textureSideSize = sideSize;
     _updateParameters();
     _rotate();
@@ -78,23 +77,6 @@ RegularGrid* Slicer::GetSlice( size_t sideSize ) {
     std::vector<double> maxu = { 2,2,2 };
     RegularGrid* slice = new RegularGrid( dims, bs, data, _boxMin, _boxMax );
 
-    /*std::cout << fixed << setprecision(6) << setfill(' ');
-    auto nodeItr = slice->ConstNodeBegin();
-    for (int i=0; i<textureSize; i++) {
-        //std::cout << std::setw(9) << dataValues[i*2] << " " << slice->GetValueAtIndex(*nodeItr) << std::endl;
-        std::cout << std::setw(9) << dataValues[i] << " " << slice->GetValueAtIndex(*nodeItr) << std::endl;
-        //if (dataValues[i] != slice->GetValueAtIndex(*node)) std::cout << "Fail" << std::endl;
-        //else std::cout << "Pass" << std::endl;
-        nodeItr++;
-    }
-    std::cout << "ni1 " << slice->GetValueAtIndex(*nodeItr) << std::endl;
-    nodeItr+=1;
-    std::cout << "ni1 " << slice->GetValueAtIndex(*nodeItr) << std::endl;
-    auto nodeItr2 = slice->ConstNodeBegin();
-    std::cout << "ni2 " << slice->GetValueAtIndex(*nodeItr2) << std::endl;
-    nodeItr2+=1;
-    std::cout << "ni2 " << slice->GetValueAtIndex(*nodeItr2) << std::endl;*/
-
     _dataMgr->UnlockGrid(grid3d);
     delete grid3d;
     grid3d = nullptr;
@@ -106,8 +88,12 @@ std::vector<double> Slicer::GetWindingOrder() const {
     return _windingOrder;
 }
 
-std::vector<double> Slicer::GetTextureCoordinates() const {
-    return _texCoords;
+std::vector<glm::vec3> Slicer::GetPolygon() const {
+    return _polygon3D;
+}
+
+std::vector<glm::vec3> Slicer::GetRectangle() const {
+    return _rectangle3D;
 }
 
 void Slicer::_updateParameters() {
@@ -115,8 +101,6 @@ void Slicer::_updateParameters() {
     box->GetExtents(_boxMin, _boxMax);
     VAssert(_boxMin.size() == 3);
     VAssert(_boxMax.size() == 3);
-
-    //_textureSideSize = _renderParams->GetValueDouble(RenderParams::SampleRateTag, 200);
 
     _rotation = {_renderParams->GetValueDouble(RenderParams::XSlicePlaneRotationTag, 0.), 
                  _renderParams->GetValueDouble(RenderParams::YSlicePlaneRotationTag, 0.), 
@@ -354,8 +338,6 @@ void Slicer::_populateData(Grid *grid) const
             CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
             _dataValues[index] = grid->GetValue(p);
             index++;
-
-            //std::cout << "Slicer: " << _dataValues[index] << std::endl;
         }
     }
 }
