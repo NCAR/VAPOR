@@ -11,6 +11,7 @@
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/ConvexHull.h>
+#include <vapor/Slicer.h>
 
 #define X  0
 #define Y  1
@@ -448,6 +449,19 @@ int SliceRenderer::_saveTextureData()
 
     _createDataTexture(dataValues);
 
+
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    Slicer* slicer = new Slicer( p, _dataMgr );
+    RegularGrid* slice = slicer->GetSlice();
+    auto node = slice->ConstNodeBegin();
+
+    for (int i=0; i<textureSize; i++) {
+        if (dataValues[i] != slice->GetValueAtIndex(*node)) std::cout << "Fail" << std::endl;
+        else std::cout << "Pass" << std::endl;
+        node++;
+    }
+    
+
     delete[] dataValues;
     _dataMgr->UnlockGrid(grid);
     delete grid;
@@ -463,8 +477,10 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glGenTextures(1, &_dataValueTextureID);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
