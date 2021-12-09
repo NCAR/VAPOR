@@ -20,8 +20,6 @@
 #define XZ 1
 #define YZ 2
 
-#define MAX_TEXTURE_SIZE 2000
-
 //#define DEBUG 1
 
 using namespace VAPoR;
@@ -51,6 +49,8 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     VAssert(p);
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
     _colorMapSize = tf->getNumEntries();
+    
+    _slicer = new Slicer( p, _dataMgr );
 }
 
 SliceRenderer::~SliceRenderer()
@@ -117,10 +117,11 @@ void SliceRenderer::_initVertexVBO()
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(0);
-    glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _vertexCoords.data(), GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _vertexCoords.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _slicer->GetWindingOrder().data(), GL_STATIC_DRAW);
 }
 
-int SliceRenderer::_resetDataCache()
+void SliceRenderer::_resetCache()
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);
@@ -142,18 +143,9 @@ int SliceRenderer::_resetDataCache()
 
     _cacheParams.textureSampleRate = p->GetValueDouble(RenderParams::SampleRateTag, 200);
 
-    _resetBoxCache();
+    _getModifiedExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+
     _resetColormapCache();
-
-    int rc;
-    rc = _saveTextureData();
-
-    if (rc < 0) {
-        SetErrMsg("Unable to acquire data for Slice texture");
-        return rc;
-    }
-
-    return rc;
 }
 
 void SliceRenderer::_resetColormapCache()
@@ -398,13 +390,13 @@ void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
     float varValue, missingValue;
 
     glm::vec2 delta = (_rectangle2D[1] - _rectangle2D[0]);
-    delta.x = delta.x / _xSamples;
-    delta.y = delta.y / _ySamples;
+    delta.x = delta.x / _textureSideSize;
+    delta.y = delta.y / _textureSideSize;
     glm::vec2 offset = {delta.x / 2., delta.y / 2.};
 
     int index = 0;
-    for (int j = 0; j < _ySamples; j++) {
-        for (int i = 0; i < _xSamples; i++) {
+    for (int j = 0; j < _textureSideSize; j++) {
+        for (int i = 0; i < _textureSideSize; i++) {
             glm::vec3 samplePoint = _inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
             CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
             varValue = grid->GetValue(p);
@@ -422,9 +414,9 @@ void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
     }
 }
 
-int SliceRenderer::_saveTextureData()
+void SliceRenderer::_regenerateSlice()
 {
-    Grid *grid = nullptr;
+    /*Grid *grid = nullptr;
     int   rc =
         DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, _cacheParams.boxMin, _cacheParams.boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
 
@@ -435,39 +427,34 @@ int SliceRenderer::_saveTextureData()
     VAssert(grid);
 
     grid->SetInterpolationOrder(1);
-
+    */
     _rotate();
     _setVertexPositions();
 
-    _xSamples = _textureSideSize;
-    _ySamples = _textureSideSize;
+    int    textureSize = 2 * _textureSideSize * _textureSideSize;
+    float *textureValues = new float[textureSize];
 
-    int    textureSize = 2 * _xSamples * _ySamples;
-    float *dataValues = new float[textureSize];
+    //_populateData(dataValues2, grid);
+    //_createDataTexture(dataValues);
 
-    _populateData(dataValues, grid);
+    RegularGrid* slice = _slicer->GetSlice( _textureSideSize );
+    float* dataValues = slice->GetBlks()[0];
+    float missingValue = slice->GetMissingValue();
 
-    _createDataTexture(dataValues);
-
-
-    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
-    Slicer* slicer = new Slicer( p, _dataMgr );
-    RegularGrid* slice = slicer->GetSlice();
-    auto node = slice->ConstNodeBegin();
-
-    for (int i=0; i<textureSize; i++) {
-        if (dataValues[i] != slice->GetValueAtIndex(*node)) std::cout << "Fail" << std::endl;
-        else std::cout << "Pass" << std::endl;
-        node++;
+    for (size_t i=0; i<textureSize/2; i++) {
+        float dataValue = dataValues[i];
+        if (dataValue == missingValue)
+            textureValues[i*2+1] = 1.f;
+        else
+            textureValues[i*2+1] = 0.f;
+        
+        textureValues[i*2] = dataValues[i];
     }
-    
+ 
+    _createDataTexture(textureValues);
 
-    delete[] dataValues;
-    _dataMgr->UnlockGrid(grid);
-    delete grid;
-    grid = nullptr;
-
-    return rc;
+    delete slice;
+    delete[] textureValues;
 }
 
 void SliceRenderer::_createDataTexture(float *dataValues)
@@ -484,7 +471,7 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _xSamples, _ySamples, 0, GL_RG, GL_FLOAT, dataValues);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues);
 }
 
 bool SliceRenderer::_isDataCacheDirty() const
@@ -564,30 +551,17 @@ int SliceRenderer::_paintGL(bool fast)
 
     _initializeState();
 
-    // If we're in fast mode, degrade the quality of the slice for better interactivity
-    if (fast) {
-        _textureSideSize = 50;
-    } else {
-        _textureSideSize = _cacheParams.textureSampleRate;
-    }
-    if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
+    if (_isDataCacheDirty() || _isBoxCacheDirty() || _isColormapCacheDirty() ) {
+        _resetCache();
 
-    if (_isDataCacheDirty()) {
-        rc = _resetDataCache();
-        if (rc < 0) {
-            _resetState();
-            return rc;    // error message already set by _resetDataCache()
+        // If we're in fast mode, degrade the quality of the slice for better interactivity
+        if (fast) {
+            _textureSideSize = 50;
+        } else {
+            _textureSideSize = _cacheParams.textureSampleRate;
         }
-    } else {
-        if (_isColormapCacheDirty()) _resetColormapCache();
 
-        if (_isBoxCacheDirty()) {
-            rc = _resetBoxCache();
-            if (rc < 0) {
-                _resetState();
-                return rc;    // error message already set by _resetBoxCache()
-            }
-        }
+        _regenerateSlice();
     }
 
     _configureShader();

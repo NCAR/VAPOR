@@ -3,6 +3,7 @@
 #include <limits>
 //#include <ctime>
 
+#include <iomanip>
 #include <vapor/Slicer.h>
 //#include <vapor/ResourcePath.h>
 #include <vapor/MyBase.h>
@@ -39,14 +40,21 @@ Slicer::Slicer( RenderParams* rp, DataMgr* dm )
                   0.0f, 0.0f, 1.0f, 
                   1.0f, 0.0f, 1.0f, 
                   1.0f, 0.0f, 1.0f};
+
+    _dataValues = nullptr;
 }
 
 Slicer::~Slicer()
 {
+    if (_dataValues != nullptr) {
+        delete[] _dataValues;
+        _dataValues = nullptr;
+    }
 }
 
-RegularGrid* Slicer::GetSlice() {
-
+RegularGrid* Slicer::GetSlice( size_t sideSize ) {
+    std::cout << "Get slice " << sideSize << std::endl;
+    _textureSideSize = sideSize;
     _updateParameters();
     _rotate();
     _generateWindingOrder();
@@ -54,25 +62,48 @@ RegularGrid* Slicer::GetSlice() {
     Grid* grid3d = nullptr;
     int rc = _get3DGrid( grid3d );
     if (rc < 0) return nullptr;
-    int    textureSize = 2 * _textureSideSize * _textureSideSize;
-    float *dataValues = new float[textureSize];  // Needs to be allocated as in gridTools.cpp
-    _populateData(dataValues, grid3d);
+    
+    if (_dataValues != nullptr) {
+        delete[] _dataValues;
+        _dataValues = nullptr;
+    }
+    int textureSize = _textureSideSize * _textureSideSize;
+    _dataValues = new float[textureSize];  // Needs to be allocated as in gridTools.cpp
+    _populateData(grid3d);
 
     std::vector<size_t> dims = { _textureSideSize, _textureSideSize };
     std::vector<size_t> bs   = { _textureSideSize, _textureSideSize };
-    std::vector<float*> data = { dataValues };  // Maybe use data.values() instead of dataValues?
+    std::vector<float*> data = { _dataValues };  // Maybe use data.values() instead of dataValues?
     std::vector<double> minu = { 0,0,0 };
     std::vector<double> maxu = { 2,2,2 };
-    //std::vector<float > data( dataValues, textureSize );
     RegularGrid* slice = new RegularGrid( dims, bs, data, _boxMin, _boxMax );
-    //AllocateData
 
-    delete[] dataValues;
+    /*std::cout << fixed << setprecision(6) << setfill(' ');
+    auto nodeItr = slice->ConstNodeBegin();
+    for (int i=0; i<textureSize; i++) {
+        //std::cout << std::setw(9) << dataValues[i*2] << " " << slice->GetValueAtIndex(*nodeItr) << std::endl;
+        std::cout << std::setw(9) << dataValues[i] << " " << slice->GetValueAtIndex(*nodeItr) << std::endl;
+        //if (dataValues[i] != slice->GetValueAtIndex(*node)) std::cout << "Fail" << std::endl;
+        //else std::cout << "Pass" << std::endl;
+        nodeItr++;
+    }
+    std::cout << "ni1 " << slice->GetValueAtIndex(*nodeItr) << std::endl;
+    nodeItr+=1;
+    std::cout << "ni1 " << slice->GetValueAtIndex(*nodeItr) << std::endl;
+    auto nodeItr2 = slice->ConstNodeBegin();
+    std::cout << "ni2 " << slice->GetValueAtIndex(*nodeItr2) << std::endl;
+    nodeItr2+=1;
+    std::cout << "ni2 " << slice->GetValueAtIndex(*nodeItr2) << std::endl;*/
+
     _dataMgr->UnlockGrid(grid3d);
     delete grid3d;
     grid3d = nullptr;
 
     return slice;
+}
+
+std::vector<double> Slicer::GetWindingOrder() const {
+    return _windingOrder;
 }
 
 void Slicer::_updateParameters() {
@@ -81,7 +112,7 @@ void Slicer::_updateParameters() {
     VAssert(_boxMin.size() == 3);
     VAssert(_boxMax.size() == 3);
 
-    _textureSideSize = _renderParams->GetValueDouble(RenderParams::SampleRateTag, 200);
+    //_textureSideSize = _renderParams->GetValueDouble(RenderParams::SampleRateTag, 200);
 
     _rotation = {_renderParams->GetValueDouble(RenderParams::XSlicePlaneRotationTag, 0.), 
                  _renderParams->GetValueDouble(RenderParams::YSlicePlaneRotationTag, 0.), 
@@ -305,10 +336,8 @@ glm::vec3 Slicer::_inverseProjection(float x, float y) const
     return point;
 }
 
-void Slicer::_populateData(float *dataValues, Grid *grid) const
+void Slicer::_populateData(Grid *grid) const
 {
-    float varValue, missingValue;
-
     glm::vec2 delta = (_rectangle2D[1] - _rectangle2D[0]);
     delta.x = delta.x / _textureSideSize;
     delta.y = delta.y / _textureSideSize;
@@ -319,17 +348,10 @@ void Slicer::_populateData(float *dataValues, Grid *grid) const
         for (int i = 0; i < _textureSideSize; i++) {
             glm::vec3 samplePoint = _inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
             CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
-            varValue = grid->GetValue(p);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue || samplePoint.x > _boxMax[X] || samplePoint.y > _boxMax[Y] || samplePoint.z > _boxMax[Z]
-                || samplePoint.x < _boxMin[X] || samplePoint.y < _boxMin[Y] || samplePoint.z < _boxMin[Z])
-                dataValues[index + 1] = 1.f;
-            else
-                dataValues[index + 1] = 0.f;
+            _dataValues[index] = grid->GetValue(p);
+            index++;
 
-            dataValues[index] = varValue;
-
-            index += 2;
+            //std::cout << "Slicer: " << _dataValues[index] << std::endl;
         }
     }
 }

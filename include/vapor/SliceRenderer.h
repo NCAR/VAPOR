@@ -16,6 +16,8 @@
 
 namespace VAPoR {
 
+class Slicer;
+
 class RENDER_API SliceRenderer : public Renderer {
 public:
     SliceRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr);
@@ -59,6 +61,8 @@ private:
         glm::vec2 twoD;
     };
 
+    Slicer* _slicer;
+
     void                   _rotate();
     void                   _findIntercepts(glm::vec3 &origin, glm::vec3 &normal, std::vector<_vertexIn2dAnd3d> &vertices, bool stretch) const;
     stack<glm::vec2>       _2DConvexHull(std::vector<_vertexIn2dAnd3d> &vertices) const;
@@ -79,11 +83,10 @@ private:
     int       _saveCacheParams();
     void      _resetColormapCache();
     int       _resetBoxCache();
-    int       _resetDataCache();
+    void      _resetCache();
     void      _initTextures();
     void      _createDataTexture(float *dataValues);
-    int       _saveTextureData();
-    int       _saveTextureData2();
+    void      _regenerateSlice();
     void      _populateData(float *dataValues, Grid *grid) const;
     glm::vec3 _getOrthogonal(const glm::vec3 u) const;
     glm::vec3 _rotateVector(glm::vec3 vector, glm::quat rotation) const;
