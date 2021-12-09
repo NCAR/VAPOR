@@ -24,6 +24,7 @@ set (SRC
 	ControlExecutive.cpp
 	ContourRenderer.cpp
     SliceRenderer.cpp
+    Slicer.cpp
 	MyPython.cpp
 	MatrixManager.cpp
 	Shader.cpp
@@ -104,6 +105,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/jpegapi.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Proj4StringParser.h
 	${PROJECT_SOURCE_DIR}/include/vapor/SliceRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Slicer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/glutil.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeAlgorithm.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeGLSL.h

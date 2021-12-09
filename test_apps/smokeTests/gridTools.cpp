@@ -55,6 +55,8 @@ template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, co
         nblocks *= nb;
     }
 
+    std::cout << "num blocks " << nblocks << std::endl;
+
     void *tmp = std::malloc(sizeof(T) * nblocks * block_size);
     T *   buf = static_cast<T *>(tmp);
 
