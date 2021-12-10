@@ -175,13 +175,12 @@ void SliceRenderer::_resetColormapCache()
 
 void SliceRenderer::_regenerateSlice()
 {
-    int    textureSize = 2 * _textureSideSize * _textureSideSize;
-    float *textureValues = new float[textureSize];
-
     RegularGrid* slice = _slicer->GetSlice( _textureSideSize );
     float* dataValues = slice->GetBlks()[0];
     float missingValue = slice->GetMissingValue();
 
+    int    textureSize = 2 * _textureSideSize * _textureSideSize;
+    float *textureValues = new float[textureSize];
     for (size_t i=0; i<textureSize/2; i++) {
         float dataValue = dataValues[i];
         if (dataValue == missingValue)
