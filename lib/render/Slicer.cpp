@@ -127,7 +127,6 @@ int Slicer::_get3DGrid( Grid*& grid3d ) {
         return rc;
     }
     VAssert(grid3d);
-    if (grid3d->GetNumDimensions() != 3) VAssert(!"Slicer can only operate on 3D variables");
     grid3d->SetInterpolationOrder(1);
 
     return 0;
