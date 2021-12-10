@@ -20,7 +20,7 @@
 #define XZ 1
 #define YZ 2
 
-#define DEBUG 1
+//#define DEBUG 1
 
 using namespace VAPoR;
 
