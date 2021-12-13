@@ -59,6 +59,8 @@ void Histo::reset(int newNumBins)
         if (_above) delete[] _above;
         _below = nullptr;
         _above = nullptr;
+        _nBinsBelow = 0;
+        _nBinsAbove = 0;
     }
     for (int i = 0; i < _numBins; i++) _binArray[i] = 0;
     if (_below) memset(_below, 0, _nBinsBelow * sizeof(*_below));
@@ -140,12 +142,12 @@ int Histo::getMaxBinSizeBetweenIndices(const int start, const int end) const
 {
     int maxBin = 0;
 
-    if (start < 0)
+    if (start < 0 && _below)
         for (int i = max(0, start + _nBinsBelow); i < min(end + _nBinsBelow, _nBinsBelow); i++) maxBin = maxBin < _below[i] ? _below[i] : maxBin;
 
     for (int i = max(start, 0); i < min(end, _numBins); i++) maxBin = maxBin < _binArray[i] ? _binArray[i] : maxBin;
 
-    if (end >= _numBins)
+    if (end >= _numBins && _above)
         for (int i = max(start - _numBins, 0); i < min(end - _numBins, _nBinsAbove); i++) maxBin = maxBin < _above[i] ? _above[i] : maxBin;
 
     if (maxBin == 0)
@@ -227,10 +229,12 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
     if (_below) {
         delete[] _below;
         _below = nullptr;
+        _nBinsBelow = 0;
     }
     if (_above) {
         delete[] _above;
         _above = nullptr;
+        _nBinsAbove = 0;
     }
 
     _getDataRange(varName, dm, rp, &_minData, &_maxData);
