@@ -59,6 +59,8 @@ private:
     std::vector<glm::vec2>     _makeRectangle2D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
     std::vector<glm::vec3>     _makePolygon3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
     std::vector<glm::vec3>     _makeRectangle3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
+    std::vector<glm::vec3>     _makeRectangle3D2(const std::vector<_vertexIn2dAnd3d> &vertices) const;
+    std::vector<glm::vec3>     _makeRectangle3D3(const std::vector<_vertexIn2dAnd3d> &vertices) const;
 
     void _generateWindingOrder();
     void      _populateData(Grid *grid) const;
@@ -66,6 +68,7 @@ private:
 
     glm::vec3              _axis1, _axis2, _normal, _origin, _rotation;
     std::vector<glm::vec3> _polygon3D;
+    std::vector<glm::vec2> _polygon2D;
     std::vector<glm::vec3> _rectangle3D;
     std::vector<glm::vec2> _rectangle2D;
     std::vector<double>    _boxMin, _boxMax;

@@ -20,7 +20,7 @@
 #define XZ 1
 #define YZ 2
 
-//#define DEBUG 1
+#define DEBUG 1
 
 using namespace VAPoR;
 
@@ -189,6 +189,8 @@ void SliceRenderer::_regenerateSlice()
             textureValues[i*2+1] = 0.f;
         
         textureValues[i*2] = dataValues[i];
+
+        //std::cout << "tex " << dataValue << " " << textureValues[i*2+1] << std::endl;
     }
 
     _createDataTexture(textureValues);
@@ -333,7 +335,7 @@ void SliceRenderer::_drawDebugPolygons() const
     // 3D green polygon that shows where we should see data
     std::vector<glm::vec3> polygon = _slicer->GetPolygon();
     LegacyGL *lgl = _glManager->legacy;
-    lgl->Color4f(0, 1., 0, 1.);
+    /*lgl->Color4f(0, 1., 0, 1.);
     lgl->Begin(GL_LINES);
     if (polygon.size()) {
         for (int i = 0; i < polygon.size() - 1; i++) {
@@ -368,6 +370,31 @@ void SliceRenderer::_drawDebugPolygons() const
         lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
         lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
     }
+    lgl->End();*/
+
+
+    double* wo = _slicer->GetWindingOrder().data();
+    lgl = _glManager->legacy;
+    lgl->Begin(GL_LINES);
+    lgl->Color4f(0., 1., 0., 1.);        // green
+    lgl->Vertex3f(wo[0], wo[1], wo[2]);
+    lgl->Vertex3f(wo[3], wo[4], wo[5]);
+    lgl->Color4f(0., 1., 1., 1.);        // teal
+    lgl->Vertex3f(wo[3], wo[4], wo[5]);
+    lgl->Vertex3f(wo[6], wo[7], wo[8]);
+    lgl->Color4f(1., 1., 1., 1.);        // white
+    lgl->Vertex3f(wo[6], wo[7], wo[8]);
+    lgl->Vertex3f(wo[0], wo[1], wo[2]);
+
+    lgl->Color4f(.9, .9, 1., 1.);
+    lgl->Vertex3f(wo[9], wo[10], wo[11]);
+    lgl->Vertex3f(wo[12], wo[13], wo[14]);
+    lgl->Color4f(1., 0., 0., 1.);
+    lgl->Vertex3f(wo[12], wo[13], wo[14]);
+    lgl->Vertex3f(wo[15], wo[16], wo[17]);
+    lgl->Color4f(0., 1., 1., 1.);
+    lgl->Vertex3f(wo[15], wo[16], wo[17]);
+    lgl->Vertex3f(wo[9], wo[10], wo[11]);
     lgl->End();
 }
 

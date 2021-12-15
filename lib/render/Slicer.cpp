@@ -10,6 +10,7 @@
 #include <vapor/DataMgrUtils.h>
 #include <vapor/ConvexHull.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <vapor/GTE/MinimumAreaBox2.h>
 
 #define X  0
 #define Y  1
@@ -152,8 +153,87 @@ void Slicer::_rotate()
     std::vector<_vertexIn2dAnd3d> vertices;
     _findIntercepts(_origin, _normal, vertices, false);
 
+    std::vector<gte::Vector2<float>> mVertices;    
+    //mVertices.resize(vertices.size());
+    //for (auto& v: vertices) {
+    for (int i=0; i<vertices.size(); i++) {
+        glm::vec3 v3d = vertices[i].threeD;
+        float x = glm::dot(_axis1, v3d-_origin);
+        float y = glm::dot(_axis2, v3d-_origin);
+        gte::Vector2<float> v{x,y};
+        mVertices.push_back(v);
+    }
+
+    typedef gte::BSRational<gte::UIntegerAP32> MABRational;
+    gte::MinimumAreaBox2<float, MABRational> mab2;
+    gte::OrientedBox2<float> minimalBox = mab2(vertices.size(), &mVertices[0]);
+    std::array<gte::Vector2<float>, 4> vertex;
+    minimalBox.GetVertices(vertex);
+
+
+
     // Use Convex Hull to get an ordered list of vertices
-    stack<glm::vec2> polygon2D = _2DConvexHull(vertices);
+    stack<glm::vec2> polygonStack2D = _2DConvexHull(vertices);
+
+    // _rectangle2D
+    _rectangle2D.clear();
+    _rectangle2D.resize(4);
+    _rectangle2D[0] = glm::vec2(vertex[0][0], vertex[0][1]);
+    _rectangle2D[1] = glm::vec2(vertex[1][0], vertex[1][1]);
+    _rectangle2D[2] = glm::vec2(vertex[3][0], vertex[3][1]);
+    _rectangle2D[3] = glm::vec2(vertex[2][0], vertex[2][1]);
+    /*_rectangle2D.clear();
+    stack<glm::vec2> s = polygonStack2D;
+    while (!s.empty()) {
+        glm::vec2 point = s.top();
+        _rectangle2D.push_back(point);
+        s.pop();
+    }*/
+
+    // _polygon3D
+    stack<glm::vec2> s = polygonStack2D;
+    //s = polygonStack2D;
+    _polygon3D = _makePolygon3D(vertices, s);
+
+    // _rectangle3D
+    s = polygonStack2D;
+    _rectangle3D.clear();
+    int const lookup[4][2] = { { 0, 1 }, { 1, 3 }, { 3, 2 }, { 2, 0 } };
+    _rectangle3D.push_back( _inverseProjection( vertex[0][0], vertex[0][1] ));
+    _rectangle3D.push_back( _inverseProjection( vertex[1][0], vertex[1][1] ));
+    _rectangle3D.push_back( _inverseProjection( vertex[3][0], vertex[3][1] ));
+    _rectangle3D.push_back( _inverseProjection( vertex[2][0], vertex[2][1] ));
+    /*for (int i=0; i<4; i++) {
+        //float x = minimalBox[i][0];
+        //float y = minimalBox[i][1];
+        float x = vertex[i][0];
+        float y = vertex[i][1];
+        glm::vec3 point = _inverseProjection( x, y );
+        _rectangle3D.push_back(point);
+    }*/
+    /*while (!s.empty()) {
+        float x = s.top().x;
+        float y = s.top().y;
+        glm::vec3 point = _inverseProjection( x, y );
+        _rectangle3D.push_back(point);
+        s.pop();
+    }
+    std::cout << _rectangle3D.size() << std::endl;*/
+
+    //_rectangle3D = _makeRectangle3D2(vertices);
+
+
+
+    /*double x0 = glm::dot(_axis1, _rectangle3D[0]-_origin);    // Find 3D point's projected X coordinate
+    double y0 = glm::dot(_axis2, _rectangle3D[0]-_origin);    // Find 3D point's projected Y coordinate
+    double x1 = glm::dot(_axis1, _rectangle3D[1]-_origin);    // Find 3D point's projected X coordinate
+    double y1 = glm::dot(_axis2, _rectangle3D[1]-_origin);    // Find 3D point's projected Y coordinate
+    _rectangle2D = {glm::vec2(x0,y0), 
+                    glm::vec2(x1,y0),
+                    glm::vec2(x1,y1),
+                    glm::vec2(x0,y1)};*/
+    
+
 
     // At this point, 'vertices' has a vector<glm::vec3> that describe the 3D points of our polygon,
     // and a vector<glm::vec2> that describe the 2D points of our polygon.
@@ -161,17 +241,19 @@ void Slicer::_rotate()
 
     // Find a rectangle that encompasses our 3D polygon by finding the min/max bounds along our 2D points.
     // We will sample along the X/Y axes of this rectangle.
-    stack<glm::vec2> s = polygon2D;
-    _rectangle2D = _makeRectangle2D(vertices, s);
+    //stack<glm::vec2> s = polygonStack2D;
+//    s = polygonStack2D;
+//    _rectangle2D = _makeRectangle2D(vertices, s);
 
     // Map our rectangle's 2D edges back into 3D space, to get an
     // ordered list of vertices for our data-enclosing rectangle.
-    s = polygon2D;
-    _polygon3D = _makePolygon3D(vertices, s);
+//    s = polygonStack2D;
+//    _polygon3D = _makePolygon3D(vertices, s);
 
     // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
     // rectangle to generate our 2D texture.
-    _rectangle3D = _makeRectangle3D(vertices, polygon2D);
+//    s = polygonStack2D;
+//    _rectangle3D = _makeRectangle3D(vertices, s);
 }
 
 void Slicer::_findIntercepts(glm::vec3 &_origin, glm::vec3 &_normal, std::vector<_vertexIn2dAnd3d> &vertices, bool stretch) const
@@ -286,6 +368,40 @@ std::vector<glm::vec3> Slicer::_makePolygon3D(const std::vector<_vertexIn2dAnd3d
     return polygon3D;
 }
 
+std::vector<glm::vec3> Slicer::_makeRectangle3D3(const std::vector<_vertexIn2dAnd3d> &vertices) const
+{
+    /*for (auto vertex : _polygon3D) {
+        if (vertex.x
+        _rectangle3D.push_back(vertex);
+    }*/
+}
+
+//std::vector<glm::vec3> Slicer::_makeRectangle3D2(std::vector<glm::vec3> &polygon3D) const
+std::vector<glm::vec3> Slicer::_makeRectangle3D2(const std::vector<_vertexIn2dAnd3d> &vertices) const
+{
+    glm::vec3 min = _polygon3D[0];
+    glm::vec3 max = _polygon3D[0];
+
+    for (auto vertex : _polygon3D) {
+        if (vertex.x < min.x) min.x = vertex.x;
+        if (vertex.y < min.y) min.y = vertex.y;
+        if (vertex.z < min.z) min.z = vertex.z;
+        if (vertex.x > max.x) max.x = vertex.x;
+        if (vertex.y > max.y) max.y = vertex.y;
+        if (vertex.z > max.z) max.z = vertex.z;
+    }
+
+    std::vector<glm::vec3> rectangle3D = {glm::vec3(min.x, min.y, min.z),
+                                          glm::vec3(max.x, max.y, min.z),
+                                          glm::vec3(max.x, max.y, max.z),
+                                          glm::vec3(min.x, min.y, max.z)};
+
+    // We know the plane exists at (min min min) and (max max max)
+    // Where are the other two corners of the plane?
+
+    return rectangle3D;        
+}
+
 std::vector<glm::vec3> Slicer::_makeRectangle3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const
 {
     // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
@@ -325,17 +441,28 @@ glm::vec3 Slicer::_inverseProjection(float x, float y) const
 
 void Slicer::_populateData(Grid *grid) const
 {
-    glm::vec2 delta = (_rectangle2D[1] - _rectangle2D[0]);
+    //glm::vec2 delta = (_rectangle2D[1] - _rectangle2D[0]);
+    glm::vec2 delta = {_rectangle2D[1].x-_rectangle2D[0].x, _rectangle2D[1].y-_rectangle2D[0].y};
     delta.x = delta.x / _textureSideSize;
     delta.y = delta.y / _textureSideSize;
     glm::vec2 offset = {delta.x / 2., delta.y / 2.};
 
+    float xScanlineIncrement = (_rectangle2D[3].x-_rectangle2D[0].x)/_textureSideSize;
+    float yScanlineIncrement = (_rectangle2D[3].y-_rectangle2D[0].y)/_textureSideSize;
+
     int index = 0;
     for (int j = 0; j < _textureSideSize; j++) {
+        float xStart = _rectangle2D[0].x + offset.x + j*xScanlineIncrement;
+        float yStart = _rectangle2D[0].y + offset.y + j*yScanlineIncrement;
         for (int i = 0; i < _textureSideSize; i++) {
-            glm::vec3 samplePoint = _inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
+            float x = xStart + i*delta.x;
+            float y = yStart + i*delta.y;
+            glm::vec3 samplePoint = _inverseProjection(x,y);
+            //glm::vec3 samplePoint = _inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
             CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
             _dataValues[index] = grid->GetValue(p);
+            //std::cout << std::setprecision(6) << "p/v " << grid->GetValue(p) << " " << samplePoint.x << " " << samplePoint.y << " " << samplePoint.z << " " << x << " " << y << std::endl;
+            std::cout << std::setprecision(6) << "p/v " << grid->GetValue(p) << " " << x << " " << y << std::endl;
             index++;
         }
     }
@@ -344,11 +471,39 @@ void Slicer::_populateData(Grid *grid) const
 void Slicer::_generateWindingOrder()
 {
     if (_rectangle3D.empty()) return;
-    std::vector<double> temp = {_rectangle3D[3].x, _rectangle3D[3].y, _rectangle3D[3].z, 
+    /*std::vector<double> temp = {_rectangle3D[3].x, _rectangle3D[3].y, _rectangle3D[3].z, 
                                 _rectangle3D[0].x, _rectangle3D[0].y, _rectangle3D[0].z,
                                 _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z, 
                                 _rectangle3D[0].x, _rectangle3D[0].y, _rectangle3D[0].z,
                                 _rectangle3D[1].x, _rectangle3D[1].y, _rectangle3D[1].z, 
-                                _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z};
+                                _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z};*/
+
+
+                                                                                         // yellow = teal
+    /*std::vector<double> temp = {_rectangle3D[3].x, _rectangle3D[3].y, _rectangle3D[3].z, // 1 white/green -> 2 green/teal       XX
+                                _rectangle3D[0].x, _rectangle3D[0].y, _rectangle3D[0].z, // 2 green/teal  -> 5 prpl/red
+                                _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z, // 3 teal/white  -> 1 white/green
+                                _rectangle3D[0].x, _rectangle3D[0].y, _rectangle3D[0].z, // 4 teal/prpl   -> 5 prpl/red
+                                _rectangle3D[1].x, _rectangle3D[1].y, _rectangle3D[1].z, // 5 prpl/red    -> 6 red/teal         XX
+                                _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z};// 6 red/teal    -> 1 white/green*/
+   
+    // Nope 
+    /*std::vector<double> temp = {
+                                 1 _rectangle3D[0].x, _rectangle3D[0].y, _rectangle3D[0].z, // green/teal
+                                 2 _rectangle3D[1].x, _rectangle3D[1].y, _rectangle3D[1].z, // prpl/red 
+                                 3 _rectangle3D[3].x, _rectangle3D[3].y, _rectangle3D[3].z, // white/green
+                                 4 _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z, // red/teal
+                                 5 _rectangle3D[3].x, _rectangle3D[3].y, _rectangle3D[3].z, // white/green
+                                 6 _rectangle3D[1].x, _rectangle3D[1].y, _rectangle3D[1].z, // prpl/red */
+    std::vector<double> temp = {
+                                 _rectangle3D[0].x, _rectangle3D[0].y, _rectangle3D[0].z, // green/teal
+                                 _rectangle3D[1].x, _rectangle3D[1].y, _rectangle3D[1].z, // prpl/red 
+                                 _rectangle3D[3].x, _rectangle3D[3].y, _rectangle3D[3].z, // white/green
+                                 _rectangle3D[1].x, _rectangle3D[1].y, _rectangle3D[1].z, // prpl/red 
+                                 _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z, // red/teal
+                                 _rectangle3D[3].x, _rectangle3D[3].y, _rectangle3D[3].z}; // white/green
+
+
+
     _windingOrder = temp;
 }
