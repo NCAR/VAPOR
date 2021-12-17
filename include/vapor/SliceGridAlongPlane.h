@@ -9,7 +9,7 @@
 
 #include <glm/glm.hpp>
 
-#include <vapor/RegularGrid.h>
+class RegularGrid;
 
 struct planeDescription {
     std::vector<double> origin;
@@ -67,7 +67,6 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
     size_t sideSize, 
     float *data, 
     std::vector<double>& windingOrder, 
-    //std::vector<glm::tvec3<double, glm::highp>>& rectangle3D
     std::vector<double>& rectangle3D
 );
 

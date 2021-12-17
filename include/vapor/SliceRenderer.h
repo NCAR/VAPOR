@@ -16,7 +16,6 @@
 
 namespace VAPoR {
 
-class Slicer;
 
 class RENDER_API SliceRenderer : public Renderer {
 public:
@@ -61,9 +60,6 @@ private:
         glm::vec2 twoD;
     };
 
-    Slicer* _slicer;
-
-
     void _initVAO();
     void _initTexCoordVBO();
     void _initVertexVBO();
@@ -71,7 +67,7 @@ private:
     bool      _isColormapCacheDirty() const;
     bool      _isDataCacheDirty() const;
     bool      _isBoxCacheDirty() const;
-    void      _getModifiedExtents(vector<double> &min, vector<double> &max) const;
+    void      _getExtents(vector<double> &min, vector<double> &max) const;
     int       _saveCacheParams();
     void      _resetColormapCache();
     void      _resetCache();
@@ -99,8 +95,6 @@ private:
 
     std::vector<double> _windingOrder;
     std::vector<double>  _rectangle3D;
-    //std::vector<glm::tvec3<double, glm::highp>>& _rectangle3D;
-    //std::vector<glm::tvec3<double, glm::highp>>& _windingOrder;
 
     GLuint _VAO;
     GLuint _vertexVBO;

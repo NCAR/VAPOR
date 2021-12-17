@@ -19,7 +19,7 @@
 #define XZ 1
 #define YZ 2
 
-#define DEBUG 1
+//#define DEBUG 1
 
 using namespace VAPoR;
 
@@ -30,8 +30,8 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
 {
     _initialized = false;
 
-    _windingOrder = {0.0f, 0.0f, 0.f,  1.0f, 0.0f, 0.f,  0.0f, 1.0f, 0.f,  1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f}; // _vertexCoords
-    _rectangle3D =  {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};                                  // _texCoords
+    _windingOrder = {0.0f, 0.0f, 0.f,  1.0f, 0.0f, 0.f,  0.0f, 1.0f, 0.f,  1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
+    _rectangle3D =  {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
 
     _VAO = 0;
     _vertexVBO = 0;
@@ -138,7 +138,7 @@ void SliceRenderer::_resetCache()
 
     _cacheParams.textureSampleRate = p->GetValueDouble(RenderParams::SampleRateTag, 200);
 
-    _getModifiedExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+    _getExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
     _resetColormapCache();
 }
@@ -170,6 +170,7 @@ int SliceRenderer::_regenerateSlice()
     int rc = _getGrid3D( grid3d );
     if ( rc < 0 ) return -1;
 
+    // Get data values from a slice
     float* dataValues = new float[_textureSideSize*_textureSideSize];
     planeDescription pd;
     pd.origin = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
@@ -179,6 +180,7 @@ int SliceRenderer::_regenerateSlice()
     RegularGrid* slice = SliceGridAlongPlane( grid3d, pd, _textureSideSize, dataValues, _windingOrder, _rectangle3D);
     float missingValue = slice->GetMissingValue();
 
+    // Apply opacity to missing values
     int    textureSize = 2 * _textureSideSize * _textureSideSize;
     float *textureValues = new float[textureSize];
     for (size_t i=0; i<textureSize/2; i++) {
@@ -275,14 +277,14 @@ bool SliceRenderer::_isColormapCacheDirty() const
 bool SliceRenderer::_isBoxCacheDirty() const
 {
     vector<double> min, max;
-    _getModifiedExtents(min, max);
+    _getExtents(min, max);
 
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
     return false;
 }
 
-void SliceRenderer::_getModifiedExtents(vector<double> &min, vector<double> &max) const
+void SliceRenderer::_getExtents(vector<double> &min, vector<double> &max) const
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);

@@ -122,7 +122,6 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ConvexHull.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TrackBall.h
 	${PROJECT_SOURCE_DIR}/include/vapor/NavigationUtils.h
-
 	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/ArbitraryPrecision.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/BSNumber.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/BSPrecision.h
