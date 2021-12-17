@@ -10,8 +10,6 @@
 #include <vapor/GLManager.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
-#include <vapor/ConvexHull.h>
-#include <vapor/Slicer.h>
 #include <vapor/SliceGridAlongPlane.h>
 
 #define X  0
@@ -49,11 +47,6 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     VAssert(p);
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
     _colorMapSize = tf->getNumEntries();
-    
-    _slicer = new Slicer( p, _dataMgr );
-
-    //_rectangle3D = {};
-    //_windingOrder = {};
 }
 
 SliceRenderer::~SliceRenderer()
@@ -81,11 +74,6 @@ SliceRenderer::~SliceRenderer()
     if (_dataValueTextureID != 0) {
         glDeleteTextures(1, &_dataValueTextureID);
         _dataValueTextureID = 0;
-    }
-
-    if (_slicer != nullptr) {
-        delete _slicer;
-        _slicer = nullptr;
     }
 }
 
@@ -125,7 +113,6 @@ void SliceRenderer::_initVertexVBO()
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(0);
-    //glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _slicer->GetWindingOrder().data(), GL_STATIC_DRAW);
     glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _windingOrder.data(), GL_STATIC_DRAW);
 }
 
@@ -179,10 +166,6 @@ void SliceRenderer::_resetColormapCache()
 
 int SliceRenderer::_regenerateSlice()
 {
-    //RegularGrid* slice = _slicer->GetSlice( _textureSideSize );
-    //float* dataValues = slice->GetBlks()[0];
-    //float missingValue = slice->GetMissingValue();
-
     Grid* grid3d = nullptr;
     int rc = _getGrid3D( grid3d );
     if ( rc < 0 ) return -1;
@@ -242,16 +225,13 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glGenTextures(1, &_dataValueTextureID);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
-    //glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _slicer->GetWindingOrder().data());
     glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _windingOrder.data());
 }
 
@@ -370,26 +350,6 @@ int SliceRenderer::_paintGL(bool fast)
 
 void SliceRenderer::_drawDebugPolygons()
 {
-    // 3D green polygon that shows where we should see data
-    /*std::vector<glm::tvec3<double, glm::highp>> polygon = _slicer->GetPolygon();
-    LegacyGL *lgl = _glManager->legacy;
-    lgl->Color4f(0, 1., 0, 1.);
-    lgl->Begin(GL_LINES);
-    if (polygon.size()) {
-        for (int i = 0; i < polygon.size() - 1; i++) {
-            glm::vec3 vert1 = polygon[i];
-            glm::vec3 vert2 = polygon[i + 1];
-            lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-            lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-        }
-        lgl->Color4f(0, 1., 0, 1.);
-        glm::vec3 vert1 = polygon[polygon.size() - 1];
-        glm::vec3 vert2 = polygon[0];
-        lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-        lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-    }
-    lgl->End();*/
-
     // 3D yellow enclosing rectangle that defines the perimeter of our texture
     // This can and often will extend beyond the Box
     //std::vector<glm::vec3> rectangle = _slicer->GetRectangle();
@@ -407,22 +367,10 @@ void SliceRenderer::_drawDebugPolygons()
     
     lgl->Vertex3f(_rectangle3D[9], _rectangle3D[10], _rectangle3D[11]);
     lgl->Vertex3f(_rectangle3D[0], _rectangle3D[1], _rectangle3D[2]);
-    /*if (_rectangle3D.size()) {
-        for (int i = 0; i < _rectangle3D.size() - 1; i++) {
-            glm::tvec3<double, glm::highp> vert1 = _rectangle3D[i];
-            glm::tvec3<double, glm::highp> vert2 = _rectangle3D[i + 1];
-            lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-            lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-        }
-        glm::vec3 vert1 = _rectangle3D[3];
-        glm::vec3 vert2 = _rectangle3D[0];
-        lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-        lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-    }*/
     lgl->End();
 
 
-    //double* wo = _slicer->GetWindingOrder().data();
+    // Winding order
     double* wo = _windingOrder.data();
     lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
@@ -436,13 +384,13 @@ void SliceRenderer::_drawDebugPolygons()
     lgl->Vertex3f(wo[6], wo[7], wo[8]);
     lgl->Vertex3f(wo[0], wo[1], wo[2]);
 
-    lgl->Color4f(.9, .9, 1., 1.);
+    lgl->Color4f(.9, .9, 1., 1.);           // purple
     lgl->Vertex3f(wo[9], wo[10], wo[11]);
     lgl->Vertex3f(wo[12], wo[13], wo[14]);
-    lgl->Color4f(1., 0., 0., 1.);
+    lgl->Color4f(1., 0., 0., 1.);           // red
     lgl->Vertex3f(wo[12], wo[13], wo[14]);
     lgl->Vertex3f(wo[15], wo[16], wo[17]);
-    lgl->Color4f(0., 1., 1., 1.);
+    lgl->Color4f(0., 1., 1., 1.);           // yellow
     lgl->Vertex3f(wo[15], wo[16], wo[17]);
     lgl->Vertex3f(wo[9], wo[10], wo[11]);
     lgl->End();
