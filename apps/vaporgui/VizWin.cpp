@@ -661,7 +661,7 @@ void VizWin::_renderHelper(bool fast)
 
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
-        if (_getRenderParams()->GetOrientable()) { _updateOriginGlyph(); }
+        if (_getRenderParams() && _getRenderParams()->GetOrientable()) { _updateOriginGlyph(); }
     } else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
 #ifndef WIN32
         _glManager->PixelCoordinateSystemPush();
