@@ -29,10 +29,10 @@ public:
     std::vector<double> GetWindingOrder() const;
 
     // Returns a polygon that encloses the slice
-    std::vector<glm::vec3> GetPolygon() const;
+    std::vector<glm::tvec3<double, glm::highp>> GetPolygon() const;
 
     // Returns a rectangle that encloses the slice
-    std::vector<glm::vec3> GetRectangle() const;
+    std::vector<glm::tvec3<double, glm::highp>> GetRectangle() const;
 
 private:
     RenderParams* _renderParams;
@@ -43,7 +43,7 @@ private:
     // be projected into 2D space for sampling.  This struct defines a vertex in
     // 3D space, as well as its projection in 2D space.
     struct _vertexIn2dAnd3d {
-        glm::vec3 threeD;
+        glm::tvec3<double, glm::highp> threeD;
         glm::vec2 twoD;
     };
 
@@ -52,24 +52,24 @@ private:
 
     // _rotate(), and its utility functions
     void                   _rotate();
-    glm::vec3                  _getOrthogonal(const glm::vec3 u) const;
-    void                       _findIntercepts(glm::vec3 &origin, glm::vec3 &normal, std::vector<_vertexIn2dAnd3d> &vertices, bool stretch) const;
+    glm::tvec3<double, glm::highp>                  _getOrthogonal(const glm::tvec3<double, glm::highp> u) const;
+    void                       _findIntercepts(glm::tvec3<double, glm::highp> &origin, glm::tvec3<double, glm::highp> &normal, std::vector<_vertexIn2dAnd3d> &vertices, bool stretch) const;
     stack<glm::vec2>           _2DConvexHull(std::vector<_vertexIn2dAnd3d> &vertices) const;
-    glm::vec3                  _inverseProjection(float x, float y) const;
+    glm::tvec3<double, glm::highp>                  _inverseProjection(double x, double y) const;
     std::vector<glm::vec2>     _makeRectangle2D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
-    std::vector<glm::vec3>     _makePolygon3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
-    std::vector<glm::vec3>     _makeRectangle3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
-    std::vector<glm::vec3>     _makeRectangle3D2(const std::vector<_vertexIn2dAnd3d> &vertices) const;
-    std::vector<glm::vec3>     _makeRectangle3D3(const std::vector<_vertexIn2dAnd3d> &vertices) const;
+    std::vector<glm::tvec3<double, glm::highp>>     _makePolygon3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
+    std::vector<glm::tvec3<double, glm::highp>>     _makeRectangle3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const;
+    std::vector<glm::tvec3<double, glm::highp>>     _makeRectangle3D2(const std::vector<_vertexIn2dAnd3d> &vertices) const;
+    std::vector<glm::tvec3<double, glm::highp>>     _makeRectangle3D3(const std::vector<_vertexIn2dAnd3d> &vertices) const;
 
     void _generateWindingOrder();
     void      _populateData(Grid *grid) const;
-    glm::vec3 _rotateVector(glm::vec3 vector, glm::quat rotation) const;
+    glm::tvec3<double, glm::highp> _rotateVector(glm::tvec3<double, glm::highp> vector, glm::quat rotation) const;
 
-    glm::vec3              _axis1, _axis2, _normal, _origin, _rotation;
-    std::vector<glm::vec3> _polygon3D;
+    glm::tvec3<double, glm::highp>              _axis1, _axis2, _normal, _origin, _rotation;
+    std::vector<glm::tvec3<double, glm::highp>> _polygon3D;
     std::vector<glm::vec2> _polygon2D;
-    std::vector<glm::vec3> _rectangle3D;
+    std::vector<glm::tvec3<double, glm::highp>> _rectangle3D;
     std::vector<glm::vec2> _rectangle2D;
     std::vector<double>    _boxMin, _boxMax;
     float* _dataValues;

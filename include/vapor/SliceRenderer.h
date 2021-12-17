@@ -77,8 +77,9 @@ private:
     void      _resetCache();
     void      _initTextures();
     void      _createDataTexture(float *dataValues);
-    void      _regenerateSlice();
-    void      _drawDebugPolygons() const;
+    int       _regenerateSlice();
+    int       _getGrid3D(Grid*& grid) const;
+    void      _drawDebugPolygons();
 
     double _newWaySeconds;
     double _newWayInlineSeconds;
@@ -96,8 +97,10 @@ private:
     GLuint _colorMapTextureID;
     GLuint _dataValueTextureID;
 
-    std::vector<double> _vertexCoords;
-    std::vector<float>  _texCoords;
+    std::vector<double> _windingOrder;
+    std::vector<double>  _rectangle3D;
+    //std::vector<glm::tvec3<double, glm::highp>>& _rectangle3D;
+    //std::vector<glm::tvec3<double, glm::highp>>& _windingOrder;
 
     GLuint _VAO;
     GLuint _vertexVBO;

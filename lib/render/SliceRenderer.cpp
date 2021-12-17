@@ -12,6 +12,7 @@
 #include <vapor/DataMgrUtils.h>
 #include <vapor/ConvexHull.h>
 #include <vapor/Slicer.h>
+#include <vapor/SliceGridAlongPlane.h>
 
 #define X  0
 #define Y  1
@@ -31,9 +32,8 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
 {
     _initialized = false;
 
-    _vertexCoords = {0.0f, 0.0f, 0.f, 1.0f, 0.0f, 0.f, 0.0f, 1.0f, 0.f, 1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
-
-    _texCoords = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
+    _windingOrder = {0.0f, 0.0f, 0.f,  1.0f, 0.0f, 0.f,  0.0f, 1.0f, 0.f,  1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f}; // _vertexCoords
+    _rectangle3D =  {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};                                  // _texCoords
 
     _VAO = 0;
     _vertexVBO = 0;
@@ -51,6 +51,9 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     _colorMapSize = tf->getNumEntries();
     
     _slicer = new Slicer( p, _dataMgr );
+
+    //_rectangle3D = {};
+    //_windingOrder = {};
 }
 
 SliceRenderer::~SliceRenderer()
@@ -109,9 +112,9 @@ void SliceRenderer::_initTexCoordVBO()
 
     glGenBuffers(1, &_texCoordVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glVertexAttribPointer(1, 2, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * _texCoords.size(), _texCoords.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(double) * _rectangle3D.size(), _rectangle3D.data(), GL_DYNAMIC_DRAW);
 }
 
 void SliceRenderer::_initVertexVBO()
@@ -122,7 +125,8 @@ void SliceRenderer::_initVertexVBO()
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(0);
-    glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _slicer->GetWindingOrder().data(), GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _slicer->GetWindingOrder().data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _windingOrder.data(), GL_STATIC_DRAW);
 }
 
 void SliceRenderer::_resetCache()
@@ -173,10 +177,23 @@ void SliceRenderer::_resetColormapCache()
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, _colorMapSize, 0, GL_RGBA, GL_FLOAT, &_cacheParams.tf_lut[0]);
 }
 
-void SliceRenderer::_regenerateSlice()
+int SliceRenderer::_regenerateSlice()
 {
-    RegularGrid* slice = _slicer->GetSlice( _textureSideSize );
-    float* dataValues = slice->GetBlks()[0];
+    //RegularGrid* slice = _slicer->GetSlice( _textureSideSize );
+    //float* dataValues = slice->GetBlks()[0];
+    //float missingValue = slice->GetMissingValue();
+
+    Grid* grid3d = nullptr;
+    int rc = _getGrid3D( grid3d );
+    if ( rc < 0 ) return -1;
+
+    float* dataValues = new float[_textureSideSize*_textureSideSize];
+    planeDescription pd;
+    pd.origin = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
+    pd.rotation = {_cacheParams.xRotation, _cacheParams.yRotation, _cacheParams.zRotation};
+    pd.boxMin = _cacheParams.boxMin;
+    pd.boxMax = _cacheParams.boxMax;
+    RegularGrid* slice = SliceGridAlongPlane( grid3d, pd, _textureSideSize, dataValues, _windingOrder, _rectangle3D);
     float missingValue = slice->GetMissingValue();
 
     int    textureSize = 2 * _textureSideSize * _textureSideSize;
@@ -189,14 +206,33 @@ void SliceRenderer::_regenerateSlice()
             textureValues[i*2+1] = 0.f;
         
         textureValues[i*2] = dataValues[i];
-
-        //std::cout << "tex " << dataValue << " " << textureValues[i*2+1] << std::endl;
     }
 
     _createDataTexture(textureValues);
 
     delete slice;
     delete[] textureValues;
+
+    return 0;
+}
+
+int SliceRenderer::_getGrid3D( Grid*& grid3d ) const {
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    int rLevel = p->GetRefinementLevel();
+    int cLevel = p->GetCompressionLevel();
+    int   rc = DataMgrUtils::GetGrids(_dataMgr,
+                                      p->GetCurrentTimestep(),
+                                      p->GetVariableName(),
+                                      _cacheParams.boxMin, _cacheParams.boxMax, true,
+                                      &rLevel, &cLevel, &grid3d);
+    if (rc < 0) {
+        Wasp::MyBase::SetErrMsg("Unable to acquire Grid for Slice texture");
+        return rc;
+    }
+    VAssert(grid3d);
+    grid3d->SetInterpolationOrder(1);
+
+    return 0;
 }
 
 void SliceRenderer::_createDataTexture(float *dataValues)
@@ -215,7 +251,8 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _slicer->GetWindingOrder().data());
+    //glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _slicer->GetWindingOrder().data());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _windingOrder.data());
 }
 
 bool SliceRenderer::_isDataCacheDirty() const
@@ -305,7 +342,8 @@ int SliceRenderer::_paintGL(bool fast)
             _textureSideSize = _cacheParams.textureSampleRate;
         }
 
-        _regenerateSlice();
+        int rc = _regenerateSlice();
+        if (rc<0) return -1;
     }
 
     _configureShader();
@@ -330,12 +368,12 @@ int SliceRenderer::_paintGL(bool fast)
     return rc;
 }
 
-void SliceRenderer::_drawDebugPolygons() const
+void SliceRenderer::_drawDebugPolygons()
 {
     // 3D green polygon that shows where we should see data
-    std::vector<glm::vec3> polygon = _slicer->GetPolygon();
+    /*std::vector<glm::tvec3<double, glm::highp>> polygon = _slicer->GetPolygon();
     LegacyGL *lgl = _glManager->legacy;
-    /*lgl->Color4f(0, 1., 0, 1.);
+    lgl->Color4f(0, 1., 0, 1.);
     lgl->Begin(GL_LINES);
     if (polygon.size()) {
         for (int i = 0; i < polygon.size() - 1; i++) {
@@ -350,30 +388,42 @@ void SliceRenderer::_drawDebugPolygons() const
         lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
         lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
     }
-    lgl->End();
+    lgl->End();*/
 
     // 3D yellow enclosing rectangle that defines the perimeter of our texture
     // This can and often will extend beyond the Box
-    std::vector<glm::vec3> rectangle = _slicer->GetRectangle();
-    lgl = _glManager->legacy;
+    //std::vector<glm::vec3> rectangle = _slicer->GetRectangle();
+    LegacyGL *lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
     lgl->Color4f(1., 1., 0., 1.);
-    if (rectangle.size()) {
-        for (int i = 0; i < rectangle.size() - 1; i++) {
-            glm::vec3 vert1 = rectangle[i];
-            glm::vec3 vert2 = rectangle[i + 1];
+    lgl->Vertex3f(_rectangle3D[0], _rectangle3D[1], _rectangle3D[2]);
+    lgl->Vertex3f(_rectangle3D[3], _rectangle3D[4], _rectangle3D[5]);
+    
+    lgl->Vertex3f(_rectangle3D[3], _rectangle3D[4], _rectangle3D[5]);
+    lgl->Vertex3f(_rectangle3D[6], _rectangle3D[7], _rectangle3D[8]);
+    
+    lgl->Vertex3f(_rectangle3D[6], _rectangle3D[7], _rectangle3D[8]);
+    lgl->Vertex3f(_rectangle3D[9], _rectangle3D[10], _rectangle3D[11]);
+    
+    lgl->Vertex3f(_rectangle3D[9], _rectangle3D[10], _rectangle3D[11]);
+    lgl->Vertex3f(_rectangle3D[0], _rectangle3D[1], _rectangle3D[2]);
+    /*if (_rectangle3D.size()) {
+        for (int i = 0; i < _rectangle3D.size() - 1; i++) {
+            glm::tvec3<double, glm::highp> vert1 = _rectangle3D[i];
+            glm::tvec3<double, glm::highp> vert2 = _rectangle3D[i + 1];
             lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
             lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
         }
-        glm::vec3 vert1 = rectangle[3];
-        glm::vec3 vert2 = rectangle[0];
+        glm::vec3 vert1 = _rectangle3D[3];
+        glm::vec3 vert2 = _rectangle3D[0];
         lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
         lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-    }
-    lgl->End();*/
+    }*/
+    lgl->End();
 
 
-    double* wo = _slicer->GetWindingOrder().data();
+    //double* wo = _slicer->GetWindingOrder().data();
+    double* wo = _windingOrder.data();
     lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
     lgl->Color4f(0., 1., 0., 1.);        // green
