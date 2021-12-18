@@ -724,7 +724,7 @@ private:
     VAPoR::CurvilinearGrid *_make_grid_curvilinear(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const DimsType &dims, const std::vector<float *> &blkvec,
                                                    const DimsType &bs, const DimsType &bmin, const DimsType &bmax);
 
-    void _ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDims, std::vector<size_t> &faceDims, std::vector<size_t> &edgeDims,
+    void _ugrid_setup(const DC::DataVar &var, DimsType &vertexDims, DimsType &faceDims, DimsType &edgeDims,
                       UnstructuredGrid::Location &location,    // node,face, edge
                       size_t &maxVertexPerFace, size_t &maxFacePerVertex, long &vertexOffset, long &faceOffset, long ts) const;
 
@@ -829,8 +829,8 @@ private:
 
     int _openVariableRead(size_t ts, string varname, int level, int lod);
 
-    template<class T> int _readRegionBlock(int fd, const DimsType &min, const DimsType &max, T *region);
-    template<class T> int _readRegion(int fd, const DimsType &min, const DimsType &max, T *region);
+    template<class T> int _readRegionBlock(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region);
+    template<class T> int _readRegion(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region);
     int                   _closeVariable(int fd);
 
     int _getVar(string varname, int level, int lod, float *data);

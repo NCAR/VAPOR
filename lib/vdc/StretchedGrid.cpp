@@ -28,6 +28,13 @@ void StretchedGrid::_stretchedGrid(const vector<double> &xcoords, const vector<d
     GetUserExtentsHelper(_minu, _maxu);
 }
 
+StretchedGrid::StretchedGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const vector<double> &xcoords, const vector<double> &ycoords,
+                             const vector<double> &zcoords)
+: StructuredGrid(dims, bs, blks)
+{
+    _stretchedGrid(xcoords, ycoords, zcoords);
+}
+
 StretchedGrid::StretchedGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const vector<double> &xcoords, const vector<double> &ycoords,
                              const vector<double> &zcoords)
 : StructuredGrid(dims, bs, blks)

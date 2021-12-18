@@ -1139,10 +1139,10 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
     VAssert(rc >= 0);
     DimsType dims = {1,1,1};
     Grid::CopyToArr3(dimsv, dims);
-
     dimsvec.push_back(dims);
-    DimsType bs = _bs;
 
+    DimsType bs = {1,1,1};
+    Grid::CopyToArr3(_bs.data(), dimsv.size(), bs);
     bsvec.push_back(bs);
 
     // Map voxel coordinates into block coordinates
@@ -1165,9 +1165,12 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
         _setupCoordVecsHelper(varname, dims, bmin, bmax, cvarnames[i], i, coord_dims, coord_bmin, coord_bmax, structured, ts);
 
         dimsvec.push_back(coord_dims);
-        bsvec.push_back(bs);
         bminvec.push_back(coord_bmin);
         bmaxvec.push_back(coord_bmax);
+
+        DimsType bs = {1,1,1};
+        Grid::CopyToArr3(_bs.data(), Grid::GetNumDimensions(coord_dims), bs);
+        bsvec.push_back(bs);
     }
 
     varnames.push_back(varname);
@@ -1300,9 +1303,9 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, DimsT
     }
 
     if (_gridHelper.IsUnstructured(gridType)) {
-        vector<size_t>             vertexDims;
-        vector<size_t>             faceDims;
-        vector<size_t>             edgeDims;
+        DimsType             vertexDims;
+        DimsType             faceDims;
+        DimsType             edgeDims;
         UnstructuredGrid::Location location;
         size_t                     maxVertexPerFace;
         size_t                     maxFacePerVertex;
@@ -1786,6 +1789,8 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
 
     int nlevels = DataMgr::GetNumRefLevels(varname);
 
+    size_t ndims = number_of_dimensions(grid_dims);
+
     // Downsample the data if needed
     //
     if (level < -nlevels) {
@@ -1812,7 +1817,7 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
 
         T *buf = new T[vproduct(box_dims(file_min, file_max))];
 
-        rc = _readRegion(fd, file_min, file_max, buf);
+        rc = _readRegion(fd, file_min, file_max, ndims, buf);
         if (rc < 0) {
             delete[] buf;
             return (-1);
@@ -1822,7 +1827,7 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
 
         if (buf) delete[] buf;
     } else {
-        int rc = _readRegion(fd, grid_min, grid_max, region);
+        int rc = _readRegion(fd, grid_min, grid_max, ndims, region);
         if (rc < 0) {
             if (region) delete[] region;
             _closeVariable(fd);
@@ -1868,10 +1873,12 @@ int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, i
     map_blk_to_vox(file_bs, bmin, bmax, file_min, file_max);
     T *file_block = new T[vproduct(box_dims(file_min, file_max))];
 
+    size_t ndims = number_of_dimensions(file_dims);
+
     for (size_t i = 0; i < nreads; i++) {
         map_blk_to_vox(file_bs, file_dims, bmin, bmax, file_min, file_max);
 
-        int rc = _readRegion(fd, file_min, file_max, file_block);
+        int rc = _readRegion(fd, file_min, file_max, ndims, file_block);
         if (rc < 0) {
             delete[] file_block;
             return (-1);
@@ -1882,8 +1889,8 @@ int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, i
         // Increment along slowest axis (2)
         // This is a no-op if less than 3 dimensions
         //
-        bmin = IncrementCoords(file_bmin, file_bmax, bmin, 2);
-        bmax = IncrementCoords(file_bmin, file_bmax, bmax, 2);
+        IncrementCoords(file_bmin.data(), file_bmax.data(), bmin.data(), bmin.size(), 2);
+        IncrementCoords(file_bmin.data(), file_bmax.data(), bmax.data(), bmin.size(), 2);
     }
 
     (void)_closeVariable(fd);
@@ -1900,7 +1907,7 @@ T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, c
     T *blks = (T *)_alloc_region(ts, varname, level, lod, grid_bmin, grid_bmax, grid_bs, sizeof(T), lock, false);
     if (!blks) return (NULL);
 
-    DimsType file_dimsv, file_bsv;
+    vector <size_t> file_dimsv, file_bsv;
     int            rc = GetDimLensAtLevel(varname, level, file_dimsv, file_bsv, ts);
     VAssert(rc >= 0);
 
@@ -2539,13 +2546,14 @@ int DataMgr::_initTimeCoord()
     return (0);
 }
 
-void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDims, std::vector<size_t> &faceDims, std::vector<size_t> &edgeDims,
+void DataMgr::_ugrid_setup(const DC::DataVar &var, DimsType &vertexDims, DimsType &faceDims, DimsType &edgeDims,
                            UnstructuredGrid::Location &location,    // node,face, edge
                            size_t &maxVertexPerFace, size_t &maxFacePerVertex, long &vertexOffset, long &faceOffset, long ts) const
 {
-    vertexDims.clear();
-    faceDims.clear();
-    edgeDims.clear();
+    
+    vertexDims = {1,1,1};
+    faceDims = {1,1,1};
+    edgeDims = {1,1,1};
 
     DC::Mesh m;
     bool     status = GetMesh(var.GetMeshName(), m);
@@ -2565,15 +2573,15 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     string dimname = m.GetNodeDimName();
     status = _dc->GetDimension(dimname, dimension, ts);
     VAssert(status);
-    vertexDims.push_back(dimension.GetLength());
-    if (layers_dimlen) { vertexDims.push_back(layers_dimlen); }
+    vertexDims[0] = dimension.GetLength();
+    if (layers_dimlen) { vertexDims[1] = (layers_dimlen); }
 
     dimname = m.GetFaceDimName();
     if (!dimname.empty()) {
         status = _dc->GetDimension(dimname, dimension, ts);
         VAssert(status);
-        faceDims.push_back(dimension.GetLength());
-        if (layers_dimlen) { faceDims.push_back(layers_dimlen - 1); }
+        faceDims[0] = (dimension.GetLength());
+        if (layers_dimlen) { faceDims[1] = (layers_dimlen - 1); }
     } else
         VAssert(!"FaceDim Required");
 
@@ -2581,8 +2589,8 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     if (dimname.size()) {
         status = _dc->GetDimension(dimname, dimension, ts);
         VAssert(status);
-        edgeDims.push_back(dimension.GetLength());
-        if (layers_dimlen) { edgeDims.push_back(layers_dimlen - 1); }
+        edgeDims[0] = (dimension.GetLength());
+        if (layers_dimlen) { edgeDims[1] = (layers_dimlen - 1); }
     }
 
     DC::Mesh::Location l = var.GetSamplingLocation();
@@ -3036,30 +3044,42 @@ int DataMgr::_openVariableRead(size_t ts, string varname, int level, int lod)
     return (_dc->OpenVariableRead(ts, _openVarName, level, lod));
 }
 
-template<class T> int DataMgr::_readRegionBlock(int fd, const DimsType &min, const DimsType &max, T *region)
+template<class T> int DataMgr::_readRegionBlock(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region)
 {
+    vector <size_t> minv, maxv;
+    Grid::CopyFromArr3(min, minv);
+    minv.resize(ndims);
+    Grid::CopyFromArr3(max, maxv);
+    maxv.resize(ndims);
+
     int         rc = 0;
     DerivedVar *derivedVar = _getDerivedVar(_openVarName);
     if (derivedVar) {
         VAssert((std::is_same<T, float>::value) == true);
-        rc = derivedVar->ReadRegionBlock(fd, min, max, (float *)region);
+        rc = derivedVar->ReadRegionBlock(fd, minv, maxv, (float *)region);
     } else {
-        rc = _dc->ReadRegionBlock(fd, min, max, region);
+        rc = _dc->ReadRegionBlock(fd, minv, maxv, region);
     }
 
     _sanitizeFloats(region, vproduct(box_dims(min, max)));
     return (rc);
 }
 
-template<class T> int DataMgr::_readRegion(int fd, const DimsType &min, const DimsType &max, T *region)
+template<class T> int DataMgr::_readRegion(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region)
 {
+    vector <size_t> minv, maxv;
+    Grid::CopyFromArr3(min, minv);
+    minv.resize(ndims);
+    Grid::CopyFromArr3(max, maxv);
+    maxv.resize(ndims);
+
     int         rc = 0;
     DerivedVar *derivedVar = _getDerivedVar(_openVarName);
     if (derivedVar) {
         VAssert((std::is_same<T, float>::value) == true);
-        rc = derivedVar->ReadRegion(fd, min, max, (float *)region);
+        rc = derivedVar->ReadRegion(fd, minv, maxv, (float *)region);
     } else {
-        rc = _dc->ReadRegion(fd, min, max, region);
+        rc = _dc->ReadRegion(fd, minv, maxv, region);
     }
 
     _sanitizeFloats(region, vproduct(box_dims(min, max)));
@@ -3121,15 +3141,14 @@ int DataMgr::_getVar(size_t ts, string varname, int level, int lod, float *data)
     return (0);
 }
 
-void DataMgr::_getLonExtents(vector<float> &lons, vector<size_t> dims, float &min, float &max) const
+void DataMgr::_getLonExtents(vector<float> &lons, DimsType dims, float &min, float &max) const
 {
     min = max = 0.0;
-    VAssert(dims.size() == 1 || dims.size() == 2);
 
     if (!lons.size()) return;
 
     size_t nx = dims[0];
-    size_t ny = dims.size() > 1 ? dims[1] : 1;
+    size_t ny = dims[1];
     for (size_t j = 0; j < ny; j++) {
         GeoUtil::UnwrapLongitude(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
         GeoUtil::ShiftLon(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
@@ -3139,7 +3158,7 @@ void DataMgr::_getLonExtents(vector<float> &lons, vector<size_t> dims, float &mi
     max = *(minmaxitr.second);
 }
 
-void DataMgr::_getLatExtents(vector<float> &lats, vector<size_t> dims, float &min, float &max) const
+void DataMgr::_getLatExtents(vector<float> &lats, DimsType dims, float &min, float &max) const
 {
     min = max = 0.0;
 
@@ -3154,35 +3173,41 @@ int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &
 {
     lonmin = lonmax = latmin = latmax = 0.0;
 
-    vector<size_t> dims, dummy;
-    int            rc = _dc->GetDimLensAtLevel(lon, 0, dims, dummy, ts);
+    vector<size_t> dimsv, dummy;
+    int            rc = _dc->GetDimLensAtLevel(lon, 0, dimsv, dummy, ts);
+
     if (rc < 0) {
         SetErrMsg("Invalid variable reference : %s", lon.c_str());
         return (-1);
     }
-    if (!(dims.size() == 1 || dims.size() == 2)) {
+    if (!(dimsv.size() == 1 || dimsv.size() == 2)) {
         SetErrMsg("Unsupported variable dimension for variable \"%s\"", lon.c_str());
         return (-1);
     }
 
-    vector<float> buf(VProduct(dims));
+
+    DimsType dims = {1,1,1};
+    Grid::CopyToArr3(dimsv, dims);
+    vector<float> buf(VProduct(dimsv));
 
     rc = _getVar(0, lon, 0, 0, buf.data());
     if (rc < 0) return (-1);
 
     _getLonExtents(buf, dims, lonmin, lonmax);
 
-    rc = _dc->GetDimLensAtLevel(lat, 0, dims, dummy, ts);
+    rc = _dc->GetDimLensAtLevel(lat, 0, dimsv, dummy, ts);
     if (rc < 0) {
         SetErrMsg("Invalid variable reference : %s", lat.c_str());
         return (-1);
     }
-    if (!(dims.size() == 1 || dims.size() == 2)) {
+    if (!(dimsv.size() == 1 || dimsv.size() == 2)) {
         SetErrMsg("Unsupported variable dimension for variable \"%s\"", lat.c_str());
         return (-1);
     }
 
-    buf.resize(VProduct(dims));
+    dims = {1,1,1};
+    Grid::CopyToArr3(dimsv, dims);
+    buf.resize(vproduct(dims));
 
     rc = _getVar(0, lat, 0, 0, buf.data());
     if (rc < 0) return (-1);

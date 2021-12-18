@@ -21,14 +21,28 @@
 using namespace std;
 using namespace VAPoR;
 
-StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks) : Grid(dims, bs, blks, dims.size())
+void StructuredGrid::_structuredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks) 
 {
-
     _cellDims = Grid::GetDimensions();
     for (int i = 0; i < _cellDims.size(); i++) {
         _cellDims[i]--;
         if (_cellDims[i] < 1) _cellDims[i] = 1;
     }
+}
+
+StructuredGrid::StructuredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks) : Grid(dims, bs, blks, GetNumDimensions(dims))
+{
+    _structuredGrid(dims, bs, blks);
+}
+
+StructuredGrid::StructuredGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks) : Grid(dimsv, bsv, blks, dimsv.size())
+{
+    DimsType dims = {1,1,1};
+    DimsType bs = {1,1,1};
+    CopyToArr3(dimsv, dims);
+    CopyToArr3(bsv, bs);
+
+    _structuredGrid(dims, bs, blks);
 }
 
 const DimsType &StructuredGrid::GetNodeDimensions() const { return GetDimensions(); }

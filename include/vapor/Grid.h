@@ -79,11 +79,12 @@ public:
     //! until the class instance is destroyed.
     //!
     //! \param[in] topology_dimension Topological dimension of
-    //! grid: 2 or 3, for 2D or 3D, respectively. Grids with 2D
-    //! topology are described by 2D spatial coordiantes, while
-    //! grids with 2D topology are described by 3D spatial coordinates.
+    //! grid: 1, 2 or 3, for 1D, 2D or 3D, respectively. Grids with 2D
+    //! topology are composed of 2D polygons, while
+    //! grids with 3D topology are composed of 3D polyhedron
     //!
     Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, size_t topology_dimension);
+    Grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension);
 
     Grid();
     virtual ~Grid() = default;
@@ -94,6 +95,8 @@ public:
     //! the constructor. If the parameter has less than 3 values, then
     //! number 1 will be filled.
     //!
+    //! \sa GetGeometryDim(), GetTopologyDim()
+    //!
     const DimsType &GetDimensions() const { return _dims; }
 
     //! Return the useful number of dimensions of grid connectivity array
@@ -102,6 +105,14 @@ public:
     //! the constructor.
     //!
     size_t GetNumDimensions() const { return _nDims; }
+
+    //! Return the number of non-unit dimensions 
+    //!
+    //! Return the number of non-unit dimensions in \p dims
+    //!
+    //! \param[in] dims 
+    //!
+    static size_t GetNumDimensions(DimsType dims) ;
 
     //! Return the dimensions of the specified coordinate variable
     //!
@@ -1279,6 +1290,8 @@ private:
     long                 _cellIDOffset = 0;
     mutable CoordType    _minuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
     mutable CoordType    _maxuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
+
+    void _grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension);
 
     virtual void _getUserCoordinatesHelper(const std::vector<double> &coords, double &x, double &y, double &z) const;
 };

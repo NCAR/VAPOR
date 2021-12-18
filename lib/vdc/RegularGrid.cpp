@@ -18,18 +18,24 @@
 using namespace std;
 using namespace VAPoR;
 
-void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &maxu)
+void RegularGrid::_regularGrid(const CoordType &minu, const CoordType &maxu)
 {
     VAssert(minu.size() == maxu.size());
 
     _delta = {0.0, 0.0, 0.0};
-    _geometryDim = minu.size();
 
-    CopyToArr3(minu, _minu);
-    CopyToArr3(maxu, _maxu);
+    _geometryDim = 0;
+    for (int i=0; i<minu.size(); i++) {
+        if (minu[i] != maxu[i]) _geometryDim++;
+        else break;
+    }
+    VAssert(_geometryDim >= GetNumDimensions());
 
-    auto dims = GetDimensions();
-    for (int i = 0; i < GetNumDimensions(); i++) {
+    _minu = minu;
+    _maxu = maxu;
+
+    DimsType dims = GetDimensions();
+    for (int i = 0; i < minu.size(); i++) { 
         if (dims[i] > 1) {
             _delta[i] = (_maxu[i] - _minu[i]) / (double)(dims[i] - 1);
         } else {
@@ -38,12 +44,22 @@ void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &
     }
 }
 
-RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const vector<double> &minu, const vector<double> &maxu) : StructuredGrid(dims, bs, blks)
+RegularGrid::RegularGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const CoordType &minu, const CoordType &maxu) : StructuredGrid(dims, bs, blks)
 {
-    VAssert(minu.size() == maxu.size());
-    VAssert(minu.size() >= GetNumDimensions());
+    _regularGrid(minu, maxu);
+}
 
-    _SetExtents(minu, maxu);
+RegularGrid::RegularGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks, const vector<double> &minuv, const vector<double> &maxuv) : StructuredGrid(dimsv, bsv, blks)
+{
+    VAssert(minuv.size() == maxuv.size());
+    VAssert(minuv.size() >= GetNumDimensions());
+
+    CoordType minu = {0.0, 0.0, 0.0};
+    CoordType maxu = {0.0, 0.0, 0.0};
+    CopyToArr3(minuv, minu);
+    CopyToArr3(maxuv, maxu);
+
+    _regularGrid(minu, maxu);
 }
 
 vector<size_t> RegularGrid::GetCoordDimensions(size_t dim) const

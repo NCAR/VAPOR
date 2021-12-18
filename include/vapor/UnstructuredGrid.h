@@ -114,6 +114,12 @@ public:
     //! \param[in] cellOffset The offset from zero for the first element
     //! in \p faceOnVertex or \p faceOnFace
     //
+    UnstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks,
+                     size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+                     Location location,    // node,face, edge
+                     size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset
+
+    );
     UnstructuredGrid(const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, const std::vector<size_t> &bs, const std::vector<float *> &blks,
                      size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                      Location location,    // node,face, edge
@@ -204,6 +210,13 @@ private:
     size_t              _nDims;
     int                 _missingID;
     int                 _boundaryID;
+
+    void _unstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks,
+                     size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+                     Location location,    // node,face, edge
+                     size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset
+
+    );
 };
 };    // namespace VAPoR
 

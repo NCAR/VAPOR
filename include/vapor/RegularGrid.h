@@ -40,6 +40,7 @@ public:
     //! equal to corresponding elements in \p minu.
     //!
     //
+    RegularGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const CoordType &minu, const CoordType &maxu);
     RegularGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const std::vector<double> &minu, const std::vector<double> &maxu);
 
     RegularGrid() = default;
@@ -119,7 +120,7 @@ protected:
     virtual void GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const override;
 
 private:
-    void _SetExtents(const std::vector<double> &minu, const std::vector<double> &maxu);
+    void _regularGrid(const CoordType &minu, const CoordType &maxu);
 
     CoordType           _minu = {{0.0, 0.0, 0.0}};
     CoordType           _maxu = {{0.0, 0.0, 0.0}};

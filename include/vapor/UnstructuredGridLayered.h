@@ -24,6 +24,12 @@ public:
     //! Construct a unstructured grid sampling Layered scalar function
     //!
     //
+    UnstructuredGridLayered(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs,
+                            const std::vector<float *> &blks, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+                            Location location,    // node,face, edge
+                            size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
+                            const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangleP> qtr);
+
     UnstructuredGridLayered(const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, const std::vector<size_t> &bs,
                             const std::vector<float *> &blks, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                             Location location,    // node,face, edge
