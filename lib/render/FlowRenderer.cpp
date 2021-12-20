@@ -5,7 +5,6 @@
 #include <iostream>
 #include <sstream>
 #include <cstring>
-#include <cctype>    // std::isspace
 #include <random>
 #include <algorithm>
 #include <vapor/Progress.h>
@@ -49,7 +48,6 @@ std::string FlowRenderer::_getColorbarVariableName() const { return GetActivePar
 
 int FlowRenderer::_initializeGL()
 {
-    // First prepare the VelocityField
     _velocityField.AssignDataManager(_dataMgr);
     _colorField.AssignDataManager(_dataMgr);
     _timestamps = _dataMgr->GetTimeCoordinates();
@@ -344,6 +342,11 @@ int FlowRenderer::_paintGL(bool fast)
     }
 
     _restoreGLState();
+
+    // Release grids that are acquired during this paint event
+    // before their DataMgr is destroyed by others.
+    _velocityField.ReleaseLockedGrids();
+    _colorField.ReleaseLockedGrids();
 
     return rv;
 }
