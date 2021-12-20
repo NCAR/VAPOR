@@ -94,7 +94,7 @@ auto VaporField::UnlockParams() -> int
 bool VaporField::InsideVolumeVelocity(double time, const glm::vec3 &pos) const
 {
     const std::array<double, 3> coords{pos.x, pos.y, pos.z};
-    const VAPoR::Grid *         grid = nullptr;
+    const VAPoR::Grid          *grid = nullptr;
     VAssert(_isReady());
 
     // In case of steady field, we only check a specific time step
@@ -148,7 +148,7 @@ bool VaporField::InsideVolumeScalar(double time, const glm::vec3 &pos) const
     if (ScalarName.empty()) return true;
 
     const std::array<double, 3> coords{pos.x, pos.y, pos.z};
-    const VAPoR::Grid *         grid = nullptr;
+    const VAPoR::Grid          *grid = nullptr;
     VAssert(_isReady());
 
     // In case of steady field, we only check a specific time step
@@ -189,7 +189,7 @@ bool VaporField::InsideVolumeScalar(double time, const glm::vec3 &pos) const
 
 int VaporField::GetVelocityIntersection(size_t ts, glm::vec3 &minxyz, glm::vec3 &maxxyz) const
 {
-    const VAPoR::Grid *   grid = nullptr;
+    const VAPoR::Grid    *grid = nullptr;
     std::array<double, 3> min[3], max[3];
 
     // For each velocity variables
@@ -218,7 +218,7 @@ int VaporField::GetVelocityIntersection(size_t ts, glm::vec3 &minxyz, glm::vec3 
 int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &velocity) const
 {
     const std::array<double, 3> coords{pos.x, pos.y, pos.z};
-    const VAPoR::Grid *         grid = nullptr;
+    const VAPoR::Grid          *grid = nullptr;
 
     // Retrieve the missing value and velocity multiplier
     glm::vec3 missingV(0.0f);    // stores missing values for 3 velocity variables
@@ -297,7 +297,7 @@ int VaporField::GetScalar(double time, const glm::vec3 &pos, float &scalar) cons
     if (ScalarName.empty()) return NO_FIELD_YET;
 
     const std::array<double, 3> coords{pos.x, pos.y, pos.z};
-    const VAPoR::Grid *         grid = nullptr;
+    const VAPoR::Grid          *grid = nullptr;
 
     if (IsSteady) {
         if (_params_locked) {
@@ -537,7 +537,4 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
     return grid;
 }
 
-void VaporField::ReleaseLockedGrids()
-{
-  _recentGrids.clear();
-}
+void VaporField::ReleaseLockedGrids() { _recentGrids.clear(); }
