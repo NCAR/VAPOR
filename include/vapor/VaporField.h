@@ -111,7 +111,7 @@ private:
     // Member variables
     //
     std::vector<double>      _timestamps;    // in ascending order
-    VAPoR::DataMgr          *_datamgr = nullptr;
+    VAPoR::DataMgr *         _datamgr = nullptr;
     const VAPoR::FlowParams *_params = nullptr;
 
     using cacheType = VAPoR::unique_ptr_cache<GridKey, GridWrapper>;
@@ -126,7 +126,7 @@ private:
     int32_t                            _c_refLev = -2, _c_compLev = -2;    // cached ref/comp levels
     float                              _c_vel_mult = 0.0f;                 // cached velocity multiplier
     std::vector<double>                _c_ext_min, _c_ext_max;             // cached extents
-    const VAPoR::Grid                 *_c_scalar_grid = nullptr;           // cached scalar grid
+    const VAPoR::Grid *                _c_scalar_grid = nullptr;           // cached scalar grid
     std::array<const VAPoR::Grid *, 3> _c_velocity_grids = {{nullptr, nullptr, nullptr}};
     // Note on the cached scalar and velocity grids:
     // they act as a cache of _recentGrids, so kind of like a cache of cache.

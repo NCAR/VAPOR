@@ -593,8 +593,8 @@ glm::vec3 FlowRenderer::_getScales()
     string                  myVisName = GetVisualizer();
     VAPoR::ViewpointParams *vpp = _paramsMgr->GetViewpointParams(myVisName);
     string                  datasetName = GetMyDatasetName();
-    Transform              *tDataset = vpp->GetTransform(datasetName);
-    Transform              *tRenderer = GetActiveParams()->GetTransform();
+    Transform *             tDataset = vpp->GetTransform(datasetName);
+    Transform *             tRenderer = GetActiveParams()->GetTransform();
 
     vector<double> scales = tDataset->GetScales();
     vector<double> rendererScales = tRenderer->GetScales();
