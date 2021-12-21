@@ -536,3 +536,5 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
     _recentGrids.insert(key, new GridWrapper(grid, _datamgr));
     return grid;
 }
+
+void VaporField::ReleaseLockedGrids() { _recentGrids.clear(); }
