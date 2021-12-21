@@ -2,7 +2,7 @@
 #include <iomanip>
 
 #include <glm/gtc/type_ptr.hpp>
-#include <vapor/GTE/MinimumAreaBox2.h>
+#include <GTE/MinimumAreaBox2.h>
 #include <vapor/RegularGrid.h>
 #include <vapor/SliceGridAlongPlane.h>
 
