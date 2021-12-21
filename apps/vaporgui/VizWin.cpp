@@ -888,9 +888,9 @@ void VizWin::_updateOriginGlyph()
     string      dataMgrName = _getCurrentDataMgrName();
     DataMgr *   dataMgr = dataStatus->GetDataMgr(dataMgrName);
 
-    std::vector<double> min, max;
+    CoordType min, max;
     dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, min, max);
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < min.size(); i++) {
         min[i] *= scales[i];
         max[i] *= scales[i];
     }
