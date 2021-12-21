@@ -138,13 +138,13 @@ void getMinimumAreaRectangle(
 }
 
 void populateData(
-    VAPoR::Grid *grid, 
+    const VAPoR::Grid *grid, 
     size_t sideSize,
     const glm::tvec3<double, glm::highp>& origin,
     const glm::tvec3<double, glm::highp>& axis1,
     const glm::tvec3<double, glm::highp>& axis2,
     const std::vector<glm::tvec2<double, glm::highp>>& rectangle2D,
-    float* dataValues
+    std::unique_ptr<float>& dataValues
 ) {
     glm::tvec2<double, glm::highp> delta( (rectangle2D[1].x-rectangle2D[0].x)/sideSize, (rectangle2D[1].y-rectangle2D[0].y)/sideSize );
     glm::tvec2<double, glm::highp> offset = {delta.x / 2., delta.y / 2.};
@@ -161,7 +161,7 @@ void populateData(
             double y = yStart + i*delta.y;
             glm::tvec3<double, glm::highp> samplePoint = origin + x*axis1 + y*axis2;
             VAPoR::CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
-            dataValues[index] = grid->GetValue(p);
+            dataValues.get()[index] = grid->GetValue(p);
             index++;
         }
     }
@@ -186,12 +186,11 @@ void getWindingOrder(
 }
 
 VAPoR::RegularGrid* SliceGridAlongPlane(
-    VAPoR::Grid *grid3d,
+    const VAPoR::Grid *grid3d,
     planeDescription description,
     size_t sideSize,
-    float *dataValues,
+    std::unique_ptr<float>& dataValues,
     std::vector<double>& windingOrder,
-    //std::vector<glm::tvec3<double, glm::highp>>& rectangle3D
     std::vector<double>& rectangle3D
 ) {
 
@@ -234,7 +233,7 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
     // Finally generate the grid
     std::vector<size_t> dims = { sideSize, sideSize };
     std::vector<size_t> bs   = { sideSize, sideSize };
-    std::vector<float*> data = { dataValues };
+    std::vector<float*> data = { dataValues.get() };
     VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, bs, data, description.boxMin, description.boxMax );
 
     return slice;

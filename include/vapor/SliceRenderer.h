@@ -14,6 +14,8 @@
 #include <vapor/utils.h>
 #include <vapor/Renderer.h>
 
+#define DEBUG 1
+
 namespace VAPoR {
 
 
@@ -72,10 +74,12 @@ private:
     void      _resetColormapCache();
     void      _resetCache();
     void      _initTextures();
-    void      _createDataTexture(float *dataValues);
+    void      _createDataTexture(std::unique_ptr<float>& dataValues);
     int       _regenerateSlice();
     int       _getGrid3D(Grid*& grid) const;
+#ifdef DEBUG
     void      _drawDebugPolygons();
+#endif
 
     double _newWaySeconds;
     double _newWayInlineSeconds;
