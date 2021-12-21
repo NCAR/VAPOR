@@ -171,7 +171,7 @@ int SliceRenderer::_regenerateSlice()
     if ( rc < 0 ) return -1;
 
     // Get data values from a slice
-    float* dataValues = new float[_textureSideSize*_textureSideSize];
+    std::unique_ptr<float> dataValues(new float[_textureSideSize*_textureSideSize]);
     planeDescription pd;
     pd.origin = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
     pd.rotation = {_cacheParams.xRotation, _cacheParams.yRotation, _cacheParams.zRotation};
@@ -182,21 +182,20 @@ int SliceRenderer::_regenerateSlice()
 
     // Apply opacity to missing values
     int    textureSize = 2 * _textureSideSize * _textureSideSize;
-    float *textureValues = new float[textureSize];
+    std::unique_ptr<float> textureValues(new float[textureSize]);
     for (size_t i=0; i<textureSize/2; i++) {
-        float dataValue = dataValues[i];
+        float dataValue = dataValues.get()[i];
         if (dataValue == missingValue)
-            textureValues[i*2+1] = 1.f;
+            textureValues.get()[i*2+1] = 1.f;
         else
-            textureValues[i*2+1] = 0.f;
+            textureValues.get()[i*2+1] = 0.f;
         
-        textureValues[i*2] = dataValues[i];
+        textureValues.get()[i*2] = dataValues.get()[i];
     }
 
     _createDataTexture(textureValues);
 
     delete slice;
-    delete[] textureValues;
 
     return 0;
 }
@@ -220,7 +219,7 @@ int SliceRenderer::_getGrid3D( Grid*& grid3d ) const {
     return 0;
 }
 
-void SliceRenderer::_createDataTexture(float *dataValues)
+void SliceRenderer::_createDataTexture(std::unique_ptr<float>& dataValues)
 {
     if (_dataValueTextureID != 0) glDeleteTextures(1, &_dataValueTextureID);
 
@@ -231,7 +230,7 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues.get());
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _windingOrder.data());
@@ -350,6 +349,7 @@ int SliceRenderer::_paintGL(bool fast)
     return rc;
 }
 
+#ifdef DEBUG
 void SliceRenderer::_drawDebugPolygons()
 {
     // 3D yellow enclosing rectangle that defines the perimeter of our texture
@@ -397,6 +397,7 @@ void SliceRenderer::_drawDebugPolygons()
     lgl->Vertex3f(wo[9], wo[10], wo[11]);
     lgl->End();
 }
+#endif
 
 void SliceRenderer::_configureShader()
 {

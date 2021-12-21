@@ -1,12 +1,6 @@
 #pragma once
 
 #include <vapor/glutil.h>
-#ifdef Darwin
-    #include <OpenGL/gl.h>
-#else
-    #include <GL/gl.h>
-#endif
-
 #include <glm/glm.hpp>
 
 class RegularGrid;
@@ -18,54 +12,26 @@ struct planeDescription {
     std::vector<double> boxMax;
 };
 
-glm::tvec3<double, glm::highp> getOrthogonal(
-    const glm::tvec3<double, glm::highp>& u
-);
-
-void rotate(
-    glm::tvec3<double, glm::highp>& rotation,
-    glm::tvec3<double, glm::highp>& normal,
-    glm::tvec3<double, glm::highp>& axis1,
-    glm::tvec3<double, glm::highp>& axis2
-);
-
-void findIntercepts(
-    const glm::tvec3<double, glm::highp>& origin, 
-    const std::vector<double>& boxMin,
-    const std::vector<double>& boxMax,
-    const glm::tvec3<double, glm::highp>& normal, 
-    std::vector<glm::tvec3<double, glm::highp>> &vertices
-);
-
-void getMinimumAreaRectangle(
-    const std::vector<glm::tvec3<double, glm::highp>> &vertices,
-    const glm::tvec3<double, glm::highp>& origin,
-    const glm::tvec3<double, glm::highp>& axis1,
-    const glm::tvec3<double, glm::highp>& axis2,
-    std::vector<glm::tvec2<double, glm::highp>>& rectangle2D,
-    std::vector<glm::tvec3<double, glm::highp>>& rectangle3D
-);
-
-void populateData(
-    VAPoR::Grid *grid,
-    size_t sideSize,
-    const glm::tvec3<double, glm::highp>& origin,
-    const glm::tvec3<double, glm::highp>& axis1,
-    const glm::tvec3<double, glm::highp>& axis2,
-    const std::vector<glm::tvec2<double, glm::highp>>& rectangle2D,
-    float* dataValues
-); 
-
-void getWindingOrder(
-    std::vector<double>& windingOrder,
-    const std::vector<glm::tvec3<double, glm::highp>>& rectangle3D
-);
+//! Create a 2D grid that is sampled along the orientation of a 3D grid.
+//! The "planeDescription" variable includes parameters that define the
+//! 2D grid's origin, rotation, and extents.  The sampling rate is defined
+//! by the "sideSize" parameter, which defines how many samples along the X
+//! and Y axes are taken along the plane inside of the 3D grid.
+//!
+//! \param[in] grid3d A variable's 3D grid to be sampled along a plane, to generate a 2D grid object
+//! \param[in] description A set of std::vector<dobule> values that define the origin, rotation, and extents of the returned 2D grid
+//! \param[in] sideSize The sampling rate that the 2D grid will be defined upon, along its X and Y axes
+//! \param[out] data An array of sideSize*sideSize values that contain floating point values of the sampled data.
+//! \param[out] windingOrder A vector of double values that contain the spatial coordinates of the vertices that correspond to the two triangles that define the texture being drawn by the "data" array.
+//! \param[out] rectangle3D A set of four vertices that define the rectangle containing the returned 2D grid's texture.  Useful for debugging.
+//!
 
 VAPoR::RegularGrid* SliceGridAlongPlane(
-    VAPoR::Grid *grid3d, 
+    const VAPoR::Grid *grid3d, 
     planeDescription description, 
     size_t sideSize, 
-    float *data, 
+    //std::shared_ptr<float> data, 
+    std::unique_ptr<float>& data, 
     std::vector<double>& windingOrder, 
     std::vector<double>& rectangle3D
 );

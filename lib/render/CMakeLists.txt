@@ -120,23 +120,6 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ParticleRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TrackBall.h
 	${PROJECT_SOURCE_DIR}/include/vapor/NavigationUtils.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/ArbitraryPrecision.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/BSNumber.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/BSPrecision.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/BSRational.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/BitHacks.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/ConvexHull2.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/FPInterval.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/IEEEBinary.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/Line.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/Logger.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/Math.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/OrientedBox.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/UIntegerALU32.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/UIntegerAP32.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/UIntegerFP32.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/Vector.h
-	${PROJECT_SOURCE_DIR}/include/vapor/GTE/Mathematics/Vector2.h
 )
 
 if(BUILD_OSP)

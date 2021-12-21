@@ -14,6 +14,8 @@
 #include <vapor/utils.h>
 #include <vapor/Renderer.h>
 
+#define DEBUG 1
+
 namespace VAPoR {
 
 
@@ -51,15 +53,6 @@ private:
         std::vector<double> sampleLocation;
     } _cacheParams;
 
-    // The SliceRenderer calculates a series of vertices in 3D space that define
-    // the corners of a rectangle that we sample along.  These vertices need to
-    // be projected into 2D space for sampling.  This struct defines a vertex in
-    // 3D space, as well as its projection in 2D space.
-    struct _vertexIn2dAnd3d {
-        glm::vec3 threeD;
-        glm::vec2 twoD;
-    };
-
     void _initVAO();
     void _initTexCoordVBO();
     void _initVertexVBO();
@@ -68,20 +61,14 @@ private:
     bool      _isDataCacheDirty() const;
     bool      _isBoxCacheDirty() const;
     void      _getExtents(vector<double> &min, vector<double> &max) const;
-    int       _saveCacheParams();
     void      _resetColormapCache();
     void      _resetCache();
-    void      _initTextures();
-    void      _createDataTexture(float *dataValues);
+    void      _createDataTexture(std::unique_ptr<float>& dataValues);
     int       _regenerateSlice();
     int       _getGrid3D(Grid*& grid) const;
+#ifdef DEBUG
     void      _drawDebugPolygons();
-
-    double _newWaySeconds;
-    double _newWayInlineSeconds;
-    double _oldWaySeconds;
-
-    int _getConstantAxis() const;
+#endif
 
     void _configureShader();
     void _resetState();
