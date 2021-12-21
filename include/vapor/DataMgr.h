@@ -589,8 +589,8 @@ public:
         friend std::ostream &operator<<(std::ostream &o, const BlkExts &b);
 
     private:
-        DimsType               _bmin = {0, 0, 0};
-        DimsType               _bmax = {0, 0, 0};
+        DimsType               _bmin = {{0, 0, 0}};
+        DimsType               _bmax = {{0, 0, 0}};
         std::vector<CoordType> _mins;
         std::vector<CoordType> _maxs;
     };
