@@ -26,7 +26,7 @@ void PSliceOriginSelector::updateGUI() const
 {
     SliceParams *rp = getParams<SliceParams>();
 
-    CoordType min, max;
+    CoordType      min, max;
     size_t         ts = rp->GetCurrentTimestep();
     int            level = rp->GetRefinementLevel();
     int            lod = rp->GetCompressionLevel();
