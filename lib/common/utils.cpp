@@ -117,7 +117,6 @@ std::vector<size_t> Wasp::VectorizeCoords(size_t offset, const std::vector<size_
 
 void Wasp::IncrementCoords(const size_t *min, const size_t *max, size_t *counter, size_t n, int dim)
 {
-
     for (int i = dim; i < n; i++) {
         if (counter[i] < (max[i])) {
             counter[i] += 1;
@@ -133,7 +132,7 @@ vector<size_t> Wasp::IncrementCoords(const vector<size_t> &min, const vector<siz
     VAssert(min.size() == counter.size());
 
     IncrementCoords(min.data(), max.data(), counter.data(), min.size(), dim);
-    return(counter);
+    return (counter);
 }
 
 vector<size_t> Wasp::Dims(const vector<size_t> &min, const vector<size_t> &max)

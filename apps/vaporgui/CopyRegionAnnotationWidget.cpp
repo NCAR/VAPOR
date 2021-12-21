@@ -83,7 +83,7 @@ void CopyRegionAnnotationWidget::copyRegion()
 
 void CopyRegionAnnotationWidget::_scaleWorldCoordsToNormalized(CoordType &minExts, CoordType &maxExts, int timeStep)
 {
-    VAPoR::CoordType minDomainExts, maxDomainExts;
+    VAPoR::CoordType    minDomainExts, maxDomainExts;
     DataStatus *        dataStatus = _controlExec->GetDataStatus();
     dataStatus->GetActiveExtents(_paramsMgr, timeStep, minDomainExts, maxDomainExts);
     VAssert(minExts.size() == maxExts.size());

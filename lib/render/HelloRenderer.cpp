@@ -82,7 +82,7 @@ int HelloRenderer::_paintGL(bool)
     CoordType point2 = {0.0, 0.0, 0.0};
     Grid::CopyToArr3(point1Vec, point1);
     Grid::CopyToArr3(point2Vec, point2);
-    
+
 
     cout << "helloParams point: " << endl;
     cout << "point1: " << point1[0] << " " << point1[1] << " " << point1[2] << endl;

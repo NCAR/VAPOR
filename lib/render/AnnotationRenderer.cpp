@@ -434,8 +434,7 @@ void AnnotationRenderer::_getDataMgrCorner(const int cornerNumber, glm::vec4 &da
     dataMgrCorner = glm::vec4(xCoord, yCoord, zCoord, 1.f);
 }
 
-void AnnotationRenderer::_applyDataMgrToDomainExtents(std::vector<double> &domainExtents, const CoordType &dataMgrMinExts, const CoordType &dataMgrMaxExts,
-                                                      const Transform *transform) const
+void AnnotationRenderer::_applyDataMgrToDomainExtents(std::vector<double> &domainExtents, const CoordType &dataMgrMinExts, const CoordType &dataMgrMaxExts, const Transform *transform) const
 {
     assert(domainExtents.size() == 6);
 

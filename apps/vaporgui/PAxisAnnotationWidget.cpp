@@ -118,7 +118,7 @@ std::vector<double> PAxisAnnotationWidget::_getDomainExtents() const
     VAssert(aParams);
     int                 ts = aParams->GetCurrentTimestep();
     VAPoR::DataStatus * dataStatus = _controlExec->GetDataStatus();
-    VAPoR::CoordType minExts, maxExts;
+    VAPoR::CoordType    minExts, maxExts;
     dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
 
     std::vector<double> extents = {minExts[0], minExts[1], minExts[2], maxExts[0], maxExts[1], maxExts[2]};

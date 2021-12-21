@@ -58,8 +58,7 @@ CurvilinearGrid::CurvilinearGrid(const DimsType &dims, const DimsType &bs, const
     _curvilinearGrid(xrg, yrg, zrg, vector<double>(), qtr);
 }
 
-CurvilinearGrid::CurvilinearGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
-                                 std::shared_ptr<const QuadTreeRectangleP> qtr)
+CurvilinearGrid::CurvilinearGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, std::shared_ptr<const QuadTreeRectangleP> qtr)
 : StructuredGrid(dims, bs, blks)
 {
     // Only support 2D X & Y coordinates currently. I.e. only support
@@ -88,8 +87,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dimsv, const vector<size_
 
     _terrainFollowing = false;
 
-    DimsType dims = {1,1,1};
-    DimsType bs = {1,1,1};
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
     CopyToArr3(dimsv, dims);
     CopyToArr3(bsv, bs);
     _curvilinearGrid(xrg, yrg, RegularGrid(), zcoords, qtr);
@@ -111,8 +110,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dimsv, const vector<size_
 
     _terrainFollowing = true;
 
-    DimsType dims = {1,1,1};
-    DimsType bs = {1,1,1};
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
     CopyToArr3(dimsv, dims);
     CopyToArr3(bsv, bs);
     _curvilinearGrid(xrg, yrg, zrg, vector<double>(), qtr);
@@ -133,8 +132,8 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dimsv, const vector<size_
 
     _terrainFollowing = false;
 
-    DimsType dims = {1,1,1};
-    DimsType bs = {1,1,1};
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
     CopyToArr3(dimsv, dims);
     CopyToArr3(bsv, bs);
     _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), qtr);

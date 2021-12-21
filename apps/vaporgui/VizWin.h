@@ -137,7 +137,7 @@ private:
     string              _getCurrentMouseMode() const;
     void                _setNewExtents();
     void                _getActiveExtents(VAPoR::CoordType &minExts, VAPoR::CoordType &maxExts);
-    void   _getUnionOfFieldVarExtents(VAPoR::RenderParams *rParams, VAPoR::DataMgr *dataMgr, int timestep, int refLevel, int lod, VAPoR::CoordType &minExts, VAPoR::CoordType &maxExts);
+    void                _getUnionOfFieldVarExtents(VAPoR::RenderParams *rParams, VAPoR::DataMgr *dataMgr, int timestep, int refLevel, int lod, VAPoR::CoordType &minExts, VAPoR::CoordType &maxExts);
     string _getCurrentDataMgrName() const;
     VAPoR::Transform *_getDataMgrTransform() const;
 

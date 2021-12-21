@@ -23,8 +23,8 @@ public:
     //! Construct a unstructured grid sampling 2D scalar function
     //!
     //
-    UnstructuredGridCoordless(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs,
-                              const std::vector<float *> &blks, size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+    UnstructuredGridCoordless(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension,
+                              const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                               Location location,    // node,face, edge
                               size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
     : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, topology_dimension, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset)

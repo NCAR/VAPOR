@@ -449,8 +449,8 @@ void Plot::_setInitialExtents()
     VAPoR::CoordType minExt, maxExt;
     _dataStatus->GetActiveExtents(_paramsMgr, 0, minExt, maxExt);
 
-    std::vector <double> minActiveExtents = {minExt[0], minExt[1], minExt[2]};
-    std::vector <double> maxActiveExtents = {maxExt[0], maxExt[1], maxExt[2]};
+    std::vector<double> minActiveExtents = {minExt[0], minExt[1], minExt[2]};
+    std::vector<double> maxActiveExtents = {maxExt[0], maxExt[1], maxExt[2]};
 
     int dimensionality = 3;
     _getCurrentPlotParams()->SetMinExtents(minActiveExtents);
@@ -798,7 +798,7 @@ void Plot::_updateExtents()
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
 
     // Retrieve extents of all variables at 3 different time steps.
-    VAPoR::CoordType min, max, minT1, maxT1, minT2, maxT2;
+    VAPoR::CoordType    min, max, minT1, maxT1, minT2, maxT2;
     std::vector<int>    axes;
     std::vector<long>   TSToExamine;
     TSToExamine.push_back(plotParams->GetCurrentTimestep());
@@ -830,8 +830,8 @@ void Plot::_updateExtents()
         if (maxT2[i] > max[i]) max[i] = maxT2[i];
     }
 
-    vector <double> minVec = {min[0], min[1], min[2]};
-    vector <double> maxVec = {max[0], max[1], max[2]};
+    vector<double> minVec = {min[0], min[1], min[2]};
+    vector<double> maxVec = {max[0], max[1], max[2]};
     plotParams->SetMinExtents(minVec);
     plotParams->SetMaxExtents(maxVec);
 }

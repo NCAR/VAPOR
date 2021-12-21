@@ -68,8 +68,8 @@ public:
     //!
     //! \sa RegularGrid()
     //
-    CurvilinearGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
-                    const std::vector<double> &zcoords, std::shared_ptr<const QuadTreeRectangleP> qtr);
+    CurvilinearGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const std::vector<double> &zcoords,
+                    std::shared_ptr<const QuadTreeRectangleP> qtr);
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
                     const std::vector<double> &zcoords, std::shared_ptr<const QuadTreeRectangleP> qtr);
 
@@ -145,8 +145,7 @@ public:
     //!
     //! \sa RegularGrid()
     //
-    CurvilinearGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
-                    std::shared_ptr<const QuadTreeRectangleP> qtr);
+    CurvilinearGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, std::shared_ptr<const QuadTreeRectangleP> qtr);
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
                     std::shared_ptr<const QuadTreeRectangleP> qtr);
 

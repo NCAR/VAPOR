@@ -711,7 +711,7 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     // on the same mesh (they have same dimensions)
     //
     vector<vector<size_t>> outputVarDims;
-    DimsType minAbs = {0,0,0};
+    DimsType               minAbs = {0, 0, 0};
     if (inputVarDims.size()) {
         outputVarDims.push_back(inputVarDims[0]);
         minAbs = variables[0]->GetMinAbs();

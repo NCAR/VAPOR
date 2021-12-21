@@ -185,7 +185,7 @@ void BarbRenderer::_getGridRequirements(int &ts, int &refLevel, int &lod, CoordT
     bParams->GetBox()->GetExtents(minExts, maxExts);
 }
 
-int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, CoordType  minExts, CoordType  maxExts, std::vector<VAPoR::Grid *> &varData)
+int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, CoordType minExts, CoordType maxExts, std::vector<VAPoR::Grid *> &varData)
 {
     Grid *sg = NULL;
     varData.push_back(sg);
@@ -230,7 +230,7 @@ int BarbRenderer::_generateBarbs()
     vector<Grid *> varData;
 
     int            ts, refLevel, lod;
-    CoordType  minExts, maxExts;
+    CoordType      minExts, maxExts;
     _getGridRequirements(ts, refLevel, lod, minExts, maxExts);
 
     // Get vector variables
@@ -780,7 +780,7 @@ bool BarbRenderer::_getColorMapping(float val, const float clut[256 * 4])
 double BarbRenderer::_getDomainHypotenuse(size_t ts) const
 {
     std::vector<int>    axes;
-    CoordType minExts, maxExts;
+    CoordType           minExts, maxExts;
     std::vector<string> varNames;
 
     BarbParams *p = dynamic_cast<BarbParams *>(GetActiveParams());

@@ -25,9 +25,11 @@ void RegularGrid::_regularGrid(const CoordType &minu, const CoordType &maxu)
     _delta = {0.0, 0.0, 0.0};
 
     _geometryDim = 0;
-    for (int i=0; i<minu.size(); i++) {
-        if (minu[i] != maxu[i]) _geometryDim++;
-        else break;
+    for (int i = 0; i < minu.size(); i++) {
+        if (minu[i] != maxu[i])
+            _geometryDim++;
+        else
+            break;
     }
     VAssert(_geometryDim >= GetNumDimensions());
 
@@ -35,7 +37,7 @@ void RegularGrid::_regularGrid(const CoordType &minu, const CoordType &maxu)
     _maxu = maxu;
 
     DimsType dims = GetDimensions();
-    for (int i = 0; i < minu.size(); i++) { 
+    for (int i = 0; i < minu.size(); i++) {
         if (dims[i] > 1) {
             _delta[i] = (_maxu[i] - _minu[i]) / (double)(dims[i] - 1);
         } else {
@@ -49,7 +51,8 @@ RegularGrid::RegularGrid(const DimsType &dims, const DimsType &bs, const vector<
     _regularGrid(minu, maxu);
 }
 
-RegularGrid::RegularGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks, const vector<double> &minuv, const vector<double> &maxuv) : StructuredGrid(dimsv, bsv, blks)
+RegularGrid::RegularGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks, const vector<double> &minuv, const vector<double> &maxuv)
+: StructuredGrid(dimsv, bsv, blks)
 {
     VAssert(minuv.size() == maxuv.size());
     VAssert(minuv.size() >= GetNumDimensions());

@@ -19,10 +19,10 @@
 using namespace std;
 using namespace VAPoR;
 
-void UnstructuredGrid::_unstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs,
-                                   const std::vector<float *> &blks, size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
-                                   Location location,    // node,face, edge
-                                   size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
+void UnstructuredGrid::_unstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks,
+                                         size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+                                         Location location,    // node,face, edge
+                                         size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
 {
     VAssert(GetNumDimensions(vertexDims) == 1 || GetNumDimensions(vertexDims) == 2);
     VAssert(GetNumDimensions(vertexDims) == GetNumDimensions(faceDims));
@@ -54,8 +54,8 @@ void UnstructuredGrid::_unstructuredGrid(const DimsType &vertexDims, const DimsT
     Grid::SetCellOffset(cellOffset);
 }
 
-UnstructuredGrid::UnstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs,
-                                   const std::vector<float *> &blks, size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+UnstructuredGrid::UnstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension,
+                                   const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                                    Location location,    // node,face, edge
                                    size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
 : Grid(location == NODE ? vertexDims : (location == CELL ? faceDims : edgeDims), bs, blks, topology_dimension)
@@ -69,10 +69,10 @@ UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDimsv, const
                                    size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
 : Grid(location == NODE ? vertexDimsv : (location == CELL ? faceDimsv : edgeDimsv), bsv, blks, topology_dimension)
 {
-    DimsType vertexDims = {1,1,1};
-    DimsType faceDims = {1,1,1};
-    DimsType edgeDims = {1,1,1};
-    DimsType bs = {1,1,1};
+    DimsType vertexDims = {1, 1, 1};
+    DimsType faceDims = {1, 1, 1};
+    DimsType edgeDims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
     CopyToArr3(vertexDimsv, vertexDims);
     CopyToArr3(faceDimsv, faceDims);
     CopyToArr3(edgeDimsv, edgeDims);

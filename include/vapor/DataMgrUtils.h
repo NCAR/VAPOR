@@ -120,8 +120,8 @@ VDF_API int ConvertLonLatToPCS(string projString, double coords[], int npoints =
 //! memory until released by an explicit call to UnlockGrids()
 //
 template<typename T>
-VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const T &minExtsReq, const T &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
-                     std::vector<Grid *> &grids, bool lock = false);
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const T &minExtsReq, const T &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, std::vector<Grid *> &grids,
+                     bool lock = false);
 
 VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, const CoordType &minExtsReq, const CoordType &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr,
                      bool lock = false);

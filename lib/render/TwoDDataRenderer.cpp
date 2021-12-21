@@ -257,8 +257,8 @@ int TwoDDataRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norma
     // Find box extents for ROI
     //
     size_t         ts = rParams->GetCurrentTimestep();
-    CoordType minBoxReq = {0.0, 0.0, 0.0};
-    CoordType maxBoxReq = {0.0, 0.0, 0.0};
+    CoordType      minBoxReq = {0.0, 0.0, 0.0};
+    CoordType      maxBoxReq = {0.0, 0.0, 0.0};
     rParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
 
     string varname = rParams->GetVariableName();

@@ -42,7 +42,7 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::s
 
     if (_needToSetDefaultAlgorithm()) {
         VolumeParams * vp = (VolumeParams *)GetActiveParams();
-        CoordType minExt, maxExt;
+        CoordType      minExt, maxExt;
         vp->GetBox()->GetExtents(minExt, maxExt);
 
         Grid *grid = _dataMgr->GetVariable(vp->GetCurrentTimestep(), vp->GetVariableName(), vp->GetRefinementLevel(), vp->GetCompressionLevel(), minExt, maxExt);

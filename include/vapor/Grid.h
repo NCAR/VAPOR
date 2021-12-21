@@ -106,13 +106,13 @@ public:
     //!
     size_t GetNumDimensions() const { return _nDims; }
 
-    //! Return the number of non-unit dimensions 
+    //! Return the number of non-unit dimensions
     //!
     //! Return the number of non-unit dimensions in \p dims
     //!
-    //! \param[in] dims 
+    //! \param[in] dims
     //!
-    static size_t GetNumDimensions(DimsType dims) ;
+    static size_t GetNumDimensions(DimsType dims);
 
     //! Return the dimensions of the specified coordinate variable
     //!
@@ -756,10 +756,7 @@ public:
     //! the offset to the first grid point in the mesh. The default is the
     //! zero vector
     //
-    virtual void SetMinAbs(const DimsType &minAbs)
-    {
-        _minAbs = minAbs;
-    }
+    virtual void SetMinAbs(const DimsType &minAbs) { _minAbs = minAbs; }
 
     //! Test whether a point is contained in a bounding rectangle
     //!
@@ -1281,7 +1278,7 @@ private:
     std::vector<size_t>  _bdimsDeprecated;        // legacy API
     std::vector<float *> _blks;
     std::vector<bool>    _periodic;    // periodicity of boundaries
-    DimsType  _minAbs;      // Offset to start of grid
+    DimsType             _minAbs;      // Offset to start of grid
     size_t               _topologyDimension = 0;
     float                _missingValue = std::numeric_limits<float>::infinity();
     bool                 _hasMissing = false;

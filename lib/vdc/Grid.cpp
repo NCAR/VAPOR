@@ -27,8 +27,8 @@ Grid::Grid()
     _nDims = 0;
 }
 
-void Grid::_grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension) {
-
+void Grid::_grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension)
+{
     for (int i = 0; i < bs.size(); i++) {
         VAssert(bs[i] > 0);
         VAssert(dims[i] > 0);
@@ -50,7 +50,7 @@ void Grid::_grid(const DimsType &dims, const DimsType &bs, const std::vector<flo
     _interpolationOrder = 0;
     _nodeIDOffset = 0;
     _cellIDOffset = 0;
-    _minAbs = {0,0,0};
+    _minAbs = {0, 0, 0};
 
     //
     // Shallow  copy blocks
@@ -58,30 +58,28 @@ void Grid::_grid(const DimsType &dims, const DimsType &bs, const std::vector<flo
     _blks = blks;
 }
 
-Grid::Grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension)
+Grid::Grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension) { _grid(dims, bs, blks, topology_dimension); }
+
+Grid::Grid(const std::vector<size_t> &dimsv, const std::vector<size_t> &bsv, const std::vector<float *> &blks, size_t topology_dimension)
 {
-    _grid(dims, bs, blks, topology_dimension);
-}
-
-Grid::Grid(const std::vector<size_t> &dimsv, const std::vector<size_t> &bsv, const std::vector<float *> &blks, size_t topology_dimension) {
-
     VAssert(dimsv.size() <= 3);
     VAssert(dimsv.size() == bsv.size());
 
-    DimsType dims = {1,1,1};
-    DimsType bs = {1,1,1};
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
     CopyToArr3(dimsv, dims);
     CopyToArr3(bsv, bs);
     _grid(dims, bs, blks, topology_dimension);
 }
 
-size_t Grid::GetNumDimensions(DimsType dims) {
+size_t Grid::GetNumDimensions(DimsType dims)
+{
     size_t nDims = 0;
     for (size_t i = 0; i < dims.size(); i++) {
         VAssert(dims[i] > 0);
         if (dims[i] > 1) nDims++;
     }
-    return(nDims);
+    return (nDims);
 }
 
 

@@ -114,8 +114,8 @@ public:
     //! \param[in] cellOffset The offset from zero for the first element
     //! in \p faceOnVertex or \p faceOnFace
     //
-    UnstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks,
-                     size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+    UnstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension,
+                     const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                      Location location,    // node,face, edge
                      size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset
 
@@ -211,10 +211,10 @@ private:
     int                 _missingID;
     int                 _boundaryID;
 
-    void _unstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks,
-                     size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
-                     Location location,    // node,face, edge
-                     size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset
+    void _unstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension,
+                           const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+                           Location location,    // node,face, edge
+                           size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset
 
     );
 };

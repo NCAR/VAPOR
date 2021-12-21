@@ -115,7 +115,7 @@ public:
 protected:
 private:
     DimsType _cellDims;
-    void _structuredGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks);
+    void     _structuredGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks);
 };
 };    // namespace VAPoR
 #endif

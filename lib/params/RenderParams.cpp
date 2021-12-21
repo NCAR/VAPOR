@@ -133,9 +133,8 @@ int RenderParams::Initialize()
     //
     string varname = GetVariableName();
     size_t ts = 0;
-    int ndim = _maxDim;
+    int    ndim = _maxDim;
     if (!_dataMgr->VariableExists(ts, varname, 0, 0)) {
-
         // Probably should have a _minDim here..
         //
         for (; ndim > 0; ndim--) {
@@ -152,7 +151,7 @@ int RenderParams::Initialize()
     int rc = _dataMgr->GetVariableExtents(ts, varname, 0, 0, minExt, maxExt);
     if (rc < 0) return (-1);
 
-    // Configure box as planar or volumetric. 
+    // Configure box as planar or volumetric.
     //
     // N.B.Not handling case where ndim == 1!!!
     //
@@ -163,8 +162,8 @@ int RenderParams::Initialize()
         _Box->SetOrientation(VAPoR::Box::XYZ);
     }
 
-    vector <double> minExtVec = {minExt[0], minExt[1], minExt[2]};
-    vector <double> maxExtVec = {maxExt[0], maxExt[1], maxExt[2]};
+    vector<double> minExtVec = {minExt[0], minExt[1], minExt[2]};
+    vector<double> maxExtVec = {maxExt[0], maxExt[1], maxExt[2]};
     _Box->SetExtents(minExtVec, maxExtVec);
     _Box->SetPlanar(planar);
 

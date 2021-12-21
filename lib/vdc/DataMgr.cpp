@@ -39,7 +39,7 @@ size_t vproduct(DimsType a)
     return (ntotal);
 }
 
-DimsType box_dims(const DimsType  &min, const DimsType  &max)
+DimsType box_dims(const DimsType &min, const DimsType &max)
 {
     DimsType dims;
 
@@ -65,11 +65,12 @@ template<class T> string vector_to_string(T v)
     return (oss.str());
 }
 
-size_t number_of_dimensions(DimsType dims) {
+size_t number_of_dimensions(DimsType dims)
+{
     size_t ndims = 0;
-    for (int i=0; i<dims.size() && dims[i] > 1; i++) ndims++;
+    for (int i = 0; i < dims.size() && dims[i] > 1; i++) ndims++;
 
-    return(ndims);
+    return (ndims);
 }
 
 #ifdef UNUSED_FUNCTION
@@ -158,7 +159,6 @@ template<typename T> void decimate2d(const DimsType &src_bs, const T *src, T *ds
 
 template<typename T> void decimate3d(const DimsType > &src_bs, const T *src, T *dst)
 {
-
     DimsType dst_bs;
     for (int i = 0; i < src_bs.size(); i++) { dst_bs[i] = (decimate_length(src_bs[i])); }
 
@@ -206,7 +206,6 @@ template<typename T> void decimate3d(const DimsType > &src_bs, const T *src, T *
 //
 template<typename T> void decimate(const DimsType &bmin, const DimsType &bmax, const DimsType &src_bs, const T *src, T *dst)
 {
-
     DimsType dst_bs;
     for (int i = 0; i < src_bs.size(); i++) { dst_bs[i] = (decimate_length(src_bs[i])); }
 
@@ -400,8 +399,6 @@ void map_blk_to_vox(const DimsType &bs, const DimsType &dims, const DimsType &bm
 //
 template<class T> void copy_block(const T *src, T *dst, const DimsType &min, const DimsType &max, const DimsType &bs, const DimsType &grid_min, const DimsType &grid_max)
 {
-    
-
     DimsType dims;        // dimensions of destination region in voxels
     DimsType bdims;       // dimensions of destination grid in blocks
     DimsType src_dims;    // dimensions of source region in voxels
@@ -999,8 +996,8 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool 
         return (NULL);
     }
 
-    DimsType min = {0,0,0};
-    DimsType max = {0,0,0};
+    DimsType min = {0, 0, 0};
+    DimsType max = {0, 0, 0};
     for (int i = 0; i < dims_at_level.size(); i++) {
         min[i] = (0);
         max[i] = (dims_at_level[i] - 1);
@@ -1011,12 +1008,12 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool 
 
 // Find the subset of the data dimension that are the coord dimensions
 //
-void DataMgr::_setupCoordVecsHelper(string data_varname, const DimsType &data_dimlens, const DimsType &data_bmin, const DimsType &data_bmax, string coord_varname, int order,
-                                    DimsType &coord_dimlens, DimsType &coord_bmin, DimsType &coord_bmax, bool structured, long ts) const
+void DataMgr::_setupCoordVecsHelper(string data_varname, const DimsType &data_dimlens, const DimsType &data_bmin, const DimsType &data_bmax, string coord_varname, int order, DimsType &coord_dimlens,
+                                    DimsType &coord_bmin, DimsType &coord_bmax, bool structured, long ts) const
 {
-    coord_dimlens = {1,1,1};
-    coord_bmin = {0,0,0};
-    coord_bmax = {0,0,0};
+    coord_dimlens = {1, 1, 1};
+    coord_bmin = {0, 0, 0};
+    coord_bmax = {0, 0, 0};
 
     vector<DC::Dimension> data_dims;
     bool                  ok = _getVarDimensions(data_varname, data_dims, ts);
@@ -1118,11 +1115,11 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const DimsType &data_di
     }
 }
 
-int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, const DimsType &min, const DimsType &max, vector<string> &varnames, DimsType &roi_dims,
-                             vector<DimsType> &dimsvec, vector<DimsType> &bsvec, vector<DimsType> &bminvec, vector<DimsType> &bmaxvec, bool structured) const
+int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, const DimsType &min, const DimsType &max, vector<string> &varnames, DimsType &roi_dims, vector<DimsType> &dimsvec,
+                             vector<DimsType> &bsvec, vector<DimsType> &bminvec, vector<DimsType> &bmaxvec, bool structured) const
 {
     varnames.clear();
-    roi_dims = {1,1,1};
+    roi_dims = {1, 1, 1};
     dimsvec.clear();
     bsvec.clear();
     bminvec.clear();
@@ -1137,11 +1134,11 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
     vector<size_t> dimsv;
     int            rc = GetDimLensAtLevel(varname, level, dimsv, ts);
     VAssert(rc >= 0);
-    DimsType dims = {1,1,1};
+    DimsType dims = {1, 1, 1};
     Grid::CopyToArr3(dimsv, dims);
     dimsvec.push_back(dims);
 
-    DimsType bs = {1,1,1};
+    DimsType bs = {1, 1, 1};
     Grid::CopyToArr3(_bs.data(), dimsv.size(), bs);
     bsvec.push_back(bs);
 
@@ -1168,7 +1165,7 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
         bminvec.push_back(coord_bmin);
         bmaxvec.push_back(coord_bmax);
 
-        DimsType bs = {1,1,1};
+        DimsType bs = {1, 1, 1};
         Grid::CopyToArr3(_bs.data(), Grid::GetNumDimensions(coord_dims), bs);
         bsvec.push_back(bs);
     }
@@ -1218,7 +1215,7 @@ int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, vecto
             return (-1);
         }
 
-        DimsType dims = {1,1,1};
+        DimsType dims = {1, 1, 1};
         Grid::CopyToArr3(dimsv, dims);
 
         // Ugh. Connection data are not blocked.
@@ -1227,8 +1224,8 @@ int DataMgr::_setupConnVecs(size_t ts, string varname, int level, int lod, vecto
 
         // Always read the entire connection variable
         //
-        DimsType conn_min = {0,0,0};
-        DimsType conn_max = {dims[0]-1, dims[1]-1, dims[2]-1};
+        DimsType conn_min = {0, 0, 0};
+        DimsType conn_max = {dims[0] - 1, dims[1] - 1, dims[2] - 1};
 
         // Map voxel coordinates into block coordinates
         //
@@ -1265,11 +1262,11 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, DimsT
     VAssert(status);
 
     vector<string>         varnames;
-    DimsType         roi_dims;
-    vector<DimsType> dimsvec;
-    vector<DimsType> bsvec;
-    vector<DimsType> bminvec;
-    vector<DimsType> bmaxvec;
+    DimsType               roi_dims;
+    vector<DimsType>       dimsvec;
+    vector<DimsType>       bsvec;
+    vector<DimsType>       bminvec;
+    vector<DimsType>       bmaxvec;
 
     // Get dimensions for coordinate variables
     //
@@ -1288,10 +1285,10 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, DimsT
     // Get dimensions for connectivity variables (if any)
     //
     vector<string>         conn_varnames;
-    vector<DimsType> conn_dimsvec;
-    vector<DimsType> conn_bsvec;
-    vector<DimsType> conn_bminvec;
-    vector<DimsType> conn_bmaxvec;
+    vector<DimsType>       conn_dimsvec;
+    vector<DimsType>       conn_bsvec;
+    vector<DimsType>       conn_bminvec;
+    vector<DimsType>       conn_bmaxvec;
 
     vector<int *> conn_blkvec;
     if (_gridHelper.IsUnstructured(gridType)) {
@@ -1303,9 +1300,9 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, DimsT
     }
 
     if (_gridHelper.IsUnstructured(gridType)) {
-        DimsType             vertexDims;
-        DimsType             faceDims;
-        DimsType             edgeDims;
+        DimsType                   vertexDims;
+        DimsType                   faceDims;
+        DimsType                   edgeDims;
         UnstructuredGrid::Location location;
         size_t                     maxVertexPerFace;
         size_t                     maxFacePerVertex;
@@ -1364,9 +1361,9 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, DimsTy
     bool           ok = GetVarCoordVars(varname, true, coord_vars);
     VAssert(ok);
 
-    DimsType min_vec = {0,0,0};
-    DimsType max_vec = {0,0,0};
-    for (int i=0; i<coord_vars.size(); i++) {
+    DimsType min_vec = {0, 0, 0};
+    DimsType max_vec = {0, 0, 0};
+    for (int i = 0; i < coord_vars.size(); i++) {
         min_vec[i] = (min[i]);
         max_vec[i] = (max[i]);
     }
@@ -1428,7 +1425,7 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
 {
     SetDiagMsg("DataMgr::GetDataRange(%d,%s)", ts, varname.c_str());
 
-    CoordType min, max;
+    CoordType      min, max;
     int            rc = GetVariableExtents(ts, varname, level, lod, min, max);
     if (rc < 0) return (-1);
 
@@ -1779,8 +1776,8 @@ template<typename T> T *DataMgr::_get_region_from_cache(size_t ts, string varnam
 }
 
 template<typename T>
-int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level, int lod, const DimsType &grid_dims, const DimsType &grid_bs, const DimsType &grid_min,
-                                           const DimsType &grid_max, T *blks)
+int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level, int lod, const DimsType &grid_dims, const DimsType &grid_bs, const DimsType &grid_min, const DimsType &grid_max,
+                                           T *blks)
 {
     int fd = _openVariableRead(ts, varname, level, lod);
     if (fd < 0) return (fd);
@@ -1797,7 +1794,7 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
         vector<size_t> dimsv;
         int            rc = GetDimLensAtLevel(varname, level, dimsv, ts);
 
-        DimsType dims = {1,1,1};
+        DimsType dims = {1, 1, 1};
         Grid::CopyToArr3(dimsv, dims);
 
         // grid_min and grid_max are specified in voxel coordinates
@@ -1845,8 +1842,8 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
 }
 
 template<typename T>
-int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, int lod, const DimsType &file_bs, const DimsType &file_dims, const DimsType &grid_dims,
-                                         const DimsType &grid_bs, const DimsType &grid_min, const DimsType &grid_max, T *blks)
+int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, int lod, const DimsType &file_bs, const DimsType &file_dims, const DimsType &grid_dims, const DimsType &grid_bs,
+                                         const DimsType &grid_min, const DimsType &grid_max, T *blks)
 {
     // Map requested region voxel coordinates to disk block coordinates
     //
@@ -1901,20 +1898,19 @@ int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, i
 }
 
 template<typename T>
-T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, const DimsType &grid_dims, const DimsType &grid_bs, const DimsType &grid_bmin,
-                                const DimsType &grid_bmax, bool lock)
+T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, const DimsType &grid_dims, const DimsType &grid_bs, const DimsType &grid_bmin, const DimsType &grid_bmax, bool lock)
 {
     T *blks = (T *)_alloc_region(ts, varname, level, lod, grid_bmin, grid_bmax, grid_bs, sizeof(T), lock, false);
     if (!blks) return (NULL);
 
-    vector <size_t> file_dimsv, file_bsv;
+    vector<size_t> file_dimsv, file_bsv;
     int            rc = GetDimLensAtLevel(varname, level, file_dimsv, file_bsv, ts);
     VAssert(rc >= 0);
 
-	DimsType file_dims = {1,1,1};
-	Grid::CopyToArr3(file_dimsv, file_dims);
-	DimsType file_bs = {1,1,1};
-	Grid::CopyToArr3(file_bsv, file_bs);
+    DimsType file_dims = {1, 1, 1};
+    Grid::CopyToArr3(file_dimsv, file_dims);
+    DimsType file_bs = {1, 1, 1};
+    Grid::CopyToArr3(file_bsv, file_bs);
 
     // Get voxel coordinates of requested region, clamped to grid
     // boundaries.
@@ -1941,9 +1937,7 @@ T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, c
     return (blks);
 }
 
-template<typename T>
-T *DataMgr::_get_region(size_t ts, string varname, int level, int lod, int nlods, const DimsType &dims, const DimsType &bs, const DimsType &bmin, const DimsType &bmax,
-                        bool lock)
+template<typename T> T *DataMgr::_get_region(size_t ts, string varname, int level, int lod, int nlods, const DimsType &dims, const DimsType &bs, const DimsType &bmin, const DimsType &bmax, bool lock)
 {
     if (lod < -nlods) lod = -nlods;
 
@@ -2550,10 +2544,9 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, DimsType &vertexDims, DimsTyp
                            UnstructuredGrid::Location &location,    // node,face, edge
                            size_t &maxVertexPerFace, size_t &maxFacePerVertex, long &vertexOffset, long &faceOffset, long ts) const
 {
-    
-    vertexDims = {1,1,1};
-    faceDims = {1,1,1};
-    edgeDims = {1,1,1};
+    vertexDims = {1, 1, 1};
+    faceDims = {1, 1, 1};
+    edgeDims = {1, 1, 1};
 
     DC::Mesh m;
     bool     status = GetMesh(var.GetMeshName(), m);
@@ -2664,8 +2657,8 @@ string DataMgr::_get_grid_type(string varname) const
 //
 int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, CoordType min, CoordType max, DimsType &min_ui, DimsType &max_ui)
 {
-    min_ui = {0,0,0};
-    max_ui = {0,0,0};
+    min_ui = {0, 0, 0};
+    max_ui = {0, 0, 0};
 
     vector<string> scvars;
     string         tcvar;
@@ -2696,7 +2689,7 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
         return (0);
     }
 
-    DimsType bs = {1,1,1};
+    DimsType bs = {1, 1, 1};
     for (int i = 0; i < dims_at_level.size(); i++) { bs[i] = _bs[i]; }
 
     // hash tag for block coordinate cache
@@ -2719,10 +2712,10 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
 
         // Voxel and block min and max coordinates of entire grid
         //
-        DimsType vmin = {0,0,0};
-        DimsType vmax = {0,0,0};
-        DimsType bmin = {0,0,0};
-        DimsType bmax = {0,0,0};
+        DimsType vmin = {0, 0, 0};
+        DimsType vmax = {0, 0, 0};
+        DimsType bmin = {0, 0, 0};
+        DimsType bmax = {0, 0, 0};
 
         for (int i = 0; i < dims_at_level.size(); i++) {
             vmin[i] = 0;
@@ -2737,14 +2730,14 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
         // box. Include a one-voxel halo region on all non-boundary
         // faces
         //
-        size_t nblocks = Wasp::LinearizeCoords(bmax.data(), bmin.data(), bmax.data(),bmax.size()) + 1;
+        size_t nblocks = Wasp::LinearizeCoords(bmax.data(), bmin.data(), bmax.data(), bmax.size()) + 1;
         for (size_t offset = 0; offset < nblocks; offset++) {
             CoordType my_min, my_max;
-            DimsType my_vmin, my_vmax;
+            DimsType  my_vmin, my_vmax;
 
             // Get coordinates for current block
             //
-            DimsType bcoord = {0,0,0};
+            DimsType bcoord = {0, 0, 0};
             Wasp::VectorizeCoords(offset, bmin.data(), bmax.data(), bcoord.data(), bmin.size());
 
             for (int i = 0; i < bcoord.size(); i++) {
@@ -2782,9 +2775,7 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
     //
     DimsType bmin, bmax;
     ok = blkexts.Intersect(min, max, bmin, bmax);
-    if (!ok) {
-        return (1);
-    }
+    if (!ok) { return (1); }
 
     // Finally, map from block to voxel coordinates
     //
@@ -3046,7 +3037,7 @@ int DataMgr::_openVariableRead(size_t ts, string varname, int level, int lod)
 
 template<class T> int DataMgr::_readRegionBlock(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region)
 {
-    vector <size_t> minv, maxv;
+    vector<size_t> minv, maxv;
     Grid::CopyFromArr3(min, minv);
     minv.resize(ndims);
     Grid::CopyFromArr3(max, maxv);
@@ -3067,7 +3058,7 @@ template<class T> int DataMgr::_readRegionBlock(int fd, const DimsType &min, con
 
 template<class T> int DataMgr::_readRegion(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region)
 {
-    vector <size_t> minv, maxv;
+    vector<size_t> minv, maxv;
     Grid::CopyFromArr3(min, minv);
     minv.resize(ndims);
     Grid::CopyFromArr3(max, maxv);
@@ -3186,7 +3177,7 @@ int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &
     }
 
 
-    DimsType dims = {1,1,1};
+    DimsType dims = {1, 1, 1};
     Grid::CopyToArr3(dimsv, dims);
     vector<float> buf(VProduct(dimsv));
 
@@ -3205,7 +3196,7 @@ int DataMgr::_getCoordPairExtents(string lon, string lat, float &lonmin, float &
         return (-1);
     }
 
-    dims = {1,1,1};
+    dims = {1, 1, 1};
     Grid::CopyToArr3(dimsv, dims);
     buf.resize(vproduct(dims));
 

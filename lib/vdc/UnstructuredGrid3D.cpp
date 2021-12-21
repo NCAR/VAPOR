@@ -19,8 +19,8 @@
 using namespace std;
 using namespace VAPoR;
 
-UnstructuredGrid3D::UnstructuredGrid3D(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs,
-                                       const std::vector<float *> &blks, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+UnstructuredGrid3D::UnstructuredGrid3D(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks, const int *vertexOnFace,
+                                       const int *faceOnVertex, const int *faceOnFace,
                                        Location location,    // node,face, edge
                                        size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
                                        const UnstructuredGridCoordless &zug)

@@ -446,7 +446,7 @@ int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     bool  geom3d = rp->GetValueLong(FlowParams::RenderGeom3DTag, false);
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
-	CoordType mind, maxd;
+        CoordType mind, maxd;
 
         // Need to find a non-empty variable from color mapping or velocity variables.
         std::string nonEmptyVarName = rp->GetColorMapVariableName();

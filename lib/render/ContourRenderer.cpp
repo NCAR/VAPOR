@@ -112,9 +112,7 @@ int ContourRenderer::_buildCache()
 
     Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax);
     Grid *heightGrid = NULL;
-    if (!_cacheParams.heightVarName.empty()) {
-        heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax);
-    }
+    if (!_cacheParams.heightVarName.empty()) { heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax); }
 
     if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) { return -1; }
 

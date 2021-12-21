@@ -139,7 +139,6 @@ RegularGrid *GridHelper::_make_grid_regular(const DimsType &dims, const vector<f
 
 ) const
 {
-
     CoordType minu, maxu;
     for (int i = 0; i < dims.size(); i++) {
         VAssert(dims[i] > 0);
@@ -236,15 +235,15 @@ LayeredGrid *GridHelper::_make_grid_layered(const DimsType &dims, const vector<f
     }
     for (int i = 0; i < nblocks; i++) { zcblkptrs.push_back(blkvec[3] + i * block_size); }
 
-    RegularGrid rg(dims, bs, zcblkptrs, CoordType {0.0, 0.0, 0.0}, CoordType {1.0, 1.0, 1.0});
+    RegularGrid rg(dims, bs, zcblkptrs, CoordType{0.0, 0.0, 0.0}, CoordType{1.0, 1.0, 1.0});
 
     LayeredGrid *lg = new LayeredGrid(dims, bs, blkptrs, xcoords, ycoords, rg);
 
     return (lg);
 }
 
-CurvilinearGrid *GridHelper::_make_grid_curvilinear(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const DimsType &dims, const vector<float *> &blkvec,
-                                                    const DimsType &bs, const DimsType &bmin, const DimsType &bmax)
+CurvilinearGrid *GridHelper::_make_grid_curvilinear(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const DimsType &dims, const vector<float *> &blkvec, const DimsType &bs,
+                                                    const DimsType &bmin, const DimsType &bmax)
 {
 
     // Data blocks
@@ -265,7 +264,7 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(size_t ts, int level, int lo
 
     // X horizontal coord blocks
     //
-    DimsType bs2d = {bs[0], bs[1], 1};
+    DimsType       bs2d = {bs[0], bs[1], 1};
     size_t         nblocks2d = 1;
     size_t         block_size2d = 1;
     for (int i = 0; i < bs2d.size(); i++) {
@@ -281,9 +280,9 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(size_t ts, int level, int lo
     vector<float *> ycblkptrs;
     for (int i = 0; i < nblocks2d; i++) { ycblkptrs.push_back(blkvec[2] + i * block_size2d); }
 
-    CoordType minu2d = {0.0, 0.0, 0.0};
-    CoordType maxu2d = {1.0, 1.0, 1.0};
-    DimsType dims2d = {dims[0], dims[1], 1};
+    CoordType      minu2d = {0.0, 0.0, 0.0};
+    CoordType      maxu2d = {1.0, 1.0, 1.0};
+    DimsType       dims2d = {dims[0], dims[1], 1};
     RegularGrid    xrg(dims2d, bs2d, xcblkptrs, minu2d, maxu2d);
     RegularGrid    yrg(dims2d, bs2d, ycblkptrs, minu2d, maxu2d);
 
@@ -337,10 +336,10 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(size_t ts, int level, int lo
 }
 
 UnstructuredGrid2D *GridHelper::_make_grid_unstructured2d(size_t ts, int level, int lod, const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo, const DimsType &dims,
-                                                          const vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax,
-                                                          const vector<int *> &conn_blkvec, const DimsType &conn_bs, const DimsType &conn_bmin, const DimsType &conn_bmax,
-                                                          const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, UnstructuredGrid::Location location,
-                                                          size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset, long faceOffset)
+                                                          const vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax, const vector<int *> &conn_blkvec,
+                                                          const DimsType &conn_bs, const DimsType &conn_bmin, const DimsType &conn_bmax, const DimsType &vertexDims, const DimsType &faceDims,
+                                                          const DimsType &edgeDims, UnstructuredGrid::Location location, size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset,
+                                                          long faceOffset)
 {
     VAssert(conn_blkvec.size() >= 1);
 
@@ -406,10 +405,10 @@ UnstructuredGrid2D *GridHelper::_make_grid_unstructured2d(size_t ts, int level, 
 }
 
 UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(size_t ts, int level, int lod, const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo, const DimsType &dims,
-                                                                     const vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax,
-                                                                     const vector<int *> &conn_blkvec, const DimsType &conn_bs, const DimsType &conn_bmin, const DimsType &conn_bmax,
-                                                                     const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims,
-                                                                     UnstructuredGrid::Location location, size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset, long faceOffset)
+                                                                     const vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax, const vector<int *> &conn_blkvec,
+                                                                     const DimsType &conn_bs, const DimsType &conn_bmin, const DimsType &conn_bmax, const DimsType &vertexDims,
+                                                                     const DimsType &faceDims, const DimsType &edgeDims, UnstructuredGrid::Location location, size_t maxVertexPerFace,
+                                                                     size_t maxFacePerVertex, long vertexOffset, long faceOffset)
 {
     VAssert(blkvec.size() == 4);
 
@@ -465,8 +464,8 @@ UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(size_t ts, 
 
     DimsType vertexDims1D = {vertexDims[0], 1, 1};
     DimsType faceDims1D = {faceDims[0], 1, 1};
-    DimsType edgeDims1D = {edgeDims[0],1,1};
-    DimsType bs1D = {bs[0],1,1};
+    DimsType edgeDims1D = {edgeDims[0], 1, 1};
+    DimsType bs1D = {bs[0], 1, 1};
 
     UnstructuredGridCoordless xug(vertexDims1D, faceDims1D, edgeDims1D, bs1D, xcblkptrs, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset,
                                   faceOffset);
@@ -503,10 +502,10 @@ UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(size_t ts, 
 
 
 UnstructuredGrid3D *GridHelper::_make_grid_unstructured_3d(size_t ts, int level, int lod, const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo, const DimsType &dims,
-                                                           const vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax,
-                                                           const vector<int *> &conn_blkvec, const DimsType &conn_bs, const DimsType &conn_bmin, const DimsType &conn_bmax,
-                                                           const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, UnstructuredGrid::Location location,
-                                                           size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset, long faceOffset)
+                                                           const vector<float *> &blkvec, const DimsType &bs, const DimsType &bmin, const DimsType &bmax, const vector<int *> &conn_blkvec,
+                                                           const DimsType &conn_bs, const DimsType &conn_bmin, const DimsType &conn_bmax, const DimsType &vertexDims, const DimsType &faceDims,
+                                                           const DimsType &edgeDims, UnstructuredGrid::Location location, size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset,
+                                                           long faceOffset)
 {
     VAssert(blkvec.size() == 4);
 
@@ -562,10 +561,10 @@ UnstructuredGrid3D *GridHelper::_make_grid_unstructured_3d(size_t ts, int level,
     const int *faceOnVertex = conn_blkvec[1];
     const int *faceOnFace = conn_blkvec.size() == 3 ? conn_blkvec[2] : NULL;
 
-    DimsType vertexDims1D = {vertexDims[0],1,1};
-    DimsType faceDims1D = {faceDims[0],1,1};
-    DimsType edgeDims1D = {edgeDims[0],1,1};
-    DimsType bs1D = {bs[0],1,1};
+    DimsType vertexDims1D = {vertexDims[0], 1, 1};
+    DimsType faceDims1D = {faceDims[0], 1, 1};
+    DimsType edgeDims1D = {edgeDims[0], 1, 1};
+    DimsType bs1D = {bs[0], 1, 1};
 
     UnstructuredGridCoordless xug(vertexDims1D, faceDims1D, edgeDims1D, bs1D, xcblkptrs, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset,
                                   faceOffset);
@@ -621,8 +620,7 @@ void GridHelper::_makeGridHelper(const DC::DataVar &var, const DimsType &roi_dim
 //
 
 StructuredGrid *GridHelper::MakeGridStructured(string gridType, size_t ts, int level, int lod, const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo, const DimsType &roi_dims,
-                                               const DimsType &dims, const vector<float *> &blkvec, const vector<DimsType> &bsvec, const vector<DimsType> &bminvec,
-                                               const vector<DimsType> &bmaxvec)
+                                               const DimsType &dims, const vector<float *> &blkvec, const vector<DimsType> &bsvec, const vector<DimsType> &bminvec, const vector<DimsType> &bmaxvec)
 {
     StructuredGrid *rg = NULL;
     if (gridType == RegularGrid::GetClassType()) {
@@ -643,10 +641,9 @@ StructuredGrid *GridHelper::MakeGridStructured(string gridType, size_t ts, int l
 }
 
 UnstructuredGrid *GridHelper::MakeGridUnstructured(string gridType, size_t ts, int level, int lod, const DC::DataVar &var, const vector<DC::CoordVar> &cvarsinfo, const DimsType &roi_dims,
-                                                   const DimsType &dims, const vector<float *> &blkvec, const vector<DimsType> &bsvec, const vector<DimsType> &bminvec,
-                                                   const vector<DimsType> &bmaxvec, const vector<int *> &conn_blkvec, const vector<DimsType> &conn_bsvec,
-                                                   const vector<DimsType> &conn_bminvec, const vector<DimsType> &conn_bmaxvec, const DimsType &vertexDims,
-                                                   const DimsType &faceDims, const DimsType &edgeDims, UnstructuredGrid::Location location, size_t maxVertexPerFace,
+                                                   const DimsType &dims, const vector<float *> &blkvec, const vector<DimsType> &bsvec, const vector<DimsType> &bminvec, const vector<DimsType> &bmaxvec,
+                                                   const vector<int *> &conn_blkvec, const vector<DimsType> &conn_bsvec, const vector<DimsType> &conn_bminvec, const vector<DimsType> &conn_bmaxvec,
+                                                   const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, UnstructuredGrid::Location location, size_t maxVertexPerFace,
                                                    size_t maxFacePerVertex, long vertexOffset, long faceOffset)
 {
     UnstructuredGrid *rg = NULL;

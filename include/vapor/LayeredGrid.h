@@ -43,8 +43,7 @@ public:
     //! min/max offsets as specified by \p bs, \p min, and \p max. The
     //! data values of \p rg provide the user coordinates for the Z dinmension.
     //!
-    LayeredGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords,
-                const RegularGrid &rg);
+    LayeredGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords, const RegularGrid &rg);
     LayeredGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords,
                 const RegularGrid &rg);
 
@@ -172,8 +171,7 @@ private:
     CoordType           _maxu = {{0.0, 0.0, 0.0}};
     int                 _interpolationOrder;
 
-    void _layeredGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords,
-                const RegularGrid &rg);
+    void _layeredGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords, const RegularGrid &rg);
 
     virtual float GetValueNearestNeighbor(const CoordType &coords) const override;
 

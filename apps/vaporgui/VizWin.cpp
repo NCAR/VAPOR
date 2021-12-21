@@ -727,8 +727,8 @@ string VizWin::_getCurrentDataMgrName() const
 void VizWin::_getUnionOfFieldVarExtents(RenderParams *rParams, DataMgr *dataMgr, int timeStep, int refLevel, int lod, CoordType &minExts, CoordType &maxExts)
 {
     vector<string> fieldVars = rParams->GetFieldVariableNames();
-    vector <int> axes;
-    bool ok = DataMgrUtils::GetExtents(dataMgr, timeStep, fieldVars, refLevel, lod, minExts, maxExts, axes);
+    vector<int>    axes;
+    bool           ok = DataMgrUtils::GetExtents(dataMgr, timeStep, fieldVars, refLevel, lod, minExts, maxExts, axes);
     VAssert(ok);
 }
 
@@ -776,7 +776,7 @@ void VizWin::updateManip(bool initialize)
 
     _getActiveExtents(minExts, maxExts);
 
-    CoordType  llc, urc;
+    CoordType            llc, urc;
     string               classType;
     VAPoR::RenderParams *rParams = _getRenderParams(classType);
     if (initialize || rParams == NULL) {
@@ -834,10 +834,10 @@ void VizWin::updateManip(bool initialize)
     VAPoR::Transform *rpTransform = NULL;
     if (rParams != NULL) rpTransform = rParams->GetTransform();
 
-    vector <double> llcVec = {llc[0], llc[1], llc[2]};
-    vector <double> urcVec = {urc[0], urc[1], urc[2]};
-    vector <double> minExtsVec = {minExts[0], minExts[1], minExts[2]};
-    vector <double> maxExtsVec = {maxExts[0], maxExts[1], maxExts[2]};
+    vector<double> llcVec = {llc[0], llc[1], llc[2]};
+    vector<double> urcVec = {urc[0], urc[1], urc[2]};
+    vector<double> minExtsVec = {minExts[0], minExts[1], minExts[2]};
+    vector<double> maxExtsVec = {maxExts[0], maxExts[1], maxExts[2]};
 
     _manip->Update(llcVec, urcVec, minExtsVec, maxExtsVec, rpTransform, dmTransform, constrain);
 

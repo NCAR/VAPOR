@@ -33,7 +33,7 @@ void PSliceSampleLocationSelector1D::updateGUI() const
     _slider->SetMinimum(min[_dim]);
     _slider->SetMaximum(max[_dim]);
 
-    vector <double> minVec = rp->GetValueDoubleVec(SliceParams::SampleLocationTag);
+    vector<double> minVec = rp->GetValueDoubleVec(SliceParams::SampleLocationTag);
     _slider->SetValue(minVec[_dim]);
 }
 

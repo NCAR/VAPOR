@@ -34,21 +34,20 @@ void LayeredGrid::_layeredGrid(const DimsType &dims, const DimsType &bs, const v
     _maxu[2] = (double)range[1];
 }
 
-LayeredGrid::LayeredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords,
-                         const RegularGrid &zrg)
-: StructuredGrid(dims, bs, blks), _sg2d(DimsType{dims[0], dims[1], 1}, DimsType{bs[0], bs[1], 1}, vector<float *>(), xcoords, ycoords, vector<double>()), _zrg(zrg),
-  _xcoords(xcoords), _ycoords(ycoords)
+LayeredGrid::LayeredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords, const RegularGrid &zrg)
+: StructuredGrid(dims, bs, blks), _sg2d(DimsType{dims[0], dims[1], 1}, DimsType{bs[0], bs[1], 1}, vector<float *>(), xcoords, ycoords, vector<double>()), _zrg(zrg), _xcoords(xcoords),
+  _ycoords(ycoords)
 {
     _layeredGrid(dims, bs, blks, xcoords, ycoords, zrg);
 }
 
 LayeredGrid::LayeredGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords,
                          const RegularGrid &zrg)
-: StructuredGrid(dimsv, bsv, blks), _sg2d(vector<size_t>(dimsv.begin(), dimsv.begin() + 2), vector<size_t>(bsv.begin(), bsv.begin() + 2), vector<float *>(), xcoords, ycoords, vector<double>()), _zrg(zrg),
-  _xcoords(xcoords), _ycoords(ycoords)
+: StructuredGrid(dimsv, bsv, blks), _sg2d(vector<size_t>(dimsv.begin(), dimsv.begin() + 2), vector<size_t>(bsv.begin(), bsv.begin() + 2), vector<float *>(), xcoords, ycoords, vector<double>()),
+  _zrg(zrg), _xcoords(xcoords), _ycoords(ycoords)
 {
-    DimsType dims = {1,1,1};
-    DimsType bs = {1,1,1};
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
     CopyToArr3(dimsv, dims);
     CopyToArr3(bsv, bs);
 

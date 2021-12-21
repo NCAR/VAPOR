@@ -326,15 +326,13 @@ void SliceRenderer::_populateDataYZ(float *dataValues, Grid *grid) const
 
 int SliceRenderer::_saveTextureData()
 {
-
     CoordType boxMin = {0.0, 0.0, 0.0};
     CoordType boxMax = {0.0, 0.0, 0.0};
     Grid::CopyToArr3(_cacheParams.boxMin, boxMin);
     Grid::CopyToArr3(_cacheParams.boxMax, boxMax);
 
     Grid *grid = nullptr;
-    int   rc =
-        DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, boxMin, boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
+    int   rc = DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, boxMin, boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
 
     if (rc < 0) {
         SetErrMsg("Unable to acquire Grid for Slice texture");

@@ -163,7 +163,7 @@ void DataStatus::_getExtents(size_t ts, const map<string, vector<var_info_t>> &v
         for (auto it = variables.begin(); it != variables.end(); ++it) {
             const var_info_t &var = *it;
 
-            CoordType minVExts, maxVExts;
+            CoordType      minVExts, maxVExts;
             vector<int>    axes;
             bool           status = DataMgrUtils::GetExtents(dataMgr, local_ts, var.varnames, var.refLevel, var.compLevel, minVExts, maxVExts, axes);
             if (!status) continue;
@@ -274,9 +274,9 @@ void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, st
 
 void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, size_t ts, CoordType &minExts, CoordType &maxExts) const
 {
-    for (int i=0; i<minExts.size(); i++) {
-        minExts[i] =  std::numeric_limits<double>::max();
-        maxExts[i] =  std::numeric_limits<double>::lowest();
+    for (int i = 0; i < minExts.size(); i++) {
+        minExts[i] = std::numeric_limits<double>::max();
+        maxExts[i] = std::numeric_limits<double>::lowest();
     }
 
     vector<string> dataSetNames = GetDataMgrNames();
@@ -294,9 +294,9 @@ void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, si
 
 void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, CoordType &minExts, CoordType &maxExts) const
 {
-    for (int i=0; i<minExts.size(); i++) {
-        minExts[i] =  std::numeric_limits<double>::max();
-        maxExts[i] =  std::numeric_limits<double>::lowest();
+    for (int i = 0; i < minExts.size(); i++) {
+        minExts[i] = std::numeric_limits<double>::max();
+        maxExts[i] = std::numeric_limits<double>::lowest();
     }
 
     vector<string> winNames = paramsMgr->GetVisualizerNames();

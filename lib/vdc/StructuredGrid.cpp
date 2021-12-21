@@ -21,7 +21,7 @@
 using namespace std;
 using namespace VAPoR;
 
-void StructuredGrid::_structuredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks) 
+void StructuredGrid::_structuredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks)
 {
     _cellDims = Grid::GetDimensions();
     for (int i = 0; i < _cellDims.size(); i++) {
@@ -30,15 +30,12 @@ void StructuredGrid::_structuredGrid(const DimsType &dims, const DimsType &bs, c
     }
 }
 
-StructuredGrid::StructuredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks) : Grid(dims, bs, blks, GetNumDimensions(dims))
-{
-    _structuredGrid(dims, bs, blks);
-}
+StructuredGrid::StructuredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks) : Grid(dims, bs, blks, GetNumDimensions(dims)) { _structuredGrid(dims, bs, blks); }
 
 StructuredGrid::StructuredGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks) : Grid(dimsv, bsv, blks, dimsv.size())
 {
-    DimsType dims = {1,1,1};
-    DimsType bs = {1,1,1};
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
     CopyToArr3(dimsv, dims);
     CopyToArr3(bsv, bs);
 
