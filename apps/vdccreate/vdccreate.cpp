@@ -288,15 +288,15 @@ int main(int argc, char **argv)
         if (rc < 0) exit(1);
     }
     if (!opt.ycoords.empty()) {
-        rc = read_float_vec(opt.ycoords, opt.dim.nx, ycoords);
+        rc = read_float_vec(opt.ycoords, opt.dim.ny, ycoords);
         if (rc < 0) exit(1);
     }
     if (!opt.zcoords.empty()) {
-        rc = read_float_vec(opt.zcoords, opt.dim.nx, zcoords);
+        rc = read_float_vec(opt.zcoords, opt.dim.nz, zcoords);
         if (rc < 0) exit(1);
     }
     if (!opt.tcoords.empty()) {
-        rc = read_float_vec(opt.tcoords, opt.dim.nx, tcoords);
+        rc = read_float_vec(opt.tcoords, opt.numts, tcoords);
         if (rc < 0) exit(1);
     }
 

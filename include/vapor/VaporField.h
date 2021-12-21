@@ -75,6 +75,7 @@ public:
     //
     void AssignDataManager(VAPoR::DataMgr *dmgr);
     void UpdateParams(const VAPoR::FlowParams *);
+    void ReleaseLockedGrids();    // Supposed to be invoked at the end of each paintGL event.
 
     //
     // Find one index whose timestamp is just below a given time

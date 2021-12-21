@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <string>
 #include <algorithm>
+#include <memory>
 
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
@@ -37,7 +38,7 @@ std::vector<void *> Heap;
 
 void DeleteHeap()
 {
-    for (size_t i = 0; i < Heap.size(); i++) ::operator delete(Heap[i]);
+    for (size_t i = 0; i < Heap.size(); i++) std::free(Heap[i]);
 }
 
 template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, const vector<size_t> &dims)
@@ -54,9 +55,10 @@ template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, co
         nblocks *= nb;
     }
 
-    T *buf = new T[nblocks * block_size];
+    void *tmp = std::malloc(sizeof(T) * nblocks * block_size);
+    T *   buf = static_cast<T *>(tmp);
 
-    Heap.push_back(buf);
+    Heap.push_back(tmp);
 
     std::vector<T *> blks;
     for (size_t i = 0; i < nblocks; i++) { blks.push_back(buf + i * block_size); }
@@ -441,16 +443,16 @@ VAPoR::CurvilinearGrid *MakeCurvilinearTerrainGrid(const std::vector<size_t> &bs
     std::vector<double> maxu2d = {maxu[X], maxu[Y]};
 
     std::vector<float *> xblks = AllocateBlocks(bs2d, dims2d);
-    RegularGrid *        xrg = new RegularGrid(dims2d, bs2d, xblks, minu2d, maxu2d);
-    MakeRampOnAxis(xrg, minu[X], maxu[X], X);
+    auto                 xrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims2d, bs2d, xblks, minu2d, maxu2d));
+    MakeRampOnAxis(xrg.get(), minu[X], maxu[X], X);
 
     std::vector<float *> yblks = AllocateBlocks(bs2d, dims2d);
-    RegularGrid *        yrg = new RegularGrid(dims2d, bs2d, yblks, minu2d, maxu2d);
-    MakeRampOnAxis(yrg, minu[Y], maxu[Y], Y);
+    auto                 yrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims2d, bs2d, yblks, minu2d, maxu2d));
+    MakeRampOnAxis(yrg.get(), minu[Y], maxu[Y], Y);
 
     std::vector<float *> zblks = AllocateBlocks(bs, dims);
-    RegularGrid *        zrg = new RegularGrid(dims, bs, zblks, minu, maxu);
-    MakeRampOnAxis(zrg, minu[Z], maxu[Z], Z);
+    auto                 zrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims, bs, zblks, minu, maxu));
+    MakeRampOnAxis(zrg.get(), minu[Z], maxu[Z], Z);
 
     std::vector<float *> blks = AllocateBlocks(bs, dims);
     CurvilinearGrid *    cg = new CurvilinearGrid(dims, bs, blks, *xrg, *yrg, *zrg, NULL);

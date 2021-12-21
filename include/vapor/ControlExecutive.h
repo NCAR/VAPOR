@@ -686,6 +686,8 @@ private:
     void _removeRendererHelper(string winName, string dataSetName, string paramsType, string renderName, bool removeFromParamsFlag, bool hasOpenGLContext);
 
     void _autoStretchExtents(string dataSetName);
+
+    void _setDefaultOrigin(string datasetName);
 };
 };    // namespace VAPoR
 

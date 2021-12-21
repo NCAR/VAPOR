@@ -51,6 +51,13 @@ const string RenderParams::_RefinementLevelTag = "RefinementLevel";
 const string RenderParams::_transferFunctionsTag = "MapperFunctions";
 const string RenderParams::_stretchFactorsTag = "StretchFactors";
 const string RenderParams::_currentTimestepTag = "CurrentTimestep";
+const string RenderParams::XSlicePlaneOriginTag = "XSlicePlaneOrigin";
+const string RenderParams::YSlicePlaneOriginTag = "YSlicePlaneOrigin";
+const string RenderParams::ZSlicePlaneOriginTag = "ZSlicePlaneOrigin";
+const string RenderParams::XSlicePlaneRotationTag = "XSlicePlaneRotation";
+const string RenderParams::YSlicePlaneRotationTag = "YSlicePlaneRotation";
+const string RenderParams::ZSlicePlaneRotationTag = "ZSlicePlaneRotation";
+const string RenderParams::SampleRateTag = "SampleRate";
 
 #define REQUIRED_SAMPLE_SIZE 1000000
 
@@ -848,3 +855,5 @@ vector<string> RenParamsContainer::GetNames() const
 
     return (names);
 }
+
+bool RenderParams::GetOrientable() const { return false; }

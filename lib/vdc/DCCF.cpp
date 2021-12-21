@@ -376,7 +376,7 @@ bool DCCF::_isUniform(NetCDFCFCollection *ncdfc, string varname)
 
     if (dims.size() != 1) return (false);
 
-    if (dims[0] == 2) return (true);
+    if (dims[0] < 2) return (true);
 
     vector<float> buf(dims[0]);
 
@@ -393,6 +393,8 @@ bool DCCF::_isUniform(NetCDFCFCollection *ncdfc, string varname)
     }
     ncdfc->Close(fd);
     EnableErrMsg(enabled);
+
+    VAssert(buf.size() >= 2);
 
     float epsilon = 0.0001;
     float delta = buf[1] - buf[0];

@@ -95,6 +95,7 @@ private:
     void _preRender();
     void _postRender();
     void updateManip(bool initialize = false);
+    void _updateOriginGlyph();
 
     // Event handling
     // Virtual overrides:
