@@ -1054,7 +1054,6 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
         if (data_dims.size() == 1) {
             VAssert(coord_dims.size() == 1);
             VAssert(order == 0);
-            VAssert(data_dims[0].GetLength() == coord_dims[0].GetLength());
 
             coord_dimlens.push_back(data_dimlens[0]);
             coord_bmin.push_back(data_bmin[0]);
@@ -1064,14 +1063,11 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
             VAssert(order >= 0 && order <= 1);
 
             if (coord_dims.size() == 1) {
-                VAssert(data_dims[order].GetLength() == coord_dims[0].GetLength());
 
                 coord_dimlens.push_back(data_dimlens[order]);
                 coord_bmin.push_back(data_bmin[order]);
                 coord_bmax.push_back(data_bmax[order]);
             } else {
-                VAssert(data_dims[0].GetLength() == coord_dims[0].GetLength());
-                VAssert(data_dims[1].GetLength() == coord_dims[1].GetLength());
 
                 coord_dimlens.push_back(data_dimlens[0]);
                 coord_bmin.push_back(data_bmin[0]);
@@ -1085,7 +1081,6 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
             VAssert(order >= 0 && order <= 2);
 
             if (coord_dims.size() == 1) {
-                VAssert(data_dims[order].GetLength() == coord_dims[0].GetLength());
 
                 coord_dimlens.push_back(data_dimlens[order]);
                 coord_bmin.push_back(data_bmin[order]);
