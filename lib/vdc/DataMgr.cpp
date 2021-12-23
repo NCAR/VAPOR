@@ -975,7 +975,7 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, CoordT
 
     if (rc == 1) {
         SetErrMsg("Failed to get requested variable: spatial extents out of range");
-        return(NULL);
+        return (NULL);
     }
 
     return (DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui, lock));

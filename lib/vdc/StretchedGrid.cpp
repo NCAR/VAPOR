@@ -164,8 +164,10 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const StretchedGrid *sg, bool be
     const DimsType &dims = sg->GetDimensions();
 
     if (!begin) {
-        if (ndims < 1) _index[0] = 1; // edge case for 0D grids
-        else _index[ndims - 1] = dims[ndims - 1];
+        if (ndims < 1)
+            _index[0] = 1;    // edge case for 0D grids
+        else
+            _index[ndims - 1] = dims[ndims - 1];
     }
 
     if (_sg->GetGeometryDim() >= 1) _coords[0] = _sg->_xcoords[0];

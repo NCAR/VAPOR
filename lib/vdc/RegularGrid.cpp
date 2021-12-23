@@ -303,8 +303,10 @@ RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const RegularGrid *rg, bool begin)
 
 
     if (!begin) {
-        if (_nDims < 1) _index[0] = 1; // edge case for 0D grids
-        else _index[_nDims - 1] = _dims[_nDims - 1];
+        if (_nDims < 1)
+            _index[0] = 1;    // edge case for 0D grids
+        else
+            _index[_nDims - 1] = _dims[_nDims - 1];
     }
 }
 

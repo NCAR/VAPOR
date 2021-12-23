@@ -288,8 +288,10 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
         _yCoordItr = _cg->_yrg.cend();
         if (_terrainFollowing) { _zCoordItr = _cg->_zrg.cend(); }
 
-        if (ndims < 1) _index[0] = 1; // edge case for 0D grids
-        else _index[ndims - 1] = dims[ndims - 1];
+        if (ndims < 1)
+            _index[0] = 1;    // edge case for 0D grids
+        else
+            _index[ndims - 1] = dims[ndims - 1];
 
         return;
     }
