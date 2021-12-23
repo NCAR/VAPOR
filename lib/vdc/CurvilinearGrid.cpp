@@ -101,13 +101,6 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dimsv, const vector<size_
     VAssert(dimsv.size() == 3);
     VAssert(bsv.size() == dimsv.size());
 
-    // Only support 2D X & Y coordinates currently. I.e. only support
-    // "layered" curvilinear grids
-    //
-    VAssert(xrg.GetNumDimensions() == 2);
-    VAssert(yrg.GetNumDimensions() == 2);
-    VAssert(zrg.GetNumDimensions() == 3);
-
     _terrainFollowing = true;
 
     DimsType dims = {1, 1, 1};
@@ -294,7 +287,10 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
         _xCoordItr = _cg->_xrg.cend();
         _yCoordItr = _cg->_yrg.cend();
         if (_terrainFollowing) { _zCoordItr = _cg->_zrg.cend(); }
-        _index[ndims - 1] = dims[ndims - 1];
+
+        if (ndims < 1) _index[0] = 1; // edge case for 0D grids
+        else _index[ndims - 1] = dims[ndims - 1];
+
         return;
     }
     _coords[0] = *_xCoordItr;
@@ -342,6 +338,8 @@ void CurvilinearGrid::ConstCoordItrCG::next()
         if (_terrainFollowing) { _coords[2] = *_zCoordItr; }
         return;
     }
+
+    if (_cg->GetNumDimensions() <= 1) return;
 
     _index[0] = 0;
     _index[1]++;

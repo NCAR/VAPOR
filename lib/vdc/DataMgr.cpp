@@ -974,9 +974,8 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, CoordT
     if (rc < 0) return (NULL);
 
     if (rc == 1) {
-        // Why not return NULL?
-        //
-        return (new RegularGrid());
+        SetErrMsg("Failed to get requested variable: spatial extents out of range");
+        return(NULL);
     }
 
     return (DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui, lock));
@@ -2374,7 +2373,7 @@ bool DataMgr::BlkExts::Intersect(const CoordType &min, const CoordType &max, Dim
         for (int j = 0; j < min.size(); j++) {
             if (_maxs[offset][j] < min[j] || _mins[offset][j] > max[j]) {
                 overlap = false;
-                continue;
+                break;
             }
         }
 

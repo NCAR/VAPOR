@@ -288,9 +288,14 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const Grid *g, bool begin) : Cons
     _nDims = g->GetNumNodeDimensions();
     _index = {0, 0, 0};
     _lastIndex = {0, 0, 0};
-    if (_nDims) _lastIndex[_nDims - 1] = _dims[_nDims - 1];
 
-    if (!begin) { _index = _lastIndex; }
+    if (!begin) {
+        if (_nDims < 1) _lastIndex[0] = 1; // edge case for 0D grids
+        else _lastIndex[_nDims - 1] = _dims[_nDims - 1];
+
+        _index = _lastIndex; 
+    }
+
 }
 
 Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const ConstNodeIteratorSG &rhs) : ConstNodeIteratorAbstract()
@@ -311,10 +316,8 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG() : ConstNodeIteratorAbstract()
 
 void Grid::ConstNodeIteratorSG::next()
 {
-    if (!_nDims) return;
-
     _index[0]++;
-    if (_index[0] < _dims[0] || _nDims == 1) { return; }
+    if (_index[0] < _dims[0] || _nDims <= 1) { return; }
 
     _index[0] = 0;
     _index[1]++;
@@ -382,8 +385,13 @@ Grid::ConstCellIteratorSG::ConstCellIteratorSG(const Grid *g, bool begin) : Cons
     _nDims = g->GetNumCellDimensions();
     _index = {0, 0, 0};
     _lastIndex = _index;
-    _lastIndex[_nDims - 1] = _dims[_nDims - 1];
-    if (!begin) { _index = _lastIndex; }
+
+    if (!begin) {
+        if (_nDims < 1) _lastIndex[0] = 1; // edge case for 0D grids
+        else _lastIndex[_nDims - 1] = _dims[_nDims - 1];
+
+        _index = _lastIndex; 
+    }
 }
 
 Grid::ConstCellIteratorSG::ConstCellIteratorSG(const ConstCellIteratorSG &rhs) : ConstCellIteratorAbstract()
@@ -405,7 +413,7 @@ Grid::ConstCellIteratorSG::ConstCellIteratorSG() : ConstCellIteratorAbstract()
 void Grid::ConstCellIteratorSG::next()
 {
     _index[0]++;
-    if (_index[0] < (_dims[0]) || _nDims == 1) { return; }
+    if (_index[0] < (_dims[0]) || _nDims <= 1) { return; }
 
     _index[0] = 0;
     _index[1]++;
@@ -538,8 +546,6 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
     _indexL = 0;
 
     _end_indexL = 0;
-
-    if (_ndims < 1) return;
 
     _end_indexL = Wasp::VProduct(_dims3d.data(), _dims3d.size());
     if (!begin || !_blks.size()) {

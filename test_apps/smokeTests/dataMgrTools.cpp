@@ -111,6 +111,10 @@ void TestVariables(VAPoR::DataMgr &dataMgr, bool silenceTime)
             }
 
             VAPoR::Grid *grid = dataMgr.GetVariable(0, varName, -1, -1, minExt, maxExt);
+            if (! grid) {
+                cerr << "Failed to read variable " << varName << endl;
+                exit (1);
+            }
             double       rms;
             size_t       numMissingValues;
             size_t       disagreements;

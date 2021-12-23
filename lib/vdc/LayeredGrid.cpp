@@ -180,7 +180,7 @@ bool LayeredGrid::_insideGrid(const CoordType &coords, DimsType &indices, double
     z0 = zcoords[indices[2]];
     z1 = indices[2] < nz - 1 ? zcoords[indices[2] + 1] : z0;
 
-    wgts[2] = 1.0 - (coords[2] - z0) / (z1 - z0);
+    wgts[2] = z0 == z1 ? 1.0 : (1.0 - (coords[2] - z0) / (z1 - z0));
 
     return (true);
 }
