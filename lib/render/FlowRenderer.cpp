@@ -316,8 +316,11 @@ int FlowRenderer::_paintGL(bool fast)
                 rv = _2ndAdvection->CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
 
             if (setAllToFinalValue) {
-                _advection.SetAllStreamValuesToFinalValue();
-                if (_2ndAdvection) _2ndAdvection->SetAllStreamValuesToFinalValue();
+                int numSamplesPerStream;
+                if (_cache_isSteady) numSamplesPerStream = _cache_steadyNumOfSteps;
+                else numSamplesPerStream = _cache_currentTS;
+                _advection.SetAllStreamValuesToFinalValue(numSamplesPerStream);
+                if (_2ndAdvection) _2ndAdvection->SetAllStreamValuesToFinalValue(numSamplesPerStream);
             }
 
             vector<double> histoRange;
@@ -910,6 +913,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
                 if (_velocityStatus == FlowStatus::UPTODATE) _velocityStatus = FlowStatus::TIME_STEP_OOD;
             }
             if (params->GetSteadyNumOfSteps() != _cache_steadyNumOfSteps) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
+            if (params->GetSteadyNumOfSteps() < _cache_steadyNumOfSteps && doIntegration) _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
             _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
 
             if (_cache_currentTS != params->GetCurrentTimestep()) {

@@ -402,18 +402,29 @@ void Advection::_calculateParticleIntegratedValue(Particle &p, const Particle &p
     p.value = prev.value + value * dist * distScale;
 }
 
-void Advection::SetAllStreamValuesToFinalValue()
+void Advection::SetAllStreamValuesToFinalValue(int realNSamples)
 {
     for (auto &s : _streams) {
-        int start = 0;
-        int sSize = s.size();
-        if (sSize && s[0].IsSpecial()) start = 1;
-
-        for (int i = 0; i < sSize - 1; i++) {
-            if (s[i + 1].IsSpecial() || i == sSize - 2) {
-                for (int j = start; j < i; j++) { s[j].value = s[i].value; }
-                start = i + 2;
+        float finalValue = 0;
+        
+        int sampleCount = 0;
+        for (auto &p : s) {
+            if (!p.IsSpecial()) {
+                finalValue = p.value;
+                sampleCount++;
             }
+            if (sampleCount == realNSamples)
+                break;
+        }
+        
+        int setCount = 0;
+        for (auto &p : s) {
+            if (!p.IsSpecial()) {
+                p.value = finalValue;
+                setCount++;
+            }
+            if (setCount == sampleCount)
+                break;
         }
     }
 }

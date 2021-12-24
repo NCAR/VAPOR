@@ -40,7 +40,7 @@ public:
     int CalculateParticleValues(Field *scalarField, bool skipNonZero);
     int CalculateParticleIntegratedValues(Field *scalarField, const bool skipNonZero, const float distScale = 1.f, const std::vector<double> &integrateWithinVolumeMin = {-FLT_MAX, -FLT_MAX, -FLT_MAX},
                                           const std::vector<double> &integrateWithinVolumeMax = {FLT_MAX, FLT_MAX, FLT_MAX});
-    void SetAllStreamValuesToFinalValue();
+    void SetAllStreamValuesToFinalValue(int realNSamples);
     int CalculateParticleProperties(Field *scalarField);
 
     void CalculateParticleHistogram(std::vector<double> &bounds, std::vector<long> &bins);
