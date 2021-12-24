@@ -406,25 +406,23 @@ void Advection::SetAllStreamValuesToFinalValue(int realNSamples)
 {
     for (auto &s : _streams) {
         float finalValue = 0;
-        
+
         int sampleCount = 0;
         for (auto &p : s) {
             if (!p.IsSpecial()) {
                 finalValue = p.value;
                 sampleCount++;
             }
-            if (sampleCount == realNSamples)
-                break;
+            if (sampleCount == realNSamples) break;
         }
-        
+
         int setCount = 0;
         for (auto &p : s) {
             if (!p.IsSpecial()) {
                 p.value = finalValue;
                 setCount++;
             }
-            if (setCount == sampleCount)
-                break;
+            if (setCount == sampleCount) break;
         }
     }
 }

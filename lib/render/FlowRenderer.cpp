@@ -317,8 +317,10 @@ int FlowRenderer::_paintGL(bool fast)
 
             if (setAllToFinalValue) {
                 int numSamplesPerStream;
-                if (_cache_isSteady) numSamplesPerStream = _cache_steadyNumOfSteps;
-                else numSamplesPerStream = _cache_currentTS;
+                if (_cache_isSteady)
+                    numSamplesPerStream = _cache_steadyNumOfSteps;
+                else
+                    numSamplesPerStream = _cache_currentTS;
                 _advection.SetAllStreamValuesToFinalValue(numSamplesPerStream);
                 if (_2ndAdvection) _2ndAdvection->SetAllStreamValuesToFinalValue(numSamplesPerStream);
             }
