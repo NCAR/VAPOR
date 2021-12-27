@@ -408,6 +408,7 @@ bool DCCF::_isUniform(NetCDFCFCollection *ncdfc, string varname)
 int DCCF::addCoordvars(NetCDFCFCollection *ncdfc, const vector<string> &cvars, std::map<string, DC::CoordVar> &coordVarsMap)
 {
     for (int i = 0; i < cvars.size(); i++) {
+
         // Get dimension names
         //
         vector<string> dimnames = ncdfc->GetDimNames(cvars[i]);
@@ -669,6 +670,12 @@ int DCCF::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> 
     // For each variable add a member to dataVarsMap
     //
     for (auto varName : vars) {
+
+        // A variable can't be both a data variable and a coordinate variable
+        //
+        auto itr = _coordVarsMap.find(varName);
+        if (itr != _coordVarsMap.end()) continue;
+
         // variable type must be float or int
         //
         int type = ncdfc->GetXType(varName);

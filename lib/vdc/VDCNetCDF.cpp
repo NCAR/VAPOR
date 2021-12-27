@@ -978,7 +978,10 @@ int VDCNetCDF::CopyVar(DC &dc, size_t ts, string varname, int srclod, int dstlod
     if (fdr < 0) return (fdr);
 
     int fdw = OpenVariableWrite(ts, varname, dstlod);
-    if (fdw < 0) return (fdw);
+    if (fdw < 0) {
+        dc.CloseVariable(fdr);
+        return (fdw);
+    }
 
     if (varInfo.GetXType() == FLOAT || varInfo.GetXType() == DOUBLE) {
         size_t bufsize = vproduct(buffer_dims);

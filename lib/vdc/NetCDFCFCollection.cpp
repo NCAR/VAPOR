@@ -144,7 +144,10 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
         } else if (_IsVertCoordVar(varinfo)) {
             _vertCoordVars.push_back(varName);
             _auxCoordinateVars.push_back(varName);
-        } else if (_IsTimeCoordVar(varinfo)) {
+        //
+        // Only support CF "Coordinate" variables as time coord variables
+        //
+        } else if (_IsCoordinateVar(varinfo) && _IsTimeCoordVar(varinfo)) {
             _timeCoordVars.push_back(varName);
             _auxCoordinateVars.push_back(varName);
         }
