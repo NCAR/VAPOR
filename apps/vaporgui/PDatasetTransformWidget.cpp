@@ -27,6 +27,7 @@ void PDatasetTransformWidget::updateGUI() const
     auto             stateParams = ((GUIStateParams *)pm->GetParams(GUIStateParams::GetClassType()));
     auto             activeViz = stateParams->GetActiveVizName();
     ViewpointParams *vp = pm->GetViewpointParams(activeViz);
+    if (!vp) return;
 
     DataStatus *   dataStatus = _ce->GetDataStatus();
     vector<string> datasets = dataStatus->GetDataMgrNames();
