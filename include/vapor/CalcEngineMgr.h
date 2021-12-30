@@ -49,6 +49,7 @@ public:
     //! \p paramsMgr passed in to the constructor
     //
     void ReinitFromState() { _sync(); }
+    void Clean() { _clean(); }
 
 private:
     const DataStatus *_dataStatus;

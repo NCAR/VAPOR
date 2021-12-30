@@ -458,6 +458,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     // new data manager
     //
     if (_dataStatus->GetDataMgr(dataSetName)) {
+        _calcEngineMgr->Clean();
         _dataStatus->Close(dataSetName);
 
         vector<string> vizNames = _paramsMgr->GetVisualizerNames();
