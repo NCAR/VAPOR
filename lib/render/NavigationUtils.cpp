@@ -255,7 +255,7 @@ void NavigationUtils::SetTimestep(ControlExec *ce, size_t ts)
 
                     MapperFunction *tf = rp->GetMapperFunc(varNames[i]);
                     vector<double>  range = tf->getMinMaxMapValue();
-                    if (abs(range[1] - range[0]) > FLT_EPSILON) continue;
+                    if (abs(range[1] - range[0]) > FLT_EPSILON * max(abs(range[0]), abs(range[1]))) continue;
 
                     DataMgr *dm = dataStatus->GetDataMgr(dataSetNames[j]);
                     if (!dm) continue;
