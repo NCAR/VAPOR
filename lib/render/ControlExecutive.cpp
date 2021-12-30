@@ -489,6 +489,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     for (int i = 0; i < appRenderParams.size(); i++) {
         int rc = appRenderParams[i]->Initialize();
         if (rc < 0) {
+            _calcEngineMgr->Clean();
             _dataStatus->Close(dataSetName);
             _paramsMgr->RemoveDataMgr(dataSetName);
             SetErrMsg("Failure to initialize application renderer \"%s\"", appRenderParams[i]->GetName().c_str());
@@ -536,6 +537,7 @@ void ControlExec::CloseData(string dataSetName)
     //
     _calcEngineMgr->ReinitFromState();
 
+    _calcEngineMgr->Clean();
     _dataStatus->Close(dataSetName);
 
     UndoRedoClear();
