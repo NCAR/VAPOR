@@ -532,11 +532,6 @@ void ControlExec::CloseData(string dataSetName)
 
     _paramsMgr->RemoveDataMgr(dataSetName);
 
-    // Rebuild the calculation engine from params database after removing
-    // the data set from the params database.
-    //
-    _calcEngineMgr->ReinitFromState();
-
     _calcEngineMgr->Clean();
     _dataStatus->Close(dataSetName);
 
