@@ -49,6 +49,10 @@ public:
     //! \p paramsMgr passed in to the constructor
     //
     void ReinitFromState() { _sync(); }
+
+    //! Remove all functions added with AddFunction()
+    //!
+    //! \sa AddFunction()
     void Clean() { _clean(); }
 
 private:
