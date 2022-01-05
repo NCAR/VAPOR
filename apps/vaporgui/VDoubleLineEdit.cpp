@@ -14,16 +14,8 @@ VDoubleLineEdit::VDoubleLineEdit(double value) : VNumericLineEdit(), _value(valu
 
 void VDoubleLineEdit::SetValueDouble(double value)
 {
+    _value = value;
     std::string formattedNumber = _formatValue(value);
-
-    try {
-        _value = std::stod(formattedNumber);
-    } catch (const std::invalid_argument &) {
-        return;
-    } catch (const std::out_of_range &) {
-        return;
-    }
-
     SetValueString(formattedNumber);
 }
 
