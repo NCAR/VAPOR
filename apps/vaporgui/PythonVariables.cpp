@@ -107,7 +107,6 @@ PythonVariables::~PythonVariables()
 
 void PythonVariables::Update(bool internalUpdate)
 {
-
     VAPoR::DataStatus * dataStatus = _controlExec->GetDataStatus();
     std::vector<string> dataMgrNames = dataStatus->GetDataMgrNames();
 
