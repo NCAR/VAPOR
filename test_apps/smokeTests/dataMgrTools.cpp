@@ -110,7 +110,6 @@ void TestVariables(VAPoR::DataMgr &dataMgr, bool silenceTime)
                 double width = (maxExt[i] - minExt[i]) / 32.0;
                 minExt[i] = center - (width / 2.0);
                 maxExt[i] = center + (width / 2.0);
-                //maxExt[i] = minExt[i] + maxExt[i] / 32.0;
             }
 
             VAPoR::Grid *grid = dataMgr.GetVariable(0, varName, -1, -1, minExt, maxExt);
