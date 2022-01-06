@@ -104,7 +104,7 @@ void TestVariables(VAPoR::DataMgr &dataMgr, bool silenceTime)
             VAPoR::CoordType minExt, maxExt;
             dataMgr.GetVariableExtents(0, varName, -1, -1, minExt, maxExt);
 
-            // Reduce extents to test, while maintaining the same origin
+            // Reduce extents about the center of the volume to speed tests
             for (int i = 0; i < minExt.size(); i++) {
                 double center = (maxExt[i] + minExt[i]) / 2.0;
                 double width = (maxExt[i] - minExt[i]) / 32.0;
