@@ -684,28 +684,22 @@ void MainForm::_createAnimationToolBar()
 void MainForm::_createVizToolBar()
 {
     // Actions for the viztoolbar:
-    QPixmap *homeIcon = new QPixmap(home);
-    _homeAction = new QAction(*homeIcon, QString(tr("Go to Home Viewpoint  ")), this);
+    _homeAction = new QAction(QPixmap(home), QString(tr("Go to Home Viewpoint  ")), this);
     _homeAction->setShortcut(QKeySequence(tr("Ctrl+H")));
     _homeAction->setShortcut(Qt::CTRL + Qt::Key_H);
 
-    QPixmap *sethomeIcon = new QPixmap(sethome);
-    _sethomeAction = new QAction(*sethomeIcon, "Set Home Viewpoint", this);
+    _sethomeAction = new QAction(QPixmap(sethome), "Set Home Viewpoint", this);
 
-    QPixmap *eyeIcon = new QPixmap(eye);
-    _viewAllAction = new QAction(*eyeIcon, QString(tr("View All  ")), this);
+    _viewAllAction = new QAction(QPixmap(eye), QString(tr("View All  ")), this);
     _viewAllAction->setShortcut(QKeySequence(tr("Ctrl+V")));
     _viewAllAction->setShortcut(Qt::CTRL + Qt::Key_V);
 
-    QPixmap *magnifyIcon = new QPixmap(magnify);
-    _viewRegionAction = new QAction(*magnifyIcon, "View Region", this);
+    _viewRegionAction = new QAction(QPixmap(magnify), "View Region", this);
 
-    QPixmap *tileIcon = new QPixmap(tiles);
-    _tileAction = new QAction(*tileIcon, QString(tr("Tile Windows  ")), this);
+    _tileAction = new QAction(QPixmap(tiles), QString(tr("Tile Windows  ")), this);
     _tileAction->setShortcut(Qt::CTRL + Qt::Key_T);
 
-    QPixmap *cascadeIcon = new QPixmap(cascade);
-    _cascadeAction = new QAction(*cascadeIcon, "Cascade Windows", this);
+    _cascadeAction = new QAction(QPixmap(cascade), "Cascade Windows", this);
 
     // Viz tool bar:
     //

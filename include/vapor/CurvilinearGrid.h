@@ -35,7 +35,7 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
 public:
     //! \copydoc StructuredGrid::StructuredGrid()
     //!
-    //! Construct a layered, horizontally curvlinear 3D grid
+    //! Construct a vetically stretched, horizontally curvlinear 3D grid
     //!
     //! This constructor instantiates a curvilinear grid  where the x,y,z
     //! user coordinates are expressed as follows:
@@ -68,6 +68,8 @@ public:
     //!
     //! \sa RegularGrid()
     //
+    CurvilinearGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const std::vector<double> &zcoords,
+                    std::shared_ptr<const QuadTreeRectangleP> qtr);
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
                     const std::vector<double> &zcoords, std::shared_ptr<const QuadTreeRectangleP> qtr);
 
@@ -107,6 +109,8 @@ public:
     //!
     //! \sa RegularGrid()
     //
+    CurvilinearGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg,
+                    std::shared_ptr<const QuadTreeRectangleP> qtr);
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg,
                     std::shared_ptr<const QuadTreeRectangleP> qtr);
 
@@ -141,6 +145,7 @@ public:
     //!
     //! \sa RegularGrid()
     //
+    CurvilinearGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, std::shared_ptr<const QuadTreeRectangleP> qtr);
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
                     std::shared_ptr<const QuadTreeRectangleP> qtr);
 

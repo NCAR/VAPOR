@@ -193,7 +193,10 @@ int CopyVar2d3dMask(DC &dc, VDCNetCDF &vdc, size_t ts, string varname, int lod)
     if (fdr < 0) return (fdr);
 
     int fdw = vdc.OpenVariableWrite(ts, maskvar, lod);
-    if (fdw < 0) return (fdw);
+    if (fdw < 0) {
+        dc.CloseVariable(fdr);
+        return (fdw);
+    }
 
     size_t bufsize = vproduct(buffer_dims);
     float *buffer = (float *)dataBuffer.Alloc(bufsize * sizeof(*buffer));

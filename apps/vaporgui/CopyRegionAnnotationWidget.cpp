@@ -56,9 +56,13 @@ void CopyRegionAnnotationWidget::copyRegion()
         VAssert(copyParams);
 
         Box *               copyBox = copyParams->GetBox();
-        std::vector<double> minExtents, maxExtents;
-        copyBox->GetExtents(minExtents, maxExtents);
-        VAssert(minExtents.size() == maxExtents.size());
+        std::vector<double> minExtentsVec, maxExtentsVec;
+        copyBox->GetExtents(minExtentsVec, maxExtentsVec);
+
+        CoordType minExtents = {0.0, 0.0, 0.0};
+        CoordType maxExtents = {0.0, 0.0, 0.0};
+        Grid::CopyToArr3(minExtentsVec, minExtents);
+        Grid::CopyToArr3(maxExtentsVec, maxExtents);
 
         AnnotationParams *a = _paramsMgr->GetAnnotationParams(visualizer);
         AxisAnnotation *  aa = a->GetAxisAnnotation();
@@ -69,17 +73,17 @@ void CopyRegionAnnotationWidget::copyRegion()
 
         _scaleWorldCoordsToNormalized(minExtents, maxExtents, timeStep);
 
-        aa->SetAxisOrigin(minExtents);
-        aa->SetMinTics(minExtents);
-        aa->SetMaxTics(maxExtents);
+        aa->SetAxisOrigin(minExtentsVec);
+        aa->SetMinTics(minExtentsVec);
+        aa->SetMaxTics(maxExtentsVec);
 
         emit valueChanged();
     }
 }
 
-void CopyRegionAnnotationWidget::_scaleWorldCoordsToNormalized(std::vector<double> &minExts, std::vector<double> &maxExts, int timeStep)
+void CopyRegionAnnotationWidget::_scaleWorldCoordsToNormalized(CoordType &minExts, CoordType &maxExts, int timeStep)
 {
-    std::vector<double> minDomainExts, maxDomainExts;
+    VAPoR::CoordType    minDomainExts, maxDomainExts;
     DataStatus *        dataStatus = _controlExec->GetDataStatus();
     dataStatus->GetActiveExtents(_paramsMgr, timeStep, minDomainExts, maxDomainExts);
     VAssert(minExts.size() == maxExts.size());

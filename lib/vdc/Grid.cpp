@@ -27,11 +27,8 @@ Grid::Grid()
     _nDims = 0;
 }
 
-Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, size_t topology_dimension)
+void Grid::_grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension)
 {
-    VAssert(dims.size() == bs.size());
-    VAssert(dims.size() <= 3);
-
     for (int i = 0; i < bs.size(); i++) {
         VAssert(bs[i] > 0);
         VAssert(dims[i] > 0);
@@ -44,10 +41,8 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     VAssert(blks.size() == 0 ||    // dataless
             blks.size() == std::accumulate(_bdims.begin(), _bdims.end(), 1, std::multiplies<size_t>()));
 
-    assert(dims.size() <= 3);    // will help debug.
-    _dims = {1, 1, 1};
-    _nDims = dims.size();
-    std::copy(dims.begin(), dims.begin() + dims.size(), _dims.begin());
+    _dims = dims;
+    _nDims = GetNumDimensions(dims);
     _periodic = vector<bool>(topology_dimension, false);
     _topologyDimension = topology_dimension;
     _missingValue = INFINITY;
@@ -55,13 +50,38 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     _interpolationOrder = 0;
     _nodeIDOffset = 0;
     _cellIDOffset = 0;
-    _minAbs = vector<size_t>(_nDims, 0);
+    _minAbs = {0, 0, 0};
 
     //
     // Shallow  copy blocks
     //
     _blks = blks;
 }
+
+Grid::Grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension) { _grid(dims, bs, blks, topology_dimension); }
+
+Grid::Grid(const std::vector<size_t> &dimsv, const std::vector<size_t> &bsv, const std::vector<float *> &blks, size_t topology_dimension)
+{
+    VAssert(dimsv.size() <= 3);
+    VAssert(dimsv.size() == bsv.size());
+
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
+    CopyToArr3(dimsv, dims);
+    CopyToArr3(bsv, bs);
+    _grid(dims, bs, blks, topology_dimension);
+}
+
+size_t Grid::GetNumDimensions(DimsType dims)
+{
+    size_t nDims = 0;
+    for (size_t i = 0; i < dims.size(); i++) {
+        VAssert(dims[i] > 0);
+        if (dims[i] > 1) nDims++;
+    }
+    return (nDims);
+}
+
 
 float Grid::GetMissingValue() const { return (_missingValue); }
 
@@ -268,9 +288,15 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const Grid *g, bool begin) : Cons
     _nDims = g->GetNumNodeDimensions();
     _index = {0, 0, 0};
     _lastIndex = {0, 0, 0};
-    if (_nDims) _lastIndex[_nDims - 1] = _dims[_nDims - 1];
 
-    if (!begin) { _index = _lastIndex; }
+    if (!begin) {
+        if (_nDims < 1)
+            _lastIndex[0] = 1;    // edge case for 0D grids
+        else
+            _lastIndex[_nDims - 1] = _dims[_nDims - 1];
+
+        _index = _lastIndex;
+    }
 }
 
 Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const ConstNodeIteratorSG &rhs) : ConstNodeIteratorAbstract()
@@ -291,10 +317,8 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG() : ConstNodeIteratorAbstract()
 
 void Grid::ConstNodeIteratorSG::next()
 {
-    if (!_nDims) return;
-
     _index[0]++;
-    if (_index[0] < _dims[0] || _nDims == 1) { return; }
+    if (_index[0] < _dims[0] || _nDims <= 1) { return; }
 
     _index[0] = 0;
     _index[1]++;
@@ -362,8 +386,15 @@ Grid::ConstCellIteratorSG::ConstCellIteratorSG(const Grid *g, bool begin) : Cons
     _nDims = g->GetNumCellDimensions();
     _index = {0, 0, 0};
     _lastIndex = _index;
-    _lastIndex[_nDims - 1] = _dims[_nDims - 1];
-    if (!begin) { _index = _lastIndex; }
+
+    if (!begin) {
+        if (_nDims < 1)
+            _lastIndex[0] = 1;    // edge case for 0D grids
+        else
+            _lastIndex[_nDims - 1] = _dims[_nDims - 1];
+
+        _index = _lastIndex;
+    }
 }
 
 Grid::ConstCellIteratorSG::ConstCellIteratorSG(const ConstCellIteratorSG &rhs) : ConstCellIteratorAbstract()
@@ -385,7 +416,7 @@ Grid::ConstCellIteratorSG::ConstCellIteratorSG() : ConstCellIteratorAbstract()
 void Grid::ConstCellIteratorSG::next()
 {
     _index[0]++;
-    if (_index[0] < (_dims[0]) || _nDims == 1) { return; }
+    if (_index[0] < (_dims[0]) || _nDims <= 1) { return; }
 
     _index[0] = 0;
     _index[1]++;
@@ -518,8 +549,6 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
     _indexL = 0;
 
     _end_indexL = 0;
-
-    if (_ndims < 1) return;
 
     _end_indexL = Wasp::VProduct(_dims3d.data(), _dims3d.size());
     if (!begin || !_blks.size()) {

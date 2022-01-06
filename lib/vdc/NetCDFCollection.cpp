@@ -1746,6 +1746,7 @@ int NetCDFCollection::TimeVaryingVar::Insert(const NetCDFSimple *netcdf, const N
             space_dim_names.erase(space_dim_names.begin());
         }
     }
+
     if (!time_varying) {
         key = "constant";
     } else if (file_org == 1 || file_org == 2) {

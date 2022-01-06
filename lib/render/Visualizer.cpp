@@ -537,7 +537,7 @@ int Visualizer::_captureImage(std::string path)
         VAssert(_dataStatus->GetDataMgrNames().size());
         string projString = _dataStatus->GetDataMgr(_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
 
-        vector<double> dataMinExtents, dataMaxExtents;
+        CoordType dataMinExtents, dataMaxExtents;
         _dataStatus->GetActiveExtents(_paramsMgr, _winName, _getCurrentTimestep(), dataMinExtents, dataMaxExtents);
 
         double m[16];

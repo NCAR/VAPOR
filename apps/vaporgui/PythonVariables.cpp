@@ -107,7 +107,10 @@ PythonVariables::~PythonVariables()
 
 void PythonVariables::Update(bool internalUpdate)
 {
-    if ((_scriptName == "") || (_dataMgrName == "")) {
+    VAPoR::DataStatus * dataStatus = _controlExec->GetDataStatus();
+    std::vector<string> dataMgrNames = dataStatus->GetDataMgrNames();
+
+    if ((_scriptName == "") || (_dataMgrName == "") || ((std::find(dataMgrNames.begin(), dataMgrNames.end(), _dataMgrName) == dataMgrNames.end()))) {
         _reset();
         _setGUIEnabled(false);
     } else {
