@@ -182,11 +182,16 @@ int SliceRenderer::_resetBoxCache()
     VAssert(p);
     _getModifiedExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
-    int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, _cacheParams.varName, _cacheParams.refinementLevel, _cacheParams.compressionLevel, _cacheParams.domainMin, _cacheParams.domainMax);
+    CoordType domainMin, domainMax;
+
+    int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, _cacheParams.varName, _cacheParams.refinementLevel, _cacheParams.compressionLevel, domainMin, domainMax);
     if (rc < 0) {
         SetErrMsg("Unable to determine domain extents for %s", _cacheParams.varName.c_str());
         return rc;
     }
+
+    Grid::CopyFromArr3(domainMin, _cacheParams.domainMin);
+    Grid::CopyFromArr3(domainMax, _cacheParams.domainMax);
 
     _setVertexPositions();
     return rc;
@@ -423,9 +428,13 @@ void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
 
 int SliceRenderer::_saveTextureData()
 {
+    CoordType boxMin = {0.0, 0.0, 0.0};
+    CoordType boxMax = {0.0, 0.0, 0.0};
+    Grid::CopyToArr3(_cacheParams.boxMin, boxMin);
+    Grid::CopyToArr3(_cacheParams.boxMax, boxMax);
+
     Grid *grid = nullptr;
-    int   rc =
-        DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, _cacheParams.boxMin, _cacheParams.boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
+    int   rc = DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, boxMin, boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
 
     if (rc < 0) {
         SetErrMsg("Unable to acquire Grid for Slice texture");

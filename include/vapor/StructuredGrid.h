@@ -63,6 +63,8 @@ public:
     //! coordinate access methods may still be invoked.
     //!
     StructuredGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks);
+    StructuredGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks);
+
 
     StructuredGrid() = default;
     virtual ~StructuredGrid() = default;
@@ -113,6 +115,7 @@ public:
 protected:
 private:
     DimsType _cellDims;
+    void     _structuredGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks);
 };
 };    // namespace VAPoR
 #endif

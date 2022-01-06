@@ -673,7 +673,7 @@ int PyEngine::DerivedPythonVar::_readRegionAll(int fd, const std::vector<size_t>
     return (0);
 }
 
-int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region)
+int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size_t> &minVec, const std::vector<size_t> &maxVec, float *region)
 {
     DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
 
@@ -682,6 +682,11 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     size_t ts = f->GetTS();
     int    level = f->GetLevel();
     int    lod = f->GetLOD();
+
+    DimsType min = {0, 0, 0};
+    DimsType max = {0, 0, 0};
+    Grid::CopyToArr3(minVec, min);
+    Grid::CopyToArr3(maxVec, max);
 
     int rc = DataMgrUtils::GetGrids(_dataMgr, ts, _inNames, min, max, false, &level, &lod, variables);
     if (rc < 0) return (-1);
@@ -706,12 +711,12 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     // on the same mesh (they have same dimensions)
     //
     vector<vector<size_t>> outputVarDims;
-    vector<size_t>         minAbs(min.size(), 0);
+    DimsType               minAbs = {0, 0, 0};
     if (inputVarDims.size()) {
         outputVarDims.push_back(inputVarDims[0]);
         minAbs = variables[0]->GetMinAbs();
     } else {
-        outputVarDims.push_back(Dims(min, max));
+        outputVarDims.push_back(Dims(minVec, maxVec));
     }
 
     vector<float *> inputVarArrays;

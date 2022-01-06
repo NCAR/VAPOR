@@ -256,8 +256,9 @@ int TwoDDataRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norma
 
     // Find box extents for ROI
     //
-    vector<double> minBoxReq, maxBoxReq;
     size_t         ts = rParams->GetCurrentTimestep();
+    CoordType      minBoxReq = {0.0, 0.0, 0.0};
+    CoordType      maxBoxReq = {0.0, 0.0, 0.0};
     rParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
 
     string varname = rParams->GetVariableName();
@@ -452,7 +453,7 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
 
     // Find box extents for ROI
     //
-    vector<double> minExts, maxExts;
+    CoordType minExts, maxExts;
     g->GetUserExtents(minExts, maxExts);
 
     // Try to get requested refinement level or the nearest acceptable level:
@@ -557,7 +558,8 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(DataMgr *dataMgr, const Struct
 
     // Find box extents for ROI
     //
-    vector<double> minExtsReq, maxExtsReq;
+    CoordType minExtsReq = {0.0, 0.0, 0.0};
+    CoordType maxExtsReq = {0.0, 0.0, 0.0};
     rParams->GetBox()->GetExtents(minExtsReq, maxExtsReq);
 
     // Try to get requested refinement level or the nearest acceptable level:
@@ -680,7 +682,8 @@ const GLvoid *TwoDDataRenderer::_getTexture(DataMgr *dataMgr)
 
     // Find box extents for ROI
     //
-    vector<double> minBoxReq, maxBoxReq;
+    CoordType minBoxReq = {0.0, 0.0, 0.0};
+    CoordType maxBoxReq = {0.0, 0.0, 0.0};
     rParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
 
     Grid *g = NULL;

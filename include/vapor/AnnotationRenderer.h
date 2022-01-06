@@ -106,9 +106,9 @@ private:
 
     void _applyDataMgrCornerToDomain(std::vector<double> &domainExtents, const glm::vec4 &dataMgrCorner, const glm::mat4 &transformMatrix) const;
 
-    void _getDataMgrCorner(const int cornerNumber, glm::vec4 &dataMgrCorner, const std::vector<double> &minDataMgrExtents, const std::vector<double> &maxDataMgrExtents) const;
+    void _getDataMgrCorner(const int cornerNumber, glm::vec4 &dataMgrCorner, const CoordType &minDataMgrExtents, const CoordType &maxDataMgrExtents) const;
 
-    void _applyDataMgrToDomainExtents(std::vector<double> &domainExtents, const std::vector<double> &dataMgrMinExts, const std::vector<double> &dataMgrMaxExts, const Transform *transform) const;
+    void _applyDataMgrToDomainExtents(std::vector<double> &domainExtents, const CoordType &dataMgrMinExts, const CoordType &dataMgrMaxExts, const Transform *transform) const;
 
     void _calculateDomainExtents(std::vector<double> &domainExtents) const;
 

@@ -22,6 +22,7 @@
 #include <cfloat>
 #include <vector>
 #include "vapor/VAssert.h"
+#include <vapor/Grid.h>
 #include <vapor/Box.h>
 
 using namespace std;
@@ -98,6 +99,22 @@ void Box::GetExtents(vector<double> &minExt, vector<double> &maxExt) const
     int n = IsPlanar() ? 2 : 3;
     for (int i = 0; i < n; i++) minExt.push_back(exts[i]);
     for (int i = 0; i < n; i++) maxExt.push_back(exts[i + 3]);
+}
+
+void Box::GetExtents(VAPoR::CoordType &minExt, VAPoR::CoordType &maxExt) const
+{
+    minExt = {0.0, 0.0, 0.0};
+    maxExt = {0.0, 0.0, 0.0};
+
+    vector<double> defaultv = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    // exts is guaranteed to have the same number of elements as
+    // defaultv
+    //
+    vector<double> exts = GetValueDoubleVec(m_extentsTag, defaultv);
+
+    int n = IsPlanar() ? 2 : 3;
+    for (int i = 0; i < n; i++) minExt[i] = exts[i];
+    for (int i = 0; i < n; i++) maxExt[i] = exts[i + 3];
 }
 
 void Box::SetPlanar(bool value)

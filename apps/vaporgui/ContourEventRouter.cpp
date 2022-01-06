@@ -48,7 +48,8 @@ void ContourEventRouter::_updateTab()
     int           level = rp->GetRefinementLevel();
     int           lod = rp->GetCompressionLevel();
 
-    vector<double> minExt, maxExt;
+    CoordType minExt = {0.0, 0.0, 0.0};
+    CoordType maxExt = {0.0, 0.0, 0.0};
     rp->GetBox()->GetExtents(minExt, maxExt);
 
     vector<double> dataExts(2, 0);

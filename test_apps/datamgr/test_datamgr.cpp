@@ -154,7 +154,7 @@ void print_info(DataMgr &datamgr, bool verbose)
     cout << endl << endl;
 }
 
-void test_node_iterator(const Grid *g, vector<double> minu, vector<double> maxu)
+void test_node_iterator(const Grid *g, VAPoR::CoordType minu, VAPoR::CoordType maxu)
 {
     cout << "Node Iterator Test ----->" << endl;
 
@@ -163,11 +163,7 @@ void test_node_iterator(const Grid *g, vector<double> minu, vector<double> maxu)
 
     float t0 = GetTime();
 
-    CoordType minuCT = {0.0, 0.0, 0.0};
-    CoordType maxuCT = {0.0, 0.0, 0.0};
-    Grid::CopyToArr3(minu, minuCT);
-    Grid::CopyToArr3(maxu, maxuCT);
-    itr = g->ConstNodeBegin(minuCT, maxuCT);
+    itr = g->ConstNodeBegin(minu, maxu);
 
     size_t count = 0;
     for (; itr != enditr; ++itr) { count++; }
@@ -275,11 +271,12 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
         return;
     }
 
-    vector<double> minu, maxu;
+    VAPoR::CoordType minu = {0.0, 0.0, 0.0};
+    VAPoR::CoordType maxu = {0.0, 0.0, 0.0};
     if (opt.minu.size()) {
         VAssert(opt.minu.size() == opt.maxu.size());
-        minu = opt.minu;
-        maxu = opt.maxu;
+        Grid::CopyToArr3(opt.minu, minu);
+        Grid::CopyToArr3(opt.maxu, maxu);
     } else {
         int rc = datamgr.GetVariableExtents(ts, vname, opt.level, opt.lod, minu, maxu);
         if (rc < 0) exit(1);

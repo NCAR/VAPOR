@@ -640,7 +640,9 @@ bool Statistics::_calc3M(std::string varname)
     int minTS = statsParams->GetCurrentTimestep();
     int maxTS = statsParams->GetCurrentMaxTS();
     if (!currentDmgr->IsTimeVarying(varname)) maxTS = minTS;
-    std::vector<double> minExtent, maxExtent;
+
+    CoordType minExtent = {0.0, 0.0, 0.0};
+    CoordType maxExtent = {0.0, 0.0, 0.0};
     statsParams->GetBox()->GetExtents(minExtent, maxExtent);
 
     float c = 0.0;
@@ -696,7 +698,9 @@ bool Statistics::_calcMedian(std::string varname)
     int minTS = statsParams->GetCurrentTimestep();
     int maxTS = statsParams->GetCurrentMaxTS();
     if (!currentDmgr->IsTimeVarying(varname)) maxTS = minTS;
-    std::vector<double> minExtent, maxExtent;
+
+    CoordType minExtent = {0.0, 0.0, 0.0};
+    CoordType maxExtent = {0.0, 0.0, 0.0};
     statsParams->GetBox()->GetExtents(minExtent, maxExtent);
 
     std::vector<float> buffer;
@@ -736,7 +740,9 @@ bool Statistics::_calcStddev(std::string varname)
     int minTS = statsParams->GetCurrentTimestep();
     int maxTS = statsParams->GetCurrentMaxTS();
     if (!currentDmgr->IsTimeVarying(varname)) maxTS = minTS;
-    std::vector<double> minExtent, maxExtent;
+
+    CoordType minExtent = {0.0, 0.0, 0.0};
+    CoordType maxExtent = {0.0, 0.0, 0.0};
     statsParams->GetBox()->GetExtents(minExtent, maxExtent);
 
     float c = 0.0;

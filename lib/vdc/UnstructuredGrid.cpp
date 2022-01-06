@@ -19,28 +19,23 @@
 using namespace std;
 using namespace VAPoR;
 
-UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, const std::vector<size_t> &bs,
-                                   const std::vector<float *> &blks, size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
-                                   Location location,    // node,face, edge
-                                   size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
-: Grid(location == NODE ? vertexDims : (location == CELL ? faceDims : edgeDims), bs, blks, topology_dimension)
+void UnstructuredGrid::_unstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks,
+                                         size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+                                         Location location,    // node,face, edge
+                                         size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
 {
-    VAssert(vertexDims.size() == 1 || vertexDims.size() == 2);
-    VAssert(vertexDims.size() == faceDims.size());
-    VAssert(vertexDims.size() == edgeDims.size() || edgeDims.size() == 0);
+    VAssert(GetNumDimensions(vertexDims) == 1 || GetNumDimensions(vertexDims) == 2);
+    VAssert(GetNumDimensions(vertexDims) == GetNumDimensions(faceDims));
+    VAssert((GetNumDimensions(vertexDims) == GetNumDimensions(edgeDims)) || (GetNumDimensions(edgeDims) == 0));
 
     // Edge data not supported yet
     //
     VAssert(location == NODE || location == CELL);
 
-    _vertexDims = {1, 1, 1};
-    _faceDims = {1, 1, 1};
-    _edgeDims = {1, 1, 1};
-    _nDims = vertexDims.size();
-
-    CopyToArr3(vertexDims, _vertexDims);
-    CopyToArr3(faceDims, _faceDims);
-    CopyToArr3(edgeDims, _edgeDims);
+    _vertexDims = vertexDims;
+    _faceDims = faceDims;
+    _edgeDims = edgeDims;
+    _nDims = GetNumDimensions(vertexDims);
 
     //
     // Shallow copy raw pointers
@@ -57,6 +52,33 @@ UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const 
 
     Grid::SetNodeOffset(nodeOffset);
     Grid::SetCellOffset(cellOffset);
+}
+
+UnstructuredGrid::UnstructuredGrid(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension,
+                                   const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+                                   Location location,    // node,face, edge
+                                   size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
+: Grid(location == NODE ? vertexDims : (location == CELL ? faceDims : edgeDims), bs, blks, topology_dimension)
+{
+    _unstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, topology_dimension, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset);
+}
+
+UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDimsv, const std::vector<size_t> &faceDimsv, const std::vector<size_t> &edgeDimsv, const std::vector<size_t> &bsv,
+                                   const std::vector<float *> &blks, size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+                                   Location location,    // node,face, edge
+                                   size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
+: Grid(location == NODE ? vertexDimsv : (location == CELL ? faceDimsv : edgeDimsv), bsv, blks, topology_dimension)
+{
+    DimsType vertexDims = {1, 1, 1};
+    DimsType faceDims = {1, 1, 1};
+    DimsType edgeDims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
+    CopyToArr3(vertexDimsv, vertexDims);
+    CopyToArr3(faceDimsv, faceDims);
+    CopyToArr3(edgeDimsv, edgeDims);
+    CopyToArr3(bsv, bs);
+
+    _unstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, topology_dimension, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset);
 }
 
 

@@ -914,7 +914,7 @@ void ControlExec::_autoStretchExtents(string dataSetName)
     ParamsMgr *    paramsMgr = GetParamsMgr();
     vector<string> winNames = paramsMgr->GetVisualizerNames();
 
-    vector<double> minExt, maxExt;
+    CoordType minExt, maxExt;
 
     for (int i = 0; i < winNames.size(); i++) {
         ViewpointParams *   vpParams = paramsMgr->GetViewpointParams(winNames[i]);
@@ -961,7 +961,7 @@ void ControlExec::_setDefaultOrigin(string datasetName)
     ParamsMgr *    paramsMgr = GetParamsMgr();
     vector<string> winNames = paramsMgr->GetVisualizerNames();
 
-    vector<double> minExt, maxExt;
+    CoordType minExt, maxExt;
 
     for (int i = 0; i < winNames.size(); i++) {
         ViewpointParams *   vpParams = paramsMgr->GetViewpointParams(winNames[i]);

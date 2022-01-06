@@ -107,8 +107,8 @@ int DataMgrUtils::ConvertLonLatToPCS(string projString, double coords[2], int np
 }
 
 template<typename T>
-int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<T> &minExtsReq, const vector<T> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
-                           vector<Grid *> &grids, bool lock)
+int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const T &minExtsReq, const T &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, vector<Grid *> &grids,
+                           bool lock)
 {
     grids.clear();
     VAssert(minExtsReq.size() == maxExtsReq.size());
@@ -179,14 +179,15 @@ int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &va
     return 0;
 }
 
-template VDF_API int DataMgrUtils::GetGrids<size_t>(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<size_t> &minExtsReq, const vector<size_t> &maxExtsReq,
-                                                    bool useLowerAccuracy, int *refLevel, int *lod, vector<Grid *> &grids, bool lock);
 
-template VDF_API int DataMgrUtils::GetGrids<double>(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<double> &minExtsReq, const vector<double> &maxExtsReq,
-                                                    bool useLowerAccuracy, int *refLevel, int *lod, vector<Grid *> &grids, bool lock);
+template VDF_API int DataMgrUtils::GetGrids<CoordType>(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const CoordType &minExtsReq, const CoordType &maxExtsReq, bool useLowerAccuracy,
+                                                       int *refLevel, int *lod, vector<Grid *> &grids, bool lock);
 
-int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, string varname, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
-                           Grid **gridptr, bool lock)
+template VDF_API int DataMgrUtils::GetGrids<DimsType>(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const DimsType &minExtsReq, const DimsType &maxExtsReq, bool useLowerAccuracy,
+                                                      int *refLevel, int *lod, vector<Grid *> &grids, bool lock);
+
+int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, string varname, const CoordType &minExtsReq, const CoordType &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr,
+                           bool lock)
 {
     *gridptr = NULL;
 
@@ -209,10 +210,10 @@ int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &va
 {
     grids.clear();
 
-    vector<double> minExtsReq, maxExtsReq;
-    for (int i = 0; i < 3; i++) { minExtsReq.push_back(std::numeric_limits<double>::lowest()); }
+    CoordType minExtsReq, maxExtsReq;
+    for (int i = 0; i < 3; i++) { minExtsReq[i] = (std::numeric_limits<double>::lowest()); }
 
-    for (int i = 0; i < 3; i++) { maxExtsReq.push_back(std::numeric_limits<double>::max()); }
+    for (int i = 0; i < 3; i++) { maxExtsReq[i] = (std::numeric_limits<double>::max()); }
 
     return (DataMgrUtils::GetGrids(dataMgr, ts, varnames, minExtsReq, maxExtsReq, useLowerAccuracy, refLevel, lod, grids, lock));
 }
@@ -255,10 +256,10 @@ bool DataMgrUtils::GetAxes(const DataMgr *dataMgr, string varname, vector<int> &
     return (true);
 }
 
-bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, string varname, int refLevel, int lod, vector<double> &minExts, vector<double> &maxExts)
+bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, string varname, int refLevel, int lod, CoordType &minExts, CoordType &maxExts)
 {
-    minExts.clear();
-    maxExts.clear();
+    minExts = {0.0, 0.0, 0.0};
+    maxExts = {0.0, 0.0, 0.0};
 
     // If varname not specified look for first variable of highest
     // dimensionality
@@ -289,10 +290,10 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, string varname,
     return (true);
 }
 
-bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> &varnames, int refLevel, int lod, vector<double> &minExts, vector<double> &maxExts, vector<int> &axes)
+bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> &varnames, int refLevel, int lod, CoordType &minExts, CoordType &maxExts, vector<int> &axes)
 {
-    minExts.clear();
-    maxExts.clear();
+    minExts = {0.0, 0.0, 0.0};
+    maxExts = {0.0, 0.0, 0.0};
     axes.clear();
 
     vector<double> tmpMinExts(3, std::numeric_limits<double>::max());
@@ -309,8 +310,8 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<st
     for (int i = 0; i < varnames.size(); i++) {
         if (varnames[i] == "") { continue; }
 
-        vector<double> varMinExts;
-        vector<double> varMaxExts;
+        CoordType      varMinExts = {0.0, 0.0, 0.0};
+        CoordType      varMaxExts = {0.0, 0.0, 0.0};
         vector<int>    varAxes;
 
         bool status = DataMgrUtils::GetExtents(dataMgr, timestep, varnames[i], refLevel, lod, varMinExts, varMaxExts);
@@ -321,7 +322,6 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<st
         //
         status = DataMgrUtils::GetAxes(dataMgr, varnames[i], varAxes);
         VAssert(status);
-        VAssert(varMinExts.size() == varAxes.size());
 
         for (int j = 0; j < varAxes.size(); j++) {
             int axis = varAxes[j];
@@ -331,14 +331,12 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<st
         }
     }
 
-    // tmp{Min,Max}Exts are always 3D vectors. If all variables are 2D
-    // and live in same plane the returned {min,max}Exts should have
-    // size of 2.
+    // tmp{Min,Max}Exts are always 3D vectors.
     //
     for (int i = 0; i < tmpMinExts.size(); i++) {
         if (tmpMinExts[i] != std::numeric_limits<double>::max()) {
-            minExts.push_back(tmpMinExts[i]);
-            maxExts.push_back(tmpMaxExts[i]);
+            minExts[i] = (tmpMinExts[i]);
+            maxExts[i] = (tmpMaxExts[i]);
             axes.push_back(i);
         }
     }
@@ -365,13 +363,13 @@ int DataMgrUtils::GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname
 
 double DataMgrUtils::Get2DRendererDefaultZ(DataMgr *dataMgr, size_t ts, int refLevel, int lod)
 {
-    vector<double> minExts;
-    vector<double> maxExts;
+    CoordType minExts;
+    CoordType maxExts;
 
     bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", refLevel, lod, minExts, maxExts);
     if (!status) return (0.0);
 
-    return (minExts.size() == 3 ? minExts[2] : 0.0);
+    return (minExts[2]);
 }
 
 bool DataMgrUtils::GetFirstExistingVariable(DataMgr *dataMgr, int level, int lod, int ndim, string &varname, size_t &ts)

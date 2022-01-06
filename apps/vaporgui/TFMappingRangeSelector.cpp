@@ -37,7 +37,7 @@ void TFMappingRangeSelector::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
 
 void TFMappingRangeSelector::_getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
 {
-    vector<double> minExt, maxExt;
+    VAPoR::CoordType minExt, maxExt;
     r->GetBox()->GetExtents(minExt, maxExt);
 
     std::vector<double> range;

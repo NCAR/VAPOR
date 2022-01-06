@@ -79,11 +79,12 @@ public:
     //! until the class instance is destroyed.
     //!
     //! \param[in] topology_dimension Topological dimension of
-    //! grid: 2 or 3, for 2D or 3D, respectively. Grids with 2D
-    //! topology are described by 2D spatial coordiantes, while
-    //! grids with 2D topology are described by 3D spatial coordinates.
+    //! grid: 1, 2 or 3, for 1D, 2D or 3D, respectively. Grids with 2D
+    //! topology are composed of 2D polygons, while
+    //! grids with 3D topology are composed of 3D polyhedron
     //!
     Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, size_t topology_dimension);
+    Grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension);
 
     Grid();
     virtual ~Grid() = default;
@@ -94,6 +95,8 @@ public:
     //! the constructor. If the parameter has less than 3 values, then
     //! number 1 will be filled.
     //!
+    //! \sa GetGeometryDim(), GetTopologyDim()
+    //!
     const DimsType &GetDimensions() const { return _dims; }
 
     //! Return the useful number of dimensions of grid connectivity array
@@ -102,6 +105,14 @@ public:
     //! the constructor.
     //!
     size_t GetNumDimensions() const { return _nDims; }
+
+    //! Return the number of non-unit dimensions
+    //!
+    //! Return the number of non-unit dimensions in \p dims
+    //!
+    //! \param[in] dims
+    //!
+    static size_t GetNumDimensions(DimsType dims);
 
     //! Return the dimensions of the specified coordinate variable
     //!
@@ -736,7 +747,7 @@ public:
     //! \note The value of returned is not used within the Grid class
     //! and any value can be stored here using SetMinAbs().
     //!
-    virtual std::vector<size_t> GetMinAbs() const { return (_minAbs); }
+    virtual DimsType GetMinAbs() const { return (_minAbs); }
 
     //! Set the absolute minimum grid coordinate
     //!
@@ -745,11 +756,7 @@ public:
     //! the offset to the first grid point in the mesh. The default is the
     //! zero vector
     //
-    virtual void SetMinAbs(const std::vector<size_t> &minAbs)
-    {
-        VAssert(minAbs.size() == this->GetNumDimensions());
-        _minAbs = minAbs;
-    }
+    virtual void SetMinAbs(const DimsType &minAbs) { _minAbs = minAbs; }
 
     //! Test whether a point is contained in a bounding rectangle
     //!
@@ -1271,7 +1278,7 @@ private:
     std::vector<size_t>  _bdimsDeprecated;        // legacy API
     std::vector<float *> _blks;
     std::vector<bool>    _periodic;    // periodicity of boundaries
-    std::vector<size_t>  _minAbs;      // Offset to start of grid
+    DimsType             _minAbs;      // Offset to start of grid
     size_t               _topologyDimension = 0;
     float                _missingValue = std::numeric_limits<float>::infinity();
     bool                 _hasMissing = false;
@@ -1280,6 +1287,8 @@ private:
     long                 _cellIDOffset = 0;
     mutable CoordType    _minuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
     mutable CoordType    _maxuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
+
+    void _grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension);
 
     virtual void _getUserCoordinatesHelper(const std::vector<double> &coords, double &x, double &y, double &z) const;
 };

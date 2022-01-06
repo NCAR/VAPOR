@@ -154,7 +154,7 @@ void BarbRenderer::_recalculateScales(
     }
 }
 
-int BarbRenderer::_getVectorVarGrids(int ts, int refLevel, int lod, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData)
+int BarbRenderer::_getVectorVarGrids(int ts, int refLevel, int lod, CoordType minExts, CoordType maxExts, std::vector<VAPoR::Grid *> &varData)
 {
     BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
     VAssert(bParams);
@@ -172,7 +172,7 @@ int BarbRenderer::_getVectorVarGrids(int ts, int refLevel, int lod, std::vector<
     return rc;
 }
 
-void BarbRenderer::_getGridRequirements(int &ts, int &refLevel, int &lod, std::vector<double> &minExts, std::vector<double> &maxExts) const
+void BarbRenderer::_getGridRequirements(int &ts, int &refLevel, int &lod, CoordType &minExts, CoordType &maxExts) const
 {
     BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
     VAssert(bParams);
@@ -181,10 +181,11 @@ void BarbRenderer::_getGridRequirements(int &ts, int &refLevel, int &lod, std::v
 
     refLevel = bParams->GetRefinementLevel();
     lod = bParams->GetCompressionLevel();
+
     bParams->GetBox()->GetExtents(minExts, maxExts);
 }
 
-int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData)
+int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, CoordType minExts, CoordType maxExts, std::vector<VAPoR::Grid *> &varData)
 {
     Grid *sg = NULL;
     varData.push_back(sg);
@@ -229,7 +230,7 @@ int BarbRenderer::_generateBarbs()
     vector<Grid *> varData;
 
     int            ts, refLevel, lod;
-    vector<double> minExts, maxExts;
+    CoordType      minExts, maxExts;
     _getGridRequirements(ts, refLevel, lod, minExts, maxExts);
 
     // Get vector variables
@@ -779,7 +780,7 @@ bool BarbRenderer::_getColorMapping(float val, const float clut[256 * 4])
 double BarbRenderer::_getDomainHypotenuse(size_t ts) const
 {
     std::vector<int>    axes;
-    std::vector<double> minExts, maxExts;
+    CoordType           minExts, maxExts;
     std::vector<string> varNames;
 
     BarbParams *p = dynamic_cast<BarbParams *>(GetActiveParams());
@@ -795,8 +796,7 @@ double BarbRenderer::_getDomainHypotenuse(size_t ts) const
 
     double yLen = maxExts[1] - minExts[1];
 
-    double zLen = 0.0;
-    if (minExts.size() > 2) zLen = maxExts[2] - minExts[2];
+    double zLen = maxExts[2] - minExts[2];
 
     double diag = sqrt(xLen * xLen + yLen * yLen + zLen * zLen);
     return diag;

@@ -242,8 +242,9 @@ RayCaster::UserCoordinates::~UserCoordinates()
 
 int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, DataMgr *dataMgr, StructuredGrid **gridpp) const
 {
-    std::vector<double> extMin, extMax;
+    CoordType extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
+
     StructuredGrid *grid =
         dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(params->GetCurrentTimestep(), params->GetVariableName(), params->GetRefinementLevel(), params->GetCompressionLevel(), extMin, extMax));
     if (grid == nullptr) {
@@ -381,8 +382,9 @@ int RayCaster::UserCoordinates::Update2ndVariable(const RayCasterParams *params,
     my2ndVarName = params->GetColorMapVariableName();
 
     // Retrieve grid for the 2nd variable
-    std::vector<double> extMin, extMax;
+    CoordType extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
+
     StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(myCurrentTimeStep, my2ndVarName, myRefinementLevel, myCompressionLevel, extMin, extMax));
     if (grid == nullptr) {
         MyBase::SetErrMsg("The secondary variable isn't on a StructuredGrid; "
