@@ -26,7 +26,7 @@ struct planeDescription {
 //! \param[out] rectangle3D A set of four vertices that define the rectangle containing the returned 2D grid's texture.  Useful for debugging.
 //!
 
-VAPoR::RegularGrid* SliceGridAlongPlane(
+VDF_API VAPoR::RegularGrid* SliceGridAlongPlane(
     const VAPoR::Grid *grid3d, 
     planeDescription description, 
     size_t sideSize, 
