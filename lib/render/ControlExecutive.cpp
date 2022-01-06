@@ -458,6 +458,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     // new data manager
     //
     if (_dataStatus->GetDataMgr(dataSetName)) {
+        _calcEngineMgr->Clean();
         _dataStatus->Close(dataSetName);
 
         vector<string> vizNames = _paramsMgr->GetVisualizerNames();
@@ -488,6 +489,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     for (int i = 0; i < appRenderParams.size(); i++) {
         int rc = appRenderParams[i]->Initialize();
         if (rc < 0) {
+            _calcEngineMgr->Clean();
             _dataStatus->Close(dataSetName);
             _paramsMgr->RemoveDataMgr(dataSetName);
             SetErrMsg("Failure to initialize application renderer \"%s\"", appRenderParams[i]->GetName().c_str());
@@ -530,11 +532,7 @@ void ControlExec::CloseData(string dataSetName)
 
     _paramsMgr->RemoveDataMgr(dataSetName);
 
-    // Rebuild the calculation engine from params database after removing
-    // the data set from the params database.
-    //
-    _calcEngineMgr->ReinitFromState();
-
+    _calcEngineMgr->Clean();
     _dataStatus->Close(dataSetName);
 
     UndoRedoClear();

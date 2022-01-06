@@ -50,6 +50,11 @@ public:
     //
     void ReinitFromState() { _sync(); }
 
+    //! Remove all functions added with AddFunction()
+    //!
+    //! \sa AddFunction()
+    void Clean() { _clean(); }
+
 private:
     const DataStatus *_dataStatus;
     const ParamsMgr * _paramsMgr;
