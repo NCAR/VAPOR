@@ -463,20 +463,26 @@ jobs:
             shaMessage="$title$ubuntuSha$centosSha$osxSha$winSha"
             date=`date +"%d_%m_%y"`
             echo $shaMessage > "/tmp/workspace/installers/sha256.txt"
-            echo ghr -b "Weely installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
-            ghr -b "Weely installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
+            echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
+            ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
 
 workflows:
   version: 2
   build:
     jobs:
+      - build_ubuntu18
+      - build_centos7
+      - test_clang_format
       #- build_win10_installer
       #- build_osx_installer
       #- build_ubuntu18_installer
       #- build_centos7_installer
-      - build_ubuntu18
-      - build_centos7
-      - test_clang_format
+      #- release_weekly_installers:
+      #    requires:
+      #      - build_ubuntu18_installer
+      #      - build_centos7_installer
+      #      - build_osx_installer
+      #      - build_win10_installer
   weekly:
       triggers:
         - schedule:
