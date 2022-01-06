@@ -3,6 +3,8 @@
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
 
+// clang-format off
+
 class RegularGrid;
 
 struct planeDescription {
@@ -36,3 +38,4 @@ VDF_API VAPoR::RegularGrid* SliceGridAlongPlane(
     std::vector<double>& rectangle3D
 );
 
+// clang-format on

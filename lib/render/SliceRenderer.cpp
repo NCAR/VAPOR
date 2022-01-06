@@ -21,6 +21,8 @@
 
 //#define DEBUG 1
 
+// clang-format off
+
 using namespace VAPoR;
 
 static RendererRegistrar<SliceRenderer> registrar(SliceRenderer::GetClassType(), SliceParams::GetClassType());
@@ -452,3 +454,5 @@ void SliceRenderer::_resetState()
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
 }
+
+// clang-format on

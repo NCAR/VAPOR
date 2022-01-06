@@ -6,6 +6,8 @@
 #include <vapor/RegularGrid.h>
 #include <vapor/SliceGridAlongPlane.h>
 
+// clang-format off
+
 // Huges-Moller algorithm to get an orthogonal vector
 // https://blog.selfshadow.com/2011/10/17/perp-vectors/
 glm::tvec3<double, glm::highp> getOrthogonal(const glm::tvec3<double, glm::highp>& u) 
@@ -238,3 +240,5 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
 
     return slice;
 }
+
+// clang-format on
