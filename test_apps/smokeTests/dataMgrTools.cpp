@@ -105,10 +105,8 @@ void TestVariables(VAPoR::DataMgr &dataMgr, bool silenceTime)
             dataMgr.GetVariableExtents(0, varName, -1, -1, minExt, maxExt);
 
             // Reduce extents to test
-            for (int i = 0; i < minExt.size(); i++) {
-                minExt[i] = minExt[i] + minExt[i] / 32.0;
+            for (int i = 0; i < minExt.size(); i++)
                 maxExt[i] = minExt[i] + maxExt[i] / 32.0;
-            }
 
             VAPoR::Grid *grid = dataMgr.GetVariable(0, varName, -1, -1, minExt, maxExt);
             if (!grid) {
