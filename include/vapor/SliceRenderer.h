@@ -14,7 +14,9 @@
 #include <vapor/utils.h>
 #include <vapor/Renderer.h>
 
-#define DEBUG 1
+// clang-format off
+
+//#define DEBUG 1
 
 namespace VAPoR {
 
@@ -95,3 +97,5 @@ private:
 };    // namespace VAPoR
 
 #endif
+
+// clang-format on
