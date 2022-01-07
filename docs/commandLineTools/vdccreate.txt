@@ -1,3 +1,5 @@
+.. _vdccreate:
+
 Usage: vdccreate [options] master.nc
     OPTION        NUM_ARGS    DEFAULT         
     ------        --------    -------         

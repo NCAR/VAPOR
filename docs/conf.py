@@ -35,11 +35,12 @@ author = 'John Clyne, Scott Pearse, Samuel Li, Stanislaw Jaroszynski'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '3.4.0.preRelease'
+release = '3.5.0'
 
 
 #breathe_projects = { "myproject": "/Users/pearse/vapor2/targets/common/doc/library/xml" }
 #breathe_default_project = "myproject"
+
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -54,7 +55,7 @@ extensions = [
     'sphinx.ext.imgmath', 
     'sphinx.ext.todo', 
     'sphinx.ext.autodoc',
-    'jupyter_sphinx'
+    'sphinx_gallery.gen_gallery',
     #'jupyter_sphinx.execute'
     #'breathe'
     #'wheel'
@@ -98,7 +99,7 @@ html_logo = "_images/vaporLogoWhite2.png"
 html_favicon = "_images/vaporVLogo.png"
 
 html_theme_options = {
-    'navigation_depth': 3,
+    'navigation_depth': 4,
 }
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -198,3 +199,52 @@ epub_title = project
 
 
 # -- Extension configuration -------------------------------------------------
+
+
+# -- Download example data ---------------------------------------------------
+import requests
+from pathlib import Path
+home = str(Path.home())
+simpleNC = home + "/simple.nc"
+dataFile = "https://github.com/NCAR/VAPOR-Data/raw/main/netCDF/simple.nc"
+response = requests.get(dataFile, stream=True)
+with open(simpleNC, "wb") as file:
+  for chunk in response.iter_content(chunk_size=1024):
+    if chunk:
+      file.write(chunk)
+
+# Set plotly renderer to capture _repr_html_ for sphinx-gallery
+try:
+    import plotly.io as pio
+    pio.renderers.default = 'sphinx_gallery'
+except ImportError:
+    pass
+
+# -- suppress warnings -------------------------------------------------------
+import warnings
+
+# filter Matplotlib 'agg' warnings
+warnings.filterwarnings("ignore",
+                        category=UserWarning,
+                        message='Matplotlib is currently using agg, which is a'
+                        ' non-GUI backend, so cannot show the figure.')
+
+# filter seaborn warnings
+warnings.filterwarnings("ignore",
+                        category=UserWarning,
+                        message='As seaborn no longer sets a default style on'
+                        ' import, the seaborn.apionly module is'
+                        ' deprecated. It will be removed in a future'
+                        ' version.')
+
+# Configure sphinx-gallery plugin
+from sphinx_gallery.sorting import ExampleTitleSortKey
+
+sphinx_gallery_conf = {
+    'examples_dirs': ['data/netCDF'],  # path to your example scripts
+    'gallery_dirs': ['data/netCDF/examples'],  # path to where to save gallery generated output
+    'filename_pattern': 'GridExample.py',
+    'ignore_pattern': 'ToCF',
+    'within_subsection_order': ExampleTitleSortKey,
+    'matplotlib_animations': True,
+}

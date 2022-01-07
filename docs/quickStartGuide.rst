@@ -4,14 +4,14 @@
 Quick Start Guide
 =================
 
-Install the version of Vapor3 for your computer's operating system from our :ref:`downloads <downloads>` page.  Updating your system's graphics driver if you're not sure that it's current.
+First, install Vapor from our :ref:`downloads <downloads>` page.
 
-If you don't have :ref:`data that's supported <gettingDataIntoVapor>` by Vapor3 yet, you can :ref:`download a sample <sampleData>` to get started with.
+Sample data can be found :ref:`here <sampleData>`.
 
-Start Vapor3
-````````````
+Launch Vapor
+------------
 
-After following the :ref:`installation instructions <installationInstructions>` for Vapor3, run the application by doing the following:
+After following the :ref:`installation instructions <installationInstructions>` for your platform (:ref:`OSX <osxInstallation>`, :ref:`Linux <linuxInstallation>`, or :ref:`Windows <windowsInstallation>`), launch the application by doing the following:
 
 :OSX:
 
@@ -29,28 +29,29 @@ After following the :ref:`installation instructions <installationInstructions>` 
 
         user@localhost:/vaporInstallDir$ bin/vapor
 
-Import or Load Data
-```````````````````
+Load Data
+---------
 
-There are two ways to get data into Vapor3.  Once you've loaded data, we can create your first :ref:`Renderer <Renderers>`.
+There are two ways to get data into Vapor3.
 
 To load data, do one of the following from the ``File`` menu:
 
-1. Load a .vdc file after converting your data into a :ref:`VDC`
+1. Load a .vdc file after converting your data into a :ref:`vdc`
     ``File->Open VDC``
 
-2. Import your data, if it's one of the :ref:`natively supported data types <gettingDataIntoVapor>` (WRF, NetCDF-CF, MPAS)
+2. Import your data, if your datatype is supported.
     ``File->Import->[dataType]``
 
-+------------------------------------------------+----+------------------------------------------------+
-| Loading a .vdc file                            |    | Importing data                                 |
-+------------------------------------------------+----+------------------------------------------------+
-| .. image :: _images/loadData.png               | or | .. image :: _images/importWRF.png              |
-+------------------------------------------------+----+------------------------------------------------+
++------------------------------------------------+----+-------------------------------------------------+
+| Loading a .vdc file                            |    | Importing data                                  |
++------------------------------------------------+----+-------------------------------------------------+
+| .. image :: _images/loadData.png               | or | .. image :: _images/importData.png              |
++------------------------------------------------+----+-------------------------------------------------+
 
-Creating a Renderer
-```````````````````
-Now that we've loaded some data to visualize, we can create a new :ref:`Renderer <Renderers>`.
+Create a Renderer
+-----------------
+
+Now that we've loaded data, we can create a new :ref:`Renderer <Renderers>`.
 
 Vapor3 displays all of your renderers in a table in the upper left corner of the application.  Next to this table are controls that  let you create ``New`` renderers, ``Delete`` renderers, or ``Duplicate`` existing renderers.  
 
