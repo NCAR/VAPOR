@@ -47,8 +47,8 @@ void rotate(
 
 void findIntercepts(
     const glm::tvec3<double, glm::highp>& origin, 
-    const std::vector<double>& boxMin,
-    const std::vector<double>& boxMax,
+    const VAPoR::CoordType& boxMin,
+    const VAPoR::CoordType& boxMax,
     const glm::tvec3<double, glm::highp>& normal, 
     std::vector<glm::tvec3<double, glm::highp>> &vertices
 )  {
@@ -233,10 +233,15 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
     getWindingOrder( windingOrder, tmpRectangle3D );
 
     // Finally generate the grid
-    std::vector<size_t> dims = { sideSize, sideSize };
-    std::vector<size_t> bs   = { sideSize, sideSize };
+    VAPoR::DimsType dims = { sideSize, sideSize };
+    VAPoR::DimsType bs   = { sideSize, sideSize };
     std::vector<float*> data = { dataValues.get() };
-    VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, bs, data, description.boxMin, description.boxMax );
+    VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, 
+                                                        bs, 
+                                                        data, 
+                                                        description.boxMin, 
+                                                        description.boxMax 
+                                                    );
 
     return slice;
 }

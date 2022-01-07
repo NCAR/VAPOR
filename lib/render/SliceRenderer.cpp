@@ -209,8 +209,12 @@ int SliceRenderer::_getGrid3D( Grid*& grid3d ) const {
     int   rc = DataMgrUtils::GetGrids(_dataMgr,
                                       p->GetCurrentTimestep(),
                                       p->GetVariableName(),
-                                      _cacheParams.boxMin, _cacheParams.boxMax, true,
-                                      &rLevel, &cLevel, &grid3d);
+                                      _cacheParams.boxMin, 
+                                      _cacheParams.boxMax, 
+                                      true,
+                                      &rLevel, 
+                                      &cLevel, 
+                                      &grid3d);
     if (rc < 0) {
         Wasp::MyBase::SetErrMsg("Unable to acquire Grid for Slice texture");
         return rc;
@@ -277,7 +281,7 @@ bool SliceRenderer::_isColormapCacheDirty() const
 
 bool SliceRenderer::_isBoxCacheDirty() const
 {
-    vector<double> min, max;
+    VAPoR::CoordType min, max;
     _getExtents(min, max);
 
     if (_cacheParams.boxMin != min) return true;
@@ -285,14 +289,12 @@ bool SliceRenderer::_isBoxCacheDirty() const
     return false;
 }
 
-void SliceRenderer::_getExtents(vector<double> &min, vector<double> &max) const
+void SliceRenderer::_getExtents(VAPoR::CoordType &min, VAPoR::CoordType &max) const
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);
     Box *box = p->GetBox();
 
-    min.resize(3);
-    max.resize(3);
     box->GetExtents(min, max);
     VAssert(min.size() == 3);
     VAssert(max.size() == 3);

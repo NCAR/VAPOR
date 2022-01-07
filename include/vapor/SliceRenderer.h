@@ -50,7 +50,8 @@ private:
         double              zOrigin;
         std::vector<float>  tf_lut;
         std::vector<double> tf_minMax;
-        std::vector<double> boxMin, boxMax;
+        //std::vector<double> boxMin, boxMax;
+        VAPoR::CoordType    boxMin, boxMax;
         std::vector<double> domainMin, domainMax;
         std::vector<double> sampleLocation;
     } _cacheParams;
@@ -62,7 +63,7 @@ private:
     bool      _isColormapCacheDirty() const;
     bool      _isDataCacheDirty() const;
     bool      _isBoxCacheDirty() const;
-    void      _getExtents(vector<double> &min, vector<double> &max) const;
+    void      _getExtents(VAPoR::CoordType &min, VAPoR::CoordType &max) const;
     void      _resetColormapCache();
     void      _resetCache();
     void      _createDataTexture(std::unique_ptr<float>& dataValues);

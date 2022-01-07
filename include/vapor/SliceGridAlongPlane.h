@@ -10,8 +10,8 @@ class RegularGrid;
 struct planeDescription {
     std::vector<double> origin;
     std::vector<double> rotation;
-    std::vector<double> boxMin;
-    std::vector<double> boxMax;
+    VAPoR::CoordType boxMin;
+    VAPoR::CoordType boxMax;
 };
 
 //! Create a 2D grid that is sampled along the orientation of a 3D grid.
