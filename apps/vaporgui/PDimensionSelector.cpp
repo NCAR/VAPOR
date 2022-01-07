@@ -31,5 +31,27 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
         rp->GetBox()->SetOrientation(VAPoR::Box::XYZ);
     }
     rp->SetDefaultVariables(dim, true);
+    
+    if (!rp->GetBox()->IsPlanar()) {
+        vector<double> min, max;
+        rp->GetBox()->GetExtents(min, max);
+        float minZ = min[2];
+        float maxZ = max[2];
+        float epsilon = std::max(abs(minZ), abs(maxZ))*__FLT_EPSILON__;
+        if (abs(maxZ-minZ) <= epsilon) {
+            vector<double> dmin, dmax;
+            size_t         ts = rp->GetCurrentTimestep();
+            int            level = rp->GetRefinementLevel();
+            int            lod = rp->GetCompressionLevel();
+            string         varName = rp->GetFirstVariableName();
+
+            int ret = getDataMgr()->GetVariableExtents(ts, varName, level, lod, dmin, dmax);
+            if (ret == 0) {
+                min[2] = dmin[2];
+                max[2] = dmax[2];
+                rp->GetBox()->SetExtents(min, max);
+            }
+        }
+    }
     rp->EndGroup();
 }
