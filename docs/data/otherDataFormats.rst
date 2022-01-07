@@ -31,7 +31,7 @@ If your data format is not currently supported by Vapor you may be able to conve
     | Particle Data      |  No                                        | No                         | No               | Yes              |
     +--------------------+--------------------------------------------+----------------------------+------------------+------------------+
 
-For example, if your data is organized as a collection of RAW files that are sampled on a `regular grid <https://en.wikipedia.org/wiki/Regular_grid>`_ you may want to use Vapor's BOV format. This is the easiest way to import unsupported data because it only involves creating a small, ASCII metadata file that describes your data.
+For example, if your data is organized as a collection of RAW files that are sampled on a `regular grid <https://en.wikipedia.org/wiki/Regular_grid>`_ you may want to use :ref:`Vapor's BOV format <brickOfValues>`. This is the easiest way to import unsupported data because it only involves creating a small, ASCII metadata file that describes your data.
 
 .. note::
 
