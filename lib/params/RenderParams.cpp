@@ -90,11 +90,11 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
         if (ok = DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, i, varname, ts)) break;
     }
     if (!ok) varname = "";
-    
+
     if (!varname.empty()) {
         int lastDims = _dataMgr->GetNumDimensions(GetVariableName());
         int newDims = _dataMgr->GetNumDimensions(varname);
-        
+
         if (lastDims == 2 && newDims == 3) {
             vector<double> min, max;
             GetBox()->GetExtents(min, max);
@@ -116,7 +116,7 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
             }
         }
     }
-    
+
     SetVariableName(varname);
     SetColorMapVariableName(varname);
 
