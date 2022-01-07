@@ -14,6 +14,10 @@ Make sure to pick the example that matches the grid type of your data.  For info
 
 A demonstration can be viewed below, and the sample data used in these examples can be downloaded :download:`here <https://github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc>`.
 
+.. note::
+
+    The Cartesian and Rectilinar grid examples are nearly identical.  The only difference is how we define the coordinate variables, using numpy.linspace in the cartesian grid example, and numpy.geomspace in the rectilinear grid example.
+
 .. raw:: html
 
     <iframe width="560" height="315" src="https://www.youtube.com/embed/lYzj3ZQMlBE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>

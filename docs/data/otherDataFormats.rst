@@ -14,7 +14,7 @@ If your data format is not currently supported by Vapor you may be able to conve
     +--------------------+--------------------------------------------+----------------------------+------------------+------------------+
     |                    |  :ref:`CF Compliant netCDF <cfCompliance>` | :ref:`BOV <brickOfValues>` | :ref:`VDC <vdc>` | :ref:`DCP <dcp>` |
     +--------------------+--------------------------------------------+----------------------------+------------------+------------------+
-    | Cartesian grids    |  Yes                                       | Yes                        | Yes              | No               | 
+    | Regular grids      |  Yes                                       | Yes                        | Yes              | No               | 
     +--------------------+--------------------------------------------+----------------------------+------------------+------------------+
     | Rectilinear grids  |  Yes                                       | No                         | Yes              | No               |
     +--------------------+--------------------------------------------+----------------------------+------------------+------------------+
@@ -31,7 +31,13 @@ If your data format is not currently supported by Vapor you may be able to conve
     | Particle Data      |  No                                        | No                         | No               | Yes              |
     +--------------------+--------------------------------------------+----------------------------+------------------+------------------+
 
-For example, if your data is organized as a collection of RAW files that are sampled on a `cartesian grid <https://en.wikipedia.org/wiki/Regular_grid>`_ you may want to use Vapor's BOV format. This is the easiest way to import unsupported data because it only involves creating a small, ASCII metadata file that describes your data.
+For example, if your data is organized as a collection of RAW files that are sampled on a `regular grid <https://en.wikipedia.org/wiki/Regular_grid>`_ you may want to use Vapor's BOV format. This is the easiest way to import unsupported data because it only involves creating a small, ASCII metadata file that describes your data.
+
+.. note::
+
+    *The geophysical modelling community often uses the term "stretched grid" in place of "rectilinear grid".  In Vapor parlance, they are the same.
+
+If your data are sampled on rectilinear (a.k.a. "stretched") or curvilinear grids, or if regular but stored in a format other than raw binaries, converting your data to CF compliant NetCDF is probably your best bet. CF NetCDF is widely used in the earth sciences and is highly flexible.  There is a large ecosystem of software tools that are capable reading, writing, and manipulating CF NetCDF files.
 
 If your data are sampled on a high resolution grid, and performance is a concern, you may want to consider VAPOR's multi-resolultion VDC file format. However, this format should only be considered if multi-resolution is required. For small to modest sized data sets, performance may be degraded by using the VDC.
 
