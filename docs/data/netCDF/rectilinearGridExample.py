@@ -13,14 +13,13 @@ The sample data for this script can be downloaded here:
     https://github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc
 """
 
-# sphinx_gallery_thumbnail_path = '_images/rectilinear.png'
-
 ###############################################################################
 # Import packages:
 
 import xarray as xr
 import numpy as np
 from pathlib import Path
+# sphinx_gallery_thumbnail_path = '_images/rectilinear.png'
 
 ###############################################################################
 # Open sample data as an xarray dataset.
@@ -36,8 +35,9 @@ ds.info()
 ds['time'] = np.linspace(start=0, stop=0, num=1);
 
 ###############################################################################
-# Generate Coordinate Variables for our x, y, z dimensions.  Assign values to
-# the them with numpy's geomspace.
+# Generate Coordinate Variables for our x, y, z dimensions.  The coordinates
+# will monotonically increase in spacing logarithmically, and are generated 
+# with numpy's geomspace function.
 # https://numpy.org/doc/stable/reference/generated/numpy.geomspace.html
   
 ds['y'] = np.geomspace(start=1, stop=100, num=48)

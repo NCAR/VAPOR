@@ -11,7 +11,14 @@ When your data is output as a series of binary files that have values of type fl
 
     2) You've written a BOV header file that describes the structure of a corresponding data file
 
-    3) Your data is on a 3D rectilinear grid
+    3) Your data is on a 3D regular grid*
+
+.. note::
+
+   *For more information on the regular grids supported by the BOV reader, see `this wikipedia article <https://en.wikipedia.org/wiki/Regular_grid>`_. 
+
+BOV header files
+----------------
 
 The BOV header files that describe the structure of your data are just a list of key/value pairs.  Some keys are mandatory, and some are optional.  See below for descriptions of these keys, special rules that pertain to the keys and their values, and an example file.
 
@@ -45,6 +52,9 @@ Example BOV header file
    # bytes to skip at the front of the file. This can be useful for # skipping the 4-byte header that Fortran tends to write to files. # If your file does not have a header the
    BYTE_OFFSET. BYTE_OFFSET: 4
 
+BOV header file requirements and options
+----------------------------------------
+
 The following BOV tags are mandatory for Vapor to ingest data:
     - DATA_FILE    (type: string)
     - DATA_SIZE    (type: three integer values that are >1)
@@ -57,8 +67,7 @@ The following BOV tags are optional:
     - VARIABLE     (type: one alphanumeric string value, default: "brickVar")
     - BYTE_OFFSET  (type: one integer value,             default: 0)
 
-The following BOV tags are currently unsupported.  They can be included in a BOV header,
-but they will be unused.
+The following BOV tags are currently unsupported.  They can be included in a BOV header, but they will be unused:
     - DATA_ENDIAN
     - CENTERING
     - DIVIDE_BRICK

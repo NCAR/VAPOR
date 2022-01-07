@@ -39,7 +39,7 @@ If your data are sampled on a high resolution grid, and performance is a concern
    :maxdepth: 1
 
    rawData
-   NetCDF <netCDF/cfCompliance>
+   Generic NetCDF <netCDF/cfCompliance>
 
 .. note::
 
