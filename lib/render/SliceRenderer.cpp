@@ -21,8 +21,6 @@
 
 //#define DEBUG 1
 
-// clang-format off
-
 using namespace VAPoR;
 
 static RendererRegistrar<SliceRenderer> registrar(SliceRenderer::GetClassType(), SliceParams::GetClassType());
@@ -32,8 +30,8 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
 {
     _initialized = false;
 
-    _windingOrder = {0.0f, 0.0f, 0.f,  1.0f, 0.0f, 0.f,  0.0f, 1.0f, 0.f,  1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
-    _rectangle3D =  {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
+    _windingOrder = {0.0f, 0.0f, 0.f, 1.0f, 0.0f, 0.f, 0.0f, 1.0f, 0.f, 1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
+    _rectangle3D = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
 
     _VAO = 0;
     _vertexVBO = 0;
@@ -168,31 +166,31 @@ void SliceRenderer::_resetColormapCache()
 
 int SliceRenderer::_regenerateSlice()
 {
-    Grid* grid3d = nullptr;
-    int rc = _getGrid3D( grid3d );
-    if ( rc < 0 ) return -1;
+    Grid *grid3d = nullptr;
+    int   rc = _getGrid3D(grid3d);
+    if (rc < 0) return -1;
 
     // Get data values from a slice
-    std::unique_ptr<float> dataValues(new float[_textureSideSize*_textureSideSize]);
-    planeDescription pd;
+    std::unique_ptr<float> dataValues(new float[_textureSideSize * _textureSideSize]);
+    planeDescription       pd;
     pd.origin = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
     pd.rotation = {_cacheParams.xRotation, _cacheParams.yRotation, _cacheParams.zRotation};
     pd.boxMin = _cacheParams.boxMin;
     pd.boxMax = _cacheParams.boxMax;
-    RegularGrid* slice = SliceGridAlongPlane( grid3d, pd, _textureSideSize, dataValues, _windingOrder, _rectangle3D);
-    float missingValue = slice->GetMissingValue();
+    RegularGrid *slice = SliceGridAlongPlane(grid3d, pd, _textureSideSize, dataValues, _windingOrder, _rectangle3D);
+    float        missingValue = slice->GetMissingValue();
 
     // Apply opacity to missing values
-    int    textureSize = 2 * _textureSideSize * _textureSideSize;
+    int                    textureSize = 2 * _textureSideSize * _textureSideSize;
     std::unique_ptr<float> textureValues(new float[textureSize]);
-    for (size_t i=0; i<textureSize/2; i++) {
+    for (size_t i = 0; i < textureSize / 2; i++) {
         float dataValue = dataValues.get()[i];
         if (dataValue == missingValue)
-            textureValues.get()[i*2+1] = 1.f;
+            textureValues.get()[i * 2 + 1] = 1.f;
         else
-            textureValues.get()[i*2+1] = 0.f;
-        
-        textureValues.get()[i*2] = dataValues.get()[i];
+            textureValues.get()[i * 2 + 1] = 0.f;
+
+        textureValues.get()[i * 2] = dataValues.get()[i];
     }
 
     _createDataTexture(textureValues);
@@ -202,19 +200,12 @@ int SliceRenderer::_regenerateSlice()
     return 0;
 }
 
-int SliceRenderer::_getGrid3D( Grid*& grid3d ) const {
+int SliceRenderer::_getGrid3D(Grid *&grid3d) const
+{
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
-    int rLevel = p->GetRefinementLevel();
-    int cLevel = p->GetCompressionLevel();
-    int   rc = DataMgrUtils::GetGrids(_dataMgr,
-                                      p->GetCurrentTimestep(),
-                                      p->GetVariableName(),
-                                      _cacheParams.boxMin, 
-                                      _cacheParams.boxMax, 
-                                      true,
-                                      &rLevel, 
-                                      &cLevel, 
-                                      &grid3d);
+    int          rLevel = p->GetRefinementLevel();
+    int          cLevel = p->GetCompressionLevel();
+    int          rc = DataMgrUtils::GetGrids(_dataMgr, p->GetCurrentTimestep(), p->GetVariableName(), _cacheParams.boxMin, _cacheParams.boxMax, true, &rLevel, &cLevel, &grid3d);
     if (rc < 0) {
         Wasp::MyBase::SetErrMsg("Unable to acquire Grid for Slice texture");
         return rc;
@@ -225,7 +216,7 @@ int SliceRenderer::_getGrid3D( Grid*& grid3d ) const {
     return 0;
 }
 
-void SliceRenderer::_createDataTexture(std::unique_ptr<float>& dataValues)
+void SliceRenderer::_createDataTexture(std::unique_ptr<float> &dataValues)
 {
     if (_dataValueTextureID != 0) glDeleteTextures(1, &_dataValueTextureID);
 
@@ -317,7 +308,7 @@ int SliceRenderer::_paintGL(bool fast)
 
     _initializeState();
 
-    if (_isDataCacheDirty() || _isBoxCacheDirty() || _isColormapCacheDirty() ) {
+    if (_isDataCacheDirty() || _isBoxCacheDirty() || _isColormapCacheDirty()) {
         _resetCache();
 
         // If we're in fast mode, degrade the quality of the slice for better interactivity
@@ -328,7 +319,7 @@ int SliceRenderer::_paintGL(bool fast)
         }
 
         int rc = _regenerateSlice();
-        if (rc<0) return -1;
+        if (rc < 0) return -1;
     }
 
     _configureShader();
@@ -358,45 +349,45 @@ void SliceRenderer::_drawDebugPolygons()
 {
     // 3D yellow enclosing rectangle that defines the perimeter of our texture
     // This can and often will extend beyond the Box
-    //std::vector<glm::vec3> rectangle = _slicer->GetRectangle();
+    // std::vector<glm::vec3> rectangle = _slicer->GetRectangle();
     LegacyGL *lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
     lgl->Color4f(1., 1., 0., 1.);
     lgl->Vertex3f(_rectangle3D[0], _rectangle3D[1], _rectangle3D[2]);
     lgl->Vertex3f(_rectangle3D[3], _rectangle3D[4], _rectangle3D[5]);
-    
+
     lgl->Vertex3f(_rectangle3D[3], _rectangle3D[4], _rectangle3D[5]);
     lgl->Vertex3f(_rectangle3D[6], _rectangle3D[7], _rectangle3D[8]);
-    
+
     lgl->Vertex3f(_rectangle3D[6], _rectangle3D[7], _rectangle3D[8]);
     lgl->Vertex3f(_rectangle3D[9], _rectangle3D[10], _rectangle3D[11]);
-    
+
     lgl->Vertex3f(_rectangle3D[9], _rectangle3D[10], _rectangle3D[11]);
     lgl->Vertex3f(_rectangle3D[0], _rectangle3D[1], _rectangle3D[2]);
     lgl->End();
 
 
     // Winding order
-    double* wo = _windingOrder.data();
+    double *wo = _windingOrder.data();
     lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
-    lgl->Color4f(0., 1., 0., 1.);        // green
+    lgl->Color4f(0., 1., 0., 1.);    // green
     lgl->Vertex3f(wo[0], wo[1], wo[2]);
     lgl->Vertex3f(wo[3], wo[4], wo[5]);
-    lgl->Color4f(0., 1., 1., 1.);        // teal
+    lgl->Color4f(0., 1., 1., 1.);    // teal
     lgl->Vertex3f(wo[3], wo[4], wo[5]);
     lgl->Vertex3f(wo[6], wo[7], wo[8]);
-    lgl->Color4f(1., 1., 1., 1.);        // white
+    lgl->Color4f(1., 1., 1., 1.);    // white
     lgl->Vertex3f(wo[6], wo[7], wo[8]);
     lgl->Vertex3f(wo[0], wo[1], wo[2]);
 
-    lgl->Color4f(.9, .9, 1., 1.);           // purple
+    lgl->Color4f(.9, .9, 1., 1.);    // purple
     lgl->Vertex3f(wo[9], wo[10], wo[11]);
     lgl->Vertex3f(wo[12], wo[13], wo[14]);
-    lgl->Color4f(1., 0., 0., 1.);           // red
+    lgl->Color4f(1., 0., 0., 1.);    // red
     lgl->Vertex3f(wo[12], wo[13], wo[14]);
     lgl->Vertex3f(wo[15], wo[16], wo[17]);
-    lgl->Color4f(0., 1., 1., 1.);           // yellow
+    lgl->Color4f(0., 1., 1., 1.);    // yellow
     lgl->Vertex3f(wo[15], wo[16], wo[17]);
     lgl->Vertex3f(wo[9], wo[10], wo[11]);
     lgl->End();
@@ -456,5 +447,3 @@ void SliceRenderer::_resetState()
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
 }
-
-// clang-format on

@@ -14,8 +14,6 @@
 #include <vapor/utils.h>
 #include <vapor/Renderer.h>
 
-// clang-format off
-
 //#define DEBUG 1
 
 namespace VAPoR {
@@ -50,7 +48,6 @@ private:
         double              zOrigin;
         std::vector<float>  tf_lut;
         std::vector<double> tf_minMax;
-        //std::vector<double> boxMin, boxMax;
         VAPoR::CoordType    boxMin, boxMax;
         std::vector<double> domainMin, domainMax;
         std::vector<double> sampleLocation;
@@ -60,17 +57,17 @@ private:
     void _initTexCoordVBO();
     void _initVertexVBO();
 
-    bool      _isColormapCacheDirty() const;
-    bool      _isDataCacheDirty() const;
-    bool      _isBoxCacheDirty() const;
-    void      _getExtents(VAPoR::CoordType &min, VAPoR::CoordType &max) const;
-    void      _resetColormapCache();
-    void      _resetCache();
-    void      _createDataTexture(std::unique_ptr<float>& dataValues);
-    int       _regenerateSlice();
-    int       _getGrid3D(Grid*& grid) const;
+    bool _isColormapCacheDirty() const;
+    bool _isDataCacheDirty() const;
+    bool _isBoxCacheDirty() const;
+    void _getExtents(VAPoR::CoordType &min, VAPoR::CoordType &max) const;
+    void _resetColormapCache();
+    void _resetCache();
+    void _createDataTexture(std::unique_ptr<float> &dataValues);
+    int  _regenerateSlice();
+    int  _getGrid3D(Grid *&grid) const;
 #ifdef DEBUG
-    void      _drawDebugPolygons();
+    void _drawDebugPolygons();
 #endif
 
     void _configureShader();
@@ -84,7 +81,7 @@ private:
     GLuint _dataValueTextureID;
 
     std::vector<double> _windingOrder;
-    std::vector<double>  _rectangle3D;
+    std::vector<double> _rectangle3D;
 
     GLuint _VAO;
     GLuint _vertexVBO;
@@ -98,5 +95,3 @@ private:
 };    // namespace VAPoR
 
 #endif
-
-// clang-format on
