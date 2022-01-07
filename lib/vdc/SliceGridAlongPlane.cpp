@@ -233,8 +233,8 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
     getWindingOrder( windingOrder, tmpRectangle3D );
 
     // Finally generate the grid
-    VAPoR::DimsType dims = { sideSize, sideSize };
-    VAPoR::DimsType bs   = { sideSize, sideSize };
+    VAPoR::DimsType dims = { sideSize, sideSize, 1 };
+    VAPoR::DimsType bs   = { sideSize, sideSize, 1 };
     std::vector<float*> data = { dataValues.get() };
     VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, 
                                                         bs, 
