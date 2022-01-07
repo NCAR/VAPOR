@@ -37,9 +37,9 @@ For example, if your data is organized as a collection of RAW files that are sam
 
     *The geophysical modelling community often uses the term "stretched grid" in place of "rectilinear grid".  In Vapor parlance, they are the same.
 
-If your data are sampled on rectilinear (a.k.a. "stretched") or curvilinear grids, or if regular but stored in a format other than raw binaries, converting your data to CF compliant NetCDF is probably your best bet. CF NetCDF is widely used in the earth sciences and is highly flexible.  There is a large ecosystem of software tools that are capable reading, writing, and manipulating CF NetCDF files.
+If your data are sampled on rectilinear (a.k.a. "stretched") or curvilinear grids, or if your grid is regular and stored in a format other than raw-binaries, converting your data to :ref:`CF compliant NetCDF <cfCompliance>` is probably your best bet. CF NetCDF is widely used in the earth sciences and is highly flexible.  There is a large ecosystem of software tools that are capable reading, writing, and manipulating CF NetCDF files.
 
-If your data are sampled on a high resolution grid, and performance is a concern, you may want to consider VAPOR's multi-resolultion VDC file format. However, this format should only be considered if multi-resolution is required. For small to modest sized data sets, performance may be degraded by using the VDC.
+If your data are sampled on a high resolution grid, and performance is a concern, you may want to consider VAPOR's multi-resolultion :ref:`VDC file format <vdc>`. However, this format should only be considered if multi-resolution is required. For small to modest sized data sets, performance may be degraded by using the VDC.
 
 .. toctree::
    :maxdepth: 1
