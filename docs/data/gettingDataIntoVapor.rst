@@ -18,5 +18,5 @@ Vapor supports some data formats natively.  Other data formats are semi-supporte
    :maxdepth: 1
 
    nativelySupportedDataFormats
-   importingUnsupportedData
+   otherDataFormats
    Converting large data to VDC <vdc>
