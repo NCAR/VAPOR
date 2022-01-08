@@ -66,7 +66,7 @@ void PRegionSelector1D::sliderValueChanged(float v0, float v1)
 {
     Box *box = getBox();
 
-    vector<double> min, max;
+    CoordType min, max;
     box->GetExtents(min, max);
     min[_dim] = v0;
     max[_dim] = v1;

@@ -79,6 +79,16 @@ void Box::SetExtents(const vector<double> &minExt, const vector<double> &maxExt)
     SetValueDoubleVec(m_extentsTag, "Set box extents", exts);
 }
 
+void Box::SetExtents(const VAPoR::CoordType &minExt, const VAPoR::CoordType &maxExt)
+{
+    vector<double> mind(3, 0), maxd(3, 0);
+    for (int i = 0; i < minExt.size(); i++) {
+        mind[i] = minExt[i];
+        maxd[i] = maxExt[i];
+    }
+    SetExtents(mind, maxd);
+}
+
 void Box::GetExtents(vector<double> &minExt, vector<double> &maxExt) const
 {
     minExt.clear();
@@ -112,7 +122,7 @@ void Box::GetExtents(VAPoR::CoordType &minExt, VAPoR::CoordType &maxExt) const
     //
     vector<double> exts = GetValueDoubleVec(m_extentsTag, defaultv);
 
-    int n = IsPlanar() ? 2 : 3;
+    int n = 3;
     for (int i = 0; i < n; i++) minExt[i] = exts[i];
     for (int i = 0; i < n; i++) maxExt[i] = exts[i + 3];
 }

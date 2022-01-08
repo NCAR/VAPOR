@@ -102,7 +102,7 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
             float maxZ = max[2];
             float epsilon = std::max(abs(minZ), abs(maxZ)) * __FLT_EPSILON__;
             if (abs(maxZ - minZ) <= epsilon) {
-                vector<double> dmin, dmax;
+                CoordType dmin, dmax;
                 size_t         ts = GetCurrentTimestep();
                 int            level = GetRefinementLevel();
                 int            lod = GetCompressionLevel();
