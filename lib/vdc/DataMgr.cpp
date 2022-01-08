@@ -1041,12 +1041,10 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const DimsType &data_di
             VAssert(order >= 0 && order <= 1);
 
             if (coord_dims.size() == 1) {
-
                 coord_dimlens[0] = (data_dimlens[order]);
                 coord_bmin[0] = (data_bmin[order]);
                 coord_bmax[0] = (data_bmax[order]);
             } else {
-
                 coord_dimlens[0] = (data_dimlens[0]);
                 coord_bmin[0] = (data_bmin[0]);
                 coord_bmax[0] = (data_bmax[0]);
@@ -1059,7 +1057,6 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const DimsType &data_di
             VAssert(order >= 0 && order <= 2);
 
             if (coord_dims.size() == 1) {
-
                 coord_dimlens[0] = (data_dimlens[order]);
                 coord_bmin[0] = (data_bmin[order]);
                 coord_bmax[0] = (data_bmax[order]);
