@@ -92,6 +92,7 @@ COMMON_API size_t LinearizeCoords(const std::vector<size_t> &coords, const std::
 //! to \p max. Overflow is possible, resulting in wraparound and setting
 //! \p counter back to \p min
 //
+COMMON_API void IncrementCoords(const size_t *min, const size_t *max, size_t *counter, size_t n, int dim);
 COMMON_API std::vector<size_t> IncrementCoords(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<size_t> counter, int dim = 0);
 
 //! Return the dimesions of a subregion

@@ -64,7 +64,7 @@ private:
 
     void _setDefaultLengthAndThicknessScales(size_t ts, const std::vector<VAPoR::Grid *> &varData, const BarbParams *bParams);
 
-    void _getGridRequirements(int &ts, int &refLevel, int &lod, std::vector<double> &minExts, std::vector<double> &maxExts) const;
+    void _getGridRequirements(int &ts, int &refLevel, int &lod, CoordType &minExts, CoordType &maxExts) const;
 
     //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
@@ -74,9 +74,9 @@ private:
 
     int _generateBarbs();
 
-    int _getVectorVarGrids(int ts, int refLevel, int lod, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData);
+    int _getVectorVarGrids(int ts, int refLevel, int lod, CoordType minExts, CoordType maxExts, std::vector<VAPoR::Grid *> &varData);
 
-    int _getVarGrid(int ts, int refLevel, int lod, string varName, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData);
+    int _getVarGrid(int ts, int refLevel, int lod, string varName, CoordType minExts, CoordType maxExts, std::vector<VAPoR::Grid *> &varData);
 
     void _setUpLightingAndColor();
 

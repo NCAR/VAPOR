@@ -508,10 +508,13 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
         // In case of an empty variable name, we generate a constantGrid with zeros.
         grid = new VAPoR::ConstantGrid(0.0f, 3);
     } else {
+        VAPoR::CoordType extMin;
+        VAPoR::CoordType extMax;
         if (_params_locked) {
-            grid = _datamgr->GetVariable(_c_currentTS, varName, _c_refLev, _c_compLev, _c_ext_min, _c_ext_max, true);
+            VAPoR::Grid::CopyToArr3(_c_ext_min, extMin);
+            VAPoR::Grid::CopyToArr3(_c_ext_max, extMax);
+            grid = _datamgr->GetVariable(_c_currentTS, varName, _c_refLev, _c_compLev, extMin, extMax, true);
         } else {
-            std::vector<double> extMin, extMax;
             _params->GetBox()->GetExtents(extMin, extMax);
             int refLevel = _params->GetRefinementLevel();
             int compLevel = _params->GetCompressionLevel();

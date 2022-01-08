@@ -206,14 +206,19 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
     size_t         ts = rp->GetCurrentTimestep();
     int            refLevel = rp->GetRefinementLevel();
     int            lod = rp->GetCompressionLevel();
-    vector<double> minExts, maxExts;
-    rp->GetBox()->GetExtents(minExts, maxExts);
+    vector<double> minExtsVec, maxExtsVec;
+    rp->GetBox()->GetExtents(minExtsVec, maxExtsVec);
+
+    CoordType minExts = {0.0, 0.0, 0.0};
+    CoordType maxExts = {0.0, 0.0, 0.0};
+    Grid::CopyToArr3(minExtsVec, minExts);
+    Grid::CopyToArr3(maxExtsVec, maxExts);
 
     if (autoSetProperties) {
         MapperFunction *mf = rp->GetMapperFunc(varName);
         setProperties(mf->getMinMapValue(), mf->getMaxMapValue(), varName, ts);
-        _minExts = minExts;
-        _maxExts = maxExts;
+        _minExts = minExtsVec;
+        _maxExts = maxExtsVec;
         _lod = lod;
         _refLevel = refLevel;
     }
@@ -254,7 +259,7 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
     grid->SetInterpolationOrder(1);
 
     if (shouldUseSampling(varName, dm, rp))
-        populateSamplingHistogram(grid, minExts, maxExts);
+        populateSamplingHistogram(grid, minExtsVec, maxExtsVec);
     else
         populateIteratingHistogram(grid, calculateStride(varName, dm, rp));
 
@@ -397,7 +402,8 @@ void Histo::calculateMaxBinSize()
 
 void Histo::_getDataRange(const std::string &varName, VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
 {
-    vector<double> minExt, maxExt;
+    CoordType minExt = {0.0, 0.0, 0.0};
+    CoordType maxExt = {0.0, 0.0, 0.0};
     r->GetBox()->GetExtents(minExt, maxExt);
 
     std::vector<double> range;

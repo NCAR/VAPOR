@@ -28,6 +28,12 @@ void StretchedGrid::_stretchedGrid(const vector<double> &xcoords, const vector<d
     GetUserExtentsHelper(_minu, _maxu);
 }
 
+StretchedGrid::StretchedGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const vector<double> &xcoords, const vector<double> &ycoords, const vector<double> &zcoords)
+: StructuredGrid(dims, bs, blks)
+{
+    _stretchedGrid(xcoords, ycoords, zcoords);
+}
+
 StretchedGrid::StretchedGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const vector<double> &xcoords, const vector<double> &ycoords,
                              const vector<double> &zcoords)
 : StructuredGrid(dims, bs, blks)
@@ -154,14 +160,19 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const StretchedGrid *sg, bool be
     _sg = sg;
     _index = {0, 0, 0};
     _coords = {0.0, 0.0, 0.0};
-    size_t          ndims = sg->GetGeometryDim();
+    size_t          ndims = sg->GetNumDimensions();
     const DimsType &dims = sg->GetDimensions();
 
-    if (!begin) { _index[ndims - 1] = dims[ndims - 1]; }
+    if (!begin) {
+        if (ndims < 1)
+            _index[0] = 1;    // edge case for 0D grids
+        else
+            _index[ndims - 1] = dims[ndims - 1];
+    }
 
-    _coords[0] = _sg->_xcoords[0];
-    _coords[1] = _sg->_ycoords[0];
-    if (ndims == 3) { _coords[2] = _sg->_zcoords[0]; }
+    if (_sg->GetGeometryDim() >= 1) _coords[0] = _sg->_xcoords[0];
+    if (_sg->GetGeometryDim() >= 2) _coords[1] = _sg->_ycoords[0];
+    if (_sg->GetGeometryDim() >= 3) _coords[2] = _sg->_zcoords[0];
 }
 
 StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const ConstCoordItrSG &rhs) : ConstCoordItrAbstract()
@@ -190,6 +201,8 @@ void StretchedGrid::ConstCoordItrSG::next()
         _coords[1] = _sg->_ycoords[_index[1]];
         return;
     }
+
+    if (ndims <= 1) return;
 
     _index[0] = 0;
     _index[1]++;

@@ -73,8 +73,10 @@ int ParticleRenderer::_paintGL(bool)
     float mapMax = mf->getMaxMapValue();
     float mapDif = mapMax - mapMin;
 
-    vector<double> minExt, maxExt;
+    CoordType minExt = {0.0, 0.0, 0.0};
+    CoordType maxExt = {0.0, 0.0, 0.0};
     p->GetBox()->GetExtents(minExt, maxExt);
+
 #define PD3(v) printf("%s = %f, %f, %f\n", #v, v[0], v[1], v[2])
     string varName = p->GetVariableName();
     Grid * grid = _dataMgr->GetVariable(p->GetCurrentTimestep(), varName, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt, true);
@@ -134,18 +136,12 @@ int ParticleRenderer::_paintGL(bool)
     lgl->Color3f(1, 1, 1);
     lgl->Begin(showDir ? GL_LINES : GL_POINTS);
 
-    CoordType minExtCT = {0.0, 0.0, 0.0};
-    CoordType maxExtCT = {0.0, 0.0, 0.0};
-
-    Grid::CopyToArr3(minExt, minExtCT);
-    Grid::CopyToArr3(maxExt, maxExtCT);
-
     long                        renderedParticles = 0;
-    auto                        node = grid->ConstNodeBegin(minExtCT, maxExtCT);
+    auto                        node = grid->ConstNodeBegin(minExt, maxExt);
     auto                        nodeEnd = grid->ConstNodeEnd();
     CoordType                   coordsBuf;
     vector<Grid::ConstIterator> dirs;
-    for (auto g : vecGrids) dirs.push_back(g->cbegin(minExtCT, maxExtCT));
+    for (auto g : vecGrids) dirs.push_back(g->cbegin(minExt, maxExt));
     for (size_t i = 0; node != nodeEnd; ++node, ++i) {
         if (i % stride) {
             if (showDir)

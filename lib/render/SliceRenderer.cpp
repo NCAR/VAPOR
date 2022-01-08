@@ -10,7 +10,7 @@
 #include <vapor/GLManager.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
-#include <vapor/ConvexHull.h>
+#include <vapor/SliceGridAlongPlane.h>
 
 #define X  0
 #define Y  1
@@ -18,8 +18,6 @@
 #define XY 0
 #define XZ 1
 #define YZ 2
-
-#define MAX_TEXTURE_SIZE 2000
 
 //#define DEBUG 1
 
@@ -32,9 +30,8 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
 {
     _initialized = false;
 
-    _vertexCoords = {0.0f, 0.0f, 0.f, 1.0f, 0.0f, 0.f, 0.0f, 1.0f, 0.f, 1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
-
-    _texCoords = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
+    _windingOrder = {0.0f, 0.0f, 0.f, 1.0f, 0.0f, 0.f, 0.0f, 1.0f, 0.f, 1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
+    _rectangle3D = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
 
     _VAO = 0;
     _vertexVBO = 0;
@@ -103,9 +100,9 @@ void SliceRenderer::_initTexCoordVBO()
 
     glGenBuffers(1, &_texCoordVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glVertexAttribPointer(1, 2, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * _texCoords.size(), _texCoords.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(double) * _rectangle3D.size(), _rectangle3D.data(), GL_DYNAMIC_DRAW);
 }
 
 void SliceRenderer::_initVertexVBO()
@@ -116,10 +113,10 @@ void SliceRenderer::_initVertexVBO()
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(0);
-    glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _vertexCoords.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(double), _windingOrder.data(), GL_STATIC_DRAW);
 }
 
-int SliceRenderer::_resetDataCache()
+void SliceRenderer::_resetCache()
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);
@@ -141,18 +138,9 @@ int SliceRenderer::_resetDataCache()
 
     _cacheParams.textureSampleRate = p->GetValueDouble(RenderParams::SampleRateTag, 200);
 
-    _resetBoxCache();
+    _getExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+
     _resetColormapCache();
-
-    int rc;
-    rc = _saveTextureData();
-
-    if (rc < 0) {
-        SetErrMsg("Unable to acquire data for Slice texture");
-        return rc;
-    }
-
-    return rc;
 }
 
 void SliceRenderer::_resetColormapCache()
@@ -176,287 +164,59 @@ void SliceRenderer::_resetColormapCache()
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, _colorMapSize, 0, GL_RGBA, GL_FLOAT, &_cacheParams.tf_lut[0]);
 }
 
-int SliceRenderer::_resetBoxCache()
+int SliceRenderer::_regenerateSlice()
+{
+    Grid *grid3d = nullptr;
+    int   rc = _getGrid3D(grid3d);
+    if (rc < 0) return -1;
+
+    // Get data values from a slice
+    std::unique_ptr<float> dataValues(new float[_textureSideSize * _textureSideSize]);
+    planeDescription       pd;
+    pd.origin = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
+    pd.rotation = {_cacheParams.xRotation, _cacheParams.yRotation, _cacheParams.zRotation};
+    pd.boxMin = _cacheParams.boxMin;
+    pd.boxMax = _cacheParams.boxMax;
+    RegularGrid *slice = SliceGridAlongPlane(grid3d, pd, _textureSideSize, dataValues, _windingOrder, _rectangle3D);
+    float        missingValue = slice->GetMissingValue();
+
+    // Apply opacity to missing values
+    int                    textureSize = 2 * _textureSideSize * _textureSideSize;
+    std::unique_ptr<float> textureValues(new float[textureSize]);
+    for (size_t i = 0; i < textureSize / 2; i++) {
+        float dataValue = dataValues.get()[i];
+        if (dataValue == missingValue)
+            textureValues.get()[i * 2 + 1] = 1.f;
+        else
+            textureValues.get()[i * 2 + 1] = 0.f;
+
+        textureValues.get()[i * 2] = dataValues.get()[i];
+    }
+
+    _createDataTexture(textureValues);
+
+    delete slice;
+
+    return 0;
+}
+
+int SliceRenderer::_getGrid3D(Grid *&grid3d) const
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
-    VAssert(p);
-    _getModifiedExtents(_cacheParams.boxMin, _cacheParams.boxMax);
-
-    int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, _cacheParams.varName, _cacheParams.refinementLevel, _cacheParams.compressionLevel, _cacheParams.domainMin, _cacheParams.domainMax);
+    int          rLevel = p->GetRefinementLevel();
+    int          cLevel = p->GetCompressionLevel();
+    int          rc = DataMgrUtils::GetGrids(_dataMgr, p->GetCurrentTimestep(), p->GetVariableName(), _cacheParams.boxMin, _cacheParams.boxMax, true, &rLevel, &cLevel, &grid3d);
     if (rc < 0) {
-        SetErrMsg("Unable to determine domain extents for %s", _cacheParams.varName.c_str());
+        Wasp::MyBase::SetErrMsg("Unable to acquire Grid for Slice texture");
         return rc;
     }
+    VAssert(grid3d);
+    grid3d->SetInterpolationOrder(1);
 
-    _setVertexPositions();
-    return rc;
+    return 0;
 }
 
-void SliceRenderer::_rotate()
-{
-    std::vector<double> boxMin = _cacheParams.boxMin;
-    std::vector<double> boxMax = _cacheParams.boxMax;
-    double              xMid = (boxMax[X] - boxMin[X]) / 2. + boxMin[X];
-    double              yMid = (boxMax[Y] - boxMin[Y]) / 2. + boxMin[Y];
-    double              zMid = (boxMax[Z] - boxMin[Z]) / 2. + boxMin[Z];
-
-    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
-    _origin = {p->GetValueDouble(RenderParams::XSlicePlaneOriginTag, xMid), p->GetValueDouble(RenderParams::YSlicePlaneOriginTag, yMid), p->GetValueDouble(RenderParams::ZSlicePlaneOriginTag, zMid)};
-
-    // which we will use to project our polygon into 2D space.  First rotate XY plane with quaternion.
-    glm::vec3 angles(M_PI * _cacheParams.xRotation / 180., M_PI * _cacheParams.yRotation / 180., M_PI * _cacheParams.zRotation / 180.);
-    glm::quat q = glm::quat(angles);
-
-    // We will sample the slice in 2D coordinates.
-    // So we first define a basis function of three orthogonal vectors (_normal, _axis1, _axis2).
-    _normal = q * glm::vec3(0, 0, 1);
-    _axis1 = _getOrthogonal(_normal);
-    _axis2 = glm::cross(_normal, _axis1);
-
-    // Next we define a polygon that defines our slice.  To do this we
-    // find where our plane intercepts the X, Y, and Z edges of our Box extents.
-    //
-    // Each _vertexIn2dAnd3d in 'vertices' holds a glm::vec3 representing a point 3D space,
-    // and a glm::vec2 storing its location in 2D according to our basis function.
-    std::vector<_vertexIn2dAnd3d> vertices;
-    _findIntercepts(_origin, _normal, vertices, false);
-
-    // Use Convex Hull to get an ordered list of vertices
-    stack<glm::vec2> polygon2D = _2DConvexHull(vertices);
-
-    // At this point, 'vertices' has a vector<glm::vec3> that describe the 3D points of our polygon,
-    // and a vector<glm::vec2> that describe the 2D points of our polygon.
-    // The 3D and 2D values map to eachother.  IE - 3D element 0 corresponds the the coordinates of 2D element 0.
-
-    // Find a rectangle that encompasses our 3D polygon by finding the min/max bounds along our 2D points.
-    // We will sample along the X/Y axes of this rectangle.
-    stack<glm::vec2> s = polygon2D;
-    _rectangle2D = _makeRectangle2D(vertices, s);
-
-    // Map our rectangle's 2D edges back into 3D space, to get an
-    // ordered list of vertices for our data-enclosing rectangle.
-    s = polygon2D;
-    _polygon3D = _makePolygon3D(vertices, s);
-
-    // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
-    // rectangle to generate our 2D texture.
-    _rectangle3D = _makeRectangle3D(vertices, polygon2D);
-}
-
-void SliceRenderer::_findIntercepts(glm::vec3 &_origin, glm::vec3 &_normal, std::vector<_vertexIn2dAnd3d> &vertices, bool stretch) const
-{
-    // Lambdas for finding intercepts on the XYZ edges of the Box
-    // Plane equation:
-    //     _normal.x*(x-_origin.x) + _normal.y*(y-_origin.y) + _normal.z*(z-_origin.z) = 0
-
-    auto zIntercept = [&](float x, float y) {
-        if (_normal.z == 0) return;
-        double z = (_normal.x * _origin.x + _normal.y * _origin.y + _normal.z * _origin.z - _normal.x * x - _normal.y * y) / _normal.z;
-        if (z >= _cacheParams.boxMin[Z] && z <= _cacheParams.boxMax[Z]) {
-            _vertexIn2dAnd3d p = {glm::vec3(x, y, z), glm::vec2()};
-            vertices.push_back(p);
-        }
-    };
-    auto yIntercept = [&](float x, float z) {
-        if (_normal.y == 0) return;
-        double y = (_normal.x * _origin.x + _normal.y * _origin.y + _normal.z * _origin.z - _normal.x * x - _normal.z * z) / _normal.y;
-        if (y >= _cacheParams.boxMin[Y] && y <= _cacheParams.boxMax[Y]) {
-            _vertexIn2dAnd3d p = {glm::vec3(x, y, z), glm::vec2()};
-            vertices.push_back(p);
-        }
-    };
-    auto xIntercept = [&](float y, float z) {
-        if (_normal.x == 0) return;
-        double x = (_normal.x * _origin.x + _normal.y * _origin.y + _normal.z * _origin.z - _normal.y * y - _normal.z * z) / _normal.x;
-        if (x >= _cacheParams.boxMin[X] && x <= _cacheParams.boxMax[X]) {
-            _vertexIn2dAnd3d p = {glm::vec3(x, y, z), glm::vec2()};
-            vertices.push_back(p);
-        }
-    };
-
-    // Find vertices that exist on the Z edges of the Box
-    zIntercept(_cacheParams.boxMin[X], _cacheParams.boxMin[Y]);
-    zIntercept(_cacheParams.boxMax[X], _cacheParams.boxMax[Y]);
-    zIntercept(_cacheParams.boxMin[X], _cacheParams.boxMax[Y]);
-    zIntercept(_cacheParams.boxMax[X], _cacheParams.boxMin[Y]);
-    // Find any vertices that exist on the Y edges of the Box
-    yIntercept(_cacheParams.boxMin[X], _cacheParams.boxMin[Z]);
-    yIntercept(_cacheParams.boxMax[X], _cacheParams.boxMax[Z]);
-    yIntercept(_cacheParams.boxMin[X], _cacheParams.boxMax[Z]);
-    yIntercept(_cacheParams.boxMax[X], _cacheParams.boxMin[Z]);
-    // Find any vertices that exist on the X edges of the Box
-    xIntercept(_cacheParams.boxMin[Y], _cacheParams.boxMin[Z]);
-    xIntercept(_cacheParams.boxMax[Y], _cacheParams.boxMax[Z]);
-    xIntercept(_cacheParams.boxMin[Y], _cacheParams.boxMax[Z]);
-    xIntercept(_cacheParams.boxMax[Y], _cacheParams.boxMin[Z]);
-}
-
-stack<glm::vec2> SliceRenderer::_2DConvexHull(std::vector<_vertexIn2dAnd3d> &vertices) const
-{
-    VAssert(vertices.size() > 0);
-
-    // We now have a set of vertices along the Box's XYZ intercepts.  The edges of these vertices define where
-    // the user should see data.  To find the connectivity/edges of these vertices, we will first project them into a 2D
-    // coordinate system using our basis function, and then perform Convex Hull on those 2D coordinates.
-
-    // Project our 3D points onto the 2D plane using our basis function (_normal, _axis1, and _axis2)
-    glm::vec2 *unorderedTwoDPoints = new glm::vec2[vertices.size()];
-    int        count = 0;
-    for (auto &vertex : vertices) {
-        double x = glm::dot(_axis1, vertex.threeD - _origin);    // Find 3D point's projected X coordinate
-        double y = glm::dot(_axis2, vertex.threeD - _origin);    // Find 3D point's projected Y coordinate
-        vertex.twoD = {x, y};
-        unorderedTwoDPoints[count].x = vertex.twoD.x;
-        unorderedTwoDPoints[count].y = vertex.twoD.y;
-        count++;
-    }
-
-    // Perform convex hull on our list of 2D points,
-    // which defines the outer edges of our polygon
-    stack<glm::vec2> orderedTwoDPoints = convexHull(unorderedTwoDPoints, count);
-
-    if (unorderedTwoDPoints != nullptr) {
-        delete[] unorderedTwoDPoints;
-        unorderedTwoDPoints = nullptr;
-    }
-
-    return orderedTwoDPoints;
-}
-
-std::vector<glm::vec2> SliceRenderer::_makeRectangle2D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &orderedTwoDPoints) const
-{
-    std::vector<glm::vec2> rectangle2D = {glm::vec2(), glm::vec2()};
-    while (!orderedTwoDPoints.empty()) {
-        glm::vec2 vertex = orderedTwoDPoints.top();
-        if (vertex.x < rectangle2D[0].x) rectangle2D[0].x = vertex.x;
-        if (vertex.y < rectangle2D[0].y) rectangle2D[0].y = vertex.y;
-        if (vertex.x > rectangle2D[1].x) rectangle2D[1].x = vertex.x;
-        if (vertex.y > rectangle2D[1].y) rectangle2D[1].y = vertex.y;
-        orderedTwoDPoints.pop();
-    }
-    return rectangle2D;
-}
-
-// Map our rectangle's 2D edges back into 3D space, to get an
-// ordered list of vertices for our data-enclosing polygon.
-std::vector<glm::vec3> SliceRenderer::_makePolygon3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const
-{
-    std::vector<glm::vec3> polygon3D;
-    while (!polygon2D.empty()) {
-        glm::vec2 twoDPoint = polygon2D.top();
-        for (auto &vertex : vertices) {
-            if (twoDPoint.x == vertex.twoD.x && twoDPoint.y == vertex.twoD.y) {
-                polygon3D.push_back(glm::vec3(vertex.threeD.x, vertex.threeD.y, vertex.threeD.z));
-                polygon2D.pop();
-                break;
-            }
-        }
-    }
-    return polygon3D;
-}
-
-std::vector<glm::vec3> SliceRenderer::_makeRectangle3D(const std::vector<_vertexIn2dAnd3d> &vertices, stack<glm::vec2> &polygon2D) const
-{
-    // Define a rectangle that encloses our polygon in 3D space.  We will sample along this
-    // rectangle to generate our 2D texture.
-    std::vector<glm::vec3> rectangle3D = {glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()};
-    rectangle3D = {glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()};
-    rectangle3D[3] = _inverseProjection(_rectangle2D[0].x, _rectangle2D[0].y);
-    rectangle3D[0] = _inverseProjection(_rectangle2D[1].x, _rectangle2D[0].y);
-    rectangle3D[1] = _inverseProjection(_rectangle2D[1].x, _rectangle2D[1].y);
-    rectangle3D[2] = _inverseProjection(_rectangle2D[0].x, _rectangle2D[1].y);
-
-    return rectangle3D;
-}
-
-// Huges-Moller algorithm to get an orthogonal vector
-// https://blog.selfshadow.com/2011/10/17/perp-vectors/
-glm::vec3 SliceRenderer::_getOrthogonal(const glm::vec3 u) const
-{
-    glm::vec3 a = abs(u);
-    glm::vec3 v;
-    if (a.x <= a.y && a.x <= a.z)
-        v = glm::vec3(0, -u.z, u.y);
-    else if (a.y <= a.x && a.y <= a.z)
-        v = glm::vec3(-u.z, 0, u.x);
-    else
-        v = glm::vec3(-u.y, u.x, 0);
-    v = glm::normalize(v);
-    return v;
-}
-
-glm::vec3 SliceRenderer::_inverseProjection(float x, float y) const
-{
-    glm::vec3 point;
-    point = _origin + x * _axis1 + y * _axis2;
-    return point;
-}
-
-void SliceRenderer::_populateData(float *dataValues, Grid *grid) const
-{
-    float varValue, missingValue;
-
-    glm::vec2 delta = (_rectangle2D[1] - _rectangle2D[0]);
-    delta.x = delta.x / _xSamples;
-    delta.y = delta.y / _ySamples;
-    glm::vec2 offset = {delta.x / 2., delta.y / 2.};
-
-    int index = 0;
-    for (int j = 0; j < _ySamples; j++) {
-        for (int i = 0; i < _xSamples; i++) {
-            glm::vec3 samplePoint = _inverseProjection(offset.x + _rectangle2D[0].x + i * delta.x, _rectangle2D[0].y + offset.y + j * delta.y);
-            CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
-            varValue = grid->GetValue(p);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue || samplePoint.x > _cacheParams.boxMax[X] || samplePoint.y > _cacheParams.boxMax[Y] || samplePoint.z > _cacheParams.boxMax[Z]
-                || samplePoint.x < _cacheParams.boxMin[X] || samplePoint.y < _cacheParams.boxMin[Y] || samplePoint.z < _cacheParams.boxMin[Z])
-                dataValues[index + 1] = 1.f;
-            else
-                dataValues[index + 1] = 0.f;
-
-            dataValues[index] = varValue;
-
-            index += 2;
-        }
-    }
-}
-
-int SliceRenderer::_saveTextureData()
-{
-    Grid *grid = nullptr;
-    int   rc =
-        DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, _cacheParams.boxMin, _cacheParams.boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
-
-    if (rc < 0) {
-        SetErrMsg("Unable to acquire Grid for Slice texture");
-        return (rc);
-    }
-    VAssert(grid);
-
-    grid->SetInterpolationOrder(1);
-
-    _rotate();
-    _setVertexPositions();
-
-    _xSamples = _textureSideSize;
-    _ySamples = _textureSideSize;
-
-    int    textureSize = 2 * _xSamples * _ySamples;
-    float *dataValues = new float[textureSize];
-
-    _populateData(dataValues, grid);
-
-    _createDataTexture(dataValues);
-
-    delete[] dataValues;
-    _dataMgr->UnlockGrid(grid);
-    delete grid;
-    grid = nullptr;
-
-    return rc;
-}
-
-void SliceRenderer::_createDataTexture(float *dataValues)
+void SliceRenderer::_createDataTexture(std::unique_ptr<float> &dataValues)
 {
     if (_dataValueTextureID != 0) glDeleteTextures(1, &_dataValueTextureID);
 
@@ -467,8 +227,10 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues.get());
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _xSamples, _ySamples, 0, GL_RG, GL_FLOAT, dataValues);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _windingOrder.data());
 }
 
 bool SliceRenderer::_isDataCacheDirty() const
@@ -510,22 +272,20 @@ bool SliceRenderer::_isColormapCacheDirty() const
 
 bool SliceRenderer::_isBoxCacheDirty() const
 {
-    vector<double> min, max;
-    _getModifiedExtents(min, max);
+    VAPoR::CoordType min, max;
+    _getExtents(min, max);
 
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
     return false;
 }
 
-void SliceRenderer::_getModifiedExtents(vector<double> &min, vector<double> &max) const
+void SliceRenderer::_getExtents(VAPoR::CoordType &min, VAPoR::CoordType &max) const
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);
     Box *box = p->GetBox();
 
-    min.resize(3);
-    max.resize(3);
     box->GetExtents(min, max);
     VAssert(min.size() == 3);
     VAssert(max.size() == 3);
@@ -548,30 +308,18 @@ int SliceRenderer::_paintGL(bool fast)
 
     _initializeState();
 
-    // If we're in fast mode, degrade the quality of the slice for better interactivity
-    if (fast) {
-        _textureSideSize = 50;
-    } else {
-        _textureSideSize = _cacheParams.textureSampleRate;
-    }
-    if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
+    if (_isDataCacheDirty() || _isBoxCacheDirty() || _isColormapCacheDirty()) {
+        _resetCache();
 
-    if (_isDataCacheDirty()) {
-        rc = _resetDataCache();
-        if (rc < 0) {
-            _resetState();
-            return rc;    // error message already set by _resetDataCache()
+        // If we're in fast mode, degrade the quality of the slice for better interactivity
+        if (fast) {
+            _textureSideSize = 50;
+        } else {
+            _textureSideSize = _cacheParams.textureSampleRate;
         }
-    } else {
-        if (_isColormapCacheDirty()) _resetColormapCache();
 
-        if (_isBoxCacheDirty()) {
-            rc = _resetBoxCache();
-            if (rc < 0) {
-                _resetState();
-                return rc;    // error message already set by _resetBoxCache()
-            }
-        }
+        int rc = _regenerateSlice();
+        if (rc < 0) return -1;
     }
 
     _configureShader();
@@ -596,46 +344,55 @@ int SliceRenderer::_paintGL(bool fast)
     return rc;
 }
 
-void SliceRenderer::_drawDebugPolygons() const
+#ifdef DEBUG
+void SliceRenderer::_drawDebugPolygons()
 {
-    // 3D green polygon that shows where we should see data
-    LegacyGL *lgl = _glManager->legacy;
-    lgl->Color4f(0, 1., 0, 1.);
-    lgl->Begin(GL_LINES);
-    if (_polygon3D.size()) {
-        for (int i = 0; i < _polygon3D.size() - 1; i++) {
-            glm::vec3 vert1 = _polygon3D[i];
-            glm::vec3 vert2 = _polygon3D[i + 1];
-            lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-            lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-        }
-        lgl->Color4f(0, 1., 0, 1.);
-        glm::vec3 vert1 = _polygon3D[_polygon3D.size() - 1];
-        glm::vec3 vert2 = _polygon3D[0];
-        lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-        lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-    }
-    lgl->End();
-
     // 3D yellow enclosing rectangle that defines the perimeter of our texture
     // This can and often will extend beyond the Box
-    lgl = _glManager->legacy;
+    // std::vector<glm::vec3> rectangle = _slicer->GetRectangle();
+    LegacyGL *lgl = _glManager->legacy;
     lgl->Begin(GL_LINES);
     lgl->Color4f(1., 1., 0., 1.);
-    if (_rectangle3D.size()) {
-        for (int i = 0; i < _rectangle3D.size() - 1; i++) {
-            glm::vec3 vert1 = _rectangle3D[i];
-            glm::vec3 vert2 = _rectangle3D[i + 1];
-            lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-            lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-        }
-        glm::vec3 vert1 = _rectangle3D[3];
-        glm::vec3 vert2 = _rectangle3D[0];
-        lgl->Vertex3f(vert1.x, vert1.y, vert1.z);
-        lgl->Vertex3f(vert2.x, vert2.y, vert2.z);
-    }
+    lgl->Vertex3f(_rectangle3D[0], _rectangle3D[1], _rectangle3D[2]);
+    lgl->Vertex3f(_rectangle3D[3], _rectangle3D[4], _rectangle3D[5]);
+
+    lgl->Vertex3f(_rectangle3D[3], _rectangle3D[4], _rectangle3D[5]);
+    lgl->Vertex3f(_rectangle3D[6], _rectangle3D[7], _rectangle3D[8]);
+
+    lgl->Vertex3f(_rectangle3D[6], _rectangle3D[7], _rectangle3D[8]);
+    lgl->Vertex3f(_rectangle3D[9], _rectangle3D[10], _rectangle3D[11]);
+
+    lgl->Vertex3f(_rectangle3D[9], _rectangle3D[10], _rectangle3D[11]);
+    lgl->Vertex3f(_rectangle3D[0], _rectangle3D[1], _rectangle3D[2]);
+    lgl->End();
+
+
+    // Winding order
+    double *wo = _windingOrder.data();
+    lgl = _glManager->legacy;
+    lgl->Begin(GL_LINES);
+    lgl->Color4f(0., 1., 0., 1.);    // green
+    lgl->Vertex3f(wo[0], wo[1], wo[2]);
+    lgl->Vertex3f(wo[3], wo[4], wo[5]);
+    lgl->Color4f(0., 1., 1., 1.);    // teal
+    lgl->Vertex3f(wo[3], wo[4], wo[5]);
+    lgl->Vertex3f(wo[6], wo[7], wo[8]);
+    lgl->Color4f(1., 1., 1., 1.);    // white
+    lgl->Vertex3f(wo[6], wo[7], wo[8]);
+    lgl->Vertex3f(wo[0], wo[1], wo[2]);
+
+    lgl->Color4f(.9, .9, 1., 1.);    // purple
+    lgl->Vertex3f(wo[9], wo[10], wo[11]);
+    lgl->Vertex3f(wo[12], wo[13], wo[14]);
+    lgl->Color4f(1., 0., 0., 1.);    // red
+    lgl->Vertex3f(wo[12], wo[13], wo[14]);
+    lgl->Vertex3f(wo[15], wo[16], wo[17]);
+    lgl->Color4f(0., 1., 1., 1.);    // yellow
+    lgl->Vertex3f(wo[15], wo[16], wo[17]);
+    lgl->Vertex3f(wo[9], wo[10], wo[11]);
     lgl->End();
 }
+#endif
 
 void SliceRenderer::_configureShader()
 {
@@ -689,17 +446,4 @@ void SliceRenderer::_resetState()
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
-}
-
-void SliceRenderer::_setVertexPositions()
-{
-    if (_rectangle3D.empty()) return;
-    std::vector<double> temp = {_rectangle3D[3].x, _rectangle3D[3].y, _rectangle3D[3].z, _rectangle3D[0].x, _rectangle3D[0].y, _rectangle3D[0].z,
-                                _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z, _rectangle3D[0].x, _rectangle3D[0].y, _rectangle3D[0].z,
-                                _rectangle3D[1].x, _rectangle3D[1].y, _rectangle3D[1].z, _rectangle3D[2].x, _rectangle3D[2].y, _rectangle3D[2].z};
-
-    _vertexCoords = temp;
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * 3 * sizeof(double), _vertexCoords.data());
 }

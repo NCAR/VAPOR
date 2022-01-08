@@ -147,7 +147,7 @@ void VizWin::_getNearFarDist(const double posVec[3], const double dirVec[3], dou
     AnimationParams *p = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
     size_t           ts = p->GetCurrentTimestep();
 
-    vector<double> minExts, maxExts;
+    VAPoR::CoordType minExts, maxExts;
     dataStatus->GetActiveExtents(paramsMgr, _winName, ts, minExts, maxExts);
 
     for (int i = 0; i < 3; i++) camPosBox[i] = posVec[i];
@@ -738,31 +738,15 @@ string VizWin::_getCurrentDataMgrName() const
     return dataSetName;
 }
 
-void VizWin::_getUnionOfFieldVarExtents(RenderParams *rParams, DataMgr *dataMgr, int timeStep, int refLevel, int lod, std::vector<double> &minExts, std::vector<double> &maxExts)
+void VizWin::_getUnionOfFieldVarExtents(RenderParams *rParams, DataMgr *dataMgr, int timeStep, int refLevel, int lod, CoordType &minExts, CoordType &maxExts)
 {
     vector<string> fieldVars = rParams->GetFieldVariableNames();
-    for (int i = 0; i < 3; i++) {
-        std::vector<double> tmpMin, tmpMax;
-        string              varName = fieldVars[i];
-        if (varName == "") continue;
-
-        dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, tmpMin, tmpMax);
-
-        if (minExts.size() == 0) {
-            for (int j = 0; j < 3; j++) {
-                minExts = tmpMin;
-                maxExts = tmpMax;
-            }
-        } else {
-            for (int j = 0; j < 3; j++) {
-                if (tmpMin[j] < minExts[j]) minExts[j] = tmpMin[j];
-                if (tmpMax[j] > maxExts[j]) maxExts[j] = tmpMax[j];
-            }
-        }
-    }
+    vector<int>    axes;
+    bool           ok = DataMgrUtils::GetExtents(dataMgr, timeStep, fieldVars, refLevel, lod, minExts, maxExts, axes);
+    VAssert(ok);
 }
 
-void VizWin::_getActiveExtents(std::vector<double> &minExts, std::vector<double> &maxExts)
+void VizWin::_getActiveExtents(CoordType &minExts, CoordType &maxExts)
 {
     VAPoR::RenderParams *rParams = _getRenderParams();
     if (rParams == NULL) return;
@@ -801,12 +785,12 @@ VAPoR::Transform *VizWin::_getDataMgrTransform() const
 
 void VizWin::updateManip(bool initialize)
 {
-    std::vector<double> minExts(3, (std::numeric_limits<double>::max)());
-    std::vector<double> maxExts(3, std::numeric_limits<double>::lowest());
+    CoordType minExts = {0.0, 0.0, 0.0};
+    CoordType maxExts = {0.0, 0.0, 0.0};
 
     _getActiveExtents(minExts, maxExts);
 
-    std::vector<double>  llc, urc;
+    CoordType            llc, urc;
     string               classType;
     VAPoR::RenderParams *rParams = _getRenderParams(classType);
     if (initialize || rParams == NULL) {
@@ -845,8 +829,6 @@ void VizWin::updateManip(bool initialize)
                 b.push_back(defaultZ);
             }
 
-            llc.resize(3);
-            urc.resize(3);
             llc[0] = b[0];
             urc[0] = b[1];
             llc[1] = b[2];
@@ -866,7 +848,12 @@ void VizWin::updateManip(bool initialize)
     VAPoR::Transform *rpTransform = NULL;
     if (rParams != NULL) rpTransform = rParams->GetTransform();
 
-    _manip->Update(llc, urc, minExts, maxExts, rpTransform, dmTransform, constrain);
+    vector<double> llcVec = {llc[0], llc[1], llc[2]};
+    vector<double> urcVec = {urc[0], urc[1], urc[2]};
+    vector<double> minExtsVec = {minExts[0], minExts[1], minExts[2]};
+    vector<double> maxExtsVec = {maxExts[0], maxExts[1], maxExts[2]};
+
+    _manip->Update(llcVec, urcVec, minExtsVec, maxExtsVec, rpTransform, dmTransform, constrain);
 
     if (!initialize) _manip->Render();
 
@@ -901,9 +888,9 @@ void VizWin::_updateOriginGlyph()
     string      dataMgrName = _getCurrentDataMgrName();
     DataMgr *   dataMgr = dataStatus->GetDataMgr(dataMgrName);
 
-    std::vector<double> min, max;
+    CoordType min, max;
     dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, min, max);
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < min.size(); i++) {
         min[i] *= scales[i];
         max[i] *= scales[i];
     }

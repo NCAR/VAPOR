@@ -84,11 +84,11 @@ public:
     //!
     //! \sa ParamsMgr::GetRenderParams()
     //
-    void GetActiveExtents(const ParamsMgr *paramsMgr, string winName, string datasetName, size_t ts, vector<double> &minExts, vector<double> &maxExts) const;
+    void GetActiveExtents(const ParamsMgr *paramsMgr, string winName, string datasetName, size_t ts, CoordType &minExts, CoordType &maxExts) const;
 
-    void GetActiveExtents(const ParamsMgr *paramsMgr, string winName, size_t ts, vector<double> &minExts, vector<double> &maxExts) const;
+    void GetActiveExtents(const ParamsMgr *paramsMgr, string winName, size_t ts, CoordType &minExts, CoordType &maxExts) const;
 
-    void GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, vector<double> &minExts, vector<double> &maxExts) const;
+    void GetActiveExtents(const ParamsMgr *paramsMgr, size_t ts, CoordType &minExts, CoordType &maxExts) const;
 
     //! Return the aggregated time coordinates for all data sets
     //!
@@ -176,7 +176,7 @@ private:
         int                 compLevel;
     } var_info_t;
 
-    void _getExtents(size_t ts, const map<string, std::vector<var_info_t>> &variables, vector<double> &minExt, vector<double> &maxExt) const;
+    void _getExtents(size_t ts, const map<string, std::vector<var_info_t>> &variables, CoordType &minExt, CoordType &maxExt) const;
 
     map<string, vector<var_info_t>> _getFirstVar(string dataSetName, size_t &ts) const;
 
