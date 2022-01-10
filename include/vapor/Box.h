@@ -61,6 +61,7 @@ public:
     //!
     //
     virtual void SetExtents(const vector<double> &minExt, const vector<double> &maxExt);
+    virtual void SetExtents(const VAPoR::CoordType &minExt, const VAPoR::CoordType &maxExt);
 
     //! Get the box min and max extents
     //!
