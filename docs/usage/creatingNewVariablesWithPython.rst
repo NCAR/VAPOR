@@ -1,14 +1,5 @@
 .. _creatingNewVariablesWithPython:
 
-Video tutorial
---------------
-
-.. raw:: html
-
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/NUmbZZzPu0c" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-|
-
 Creating new variables with python
 ----------------------------------
 
@@ -20,6 +11,15 @@ Vapor allows users to create new variables to visualize with customizable Python
     :align: center
     :width: 500 
     :figclass: align-center
+
+Video tutorial
+--------------
+
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/NUmbZZzPu0c" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+|
 
 The vapor_wrf module
 ____________________
