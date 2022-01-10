@@ -90,33 +90,6 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
         if (ok = DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, i, varname, ts)) break;
     }
     if (!ok) varname = "";
-
-    if (!varname.empty()) {
-        int lastDims = _dataMgr->GetNumDimensions(GetVariableName());
-        int newDims = _dataMgr->GetNumDimensions(varname);
-
-        if (lastDims == 2 && newDims == 3) {
-            vector<double> min, max;
-            GetBox()->GetExtents(min, max);
-            float minZ = min[2];
-            float maxZ = max[2];
-            float epsilon = std::max(abs(minZ), abs(maxZ)) * __FLT_EPSILON__;
-            if (abs(maxZ - minZ) <= epsilon) {
-                CoordType      dmin, dmax;
-                size_t         ts = GetCurrentTimestep();
-                int            level = GetRefinementLevel();
-                int            lod = GetCompressionLevel();
-
-                int ret = _dataMgr->GetVariableExtents(ts, varname, level, lod, dmin, dmax);
-                if (ret == 0) {
-                    min[2] = dmin[2];
-                    max[2] = dmax[2];
-                    GetBox()->SetExtents(min, max);
-                }
-            }
-        }
-    }
-
     SetVariableName(varname);
     SetColorMapVariableName(varname);
 
