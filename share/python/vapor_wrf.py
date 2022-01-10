@@ -15,7 +15,7 @@
 	
 import numpy 
 import vapor_utils
-import vapor
+
 def CTT(P,PB,T,QCLOUD,QICE):
 	'''Calculate cloud-top temperature using WRF variables.
 	Calling sequence: VAL=CTT(P,PB,T,QCLOUD,QICE)
