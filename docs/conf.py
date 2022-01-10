@@ -19,6 +19,7 @@ import sys
 print(sys.executable)
 print("Python " + sys.version)
 sys.path.append( "/usr/local/lib/python3.7/site-packages/" )
+sys.path.append( "../share/python" )
 import sphinx_rtd_theme
 print (sphinx_rtd_theme.__file__)
 # sys.path.insert(0, os.path.abspath('.'))
@@ -55,6 +56,7 @@ extensions = [
     'sphinx.ext.imgmath', 
     'sphinx.ext.todo', 
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx_gallery.gen_gallery',
     #'jupyter_sphinx.execute'
     #'breathe'
