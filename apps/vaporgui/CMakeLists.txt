@@ -237,6 +237,8 @@ set (SRCS
 	PButton.h
 	PFlowRakeRegionSelector.cpp
 	PFlowRakeRegionSelector.h
+    PFlowIntegrationRegionSelector.cpp
+    PFlowIntegrationRegionSelector.h
 	PMultiVarSelector.cpp
 	PMultiVarSelector.h
 	AppSettingsMenu.cpp

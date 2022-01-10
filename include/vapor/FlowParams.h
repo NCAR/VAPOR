@@ -17,15 +17,20 @@ enum class FlowDir : int { FORWARD = 0, BACKWARD = 1, BI_DIR = 2 };
 
 class FlowParams;
 class PARAMS_API FakeRakeBox : public Box {
+    string _tag;
+
 public:
     using Box::Box;
     FlowParams *parent = nullptr;
+
+    void        Initialize(string tag);
     void        SetExtents(const vector<double> &minExt, const vector<double> &maxExt) override;
 };
 
 class PARAMS_API FlowParams : public RenderParams {
     StateSave    _fakeRakeStateSave;
     FakeRakeBox *_fakeRakeBox = nullptr;
+    FakeRakeBox *_fakeIntegrationBox = nullptr;
     bool         _initialized = false;
 
 public:
@@ -85,6 +90,9 @@ public:
     Box *              GetRakeBox();
     std::vector<float> GetRake() const;
     void               SetRake(const std::vector<float> &);
+
+    Box *GetIntegrationBox();
+    void SetIntegrationVolume(const std::vector<float> &);
 
     /*
      *This result vector could be of size 2 or 3.
@@ -170,6 +178,10 @@ public:
     static const std::string _yPeriodicTag;
     static const std::string _zPeriodicTag;
     static const std::string _rakeTag;
+    static const std::string _doIntegrationTag;
+    static const std::string _integrationScalarTag;
+    static const std::string _integrationSetAllToFinalValueTag;
+    static const std::string _integrationBoxTag;
     static const std::string _rakeBiasVariable;
     static const std::string _rakeBiasStrength;
     static const std::string _pastNumOfTimeSteps;

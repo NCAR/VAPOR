@@ -22,6 +22,7 @@ private:
     VAPoR::ParamsMgr *   _paramsMgr = nullptr;
     const std::string &  _variableNameTag;
 
+    void                   _getDefaultRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;
     void                   _getDataRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;
     std::string            _getVariableName() const;
     VAPoR::MapperFunction *_getTF() const;

@@ -76,6 +76,10 @@ private:
     FlowStatus         _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
     std::string        _cache_rakeBiasVariable;
     std::string        _cache_seedInputFilename;
+    bool                _cache_doIntegration;
+    bool                _cache_integrationSetAllToFinalValue;
+    float               _cache_integrationDistScalar;
+    std::vector<double> _cache_integrationVolume;
 
     // This Advection class is only used in bi-directional advection mode
     std::unique_ptr<flow::Advection> _2ndAdvection;

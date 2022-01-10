@@ -20,6 +20,8 @@ void main(void)
     {
         float valTranslate = (scalarV - colorMapRange.x) / colorMapRange.z;
         color = texture( colorMapTexture, valTranslate );
+        
+        if (color.a < 0.05) discard;
     }
 }
 

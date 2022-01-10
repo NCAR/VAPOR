@@ -303,10 +303,45 @@ int FlowRenderer::_paintGL(bool fast)
     }
 
     if (!_coloringComplete) {
-        rv = _advection.CalculateParticleValues(&_colorField, true);
-        _printNonZero(rv, __FILE__, __func__, __LINE__);
-        if (_2ndAdvection)    // bi-directional advection
-            rv = _2ndAdvection->CalculateParticleValues(&_colorField, true);
+        bool integrate = params->GetValueLong(params->_doIntegrationTag, false);
+        bool setAllToFinalValue = params->GetValueLong(params->_integrationSetAllToFinalValueTag, false);
+
+        if (integrate) {
+            vector<double> integrationVolumeMin, integrationVolumeMax;
+            params->GetIntegrationBox()->GetExtents(integrationVolumeMin, integrationVolumeMax);
+            float distScale = params->GetValueDouble(params->_integrationScalarTag, 1.f);
+            _advection.CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
+            if (_2ndAdvection)    // bi-directional advection
+                rv = _2ndAdvection->CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
+
+            if (setAllToFinalValue) {
+                int numSamplesPerStream;
+                if (_cache_isSteady)
+                    numSamplesPerStream = _cache_steadyNumOfSteps;
+                else
+                    numSamplesPerStream = _cache_currentTS;
+                _advection.SetAllStreamValuesToFinalValue(numSamplesPerStream);
+                if (_2ndAdvection) _2ndAdvection->SetAllStreamValuesToFinalValue(numSamplesPerStream);
+            }
+
+            vector<double> histoRange;
+            vector<long>   histo(256);
+            _advection.CalculateParticleHistogram(histoRange, histo);
+
+            params->SetValueLongVec(RenderParams::CustomHistogramDataTag, "", histo);
+            params->SetValueDoubleVec(RenderParams::CustomHistogramRangeTag, "", histoRange);
+        } else {
+            rv = _advection.CalculateParticleValues(&_colorField, true);
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
+            if (_2ndAdvection)    // bi-directional advection
+                rv = _2ndAdvection->CalculateParticleValues(&_colorField, true);
+
+            if (params->GetValueDoubleVec(RenderParams::CustomHistogramRangeTag).size()) {
+                params->SetValueLongVec(RenderParams::CustomHistogramDataTag, "", {});
+                params->SetValueDoubleVec(RenderParams::CustomHistogramRangeTag, "", {});
+            }
+        }
         _printNonZero(rv, __FILE__, __func__, __LINE__);
         _coloringComplete = true;
     }
@@ -856,6 +891,19 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
         }
     }
 
+    const auto doIntegration = params->GetValueLong(params->_doIntegrationTag, false);
+    const auto integrationSetAllToFinalValue = params->GetValueLong(params->_integrationSetAllToFinalValueTag, false);
+    const auto integrationDistScalar = params->GetValueDouble(params->_integrationScalarTag, false);
+    const auto integrationVolume = params->GetValueDoubleVec(params->_integrationBoxTag);
+    if (doIntegration != _cache_doIntegration || integrationSetAllToFinalValue != _cache_integrationSetAllToFinalValue || integrationDistScalar != _cache_integrationDistScalar
+        || integrationVolume != _cache_integrationVolume) {
+        _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+    _cache_doIntegration = doIntegration;
+    _cache_integrationSetAllToFinalValue = integrationSetAllToFinalValue;
+    _cache_integrationDistScalar = integrationDistScalar;
+    _cache_integrationVolume = integrationVolume;
+
     //
     // Now we branch into steady and unsteady cases, and treat them separately
     //
@@ -867,6 +915,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
                 if (_velocityStatus == FlowStatus::UPTODATE) _velocityStatus = FlowStatus::TIME_STEP_OOD;
             }
             if (params->GetSteadyNumOfSteps() != _cache_steadyNumOfSteps) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
+            if (params->GetSteadyNumOfSteps() < _cache_steadyNumOfSteps && doIntegration) _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
             _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
 
             if (_cache_currentTS != params->GetCurrentTimestep()) {

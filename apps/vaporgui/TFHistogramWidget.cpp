@@ -42,9 +42,18 @@ void TFHistogramMap::PopulateSettingsMenu(QMenu *menu) const
 
 void TFHistogramMap::paramsUpdate()
 {
-    int numBins = width() ? width() : 256;
-    if (_histo.getNumBins() != numBins) _histo.reset(numBins);    // This can be called before it is resized
-    if (_histo.PopulateIfNeeded(getVariableName(), getDataMgr(), getRenderParams()) < 0) MSG_ERR("Failed to populate histogram");
+    RenderParams *rp = getRenderParams();
+    if (rp->GetValueDoubleVec(RenderParams::CustomHistogramRangeTag).size()) {
+        auto range = rp->GetValueDoubleVec(RenderParams::CustomHistogramRangeTag);
+        auto bins = rp->GetValueLongVec(RenderParams::CustomHistogramDataTag);
+        int  numBins = bins.size();
+        _histo.reset(numBins, range[0], range[1]);
+        _histo.setBins(bins);
+    } else {
+        int numBins = width() ? width() : 256;
+        if (_histo.getNumBins() != numBins) _histo.reset(numBins);    // This can be called before it is resized
+        if (_histo.PopulateIfNeeded(getVariableName(), getDataMgr(), getRenderParams()) < 0) MSG_ERR("Failed to populate histogram");
+    }
 
     _scalingMenu->Update(getRenderParams());
     update();

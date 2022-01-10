@@ -545,7 +545,7 @@ string VizWin::_getCurrentMouseMode() const
     GUIStateParams *guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
 
     string activeTab = guiP->ActiveTab();
-    if (activeTab == RenderEventRouterGUI::GeometryTabName || activeTab == FlowEventRouter::SeedingTabName)
+    if (activeTab == RenderEventRouterGUI::GeometryTabName || activeTab == FlowEventRouter::SeedingTabName || activeTab == FlowEventRouter::IntegrationTabName)
         return MouseModeParams::GetRegionModeName();
     else
         return MouseModeParams::GetNavigateModeName();
@@ -585,6 +585,10 @@ void VizWin::_setNewExtents()
                 fp->SetRake(b);
             }
         }
+    } else if (_manipFlowIntegrationFlag) {
+        FlowParams *fp = dynamic_cast<FlowParams *>(rParams);
+        VAssert(fp);
+        fp->GetIntegrationBox()->SetExtents(llc, urc);
     } else {
         box->SetExtents(llc, urc);
     }
@@ -798,10 +802,12 @@ void VizWin::updateManip(bool initialize)
         urc = maxExts;
     } else {
         _manipFlowSeedFlag = false;
+        _manipFlowIntegrationFlag = false;
         GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
 
         if (rParams->GetName() == FlowParams::GetClassType()) {
             if (gp->ActiveTab() == FlowEventRouter::SeedingTabName) _manipFlowSeedFlag = true;
+            if (gp->ActiveTab() == FlowEventRouter::IntegrationTabName) _manipFlowIntegrationFlag = true;
         }
         if (_manipFlowSeedFlag) {
             FlowParams *fp = dynamic_cast<FlowParams *>(rParams);
@@ -835,6 +841,10 @@ void VizWin::updateManip(bool initialize)
             urc[1] = b[3];
             llc[2] = b[4];
             urc[2] = b[5];
+        } else if (_manipFlowIntegrationFlag) {
+            FlowParams *fp = dynamic_cast<FlowParams *>(rParams);
+            VAssert(fp);
+            fp->GetIntegrationBox()->GetExtents(llc, urc);
         } else {
             VAPoR::Box *box = rParams->GetBox();
             box->GetExtents(llc, urc);

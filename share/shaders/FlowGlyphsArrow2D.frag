@@ -36,5 +36,7 @@ void main()
 
 
         fragment = c;
+        
+        if (c.a < 0.05) discard;
     }
 }
