@@ -13,7 +13,7 @@ Vapor allows users to create new variables to visualize with customizable Python
     :figclass: align-center
 
 Video tutorial
---------------
+______________
 
 .. raw:: html
 
