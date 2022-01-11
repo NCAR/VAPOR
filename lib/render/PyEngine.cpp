@@ -457,14 +457,14 @@ int PyEngine::_python2c(PyObject *dict, vector<string> outputVarNames, vector<ve
 
         PyObject *o = PyDict_GetItem(dict, ky);
         if (!o || !PyArray_CheckExact(o)) {
-            SetErrMsg("Variable %s not produced by script", vname.c_str());
+            SetErrMsg("Output variable named %s, of type numpy.ndarray expected, but not produced by script", vname.c_str());
             return -1;
         }
         PyArrayObject *varArray = (PyArrayObject *)o;
 
         if (PyArray_TYPE(varArray) != NPY_FLOAT) {
             ;
-            SetErrMsg("Variable %s data is not float32", vname.c_str());
+            SetErrMsg("Variable %s is not of type float32", vname.c_str());
             return -1;
         }
 
