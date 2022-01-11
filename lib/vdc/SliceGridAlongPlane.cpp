@@ -154,6 +154,12 @@ void populateData(
     double xScanlineIncrement = (rectangle2D[3].x-rectangle2D[0].x)/sideSize;
     double yScanlineIncrement = (rectangle2D[3].y-rectangle2D[0].y)/sideSize;
 
+    VAPoR::DimsType dmin = {0,0,0};
+    VAPoR::DimsType dmax = grid->GetCellDimensions();
+    VAPoR::CoordType min, max;
+    grid->GetBoundingBox( dmin, dmax, min, max );
+    float missingValue = grid->GetMissingValue();
+
     size_t index = 0;
     for (size_t j = 0; j < sideSize; j++) {
         double xStart = rectangle2D[0].x + offset.x + j*xScanlineIncrement;
@@ -163,7 +169,15 @@ void populateData(
             double y = yStart + i*delta.y;
             glm::tvec3<double, glm::highp> samplePoint = origin + x*axis1 + y*axis2;
             VAPoR::CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
-            dataValues.get()[index] = grid->GetValue(p);
+
+            if ( p[0] < min[0] || p[0] > max[0] ||
+                 p[1] < min[1] || p[1] > max[1] ||
+                 p[2] < min[2] || p[2] > max[2] ) {
+                dataValues.get()[index] = missingValue;
+            }
+            else {
+                dataValues.get()[index] = grid->GetValue(p);
+            }
             index++;
         }
     }
