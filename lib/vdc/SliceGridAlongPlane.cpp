@@ -257,7 +257,7 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
                                                         data, 
                                                         description.domainMin, 
                                                         description.domainMax
-                                                    );
+                                                      );
     return slice;
 }
 
