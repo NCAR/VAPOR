@@ -8,6 +8,7 @@
 class RegularGrid;
 
 struct planeDescription {
+    size_t sideSize;
     std::vector<double> origin;
     std::vector<double> rotation;
     VAPoR::CoordType boxMin;
@@ -33,8 +34,6 @@ struct planeDescription {
 VDF_API VAPoR::RegularGrid* SliceGridAlongPlane(
     const VAPoR::Grid *grid3d, 
     planeDescription description, 
-    size_t sideSize, 
-    //std::shared_ptr<float> data, 
     std::unique_ptr<float>& data, 
     std::vector<double>& windingOrder, 
     std::vector<double>& rectangle3D

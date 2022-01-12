@@ -141,25 +141,24 @@ void getMinimumAreaRectangle(
 
 void populateData(
     const VAPoR::Grid *grid, 
-    size_t sideSize,
+    const planeDescription& description,
     const glm::tvec3<double, glm::highp>& origin,
     const glm::tvec3<double, glm::highp>& axis1,
     const glm::tvec3<double, glm::highp>& axis2,
     const std::vector<glm::tvec2<double, glm::highp>>& rectangle2D,
     std::unique_ptr<float>& dataValues
 ) {
+    size_t sideSize = description.sideSize;
+    VAPoR::CoordType min = description.boxMin;
+    VAPoR::CoordType max = description.boxMax;
+    
     glm::tvec2<double, glm::highp> delta( (rectangle2D[1].x-rectangle2D[0].x)/sideSize, (rectangle2D[1].y-rectangle2D[0].y)/sideSize );
     glm::tvec2<double, glm::highp> offset = {delta.x / 2., delta.y / 2.};
 
     double xScanlineIncrement = (rectangle2D[3].x-rectangle2D[0].x)/sideSize;
     double yScanlineIncrement = (rectangle2D[3].y-rectangle2D[0].y)/sideSize;
 
-    VAPoR::DimsType dmin = {0,0,0};
-    VAPoR::DimsType dmax = grid->GetCellDimensions();
-    VAPoR::CoordType min, max;
-    grid->GetBoundingBox( dmin, dmax, min, max );
     float missingValue = grid->GetMissingValue();
-
     size_t index = 0;
     for (size_t j = 0; j < sideSize; j++) {
         double xStart = rectangle2D[0].x + offset.x + j*xScanlineIncrement;
@@ -204,7 +203,6 @@ void getWindingOrder(
 VAPoR::RegularGrid* SliceGridAlongPlane(
     const VAPoR::Grid *grid3d,
     planeDescription description,
-    size_t sideSize,
     std::unique_ptr<float>& dataValues,
     std::vector<double>& windingOrder,
     std::vector<double>& rectangle3D
@@ -226,7 +224,6 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
         description.origin[2]
     );
     findIntercepts(origin, description.domainMin, description.domainMax, normal, vertices);
-    //findIntercepts(origin, description.boxMin, description.boxMax, normal, vertices);
 
     if ( vertices.size() == 0 ) {
        return nullptr;
@@ -245,15 +242,15 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
 
     // Pick sample points along our 2D rectangle, and project those points back into 3D space
     // to query our 3D grid for data values.
-    populateData( grid3d, sideSize, origin, axis1, axis2, rectangle2D, dataValues );
+    populateData( grid3d, description, origin, axis1, axis2, rectangle2D, dataValues );
 
     // Define the winding order for the two triangles that comprise the texture
     // for our data.
     getWindingOrder( windingOrder, tmpRectangle3D );
 
     // Finally generate the grid
-    VAPoR::DimsType dims = { sideSize, sideSize, 1 };
-    VAPoR::DimsType bs   = { sideSize, sideSize, 1 };
+    VAPoR::DimsType dims = { description.sideSize, description.sideSize, 1 };
+    VAPoR::DimsType bs   = { description.sideSize, description.sideSize, 1 };
     std::vector<float*> data = { dataValues.get() };
     VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, 
                                                         bs, 
