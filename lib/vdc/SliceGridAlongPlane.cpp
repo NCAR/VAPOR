@@ -225,10 +225,6 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
     );
     findIntercepts(origin, description.domainMin, description.domainMax, normal, vertices);
 
-    if ( vertices.size() == 0 ) {
-       return nullptr;
-    }
-
     // Find the minimum-area-rectangle that encloses the vertices that are along the edges
     // of the Box.  Define this rectangle in 3D space, and in a newly projecteed 2D space.
     std::vector<glm::tvec2<double, glm::highp>> rectangle2D;
