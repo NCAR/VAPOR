@@ -170,9 +170,9 @@ void populateData(
             glm::tvec3<double, glm::highp> samplePoint = origin + x*axis1 + y*axis2;
             VAPoR::CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
 
-            if ( p[0] < min[0] || p[0] > max[0] ||
-                 p[1] < min[1] || p[1] > max[1] ||
-                 p[2] < min[2] || p[2] > max[2] ) {
+            if ( p[0] <= min[0] || p[0] >= max[0] ||
+                 p[1] <= min[1] || p[1] >= max[1] ||
+                 p[2] <= min[2] || p[2] >= max[2] ) {
                 dataValues.get()[index] = missingValue;
             }
             else {
@@ -225,7 +225,12 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
         description.origin[1],
         description.origin[2]
     );
-    findIntercepts(origin, description.boxMin, description.boxMax, normal, vertices);
+    findIntercepts(origin, description.domainMin, description.domainMax, normal, vertices);
+    //findIntercepts(origin, description.boxMin, description.boxMax, normal, vertices);
+
+    if ( vertices.size() == 0 ) {
+       return nullptr;
+    }
 
     // Find the minimum-area-rectangle that encloses the vertices that are along the edges
     // of the Box.  Define this rectangle in 3D space, and in a newly projecteed 2D space.
@@ -253,10 +258,9 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
     VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, 
                                                         bs, 
                                                         data, 
-                                                        description.boxMin, 
-                                                        description.boxMax 
+                                                        description.domainMin, 
+                                                        description.domainMax
                                                     );
-
     return slice;
 }
 

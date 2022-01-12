@@ -12,6 +12,8 @@ struct planeDescription {
     std::vector<double> rotation;
     VAPoR::CoordType boxMin;
     VAPoR::CoordType boxMax;
+    VAPoR::CoordType domainMin;
+    VAPoR::CoordType domainMax;
 };
 
 //! Create a 2D grid that is sampled along the orientation of a 3D grid.

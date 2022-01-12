@@ -19,8 +19,6 @@
 #define XZ 1
 #define YZ 2
 
-//#define DEBUG 1
-
 using namespace VAPoR;
 
 static RendererRegistrar<SliceRenderer> registrar(SliceRenderer::GetClassType(), SliceParams::GetClassType());
@@ -39,8 +37,6 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     _colorMapTextureID = 0;
     _dataValueTextureID = 0;
 
-    _cacheParams.domainMin.resize(3, 0.f);
-    _cacheParams.domainMax.resize(3, 1.f);
     _cacheParams.textureSampleRate = 200;
 
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
@@ -140,6 +136,18 @@ void SliceRenderer::_resetCache()
 
     _getExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
+    int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, 
+                                          _cacheParams.varName, 
+                                          _cacheParams.refinementLevel, 
+                                          _cacheParams.compressionLevel, 
+                                          _cacheParams.domainMin, 
+                                          _cacheParams.domainMax
+    );
+    /*if (rc < 0) {
+        SetErrMsg("Unable to determine domain extents for %s", _cacheParams.varName.c_str());
+        return rc;
+    }*/
+
     _resetColormapCache();
 }
 
@@ -177,7 +185,10 @@ int SliceRenderer::_regenerateSlice()
     pd.rotation = {_cacheParams.xRotation, _cacheParams.yRotation, _cacheParams.zRotation};
     pd.boxMin = _cacheParams.boxMin;
     pd.boxMax = _cacheParams.boxMax;
+    pd.domainMin = _cacheParams.domainMin;
+    pd.domainMax = _cacheParams.domainMax;
     RegularGrid *slice = SliceGridAlongPlane(grid3d, pd, _textureSideSize, dataValues, _windingOrder, _rectangle3D);
+    if (slice == nullptr) return 0;
     float        missingValue = slice->GetMissingValue();
 
     // Apply opacity to missing values
