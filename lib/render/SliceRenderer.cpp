@@ -137,12 +137,12 @@ void SliceRenderer::_resetCache()
     _getExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
     // clang-format off
-    int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, 
-                                          _cacheParams.varName, 
-                                          _cacheParams.refinementLevel, 
-                                          _cacheParams.compressionLevel, 
-                                          _cacheParams.domainMin, 
-                                          _cacheParams.domainMax
+    _dataMgr->GetVariableExtents(_cacheParams.ts, 
+                                 _cacheParams.varName, 
+                                 _cacheParams.refinementLevel, 
+                                 _cacheParams.compressionLevel, 
+                                 _cacheParams.domainMin, 
+                                 _cacheParams.domainMax
     );
     // clang-format on
 
