@@ -136,6 +136,7 @@ void SliceRenderer::_resetCache()
 
     _getExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
+    // clang-format off
     int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, 
                                           _cacheParams.varName, 
                                           _cacheParams.refinementLevel, 
@@ -143,6 +144,7 @@ void SliceRenderer::_resetCache()
                                           _cacheParams.domainMin, 
                                           _cacheParams.domainMax
     );
+    // clang-format on
 
     _resetColormapCache();
 }
