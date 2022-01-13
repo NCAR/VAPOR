@@ -187,7 +187,10 @@ int SliceRenderer::_regenerateSlice()
     pd.domainMin = _cacheParams.domainMin;
     pd.domainMax = _cacheParams.domainMax;
     RegularGrid *slice = SliceGridAlongPlane(grid3d, pd, dataValues, _windingOrder, _rectangle3D);
-    if (slice == nullptr) return 0;
+    if (slice == nullptr) {
+        Wasp::MyBase::SetErrMsg("Unable to perform SliceGridAlongPlane() with current Grid");
+        return -1;
+    }
     float        missingValue = slice->GetMissingValue();
 
     // Apply opacity to missing values
