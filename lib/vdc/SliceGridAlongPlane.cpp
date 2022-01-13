@@ -169,9 +169,9 @@ void populateData(
             glm::tvec3<double, glm::highp> samplePoint = origin + x*axis1 + y*axis2;
             VAPoR::CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
 
-            if ( p[0] <= min[0] || p[0] >= max[0] ||
-                 p[1] <= min[1] || p[1] >= max[1] ||
-                 p[2] <= min[2] || p[2] >= max[2] ) {
+            if ( p[0] < min[0] || p[0] > max[0] ||
+                 p[1] < min[1] || p[1] > max[1] ||
+                 p[2] < min[2] || p[2] > max[2] ) {
                 dataValues.get()[index] = missingValue;
             }
             else {
