@@ -63,16 +63,16 @@ const std::string BOVCollection::_floatFormatString = "FLOAT";
 const std::string BOVCollection::_doubleFormatString = "DOUBLE";
 
 namespace {
-    size_t getFileSize(std::string filename) // path to file
-    {
-        FILE *p_file = NULL;
-        p_file = fopen(filename.c_str(),"rb");
-        fseek(p_file,0,SEEK_END);
-        size_t size = ftell(p_file);
-        fclose(p_file);
-        return size;
-    }
+size_t getFileSize(std::string filename)    // path to file
+{
+    FILE *p_file = NULL;
+    p_file = fopen(filename.c_str(), "rb");
+    fseek(p_file, 0, SEEK_END);
+    size_t size = ftell(p_file);
+    fclose(p_file);
+    return size;
 }
+}    // namespace
 
 BOVCollection::BOVCollection()
 : _time(_defaultTime), _dataFile(_defaultFile), _dataFormat(_defaultFormat), _variable(_defaultVar), _byteOffset(_defaultByteOffset), _divideBrick(_defaultDivBrick), _dataEndian(_defaultEndian),
@@ -115,7 +115,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 
         header.open(paths[i]);
         if (header.is_open()) {
-            if( getFileSize(paths[i]) > 1000 ) {
+            if (getFileSize(paths[i]) > 1000) {
                 SetErrMsg(("BOV header file larger than 1MB.  This text file shouldn't need to be larger than a few KB." + paths[0]).c_str());
                 return -1;
             }
