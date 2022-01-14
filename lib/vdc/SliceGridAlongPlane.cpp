@@ -141,19 +141,24 @@ void getMinimumAreaRectangle(
 
 void populateData(
     const VAPoR::Grid *grid, 
-    size_t sideSize,
+    const planeDescription& description,
     const glm::tvec3<double, glm::highp>& origin,
     const glm::tvec3<double, glm::highp>& axis1,
     const glm::tvec3<double, glm::highp>& axis2,
     const std::vector<glm::tvec2<double, glm::highp>>& rectangle2D,
     std::unique_ptr<float>& dataValues
 ) {
+    size_t sideSize = description.sideSize;
+    VAPoR::CoordType min = description.boxMin;
+    VAPoR::CoordType max = description.boxMax;
+    
     glm::tvec2<double, glm::highp> delta( (rectangle2D[1].x-rectangle2D[0].x)/sideSize, (rectangle2D[1].y-rectangle2D[0].y)/sideSize );
     glm::tvec2<double, glm::highp> offset = {delta.x / 2., delta.y / 2.};
 
     double xScanlineIncrement = (rectangle2D[3].x-rectangle2D[0].x)/sideSize;
     double yScanlineIncrement = (rectangle2D[3].y-rectangle2D[0].y)/sideSize;
 
+    float missingValue = grid->GetMissingValue();
     size_t index = 0;
     for (size_t j = 0; j < sideSize; j++) {
         double xStart = rectangle2D[0].x + offset.x + j*xScanlineIncrement;
@@ -163,7 +168,15 @@ void populateData(
             double y = yStart + i*delta.y;
             glm::tvec3<double, glm::highp> samplePoint = origin + x*axis1 + y*axis2;
             VAPoR::CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
-            dataValues.get()[index] = grid->GetValue(p);
+
+            if ( p[0] < min[0] || p[0] > max[0] ||
+                 p[1] < min[1] || p[1] > max[1] ||
+                 p[2] < min[2] || p[2] > max[2] ) {
+                dataValues.get()[index] = missingValue;
+            }
+            else {
+                dataValues.get()[index] = grid->GetValue(p);
+            }
             index++;
         }
     }
@@ -190,7 +203,6 @@ void getWindingOrder(
 VAPoR::RegularGrid* SliceGridAlongPlane(
     const VAPoR::Grid *grid3d,
     planeDescription description,
-    size_t sideSize,
     std::unique_ptr<float>& dataValues,
     std::vector<double>& windingOrder,
     std::vector<double>& rectangle3D
@@ -211,7 +223,7 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
         description.origin[1],
         description.origin[2]
     );
-    findIntercepts(origin, description.boxMin, description.boxMax, normal, vertices);
+    findIntercepts(origin, description.domainMin, description.domainMax, normal, vertices);
 
     // Find the minimum-area-rectangle that encloses the vertices that are along the edges
     // of the Box.  Define this rectangle in 3D space, and in a newly projecteed 2D space.
@@ -226,23 +238,22 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
 
     // Pick sample points along our 2D rectangle, and project those points back into 3D space
     // to query our 3D grid for data values.
-    populateData( grid3d, sideSize, origin, axis1, axis2, rectangle2D, dataValues );
+    populateData( grid3d, description, origin, axis1, axis2, rectangle2D, dataValues );
 
     // Define the winding order for the two triangles that comprise the texture
     // for our data.
     getWindingOrder( windingOrder, tmpRectangle3D );
 
     // Finally generate the grid
-    VAPoR::DimsType dims = { sideSize, sideSize, 1 };
-    VAPoR::DimsType bs   = { sideSize, sideSize, 1 };
+    VAPoR::DimsType dims = { description.sideSize, description.sideSize, 1 };
+    VAPoR::DimsType bs   = { description.sideSize, description.sideSize, 1 };
     std::vector<float*> data = { dataValues.get() };
     VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, 
                                                         bs, 
                                                         data, 
-                                                        description.boxMin, 
-                                                        description.boxMax 
-                                                    );
-
+                                                        description.domainMin, 
+                                                        description.domainMax
+                                                      );
     return slice;
 }
 

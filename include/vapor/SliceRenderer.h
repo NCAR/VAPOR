@@ -49,7 +49,7 @@ private:
         std::vector<float>  tf_lut;
         std::vector<double> tf_minMax;
         VAPoR::CoordType    boxMin, boxMax;
-        std::vector<double> domainMin, domainMax;
+        VAPoR::CoordType    domainMin, domainMax;
         std::vector<double> sampleLocation;
     } _cacheParams;
 

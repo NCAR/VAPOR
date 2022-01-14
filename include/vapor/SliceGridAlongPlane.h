@@ -8,17 +8,25 @@
 class RegularGrid;
 
 struct planeDescription {
+    size_t sideSize;
     std::vector<double> origin;
     std::vector<double> rotation;
     VAPoR::CoordType boxMin;
     VAPoR::CoordType boxMax;
+    VAPoR::CoordType domainMin;
+    VAPoR::CoordType domainMax;
 };
 
-//! Create a 2D grid that is sampled along the orientation of a 3D grid.
-//! The "planeDescription" variable includes parameters that define the
-//! 2D grid's origin, rotation, and extents.  The sampling rate is defined
-//! by the "sideSize" parameter, which defines how many samples along the X
-//! and Y axes are taken along the plane inside of the 3D grid.
+//! Create a 2D RegularGrid that samples a given 3D Grid object along a plane, 
+//! through the entire domain.  The "planeDescription" variable includes parameters 
+//! that define the 2D plane's origin, rotation, and valid extents.  Points on the
+//! 2D RegularGrid that are outside of the valid extents will be assigned as
+//! missingValues.
+//! 
+//! Note: The boxMin and boxMax values within the planeDescription should come from
+//! the current RenderParams' Box class.  The domainMin and domainMax values should 
+//! come from the DataMgr::GetVariableExtents function.  Taking these values from
+//! the given 3D grid can produce erroneous results when the 3D grid's region is reduced.
 //!
 //! \param[in] grid3d A variable's 3D grid to be sampled along a plane, to generate a 2D grid object
 //! \param[in] description A set of std::vector<dobule> values that define the origin, rotation, and extents of the returned 2D grid
@@ -31,8 +39,6 @@ struct planeDescription {
 VDF_API VAPoR::RegularGrid* SliceGridAlongPlane(
     const VAPoR::Grid *grid3d, 
     planeDescription description, 
-    size_t sideSize, 
-    //std::shared_ptr<float> data, 
     std::unique_ptr<float>& data, 
     std::vector<double>& windingOrder, 
     std::vector<double>& rectangle3D

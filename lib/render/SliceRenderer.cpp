@@ -19,8 +19,6 @@
 #define XZ 1
 #define YZ 2
 
-//#define DEBUG 1
-
 using namespace VAPoR;
 
 static RendererRegistrar<SliceRenderer> registrar(SliceRenderer::GetClassType(), SliceParams::GetClassType());
@@ -39,8 +37,6 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     _colorMapTextureID = 0;
     _dataValueTextureID = 0;
 
-    _cacheParams.domainMin.resize(3, 0.f);
-    _cacheParams.domainMax.resize(3, 1.f);
     _cacheParams.textureSampleRate = 200;
 
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
@@ -140,6 +136,16 @@ void SliceRenderer::_resetCache()
 
     _getExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
+    // clang-format off
+    _dataMgr->GetVariableExtents(_cacheParams.ts, 
+                                 _cacheParams.varName, 
+                                 _cacheParams.refinementLevel, 
+                                 _cacheParams.compressionLevel, 
+                                 _cacheParams.domainMin, 
+                                 _cacheParams.domainMax
+    );
+    // clang-format on
+
     _resetColormapCache();
 }
 
@@ -157,8 +163,13 @@ void SliceRenderer::_resetColormapCache()
     glGenTextures(1, &_colorMapTextureID);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureID);
+#ifdef DEBUG
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+#else
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#endif
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, _colorMapSize, 0, GL_RGBA, GL_FLOAT, &_cacheParams.tf_lut[0]);
@@ -173,12 +184,19 @@ int SliceRenderer::_regenerateSlice()
     // Get data values from a slice
     std::unique_ptr<float> dataValues(new float[_textureSideSize * _textureSideSize]);
     planeDescription       pd;
+    pd.sideSize = _textureSideSize;
     pd.origin = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
     pd.rotation = {_cacheParams.xRotation, _cacheParams.yRotation, _cacheParams.zRotation};
     pd.boxMin = _cacheParams.boxMin;
     pd.boxMax = _cacheParams.boxMax;
-    RegularGrid *slice = SliceGridAlongPlane(grid3d, pd, _textureSideSize, dataValues, _windingOrder, _rectangle3D);
-    float        missingValue = slice->GetMissingValue();
+    pd.domainMin = _cacheParams.domainMin;
+    pd.domainMax = _cacheParams.domainMax;
+    RegularGrid *slice = SliceGridAlongPlane(grid3d, pd, dataValues, _windingOrder, _rectangle3D);
+    if (slice == nullptr) {
+        Wasp::MyBase::SetErrMsg("Unable to perform SliceGridAlongPlane() with current Grid");
+        return -1;
+    }
+    float missingValue = slice->GetMissingValue();
 
     // Apply opacity to missing values
     int                    textureSize = 2 * _textureSideSize * _textureSideSize;
@@ -223,8 +241,13 @@ void SliceRenderer::_createDataTexture(std::unique_ptr<float> &dataValues)
     glGenTextures(1, &_dataValueTextureID);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
+#ifdef DEBUG
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+#else
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#endif
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues.get());
