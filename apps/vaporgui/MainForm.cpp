@@ -465,7 +465,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         for (auto &f : files) paths.push_back(f.toStdString());
 
         string fmt;
-        
+
         if (filesType == "auto") {
             if (!determineDatasetFormat(paths, &fmt)) {
                 fmt = "";
@@ -474,9 +474,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         } else {
             fmt = filesType;
         }
-        
-        if (!fmt.empty())
-            loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
+
+        if (!fmt.empty()) loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
 
         _stateChangeCB();
     }
