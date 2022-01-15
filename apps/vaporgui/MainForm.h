@@ -77,7 +77,7 @@ class MainForm : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainForm(vector<QString> files, QApplication *app, bool interactive = true, QWidget *parent = 0);
+    MainForm(vector<QString> files, QApplication *app, bool interactive = true, string filesType="auto", QWidget *parent = 0);
     ~MainForm();
 
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
