@@ -5,6 +5,7 @@
 #include <GTE/MinimumAreaBox2.h>
 #include <vapor/RegularGrid.h>
 #include <vapor/SliceGridAlongPlane.h>
+#include <vapor/ArbitrarilyOrientedRegularGrid.h>
 
 // clang-format off
 
@@ -146,7 +147,8 @@ void populateData(
     const glm::tvec3<double, glm::highp>& axis1,
     const glm::tvec3<double, glm::highp>& axis2,
     const std::vector<glm::tvec2<double, glm::highp>>& rectangle2D,
-    std::unique_ptr<float>& dataValues
+    //std::unique_ptr<float>& dataValues
+    std::shared_ptr<float>& dataValues
 ) {
     size_t sideSize = description.sideSize;
     VAPoR::CoordType min = description.boxMin;
@@ -200,10 +202,11 @@ void getWindingOrder(
     windingOrder = temp;
 }
 
-VAPoR::RegularGrid* SliceGridAlongPlane(
+//VAPoR::RegularGrid* SliceGridAlongPlane(
+VAPoR::ArbitrarilyOrientedRegularGrid* SliceGridAlongPlane(
     const VAPoR::Grid *grid3d,
-    planeDescription description,
-    std::unique_ptr<float>& dataValues,
+    planeDescription& description,
+    std::shared_ptr<float>& dataValues,
     std::vector<double>& windingOrder,
     std::vector<double>& rectangle3D
 ) {
@@ -215,6 +218,9 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
         description.rotation[2]
     );
     rotate( rotation, normal, axis1, axis2 );
+
+    description.axis1 = {axis1.x, axis1.y, axis1.z};
+    description.axis2 = {axis2.x, axis2.y, axis2.z};
     
     // Find the vertices where our plane intercepts the edges of the Box
     std::vector<glm::tvec3<double, glm::highp>> vertices;
@@ -247,12 +253,18 @@ VAPoR::RegularGrid* SliceGridAlongPlane(
     // Finally generate the grid
     VAPoR::DimsType dims = { description.sideSize, description.sideSize, 1 };
     VAPoR::DimsType bs   = { description.sideSize, description.sideSize, 1 };
-    std::vector<float*> data = { dataValues.get() };
-    VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, 
+    //std::vector<float*> data = { dataValues.get() };
+    /*VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, 
                                                         bs, 
                                                         data, 
                                                         description.domainMin, 
                                                         description.domainMax
+                                                      );*/
+    VAPoR::ArbitrarilyOrientedRegularGrid* slice = new VAPoR::ArbitrarilyOrientedRegularGrid( 
+                                                        description,
+                                                        dims, 
+                                                        dataValues, 
+                                                        rectangle2D
                                                       );
     return slice;
 }
