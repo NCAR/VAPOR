@@ -115,7 +115,7 @@ int BOVCollection::Initialize(const std::vector<std::string> &paths)
 
         header.open(paths[i]);
         if (header.is_open()) {
-            if (getFileSize(paths[i]) > 1000) {
+            if (getFileSize(paths[i]) > 1000000) {
                 SetErrMsg(("BOV header file larger than 1MB.  This text file shouldn't need to be larger than a few KB." + paths[0]).c_str());
                 return -1;
             }
