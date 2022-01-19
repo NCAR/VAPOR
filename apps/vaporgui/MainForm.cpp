@@ -321,7 +321,7 @@ public:
 
 // Only the main program should call the constructor:
 //
-MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, QWidget *parent) : QMainWindow(parent)
+MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, string filesType, QWidget *parent) : QMainWindow(parent)
 {
     _initMembers();
 
@@ -465,11 +465,17 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
         for (auto &f : files) paths.push_back(f.toStdString());
 
         string fmt;
-        if (determineDatasetFormat(paths, &fmt)) {
-            loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
+
+        if (filesType == "auto") {
+            if (!determineDatasetFormat(paths, &fmt)) {
+                fmt = "";
+                MSG_ERR("Could not determine dataset format for command line parameters");
+            }
         } else {
-            MSG_ERR("Could not determine dataset format for command line parameters");
+            fmt = filesType;
         }
+
+        if (!fmt.empty()) loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
 
         _stateChangeCB();
     }
