@@ -74,18 +74,21 @@ struct opt_t {
     OptionParser::IntRange_    renderRange;
     OptionParser::Dimension2D_ resolution;
     char *                     outputPath;
+    char *                     datasetType;
 } opt;
 OptionParser::OptDescRec_T set_opts[] = {{"help", 0, "", "Print this message and exit"},
                                          {"render", 0, "", "Render a given session file and exit"},
                                          {"timesteps", 1, "0:0", "Timesteps to render when using -render. Defaults to all timesteps."},
                                          {"resolution", 1, "1920x1080", "Output resolution when using -render"},
                                          {"output", 1, "vapor.tiff", "Output image file when using -render. This will be suffixed with the timestep number. Supports tiff, jpg"},
+                                         {"ftype", 1, "auto", "Specify file format of datasets passed in command line. Valid options are: auto vdc wrf mpas dcp ugrid cf bov"},
                                          {NULL}};
 OptionParser::Option_T     get_options[] = {{"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
                                         {"render", Wasp::CvtToBoolean, &opt.render, sizeof(opt.render)},
                                         {"timesteps", Wasp::CvtToIntRange, &opt.renderRange, sizeof(opt.renderRange)},
                                         {"resolution", Wasp::CvtToDimension2D, &opt.resolution, sizeof(opt.resolution)},
                                         {"output", Wasp::CvtToString, &opt.outputPath, sizeof(opt.outputPath)},
+                                        {"ftype", Wasp::CvtToString, &opt.datasetType, sizeof(opt.datasetType)},
                                         {NULL}};
 const char *               ProgName;
 
@@ -175,7 +178,7 @@ int           main(int argc, char **argv)
 
     vector<QString> files;
     for (int i = 1; i < argc; i++) { files.push_back(argv[i]); }
-    MainForm *mw = new MainForm(files, app, !opt.render);
+    MainForm *mw = new MainForm(files, app, !opt.render, opt.datasetType);
 
     // StartupParams* sParams = new StartupParams(0);
 
