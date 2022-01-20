@@ -176,6 +176,8 @@ void SliceRenderer::_resetColormapCache()
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, _colorMapSize, 0, GL_RGBA, GL_FLOAT, &_cacheParams.tf_lut[0]);
 }
 
+// clang-format off
+
 int SliceRenderer::_regenerateSlice()
 {
     Grid *grid3d = nullptr;
@@ -193,8 +195,6 @@ int SliceRenderer::_regenerateSlice()
     pd.domainMin = _cacheParams.domainMin;
     pd.domainMax = _cacheParams.domainMax;
 
-// clang-format off
-
     VAPoR::DimsType dims = { (size_t)_textureSideSize, (size_t)_textureSideSize, 1 };
 
     ArbitrarilyOrientedRegularGrid* slice = new ArbitrarilyOrientedRegularGrid(
@@ -211,8 +211,6 @@ int SliceRenderer::_regenerateSlice()
         Wasp::MyBase::SetErrMsg("Unable to perform SliceGridAlongPlane() with current Grid");
         return -1;
     }
-
-// clang-format on
 
     // Apply opacity to missing values
     float missingValue = slice->GetMissingValue();
@@ -234,6 +232,8 @@ int SliceRenderer::_regenerateSlice()
 
     return 0;
 }
+
+// clang-format on
 
 int SliceRenderer::_getGrid3D(Grid *&grid3d) const
 {
