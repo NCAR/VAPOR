@@ -41,7 +41,6 @@ set (SRC
 	DCUtils.cpp
 	QuadTreeRectangleP.cpp
     DCUGRID.cpp
-    SliceGridAlongPlane.cpp
 )
 
 set (HEADERS
@@ -88,7 +87,6 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/QuadTreeRectangleP.h
 	${PROJECT_SOURCE_DIR}/include/vapor/OpenMPSupport.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCUGRID.h
-	${PROJECT_SOURCE_DIR}/include/vapor/SliceGridAlongPlane.h
 )
 
 add_library (vdc SHARED ${SRC} ${HEADERS})
