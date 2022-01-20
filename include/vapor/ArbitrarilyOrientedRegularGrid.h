@@ -43,27 +43,10 @@ public:
     static std::string GetClassType() { return ("ArbitrarilyOrientedRegular"); }
     std::string        GetType() const override { return (GetClassType()); }
 
-    //! \copydoc Grid::GetBoundingBox()
-    //
-    //virtual void GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const override;
-
     //! \copydoc Grid::GetUserCoordinates()
     //
     virtual void GetUserCoordinates(const DimsType &indices, CoordType &coords) const override;
     //void GetUserCoordinates(size_t i, size_t j, size_t k=0) const;
-
-    // For grandparent inheritance of
-    // Grid::GetUserCoordinates(const size_t indices[], double coords[])
-    //
-    //using Grid::GetUserCoordinates;
-
-    //! \copydoc Grid::GetIndicesCell
-    //!
-    //virtual bool GetIndicesCell(const CoordType &coords, DimsType &indices) const override;
-
-    //! \copydoc Grid::InsideGrid()
-    //
-    //virtual bool InsideGrid(const CoordType &coords) const;
 
 private:
     std::vector<glm::tvec2<double, glm::highp>> _rectangle2D;
