@@ -35,7 +35,6 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
         pd.origin[1],
         pd.origin[2]
     );
-    //findIntercepts(origin, pd.domainMin, pd.domainMax, _normal, vertices);
     _findIntercepts(pd.domainMin, pd.domainMax, vertices);
 
     // Find the minimum-area-rectangle that encloses the vertices that are along the edges
@@ -57,8 +56,6 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
     // for our data.
     _getWindingOrder( windingOrder, tmpRectangle3D );
 }
-
-// clang-format on
 
 void ArbitrarilyOrientedRegularGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
 {
@@ -83,8 +80,6 @@ void ArbitrarilyOrientedRegularGrid::GetUserCoordinates(const DimsType &indices,
     std::cout << i << " " << j << std::endl;
     std::cout << setprecision(4) << coords[0] << " " << coords[1] << " " << coords[2] << std::endl << std::endl;
 }
-
-// clang-format off
 
 // Huges-Moller algorithm to get an orthogonal vector
 // https://blog.selfshadow.com/2011/10/17/perp-vectors/

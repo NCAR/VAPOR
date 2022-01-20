@@ -192,6 +192,9 @@ int SliceRenderer::_regenerateSlice()
     pd.boxMax = _cacheParams.boxMax;
     pd.domainMin = _cacheParams.domainMin;
     pd.domainMax = _cacheParams.domainMax;
+
+// clang-format off
+
     VAPoR::DimsType dims = { (size_t)_textureSideSize, (size_t)_textureSideSize, 1 };
 
     ArbitrarilyOrientedRegularGrid* slice = new ArbitrarilyOrientedRegularGrid(
@@ -208,6 +211,8 @@ int SliceRenderer::_regenerateSlice()
         Wasp::MyBase::SetErrMsg("Unable to perform SliceGridAlongPlane() with current Grid");
         return -1;
     }
+
+// clang-format on
 
     // Apply opacity to missing values
     float missingValue = slice->GetMissingValue();
