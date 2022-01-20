@@ -193,8 +193,18 @@ int SliceRenderer::_regenerateSlice()
     pd.boxMax = _cacheParams.boxMax;
     pd.domainMin = _cacheParams.domainMin;
     pd.domainMax = _cacheParams.domainMax;
+    VAPoR::DimsType dims = { (size_t)_textureSideSize, (size_t)_textureSideSize, 1 };
     //RegularGrid *slice = SliceGridAlongPlane(grid3d, pd, dataValues, _windingOrder, _rectangle3D);
-    ArbitrarilyOrientedRegularGrid *slice = SliceGridAlongPlane(grid3d, pd, dataValues, _windingOrder, _rectangle3D);
+    //ArbitrarilyOrientedRegularGrid *slice = SliceGridAlongPlane(grid3d, pd, dataValues, _windingOrder, _rectangle3D);
+    ArbitrarilyOrientedRegularGrid* slice = new ArbitrarilyOrientedRegularGrid(
+        grid3d,
+        pd,
+        dims,
+        dataValues,
+        _windingOrder,
+        _rectangle3D
+    );
+
     //delete grid3d;
     if (slice == nullptr) {
         Wasp::MyBase::SetErrMsg("Unable to perform SliceGridAlongPlane() with current Grid");
@@ -211,10 +221,11 @@ int SliceRenderer::_regenerateSlice()
         _rectangle3D
     );*/
 
+    //std::cout << slice->GetGeometryDim
     slice->GetUserCoordinates(0,0);
-    slice->GetUserCoordinates(0,1);
-    slice->GetUserCoordinates(1,0);
-    slice->GetUserCoordinates(1,1);
+    slice->GetUserCoordinates(0,3);
+    slice->GetUserCoordinates(3,0);
+    slice->GetUserCoordinates(3,3);
 
     // Apply opacity to missing values
     float missingValue = slice->GetMissingValue();

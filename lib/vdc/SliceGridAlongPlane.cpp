@@ -140,6 +140,18 @@ void getMinimumAreaRectangle(
     rectangle3D[3] = origin + rectangle[2][0]*axis1 + rectangle[2][1]*axis2;
 }
 
+/*VAPoR::CoordType getCoordinateAtIndex( 
+    const size_t i, 
+    const size_t j,
+    const glm::tvec3<double, glm::highp>& origin,
+    const glm::tvec3<double, glm::highp>& axis1,
+    const glm::tvec3<double, glm::highp>& axis2
+) {
+    glm::tvec3<double, glm::highp> samplePoint = origin + x*axis1 + y*axis2;
+    VAPoR::CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
+    return p;
+}*/
+
 void populateData(
     const VAPoR::Grid *grid, 
     const planeDescription& description,
@@ -165,11 +177,21 @@ void populateData(
     for (size_t j = 0; j < sideSize; j++) {
         double xStart = rectangle2D[0].x + offset.x + j*xScanlineIncrement;
         double yStart = rectangle2D[0].y + offset.y + j*yScanlineIncrement;
+        //double xStart = rectangle2D[0].x + j*xScanlineIncrement;
+        //double yStart = rectangle2D[0].y + j*yScanlineIncrement;
         for (size_t i = 0; i < sideSize; i++) {
             double x = xStart + i*delta.x;
             double y = yStart + i*delta.y;
             glm::tvec3<double, glm::highp> samplePoint = origin + x*axis1 + y*axis2;
             VAPoR::CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
+
+            if ((i==0 && j==0) ||
+                (i==0 && j==3) ||
+                (i==3 && j==0) ||
+                (i==3 && j==3)) {
+                std::cout << "pop " << i << " " << j << std::endl;
+                std::cout << std::setprecision(4) << samplePoint.x << " " << samplePoint.y << " " << samplePoint.z << std::endl << std::endl;
+            }
 
             if ( p[0] < min[0] || p[0] > max[0] ||
                  p[1] < min[1] || p[1] > max[1] ||
@@ -253,19 +275,19 @@ VAPoR::ArbitrarilyOrientedRegularGrid* SliceGridAlongPlane(
     // Finally generate the grid
     VAPoR::DimsType dims = { description.sideSize, description.sideSize, 1 };
     VAPoR::DimsType bs   = { description.sideSize, description.sideSize, 1 };
-    //std::vector<float*> data = { dataValues.get() };
-    /*VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, 
+    std::vector<float*> data = { dataValues.get() };
+    VAPoR::RegularGrid* slice = new VAPoR::RegularGrid( dims, 
                                                         bs, 
                                                         data, 
                                                         description.domainMin, 
                                                         description.domainMax
-                                                      );*/
-    VAPoR::ArbitrarilyOrientedRegularGrid* slice = new VAPoR::ArbitrarilyOrientedRegularGrid( 
+                                                      );
+    /*VAPoR::ArbitrarilyOrientedRegularGrid* slice = new VAPoR::ArbitrarilyOrientedRegularGrid( 
                                                         description,
                                                         dims, 
                                                         dataValues, 
                                                         rectangle2D
-                                                      );
+                                                      );*/
     return slice;
 }
 
