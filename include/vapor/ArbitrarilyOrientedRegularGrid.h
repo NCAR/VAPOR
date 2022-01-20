@@ -35,7 +35,6 @@ public:
         std::vector<double>& windingOrder,
         std::vector<double>& rectangle3D
     );
-    // clang-format on
 
     ArbitrarilyOrientedRegularGrid() = default;
     virtual ~ArbitrarilyOrientedRegularGrid() = default;
@@ -83,3 +82,4 @@ private:
     void _rotate();
 };
 };    // namespace VAPoR
+// clang-format on
