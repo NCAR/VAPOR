@@ -5,7 +5,6 @@
 #include <GTE/MinimumAreaBox2.h>
 #include <vapor/RegularGrid.h>
 #include <vapor/SliceGridAlongPlane.h>
-#include <vapor/ArbitrarilyOrientedRegularGrid.h>
 
 // clang-format off
 
@@ -140,18 +139,6 @@ void getMinimumAreaRectangle(
     rectangle3D[3] = origin + rectangle[2][0]*axis1 + rectangle[2][1]*axis2;
 }
 
-/*VAPoR::CoordType getCoordinateAtIndex( 
-    const size_t i, 
-    const size_t j,
-    const glm::tvec3<double, glm::highp>& origin,
-    const glm::tvec3<double, glm::highp>& axis1,
-    const glm::tvec3<double, glm::highp>& axis2
-) {
-    glm::tvec3<double, glm::highp> samplePoint = origin + x*axis1 + y*axis2;
-    VAPoR::CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
-    return p;
-}*/
-
 void populateData(
     const VAPoR::Grid *grid, 
     const planeDescription& description,
@@ -159,7 +146,6 @@ void populateData(
     const glm::tvec3<double, glm::highp>& axis1,
     const glm::tvec3<double, glm::highp>& axis2,
     const std::vector<glm::tvec2<double, glm::highp>>& rectangle2D,
-    //std::unique_ptr<float>& dataValues
     std::shared_ptr<float>& dataValues
 ) {
     size_t sideSize = description.sideSize;
@@ -177,21 +163,11 @@ void populateData(
     for (size_t j = 0; j < sideSize; j++) {
         double xStart = rectangle2D[0].x + offset.x + j*xScanlineIncrement;
         double yStart = rectangle2D[0].y + offset.y + j*yScanlineIncrement;
-        //double xStart = rectangle2D[0].x + j*xScanlineIncrement;
-        //double yStart = rectangle2D[0].y + j*yScanlineIncrement;
         for (size_t i = 0; i < sideSize; i++) {
             double x = xStart + i*delta.x;
             double y = yStart + i*delta.y;
             glm::tvec3<double, glm::highp> samplePoint = origin + x*axis1 + y*axis2;
             VAPoR::CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
-
-            if ((i==0 && j==0) ||
-                (i==0 && j==3) ||
-                (i==3 && j==0) ||
-                (i==3 && j==3)) {
-                std::cout << "pop " << i << " " << j << std::endl;
-                std::cout << std::setprecision(4) << samplePoint.x << " " << samplePoint.y << " " << samplePoint.z << std::endl << std::endl;
-            }
 
             if ( p[0] < min[0] || p[0] > max[0] ||
                  p[1] < min[1] || p[1] > max[1] ||
@@ -224,10 +200,9 @@ void getWindingOrder(
     windingOrder = temp;
 }
 
-//VAPoR::RegularGrid* SliceGridAlongPlane(
-VAPoR::ArbitrarilyOrientedRegularGrid* SliceGridAlongPlane(
+VAPoR::RegularGrid* SliceGridAlongPlane(
     const VAPoR::Grid *grid3d,
-    planeDescription& description,
+    planeDescription description,
     std::shared_ptr<float>& dataValues,
     std::vector<double>& windingOrder,
     std::vector<double>& rectangle3D
@@ -240,9 +215,6 @@ VAPoR::ArbitrarilyOrientedRegularGrid* SliceGridAlongPlane(
         description.rotation[2]
     );
     rotate( rotation, normal, axis1, axis2 );
-
-    description.axis1 = {axis1.x, axis1.y, axis1.z};
-    description.axis2 = {axis2.x, axis2.y, axis2.z};
     
     // Find the vertices where our plane intercepts the edges of the Box
     std::vector<glm::tvec3<double, glm::highp>> vertices;
@@ -282,12 +254,6 @@ VAPoR::ArbitrarilyOrientedRegularGrid* SliceGridAlongPlane(
                                                         description.domainMin, 
                                                         description.domainMax
                                                       );
-    /*VAPoR::ArbitrarilyOrientedRegularGrid* slice = new VAPoR::ArbitrarilyOrientedRegularGrid( 
-                                                        description,
-                                                        dims, 
-                                                        dataValues, 
-                                                        rectangle2D
-                                                      );*/
     return slice;
 }
 

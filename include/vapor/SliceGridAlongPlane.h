@@ -2,12 +2,11 @@
 
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
-#include <vapor/ArbitrarilyOrientedRegularGrid.h>
+#include <vapor/planeDescription.h>
 
 // clang-format off
 
-//class RegularGrid;
-//class ArbitrarilyOrientedRegularGrid;
+class RegularGrid;
 
 /*struct planeDescription {
     size_t sideSize;
@@ -17,8 +16,6 @@
     VAPoR::CoordType boxMax;
     VAPoR::CoordType domainMin;
     VAPoR::CoordType domainMax;
-    VAPoR::CoordType axis1;
-    VAPoR::CoordType axis2;
 };*/
 
 //! Create a 2D RegularGrid that samples a given 3D Grid object along a plane, 
@@ -40,11 +37,9 @@
 //! \param[out] rectangle3D A set of four vertices that define the rectangle containing the returned 2D grid's texture.  Useful for debugging.
 //!
 
-//VDF_API VAPoR::RegularGrid* SliceGridAlongPlane(
-VDF_API VAPoR::ArbitrarilyOrientedRegularGrid* SliceGridAlongPlane(
+VDF_API VAPoR::RegularGrid* SliceGridAlongPlane(
     const VAPoR::Grid *grid3d, 
-    planeDescription& description, 
-    //std::unique_ptr<float>& data, 
+    planeDescription description, 
     std::shared_ptr<float>& data, 
     std::vector<double>& windingOrder, 
     std::vector<double>& rectangle3D

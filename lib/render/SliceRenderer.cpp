@@ -11,7 +11,8 @@
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/SliceGridAlongPlane.h>
-//#include <vapor/ArbitrarilyOrientedRegularGrid.h>
+#include <vapor/planeDescription.h>
+#include <vapor/ArbitrarilyOrientedRegularGrid.h>
 
 #define X  0
 #define Y  1
@@ -183,7 +184,6 @@ int SliceRenderer::_regenerateSlice()
     if (rc < 0) return -1;
 
     // Get data values from a slice
-    //std::unique_ptr<float> dataValues(new float[_textureSideSize * _textureSideSize]);
     std::shared_ptr<float> dataValues(new float[_textureSideSize * _textureSideSize]);
     planeDescription       pd;
     pd.sideSize = _textureSideSize;
@@ -194,8 +194,7 @@ int SliceRenderer::_regenerateSlice()
     pd.domainMin = _cacheParams.domainMin;
     pd.domainMax = _cacheParams.domainMax;
     VAPoR::DimsType dims = { (size_t)_textureSideSize, (size_t)_textureSideSize, 1 };
-    //RegularGrid *slice = SliceGridAlongPlane(grid3d, pd, dataValues, _windingOrder, _rectangle3D);
-    //ArbitrarilyOrientedRegularGrid *slice = SliceGridAlongPlane(grid3d, pd, dataValues, _windingOrder, _rectangle3D);
+
     ArbitrarilyOrientedRegularGrid* slice = new ArbitrarilyOrientedRegularGrid(
         grid3d,
         pd,
@@ -205,27 +204,11 @@ int SliceRenderer::_regenerateSlice()
         _rectangle3D
     );
 
-    //delete grid3d;
+    delete grid3d;
     if (slice == nullptr) {
         Wasp::MyBase::SetErrMsg("Unable to perform SliceGridAlongPlane() with current Grid");
         return -1;
     }
-
-    /*DimsType dims = {{(size_t)_textureSideSize, (size_t)_textureSideSize, 1}};
-    std::shared_ptr<float> dataValues2(new float[_textureSideSize * _textureSideSize]);
-    ArbitrarilyOrientedRegularGrid* s2 = new ArbitrarilyOrientedRegularGrid(
-        grid3d,
-        pd,
-        dims,
-        dataValues2,
-        _rectangle3D
-    );*/
-
-    //std::cout << slice->GetGeometryDim
-    slice->GetUserCoordinates(0,0);
-    slice->GetUserCoordinates(0,3);
-    slice->GetUserCoordinates(3,0);
-    slice->GetUserCoordinates(3,3);
 
     // Apply opacity to missing values
     float missingValue = slice->GetMissingValue();
