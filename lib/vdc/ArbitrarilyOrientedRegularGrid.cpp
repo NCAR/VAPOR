@@ -17,24 +17,30 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
     const VAPoR::Grid *grid3d,
     planeDescription& pd,
     const DimsType& dims,
-    std::shared_ptr<float>& blks,
-    std::vector<double>& windingOrder,
-    std::vector<double>& rectangle3D
+    std::shared_ptr<float>& blks
 ) : RegularGrid(dims, {{pd.sideSize, pd.sideSize, 1}}, {blks.get()}, {{0.,0.,0.}}, {{1.,1.,1.}})
 {
+    SetMissingValue( grid3d->GetMissingValue() );
+
     _sideSize = pd.sideSize;
-    _origin = {pd.origin[0], pd.origin[1], pd.origin[2]};
     _rotation = {pd.rotation[0], pd.rotation[1], pd.rotation[2]};
 
+    // .vs3 files before Vapor3.6 will try to initialize Slices with origin values set to 0, which
+    // can sometimes lie outside of the domain.  If this happens, we need to configure a new origin
+    // within the domain bounds.
+    for (int i=0; i<3; i++) {
+        _origin[i] = (pd.origin[i] <= pd.domainMax[i] && pd.origin[i] >= pd.domainMin[i]) ? pd.origin[i] : (pd.domainMax[i]-pd.domainMin[i])/2 + pd.domainMin[i];
+        if (pd.origin[i] <= pd.domainMax[i] && pd.origin[i] >= pd.domainMin[i]) 
+            _origin[i] = pd.origin[i];
+        else 
+            _origin[i] = (pd.domainMax[i]-pd.domainMin[i])/2 + pd.domainMin[i];
+    }
+
+    // Rotate the plane via quaternion method
     _rotate();
 
     // Find the vertices where our plane intercepts the edges of the Box
     std::vector<glm::tvec3<double, glm::highp>> vertices;
-    glm::tvec3<double, glm::highp> origin(
-        pd.origin[0],
-        pd.origin[1],
-        pd.origin[2]
-    );
     _findIntercepts(pd.domainMin, pd.domainMax, vertices);
 
     // Find the minimum-area-rectangle that encloses the vertices that are along the edges
@@ -46,7 +52,6 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
                     tmpRectangle3D[1].x, tmpRectangle3D[1].y, tmpRectangle3D[1].z,
                     tmpRectangle3D[2].x, tmpRectangle3D[2].y, tmpRectangle3D[2].z,
                     tmpRectangle3D[3].x, tmpRectangle3D[3].y, tmpRectangle3D[3].z};
-    rectangle3D = _rectangle3D;
 
     // Pick sample points along our 2D rectangle, and project those points back into 3D space
     // to query our 3D grid for data values.
@@ -54,29 +59,7 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
 
     // Define the winding order for the two triangles that comprise the texture
     // for our data.
-    _getWindingOrder( windingOrder, tmpRectangle3D );
-}
-
-void ArbitrarilyOrientedRegularGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
-{
-    // For now, we ignore rotated grids that have greater than 3 dimensions
-    // Therefore we only index on i an j, but not k
-    //
-    size_t i = indices[0];
-    size_t j = indices[1];
-
-    glm::tvec2<double, glm::highp> delta( (_rectangle2D[1].x-_rectangle2D[0].x)/_sideSize, (_rectangle2D[1].y-_rectangle2D[0].y)/_sideSize );
-    glm::tvec2<double, glm::highp> offset = {delta.x / 2., delta.y / 2.};
-
-    double xScanlineIncrement = (_rectangle2D[3].x-_rectangle2D[0].x)/_sideSize;
-    double yScanlineIncrement = (_rectangle2D[3].y-_rectangle2D[0].y)/_sideSize;
-
-    double xStart = _rectangle2D[0].x + offset.x + j*xScanlineIncrement;
-    double yStart = _rectangle2D[0].y + offset.y + j*yScanlineIncrement;
-    double x = xStart + i*delta.x;
-    double y = yStart + i*delta.y;
-    glm::tvec3<double, glm::highp> samplePoint = _origin + x*_axis1 + y*_axis2;
-    coords = {samplePoint.x, samplePoint.y, samplePoint.z};
+    _generateWindingOrder( tmpRectangle3D );
 }
 
 // Huges-Moller algorithm to get an orthogonal vector
@@ -199,6 +182,37 @@ void ArbitrarilyOrientedRegularGrid::_getMinimumAreaRectangle(
     tmpRectangle3D[3] = _origin + rectangle[2][0]*_axis1 + rectangle[2][1]*_axis2;
 }
 
+
+void ArbitrarilyOrientedRegularGrid::GetWindingOrder( std::vector<double>& windingOrder ) const {
+    windingOrder = _windingOrder;
+}
+
+void ArbitrarilyOrientedRegularGrid::Get3DRectangle( std::vector<double>& rectangle3D ) const {
+    rectangle3D = _rectangle3D;
+}
+
+void ArbitrarilyOrientedRegularGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
+{
+    // For now, we ignore rotated grids that have greater than 3 dimensions
+    // Therefore we only index on i an j, but not k
+    //
+    size_t i = indices[0];
+    size_t j = indices[1];
+
+    glm::tvec2<double, glm::highp> delta( (_rectangle2D[1].x-_rectangle2D[0].x)/_sideSize, (_rectangle2D[1].y-_rectangle2D[0].y)/_sideSize );
+
+    double xScanlineIncrement = (_rectangle2D[3].x-_rectangle2D[0].x)/_sideSize;
+    double yScanlineIncrement = (_rectangle2D[3].y-_rectangle2D[0].y)/_sideSize;
+
+    glm::tvec2<double, glm::highp> offset = {delta.x / 2., yScanlineIncrement / 2.};
+
+    double x = _rectangle2D[0].x + offset.x + j*xScanlineIncrement + i*delta.x;
+    double y = _rectangle2D[0].y + offset.y + j*yScanlineIncrement + i*delta.y;
+
+    glm::tvec3<double, glm::highp> samplePoint = _origin + x*_axis1 + y*_axis2;
+    coords = {samplePoint.x, samplePoint.y, samplePoint.z};
+}
+
 void ArbitrarilyOrientedRegularGrid::_populateData(
     const VAPoR::Grid *grid, 
     const planeDescription& description,
@@ -206,23 +220,13 @@ void ArbitrarilyOrientedRegularGrid::_populateData(
 ) {
     VAPoR::CoordType min = description.boxMin;
     VAPoR::CoordType max = description.boxMax;
-    
-    glm::tvec2<double, glm::highp> delta( (_rectangle2D[1].x-_rectangle2D[0].x)/_sideSize, (_rectangle2D[1].y-_rectangle2D[0].y)/_sideSize );
-    glm::tvec2<double, glm::highp> offset = {delta.x / 2., delta.y / 2.};
-
-    double xScanlineIncrement = (_rectangle2D[3].x-_rectangle2D[0].x)/_sideSize;
-    double yScanlineIncrement = (_rectangle2D[3].y-_rectangle2D[0].y)/_sideSize;
-
     float missingValue = grid->GetMissingValue();
     size_t index = 0;
+
     for (size_t j = 0; j < _sideSize; j++) {
-        double xStart = _rectangle2D[0].x + offset.x + j*xScanlineIncrement;
-        double yStart = _rectangle2D[0].y + offset.y + j*yScanlineIncrement;
         for (size_t i = 0; i < _sideSize; i++) {
-            double x = xStart + i*delta.x;
-            double y = yStart + i*delta.y;
-            glm::tvec3<double, glm::highp> samplePoint = _origin + x*_axis1 + y*_axis2;
-            VAPoR::CoordType p = {samplePoint.x, samplePoint.y, samplePoint.z};
+            VAPoR::CoordType p;
+            GetUserCoordinates({i,j,1}, p);
 
             if ( p[0] < min[0] || p[0] > max[0] ||
                  p[1] < min[1] || p[1] > max[1] ||
@@ -237,8 +241,7 @@ void ArbitrarilyOrientedRegularGrid::_populateData(
     }
 }
 
-void ArbitrarilyOrientedRegularGrid::_getWindingOrder(
-    std::vector<double>& windingOrder,
+void ArbitrarilyOrientedRegularGrid::_generateWindingOrder(
     const std::vector<glm::tvec3<double, glm::highp>> tmpRectangle3D
 ) {
     if (tmpRectangle3D.empty()) return;
@@ -252,7 +255,7 @@ void ArbitrarilyOrientedRegularGrid::_getWindingOrder(
         tmpRectangle3D[3].x, tmpRectangle3D[3].y, tmpRectangle3D[3].z  // white/green
     };
     
-    windingOrder = temp;
+    _windingOrder = temp;
 }
 
 // clang-format on

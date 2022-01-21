@@ -200,10 +200,11 @@ int SliceRenderer::_regenerateSlice()
         grid3d,
         pd,
         dims,
-        dataValues,
-        _windingOrder,
-        _rectangle3D
+        dataValues
     );
+
+    slice->GetWindingOrder( _windingOrder );
+    slice->Get3DRectangle( _rectangle3D );
 
     delete grid3d;
     if (slice == nullptr) {
