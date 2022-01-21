@@ -10,7 +10,6 @@
 #include <vapor/GLManager.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
-#include <vapor/planeDescription.h>
 #include <vapor/ArbitrarilyOrientedRegularGrid.h>
 
 #define X  0

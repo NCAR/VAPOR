@@ -4,11 +4,9 @@
 #include <vector>
 #include <vapor/common.h>
 #include <vapor/RegularGrid.h>
-//#include <vapor/SliceGridAlongPlane.h>
-#include <vapor/planeDescription.h>
 #include <glm/glm.hpp>
 
-/*struct planeDescription {
+struct planeDescription {
     size_t sideSize;
     std::vector<double> origin;
     std::vector<double> rotation;
@@ -18,7 +16,7 @@
     VAPoR::CoordType domainMax;
     VAPoR::CoordType axis1;
     VAPoR::CoordType axis2;
-};*/
+};
 
 namespace VAPoR {
 
