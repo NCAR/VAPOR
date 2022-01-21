@@ -61,6 +61,11 @@ public:
     //! \copydoc Grid::GetUserCoordinates()
     //
     virtual void GetUserCoordinates(const DimsType &indices, CoordType &coords) const override;
+    virtual void GetUserCoordinates (const size_t indices[], double coords[]) = delete;
+    virtual void GetUserCoordinates (const std::vector< size_t > &indices, std::vector< double > &coords) = delete;
+    virtual void GetUserCoordinates (size_t i, double &x, double &y, double &z) = delete;
+    virtual void GetUserCoordinates (size_t i, size_t j, double &x, double &y, double &z) = delete;
+    virtual void GetUserCoordinates (size_t i, size_t j, size_t k, double &x, double &y, double &z) = delete;
 
     //! Retrieve the winding order that pertains to the generated array of data, if it is
     //! to be drawn as a texture as is done in the SliceRenderer's vertex buffer.  The winding order is a series
