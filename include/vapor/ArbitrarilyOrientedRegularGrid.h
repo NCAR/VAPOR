@@ -6,6 +6,8 @@
 #include <vapor/RegularGrid.h>
 #include <glm/glm.hpp>
 
+// clang-format off
+
 struct planeDescription {
     size_t sideSize;
     std::vector<double> origin;
@@ -22,14 +24,11 @@ namespace VAPoR {
 
 class VDF_API ArbitrarilyOrientedRegularGrid : public RegularGrid {
 public:
-    // clang-format off
     ArbitrarilyOrientedRegularGrid(
         const VAPoR::Grid* grid3d,
         planeDescription& pd,
         const DimsType& dims,
         std::shared_ptr<float>& blks,
-        //const std::vector<double> &extents
-        //std::vector<glm::tvec2<double, glm::highp>> extents
         std::vector<double>& windingOrder,
         std::vector<double>& rectangle3D
     );
@@ -80,4 +79,5 @@ private:
     void _rotate();
 };
 };    // namespace VAPoR
+
 // clang-format on

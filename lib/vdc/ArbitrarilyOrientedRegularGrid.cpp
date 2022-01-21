@@ -77,8 +77,6 @@ void ArbitrarilyOrientedRegularGrid::GetUserCoordinates(const DimsType &indices,
     double y = yStart + i*delta.y;
     glm::tvec3<double, glm::highp> samplePoint = _origin + x*_axis1 + y*_axis2;
     coords = {samplePoint.x, samplePoint.y, samplePoint.z};
-    std::cout << i << " " << j << std::endl;
-    std::cout << setprecision(4) << coords[0] << " " << coords[1] << " " << coords[2] << std::endl << std::endl;
 }
 
 // Huges-Moller algorithm to get an orthogonal vector
