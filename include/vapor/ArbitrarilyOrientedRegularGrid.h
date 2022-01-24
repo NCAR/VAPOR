@@ -59,11 +59,15 @@ public:
     //! \copydoc Grid::GetUserCoordinates()
     //
     virtual void GetUserCoordinates(const DimsType &indices, CoordType &coords) const override;
-    virtual void GetUserCoordinates (const size_t indices[], double coords[]) = delete;
-    virtual void GetUserCoordinates (const std::vector< size_t > &indices, std::vector< double > &coords) = delete;
-    virtual void GetUserCoordinates (size_t i, double &x, double &y, double &z) = delete;
-    virtual void GetUserCoordinates (size_t i, size_t j, double &x, double &y, double &z) = delete;
+
+    // Deleted fuctions that use CoordType
     virtual void GetUserCoordinates (size_t i, size_t j, size_t k, double &x, double &y, double &z) = delete;
+    virtual void GetUserExtents (CoordType &minu, CoordType &maxu) = delete;
+    virtual void GetBoundingBox (const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) = delete;
+    virtual bool GetEnclosingRegion (const CoordType &minu, const CoordType &maxu, DimsType &min, DimsType &max) = delete;
+    virtual bool GetIndicesCell (const CoordType &coords, DimsType &indices) = delete;
+    virtual bool InsideGrid (const CoordType &coords) = delete;
+    virtual void ClampCoord (const CoordType &coords, CoordType &cCoords) = delete;
 
 private:
     std::vector<glm::tvec2<double, glm::highp>> _rectangle2D;
