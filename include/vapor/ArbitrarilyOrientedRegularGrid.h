@@ -19,8 +19,6 @@ struct planeDescription {
     std::vector<double> rotation;
     VAPoR::CoordType boxMin;
     VAPoR::CoordType boxMax;
-    VAPoR::CoordType domainMin;
-    VAPoR::CoordType domainMax;
 };
 
 namespace VAPoR {
@@ -66,15 +64,6 @@ public:
     virtual void GetUserCoordinates (size_t i, double &x, double &y, double &z) = delete;
     virtual void GetUserCoordinates (size_t i, size_t j, double &x, double &y, double &z) = delete;
     virtual void GetUserCoordinates (size_t i, size_t j, size_t k, double &x, double &y, double &z) = delete;
-
-    //! Retrieve the winding order that pertains to the generated array of data, if it is
-    //! to be drawn as a texture as is done in the SliceRenderer's vertex buffer.  The winding order is a series
-    //! of six 3D vertices that describe two triangles that define how the texture is drawn in space.
-    void GetWindingOrder( std::vector<double>& windingOrder ) const;
-
-    //! Retrieve the 3D coordinates of the corners of the sampled data.  This is a set of four 3D coordinates,
-    //! used to configure the SliceRenderer's texture coordinate buffer.
-    void Get3DRectangle( std::vector<double>& windingOrder ) const;
 
 private:
     std::vector<glm::tvec2<double, glm::highp>> _rectangle2D;

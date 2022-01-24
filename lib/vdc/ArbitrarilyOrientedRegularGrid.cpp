@@ -25,15 +25,18 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
     _sideSize = pd.sideSize;
     _rotation = {pd.rotation[0], pd.rotation[1], pd.rotation[2]};
 
+    CoordType gridMin, gridMax;
+    grid3d->GetUserExtents(gridMin, gridMax);
+
     // .vs3 files before Vapor3.6 will try to initialize Slices with origin values set to 0, which
     // can sometimes lie outside of the domain.  If this happens, we need to configure a new origin
-    // within the domain bounds.
+    // within the 3D grid's bounds.
     for (int i=0; i<3; i++) {
-        _origin[i] = (pd.origin[i] <= pd.domainMax[i] && pd.origin[i] >= pd.domainMin[i]) ? pd.origin[i] : (pd.domainMax[i]-pd.domainMin[i])/2 + pd.domainMin[i];
-        if (pd.origin[i] <= pd.domainMax[i] && pd.origin[i] >= pd.domainMin[i]) 
+        _origin[i] = (pd.origin[i] <= gridMin[i] && pd.origin[i] >= gridMax[i]) ? pd.origin[i] : (gridMax[i]-gridMin[i])/2 + gridMin[i];
+        if (pd.origin[i] <= gridMax[i] && pd.origin[i] >= gridMin[i]) 
             _origin[i] = pd.origin[i];
         else 
-            _origin[i] = (pd.domainMax[i]-pd.domainMin[i])/2 + pd.domainMin[i];
+            _origin[i] = (gridMax[i]-gridMin[i])/2 + gridMin[i];
     }
 
     // Rotate the plane via quaternion method
@@ -41,7 +44,7 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
 
     // Find the vertices where our plane intercepts the edges of the Box
     std::vector<glm::tvec3<double, glm::highp>> vertices;
-    _findIntercepts(pd.domainMin, pd.domainMax, vertices);
+    _findIntercepts(gridMin, gridMax, vertices);
 
     // Find the minimum-area-rectangle that encloses the vertices that are along the edges
     // of the Box.  Define this rectangle in 3D space, and in a newly projecteed 2D space.
@@ -63,7 +66,7 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
 }
 
 // Huges-Moller algorithm to get an orthogonal vector
-// https://blog.selfshadow.com/2011/10/17/perp-vectors/
+// https://blog.selfshadow.com/2011/10/17/perp-vectors
 glm::tvec3<double, glm::highp> ArbitrarilyOrientedRegularGrid::_getOrthogonal(const glm::tvec3<double, glm::highp>& u) 
 {
     glm::tvec3<double, glm::highp> a = abs(u);
@@ -182,15 +185,6 @@ void ArbitrarilyOrientedRegularGrid::_getMinimumAreaRectangle(
     tmpRectangle3D[3] = _origin + rectangle[2][0]*_axis1 + rectangle[2][1]*_axis2;
 }
 
-
-void ArbitrarilyOrientedRegularGrid::GetWindingOrder( std::vector<double>& windingOrder ) const {
-    windingOrder = _windingOrder;
-}
-
-void ArbitrarilyOrientedRegularGrid::Get3DRectangle( std::vector<double>& rectangle3D ) const {
-    rectangle3D = _rectangle3D;
-}
-
 void ArbitrarilyOrientedRegularGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
 {
     // For now, we ignore rotated grids that have greater than 3 dimensions
@@ -204,10 +198,8 @@ void ArbitrarilyOrientedRegularGrid::GetUserCoordinates(const DimsType &indices,
     double xScanlineIncrement = (_rectangle2D[3].x-_rectangle2D[0].x)/_sideSize;
     double yScanlineIncrement = (_rectangle2D[3].y-_rectangle2D[0].y)/_sideSize;
 
-    glm::tvec2<double, glm::highp> offset = {delta.x / 2., yScanlineIncrement / 2.};
-
-    double x = _rectangle2D[0].x + offset.x + j*xScanlineIncrement + i*delta.x;
-    double y = _rectangle2D[0].y + offset.y + j*yScanlineIncrement + i*delta.y;
+    double x = _rectangle2D[0].x + j*xScanlineIncrement + i*delta.x;
+    double y = _rectangle2D[0].y + j*yScanlineIncrement + i*delta.y;
 
     glm::tvec3<double, glm::highp> samplePoint = _origin + x*_axis1 + y*_axis2;
     coords = {samplePoint.x, samplePoint.y, samplePoint.z};

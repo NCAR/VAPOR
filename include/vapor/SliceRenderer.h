@@ -14,7 +14,7 @@
 #include <vapor/utils.h>
 #include <vapor/Renderer.h>
 
-//#define DEBUG 1
+#define DEBUG 1
 
 namespace VAPoR {
 
@@ -75,7 +75,7 @@ private:
     void _initializeState();
 
     bool _initialized;
-    int  _textureSideSize;
+    size_t  _textureSideSize;
 
     GLuint _colorMapTextureID;
     GLuint _dataValueTextureID;
