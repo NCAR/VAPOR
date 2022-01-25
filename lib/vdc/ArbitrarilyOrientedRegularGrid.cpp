@@ -54,20 +54,11 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
     // Find the minimum-area-rectangle that encloses the vertices that are along the edges
     // of the Box.  Define this rectangle in 3D space, and in a newly projecteed 2D space.
     std::vector<glm::tvec3<double, glm::highp>> tmpRectangle3D;
-    _getMinimumAreaRectangle( vertices, tmpRectangle3D );
-    _rectangle3D.clear();
-    _rectangle3D = { tmpRectangle3D[0].x, tmpRectangle3D[0].y, tmpRectangle3D[0].z,
-                    tmpRectangle3D[1].x, tmpRectangle3D[1].y, tmpRectangle3D[1].z,
-                    tmpRectangle3D[2].x, tmpRectangle3D[2].y, tmpRectangle3D[2].z,
-                    tmpRectangle3D[3].x, tmpRectangle3D[3].y, tmpRectangle3D[3].z};
+    _getMinimumAreaRectangle( vertices );
 
     // Pick sample points along our 2D rectangle, and project those points back into 3D space
     // to query our 3D grid for data values.
     _populateData( grid3d, pd, blks );
-
-    // Define the winding order for the two triangles that comprise the texture
-    // for our data.
-    _generateWindingOrder( tmpRectangle3D );
 }
 
 ArbitrarilyOrientedRegularGrid::~ArbitrarilyOrientedRegularGrid() {
@@ -159,8 +150,7 @@ void ArbitrarilyOrientedRegularGrid::_findIntercepts(
 }
 
 void ArbitrarilyOrientedRegularGrid::_getMinimumAreaRectangle(
-    const std::vector<glm::tvec3<double, glm::highp>>& vertices,
-          std::vector<glm::tvec3<double, glm::highp>>& tmpRectangle3D
+    const std::vector<glm::tvec3<double, glm::highp>>& vertices
 ) {
 
     std::vector<gte::Vector2<double>> gteVertices;
@@ -185,14 +175,6 @@ void ArbitrarilyOrientedRegularGrid::_getMinimumAreaRectangle(
     _rectangle2D[1] = glm::vec2(rectangle[1][0], rectangle[1][1]);
     _rectangle2D[2] = glm::vec2(rectangle[3][0], rectangle[3][1]);
     _rectangle2D[3] = glm::vec2(rectangle[2][0], rectangle[2][1]);
-
-    // _rectangle3D
-    tmpRectangle3D.clear();
-    tmpRectangle3D.resize(4);
-    tmpRectangle3D[0] = _origin + rectangle[0][0]*_axis1 + rectangle[0][1]*_axis2;
-    tmpRectangle3D[1] = _origin + rectangle[1][0]*_axis1 + rectangle[1][1]*_axis2;
-    tmpRectangle3D[2] = _origin + rectangle[3][0]*_axis1 + rectangle[3][1]*_axis2;
-    tmpRectangle3D[3] = _origin + rectangle[2][0]*_axis1 + rectangle[2][1]*_axis2;
 }
 
 void ArbitrarilyOrientedRegularGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords) const
@@ -241,23 +223,6 @@ void ArbitrarilyOrientedRegularGrid::_populateData(
             index++;
         }
     }
-}
-
-void ArbitrarilyOrientedRegularGrid::_generateWindingOrder(
-    const std::vector<glm::tvec3<double, glm::highp>> tmpRectangle3D
-) {
-    if (tmpRectangle3D.empty()) return;
-
-    std::vector<double> temp = {
-        tmpRectangle3D[0].x, tmpRectangle3D[0].y, tmpRectangle3D[0].z, // green/teal
-        tmpRectangle3D[1].x, tmpRectangle3D[1].y, tmpRectangle3D[1].z, // prpl/red 
-        tmpRectangle3D[3].x, tmpRectangle3D[3].y, tmpRectangle3D[3].z, // white/green
-        tmpRectangle3D[1].x, tmpRectangle3D[1].y, tmpRectangle3D[1].z, // prpl/red 
-        tmpRectangle3D[2].x, tmpRectangle3D[2].y, tmpRectangle3D[2].z, // red/teal
-        tmpRectangle3D[3].x, tmpRectangle3D[3].y, tmpRectangle3D[3].z  // white/green
-    };
-    
-    _windingOrder = temp;
 }
 
 // clang-format on
