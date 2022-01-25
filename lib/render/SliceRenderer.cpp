@@ -203,10 +203,10 @@ int SliceRenderer::_regenerateSlice()
     );
 
     CoordType corner1, corner2, corner3, corner4;
-    slice->GetUserCoordinates({0,0,0}, corner1);
-    slice->GetUserCoordinates({0,_textureSideSize,0}, corner2);
-    slice->GetUserCoordinates({_textureSideSize,0,0}, corner3);
-    slice->GetUserCoordinates({_textureSideSize,_textureSideSize,0}, corner4);
+    slice->GetUserCoordinates( {0,                  0,                  0}, corner1);
+    slice->GetUserCoordinates( {0,                  _textureSideSize-1, 0}, corner2);
+    slice->GetUserCoordinates( {_textureSideSize-1, 0,                  0}, corner3);
+    slice->GetUserCoordinates( {_textureSideSize-1, _textureSideSize-1, 0}, corner4);
 
     _windingOrder = {corner1[0], corner1[1], corner1[2],
                      corner3[0], corner3[1], corner3[2],
