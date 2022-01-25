@@ -18,8 +18,13 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
     planeDescription& pd,
     const DimsType& dims,
     std::shared_ptr<float>& blks
-) : RegularGrid(dims, {{pd.sideSize, pd.sideSize, 1}}, {blks.get()}, {{0.,0.,0.}}, {{1.,1.,1.}})
-{
+) : RegularGrid(
+        dims, 
+        {{pd.sideSize, pd.sideSize, 1}}, 
+        {(_myBlks = new float[dims[0]*dims[1]*dims[2]])}, 
+        {{0.,0.,0.}}, 
+        {{1.,1.,1.}}
+) {
     SetMissingValue( grid3d->GetMissingValue() );
 
     _sideSize = pd.sideSize;
@@ -63,6 +68,11 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
     // Define the winding order for the two triangles that comprise the texture
     // for our data.
     _generateWindingOrder( tmpRectangle3D );
+}
+
+ArbitrarilyOrientedRegularGrid::~ArbitrarilyOrientedRegularGrid() {
+    if (_myBlks != nullptr)
+        delete [] _myBlks;
 }
 
 // Huges-Moller algorithm to get an orthogonal vector

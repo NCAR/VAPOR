@@ -51,7 +51,7 @@ public:
     );
 
     ArbitrarilyOrientedRegularGrid() = default;
-    virtual ~ArbitrarilyOrientedRegularGrid() = default;
+    virtual ~ArbitrarilyOrientedRegularGrid();
 
     static std::string GetClassType() { return ("ArbitrarilyOrientedRegular"); }
     std::string        GetType() const override { return (GetClassType()); }
@@ -74,6 +74,7 @@ private:
     std::vector<double> _rectangle3D, _windingOrder;
     size_t _sideSize;
     glm::tvec3<double, glm::highp> _normal, _origin, _axis1, _axis2, _rotation;
+    float* _myBlks;
 
     void _populateData(
         const VAPoR::Grid *grid,
