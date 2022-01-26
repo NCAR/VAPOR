@@ -213,10 +213,10 @@ void ArbitrarilyOrientedRegularGrid::_populateData(
             if ( p[0] < min[0] || p[0] > max[0] ||
                  p[1] < min[1] || p[1] > max[1] ||
                  p[2] < min[2] || p[2] > max[2] ) {
-                dataValues.get()[index] = missingValue;
+                _myBlks[index] = missingValue;
             }
             else {
-                dataValues.get()[index] = grid->GetValue(p);
+                _myBlks[index] = grid->GetValue(p);
             }
             index++;
         }

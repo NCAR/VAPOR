@@ -230,14 +230,14 @@ int SliceRenderer::_regenerateSlice()
     int                    textureSize = 2 * _textureSideSize * _textureSideSize;
     std::unique_ptr<float> textureValues(new float[textureSize]);
     for (size_t i = 0; i < textureSize / 2; i++) {
-        float dataValue = dataValues.get()[i];
-        float dataValue = slice->
+        DimsType dim = (DimsType){i%_textureSideSize, i/_textureSideSize, 0};
+        float dataValue = slice->GetValueAtIndex( dim );
         if (dataValue == missingValue)
             textureValues.get()[i * 2 + 1] = 1.f;
         else
             textureValues.get()[i * 2 + 1] = 0.f;
 
-        textureValues.get()[i * 2] = dataValues.get()[i];
+        textureValues.get()[i * 2] = dataValue;
     }
 
     _createDataTexture(textureValues);
