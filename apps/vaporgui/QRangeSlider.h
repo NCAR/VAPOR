@@ -1,12 +1,12 @@
 #pragma once
 
-#include <QSlider>
+#include "QMontereySlider.h"
 
 class QStylePainter;
 
 //! \class QRangeSlider
 //! It is the same as a QSlider except it has two independent slider controls
-class QRangeSlider : public QSlider {
+class QRangeSlider : public QMontereySlider {
     Q_OBJECT
 
 public:

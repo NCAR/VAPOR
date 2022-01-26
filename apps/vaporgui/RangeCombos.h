@@ -12,7 +12,7 @@ QT_BEGIN_NAMESPACE
 class QComboBox;
 class QGroupBox;
 class QLineEdit;
-class QSlider;
+class QMontereySlider;
 class QValidator;
 QT_END_NAMESPACE
 
@@ -40,10 +40,10 @@ public:
     //
     void Update(double minValid, double maxValid, double minValue, double maxValue);
 
-    QSlider *  GetSliderMin() const { return (_minWidget->GetSlider()); };
+    QMontereySlider *  GetSliderMin() const { return (_minWidget->GetSlider()); };
     QLineEdit *GetLineEditMin() const { return (_minWidget->GetLineEdit()); };
 
-    QSlider *  GetSliderMax() const { return (_maxWidget->GetSlider()); };
+    QMontereySlider *  GetSliderMax() const { return (_maxWidget->GetSlider()); };
     QLineEdit *GetLineEditMax() const { return (_maxWidget->GetLineEdit()); };
 
 public slots:

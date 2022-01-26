@@ -5,11 +5,12 @@
 //////////////////////////////////////////////////////
 
 #include "Combo.h"
+#include "QMontereySlider.h"
 #include <QDoubleValidator>
 #include <QIntValidator>
 #include "vapor/VAssert.h"
 
-Combo::Combo(QLineEdit *edit, QSlider *slider, bool intType)
+Combo::Combo(QLineEdit *edit, QMontereySlider *slider, bool intType)
 {
     _minValid = 0.0;
     _maxValid = 1.0;

@@ -7,6 +7,8 @@
 
 #include "VHBoxWidget.h"
 
+class QMontereySlider;
+
 //! class VSlider
 //!
 //! Wraps a QSlider and provides vaporgui's standard setter/getter fucntions
@@ -30,7 +32,8 @@ public:
     void SetRange(double min, double max);
 
 private:
-    QSlider *_slider;
+    //QSlider *_slider;
+    QMontereySlider *_slider;
     double   _min;
     double   _max;
     double   _stepSize;

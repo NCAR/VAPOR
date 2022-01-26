@@ -1,3 +1,4 @@
+#include "QMontereySlider.h"
 #include "QRangeSlider.h"
 #include <QStylePainter>
 #include <QStyleOptionSlider>
@@ -23,7 +24,7 @@ public:
 
 QRangeSlider::QRangeSlider() : QRangeSlider(Qt::Orientation::Horizontal) {}
 
-QRangeSlider::QRangeSlider(Qt::Orientation orientation) : QSlider(orientation)
+QRangeSlider::QRangeSlider(Qt::Orientation orientation) : QMontereySlider(orientation)
 {
     _position[0] = 0;
     _value[0] = 0;
@@ -31,10 +32,10 @@ QRangeSlider::QRangeSlider(Qt::Orientation orientation) : QSlider(orientation)
     _value[1] = QT_STOPS - 1;
     this->setRange(0, QT_STOPS);
     this->setTracking(true);
-    this->QSlider::setStyle(new QForceAbsoluteSetButtonsEnabledStyle(style()));
+    this->QMontereySlider::setStyle(new QForceAbsoluteSetButtonsEnabledStyle(style()));
 }
 
-QSize QRangeSlider::minimumSizeHint() const { return QSlider::minimumSizeHint(); }
+QSize QRangeSlider::minimumSizeHint() const { return QMontereySlider::minimumSizeHint(); }
 
 void QRangeSlider::SetValue(float min, float max)
 {
@@ -130,7 +131,7 @@ void QRangeSlider::mousePressEvent(QMouseEvent *event)
             _lastSelectedControl = id;
             _isOutOfBounds[id] = false;
             setValue(_value[id]);
-            QSlider::mousePressEvent(event);
+            QMontereySlider::mousePressEvent(event);
             emit ValueChangedBegin();
             return;
         }
@@ -138,7 +139,7 @@ void QRangeSlider::mousePressEvent(QMouseEvent *event)
 
     if (doesGrooveContainPixel(event->pos())) {
         setValue(-QT_STOPS);
-        QSlider::mousePressEvent(event);
+        QMontereySlider::mousePressEvent(event);
         int selectedPosition = sliderPosition();
 
         if (selectedPosition > _position[0] && selectedPosition < _position[1]) {
@@ -155,7 +156,7 @@ void QRangeSlider::mousePressEvent(QMouseEvent *event)
 
 void QRangeSlider::mouseReleaseEvent(QMouseEvent *event)
 {
-    QSlider::mouseReleaseEvent(event);
+    QMontereySlider::mouseReleaseEvent(event);
 
     if (_grabbedControl >= 0 || _grabbedBar) emitValueChanged();
 
@@ -167,7 +168,7 @@ void QRangeSlider::mouseMoveEvent(QMouseEvent *event)
 {
     if (_grabbedControl >= 0) {
         setValue(_value[_grabbedControl]);
-        QSlider::mouseMoveEvent(event);
+        QMontereySlider::mouseMoveEvent(event);
 
         if (_grabbedControl == 0)
             if (sliderPosition() > _position[1]) swapSliders();
@@ -183,7 +184,7 @@ void QRangeSlider::mouseMoveEvent(QMouseEvent *event)
 
     if (_grabbedBar) {
         setValue(_grabbedBarPosition);
-        QSlider::mouseMoveEvent(event);
+        QMontereySlider::mouseMoveEvent(event);
 
         _grabbedBarPosition = sliderPosition();
 

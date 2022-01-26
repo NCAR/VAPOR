@@ -3,12 +3,13 @@
 
 #include <QWidget>
 #include <QLineEdit>
-#include <QSlider>
 #include <QValidator>
+
+class QMontereySlider;
 
 // class Combo
 //
-// Manages a paired QSlider and QLineEdit class, synchronizing values
+// Manages a paired QMontereySlider and QLineEdit class, synchronizing values
 // across both such that a single value is represented. The value
 // must be within a specified range.
 //
@@ -16,7 +17,7 @@ class Combo : public QWidget {
     Q_OBJECT
 
 public:
-    Combo(QLineEdit *edit, QSlider *slider, bool intType = false);
+    Combo(QLineEdit *edit, QMontereySlider *slider, bool intType = false);
 
     // This method must be called whenever the minimax or maximum allowable
     // valid value changes, or the current value
@@ -29,9 +30,9 @@ public:
 
     void Update(double value) { Update(_minValid, _maxValid, value); }
 
-    // Returns a pointer the QSlider object
+    // Returns a pointer the QMontereySlider object
     //
-    QSlider *GetSlider() const { return (_slider); };
+    QMontereySlider *GetSlider() const { return (_slider); };
 
     // Returns a pointer the QLineEdit object
     //
@@ -57,7 +58,7 @@ private slots:
     //
     void setLineEdit();
 
-    // Slot for QSlider events
+    // Slot for QMontereySlider events
     //
     void setSlider();
     void setSliderMini(int pos);
@@ -82,7 +83,7 @@ private:
 
     QLineEdit * _lineEdit;
     QValidator *_lineEditValidator;
-    QSlider *   _slider;
+    QMontereySlider *   _slider;
 };
 
 #endif
