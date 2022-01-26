@@ -470,11 +470,11 @@ workflows:
   version: 2
   build:
     jobs:
-      - build_ubuntu18
-      - build_centos7
-      - test_clang_format
+      #- build_ubuntu18
+      #- build_centos7
+      #- test_clang_format
       #- build_win10_installer
-      #- build_osx_installer
+      - build_osx_installer
       #- build_ubuntu18_installer
       #- build_centos7_installer
       #- release_weekly_installers:
@@ -483,21 +483,21 @@ workflows:
       #      - build_centos7_installer
       #      - build_osx_installer
       #      - build_win10_installer
-  weekly:
-      triggers:
-        - schedule:
-             cron: "1 16 * * 4" #Mountain Standard Time +7
-             filters:
-               branches:
-                 only: main
-      jobs:
-        - build_ubuntu18_installer
-        - build_centos7_installer
-        - build_osx_installer
-        - build_win10_installer
-        - release_weekly_installers:
-            requires:
-              - build_ubuntu18_installer
-              - build_centos7_installer
-              - build_osx_installer
-              - build_win10_installer
+  #weekly:
+  #    triggers:
+  #      - schedule:
+  #           cron: "1 16 * * 4" #Mountain Standard Time +7
+  #           filters:
+  #             branches:
+  #               only: main
+  #    jobs:
+  #      - build_ubuntu18_installer
+  #      - build_centos7_installer
+  #      - build_osx_installer
+  #      - build_win10_installer
+  #      - release_weekly_installers:
+  #          requires:
+  #            - build_ubuntu18_installer
+  #            - build_centos7_installer
+  #            - build_osx_installer
+  #            - build_win10_installer
