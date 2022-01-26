@@ -16,8 +16,7 @@ using namespace VAPoR;
 ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
     const VAPoR::Grid *grid3d,
     planeDescription& pd,
-    const DimsType& dims,
-    std::shared_ptr<float>& blks
+    const DimsType& dims
 ) : RegularGrid(
         dims, 
         {{pd.sideSize, pd.sideSize, 1}}, 
@@ -58,7 +57,7 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
 
     // Pick sample points along our 2D rectangle, and project those points back into 3D space
     // to query our 3D grid for data values.
-    _populateData( grid3d, pd, blks );
+    _populateData( grid3d, pd );
 }
 
 ArbitrarilyOrientedRegularGrid::~ArbitrarilyOrientedRegularGrid() {
@@ -199,8 +198,7 @@ void ArbitrarilyOrientedRegularGrid::GetUserCoordinates(const DimsType &indices,
 
 void ArbitrarilyOrientedRegularGrid::_populateData(
     const VAPoR::Grid *grid, 
-    const planeDescription& description,
-    std::shared_ptr<float>& dataValues
+    const planeDescription& description
 ) {
     VAPoR::CoordType min = description.boxMin;
     VAPoR::CoordType max = description.boxMax;

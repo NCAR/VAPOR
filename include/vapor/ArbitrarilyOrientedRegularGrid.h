@@ -43,8 +43,7 @@ public:
     ArbitrarilyOrientedRegularGrid(
         const VAPoR::Grid* grid3d,
         planeDescription& pd,
-        const DimsType& dims,
-        std::shared_ptr<float>& blks
+        const DimsType& dims
     );
 
     ArbitrarilyOrientedRegularGrid() = default;
@@ -74,8 +73,7 @@ private:
 
     void _populateData(
         const VAPoR::Grid *grid,
-        const planeDescription& description,
-        std::shared_ptr<float>& dataValues
+        const planeDescription& description
     );
 
     void _getMinimumAreaRectangle(

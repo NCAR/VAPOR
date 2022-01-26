@@ -198,8 +198,7 @@ int SliceRenderer::_regenerateSlice()
     ArbitrarilyOrientedRegularGrid* slice = new ArbitrarilyOrientedRegularGrid(
         grid3d,
         pd,
-        dims,
-        dataValues
+        dims
     );
 
     CoordType corner1, corner2, corner3, corner4;
@@ -232,6 +231,7 @@ int SliceRenderer::_regenerateSlice()
     std::unique_ptr<float> textureValues(new float[textureSize]);
     for (size_t i = 0; i < textureSize / 2; i++) {
         float dataValue = dataValues.get()[i];
+        float dataValue = slice->
         if (dataValue == missingValue)
             textureValues.get()[i * 2 + 1] = 1.f;
         else
