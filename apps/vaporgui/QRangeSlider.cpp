@@ -32,7 +32,7 @@ QRangeSlider::QRangeSlider(Qt::Orientation orientation) : QMontereySlider(orient
     _value[1] = QT_STOPS - 1;
     this->setRange(0, QT_STOPS);
     this->setTracking(true);
-    this->QMontereySlider::setStyle(new QForceAbsoluteSetButtonsEnabledStyle(style()));
+    //this->QMontereySlider::setStyle(new QForceAbsoluteSetButtonsEnabledStyle(style()));
 }
 
 QSize QRangeSlider::minimumSizeHint() const { return QMontereySlider::minimumSizeHint(); }
@@ -69,6 +69,41 @@ void QRangeSlider::paintEvent(QPaintEvent *event)
     paintHandle(p, drawId);
     drawId = (drawId + 1) % 2;
     paintHandle(p, drawId);
+
+    //QMontereySlider::paintEvent(event);
+    //QStylePainter p(this);
+    /*QStyleOptionSlider opt;
+    initStyleOption(&opt);
+    
+    QRect handle = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
+    
+    // draw tick marks
+    // do this manually because they are very badly behaved with style sheets
+    int interval = tickInterval();
+    if (interval == 0)
+    {
+        interval = pageStep();
+    }
+    
+    if (tickPosition() != NoTicks)
+    {
+        for (int i = minimum(); i <= maximum(); i += interval)
+        {
+    	int x = std::round((double)((double)((double)(i - this->minimum()) / (double)(this->maximum() - this->minimum())) * (double)(this->width() - handle.width()) + (double)(handle.width() / 2.0))) - 1;
+    	int h = 4;
+    	p.setPen(QColor("#a5a294"));
+    	if (tickPosition() == TicksBothSides || tickPosition() == TicksAbove)
+    	{
+    	    int y = this->rect().top();
+    	    p.drawLine(x, y, x, y + h);
+    	}
+    	if (tickPosition() == TicksBothSides || tickPosition() == TicksBelow)
+    	{
+    	    int y = this->rect().bottom();
+    	    p.drawLine(x, y, x, y - h);
+    	}
+        }
+    }*/
 }
 
 void QRangeSlider::paintHandle(QStylePainter &p, int i)

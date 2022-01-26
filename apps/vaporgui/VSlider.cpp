@@ -28,7 +28,7 @@ VSlider::VSlider(double min, double max) : VHBoxWidget(), _min(0.0), _max(0.0), 
 
 void VSlider::SetValue(double value)
 {
-	std::cout << this << " VSlider::SetValue " << value << std::endl;
+	//std::cout << this << " VSlider::SetValue " << value << std::endl;
     if (_stepSize <= 0) return;
 
     if (value > _max) value = _max;
