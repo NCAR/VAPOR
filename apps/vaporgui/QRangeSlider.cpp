@@ -49,8 +49,7 @@ QRangeSlider::QRangeSlider(Qt::Orientation orientation) : QSlider(orientation)
             width: 18px;\
             margin: -2px 0; \
             border-radius: 3px;\
-		}"
-	);
+		}");
 #endif
 }
 

@@ -7,11 +7,11 @@
 #include <QColor>
 #include "math.h"
 
-class QMontereySlider:public QSlider
-{
+class QMontereySlider : public QSlider {
 public:
-    explicit QMontereySlider(Qt::Orientation orientation, QWidget *parent = nullptr):QSlider(orientation, parent){};
-    explicit QMontereySlider(QWidget *parent = nullptr):QSlider(parent){
+    explicit QMontereySlider(Qt::Orientation orientation, QWidget *parent = nullptr) : QSlider(orientation, parent){};
+    explicit QMontereySlider(QWidget *parent = nullptr) : QSlider(parent)
+    {
         this->setStyleSheet("\
             QSlider::groove:horizontal {\
             height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */ \
