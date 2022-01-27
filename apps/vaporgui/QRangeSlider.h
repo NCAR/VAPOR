@@ -1,12 +1,12 @@
 #pragma once
 
-#include "QMontereySlider.h"
+#include <QSlider>
 
 class QStylePainter;
 
 //! \class QRangeSlider
 //! It is the same as a QSlider except it has two independent slider controls
-class QRangeSlider : public QMontereySlider {
+class QRangeSlider : public QSlider {
     Q_OBJECT
 
 public:
@@ -14,7 +14,7 @@ public:
     QRangeSlider(Qt::Orientation orientation);
     QSize minimumSizeHint() const;
     void  SetValue(float min, float max);
-    //void  setStyle(QStyle *style); = delete;
+    void  setStyle(QStyle *style) = delete;
 
 signals:
     //! User began to change the value.

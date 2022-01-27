@@ -1,13 +1,16 @@
 #pragma once
 
+#ifdef Darwin
+	#include "QMontereySlider.h"
+    #define QSlider QMontereySlider
+#endif
+
 #include <string>
 
 #include <QWidget>
-#include <QSlider>
+#include "QSlider.h"
 
 #include "VHBoxWidget.h"
-
-class QMontereySlider;
 
 //! class VSlider
 //!
@@ -32,8 +35,7 @@ public:
     void SetRange(double min, double max);
 
 private:
-    //QSlider *_slider;
-    QMontereySlider *_slider;
+    QSlider *_slider;
     double   _min;
     double   _max;
     double   _stepSize;

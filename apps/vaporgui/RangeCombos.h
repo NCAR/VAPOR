@@ -1,3 +1,8 @@
+#ifdef Darwin
+	#include "QMontereySlider.h"
+    #define QSlider QMontereySlider
+#endif
+
 #ifdef WIN32
     #pragma warning(disable : 4100)
 #endif
@@ -12,7 +17,7 @@ QT_BEGIN_NAMESPACE
 class QComboBox;
 class QGroupBox;
 class QLineEdit;
-class QMontereySlider;
+class QSlider;
 class QValidator;
 QT_END_NAMESPACE
 
@@ -40,10 +45,10 @@ public:
     //
     void Update(double minValid, double maxValid, double minValue, double maxValue);
 
-    QMontereySlider *  GetSliderMin() const { return (_minWidget->GetSlider()); };
+    QSlider *  GetSliderMin() const { return (_minWidget->GetSlider()); };
     QLineEdit *GetLineEditMin() const { return (_minWidget->GetLineEdit()); };
 
-    QMontereySlider *  GetSliderMax() const { return (_maxWidget->GetSlider()); };
+    QSlider *  GetSliderMax() const { return (_maxWidget->GetSlider()); };
     QLineEdit *GetLineEditMax() const { return (_maxWidget->GetLineEdit()); };
 
 public slots:

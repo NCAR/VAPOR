@@ -4,13 +4,18 @@
 //
 //////////////////////////////////////////////////////
 
+#ifdef Darwin
+	#define QSlider QMontereySlider
+#endif
+
 #include "Combo.h"
-#include "QMontereySlider.h"
+#include "QSlider.h"
+#include <QSlider>
 #include <QDoubleValidator>
 #include <QIntValidator>
 #include "vapor/VAssert.h"
 
-Combo::Combo(QLineEdit *edit, QMontereySlider *slider, bool intType)
+Combo::Combo(QLineEdit *edit, QSlider *slider, bool intType)
 {
     _minValid = 0.0;
     _maxValid = 1.0;

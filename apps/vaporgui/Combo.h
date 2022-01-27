@@ -1,15 +1,21 @@
 #ifndef COMBO_H
 #define COMBO_H
 
+#ifdef Darwin
+	//#include "QMontereySlider.h"
+    #define QSlider QMontereySlider
+#endif
+
 #include <QWidget>
 #include <QLineEdit>
+//#include <QSlider>
 #include <QValidator>
 
-class QMontereySlider;
+class QSlider;
 
 // class Combo
 //
-// Manages a paired QMontereySlider and QLineEdit class, synchronizing values
+// Manages a paired QSlider and QLineEdit class, synchronizing values
 // across both such that a single value is represented. The value
 // must be within a specified range.
 //
@@ -17,7 +23,7 @@ class Combo : public QWidget {
     Q_OBJECT
 
 public:
-    Combo(QLineEdit *edit, QMontereySlider *slider, bool intType = false);
+    Combo(QLineEdit *edit, QSlider *slider, bool intType = false);
 
     // This method must be called whenever the minimax or maximum allowable
     // valid value changes, or the current value
@@ -30,9 +36,9 @@ public:
 
     void Update(double value) { Update(_minValid, _maxValid, value); }
 
-    // Returns a pointer the QMontereySlider object
+    // Returns a pointer the QSlider object
     //
-    QMontereySlider *GetSlider() const { return (_slider); };
+    QSlider *GetSlider() const { return (_slider); };
 
     // Returns a pointer the QLineEdit object
     //
@@ -58,7 +64,7 @@ private slots:
     //
     void setLineEdit();
 
-    // Slot for QMontereySlider events
+    // Slot for QSlider events
     //
     void setSlider();
     void setSliderMini(int pos);
@@ -83,7 +89,7 @@ private:
 
     QLineEdit * _lineEdit;
     QValidator *_lineEditValidator;
-    QMontereySlider *   _slider;
+    QSlider *   _slider;
 };
 
 #endif

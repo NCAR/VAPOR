@@ -1,17 +1,20 @@
+#ifdef Darwin
+	#include "QMontereySlider.h"
+    #define QSlider QMontereySlider
+#endif
+
 #include <iostream>
 #include <cmath>
 
 #include <QScrollEvent>
 #include <vapor/VAssert.h>
 #include "VSlider.h"
-#include "QMontereySlider.h"
 
 #define NUM_STEPS 100
 
 VSlider::VSlider(double min, double max) : VHBoxWidget(), _min(0.0), _max(0.0), _stepSize(1.0)
 {
-    //_slider = new QSlider;
-    _slider = new QMontereySlider;
+    _slider = new QSlider;
     _slider->setOrientation(Qt::Horizontal);
     _slider->setMinimum(0);
     _slider->setMaximum(NUM_STEPS);
@@ -28,7 +31,6 @@ VSlider::VSlider(double min, double max) : VHBoxWidget(), _min(0.0), _max(0.0), 
 
 void VSlider::SetValue(double value)
 {
-	//std::cout << this << " VSlider::SetValue " << value << std::endl;
     if (_stepSize <= 0) return;
 
     if (value > _max) value = _max;
@@ -44,7 +46,6 @@ double VSlider::GetMinimum() const { return _min; }
 
 void VSlider::SetMinimum(double min)
 {
-	//std::cout << this << " VSlider::SetMinimum " << min << std::endl;
     if (min > _max) _max = min;
     SetRange(min, _max);
 }
@@ -53,7 +54,6 @@ double VSlider::GetMaximum() const { return _max; }
 
 void VSlider::SetMaximum(double max)
 {
-	//std::cout << this << " VSlider::SetMaximum " << max << std::endl;
     if (max < _min) _min = max;
     SetRange(_min, max);
 }
