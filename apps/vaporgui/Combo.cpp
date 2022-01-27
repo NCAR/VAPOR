@@ -4,13 +4,7 @@
 //
 //////////////////////////////////////////////////////
 
-#ifdef Darwin
-	#define QSlider QMontereySlider
-#endif
-
 #include "Combo.h"
-#include "QSlider.h"
-#include <QSlider>
 #include <QDoubleValidator>
 #include <QIntValidator>
 #include "vapor/VAssert.h"

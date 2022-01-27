@@ -1,16 +1,16 @@
 #pragma once
 
-#ifdef Darwin
-	#include "QMontereySlider.h"
-    #define QSlider QMontereySlider
-#endif
-
 #include <string>
 
 #include <QWidget>
 #include "QSlider.h"
 
 #include "VHBoxWidget.h"
+
+#ifdef Darwin
+	#include "QMontereySlider.h"
+    #define QSlider QMontereySlider
+#endif
 
 //! class VSlider
 //!

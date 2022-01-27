@@ -1,17 +1,10 @@
 #ifndef COMBO_H
 #define COMBO_H
 
-#ifdef Darwin
-	//#include "QMontereySlider.h"
-    #define QSlider QMontereySlider
-#endif
-
 #include <QWidget>
 #include <QLineEdit>
-//#include <QSlider>
+#include <QSlider>
 #include <QValidator>
-
-class QSlider;
 
 // class Combo
 //
