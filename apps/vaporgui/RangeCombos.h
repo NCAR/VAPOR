@@ -8,6 +8,8 @@
     #include <QWidget>
     #include "Combo.h"
 
+// Fix for Qt bug https://bugreports.qt.io/browse/QTBUG-98093
+// Apply a style sheet to QSlider to make it work on OSX Monterey
 #ifdef Darwin
 	#include "QMontereySlider.h"
     #define QSlider QMontereySlider
