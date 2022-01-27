@@ -3,7 +3,7 @@
 #include <string>
 
 #include <QWidget>
-#include "QSlider.h"
+#include <QSlider>
 
 #include "VHBoxWidget.h"
 

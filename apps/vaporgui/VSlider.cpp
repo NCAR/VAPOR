@@ -1,8 +1,3 @@
-#ifdef Darwin
-	#include "QMontereySlider.h"
-    #define QSlider QMontereySlider
-#endif
-
 #include <iostream>
 #include <cmath>
 
