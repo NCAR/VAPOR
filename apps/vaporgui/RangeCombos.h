@@ -1,8 +1,3 @@
-#ifdef Darwin
-	#include "QMontereySlider.h"
-    #define QSlider QMontereySlider
-#endif
-
 #ifdef WIN32
     #pragma warning(disable : 4100)
 #endif
@@ -12,6 +7,11 @@
 
     #include <QWidget>
     #include "Combo.h"
+
+#ifdef Darwin
+	#include "QMontereySlider.h"
+    #define QSlider QMontereySlider
+#endif
 
 QT_BEGIN_NAMESPACE
 class QComboBox;

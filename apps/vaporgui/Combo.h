@@ -6,6 +6,11 @@
 #include <QSlider>
 #include <QValidator>
 
+#ifdef Darwin
+    #include "QMontereySlider.h"
+    #define QSlider QMontereySlider
+#endif
+
 // class Combo
 //
 // Manages a paired QSlider and QLineEdit class, synchronizing values
