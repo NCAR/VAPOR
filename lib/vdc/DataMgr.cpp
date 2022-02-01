@@ -630,7 +630,7 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
 
     rc = _initVerticalCoordVars();
     if (rc < 0) {
-        SetErrMsg("Failed to initialize horizontal coordinates");
+        SetErrMsg("Failed to initialize vertical coordinates");
         return (-1);
     }
 
