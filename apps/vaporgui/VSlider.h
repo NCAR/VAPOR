@@ -7,6 +7,13 @@
 
 #include "VHBoxWidget.h"
 
+// Fix for Qt bug https://bugreports.qt.io/browse/QTBUG-98093
+// Apply a style sheet to QSlider to make it work on OSX Monterey
+#ifdef Darwin
+    #include "QMontereySlider.h"
+    #define QSlider QMontereySlider
+#endif
+
 //! class VSlider
 //!
 //! Wraps a QSlider and provides vaporgui's standard setter/getter fucntions

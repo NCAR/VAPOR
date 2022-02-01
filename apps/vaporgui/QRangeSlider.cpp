@@ -32,6 +32,25 @@ QRangeSlider::QRangeSlider(Qt::Orientation orientation) : QSlider(orientation)
     this->setRange(0, QT_STOPS);
     this->setTracking(true);
     this->QSlider::setStyle(new QForceAbsoluteSetButtonsEnabledStyle(style()));
+
+// Fix for Qt bug https://bugreports.qt.io/browse/QTBUG-98093
+// Apply a style sheet to QSlider to make it work on OSX Monterey
+// Note: Inheriting from QMontereySlider does not work, so we manually apply the styleSheet
+#ifdef Darwin
+    this->setStyleSheet("\
+        QSlider::groove:horizontal {\
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #B1B1B1, stop:1 #c4c4c4);\
+			height: 8px; \
+            margin: 2px 0;\
+		}\
+		QSlider::handle:horizontal {\
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f);\
+            border: 1px solid #5c5c5c;\
+            width: 18px;\
+            margin: -2px 0; \
+            border-radius: 3px;\
+		}");
+#endif
 }
 
 QSize QRangeSlider::minimumSizeHint() const { return QSlider::minimumSizeHint(); }

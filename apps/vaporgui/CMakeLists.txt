@@ -318,6 +318,7 @@ set (SRCS
 	VizSelectCombo.h
 	WireFrameEventRouter.h
 	Flags.h
+	QMontereySlider.h
 )
 
 set (UIS 
