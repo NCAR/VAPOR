@@ -2,6 +2,7 @@
 #include <string>
 #include <limits>
 #include <ctime>
+#include <iomanip>
 
 #include <vapor/SliceRenderer.h>
 #include <vapor/SliceParams.h>
@@ -10,7 +11,7 @@
 #include <vapor/GLManager.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
-#include <vapor/SliceGridAlongPlane.h>
+#include <vapor/ArbitrarilyOrientedRegularGrid.h>
 
 #define X  0
 #define Y  1
@@ -175,6 +176,8 @@ void SliceRenderer::_resetColormapCache()
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, _colorMapSize, 0, GL_RGBA, GL_FLOAT, &_cacheParams.tf_lut[0]);
 }
 
+// clang-format off
+
 int SliceRenderer::_regenerateSlice()
 {
     Grid *grid3d = nullptr;
@@ -182,33 +185,59 @@ int SliceRenderer::_regenerateSlice()
     if (rc < 0) return -1;
 
     // Get data values from a slice
-    std::unique_ptr<float> dataValues(new float[_textureSideSize * _textureSideSize]);
+    std::shared_ptr<float> dataValues(new float[_textureSideSize * _textureSideSize]);
     planeDescription       pd;
     pd.sideSize = _textureSideSize;
     pd.origin = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
     pd.rotation = {_cacheParams.xRotation, _cacheParams.yRotation, _cacheParams.zRotation};
     pd.boxMin = _cacheParams.boxMin;
     pd.boxMax = _cacheParams.boxMax;
-    pd.domainMin = _cacheParams.domainMin;
-    pd.domainMax = _cacheParams.domainMax;
-    RegularGrid *slice = SliceGridAlongPlane(grid3d, pd, dataValues, _windingOrder, _rectangle3D);
+
+    VAPoR::DimsType dims = { (size_t)_textureSideSize, (size_t)_textureSideSize, 1 };
+
+    ArbitrarilyOrientedRegularGrid* slice = new ArbitrarilyOrientedRegularGrid(
+        grid3d,
+        pd,
+        dims
+    );
+
+    CoordType corner1, corner2, corner3, corner4;
+    slice->GetUserCoordinates( {0,                  0,                  0}, corner1);
+    slice->GetUserCoordinates( {0,                  _textureSideSize-1, 0}, corner2);
+    slice->GetUserCoordinates( {_textureSideSize-1, 0,                  0}, corner3);
+    slice->GetUserCoordinates( {_textureSideSize-1, _textureSideSize-1, 0}, corner4);
+
+    _windingOrder = {corner1[0], corner1[1], corner1[2],
+                     corner3[0], corner3[1], corner3[2],
+                     corner2[0], corner2[1], corner2[2],
+                     corner3[0], corner3[1], corner3[2],
+                     corner4[0], corner4[1], corner4[2],
+                     corner2[0], corner2[1], corner2[2]};
+
+    _rectangle3D  = {corner1[0], corner1[1], corner1[2],
+                     corner3[0], corner3[1], corner3[2],
+                     corner4[0], corner4[1], corner4[2],
+                     corner2[0], corner2[1], corner2[2]};
+
+    delete grid3d;
     if (slice == nullptr) {
         Wasp::MyBase::SetErrMsg("Unable to perform SliceGridAlongPlane() with current Grid");
         return -1;
     }
-    float missingValue = slice->GetMissingValue();
 
     // Apply opacity to missing values
+    float missingValue = slice->GetMissingValue();
     int                    textureSize = 2 * _textureSideSize * _textureSideSize;
     std::unique_ptr<float> textureValues(new float[textureSize]);
     for (size_t i = 0; i < textureSize / 2; i++) {
-        float dataValue = dataValues.get()[i];
+        DimsType dim = (DimsType){i%_textureSideSize, i/_textureSideSize, 0};
+        float dataValue = slice->GetValueAtIndex( dim );
         if (dataValue == missingValue)
             textureValues.get()[i * 2 + 1] = 1.f;
         else
             textureValues.get()[i * 2 + 1] = 0.f;
 
-        textureValues.get()[i * 2] = dataValues.get()[i];
+        textureValues.get()[i * 2] = dataValue;
     }
 
     _createDataTexture(textureValues);
@@ -217,6 +246,8 @@ int SliceRenderer::_regenerateSlice()
 
     return 0;
 }
+
+// clang-format on
 
 int SliceRenderer::_getGrid3D(Grid *&grid3d) const
 {

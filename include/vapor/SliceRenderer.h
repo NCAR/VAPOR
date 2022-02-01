@@ -74,8 +74,8 @@ private:
     void _resetState();
     void _initializeState();
 
-    bool _initialized;
-    int  _textureSideSize;
+    bool   _initialized;
+    size_t _textureSideSize;
 
     GLuint _colorMapTextureID;
     GLuint _dataValueTextureID;
