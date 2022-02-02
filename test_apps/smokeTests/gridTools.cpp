@@ -215,10 +215,9 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
 
     if (withCoordBounds) {
         CoordType minu, maxu;
-        g->GetUserExtents (minu, maxu);
+        g->GetUserExtents(minu, maxu);
         itr = g->ConstNodeBegin(minu, maxu);
-    }
-    else {
+    } else {
         itr = g->ConstNodeBegin();
     }
 
