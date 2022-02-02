@@ -202,7 +202,7 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
     return rc;
 }
 
-bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time)
+bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time, bool withCoordBounds)
 {
     bool rc = true;
     count = 0;
@@ -213,7 +213,13 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
     Grid::ConstNodeIterator itr;
     Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
 
-    itr = g->ConstNodeBegin();
+    if (withCoordBounds) {
+        CoordType minu, maxu;
+        g->GetUserExtents(minu, maxu);
+        itr = g->ConstNodeBegin(minu, maxu);
+    } else {
+        itr = g->ConstNodeBegin();
+    }
 
     auto dims = g->GetDimensions();
     for (auto dim : dims) expectedCount *= dim;
@@ -413,9 +419,13 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
 
     PrintGridIteratorResults(type, "ConstCoordIterator", count, expectedCount, disagreements, time, silenceTime);
 
-    if (TestConstNodeIterator(grid, count, expectedCount, disagreements, time) == false) { rc = false; }
+    if (TestConstNodeIterator(grid, count, expectedCount, disagreements, time, false) == false) { rc = false; }
 
     PrintGridIteratorResults(type, "ConstNodeIterator", count, expectedCount, disagreements, time, silenceTime);
+
+    if (TestConstNodeIterator(grid, count, expectedCount, disagreements, time, true) == false) { rc = false; }
+
+    PrintGridIteratorResults(type, "ConstNodeIterator with bounds", count, expectedCount, disagreements, time, silenceTime);
 
     return rc;
 }

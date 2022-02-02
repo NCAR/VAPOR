@@ -289,14 +289,12 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const Grid *g, bool begin) : Cons
     _index = {0, 0, 0};
     _lastIndex = {0, 0, 0};
 
-    if (!begin) {
-        if (_nDims < 1)
-            _lastIndex[0] = 1;    // edge case for 0D grids
-        else
-            _lastIndex[_nDims - 1] = _dims[_nDims - 1];
+    if (_nDims < 1)
+        _lastIndex[0] = 1;    // edge case for 0D grids
+    else
+        _lastIndex[_nDims - 1] = _dims[_nDims - 1];
 
-        _index = _lastIndex;
-    }
+    if (!begin) { _index = _lastIndex; }
 }
 
 Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const ConstNodeIteratorSG &rhs) : ConstNodeIteratorAbstract()
@@ -387,14 +385,12 @@ Grid::ConstCellIteratorSG::ConstCellIteratorSG(const Grid *g, bool begin) : Cons
     _index = {0, 0, 0};
     _lastIndex = _index;
 
-    if (!begin) {
-        if (_nDims < 1)
-            _lastIndex[0] = 1;    // edge case for 0D grids
-        else
-            _lastIndex[_nDims - 1] = _dims[_nDims - 1];
+    if (_nDims < 1)
+        _lastIndex[0] = 1;    // edge case for 0D grids
+    else
+        _lastIndex[_nDims - 1] = _dims[_nDims - 1];
 
-        _index = _lastIndex;
-    }
+    if (!begin) { _index = _lastIndex; }
 }
 
 Grid::ConstCellIteratorSG::ConstCellIteratorSG(const ConstCellIteratorSG &rhs) : ConstCellIteratorAbstract()
