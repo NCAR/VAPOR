@@ -608,14 +608,11 @@ void Advection::PrintNumParts(size_t ln) const
   
   printf("at line = %ld, num of parts = %ld\n", ln, count); 
 
-  printf("  last 2 particles of stream #4:\n");
+  printf("  stream #4 has total num of parts = %ld\n", _streams[4].size());
+  printf("  last particle of stream #4:\n");
   auto itr = _streams[4].end();
   --itr;
-  --itr;
   auto p = *itr;
-  printf("  %f, %f, %f, %f, %f\n", p.location[0], p.location[1], p.location[2], p.time, p.value);
-  ++itr;
-  p = *itr;
   printf("  %f, %f, %f, %f, %f\n", p.location[0], p.location[1], p.location[2], p.time, p.value);
 }
 
