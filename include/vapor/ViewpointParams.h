@@ -271,8 +271,8 @@ public:
     static const string CustomFramebufferHeightTag;
 
 private:
-    ParamsContainer *m_VPs;
-    std::unique_ptr<ParamsContainer> _transforms = nullptr;
+    ParamsContainer *m_VPs = nullptr;
+    ParamsContainer *_transforms = nullptr;
 
     static const string _viewPointsTag;
     static const string _transformsTag;
