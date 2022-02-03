@@ -106,6 +106,8 @@ ViewpointParams &ViewpointParams::operator=(const ViewpointParams &rhs)
     if (m_VPs) delete m_VPs;
     if (_transforms) delete _transforms;
 
+    // Note: the following assign operation has to happen AFTER destroying
+    // _transforms 2 lines above. Otherwise, memory error will occur.
     ParamsBase::operator=(rhs);
 
     m_VPs = new ParamsContainer(*(rhs.m_VPs));
