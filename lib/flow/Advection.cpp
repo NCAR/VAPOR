@@ -600,6 +600,25 @@ void Advection::RemoveParticleProperty(const std::string &varToRemove)
     }
 }
 
+void Advection::PrintNumParts(size_t ln) const
+{
+  size_t count = 0;
+  for (auto& s : _streams)
+    count += s.size();
+  
+  printf("at line = %ld, num of parts = %ld\n", ln, count); 
+
+  printf("  last 2 particles of stream #4:\n");
+  auto itr = _streams[4].end();
+  --itr;
+  --itr;
+  auto p = *itr;
+  printf("  %f, %f, %f, %f, %f\n", p.location[0], p.location[1], p.location[2], p.time, p.value);
+  ++itr;
+  p = *itr;
+  printf("  %f, %f, %f, %f, %f\n", p.location[0], p.location[1], p.location[2], p.time, p.value);
+}
+
 void Advection::ResetParticleValues()
 {
     for (auto &stream : _streams)

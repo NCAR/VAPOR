@@ -302,6 +302,7 @@ int FlowRenderer::_paintGL(bool fast)
         _advectionComplete = true;
     }
 
+    _advection.PrintNumParts(__LINE__);
     if (!_coloringComplete) {
         bool integrate = params->GetValueLong(params->_doIntegrationTag, false);
         bool setAllToFinalValue = params->GetValueLong(params->_integrationSetAllToFinalValueTag, false);
@@ -310,7 +311,9 @@ int FlowRenderer::_paintGL(bool fast)
             vector<double> integrationVolumeMin, integrationVolumeMax;
             params->GetIntegrationBox()->GetExtents(integrationVolumeMin, integrationVolumeMax);
             float distScale = params->GetValueDouble(params->_integrationScalarTag, 1.f);
-            _advection.CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
+    _advection.PrintNumParts(__LINE__);
+            rv = _advection.CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
+    _advection.PrintNumParts(__LINE__);
             _printNonZero(rv, __FILE__, __func__, __LINE__);
             if (_2ndAdvection)    // bi-directional advection
                 rv = _2ndAdvection->CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
@@ -321,18 +324,24 @@ int FlowRenderer::_paintGL(bool fast)
                     numSamplesPerStream = _cache_steadyNumOfSteps;
                 else
                     numSamplesPerStream = _cache_currentTS;
+    _advection.PrintNumParts(__LINE__);
                 _advection.SetAllStreamValuesToFinalValue(numSamplesPerStream);
+    _advection.PrintNumParts(__LINE__);
                 if (_2ndAdvection) _2ndAdvection->SetAllStreamValuesToFinalValue(numSamplesPerStream);
             }
 
             vector<double> histoRange;
             vector<long>   histo(256);
+    _advection.PrintNumParts(__LINE__);
             _advection.CalculateParticleHistogram(histoRange, histo);
+    _advection.PrintNumParts(__LINE__);
 
             params->SetValueLongVec(RenderParams::CustomHistogramDataTag, "", histo);
             params->SetValueDoubleVec(RenderParams::CustomHistogramRangeTag, "", histoRange);
         } else {
+    _advection.PrintNumParts(__LINE__);
             rv = _advection.CalculateParticleValues(&_colorField, true);
+    _advection.PrintNumParts(__LINE__);
             _printNonZero(rv, __FILE__, __func__, __LINE__);
             if (_2ndAdvection)    // bi-directional advection
                 rv = _2ndAdvection->CalculateParticleValues(&_colorField, true);
