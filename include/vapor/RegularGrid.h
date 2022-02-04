@@ -99,7 +99,6 @@ public:
     private:
         DimsType  _index;
         DimsType  _dims;
-        size_t    _nDims;
         CoordType _minu;
         CoordType _delta;
         CoordType _coords;
