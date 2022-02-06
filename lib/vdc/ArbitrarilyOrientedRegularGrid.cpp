@@ -239,11 +239,11 @@ glm::vec3 ArbitrarilyOrientedRegularGrid::GetOffsetNormal(const planeDescription
 
 std::pair<float, float> ArbitrarilyOrientedRegularGrid::GetOffsetRange(const planeDescription &pd)
 {
-    auto n = GetOffsetNormal(pd);
+    auto      n = GetOffsetNormal(pd);
     glm::vec3 dataMin(pd.boxMin[0], pd.boxMin[1], pd.boxMin[2]);
     glm::vec3 dataMax(pd.boxMax[0], pd.boxMax[1], pd.boxMax[2]);
     glm::vec3 o(pd.origin[0], pd.origin[1], pd.origin[2]);
-    float t0, t1;
+    float     t0, t1;
     glm::vec3 tMin = (dataMin - o) / n;
     glm::vec3 tMax = (dataMax - o) / n;
     glm::vec3 bt1 = min(tMin, tMax);

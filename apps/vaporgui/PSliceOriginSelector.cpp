@@ -58,16 +58,16 @@ void PSliceOffsetSelector::updateGUI() const
     RenderParams *rp = getParams<RenderParams>();
 
     planeDescription pd;
-    size_t         ts = rp->GetCurrentTimestep();
-    int            level = rp->GetRefinementLevel();
-    int            lod = rp->GetCompressionLevel();
-    string         varName = rp->GetVariableName();
+    size_t           ts = rp->GetCurrentTimestep();
+    int              level = rp->GetRefinementLevel();
+    int              lod = rp->GetCompressionLevel();
+    string           varName = rp->GetVariableName();
 
     int ret = getDataMgr()->GetVariableExtents(ts, varName, level, lod, pd.boxMin, pd.boxMax);
     if (ret) return;
     pd.origin = rp->GetSlicePlaneOrigin();
     pd.rotation = rp->GetSlicePlaneRotation();
-    
+
     auto range = ArbitrarilyOrientedRegularGrid::GetOffsetRange(pd);
     _offsetSlider->SetRange(range.first, range.second);
 

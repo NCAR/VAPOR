@@ -71,6 +71,6 @@ bool PShowIf::TestStringEquals::Evaluate(VAPoR::ParamsBase *params) const { retu
 
 bool PShowIf::TestDimensionEquals::Evaluate(VAPoR::ParamsBase *params) const
 {
-    VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams*>(params);
+    VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams *>(params);
     return rp->GetRenderDim() == _val;
 }

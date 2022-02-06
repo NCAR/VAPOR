@@ -68,7 +68,7 @@ private:
         TestStringEquals(std::string tag, std::string val) : Test(tag), _val(val) {}
         bool Evaluate(VAPoR::ParamsBase *params) const override;
     };
-    
+
     struct TestDimensionEquals : public Test {
         const long _val;
         TestDimensionEquals(long val) : Test(""), _val(val) {}

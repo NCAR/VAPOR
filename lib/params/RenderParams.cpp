@@ -180,7 +180,7 @@ int RenderParams::Initialize()
     vector<double> origin(minExt.size());
     for (int i = 0; i < minExt.size(); i++) { origin[i] = minExt[i] + (maxExt[i] - minExt[i]) * 0.5; }
     _transform->SetOrigin(origin);
-    
+
     SetValueDouble(XSlicePlaneOriginTag, "", origin[0]);
     SetValueDouble(YSlicePlaneOriginTag, "", origin[1]);
     SetValueDouble(ZSlicePlaneOriginTag, "", origin[2]);

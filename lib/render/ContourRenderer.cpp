@@ -107,24 +107,21 @@ bool ContourRenderer::_isCacheDirty() const
 static CoordType ToCoordType(const vector<double> &v)
 {
     CoordType c;
-    for (int i = 0; i < std::min(c.size(), v.size()); i++)
-        c[i] = v[i];
+    for (int i = 0; i < std::min(c.size(), v.size()); i++) c[i] = v[i];
     return c;
 }
 
 static glm::vec3 ToVec3(const vector<double> &v)
 {
     glm::vec3 c;
-    for (int i = 0; i < std::min(c.length(), (int)v.size()); i++)
-        c[i] = v[i];
+    for (int i = 0; i < std::min(c.length(), (int)v.size()); i++) c[i] = v[i];
     return c;
 }
 
 static vector<double> ToDoubleVec(const glm::vec3 &v)
 {
     vector<double> c(v.length());
-    for (int i = 0; i < v.length(); i++)
-        c[i] = v[i];
+    for (int i = 0; i < v.length(); i++) c[i] = v[i];
     return c;
 }
 
@@ -150,7 +147,7 @@ int ContourRenderer::_buildCache(bool fast)
     Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax);
     Grid *grid2 = nullptr;
     Grid *heightGrid = nullptr;
-    
+
     int dims = grid->GetGeometryDim();
     if (!_cacheParams.heightVarName.empty() && dims == 2) { heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax); }
     if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) {
@@ -159,7 +156,7 @@ int ContourRenderer::_buildCache(bool fast)
         if (heightGrid) delete heightGrid;
         return -1;
     }
-    
+
     if (dims == 3) {
         planeDescription pd;
         pd.boxMin = ToCoordType(_cacheParams.boxMin);
@@ -167,25 +164,25 @@ int ContourRenderer::_buildCache(bool fast)
         pd.rotation = _cacheParams.sliceRotation;
         pd.origin = _cacheParams.sliceOrigin;
         pd.sideSize = _cacheParams.sliceResolution;
-        
+
         auto o = ToVec3(_cacheParams.sliceOrigin);
         auto n = ArbitrarilyOrientedRegularGrid::GetOffsetNormal(pd);
         auto offsetOrigin = o + n * (float)_cacheParams.sliceOffset;
         pd.origin = ToDoubleVec(offsetOrigin);
-        
+
         DimsType dims = {pd.sideSize, pd.sideSize, 1};
-        
+
         ArbitrarilyOrientedRegularGrid *grid2d = new ArbitrarilyOrientedRegularGrid(grid, pd, dims);
         grid2 = grid;
         grid = grid2d;
-        
-        CoordType corner1, corner2, corner3, corner4;
-        grid2d->GetUserCoordinates({0,                  0,                  0}, corner1);
-        grid2d->GetUserCoordinates({0,                  pd.sideSize-1, 0}, corner2);
-        grid2d->GetUserCoordinates({pd.sideSize-1, 0,                  0}, corner3);
-        grid2d->GetUserCoordinates({pd.sideSize-1, pd.sideSize-1, 0}, corner4);
 
-        _sliceQuad  = {
+        CoordType corner1, corner2, corner3, corner4;
+        grid2d->GetUserCoordinates({0, 0, 0}, corner1);
+        grid2d->GetUserCoordinates({0, pd.sideSize - 1, 0}, corner2);
+        grid2d->GetUserCoordinates({pd.sideSize - 1, 0, 0}, corner3);
+        grid2d->GetUserCoordinates({pd.sideSize - 1, pd.sideSize - 1, 0}, corner4);
+
+        _sliceQuad = {
             glm::vec3(corner1[0], corner1[1], corner1[2]),
             glm::vec3(corner3[0], corner3[1], corner3[2]),
             glm::vec3(corner4[0], corner4[1], corner4[2]),
@@ -236,9 +233,8 @@ int ContourRenderer::_buildCache(bool fast)
                 v[0] = coords[a][0] + t * (coords[b][0] - coords[a][0]);
                 v[1] = coords[a][1] + t * (coords[b][1] - coords[a][1]);
                 v[2] = coords[a][2] + t * (coords[b][2] - coords[a][2]);
-                
-                if (dims == 2)
-                    v[2] = Z0;
+
+                if (dims == 2) v[2] = Z0;
 
                 if (heightGrid) {
                     float aHeight = heightGrid->GetValueAtIndex(nodes[a]);
@@ -257,11 +253,11 @@ int ContourRenderer::_buildCache(bool fast)
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
+
     if (grid) delete grid;
     if (grid2) delete grid2;
     if (heightGrid) delete heightGrid;
-    
+
     return 0;
 }
 
@@ -275,10 +271,8 @@ int ContourRenderer::_paintGL(bool fast)
             LegacyGL *lgl = _glManager->legacy;
             lgl->Color3f(0, 1, 0);
             lgl->Begin(GL_LINE_STRIP);
-            for (auto v : _sliceQuad)
-                lgl->Vertex(v);
-            if (_sliceQuad.size())
-                lgl->Vertex(_sliceQuad[0]);
+            for (auto v : _sliceQuad) lgl->Vertex(v);
+            if (_sliceQuad.size()) lgl->Vertex(_sliceQuad[0]);
             lgl->End();
             return 0;
         }

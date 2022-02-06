@@ -77,7 +77,7 @@ private:
         vector<double> sliceOrigin;
         double         sliceOffset;
         double         sliceResolution;
-        
+
     } _cacheParams;
 
     int  _buildCache(bool fast);
@@ -85,7 +85,7 @@ private:
     void _saveCacheParams();
 
     void _clearCache() { _cacheParams.varName.clear(); }
-    
+
     vector<glm::vec3> _sliceQuad;
 };
 
