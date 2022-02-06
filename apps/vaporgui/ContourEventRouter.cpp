@@ -3,6 +3,7 @@
 #include "PWidgets.h"
 #include "PSliderEditHLI.h"
 #include "PConstantColorWidget.h"
+#include "PSliceOriginSelector.h"
 
 using namespace VAPoR;
 typedef ContourParams CP;
@@ -15,6 +16,7 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
 
     AddVariablesSubtab(new PGroup({
         new PSection("Variable Selection", {
+            new PDimensionSelector,
             new PScalarVariableSelector,
             new PHeightVariableSelector,
         }),
@@ -32,9 +34,26 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
             _minValueSlider = new PDoubleSliderEditHLI<CP>("Minimum Value", &CP::GetContourMin, &CP::SetContourMin),
             new PConstantColorWidget
         }),
+        (new PShowIf(""))->DimensionEquals(3)->Then(new PGroup({
+            new PSection("Slice", {
+                (new PDoubleSliderEdit(RenderParams::SampleRateTag, "N Samples"))->SetRange(32, 2000)
+            })
+        })),
     }));
     
-    AddGeometrySubtab(new PGeometrySubtab);
+    AddGeometrySubtab(new PGroup({
+        new PGeometrySubtab,
+        (new PShowIf(""))->DimensionEquals(3)->Then(new PGroup({
+            new PSection("Slice Rotation", {
+                (new PDoubleSliderEdit( RenderParams::XSlicePlaneRotationTag, "X"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit( RenderParams::YSlicePlaneRotationTag, "Y"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit( RenderParams::ZSlicePlaneRotationTag, "Z"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
+            }),
+            new PSliceOriginSelector,
+            new PSliceOffsetSelector,
+        })),
+    }));
+    
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on

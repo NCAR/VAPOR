@@ -73,13 +73,20 @@ private:
         double         lineThickness;
         vector<double> boxMin, boxMax;
         vector<double> contourValues;
+        vector<double> sliceRotation;
+        vector<double> sliceOrigin;
+        double         sliceOffset;
+        double         sliceResolution;
+        
     } _cacheParams;
 
-    int  _buildCache();
+    int  _buildCache(bool fast);
     bool _isCacheDirty() const;
     void _saveCacheParams();
 
     void _clearCache() { _cacheParams.varName.clear(); }
+    
+    vector<glm::vec3> _sliceQuad;
 };
 
 };    // namespace VAPoR

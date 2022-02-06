@@ -20,7 +20,7 @@ const string ContourParams::_textEnabledTag = "TextEnabled";
 const string ContourParams::_lockToTFTag = "LockToTF";
 const string ContourParams::Contours::_valuesTag = "Values";
 
-ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, ContourParams::GetClassType(), 2)
+ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, ContourParams::GetClassType(), 3)
 {
     SetDiagMsg("ContourParams::ContourParams() this=%p", this);
 
@@ -30,7 +30,7 @@ ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : R
     _init();
 }
 
-ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 2)
+ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 3)
 {
     SetDiagMsg("ContourParams::ContourParams() this=%p", this);
 

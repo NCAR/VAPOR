@@ -24,7 +24,7 @@ PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
 
 void PSliceOriginSelector::updateGUI() const
 {
-    SliceParams *rp = getParams<SliceParams>();
+    RenderParams *rp = getParams<RenderParams>();
 
     CoordType      min, max;
     size_t         ts = rp->GetCurrentTimestep();
@@ -33,12 +33,43 @@ void PSliceOriginSelector::updateGUI() const
     string         varName = rp->GetVariableName();
 
     int ret = getDataMgr()->GetVariableExtents(ts, varName, level, lod, min, max);
-    assert(ret == 0);
-    (void)ret;
+    if (ret) return;
 
     _xSlider->SetRange(min[0], max[0]);
     _ySlider->SetRange(min[1], max[1]);
     _zSlider->SetRange(min[2], max[2]);
+
+    PSection::updateGUI();
+}
+
+
+
+#include <vapor/ArbitrarilyOrientedRegularGrid.h>
+
+PSliceOffsetSelector::PSliceOffsetSelector() : PSection("Slice Offset")
+{
+    _offsetSlider = new PDoubleSliderEdit(RenderParams::SliceOffsetTag, "Offset");
+    _offsetSlider->EnableDynamicUpdate();
+    Add(_offsetSlider);
+}
+
+void PSliceOffsetSelector::updateGUI() const
+{
+    RenderParams *rp = getParams<RenderParams>();
+
+    planeDescription pd;
+    size_t         ts = rp->GetCurrentTimestep();
+    int            level = rp->GetRefinementLevel();
+    int            lod = rp->GetCompressionLevel();
+    string         varName = rp->GetVariableName();
+
+    int ret = getDataMgr()->GetVariableExtents(ts, varName, level, lod, pd.boxMin, pd.boxMax);
+    if (ret) return;
+    pd.origin = rp->GetSlicePlaneOrigin();
+    pd.rotation = rp->GetSlicePlaneRotation();
+    
+    auto range = ArbitrarilyOrientedRegularGrid::GetOffsetRange(pd);
+    _offsetSlider->SetRange(range.first, range.second);
 
     PSection::updateGUI();
 }

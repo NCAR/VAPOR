@@ -392,6 +392,9 @@ public:
 
     //! Return whether a renderer can be oriented - IE, can this renderer be rotated about an origin point?
     virtual bool GetOrientable() const;
+    
+    vector<double> GetSlicePlaneRotation() const;
+    vector<double> GetSlicePlaneOrigin() const;
 
 protected:
     DataMgr *_dataMgr;
@@ -473,6 +476,8 @@ public:
     //! this string identifies the parameter for how many samples
     //! to take along that vector.
     static const string SampleRateTag;
+    
+    static const string SliceOffsetTag;
 };
 
 //////////////////////////////////////////////////////////////////////////

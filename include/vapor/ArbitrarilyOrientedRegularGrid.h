@@ -64,6 +64,9 @@ public:
     virtual bool GetIndicesCell (const CoordType &coords, DimsType &indices) = delete;
     virtual bool InsideGrid (const CoordType &coords) = delete;
     virtual void ClampCoord (const CoordType &coords, CoordType &cCoords) = delete;
+    
+    static glm::vec3 GetOffsetNormal(const planeDescription &pd);
+    static std::pair<float, float> GetOffsetRange(const planeDescription &pd);
 
 private:
     std::vector<glm::tvec2<double, glm::highp>> _rectangle2D;

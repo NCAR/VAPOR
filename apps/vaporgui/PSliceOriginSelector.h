@@ -20,3 +20,16 @@ protected:
     virtual void updateGUI() const override;
     virtual bool requireDataMgr() const override { return true; }
 };
+
+
+
+class PSliceOffsetSelector : public PSection {
+public:
+    PSliceOffsetSelector();
+
+protected:
+    PDoubleSliderEdit *_offsetSlider;
+
+    virtual void updateGUI() const override;
+    virtual bool requireDataMgr() const override { return true; }
+};

@@ -224,3 +224,31 @@ void ArbitrarilyOrientedRegularGrid::_populateData(
 }
 
 // clang-format on
+
+glm::vec3 ArbitrarilyOrientedRegularGrid::GetOffsetNormal(const planeDescription &pd)
+{
+    glm::vec3 dataMin(pd.boxMin[0], pd.boxMin[1], pd.boxMin[2]);
+    glm::vec3 dataMax(pd.boxMax[0], pd.boxMax[1], pd.boxMax[2]);
+    glm::vec3 o(pd.origin[0], pd.origin[1], pd.origin[2]);
+    glm::vec3 r(pd.rotation[0], pd.rotation[1], pd.rotation[2]);
+    r = r * (float)M_PI / 180.f;
+    auto q = glm::quat(r);
+    auto n = q * glm::vec3(0, 0, 1);
+    return n;
+}
+
+std::pair<float, float> ArbitrarilyOrientedRegularGrid::GetOffsetRange(const planeDescription &pd)
+{
+    auto n = GetOffsetNormal(pd);
+    glm::vec3 dataMin(pd.boxMin[0], pd.boxMin[1], pd.boxMin[2]);
+    glm::vec3 dataMax(pd.boxMax[0], pd.boxMax[1], pd.boxMax[2]);
+    glm::vec3 o(pd.origin[0], pd.origin[1], pd.origin[2]);
+    float t0, t1;
+    glm::vec3 tMin = (dataMin - o) / n;
+    glm::vec3 tMax = (dataMax - o) / n;
+    glm::vec3 bt1 = min(tMin, tMax);
+    glm::vec3 bt2 = max(tMin, tMax);
+    t0 = max(max(bt1.x, bt1.y), bt1.z);
+    t1 = min(min(bt2.x, bt2.y), bt2.z);
+    return std::pair<float, float>(t0, t1);
+}
