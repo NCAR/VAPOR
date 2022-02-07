@@ -46,7 +46,7 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
     // Each stream represents a trajectory for a single particle
     // #pragma omp parallel for
     for (size_t streamIdx = 0; streamIdx < _streams.size(); streamIdx++) {
-        auto & s = _streams[streamIdx];
+        auto  &s = _streams[streamIdx];
         size_t numberOfSteps = s.size() - _separatorCount[streamIdx];
         while (numberOfSteps < maxSteps) {
             auto &past0 = s.back();
@@ -602,8 +602,11 @@ void Advection::RemoveParticleProperty(const std::string &varToRemove)
 
 void Advection::ResetParticleValues()
 {
-    for (auto &stream : _streams)
-        for (auto &part : stream) part.value = 0.0f;
+    for (auto &stream : _streams) {
+        std::for_each(stream.begin(), stream.end(), [](Particle &p) {
+            if (!p.IsSpecial()) p.value = 0.0f;
+        });
+    }
 }
 
 void Advection::SetXPeriodicity(bool isPeri, float min, float max)
