@@ -310,7 +310,7 @@ int FlowRenderer::_paintGL(bool fast)
             vector<double> integrationVolumeMin, integrationVolumeMax;
             params->GetIntegrationBox()->GetExtents(integrationVolumeMin, integrationVolumeMax);
             float distScale = params->GetValueDouble(params->_integrationScalarTag, 1.f);
-            rv = _advection.CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
+            _advection.CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
             _printNonZero(rv, __FILE__, __func__, __LINE__);
             if (_2ndAdvection)    // bi-directional advection
                 rv = _2ndAdvection->CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
