@@ -46,7 +46,6 @@ CurvilinearGrid::CurvilinearGrid(const DimsType &dims, const DimsType &bs, const
                                  std::shared_ptr<const QuadTreeRectangleP> qtr)
 : StructuredGrid(dims, bs, blks)
 {
-
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
@@ -287,18 +286,18 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
         _yCoordItr = _cg->_yrg.cend();
         if (_terrainFollowing) { _zCoordItr = _cg->_zrg.cend(); }
 
-        _index = {0, 0, dims[dims.size()-1]};
+        _index = {0, 0, dims[dims.size() - 1]};
 
         return;
     }
     _coords[0] = *_xCoordItr;
     _coords[1] = *_yCoordItr;
 
-	if (_terrainFollowing) {
-		_coords[2] = *_zCoordItr;
-	} else {
-		_coords[2] = _cg->_zcoords[0];
-	}
+    if (_terrainFollowing) {
+        _coords[2] = *_zCoordItr;
+    } else {
+        _coords[2] = _cg->_zcoords[0];
+    }
 }
 
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const ConstCoordItrCG &rhs) : ConstCoordItrAbstract()
@@ -361,12 +360,11 @@ void CurvilinearGrid::ConstCoordItrCG::next()
         return;
     }
 
-    _index = {0, 0, dims[dims.size()-1]}; // last index
+    _index = {0, 0, dims[dims.size() - 1]};    // last index
 }
 
 void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 {
-
     auto dims = _cg->GetDimensions();
     auto ndims = _cg->GetNumDimensions();
 
@@ -376,7 +374,7 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
     long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), dims.size()) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = {0, 0, dims[dims.size()-1]};
+        _index = {0, 0, dims[dims.size() - 1]};
         return;
     }
 
@@ -717,8 +715,8 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
 
 std::shared_ptr<QuadTreeRectangleP> CurvilinearGrid::_makeQuadTreeRectangle() const
 {
-    const DimsType &      dims = GetCellDimensions();
-    size_t                reserve_size = dims[0] * dims[1];
+    const DimsType &dims = GetCellDimensions();
+    size_t          reserve_size = dims[0] * dims[1];
 
     CoordType minu, maxu;
     GetUserExtents(minu, maxu);

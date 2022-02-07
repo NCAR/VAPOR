@@ -139,10 +139,10 @@ public:
     //
     virtual size_t GetGeometryDim() const = 0;
 
-    virtual const DimsType &           GetNodeDimensions() const = 0;
-    virtual const size_t               GetNumNodeDimensions() const = 0;
-    virtual const DimsType &           GetCellDimensions() const = 0;
-    virtual const size_t               GetNumCellDimensions() const = 0;
+    virtual const DimsType &GetNodeDimensions() const = 0;
+    virtual const size_t    GetNumNodeDimensions() const = 0;
+    virtual const DimsType &GetCellDimensions() const = 0;
+    virtual const size_t    GetNumCellDimensions() const = 0;
 
     //! Return the ijk dimensions of grid in blocks
     //!
@@ -1171,9 +1171,9 @@ public:
         DimsType             _bs3d;
         size_t               _blocksize;
         ConstCoordItr        _coordItr;
-        DimsType             _index;         // current index into grid
+        DimsType             _index;        // current index into grid
         DimsType             _lastIndex;    // Last valid index
-        size_t               _xb;            // x index within a block
+        size_t               _xb;           // x index within a block
         float *              _itr;
         InsideBox            _pred;
     };
@@ -1264,7 +1264,7 @@ protected:
     }
 
 private:
-    DimsType             _dims;    // dimensions of grid arrays
+    DimsType             _dims;                   // dimensions of grid arrays
     DimsType             _bs = {{1, 1, 1}};       // dimensions of each block
     DimsType             _bdims = {{1, 1, 1}};    // dimensions (specified in blocks) of ROI
     std::vector<size_t>  _bsDeprecated;           // legacy API
@@ -1282,7 +1282,6 @@ private:
     mutable CoordType    _maxuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
 
     void _grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension);
-
 };
 
 template void Grid::CopyToArr3<size_t>(const std::vector<size_t> &src, std::array<size_t, 3> &dst);

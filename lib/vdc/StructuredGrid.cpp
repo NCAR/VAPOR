@@ -215,7 +215,7 @@ bool StructuredGrid::GetEnclosingRegion(const CoordType &minu, const CoordType &
     if (!GetIndicesCell(minu, min)) return (false);
     if (!GetIndicesCell(maxu, max)) return (false);
     for (int i = 0; i < max.size(); i++) {
-        if (max[i] < dims[i]-1) max[i] += 1; 
+        if (max[i] < dims[i] - 1) max[i] += 1;
     }
 
     // For curvilinear grids it's possible that minu and maxu components

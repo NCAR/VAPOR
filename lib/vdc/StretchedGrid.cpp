@@ -162,9 +162,7 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const StretchedGrid *sg, bool be
     _coords = {0.0, 0.0, 0.0};
     const DimsType &dims = sg->GetDimensions();
 
-    if (!begin) {
-        _index = {0, 0, dims[dims.size()-1]};
-    }
+    if (!begin) { _index = {0, 0, dims[dims.size() - 1]}; }
 
     if (_sg->_xcoords.size()) _coords[0] = _sg->_xcoords[0];
     if (_sg->_ycoords.size()) _coords[1] = _sg->_ycoords[0];
@@ -215,7 +213,7 @@ void StretchedGrid::ConstCoordItrSG::next()
         return;
     }
 
-    _index[2] = dims[2];   // last index;
+    _index[2] = dims[2];    // last index;
 }
 
 void StretchedGrid::ConstCoordItrSG::next(const long &offset)
@@ -226,7 +224,7 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset)
     long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), dims.size()) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = {0, 0, dims[dims.size()-1]};
+        _index = {0, 0, dims[dims.size() - 1]};
         return;
     }
 

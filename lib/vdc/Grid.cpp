@@ -21,10 +21,7 @@
 using namespace std;
 using namespace VAPoR;
 
-Grid::Grid()
-{
-    _dims = {1, 1, 1};
-}
+Grid::Grid() { _dims = {1, 1, 1}; }
 
 void Grid::_grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension)
 {
@@ -227,7 +224,9 @@ void Grid::GetUserCoordinates(size_t i, double &x, double &y, double &z) const
     vector<size_t> indices = {i};
     vector<double> coords;
     GetUserCoordinates(indices, coords);
-    x = coords[0]; y = coords[1]; z = coords[2];
+    x = coords[0];
+    y = coords[1];
+    z = coords[2];
 }
 
 void Grid::GetUserCoordinates(size_t i, size_t j, double &x, double &y, double &z) const
@@ -236,7 +235,9 @@ void Grid::GetUserCoordinates(size_t i, size_t j, double &x, double &y, double &
     vector<size_t> indices = {i, j};
     vector<double> coords;
     GetUserCoordinates(indices, coords);
-    x = coords[0]; y = coords[1]; z = coords[2];
+    x = coords[0];
+    y = coords[1];
+    z = coords[2];
 }
 
 void Grid::GetUserCoordinates(size_t i, size_t j, size_t k, double &x, double &y, double &z) const
@@ -245,7 +246,9 @@ void Grid::GetUserCoordinates(size_t i, size_t j, size_t k, double &x, double &y
     vector<size_t> indices = {i, j, k};
     vector<double> coords;
     GetUserCoordinates(indices, coords);
-    x = coords[0]; y = coords[1]; z = coords[2];
+    x = coords[0];
+    y = coords[1];
+    z = coords[2];
 }
 
 void Grid::SetInterpolationOrder(int order)
@@ -264,7 +267,7 @@ Grid::ConstNodeIteratorSG::ConstNodeIteratorSG(const Grid *g, bool begin) : Cons
 {
     _dims = g->GetNodeDimensions();
     _index = {0, 0, 0};
-    _lastIndex = {0, 0, _dims[_dims.size()-1]};
+    _lastIndex = {0, 0, _dims[_dims.size() - 1]};
 
     if (!begin) { _index = _lastIndex; }
 }
@@ -296,7 +299,7 @@ void Grid::ConstNodeIteratorSG::next()
     _index[2]++;
     if (_index[2] < _dims[2]) { return; }
 
-    _index[2] = _dims[2];	// last index;
+    _index[2] = _dims[2];    // last index;
 }
 
 void Grid::ConstNodeIteratorSG::next(const long &offset)
@@ -353,7 +356,7 @@ Grid::ConstCellIteratorSG::ConstCellIteratorSG(const Grid *g, bool begin) : Cons
 {
     _dims = g->GetCellDimensions();
     _index = {0, 0, 0};
-    _lastIndex = {0, 0, _dims[_dims.size()-1]};
+    _lastIndex = {0, 0, _dims[_dims.size() - 1]};
 
     if (!begin) { _index = _lastIndex; }
 }
@@ -385,7 +388,7 @@ void Grid::ConstCellIteratorSG::next()
     _index[2]++;
     if (_index[2] < (_dims[2])) { return; }
 
-    _index[2] = _dims[2];	// last index;
+    _index[2] = _dims[2];    // last index;
 }
 
 void Grid::ConstCellIteratorSG::next(const long &offset)
@@ -494,15 +497,15 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
     _blks = rg->GetBlks();
 
     _dims3d = rg->GetDimensions();
-    _bdims3d = {1,1,1};
-    _bs3d = {1,1,1};
+    _bdims3d = {1, 1, 1};
+    _bs3d = {1, 1, 1};
     CopyToArr3(rg->GetDimensionInBlks(), _bdims3d);
     CopyToArr3(rg->GetBlockSize(), _bs3d);
 
     _blocksize = Wasp::VProduct(_bs3d.data(), _bs3d.size());
 
     _index = {0, 0, 0};
-    _lastIndex = {0, 0, _dims3d[_dims3d.size()-1]};
+    _lastIndex = {0, 0, _dims3d[_dims3d.size() - 1]};
 
     if (!begin || !_blks.size()) {
         _index = _lastIndex;

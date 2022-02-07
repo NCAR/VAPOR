@@ -121,10 +121,10 @@ protected:
 private:
     void _regularGrid(const CoordType &minu, const CoordType &maxu);
 
-    CoordType           _minu = {{0.0, 0.0, 0.0}};
-    CoordType           _maxu = {{0.0, 0.0, 0.0}};
-    size_t              _geometryDim;
-    CoordType           _delta;    // increment between grid points in user coords
+    CoordType _minu = {{0.0, 0.0, 0.0}};
+    CoordType _maxu = {{0.0, 0.0, 0.0}};
+    size_t    _geometryDim;
+    CoordType _delta;    // increment between grid points in user coords
 };
 };    // namespace VAPoR
 #endif

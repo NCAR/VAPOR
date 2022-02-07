@@ -298,9 +298,7 @@ RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const RegularGrid *rg, bool begin)
     _index = {0, 0, 0};
 
 
-    if (!begin) {
-        _index = {0, 0, _dims[_dims.size()-1]};
-    }
+    if (!begin) { _index = {0, 0, _dims[_dims.size() - 1]}; }
 }
 
 RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const ConstCoordItrRG &rhs) : ConstCoordItrAbstract()
@@ -341,7 +339,7 @@ void RegularGrid::ConstCoordItrRG::next()
 
     if (_index[2] < _dims[2]) { return; }
 
-    _index[2] = _dims[2];   // last index;
+    _index[2] = _dims[2];    // last index;
 }
 
 void RegularGrid::ConstCoordItrRG::next(const long &offset)
@@ -350,7 +348,7 @@ void RegularGrid::ConstCoordItrRG::next(const long &offset)
     long newIndexL = Wasp::LinearizeCoords(_index.data(), _dims.data(), _dims.size()) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = {0, 0, _dims[_dims.size()-1]};
+        _index = {0, 0, _dims[_dims.size() - 1]};
         return;
     }
 
