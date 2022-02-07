@@ -75,7 +75,6 @@ public:
     auto GetValueVarName() const -> std::string;
     auto GetPropertyVarNames() const -> std::vector<std::string>;
 
-
 private:
     std::vector<std::vector<Particle>> _streams;
     std::string                        _valueVarName;
