@@ -160,13 +160,19 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const StretchedGrid *sg, bool be
     _sg = sg;
     _index = {0, 0, 0};
     _coords = {0.0, 0.0, 0.0};
+    size_t          ndims = sg->GetNumDimensions();
     const DimsType &dims = sg->GetDimensions();
 
-    if (!begin) { _index = {0, 0, dims[dims.size() - 1]}; }
+    if (!begin) {
+        if (ndims < 1)
+            _index[0] = 1;    // edge case for 0D grids
+        else
+            _index[ndims - 1] = dims[ndims - 1];
+    }
 
-    if (_sg->_xcoords.size()) _coords[0] = _sg->_xcoords[0];
-    if (_sg->_ycoords.size()) _coords[1] = _sg->_ycoords[0];
-    if (_sg->_zcoords.size()) _coords[2] = _sg->_zcoords[0];
+    if (_sg->GetGeometryDim() >= 1) _coords[0] = _sg->_xcoords[0];
+    if (_sg->GetGeometryDim() >= 2) _coords[1] = _sg->_ycoords[0];
+    if (_sg->GetGeometryDim() >= 3) _coords[2] = _sg->_zcoords[0];
 }
 
 StretchedGrid::ConstCoordItrSG::ConstCoordItrSG(const ConstCoordItrSG &rhs) : ConstCoordItrAbstract()
@@ -186,6 +192,7 @@ StretchedGrid::ConstCoordItrSG::ConstCoordItrSG() : ConstCoordItrAbstract()
 void StretchedGrid::ConstCoordItrSG::next()
 {
     auto dims = _sg->GetDimensions();
+    auto ndims = _sg->GetNumDimensions();
 
     _index[0]++;
 
@@ -194,6 +201,8 @@ void StretchedGrid::ConstCoordItrSG::next()
         _coords[1] = _sg->_ycoords[_index[1]];
         return;
     }
+
+    if (ndims <= 1) return;
 
     _index[0] = 0;
     _index[1]++;
@@ -204,6 +213,8 @@ void StretchedGrid::ConstCoordItrSG::next()
         return;
     }
 
+    if (ndims == 2) return;
+
     _index[1] = 0;
     _index[2]++;
     if (_index[2] < dims[2]) {
@@ -212,27 +223,37 @@ void StretchedGrid::ConstCoordItrSG::next()
         _coords[2] = _sg->_zcoords[_index[2]];
         return;
     }
-
-    _index[2] = dims[2];    // last index;
 }
 
 void StretchedGrid::ConstCoordItrSG::next(const long &offset)
 {
     auto dims = _sg->GetDimensions();
+    auto ndims = _sg->GetNumDimensions();
 
-    long maxIndexL = Wasp::VProduct(dims.data(), dims.size()) - 1;
-    long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), dims.size()) + offset;
+    if (!_index.size()) return;
+
+    vector<size_t> maxIndex;
+    maxIndex.reserve(3);
+    ;
+    for (int i = 0; i < ndims; i++) maxIndex.push_back(dims[i] - 1);
+
+    long maxIndexL = Wasp::LinearizeCoords(maxIndex.data(), dims.data(), ndims);
+    long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = {0, 0, dims[dims.size() - 1]};
+        _index = {0, 0, 0};
+        _index[ndims - 1] = dims[ndims - 1];
         return;
     }
 
     _index = {0, 0, 0};
-    Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), dims.size());
+    Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
 
     _coords[0] = _sg->_xcoords[_index[0]];
     _coords[1] = _sg->_ycoords[_index[1]];
+
+    if (ndims == 2) return;
+
     _coords[2] = _sg->_zcoords[_index[2]];
 }
 
@@ -279,9 +300,10 @@ float StretchedGrid::GetValueLinear(const CoordType &coords) const
     if (!inside) return (GetMissingValue());
 
     auto dims = GetDimensions();
+    auto ndims = GetNumDimensions();
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
-    VAssert(k < dims[2]);
+    if (ndims > 2) VAssert(k < dims[2]);
 
     float verts0[4];
     verts0[0] = AccessIJK(i, j, k);
@@ -290,6 +312,8 @@ float StretchedGrid::GetValueLinear(const CoordType &coords) const
     verts0[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i + 1, j + 1, k) : 0.0;
 
     float v0 = ((verts0[0] * xwgt[0] + verts0[1] * xwgt[1]) * ywgt[0]) + ((verts0[2] * xwgt[0] + verts0[3] * xwgt[1]) * ywgt[1]);
+
+    if (ndims == 2) return (v0);
 
     if (dims[2] > 1) k++;
 
@@ -320,7 +344,7 @@ void StretchedGrid::GetUserExtentsHelper(CoordType &minext, CoordType &maxext) c
 
     CoordType minv, maxv;
     StretchedGrid::GetBoundingBox(min, max, minv, maxv);
-    for (int i = 0; i < min.size(); i++) {
+    for (int i = 0; i < GetNumDimensions(); i++) {
         minext[i] = minv[i];
         maxext[i] = maxv[i];
     }

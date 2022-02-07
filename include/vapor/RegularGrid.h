@@ -99,6 +99,7 @@ public:
     private:
         DimsType  _index;
         DimsType  _dims;
+        size_t    _nDims;
         CoordType _minu;
         CoordType _delta;
         CoordType _coords;
@@ -121,10 +122,10 @@ protected:
 private:
     void _regularGrid(const CoordType &minu, const CoordType &maxu);
 
-    CoordType _minu = {{0.0, 0.0, 0.0}};
-    CoordType _maxu = {{0.0, 0.0, 0.0}};
-    size_t    _geometryDim;
-    CoordType _delta;    // increment between grid points in user coords
+    CoordType           _minu = {{0.0, 0.0, 0.0}};
+    CoordType           _maxu = {{0.0, 0.0, 0.0}};
+    size_t              _geometryDim;
+    CoordType           _delta;    // increment between grid points in user coords
 };
 };    // namespace VAPoR
 #endif
