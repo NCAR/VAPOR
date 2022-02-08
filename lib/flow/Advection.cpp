@@ -46,7 +46,7 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
     // Each stream represents a trajectory for a single particle
     // #pragma omp parallel for
     for (size_t streamIdx = 0; streamIdx < _streams.size(); streamIdx++) {
-        auto  &s = _streams[streamIdx];
+        auto & s = _streams[streamIdx];
         size_t numberOfSteps = s.size() - _separatorCount[streamIdx];
         while (numberOfSteps < maxSteps) {
             auto &past0 = s.back();
