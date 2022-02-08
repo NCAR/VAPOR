@@ -2779,7 +2779,7 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
 
     const BlkExts &blkexts = itr->second;
 
-    
+
 
     // Find block coordinates of region that contains the bounding volume
     //
