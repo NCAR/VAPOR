@@ -1743,6 +1743,23 @@ size_t DataMgr::GetVarTopologyDim(string varname) const
     return (mesh.GetTopologyDim());
 }
 
+size_t DataMgr::GetVarGeometryDim(string varname) const
+{
+    VAssert(_dc);
+
+    DC::DataVar var;
+    bool        status = GetDataVarInfo(varname, var);
+    if (!status) return (0);
+
+    string mname = var.GetMeshName();
+
+    DC::Mesh mesh;
+    status = GetMesh(mname, mesh);
+    if (!status) return (0);
+
+    return (mesh.GetGeometryDim());
+}
+
 template<typename T> T *DataMgr::_get_region_from_cache(size_t ts, string varname, int level, int lod, const DimsType &bmin, const DimsType &bmax, bool lock)
 {
     list<region_t>::iterator itr;
@@ -2350,7 +2367,7 @@ void DataMgr::BlkExts::Insert(const DimsType &bcoord, const CoordType &min, cons
     _maxs[offset] = max;
 }
 
-bool DataMgr::BlkExts::Intersect(const CoordType &min, const CoordType &max, DimsType &bmin, DimsType &bmax) const
+bool DataMgr::BlkExts::Intersect(const CoordType &min, const CoordType &max, DimsType &bmin, DimsType &bmax, int nCoords) const
 {
     bmin = _bmax;
     bmax = _bmin;
@@ -2362,7 +2379,7 @@ bool DataMgr::BlkExts::Intersect(const CoordType &min, const CoordType &max, Dim
     //
     for (size_t offset = 0; offset < _mins.size(); offset++) {
         bool overlap = true;
-        for (int j = 0; j < min.size(); j++) {
+        for (int j = 0; j < nCoords; j++) {
             if (_maxs[offset][j] < min[j] || _mins[offset][j] > max[j]) {
                 overlap = false;
                 break;
@@ -2379,7 +2396,7 @@ bool DataMgr::BlkExts::Intersect(const CoordType &min, const CoordType &max, Dim
             DimsType coord;
             Wasp::VectorizeCoords(offset, _bmin.data(), _bmax.data(), coord.data(), coord.size());
 
-            for (int i = 0; i < coord.size(); i++) {
+            for (int i = 0; i < nCoords; i++) {
                 if (coord[i] < bmin[i]) bmin[i] = coord[i];
                 if (coord[i] > bmax[i]) bmax[i] = coord[i];
             }
@@ -2762,10 +2779,12 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
 
     const BlkExts &blkexts = itr->second;
 
+    
+
     // Find block coordinates of region that contains the bounding volume
     //
     DimsType bmin, bmax;
-    ok = blkexts.Intersect(min, max, bmin, bmax);
+    ok = blkexts.Intersect(min, max, bmin, bmax, GetVarGeometryDim(varname));
     if (!ok) { return (1); }
 
     // Finally, map from block to voxel coordinates
