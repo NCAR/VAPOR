@@ -296,7 +296,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
     if (_terrainFollowing) {
         _coords[2] = *_zCoordItr;
     } else {
-        _coords[2] = _cg->_zcoords[0];
+        if (_cg->_zcoords.size()) _coords[2] = _cg->_zcoords[0];
     }
 }
 
