@@ -1,5 +1,5 @@
 #include "PSliceOriginSelector.h"
-#include "PSliderEdit.h"
+#include "PSliderEditHLI.h"
 #include "PLabel.h"
 #include <vapor/SliceParams.h>
 #include <assert.h>
@@ -8,9 +8,9 @@ using namespace VAPoR;
 
 PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
 {
-    _xSlider = new PDoubleSliderEdit(RenderParams::XSlicePlaneOriginTag, "X");
-    _ySlider = new PDoubleSliderEdit(RenderParams::YSlicePlaneOriginTag, "Y");
-    _zSlider = new PDoubleSliderEdit(RenderParams::ZSlicePlaneOriginTag, "Z");
+    _xSlider = new PDoubleSliderEditHLI<RenderParams>("X", &RenderParams::GetXSlicePlaneOrigin, &RenderParams::SetXSlicePlaneOrigin);
+    _ySlider = new PDoubleSliderEditHLI<RenderParams>("Y", &RenderParams::GetYSlicePlaneOrigin, &RenderParams::SetYSlicePlaneOrigin);
+    _zSlider = new PDoubleSliderEditHLI<RenderParams>("Z", &RenderParams::GetZSlicePlaneOrigin, &RenderParams::SetZSlicePlaneOrigin);
 
     _xSlider->EnableDynamicUpdate();
     _ySlider->EnableDynamicUpdate();
@@ -36,9 +36,9 @@ void PSliceOriginSelector::updateGUI() const
     assert(ret == 0);
     (void)ret;
 
-    _xSlider->SetRange(min[0], max[0]);
-    _ySlider->SetRange(min[1], max[1]);
-    _zSlider->SetRange(min[2], max[2]);
+    _xSlider->SetRange(min[0], 2*max[0]);
+    _ySlider->SetRange(min[1], 2*max[1]);
+    _zSlider->SetRange(min[2], 2*max[2]);
 
     PSection::updateGUI();
 }

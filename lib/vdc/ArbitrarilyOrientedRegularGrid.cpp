@@ -32,16 +32,7 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
     CoordType gridMin, gridMax;
     grid3d->GetUserExtents(gridMin, gridMax);
 
-    // .vs3 files before Vapor3.6 will try to initialize Slices with origin values set to 0, which
-    // can sometimes lie outside of the domain.  If this happens, we need to configure a new origin
-    // within the 3D grid's bounds.
-    for (int i=0; i<3; i++) {
-        _origin[i] = (pd.origin[i] <= gridMin[i] && pd.origin[i] >= gridMax[i]) ? pd.origin[i] : (gridMax[i]-gridMin[i])/2 + gridMin[i];
-        if (pd.origin[i] <= gridMax[i] && pd.origin[i] >= gridMin[i]) 
-            _origin[i] = pd.origin[i];
-        else 
-            _origin[i] = (gridMax[i]-gridMin[i])/2 + gridMin[i];
-    }
+    _origin = {pd.origin[0], pd.origin[1], pd.origin[2]};
 
     // Rotate the plane via quaternion method
     _rotate();
@@ -49,6 +40,12 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
     // Find the vertices where our plane intercepts the edges of the Box
     std::vector<glm::tvec3<double, glm::highp>> vertices;
     _findIntercepts(gridMin, gridMax, vertices);
+
+    // If there are no vertices to define our quad, make a grid of empty values
+    if (!vertices.size()) {
+        _makeEmptyGrid();
+        return;
+    }
 
     // Find the minimum-area-rectangle that encloses the vertices that are along the edges
     // of the Box.  Define this rectangle in 3D space, and in a newly projecteed 2D space.
@@ -63,6 +60,20 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
 ArbitrarilyOrientedRegularGrid::~ArbitrarilyOrientedRegularGrid() {
     if (_myBlks != nullptr)
         delete [] _myBlks;
+}
+
+void ArbitrarilyOrientedRegularGrid::_makeEmptyGrid() {
+    _rectangle2D.clear();
+    _rectangle2D.resize(4);
+    _rectangle2D[0] = glm::vec2(0., 0.);
+    _rectangle2D[1] = glm::vec2(0., 0.);
+    _rectangle2D[2] = glm::vec2(0., 0.);
+    _rectangle2D[3] = glm::vec2(0., 0.);
+
+    size_t numSamples = _sideSize*_sideSize;
+    for (size_t i = 0; i < numSamples; i++) {
+        _myBlks[i] = GetMissingValue();
+    }
 }
 
 // Huges-Moller algorithm to get an orthogonal vector
