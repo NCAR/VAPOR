@@ -912,7 +912,7 @@ void VizWin::_updateOriginGlyph()
 
     int depthFunc;
     glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
-    
+
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -933,6 +933,6 @@ void VizWin::_updateOriginGlyph()
     lgl->Vertex3f(xOrigin, yOrigin - width[1], zOrigin);
     lgl->Vertex3f(xOrigin, yOrigin + width[1], zOrigin);
     lgl->End();
-    
+
     glDepthFunc(depthFunc);
 }

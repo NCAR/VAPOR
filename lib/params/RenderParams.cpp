@@ -898,13 +898,12 @@ vector<double> RenderParams::GetSlicePlaneNormal() const
     v.push_back(GetValueDouble(SlicePlaneNormalXTag, 0));
     v.push_back(GetValueDouble(SlicePlaneNormalYTag, 0));
     v.push_back(GetValueDouble(SlicePlaneNormalZTag, 1));
-    
-    float l = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-    if (abs(l) < __FLT_EPSILON__)
-        l = 1;
+
+    float l = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    if (abs(l) < __FLT_EPSILON__) l = 1;
     v[0] /= l;
     v[1] /= l;
     v[2] /= l;
-    
+
     return v;
 }

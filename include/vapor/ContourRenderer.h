@@ -81,7 +81,7 @@ private:
         double         sliceOffset;
         double         sliceResolution;
         int            sliceOrientationMode;
-        
+
 
     } _cacheParams;
 
@@ -93,7 +93,7 @@ private:
     void _clearCache() { _cacheParams.varName.clear(); }
 
     vector<glm::vec3> _sliceQuad;
-    glm::vec3 _finalOrigin;
+    glm::vec3         _finalOrigin;
 };
 
 };    // namespace VAPoR
