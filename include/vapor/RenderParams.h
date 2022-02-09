@@ -395,6 +395,7 @@ public:
 
     vector<double> GetSlicePlaneRotation() const;
     vector<double> GetSlicePlaneOrigin() const;
+    vector<double> GetSlicePlaneNormal() const;
 
 protected:
     DataMgr *_dataMgr;
@@ -478,6 +479,14 @@ public:
     static const string SampleRateTag;
 
     static const string SliceOffsetTag;
+    static const string SlicePlaneNormalXTag;
+    static const string SlicePlaneNormalYTag;
+    static const string SlicePlaneNormalZTag;
+    static const string SlicePlaneOrientationModeTag;
+    enum class SlicePlaneOrientationMode {
+        Rotation = 0,
+        Normal = 1,
+    };
 };
 
 //////////////////////////////////////////////////////////////////////////

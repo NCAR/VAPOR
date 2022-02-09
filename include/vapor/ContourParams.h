@@ -74,6 +74,7 @@ public:
     //! \copydoc RenderParams::GetRenderDim()
     //
     virtual size_t GetRenderDim() const override { return _dataMgr->GetVarTopologyDim(GetVariableName()); }
+    virtual bool   GetOrientable() const override { return true; }
 
     //! \copydoc RenderParams::GetActualColorMapVariableName()
     virtual string GetActualColorMapVariableName() const override { return GetColorMapVariableName(); }

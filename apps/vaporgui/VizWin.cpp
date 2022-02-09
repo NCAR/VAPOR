@@ -910,8 +910,12 @@ void VizWin::_updateOriginGlyph()
     double              p = .03 * ((max[0] - min[0]) + (max[1] - min[1])) / 2;
     std::vector<double> width = {p, p, p};
 
+    int depthFunc;
+    glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
+    
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     LegacyGL *lgl = _glManager->legacy;
     lgl->Color4f(1., 1., 0., 1.);
 
@@ -929,4 +933,6 @@ void VizWin::_updateOriginGlyph()
     lgl->Vertex3f(xOrigin, yOrigin - width[1], zOrigin);
     lgl->Vertex3f(xOrigin, yOrigin + width[1], zOrigin);
     lgl->End();
+    
+    glDepthFunc(depthFunc);
 }

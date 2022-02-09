@@ -74,9 +74,11 @@ void ContourRenderer::_saveCacheParams()
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
     _cacheParams.contourValues = p->GetContourValues(_cacheParams.varName);
     _cacheParams.sliceRotation = p->GetSlicePlaneRotation();
+    _cacheParams.sliceNormal = p->GetSlicePlaneNormal();
     _cacheParams.sliceOrigin = p->GetSlicePlaneOrigin();
     _cacheParams.sliceOffset = p->GetValueDouble(p->SliceOffsetTag, 0);
     _cacheParams.sliceResolution = p->GetValueDouble(RenderParams::SampleRateTag, 200);
+    _cacheParams.sliceOrientationMode = p->GetValueLong(RenderParams::SlicePlaneOrientationModeTag, 0);
 }
 
 bool ContourRenderer::_isCacheDirty() const
@@ -89,9 +91,11 @@ bool ContourRenderer::_isCacheDirty() const
     if (_cacheParams.lod != p->GetCompressionLevel()) return true;
     if (_cacheParams.lineThickness != p->GetLineThickness()) return true;
     if (_cacheParams.sliceRotation != p->GetSlicePlaneRotation()) return true;
+    if (_cacheParams.sliceNormal != p->GetSlicePlaneNormal()) return true;
     if (_cacheParams.sliceOrigin != p->GetSlicePlaneOrigin()) return true;
     if (_cacheParams.sliceOffset != p->GetValueDouble(p->SliceOffsetTag, 0)) return true;
     if (_cacheParams.sliceResolution != p->GetValueDouble(RenderParams::SampleRateTag, 200)) return true;
+    if (_cacheParams.sliceOrientationMode != p->GetValueLong(RenderParams::SlicePlaneOrientationModeTag, 0)) return true;
 
     vector<double> min, max, contourValues;
     p->GetBox()->GetExtents(min, max);
@@ -147,6 +151,7 @@ int ContourRenderer::_buildCache(bool fast)
     Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax);
     Grid *grid2 = nullptr;
     Grid *heightGrid = nullptr;
+    _sliceQuad.clear();
 
     int dims = grid->GetGeometryDim();
     if (!_cacheParams.heightVarName.empty() && dims == 2) { heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax); }
@@ -161,14 +166,18 @@ int ContourRenderer::_buildCache(bool fast)
         planeDescription pd;
         pd.boxMin = ToCoordType(_cacheParams.boxMin);
         pd.boxMax = ToCoordType(_cacheParams.boxMax);
-        pd.rotation = _cacheParams.sliceRotation;
         pd.origin = _cacheParams.sliceOrigin;
         pd.sideSize = _cacheParams.sliceResolution;
+        if (_cacheParams.sliceOrientationMode == (int)RenderParams::SlicePlaneOrientationMode::Normal)
+            pd.normal = _cacheParams.sliceNormal;
+        else
+            pd.normal = ToDoubleVec(ArbitrarilyOrientedRegularGrid::GetNormalFromRotations(_cacheParams.sliceRotation));
 
         auto o = ToVec3(_cacheParams.sliceOrigin);
-        auto n = ArbitrarilyOrientedRegularGrid::GetOffsetNormal(pd);
+        auto n = ToVec3(pd.normal);
         auto offsetOrigin = o + n * (float)_cacheParams.sliceOffset;
         pd.origin = ToDoubleVec(offsetOrigin);
+        _finalOrigin = offsetOrigin;
 
         DimsType dims = {pd.sideSize, pd.sideSize, 1};
 
@@ -261,6 +270,17 @@ int ContourRenderer::_buildCache(bool fast)
     return 0;
 }
 
+using glm::vec3;
+
+void ContourRenderer::_outlineSliceQuad() const
+{
+    LegacyGL *lgl = _glManager->legacy;
+    lgl->Color3f(0, 1, 0);
+    lgl->Begin(GL_LINE_STRIP);
+    for (auto v : _sliceQuad) lgl->Vertex(v);
+    if (_sliceQuad.size()) lgl->Vertex(_sliceQuad[0]);
+    lgl->End();
+}
 
 int ContourRenderer::_paintGL(bool fast)
 {
@@ -268,12 +288,7 @@ int ContourRenderer::_paintGL(bool fast)
     if (_isCacheDirty()) {
         rc = _buildCache(fast);
         if (fast) {
-            LegacyGL *lgl = _glManager->legacy;
-            lgl->Color3f(0, 1, 0);
-            lgl->Begin(GL_LINE_STRIP);
-            for (auto v : _sliceQuad) lgl->Vertex(v);
-            if (_sliceQuad.size()) lgl->Vertex(_sliceQuad[0]);
-            lgl->End();
+            _outlineSliceQuad();
             return 0;
         }
     }

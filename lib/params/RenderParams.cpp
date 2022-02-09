@@ -61,6 +61,10 @@ const string RenderParams::YSlicePlaneRotationTag = "YSlicePlaneRotation";
 const string RenderParams::ZSlicePlaneRotationTag = "ZSlicePlaneRotation";
 const string RenderParams::SampleRateTag = "SampleRate";
 const string RenderParams::SliceOffsetTag = "SliceOffsetTag";
+const string RenderParams::SlicePlaneNormalXTag = "SlicePlaneNormalXTag";
+const string RenderParams::SlicePlaneNormalYTag = "SlicePlaneNormalYTag";
+const string RenderParams::SlicePlaneNormalZTag = "SlicePlaneNormalZTag";
+const string RenderParams::SlicePlaneOrientationModeTag = "SlicePlaneOrientationModeTag";
 
 #define REQUIRED_SAMPLE_SIZE 1000000
 
@@ -185,6 +189,10 @@ int RenderParams::Initialize()
     SetValueDouble(YSlicePlaneOriginTag, "", origin[1]);
     SetValueDouble(ZSlicePlaneOriginTag, "", origin[2]);
     SetValueDouble(SampleRateTag, "", 200);
+    SetValueDouble(SlicePlaneNormalZTag, "", 0);
+    SetValueDouble(SlicePlaneNormalYTag, "", 0);
+    SetValueDouble(SlicePlaneNormalZTag, "", 1);
+    SetValueLong(SlicePlaneOrientationModeTag, "", (int)SlicePlaneOrientationMode::Rotation);
 
     _classInitialized = true;
     return (0);
@@ -881,5 +889,22 @@ vector<double> RenderParams::GetSlicePlaneOrigin() const
     v.push_back(GetValueDouble(XSlicePlaneOriginTag, 0));
     v.push_back(GetValueDouble(YSlicePlaneOriginTag, 0));
     v.push_back(GetValueDouble(ZSlicePlaneOriginTag, 0));
+    return v;
+}
+
+vector<double> RenderParams::GetSlicePlaneNormal() const
+{
+    vector<double> v;
+    v.push_back(GetValueDouble(SlicePlaneNormalXTag, 0));
+    v.push_back(GetValueDouble(SlicePlaneNormalYTag, 0));
+    v.push_back(GetValueDouble(SlicePlaneNormalZTag, 1));
+    
+    float l = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+    if (abs(l) < __FLT_EPSILON__)
+        l = 1;
+    v[0] /= l;
+    v[1] /= l;
+    v[2] /= l;
+    
     return v;
 }

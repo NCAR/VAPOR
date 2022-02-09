@@ -36,6 +36,8 @@
 #include <vapor/ShaderProgram.h>
 #include <vapor/Texture.h>
 
+#include <glm/glm.hpp>
+
 namespace VAPoR {
 
 class DataMgr;
@@ -74,19 +76,24 @@ private:
         vector<double> boxMin, boxMax;
         vector<double> contourValues;
         vector<double> sliceRotation;
+        vector<double> sliceNormal;
         vector<double> sliceOrigin;
         double         sliceOffset;
         double         sliceResolution;
+        int            sliceOrientationMode;
+        
 
     } _cacheParams;
 
     int  _buildCache(bool fast);
     bool _isCacheDirty() const;
     void _saveCacheParams();
+    void _outlineSliceQuad() const;
 
     void _clearCache() { _cacheParams.varName.clear(); }
 
     vector<glm::vec3> _sliceQuad;
+    glm::vec3 _finalOrigin;
 };
 
 };    // namespace VAPoR

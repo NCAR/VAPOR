@@ -15,7 +15,7 @@
 struct planeDescription {
     size_t sideSize;
     std::vector<double> origin;
-    std::vector<double> rotation;
+    std::vector<double> normal;
     VAPoR::CoordType boxMin;
     VAPoR::CoordType boxMax;
 };
@@ -65,13 +65,13 @@ public:
     virtual bool InsideGrid (const CoordType &coords) = delete;
     virtual void ClampCoord (const CoordType &coords, CoordType &cCoords) = delete;
     
-    static glm::vec3 GetOffsetNormal(const planeDescription &pd);
+    static glm::vec3 GetNormalFromRotations(const std::vector<double> &rotations);
     static std::pair<float, float> GetOffsetRange(const planeDescription &pd);
 
 private:
     std::vector<glm::tvec2<double, glm::highp>> _rectangle2D;
     size_t _sideSize;
-    glm::tvec3<double, glm::highp> _normal, _origin, _axis1, _axis2, _rotation;
+    glm::tvec3<double, glm::highp> _normal, _origin, _axis1, _axis2;
     float* _myBlks;
 
     void _populateData(

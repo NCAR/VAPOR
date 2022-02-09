@@ -66,7 +66,12 @@ void PSliceOffsetSelector::updateGUI() const
     int ret = getDataMgr()->GetVariableExtents(ts, varName, level, lod, pd.boxMin, pd.boxMax);
     if (ret) return;
     pd.origin = rp->GetSlicePlaneOrigin();
-    pd.rotation = rp->GetSlicePlaneRotation();
+    if (rp->GetValueLong(rp->SlicePlaneOrientationModeTag, 0) == (int)RenderParams::SlicePlaneOrientationMode::Normal) {
+        pd.normal = rp->GetSlicePlaneNormal();
+    } else {
+        auto n = ArbitrarilyOrientedRegularGrid::GetNormalFromRotations(rp->GetSlicePlaneRotation());
+        pd.normal = {n[0], n[1], n[2]};
+    }
 
     auto range = ArbitrarilyOrientedRegularGrid::GetOffsetRange(pd);
     _offsetSlider->SetRange(range.first, range.second);
