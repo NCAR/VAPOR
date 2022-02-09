@@ -859,3 +859,33 @@ vector<string> RenParamsContainer::GetNames() const
 }
 
 bool RenderParams::GetOrientable() const { return false; }
+
+void RenderParams::SetXSlicePlaneOrigin(double xOrigin) { SetValueDouble(XSlicePlaneOriginTag, "Set origin of plane on X axis", xOrigin); }
+
+void RenderParams::SetYSlicePlaneOrigin(double yOrigin) { SetValueDouble(YSlicePlaneOriginTag, "Set origin of plane on Y axis", yOrigin); }
+
+void RenderParams::SetZSlicePlaneOrigin(double zOrigin) { SetValueDouble(ZSlicePlaneOriginTag, "Set origin of plane on Z axis", zOrigin); }
+
+double RenderParams::GetXSlicePlaneOrigin() const
+{
+    VAPoR::CoordType min, max;
+    GetBox()->GetExtents(min, max);
+    double defaultVal = (min[0] + max[0]) / 2.;
+    return GetValueDouble(XSlicePlaneOriginTag, defaultVal);
+}
+
+double RenderParams::GetYSlicePlaneOrigin() const
+{
+    VAPoR::CoordType min, max;
+    GetBox()->GetExtents(min, max);
+    double defaultVal = (min[1] + max[1]) / 2.;
+    return GetValueDouble(YSlicePlaneOriginTag, defaultVal);
+}
+
+double RenderParams::GetZSlicePlaneOrigin() const
+{
+    VAPoR::CoordType min, max;
+    GetBox()->GetExtents(min, max);
+    double defaultVal = (min[2] + max[2]) / 2.;
+    return GetValueDouble(ZSlicePlaneOriginTag, defaultVal);
+}

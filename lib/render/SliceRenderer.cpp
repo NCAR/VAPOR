@@ -129,9 +129,9 @@ void SliceRenderer::_resetCache()
     _cacheParams.yRotation = p->GetValueDouble(RenderParams::YSlicePlaneRotationTag, 0);
     _cacheParams.zRotation = p->GetValueDouble(RenderParams::ZSlicePlaneRotationTag, 0);
 
-    _cacheParams.xOrigin = p->GetValueDouble(RenderParams::XSlicePlaneOriginTag, 0);
-    _cacheParams.yOrigin = p->GetValueDouble(RenderParams::YSlicePlaneOriginTag, 0);
-    _cacheParams.zOrigin = p->GetValueDouble(RenderParams::ZSlicePlaneOriginTag, 0);
+    _cacheParams.xOrigin = p->GetXSlicePlaneOrigin();
+    _cacheParams.yOrigin = p->GetYSlicePlaneOrigin();
+    _cacheParams.zOrigin = p->GetZSlicePlaneOrigin();
 
     _cacheParams.textureSampleRate = p->GetValueDouble(RenderParams::SampleRateTag, 200);
 
@@ -302,9 +302,9 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.yRotation != p->GetValueDouble(RenderParams::YSlicePlaneRotationTag, 0)) return true;
     if (_cacheParams.zRotation != p->GetValueDouble(RenderParams::ZSlicePlaneRotationTag, 0)) return true;
 
-    if (_cacheParams.xOrigin != p->GetValueDouble(RenderParams::XSlicePlaneOriginTag, 0)) return true;
-    if (_cacheParams.yOrigin != p->GetValueDouble(RenderParams::YSlicePlaneOriginTag, 0)) return true;
-    if (_cacheParams.zOrigin != p->GetValueDouble(RenderParams::ZSlicePlaneOriginTag, 0)) return true;
+    if (_cacheParams.xOrigin != p->GetXSlicePlaneOrigin()) return true;
+    if (_cacheParams.yOrigin != p->GetYSlicePlaneOrigin()) return true;
+    if (_cacheParams.zOrigin != p->GetZSlicePlaneOrigin()) return true;
 
     if (_cacheParams.textureSampleRate != p->GetValueDouble(RenderParams::SampleRateTag, 200)) return true;
 
