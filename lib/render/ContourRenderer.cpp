@@ -276,9 +276,7 @@ int ContourRenderer::_paintGL(bool fast)
     int rc = 0;
     if (_isCacheDirty()) {
         rc = _buildCache(fast);
-        if (fast) {
-            return 0;
-        }
+        if (fast) { return 0; }
     }
     if (rc != 0) return rc;
 
