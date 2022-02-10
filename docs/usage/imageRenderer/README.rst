@@ -9,8 +9,6 @@ Image Renderer
 
 |
 
-.. note:: The images that come bundled with Vapor are relatively coarse in resolution.  If a higher resolution map is needed, you can download a 500 meter version of `NASA's Big Blue Marble here <https://drive.google.com/file/d/1qIwh8ZJj67d85ktkjpgOVBAE-oMRi3rD/view?usp=sharing>`_.
-
 Description
 -----------
 
