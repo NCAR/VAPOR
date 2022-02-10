@@ -28,6 +28,6 @@ Georeferenced Images
 
 Georeferenced images may be selected in the Appearance tab.  Vapor comes bundled with two georeferenced image products: *NaturalEarth*, and *BigBlueMarble*.  However these are global images that may not have the resolution you need, depending on the size of your simulation domain.
 
-The example below (makeGeotiff.py) will show you how to generate your own georeferenced image using NASA's WorldView map server.
+The example below (makeGeotiff.py) will show you how to generate your own georeferenced image using NASA's WorldView map server.  For a list of available WorldView layers, you can see :ref:`this document <worldViewLayers>`.  These layers can also be previewed at `NASA's EarthView webpage <https://worldview.earthdata.nasa.gov/>`_.
 
 .. include:: commonControls/heightVariable.rst
