@@ -56,6 +56,9 @@ void Particle::SetSpecial(bool isSpecial)
         time = 0.0f;
         value = 0.0f;
     }
+    location.x = 0.0f;
+    location.y = 0.0f;
+    location.z = 0.0f;
 }
 
 bool Particle::IsSpecial() const { return (std::isnan(time) && std::isnan(value)); }

@@ -484,6 +484,10 @@ public:
     //!
     size_t GetVarTopologyDim(string varname) const;
 
+    //! \copydoc DC:GetVarGeometryDim()
+    //!
+    size_t GetVarGeometryDim(string varname) const;
+
     //! Clear the memory cache
     //!
     //! This method clears the internal memory cache of all entries
@@ -584,7 +588,7 @@ public:
 
         void Insert(const DimsType &bcoord, const CoordType &min, const CoordType &max);
 
-        bool Intersect(const CoordType &min, const CoordType &max, DimsType &bmin, DimsType &bmax) const;
+        bool Intersect(const CoordType &min, const CoordType &max, DimsType &bmin, DimsType &bmax, int nCoords = 3) const;
 
         friend std::ostream &operator<<(std::ostream &o, const BlkExts &b);
 

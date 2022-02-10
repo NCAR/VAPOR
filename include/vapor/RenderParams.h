@@ -397,6 +397,27 @@ public:
     vector<double> GetSlicePlaneOrigin() const;
     vector<double> GetSlicePlaneNormal() const;
 
+    //! Return the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
+    double GetXSlicePlaneOrigin() const;
+
+    //! Return the renderer's origin value on the Y axis for creating ArbitrarilyOrientedRegularGrids.
+    double GetYSlicePlaneOrigin() const;
+
+    //! Return the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
+    double GetZSlicePlaneOrigin() const;
+
+    //! Set the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \param[in] Value to use for the plane origin on the X axis.
+    void SetXSlicePlaneOrigin(double xOrigin);
+
+    //! Set the renderer's origin value on the Y axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \param[in] Value to use for the plane origin on the Y axis.
+    void SetYSlicePlaneOrigin(double yOrigin);
+
+    //! Set the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \param[in] Value to use for the plane origin on the Z axis.
+    void SetZSlicePlaneOrigin(double zOrigin);
+
 protected:
     DataMgr *_dataMgr;
     int      _maxDim;
