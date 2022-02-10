@@ -146,8 +146,6 @@ void SliceRenderer::_resetCache()
                                  _cacheParams.domainMax
     );
     // clang-format on
-
-    _resetColormapCache();
 }
 
 void SliceRenderer::_resetColormapCache()
@@ -362,7 +360,7 @@ int SliceRenderer::_paintGL(bool fast)
 
     _initializeState();
 
-    if (_isDataCacheDirty() || _isBoxCacheDirty() || _isColormapCacheDirty()) {
+    if (_isDataCacheDirty() || _isBoxCacheDirty()) {
         _resetCache();
 
         // If we're in fast mode, degrade the quality of the slice for better interactivity
@@ -375,6 +373,8 @@ int SliceRenderer::_paintGL(bool fast)
         int rc = _regenerateSlice();
         if (rc < 0) return -1;
     }
+
+    if (_isColormapCacheDirty()) _resetColormapCache();
 
     _configureShader();
     if (CheckGLError() != 0) {
