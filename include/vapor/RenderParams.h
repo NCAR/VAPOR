@@ -395,10 +395,10 @@ public:
 
     //! Return the renderer's 3 axis rotation for creating ArbitrarilyOrientedRegularGrids.
     vector<double> GetSlicePlaneRotation() const;
-    
+
     //! Return the renderer's 3 axis origin for creating ArbitrarilyOrientedRegularGrids.
     vector<double> GetSlicePlaneOrigin() const;
-    
+
     //! Return the renderer's 3 axis normal for creating ArbitrarilyOrientedRegularGrids.
     vector<double> GetSlicePlaneNormal() const;
 

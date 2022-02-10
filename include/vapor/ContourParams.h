@@ -98,8 +98,8 @@ public:
     bool GetTextEnabled() const;
     void SetTFLock(bool lock);
     bool GetTFLock();
-    
-    void SetSlicePlaneQuad(const vector<CoordType> &quad);
+
+    void              SetSlicePlaneQuad(const vector<CoordType> &quad);
     vector<CoordType> GetSlicePlaneQuad() const;
 
 private:
@@ -112,7 +112,7 @@ private:
     static const string _textEnabledTag;
     static const string _lockToTFTag;
     ParamsContainer *   _contours;
-    
+
     vector<CoordType> _slicePlaneQuad;
 
 public:

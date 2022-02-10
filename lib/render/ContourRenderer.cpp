@@ -197,7 +197,7 @@ int ContourRenderer::_buildCache(bool fast)
             {corner4[0], corner4[1], corner4[2]},
             {corner2[0], corner2[1], corner2[2]},
         });
-        
+
         if (fast) {
             _cacheParams.varName = "";
             if (grid) delete grid;
