@@ -393,9 +393,36 @@ public:
     //! Return whether a renderer can be oriented - IE, can this renderer be rotated about an origin point?
     virtual bool GetOrientable() const;
 
+    //! Return the renderer's 3 axis rotation for creating ArbitrarilyOrientedRegularGrids.
     vector<double> GetSlicePlaneRotation() const;
+
+    //! Return the renderer's 3 axis origin for creating ArbitrarilyOrientedRegularGrids.
     vector<double> GetSlicePlaneOrigin() const;
+
+    //! Return the renderer's 3 axis normal for creating ArbitrarilyOrientedRegularGrids.
     vector<double> GetSlicePlaneNormal() const;
+
+    //! Return the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
+    double GetXSlicePlaneOrigin() const;
+
+    //! Return the renderer's origin value on the Y axis for creating ArbitrarilyOrientedRegularGrids.
+    double GetYSlicePlaneOrigin() const;
+
+    //! Return the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
+    double GetZSlicePlaneOrigin() const;
+
+    //! Set the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \param[in] Value to use for the plane origin on the X axis.
+    void SetXSlicePlaneOrigin(double xOrigin);
+
+    //! Set the renderer's origin value on the Y axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \param[in] Value to use for the plane origin on the Y axis.
+    void SetYSlicePlaneOrigin(double yOrigin);
+
+    //! Set the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \param[in] Value to use for the plane origin on the Z axis.
+    void SetZSlicePlaneOrigin(double zOrigin);
+
 
 protected:
     DataMgr *_dataMgr;

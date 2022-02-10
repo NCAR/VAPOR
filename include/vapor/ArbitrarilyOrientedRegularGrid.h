@@ -74,6 +74,8 @@ private:
     glm::tvec3<double, glm::highp> _normal, _origin, _axis1, _axis2;
     float* _myBlks;
 
+    void _makeEmptyGrid();
+
     void _populateData(
         const VAPoR::Grid *grid,
         const planeDescription& description

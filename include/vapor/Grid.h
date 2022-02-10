@@ -101,10 +101,10 @@ public:
 
     //! Return the useful number of dimensions of grid connectivity array
     //!
-    //! \param[out] dims The number of values of \p dims parameter provided to
+    //! \param[out] dims The number of non-unit components of \p dims parameter provided to
     //! the constructor.
     //!
-    size_t GetNumDimensions() const { return _nDims; }
+    size_t GetNumDimensions() const { return GetNumDimensions(_dims); }
 
     //! Return the number of non-unit dimensions
     //!
@@ -139,10 +139,10 @@ public:
     //
     virtual size_t GetGeometryDim() const = 0;
 
-    virtual const DimsType &           GetNodeDimensions() const = 0;
-    virtual const size_t               GetNumNodeDimensions() const = 0;
-    virtual const DimsType &           GetCellDimensions() const = 0;
-    virtual const size_t               GetNumCellDimensions() const = 0;
+    virtual const DimsType &GetNodeDimensions() const = 0;
+    virtual const size_t    GetNumNodeDimensions() const = 0;
+    virtual const DimsType &GetCellDimensions() const = 0;
+    virtual const size_t    GetNumCellDimensions() const = 0;
 
     //! Return the ijk dimensions of grid in blocks
     //!
@@ -982,7 +982,6 @@ public:
 
     protected:
         DimsType _dims;
-        size_t   _nDims;
         DimsType _index;
         DimsType _lastIndex;
     };
@@ -1057,7 +1056,6 @@ public:
 
     protected:
         DimsType _dims;
-        size_t   _nDims;
         DimsType _index;
         DimsType _lastIndex;
     };
@@ -1146,14 +1144,13 @@ public:
         ForwardIterator<T> &operator=(ForwardIterator<T> rhs);
         ForwardIterator<T> &operator=(ForwardIterator<T> &rhs) = delete;
 
-        bool operator==(const ForwardIterator<T> &rhs) const { return (_indexL == rhs._indexL); }
-        bool operator!=(const ForwardIterator<T> &rhs) { return (_indexL != rhs._indexL); }
+        bool operator==(const ForwardIterator<T> &rhs) const { return (_index == rhs._index); }
+        bool operator!=(const ForwardIterator<T> &rhs) { return (_index != rhs._index); }
 
         const ConstCoordItr &GetCoordItr() { return (_coordItr); }
 
         friend void swap(Grid::ForwardIterator<T> &a, Grid::ForwardIterator<T> &b)
         {
-            std::swap(a._ndims, b._ndims);
             std::swap(a._blks, b._blks);
             std::swap(a._dims3d, b._dims3d);
             std::swap(a._bdims3d, b._bdims3d);
@@ -1161,25 +1158,22 @@ public:
             std::swap(a._blocksize, b._blocksize);
             std::swap(a._coordItr, b._coordItr);
             std::swap(a._index, b._index);
-            std::swap(a._indexL, b._indexL);
-            std::swap(a._end_indexL, b._end_indexL);
+            std::swap(a._lastIndex, b._lastIndex);
             std::swap(a._xb, b._xb);
             std::swap(a._itr, b._itr);
             std::swap(a._pred, b._pred);
         }
 
     private:
-        size_t               _ndims;
         std::vector<float *> _blks;
         DimsType             _dims3d;
         DimsType             _bdims3d;
         DimsType             _bs3d;
         size_t               _blocksize;
         ConstCoordItr        _coordItr;
-        DimsType             _index;         // current index into grid
-        size_t               _indexL;        // current index into grid
-        size_t               _end_indexL;    // Last valid index
-        size_t               _xb;            // x index within a block
+        DimsType             _index;        // current index into grid
+        DimsType             _lastIndex;    // Last valid index
+        size_t               _xb;           // x index within a block
         float *              _itr;
         InsideBox            _pred;
     };
@@ -1270,8 +1264,7 @@ protected:
     }
 
 private:
-    DimsType             _dims;    // dimensions of grid arrays
-    size_t               _nDims;
+    DimsType             _dims;                   // dimensions of grid arrays
     DimsType             _bs = {{1, 1, 1}};       // dimensions of each block
     DimsType             _bdims = {{1, 1, 1}};    // dimensions (specified in blocks) of ROI
     std::vector<size_t>  _bsDeprecated;           // legacy API
@@ -1289,8 +1282,6 @@ private:
     mutable CoordType    _maxuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
 
     void _grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension);
-
-    virtual void _getUserCoordinatesHelper(const std::vector<double> &coords, double &x, double &y, double &z) const;
 };
 
 template void Grid::CopyToArr3<size_t>(const std::vector<size_t> &src, std::array<size_t, 3> &dst);
