@@ -88,7 +88,6 @@ private:
     int  _buildCache(bool fast);
     bool _isCacheDirty() const;
     void _saveCacheParams();
-    void _outlineSliceQuad() const;
 
     void _clearCache() { _cacheParams.varName.clear(); }
 

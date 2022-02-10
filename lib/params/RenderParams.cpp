@@ -886,9 +886,9 @@ vector<double> RenderParams::GetSlicePlaneRotation() const
 vector<double> RenderParams::GetSlicePlaneOrigin() const
 {
     vector<double> v;
-    v.push_back(GetValueDouble(XSlicePlaneOriginTag, 0));
-    v.push_back(GetValueDouble(YSlicePlaneOriginTag, 0));
-    v.push_back(GetValueDouble(ZSlicePlaneOriginTag, 0));
+    v.push_back(GetXSlicePlaneOrigin());
+    v.push_back(GetYSlicePlaneOrigin());
+    v.push_back(GetZSlicePlaneOrigin());
     return v;
 }
 
@@ -906,6 +906,7 @@ vector<double> RenderParams::GetSlicePlaneNormal() const
     v[2] /= l;
 
     return v;
+}
 
 void RenderParams::SetXSlicePlaneOrigin(double xOrigin) { SetValueDouble(XSlicePlaneOriginTag, "Set origin of plane on X axis", xOrigin); }
 

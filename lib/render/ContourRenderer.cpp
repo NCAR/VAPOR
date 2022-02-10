@@ -191,12 +191,13 @@ int ContourRenderer::_buildCache(bool fast)
         grid2d->GetUserCoordinates({pd.sideSize - 1, 0, 0}, corner3);
         grid2d->GetUserCoordinates({pd.sideSize - 1, pd.sideSize - 1, 0}, corner4);
 
-        _sliceQuad = {
-            glm::vec3(corner1[0], corner1[1], corner1[2]),
-            glm::vec3(corner3[0], corner3[1], corner3[2]),
-            glm::vec3(corner4[0], corner4[1], corner4[2]),
-            glm::vec3(corner2[0], corner2[1], corner2[2]),
-        };
+        cParams->SetSlicePlaneQuad({
+            {corner1[0], corner1[1], corner1[2]},
+            {corner3[0], corner3[1], corner3[2]},
+            {corner4[0], corner4[1], corner4[2]},
+            {corner2[0], corner2[1], corner2[2]},
+        });
+        
         if (fast) {
             _cacheParams.varName = "";
             if (grid) delete grid;
@@ -270,25 +271,12 @@ int ContourRenderer::_buildCache(bool fast)
     return 0;
 }
 
-using glm::vec3;
-
-void ContourRenderer::_outlineSliceQuad() const
-{
-    LegacyGL *lgl = _glManager->legacy;
-    lgl->Color3f(0, 1, 0);
-    lgl->Begin(GL_LINE_STRIP);
-    for (auto v : _sliceQuad) lgl->Vertex(v);
-    if (_sliceQuad.size()) lgl->Vertex(_sliceQuad[0]);
-    lgl->End();
-}
-
 int ContourRenderer::_paintGL(bool fast)
 {
     int rc = 0;
     if (_isCacheDirty()) {
         rc = _buildCache(fast);
         if (fast) {
-            _outlineSliceQuad();
             return 0;
         }
     }

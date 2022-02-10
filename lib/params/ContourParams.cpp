@@ -230,6 +230,16 @@ bool ContourParams::GetTFLock()
     return true;
 }
 
+void ContourParams::SetSlicePlaneQuad(const vector<CoordType> &quad)
+{
+    _slicePlaneQuad = quad;
+}
+
+vector<CoordType> ContourParams::GetSlicePlaneQuad() const
+{
+    return _slicePlaneQuad;
+}
+
 ContourParams::Contours::Contours(ParamsBase::StateSave *ssave) : ParamsBase(ssave, Contours::GetClassType()) {}
 
 ContourParams::Contours::Contours(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node) {}

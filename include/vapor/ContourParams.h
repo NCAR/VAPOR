@@ -98,6 +98,9 @@ public:
     bool GetTextEnabled() const;
     void SetTFLock(bool lock);
     bool GetTFLock();
+    
+    void SetSlicePlaneQuad(const vector<CoordType> &quad);
+    vector<CoordType> GetSlicePlaneQuad() const;
 
 private:
     void                _init();
@@ -109,6 +112,8 @@ private:
     static const string _textEnabledTag;
     static const string _lockToTFTag;
     ParamsContainer *   _contours;
+    
+    vector<CoordType> _slicePlaneQuad;
 
 public:
     class PARAMS_API Contours : public ParamsBase {

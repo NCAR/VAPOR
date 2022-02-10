@@ -42,7 +42,6 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
     }));
     
     AddGeometrySubtab(new PGroup({
-        new PGeometrySubtab,
         (new PShowIf(""))->DimensionEquals(3)->Then(new PGroup({
             (new PSection("Slice Orientation", {
                 new PEnumDropdown(RenderParams::SlicePlaneOrientationModeTag, {"Rotation", "Normal"}, {(int)RenderParams::SlicePlaneOrientationMode::Rotation, (int)RenderParams::SlicePlaneOrientationMode::Normal}, "Orientation Mode"),
@@ -60,6 +59,7 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
             (new PSliceOriginSelector)->SetTooltip("The slice plane will pass through this point. The plane can be offset from this point along the plane normal determined by the orientation."),
             (new PSliceOffsetSelector)->SetTooltip("Offset the plane from its origin along its normal (set by the orientation)."),
         })),
+        new PGeometrySubtab,
     }));
     
     AddAnnotationSubtab(new PAnnotationColorbarWidget);

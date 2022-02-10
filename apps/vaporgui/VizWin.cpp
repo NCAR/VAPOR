@@ -53,6 +53,7 @@
 #include "vapor/Visualizer.h"
 #include <vapor/FlowParams.h>
 #include <vapor/SliceParams.h>
+#include <vapor/ContourParams.h>
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 #include "hide_std_error_util.h"
@@ -666,6 +667,7 @@ void VizWin::_renderHelper(bool fast)
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
         if (_getRenderParams() && _getRenderParams()->GetOrientable()) { _updateOriginGlyph(); }
+        if (dynamic_cast<ContourParams*>(_getRenderParams())) _drawContourSliceQuad();
     } else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
 #ifndef WIN32
         _glManager->PixelCoordinateSystemPush();
@@ -935,4 +937,20 @@ void VizWin::_updateOriginGlyph()
     lgl->End();
 
     glDepthFunc(depthFunc);
+}
+
+void VizWin::_drawContourSliceQuad()
+{
+    ContourParams *cp = dynamic_cast<ContourParams*>(_getRenderParams());
+    assert(cp);
+    if (!cp) return;
+    
+    auto quad = cp->GetSlicePlaneQuad();
+    
+    LegacyGL *lgl = _glManager->legacy;
+    lgl->Color3f(0, 1, 0);
+    lgl->Begin(GL_LINE_STRIP);
+    for (auto v : quad) lgl->Vertex3dv(v.data());
+    if (quad.size()) lgl->Vertex3dv(quad[0].data());
+    lgl->End();
 }
