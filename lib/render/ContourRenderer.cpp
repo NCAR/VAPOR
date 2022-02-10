@@ -153,7 +153,7 @@ int ContourRenderer::_buildCache(bool fast)
     Grid *heightGrid = nullptr;
     _sliceQuad.clear();
 
-    int dims = grid->GetGeometryDim();
+    int dims = grid->GetTopologyDim();
     if (!_cacheParams.heightVarName.empty() && dims == 2) { heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax); }
     if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) {
         if (grid) delete grid;
