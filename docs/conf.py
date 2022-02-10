@@ -241,10 +241,10 @@ warnings.filterwarnings("ignore",
 from sphinx_gallery.sorting import ExampleTitleSortKey
 
 sphinx_gallery_conf = {
-    'examples_dirs': ['data/netCDF'],  # path to your example scripts
-    'gallery_dirs': ['data/netCDF/examples'],  # path to where to save gallery generated output
-    'filename_pattern': 'GridExample.py',
-    'ignore_pattern': 'ToCF',
+    'examples_dirs': ['data/netCDF', 'usage/imageRenderer'],  # path to your example scripts
+    'gallery_dirs': ['data/netCDF/examples', 'usage/imageRenderer'],  # path to where to save gallery generated output
+    #'filename_pattern': 'GridExample.py',
+    #'ignore_pattern': 'ToCF',
     'within_subsection_order': ExampleTitleSortKey,
     'matplotlib_animations': True,
 }

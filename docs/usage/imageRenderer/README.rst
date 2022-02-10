@@ -1,7 +1,7 @@
 .. _imageRenderer:
 
 Image Renderer
-______________
+==============
 
 .. raw:: html
 
@@ -14,9 +14,7 @@ ______________
 Description
 -----------
 
-The Image Renderer displays a georeferenced image that is automatically reprojected and fit to the user's data, as long as the data contains georeference metadata.  
-
-The Image Renderer may be offset by a height variable to show bathymetry or mountainous terrain.
+The Image Renderer displays a georeferenced image that is automatically reprojected and fit to the user's data.  The image may be offset by a height variable to show bathymetry or mountainous terrain.
 
 Basic Controls
 --------------
@@ -28,8 +26,8 @@ The Image Renderer's Appearance tab does not contain a transfer function since i
 Georeferenced Images
 --------------------
 
-Georeferenced images may be selected for rendering in the Appearance tab.  Vapor comes bundled with two georeferenced image products: *NaturalEarth*, and *BigBlueMarble*.
+Georeferenced images may be selected in the Appearance tab.  Vapor comes bundled with two georeferenced image products: *NaturalEarth*, and *BigBlueMarble*.  However these are global images that may not have the resolution you need, depending on the size of your simulation domain.
 
-If an image contains transparency, this transparency can be toggled with the *Ignore transparency* checkbox.  Vapor's BigBlueMarble contains transparency over its ocean regions so that sub-surface ocean models may be viewed alongside land masses.
+The example below (makeGeotiff.py) will show you how to generate your own georeferenced image using NASA's WorldView map server.
 
 .. include:: commonControls/heightVariable.rst
