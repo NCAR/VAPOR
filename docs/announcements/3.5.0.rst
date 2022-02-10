@@ -15,6 +15,7 @@ Vapor's release cycle is accelerating, and now 3.5.0 is live.
 
 |
 
+
 New improvements include:
     - New particle data reader: Data Collection Particles (DCP)
     - New raw data reader: Brick of Values (BOV)
