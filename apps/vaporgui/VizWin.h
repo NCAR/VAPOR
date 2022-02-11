@@ -96,6 +96,7 @@ private:
     void _postRender();
     void updateManip(bool initialize = false);
     void _updateOriginGlyph();
+    void _drawContourSliceQuad();
 
     // Event handling
     // Virtual overrides:

@@ -17,6 +17,12 @@ PShowIf *PShowIf::Equals(std::string s)
     return this;
 }
 
+PShowIf *PShowIf::DimensionEquals(unsigned int dim)
+{
+    _test = std::unique_ptr<Test>(new TestDimensionEquals(dim));
+    return this;
+}
+
 PShowIf *PShowIf::Not()
 {
     _negate = !_negate;
@@ -60,3 +66,11 @@ bool PShowIf::Helper::isShown() const { return _parent->evaluate() != _negate; }
 bool PShowIf::TestLongEquals::Evaluate(VAPoR::ParamsBase *params) const { return params->GetValueLong(_tag, 0) == _val; }
 
 bool PShowIf::TestStringEquals::Evaluate(VAPoR::ParamsBase *params) const { return params->GetValueString(_tag, "") == _val; }
+
+#include <vapor/RenderParams.h>
+
+bool PShowIf::TestDimensionEquals::Evaluate(VAPoR::ParamsBase *params) const
+{
+    VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams *>(params);
+    return rp->GetRenderDim() == _val;
+}

@@ -32,11 +32,12 @@
 #include <vapor/DataStatus.h>
 #include <vapor/errorcodes.h>
 #include <vapor/ControlExecutive.h>
-#include "vapor/ShaderManager.h"
-#include "vapor/debug.h"
+#include <vapor/ShaderManager.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "vapor/GLManager.h"
+#include <vapor/GLManager.h>
+#include <vapor/LegacyGL.h>
+#include <vapor/ArbitrarilyOrientedRegularGrid.h>
 
 using namespace VAPoR;
 
@@ -72,6 +73,12 @@ void ContourRenderer::_saveCacheParams()
     _cacheParams.lineThickness = p->GetLineThickness();
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
     _cacheParams.contourValues = p->GetContourValues(_cacheParams.varName);
+    _cacheParams.sliceRotation = p->GetSlicePlaneRotation();
+    _cacheParams.sliceNormal = p->GetSlicePlaneNormal();
+    _cacheParams.sliceOrigin = p->GetSlicePlaneOrigin();
+    _cacheParams.sliceOffset = p->GetValueDouble(p->SliceOffsetTag, 0);
+    _cacheParams.sliceResolution = p->GetValueDouble(RenderParams::SampleRateTag, 200);
+    _cacheParams.sliceOrientationMode = p->GetValueLong(RenderParams::SlicePlaneOrientationModeTag, 0);
 }
 
 bool ContourRenderer::_isCacheDirty() const
@@ -83,6 +90,12 @@ bool ContourRenderer::_isCacheDirty() const
     if (_cacheParams.level != p->GetRefinementLevel()) return true;
     if (_cacheParams.lod != p->GetCompressionLevel()) return true;
     if (_cacheParams.lineThickness != p->GetLineThickness()) return true;
+    if (_cacheParams.sliceRotation != p->GetSlicePlaneRotation()) return true;
+    if (_cacheParams.sliceNormal != p->GetSlicePlaneNormal()) return true;
+    if (_cacheParams.sliceOrigin != p->GetSlicePlaneOrigin()) return true;
+    if (_cacheParams.sliceOffset != p->GetValueDouble(p->SliceOffsetTag, 0)) return true;
+    if (_cacheParams.sliceResolution != p->GetValueDouble(RenderParams::SampleRateTag, 200)) return true;
+    if (_cacheParams.sliceOrientationMode != p->GetValueLong(RenderParams::SlicePlaneOrientationModeTag, 0)) return true;
 
     vector<double> min, max, contourValues;
     p->GetBox()->GetExtents(min, max);
@@ -95,14 +108,39 @@ bool ContourRenderer::_isCacheDirty() const
     return false;
 }
 
-int ContourRenderer::_buildCache()
+static CoordType ToCoordType(const vector<double> &v)
+{
+    CoordType c;
+    for (int i = 0; i < std::min(c.size(), v.size()); i++) c[i] = v[i];
+    return c;
+}
+
+static glm::vec3 ToVec3(const vector<double> &v)
+{
+    glm::vec3 c;
+    for (int i = 0; i < std::min(c.length(), (int)v.size()); i++) c[i] = v[i];
+    return c;
+}
+
+static vector<double> ToDoubleVec(const glm::vec3 &v)
+{
+    vector<double> c(v.length());
+    for (int i = 0; i < v.length(); i++) c[i] = v[i];
+    return c;
+}
+
+
+int ContourRenderer::_buildCache(bool fast)
 {
     ContourParams *cParams = (ContourParams *)GetActiveParams();
     _saveCacheParams();
 
     vector<VertexData> vertices;
 
-    if (cParams->GetVariableName().empty()) { return 0; }
+    if (cParams->GetVariableName().empty()) {
+        MyBase::SetErrMsg("Missing Variable");
+        return 1;
+    }
     vector<double> contours = cParams->GetContourValues(_cacheParams.varName);
 
     CoordType boxMin = {0.0, 0.0, 0.0};
@@ -111,10 +149,63 @@ int ContourRenderer::_buildCache()
     Grid::CopyToArr3(_cacheParams.boxMax, boxMax);
 
     Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax);
-    Grid *heightGrid = NULL;
-    if (!_cacheParams.heightVarName.empty()) { heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax); }
+    Grid *grid2 = nullptr;
+    Grid *heightGrid = nullptr;
+    _sliceQuad.clear();
 
-    if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) { return -1; }
+    int dims = grid->GetTopologyDim();
+    if (!_cacheParams.heightVarName.empty() && dims == 2) { heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, boxMin, boxMax); }
+    if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) {
+        if (grid) delete grid;
+        if (grid2) delete grid2;
+        if (heightGrid) delete heightGrid;
+        return -1;
+    }
+
+    if (dims == 3) {
+        planeDescription pd;
+        pd.boxMin = ToCoordType(_cacheParams.boxMin);
+        pd.boxMax = ToCoordType(_cacheParams.boxMax);
+        pd.origin = _cacheParams.sliceOrigin;
+        pd.sideSize = _cacheParams.sliceResolution;
+        if (_cacheParams.sliceOrientationMode == (int)RenderParams::SlicePlaneOrientationMode::Normal)
+            pd.normal = _cacheParams.sliceNormal;
+        else
+            pd.normal = ToDoubleVec(ArbitrarilyOrientedRegularGrid::GetNormalFromRotations(_cacheParams.sliceRotation));
+
+        auto o = ToVec3(_cacheParams.sliceOrigin);
+        auto n = ToVec3(pd.normal);
+        auto offsetOrigin = o + n * (float)_cacheParams.sliceOffset;
+        pd.origin = ToDoubleVec(offsetOrigin);
+        _finalOrigin = offsetOrigin;
+
+        DimsType dims = {pd.sideSize, pd.sideSize, 1};
+
+        ArbitrarilyOrientedRegularGrid *grid2d = new ArbitrarilyOrientedRegularGrid(grid, pd, dims);
+        grid2 = grid;
+        grid = grid2d;
+
+        CoordType corner1, corner2, corner3, corner4;
+        grid2d->GetUserCoordinates({0, 0, 0}, corner1);
+        grid2d->GetUserCoordinates({0, pd.sideSize - 1, 0}, corner2);
+        grid2d->GetUserCoordinates({pd.sideSize - 1, 0, 0}, corner3);
+        grid2d->GetUserCoordinates({pd.sideSize - 1, pd.sideSize - 1, 0}, corner4);
+
+        cParams->SetSlicePlaneQuad({
+            {corner1[0], corner1[1], corner1[2]},
+            {corner3[0], corner3[1], corner3[2]},
+            {corner4[0], corner4[1], corner4[2]},
+            {corner2[0], corner2[1], corner2[2]},
+        });
+
+        if (fast) {
+            _cacheParams.varName = "";
+            if (grid) delete grid;
+            if (grid2) delete grid2;
+            if (heightGrid) delete heightGrid;
+            return 0;
+        }
+    }
 
     double mv = grid->GetMissingValue();
     float  Z0 = GetDefaultZ(_dataMgr, _cacheParams.ts);
@@ -151,7 +242,9 @@ int ContourRenderer::_buildCache()
                 float v[3];
                 v[0] = coords[a][0] + t * (coords[b][0] - coords[a][0]);
                 v[1] = coords[a][1] + t * (coords[b][1] - coords[a][1]);
-                v[2] = Z0;
+                v[2] = coords[a][2] + t * (coords[b][2] - coords[a][2]);
+
+                if (dims == 2) v[2] = Z0;
 
                 if (heightGrid) {
                     float aHeight = heightGrid->GetValueAtIndex(nodes[a]);
@@ -171,13 +264,21 @@ int ContourRenderer::_buildCache()
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    if (grid) delete grid;
+    if (grid2) delete grid2;
+    if (heightGrid) delete heightGrid;
+
     return 0;
 }
 
-int ContourRenderer::_paintGL(bool)
+int ContourRenderer::_paintGL(bool fast)
 {
     int rc = 0;
-    if (_isCacheDirty()) rc = _buildCache();
+    if (_isCacheDirty()) {
+        rc = _buildCache(fast);
+        if (fast) { return 0; }
+    }
+    if (rc != 0) return rc;
 
     RenderParams *  rp = GetActiveParams();
     MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());

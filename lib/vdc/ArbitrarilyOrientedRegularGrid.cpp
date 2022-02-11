@@ -26,8 +26,13 @@ ArbitrarilyOrientedRegularGrid::ArbitrarilyOrientedRegularGrid(
 ) {
     SetMissingValue( grid3d->GetMissingValue() );
 
+    glm::vec3 n(pd.normal[0], pd.normal[1], pd.normal[2]);
+    n = glm::normalize(n);
+    if (glm::any(glm::isnan(n)) || abs(glm::length(n)) < 0.5)
+        n = glm::vec3(0,0,1);
+    
     _sideSize = pd.sideSize;
-    _rotation = {pd.rotation[0], pd.rotation[1], pd.rotation[2]};
+    _normal = {n[0], n[1], n[2]};
 
     CoordType gridMin, gridMax;
     grid3d->GetUserExtents(gridMin, gridMax);
@@ -93,17 +98,8 @@ glm::tvec3<double, glm::highp> ArbitrarilyOrientedRegularGrid::_getOrthogonal(co
 }
 
 void ArbitrarilyOrientedRegularGrid::_rotate() {
-    // which we will use to project our polygon into 2D space.  First rotate XY plane with quaternion.
-    glm::tvec3<double, glm::highp> angles(
-        M_PI * _rotation.x / 180.,
-        M_PI * _rotation.y / 180., 
-        M_PI * _rotation.z / 180.
-    );
-    glm::tquat<double> q = glm::quat(angles);
-
     // We will sample the slice in 2D coordinates.
     // So we first define a basis function of three orthogonal vectors (normal, _axis1, _axis2).
-    _normal = q * glm::tvec3<double, glm::highp>(0, 0, 1);
     _axis1 = _getOrthogonal(_normal);
     _axis2 = glm::cross(_normal, _axis1);
 }
@@ -235,3 +231,28 @@ void ArbitrarilyOrientedRegularGrid::_populateData(
 }
 
 // clang-format on
+
+glm::vec3 ArbitrarilyOrientedRegularGrid::GetNormalFromRotations(const std::vector<double> &rotations)
+{
+    glm::vec3 r(rotations[0], rotations[1], rotations[2]);
+    r = r * (float)M_PI / 180.f;
+    auto q = glm::quat(r);
+    auto n = q * glm::vec3(0, 0, 1);
+    return n;
+}
+
+std::pair<float, float> ArbitrarilyOrientedRegularGrid::GetOffsetRange(const planeDescription &pd)
+{
+    glm::vec3 n(pd.normal[0], pd.normal[1], pd.normal[2]);
+    glm::vec3 dataMin(pd.boxMin[0], pd.boxMin[1], pd.boxMin[2]);
+    glm::vec3 dataMax(pd.boxMax[0], pd.boxMax[1], pd.boxMax[2]);
+    glm::vec3 o(pd.origin[0], pd.origin[1], pd.origin[2]);
+    float     t0, t1;
+    glm::vec3 tMin = (dataMin - o) / n;
+    glm::vec3 tMax = (dataMax - o) / n;
+    glm::vec3 bt1 = min(tMin, tMax);
+    glm::vec3 bt2 = max(tMin, tMax);
+    t0 = max(max(bt1.x, bt1.y), bt1.z);
+    t1 = min(min(bt2.x, bt2.y), bt2.z);
+    return std::pair<float, float>(t0, t1);
+}

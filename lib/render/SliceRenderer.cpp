@@ -187,7 +187,8 @@ int SliceRenderer::_regenerateSlice()
     planeDescription       pd;
     pd.sideSize = _textureSideSize;
     pd.origin = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
-    pd.rotation = {_cacheParams.xRotation, _cacheParams.yRotation, _cacheParams.zRotation};
+    auto normal = ArbitrarilyOrientedRegularGrid::GetNormalFromRotations({_cacheParams.xRotation, _cacheParams.yRotation, _cacheParams.zRotation});
+    pd.normal = {normal[0], normal[1], normal[2]};
     pd.boxMin = _cacheParams.boxMin;
     pd.boxMax = _cacheParams.boxMax;
 

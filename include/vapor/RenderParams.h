@@ -393,6 +393,15 @@ public:
     //! Return whether a renderer can be oriented - IE, can this renderer be rotated about an origin point?
     virtual bool GetOrientable() const;
 
+    //! Return the renderer's 3 axis rotation for creating ArbitrarilyOrientedRegularGrids.
+    vector<double> GetSlicePlaneRotation() const;
+
+    //! Return the renderer's 3 axis origin for creating ArbitrarilyOrientedRegularGrids.
+    vector<double> GetSlicePlaneOrigin() const;
+
+    //! Return the renderer's 3 axis normal for creating ArbitrarilyOrientedRegularGrids.
+    vector<double> GetSlicePlaneNormal() const;
+
     //! Return the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
     double GetXSlicePlaneOrigin() const;
 
@@ -494,6 +503,16 @@ public:
     //! this string identifies the parameter for how many samples
     //! to take along that vector.
     static const string SampleRateTag;
+
+    static const string SliceOffsetTag;
+    static const string SlicePlaneNormalXTag;
+    static const string SlicePlaneNormalYTag;
+    static const string SlicePlaneNormalZTag;
+    static const string SlicePlaneOrientationModeTag;
+    enum class SlicePlaneOrientationMode {
+        Rotation = 0,
+        Normal = 1,
+    };
 };
 
 //////////////////////////////////////////////////////////////////////////
