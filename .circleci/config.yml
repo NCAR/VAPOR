@@ -486,7 +486,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "1 16 * * 4" #Mountain Standard Time +7
+             cron: "50 2 * * 5" #Mountain Standard Time +7
              filters:
                branches:
                  only: main
