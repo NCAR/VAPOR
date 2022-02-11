@@ -23,6 +23,7 @@
 #include <string>
 #include <cstring>
 #include <string>
+#include <float.h>
 #include "vapor/VAssert.h"
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
@@ -900,7 +901,7 @@ vector<double> RenderParams::GetSlicePlaneNormal() const
     v.push_back(GetValueDouble(SlicePlaneNormalZTag, 1));
 
     float l = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-    if (abs(l) < __FLT_EPSILON__) l = 1;
+    if (abs(l) < FLT_EPSILON) l = 1;
     v[0] /= l;
     v[1] /= l;
     v[2] /= l;
