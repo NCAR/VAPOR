@@ -323,7 +323,7 @@ int main(int argc, char **argv)
     if (!opt.xcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[0], vector<string>{dimnames[0]}, "", "", 0, DC::XType::FLOAT, false); }
     if (!opt.ycoords.empty()) { rc = vdc.DefineCoordVar(dimnames[1], vector<string>{dimnames[1]}, "", "", 1, DC::XType::FLOAT, false); }
     if (!opt.zcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[2], vector<string>{dimnames[2]}, "", "", 2, DC::XType::FLOAT, false); }
-    if (!opt.tcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[3], vector<string>(), "", dimnames[3], 3, DC::XType::FLOAT, false); }
+    if (!opt.tcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[3], vector<string>(), dimnames[3], "", 3, DC::XType::FLOAT, false); }
 
     rc = vdc.SetCompressionBlock(opt.wname, opt.cratios);
     if (rc < 0) exit(1);
