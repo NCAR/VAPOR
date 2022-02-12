@@ -265,8 +265,19 @@ int main(int argc, char **argv)
     rc = dccf.Initialize(cffiles, vector<string>());
     if (rc < 0) { return (1); }
 
+    //
+    // Copy coordinate variables first, checking to ensure that the
+    // coordinate variable isn't also a data variable (a variable can
+    // be both data and coordinate). If a coord variable is also
+    // a data variable, skip it and handle below
+    //
     vector<string> varnames = dccf.GetCoordVarNames();
+    vector<string> dvarnames = dccf.GetDataVarNames();
     for (int i = 0; i < varnames.size(); i++) {
+        // Skip coordinate varibles that are also data variables
+        //
+        if (find(dvarnames.begin(), dvarnames.end(), varnames[i]) != dvarnames.end()) continue;
+
         int nts = dccf.GetNumTimeSteps(varnames[i]);
         nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
         VAssert(nts >= 0);
@@ -291,6 +302,8 @@ int main(int argc, char **argv)
 
     varnames = remove_vector(varnames, opt.xvars);
 
+    // Now copy data variables
+    //
     int estatus = 0;
     for (int i = 0; i < varnames.size(); i++) {
         int nts = dccf.GetNumTimeSteps(varnames[i]);
