@@ -269,12 +269,11 @@ int main(int argc, char **argv)
     // Copy coordinate variables first, checking to ensure that the
     // coordinate variable isn't also a data variable (a variable can
     // be both data and coordinate). If a coord variable is also
-    // a data variable, skip it and handle below 
+    // a data variable, skip it and handle below
     //
     vector<string> varnames = dccf.GetCoordVarNames();
-    vector <string> dvarnames = dccf.GetDataVarNames();
+    vector<string> dvarnames = dccf.GetDataVarNames();
     for (int i = 0; i < varnames.size(); i++) {
-
         // Skip coordinate varibles that are also data variables
         //
         if (find(dvarnames.begin(), dvarnames.end(), varnames[i]) != dvarnames.end()) continue;
