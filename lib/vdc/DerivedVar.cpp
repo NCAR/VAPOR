@@ -2407,11 +2407,11 @@ void DerivedCoordVarStandardOceanSCoordinate::compute_g2(const vector<size_t> &m
 //
 // The atmosphere_hybrid_sigma_pressure_coordinate conversion from pressure
 // to meters unforunately results in a flipped (inverted?) vertical coordinate
-// system with logical grid indices increasing as user coordinates 
-// decrease. I.e. Z[k] > Z[k+1]. In numerous places VAPOR 
+// system with logical grid indices increasing as user coordinates
+// decrease. I.e. Z[k] > Z[k+1]. In numerous places VAPOR
 // expects the grid index and associated vertical coordinate  to be
 // monotonically increasing. This needs to be fixed as this assumption
-// often does not hold true. However it is a big lift. For now, just 
+// often does not hold true. However it is a big lift. For now, just
 // remove the atmosphere_hybrid_sigma_pressure_coordinate converter from
 // the object factory.
 //
