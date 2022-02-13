@@ -266,10 +266,12 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(size_t ts, int level, int lo
     // X horizontal coord blocks
     //
     DimsType       bs2d = {bs[0], bs[1], 1};
+    DimsType       bmin2d = {bmin[0], bmin[1], 0};
+    DimsType       bmax2d = {bmax[0], bmax[1], 0};
     size_t         nblocks2d = 1;
     size_t         block_size2d = 1;
     for (int i = 0; i < bs2d.size(); i++) {
-        nblocks2d *= bmax[i] - bmin[i] + 1;
+        nblocks2d *= bmax2d[i] - bmin2d[i] + 1;
         block_size2d *= bs2d[i];
     }
 
@@ -287,7 +289,7 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(size_t ts, int level, int lo
     RegularGrid    xrg(dims2d, bs2d, xcblkptrs, minu2d, maxu2d);
     RegularGrid    yrg(dims2d, bs2d, ycblkptrs, minu2d, maxu2d);
 
-    string qtr_key = _getQuadTreeRectangleKey(ts, level, lod, cvarsinfo, bmin, bmax);
+    string qtr_key = _getQuadTreeRectangleKey(ts, level, lod, cvarsinfo, bmin2d, bmax2d);
 
     // Try to get a shared pointer to the QuadTreeRectangle from the
     // cache. If one does not exist the Grid class will make one. We use
