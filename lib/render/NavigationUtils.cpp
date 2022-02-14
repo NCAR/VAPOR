@@ -170,7 +170,7 @@ void NavigationUtils::AlignView(ControlExec *ce, int axis)
         curPosVec[i] = (curCenter[i] - dirvec[i]);
     }
 
-    SetAllCameras(ce, curPosVec, dirvec, curUpVec, curCenter);
+    SetAllCameras(ce, curPosVec, dirvec, upvec, curCenter);
 }
 
 
