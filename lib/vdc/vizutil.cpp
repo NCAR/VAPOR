@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include "vapor/VAssert.h"
 #include <vapor/vizutil.h>
 
@@ -185,6 +186,11 @@ bool VAPoR::BarycentricCoordsTri(const double verts[], const double pt[], double
     lambda[1] = (d11 * d20 - d01 * d21) / denom;
     lambda[2] = (d00 * d21 - d01 * d20) / denom;
     lambda[0] = 1.0f - lambda[1] - lambda[2];
+
+    const double epsilon = std::numeric_limits<double>::epsilon();
+    if ((lambda[0] < 0.0) && ((lambda[0] + epsilon) >= 0.0)) lambda[0] = 0.0;
+    if ((lambda[1] < 0.0) && ((lambda[1] + epsilon) >= 0.0)) lambda[1] = 0.0;
+    if ((lambda[2] < 0.0) && ((lambda[2] + epsilon) >= 0.0)) lambda[2] = 0.0;
 
     return (lambda[0] >= 0.0 && lambda[1] >= 0.0 && lambda[2] >= 0.0);
 }
