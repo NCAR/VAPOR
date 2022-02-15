@@ -308,8 +308,32 @@ void RenderParams::SetCompressionLevel(int level) { SetValueLong(_CompressionLev
 
 void RenderParams::SetRefinementLevel(int level)
 {
+    size_t oldRefLevel = GetRefinementLevel();
+
     if (level < 0) level = 0;
     SetValueLong(_RefinementLevelTag, "Set refinement level", level);
+
+    // Adjust the Box's extents so that it encloses the same percentage of space in the new domain as it did in the old domain
+    Box* b = GetBox();
+    if (b == nullptr) return;
+    if (!_classInitialized) return;
+
+    VAPoR::CoordType oldBoxMin, oldBoxMax, oldVarMin, oldVarMax;
+    VAPoR::CoordType newBoxMin, newBoxMax, newVarMin, newVarMax;
+    
+    b->GetExtents(oldBoxMin, oldBoxMax);
+    _dataMgr->GetVariableExtents(GetCurrentTimestep(), GetVariableName(), oldRefLevel, 0, oldVarMin, oldVarMax);
+    _dataMgr->GetVariableExtents(GetCurrentTimestep(), GetVariableName(), level, 0, newVarMin, newVarMax);
+
+    for (int i=0; i<3; i++) {
+        double oldRange = oldVarMax[i] - oldVarMin[i];
+        double minPercentile = (oldBoxMin[i]-oldVarMin[i]) / oldRange;
+        double maxPercentile = (oldBoxMax[i]-oldVarMin[i]) / oldRange;
+        double newRange = newVarMax[i] - newVarMin[i];
+        newBoxMin[i] = minPercentile * newRange + newVarMin[i];
+        newBoxMax[i] = maxPercentile * newRange + newVarMin[i];
+    }
+    b->SetExtents( newBoxMin, newBoxMax );
 }
 
 int RenderParams::GetRefinementLevel() const { return (GetValueLong(_RefinementLevelTag, 0)); }
