@@ -427,6 +427,8 @@ protected:
     DataMgr *_dataMgr;
     int      _maxDim;
 
+    bool InitBoxFromVariable(size_t ts, string varName);
+
     virtual bool GetUseSingleColorDefault() const { return false; }
 
 private:
