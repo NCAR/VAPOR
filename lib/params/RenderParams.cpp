@@ -148,16 +148,13 @@ int RenderParams::Initialize()
     size_t ts = 0;
     int    ndim = _maxDim;
     bool   foundVar = false;
-    if (! varname.empty()) {
-        for (size_t ts=0; ts<_dataMgr->GetNumTimeSteps() && ! foundVar; ts++) {
-            if (!_dataMgr->VariableExists(ts, varname, 0, 0)) {
-                foundVar = true;
-            }
+    if (!varname.empty()) {
+        for (size_t ts = 0; ts < _dataMgr->GetNumTimeSteps() && !foundVar; ts++) {
+            if (!_dataMgr->VariableExists(ts, varname, 0, 0)) { foundVar = true; }
         }
-    } 
+    }
 
-    if (! foundVar) {
-  
+    if (!foundVar) {
         // Probably should have a _minDim here..
         //
         varname.clear();
@@ -170,9 +167,9 @@ int RenderParams::Initialize()
         }
     }
 
-    if (! foundVar) return (0);
+    if (!foundVar) return (0);
 
-    (void) InitBoxFromVariable(ts, varname);
+    (void)InitBoxFromVariable(ts, varname);
 
     _classInitialized = true;
     return (0);
@@ -918,16 +915,16 @@ double RenderParams::GetZSlicePlaneOrigin() const
     return GetValueDouble(ZSlicePlaneOriginTag, defaultVal);
 }
 
-bool RenderParams::InitBoxFromVariable(size_t ts, string varName) {
-
+bool RenderParams::InitBoxFromVariable(size_t ts, string varName)
+{
     bool enabled = _ssave->GetEnabled();
     _ssave->SetEnabled(false);
 
     CoordType minExt, maxExt;
-    int rc = _dataMgr->GetVariableExtents(ts, varName, 0, 0, minExt, maxExt);
+    int       rc = _dataMgr->GetVariableExtents(ts, varName, 0, 0, minExt, maxExt);
     if (rc < 0) {
         _ssave->SetEnabled(enabled);
-        return(false);
+        return (false);
     }
     _ssave->SetEnabled(enabled);
 
@@ -936,7 +933,7 @@ bool RenderParams::InitBoxFromVariable(size_t ts, string varName) {
     // N.B.Not handling case where ndim == 1!!!
     //
     size_t ndim = _dataMgr->GetVarTopologyDim(varName);
-    bool planar = ndim == 2;
+    bool   planar = ndim == 2;
     if (planar) {
         _Box->SetOrientation(VAPoR::Box::XY);
     } else {
@@ -961,5 +958,5 @@ bool RenderParams::InitBoxFromVariable(size_t ts, string varName) {
     SetValueDouble(SlicePlaneNormalZTag, "", 1);
     SetValueLong(SlicePlaneOrientationModeTag, "", (int)SlicePlaneOrientationMode::Rotation);
 
-    return(true);
+    return (true);
 }

@@ -39,12 +39,12 @@ int ImageParams::Initialize()
     // is unique in that it operates on 2D variables if they exist. If they
     // don't we'll use any 3D variables to set up the Box correctly
     //
-	for (int ndim = 2; ndim < 4; ndim++) {
+    for (int ndim = 2; ndim < 4; ndim++) {
         size_t ts;
         string varname;
-		if (DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, ndim, varname, ts)) {
+        if (DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, ndim, varname, ts)) {
             if (InitBoxFromVariable(ts, varname)) break;
-         }
+        }
     }
 
     // The image renderer behaves like a 2D renderer, but it doesn't operate

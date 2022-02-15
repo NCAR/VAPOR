@@ -552,7 +552,7 @@ int ImageRenderer::_getMeshDisplacedGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei
             // extents are out side of extents for height variable, or if
             // height variable itself contains missing values.
             //
-            float deltaZ = (float) defaultZ;
+            float deltaZ = (float)defaultZ;
             if (hgtGrid) {
                 deltaZ = hgtGrid->GetValue(x, y, 0.0);
                 if (deltaZ == mv) deltaZ = defaultZ;
@@ -600,7 +600,7 @@ int ImageRenderer::_getMeshDisplacedNoGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsiz
             // extents are out side of extents for height variable, or if
             // height variable itself contains missing values.
             //
-            float deltaZ = (float) defaultZ;
+            float deltaZ = (float)defaultZ;
             if (hgtGrid) {
                 deltaZ = hgtGrid->GetValue(x, y, 0.0);
                 if (deltaZ == mv) deltaZ = defaultZ;
