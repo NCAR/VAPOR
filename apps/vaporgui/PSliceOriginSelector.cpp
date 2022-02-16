@@ -21,11 +21,12 @@ PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
     Add({
         new PLabel("Slice origin is shown in-scene as a yellow crosshair"),
         new PCheckbox("GUI_ShowOrigin", "Show Origin Controls"),
-        (new PShowIf("GUI_ShowOrigin"))->Then({
-            _xSlider,
-            _ySlider,
-            _zSlider,
-        }),
+        (new PShowIf("GUI_ShowOrigin"))
+            ->Then({
+                _xSlider,
+                _ySlider,
+                _zSlider,
+            }),
     });
 }
 
