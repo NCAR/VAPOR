@@ -146,7 +146,6 @@ void SliceRenderer::_resetCache()
 
     _cacheParams.sliceRotation = p->GetSlicePlaneRotation();
     _cacheParams.sliceNormal = p->GetSlicePlaneNormal();
-    _cacheParams.sliceOrigin = p->GetSlicePlaneOrigin();
     _cacheParams.sliceOffset = p->GetValueDouble(p->SliceOffsetTag, 0);
 
     _getExtents(_cacheParams.boxMin, _cacheParams.boxMax);
