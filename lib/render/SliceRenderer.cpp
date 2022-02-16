@@ -200,8 +200,11 @@ int SliceRenderer::_regenerateSlice()
     planeDescription       pd;
     pd.sideSize = _textureSideSize;
 
-    if (_cacheParams.sliceOrientationMode == (int)RenderParams::SlicePlaneOrientationMode::Normal)
+    std::cout << _cacheParams.sliceOrientationMode << " " << (int)RenderParams::SlicePlaneOrientationMode::Normal << std::endl;
+    if (_cacheParams.sliceOrientationMode == (int)RenderParams::SlicePlaneOrientationMode::Normal){
+        std::cout << "Normal" << std::endl;
         pd.normal = _cacheParams.sliceNormal;
+    }
     else
         pd.normal = ToDoubleVec(ArbitrarilyOrientedRegularGrid::GetNormalFromRotations(_cacheParams.sliceRotation));
 
@@ -329,7 +332,10 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.zOrigin != p->GetZSlicePlaneOrigin()) return true;
 
     if (_cacheParams.sliceOffset != p->GetValueDouble(p->SliceOffsetTag, 0)) return true;
+    std::cout << "cache   " << _cacheParams.sliceNormal[0] << " " << _cacheParams.sliceNormal[1] << " " << _cacheParams.sliceNormal[2] << std::endl;
+    std::cout << "params  " << p->GetSlicePlaneNormal()[0] << " " << p->GetSlicePlaneNormal()[1] << " " << p->GetSlicePlaneNormal()[2] << std::endl;
     if (_cacheParams.sliceNormal != p->GetSlicePlaneNormal()) return true;
+    if (_cacheParams.sliceOrientationMode != p->GetValueLong(RenderParams::SlicePlaneOrientationModeTag, 0)) return true;
 
     if (_cacheParams.textureSampleRate != p->GetValueDouble(RenderParams::SampleRateTag, 200)) return true;
 
