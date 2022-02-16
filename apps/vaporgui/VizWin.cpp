@@ -879,16 +879,6 @@ void VizWin::_updateOriginGlyph()
     double               yOrigin = rp->GetValueDouble(RenderParams::YSlicePlaneOriginTag, 0.);
     double               zOrigin = rp->GetValueDouble(RenderParams::ZSlicePlaneOriginTag, 0.);
 
-    std::vector<double> scales = _getDataMgrTransform()->GetScales();
-    std::vector<double> scales2 = rp->GetTransform()->GetScales();
-    scales[0] *= scales2[0];
-    scales[1] *= scales2[1];
-    scales[2] *= scales2[2];
-
-    xOrigin *= scales[0];
-    yOrigin *= scales[1];
-    zOrigin *= scales[2];
-
     int            refLevel = rp->GetRefinementLevel();
     int            lod = rp->GetCompressionLevel();
     string         varName = rp->GetVariableName();
@@ -902,10 +892,6 @@ void VizWin::_updateOriginGlyph()
 
     CoordType min, max;
     dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, min, max);
-    for (int i = 0; i < min.size(); i++) {
-        min[i] *= scales[i];
-        max[i] *= scales[i];
-    }
 
     // Find the average magnitude of the X and Y axes.  3% of that magnitude will be the size of the
     // origin marker's crosshairs.
