@@ -22,6 +22,13 @@
 
 using namespace VAPoR;
 
+static vector<double> ToDoubleVec(const glm::vec3 &v)
+{
+    vector<double> c(v.length());
+    for (int i = 0; i < v.length(); i++) c[i] = v[i];
+    return c;
+}
+
 static RendererRegistrar<SliceRenderer> registrar(SliceRenderer::GetClassType(), SliceParams::GetClassType());
 
 SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instanceName, DataMgr *dataMgr)
@@ -133,7 +140,14 @@ void SliceRenderer::_resetCache()
     _cacheParams.yOrigin = p->GetYSlicePlaneOrigin();
     _cacheParams.zOrigin = p->GetZSlicePlaneOrigin();
 
+    
     _cacheParams.textureSampleRate = p->GetValueDouble(RenderParams::SampleRateTag, 200);
+    _cacheParams.sliceOrientationMode = p->GetValueLong(RenderParams::SlicePlaneOrientationModeTag, 0);
+
+    _cacheParams.sliceRotation = p->GetSlicePlaneRotation();
+    _cacheParams.sliceNormal = p->GetSlicePlaneNormal();
+    _cacheParams.sliceOrigin = p->GetSlicePlaneOrigin();
+    _cacheParams.sliceOffset = p->GetValueDouble(p->SliceOffsetTag, 0);
 
     _getExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
@@ -186,7 +200,17 @@ int SliceRenderer::_regenerateSlice()
     std::shared_ptr<float> dataValues(new float[_textureSideSize * _textureSideSize]);
     planeDescription       pd;
     pd.sideSize = _textureSideSize;
-    pd.origin = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
+
+    if (_cacheParams.sliceOrientationMode == (int)RenderParams::SlicePlaneOrientationMode::Normal)
+        pd.normal = _cacheParams.sliceNormal;
+    else
+        pd.normal = ToDoubleVec(ArbitrarilyOrientedRegularGrid::GetNormalFromRotations(_cacheParams.sliceRotation));
+
+    glm::vec3 o = {_cacheParams.xOrigin, _cacheParams.yOrigin, _cacheParams.zOrigin};
+    glm::vec3 n = {pd.normal[0], pd.normal[1], pd.normal[2]};
+    glm::vec3 offsetOrigin = o + n * (float)_cacheParams.sliceOffset;
+    pd.origin = ToDoubleVec(offsetOrigin);
+
     auto normal = ArbitrarilyOrientedRegularGrid::GetNormalFromRotations({_cacheParams.xRotation, _cacheParams.yRotation, _cacheParams.zRotation});
     pd.normal = {normal[0], normal[1], normal[2]};
     pd.boxMin = _cacheParams.boxMin;
@@ -304,6 +328,9 @@ bool SliceRenderer::_isDataCacheDirty() const
     if (_cacheParams.xOrigin != p->GetXSlicePlaneOrigin()) return true;
     if (_cacheParams.yOrigin != p->GetYSlicePlaneOrigin()) return true;
     if (_cacheParams.zOrigin != p->GetZSlicePlaneOrigin()) return true;
+
+    if (_cacheParams.sliceOffset != p->GetValueDouble(p->SliceOffsetTag, 0)) return true;
+    if (_cacheParams.sliceNormal != p->GetSlicePlaneNormal()) return true;
 
     if (_cacheParams.textureSampleRate != p->GetValueDouble(RenderParams::SampleRateTag, 200)) return true;
 
