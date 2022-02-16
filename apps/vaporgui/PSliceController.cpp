@@ -50,7 +50,6 @@ PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
                 _zSlider,
             }),
     });
-
     SetTooltip("The slice plane will pass through this point. \nThe plane can be offset from this point along the plane normal determined by the orientation.");
 }
 
