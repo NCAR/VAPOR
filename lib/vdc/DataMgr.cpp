@@ -1708,22 +1708,14 @@ size_t DataMgr::GetNumDimensions(string varname) const
 {
     VAssert(_dc);
 
-    DC::DataVar dvar;
-    bool        status = GetDataVarInfo(varname, dvar);
+    vector<size_t> dims, dummy;
+    bool           enabled = EnableErrMsg(false);
+    int            rc = GetDimLensAtLevel(varname, 0, dims, dummy, 0);
+    EnableErrMsg(enabled);
 
-    if (status) {
-        DC::Mesh m;
-        status = GetMesh(dvar.GetMeshName(), m);
-        if (!status) return (0);
+    if (rc < 0) return (0);
 
-        return (m.GetDimNames().size());
-    }
-
-    DC::CoordVar cvar;
-    status = GetCoordVarInfo(varname, cvar);
-    if (status) return (cvar.GetDimNames().size());
-
-    return (0);
+    return (dims.size());
 }
 
 size_t DataMgr::GetVarTopologyDim(string varname) const
@@ -1794,7 +1786,9 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
 
     int nlevels = DataMgr::GetNumRefLevels(varname);
 
-    size_t ndims = number_of_dimensions(grid_dims);
+    // Rank of array describing variable
+    //
+    size_t ndims = GetNumDimensions(varname);
 
     // Downsample the data if needed
     //
