@@ -56,8 +56,8 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
                     (new PDoubleSliderEdit(RenderParams::SlicePlaneNormalZTag, "Z"))->SetRange(-1,1)->EnableDynamicUpdate(),
                 }),
             }))->SetTooltip("The plane normal of the slice. The offset will move the slice along this normal as well."),
-            (new PSliceOriginSelector)->SetTooltip("The slice plane will pass through this point. The plane can be offset from this point along the plane normal determined by the orientation."),
             (new PSliceOffsetSelector)->SetTooltip("Offset the plane from its origin along its normal (set by the orientation)."),
+            (new PSliceOriginSelector)->SetTooltip("The slice plane will pass through this point. The plane can be offset from this point along the plane normal determined by the orientation."),
         })),
         new PGeometrySubtab,
     }));
