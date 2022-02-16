@@ -3,7 +3,7 @@
 #include <vapor/ParamsBase.h>
 #include <vapor/VAssert.h>
 
-PShowIf::PShowIf(std::string tag) : PWidgetWrapper(tag, _group = new PGroup) {}
+PShowIf::PShowIf(std::string tag) : PWidgetWrapper(tag, _group = new PGroup) { _test = std::unique_ptr<Test>(new TestLongEquals(getTag(), true)); }
 
 PShowIf *PShowIf::Equals(long l)
 {
