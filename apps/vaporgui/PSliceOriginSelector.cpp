@@ -1,6 +1,8 @@
 #include "PSliceOriginSelector.h"
 #include "PSliderEditHLI.h"
 #include "PLabel.h"
+#include "PShowIf.h"
+#include "PCheckbox.h"
 #include <vapor/SliceParams.h>
 #include <assert.h>
 
@@ -16,10 +18,15 @@ PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
     _ySlider->EnableDynamicUpdate();
     _zSlider->EnableDynamicUpdate();
 
-    Add(_xSlider);
-    Add(_ySlider);
-    Add(_zSlider);
-    Add(new PLabel("Slice origin is shown in-scene as a yellow crosshair"));
+    Add({
+        new PLabel("Slice origin is shown in-scene as a yellow crosshair"),
+        new PCheckbox("GUI_ShowOrigin", "Show Origin Controls"),
+        (new PShowIf("GUI_ShowOrigin"))->Then({
+            _xSlider,
+            _ySlider,
+            _zSlider,
+        }),
+    });
 }
 
 void PSliceOriginSelector::updateGUI() const
