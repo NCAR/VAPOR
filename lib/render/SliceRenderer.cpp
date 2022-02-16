@@ -140,7 +140,7 @@ void SliceRenderer::_resetCache()
     _cacheParams.yOrigin = p->GetYSlicePlaneOrigin();
     _cacheParams.zOrigin = p->GetZSlicePlaneOrigin();
 
-    
+
     _cacheParams.textureSampleRate = p->GetValueDouble(RenderParams::SampleRateTag, 200);
     _cacheParams.sliceOrientationMode = p->GetValueLong(RenderParams::SlicePlaneOrientationModeTag, 0);
 
