@@ -1,4 +1,5 @@
-#include "PSliceOriginSelector.h"
+#include "PSliceController.h"
+#include "PEnumDropdown.h"
 #include "PSliderEditHLI.h"
 #include "PLabel.h"
 #include "PShowIf.h"
@@ -7,6 +8,32 @@
 #include <assert.h>
 
 using namespace VAPoR;
+
+PSliceController::PSliceController() : PGroup()
+{
+    Add(new PSliceOrientationSelector);
+    Add(new PSliceOffsetSelector);
+    Add(new PSliceOriginSelector);
+}
+
+PSliceOrientationSelector::PSliceOrientationSelector() : PSection("Slice Orientation")
+{
+    Add(new PEnumDropdown(RenderParams::SlicePlaneOrientationModeTag, {"Rotation", "Normal"},
+                          {(int)RenderParams::SlicePlaneOrientationMode::Rotation, (int)RenderParams::SlicePlaneOrientationMode::Normal}, "Orientation Mode"));
+    Add((new PShowIf(RenderParams::SlicePlaneOrientationModeTag))
+            ->Equals((int)RenderParams::SlicePlaneOrientationMode::Rotation)
+            ->Then({
+                (new PDoubleSliderEdit(RenderParams::XSlicePlaneRotationTag, "X"))->SetRange(-90., 90.)->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit(RenderParams::YSlicePlaneRotationTag, "Y"))->SetRange(-90., 90.)->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit(RenderParams::ZSlicePlaneRotationTag, "Z"))->SetRange(-90., 90.)->EnableDynamicUpdate(),
+            })
+            ->Else({
+                (new PDoubleSliderEdit(RenderParams::SlicePlaneNormalXTag, "X"))->SetRange(-1, 1)->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit(RenderParams::SlicePlaneNormalYTag, "Y"))->SetRange(-1, 1)->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit(RenderParams::SlicePlaneNormalZTag, "Z"))->SetRange(-1, 1)->EnableDynamicUpdate(),
+            }));
+    SetTooltip("The plane normal of the slice. The offset will move the slice along this normal as well.");
+}
 
 PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
 {
@@ -28,17 +55,18 @@ PSliceOriginSelector::PSliceOriginSelector() : PSection("Slice Origin")
                 _zSlider,
             }),
     });
+    SetTooltip("The slice plane will pass through this point. \nThe plane can be offset from this point along the plane normal determined by the orientation.");
 }
 
 void PSliceOriginSelector::updateGUI() const
 {
     RenderParams *rp = getParams<RenderParams>();
 
-    CoordType      min, max;
-    size_t         ts = rp->GetCurrentTimestep();
-    int            level = rp->GetRefinementLevel();
-    int            lod = rp->GetCompressionLevel();
-    string         varName = rp->GetVariableName();
+    CoordType min, max;
+    size_t    ts = rp->GetCurrentTimestep();
+    int       level = rp->GetRefinementLevel();
+    int       lod = rp->GetCompressionLevel();
+    string    varName = rp->GetVariableName();
 
     int ret = getDataMgr()->GetVariableExtents(ts, varName, level, lod, min, max);
     if (ret) return;
@@ -59,6 +87,7 @@ PSliceOffsetSelector::PSliceOffsetSelector() : PSection("Slice Offset")
     _offsetSlider = new PDoubleSliderEdit(RenderParams::SliceOffsetTag, "Offset");
     _offsetSlider->EnableDynamicUpdate();
     Add(_offsetSlider);
+    SetTooltip("Offset the plane from its origin \n along its normal (set by the orientation).");
 }
 
 void PSliceOffsetSelector::updateGUI() const

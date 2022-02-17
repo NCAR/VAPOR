@@ -51,6 +51,10 @@ private:
         VAPoR::CoordType    boxMin, boxMax;
         VAPoR::CoordType    domainMin, domainMax;
         std::vector<double> sampleLocation;
+        std::vector<double> sliceRotation;
+        std::vector<double> sliceNormal;
+        double              sliceOffset;
+        int                 sliceOrientationMode;
     } _cacheParams;
 
     void _initVAO();

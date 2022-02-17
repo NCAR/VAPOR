@@ -2,11 +2,20 @@
 
 #include "PSection.h"
 
-//! \class PSliceOriginSelector
-//! \brief POrovides three sliders that control the origin of a slice.  Minimum and maximum values along each axis are recalculated on each updateGUI() call.
-//! \author Scott Pearse
+//! \class PSliceController
+//! \brief Provides controls for rotating slices, offsetting them, and positioning their origin
 
 class PDoubleSliderEdit;
+
+class PSliceController : public PGroup {
+public:
+    PSliceController();
+};
+
+class PSliceOrientationSelector : public PSection {
+public:
+    PSliceOrientationSelector();
+};
 
 class PSliceOriginSelector : public PSection {
 public:
