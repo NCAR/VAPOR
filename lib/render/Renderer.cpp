@@ -140,11 +140,11 @@ int Renderer::paintGL(bool fast)
 void Renderer::ApplyTransform(GLManager *gl, const Transform *dataset, const Transform *renderer)
 {
     MatrixManager *mm = gl->matrixManager;
-    
+
     vector<double> translate = renderer->GetTranslations();
-    vector<double> rotate =    renderer->GetRotations();
-    vector<double> scale =     renderer->GetScales();
-    vector<double> origin =    renderer->GetOrigin();
+    vector<double> rotate = renderer->GetRotations();
+    vector<double> scale = renderer->GetScales();
+    vector<double> origin = renderer->GetOrigin();
     VAssert(translate.size() == 3);
     VAssert(rotate.size() == 3);
     VAssert(scale.size() == 3);

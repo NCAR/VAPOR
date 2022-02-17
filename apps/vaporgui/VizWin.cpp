@@ -944,7 +944,7 @@ void VizWin::_drawContourSliceQuad()
     ContourParams *cp = dynamic_cast<ContourParams *>(_getRenderParams());
     assert(cp);
     if (!cp) return;
-    
+
     _glManager->matrixManager->PushMatrix();
     Renderer::ApplyDatasetTransform(_glManager, _getDataMgrTransform());
     Renderer::ApplyTransform(_glManager, _getDataMgrTransform(), _getRenderParams()->GetTransform());

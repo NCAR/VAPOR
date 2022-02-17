@@ -123,7 +123,7 @@ int Visualizer::_getCurrentTimestep() const
 
 void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r)
 {
-    string datasetName = r->GetMyDatasetName();
+    string     datasetName = r->GetMyDatasetName();
     Transform *t = getActiveViewpointParams()->GetTransform(datasetName);
     VAssert(t);
     Renderer::ApplyDatasetTransform(_glManager, t);
