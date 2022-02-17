@@ -118,33 +118,9 @@ int Renderer::paintGL(bool fast)
 
     _timestep = rParams->GetCurrentTimestep();
 
-    vector<double> translate = rParams->GetTransform()->GetTranslations();
-    vector<double> rotate = rParams->GetTransform()->GetRotations();
-    vector<double> scale = rParams->GetTransform()->GetScales();
-    vector<double> origin = rParams->GetTransform()->GetOrigin();
-    VAssert(translate.size() == 3);
-    VAssert(rotate.size() == 3);
-    VAssert(scale.size() == 3);
-    VAssert(origin.size() == 3);
-
-    Transform *    datasetTransform = _paramsMgr->GetViewpointParams(_winName)->GetTransform(_dataSetName);
-    vector<double> datasetScales = datasetTransform->GetScales();
-
     mm->MatrixModeModelView();
     mm->PushMatrix();
-
-    mm->Translate(translate[0], translate[1], translate[2]);
-
-    mm->Scale(1 / datasetScales[0], 1 / datasetScales[1], 1 / datasetScales[2]);
-
-    mm->Translate(origin[0], origin[1], origin[2]);
-    mm->Rotate(glm::radians(rotate[0]), 1, 0, 0);
-    mm->Rotate(glm::radians(rotate[1]), 0, 1, 0);
-    mm->Rotate(glm::radians(rotate[2]), 0, 0, 1);
-    mm->Scale(scale[0], scale[1], scale[2]);
-    mm->Translate(-origin[0], -origin[1], -origin[2]);
-
-    mm->Scale(datasetScales[0], datasetScales[1], datasetScales[2]);
+    ApplyTransform(_glManager, GetDatasetTransform(), rParams->GetTransform());
 
     int rc = _paintGL(fast);
 
@@ -159,6 +135,55 @@ int Renderer::paintGL(bool fast)
         return (-1);
     }
     return (0);
+}
+
+void Renderer::ApplyTransform(GLManager *gl, const Transform *dataset, const Transform *renderer)
+{
+    MatrixManager *mm = gl->matrixManager;
+    
+    vector<double> translate = renderer->GetTranslations();
+    vector<double> rotate =    renderer->GetRotations();
+    vector<double> scale =     renderer->GetScales();
+    vector<double> origin =    renderer->GetOrigin();
+    VAssert(translate.size() == 3);
+    VAssert(rotate.size() == 3);
+    VAssert(scale.size() == 3);
+    VAssert(origin.size() == 3);
+
+    vector<double> datasetScales = dataset->GetScales();
+
+    mm->Translate(translate[0], translate[1], translate[2]);
+
+    mm->Scale(1 / datasetScales[0], 1 / datasetScales[1], 1 / datasetScales[2]);
+
+    mm->Translate(origin[0], origin[1], origin[2]);
+    mm->Rotate(glm::radians(rotate[0]), 1, 0, 0);
+    mm->Rotate(glm::radians(rotate[1]), 0, 1, 0);
+    mm->Rotate(glm::radians(rotate[2]), 0, 0, 1);
+    mm->Scale(scale[0], scale[1], scale[2]);
+    mm->Translate(-origin[0], -origin[1], -origin[2]);
+
+    mm->Scale(datasetScales[0], datasetScales[1], datasetScales[2]);
+}
+
+void Renderer::ApplyDatasetTransform(GLManager *gl, const Transform *t)
+{
+    MatrixManager *mm = gl->matrixManager;
+    vector<double> scales, rotations, translations, origin;
+    VAssert(t);
+    scales = t->GetScales();
+    rotations = t->GetRotations();
+    translations = t->GetTranslations();
+    origin = t->GetOrigin();
+
+    mm->Translate(origin[0], origin[1], origin[2]);
+    mm->Rotate(glm::radians(rotations[0]), 1, 0, 0);
+    mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
+    mm->Rotate(glm::radians(rotations[2]), 0, 0, 1);
+    mm->Scale(scales[0], scales[1], scales[2]);
+    mm->Translate(-origin[0], -origin[1], -origin[2]);
+
+    mm->Translate(translations[0], translations[1], translations[2]);
 }
 
 void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const
