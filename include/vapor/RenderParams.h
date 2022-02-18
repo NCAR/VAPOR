@@ -423,6 +423,14 @@ public:
     //! \param[in] Value to use for the plane origin on the Z axis.
     void SetZSlicePlaneOrigin(double zOrigin);
 
+    //! Set the values for a quad that encloses an arbitrary user-defined plane
+    //! \param[in] A std::vector<CoordType> of size 4, containing the locations of four vertices.
+    void SetSlicePlaneQuad(const std::vector<CoordType> &quad) { _slicePlaneQuad = quad; }
+
+    //! Return the values for a quad that encloses an arbitrary user-defined plane
+    //! \retval A std::vector<CoordType> of size 4, containing the locations of four vertices.
+    std::vector<CoordType> GetSlicePlaneQuad() const { return _slicePlaneQuad; }
+
 protected:
     DataMgr *_dataMgr;
     int      _maxDim;
@@ -432,14 +440,15 @@ protected:
     virtual bool GetUseSingleColorDefault() const { return false; }
 
 private:
-    void             _init();
-    void             _calculateStride(string varName);
-    int              _stride;
-    ParamsContainer *_TFs;
-    Box *            _Box;
-    ColorbarPbase *  _Colorbar;
-    Transform *      _transform;
-    bool             _classInitialized;    //
+    void                   _init();
+    void                   _calculateStride(string varName);
+    int                    _stride;
+    ParamsContainer *      _TFs;
+    Box *                  _Box;
+    ColorbarPbase *        _Colorbar;
+    Transform *            _transform;
+    bool                   _classInitialized;    //
+    std::vector<CoordType> _slicePlaneQuad;
 
     static const string _EnabledTag;
     static const string _histoScaleTag;

@@ -667,7 +667,7 @@ void VizWin::_renderHelper(bool fast)
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
         if (_getRenderParams() && _getRenderParams()->GetOrientable()) { _updateOriginGlyph(); }
-        if (dynamic_cast<ContourParams *>(_getRenderParams())) _drawContourSliceQuad();
+        if (_getRenderParams()->GetOrientable()) _drawContourSliceQuad();
     } else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
 #ifndef WIN32
         _glManager->PixelCoordinateSystemPush();
@@ -938,15 +938,11 @@ void VizWin::_updateOriginGlyph()
 
 void VizWin::_drawContourSliceQuad()
 {
-    ContourParams *cp = dynamic_cast<ContourParams *>(_getRenderParams());
-    assert(cp);
-    if (!cp) return;
-
     _glManager->matrixManager->PushMatrix();
     Renderer::ApplyDatasetTransform(_glManager, _getDataMgrTransform());
     Renderer::ApplyTransform(_glManager, _getDataMgrTransform(), _getRenderParams()->GetTransform());
 
-    auto quad = cp->GetSlicePlaneQuad();
+    auto quad = _getRenderParams()->GetSlicePlaneQuad();
 
     LegacyGL *lgl = _glManager->legacy;
     lgl->Color3f(0, 1, 0);
