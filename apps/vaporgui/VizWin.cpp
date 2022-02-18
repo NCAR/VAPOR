@@ -906,7 +906,7 @@ void VizWin::_updateOriginGlyph()
     // Find the average magnitude of the X and Y axes.  3% of that magnitude will be the size of the
     // origin marker's crosshairs.
     double              p = .03 * ((max[0] - min[0]) + (max[1] - min[1])) / 2;
-    std::vector<double> width = {p/scales[0], p/scales[1], p/scales[2]};
+    std::vector<double> width = {p / scales[0], p / scales[1], p / scales[2]};
 
     int depthFunc;
     glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
