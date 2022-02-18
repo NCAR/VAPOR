@@ -99,9 +99,6 @@ public:
     void SetTFLock(bool lock);
     bool GetTFLock();
 
-    void              SetSlicePlaneQuad(const vector<CoordType> &quad);
-    vector<CoordType> GetSlicePlaneQuad() const;
-
 private:
     void                _init();
     static const string _thicknessScaleTag;

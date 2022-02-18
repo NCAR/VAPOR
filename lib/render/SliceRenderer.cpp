@@ -239,6 +239,13 @@ int SliceRenderer::_regenerateSlice()
                      corner4[0], corner4[1], corner4[2],
                      corner2[0], corner2[1], corner2[2]};
 
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    std::vector<CoordType> sliceQuad = { {corner1[0], corner1[1], corner1[2]},
+                                         {corner3[0], corner3[1], corner3[2]},
+                                         {corner4[0], corner4[1], corner4[2]},
+                                         {corner2[0], corner2[1], corner2[2]}};
+    p->SetSlicePlaneQuad(sliceQuad);
+
     delete grid3d;
     if (slice == nullptr) {
         Wasp::MyBase::SetErrMsg("Unable to perform SliceGridAlongPlane() with current Grid");
