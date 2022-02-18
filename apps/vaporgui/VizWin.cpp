@@ -945,6 +945,10 @@ void VizWin::_drawContourSliceQuad()
     assert(cp);
     if (!cp) return;
 
+    _glManager->matrixManager->PushMatrix();
+    Renderer::ApplyDatasetTransform(_glManager, _getDataMgrTransform());
+    Renderer::ApplyTransform(_glManager, _getDataMgrTransform(), _getRenderParams()->GetTransform());
+
     auto quad = cp->GetSlicePlaneQuad();
 
     LegacyGL *lgl = _glManager->legacy;
@@ -953,4 +957,5 @@ void VizWin::_drawContourSliceQuad()
     for (auto v : quad) lgl->Vertex3dv(v.data());
     if (quad.size()) lgl->Vertex3dv(quad[0].data());
     lgl->End();
+    _glManager->matrixManager->PopMatrix();
 }

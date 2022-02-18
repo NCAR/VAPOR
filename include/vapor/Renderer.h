@@ -254,6 +254,10 @@ public:
 
     Transform *GetDatasetTransform() const { return GetViewpointParams()->GetTransform(_dataSetName); }
 
+    static void ApplyTransform(GLManager *gl, const Transform *dataset, const Transform *renderer);
+
+    static void ApplyDatasetTransform(GLManager *gl, const Transform *dataset);
+
 protected:
     Renderer() {}
 

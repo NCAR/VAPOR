@@ -123,29 +123,10 @@ int Visualizer::_getCurrentTimestep() const
 
 void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r)
 {
-    string datasetName = r->GetMyDatasetName();
-    string myName = r->GetMyName();
-    string myType = r->GetMyType();
-
-    VAPoR::ViewpointParams *vpParams = getActiveViewpointParams();
-    vector<double>          scales, rotations, translations, origin;
-    Transform *             t = vpParams->GetTransform(datasetName);
+    string     datasetName = r->GetMyDatasetName();
+    Transform *t = getActiveViewpointParams()->GetTransform(datasetName);
     VAssert(t);
-    scales = t->GetScales();
-    rotations = t->GetRotations();
-    translations = t->GetTranslations();
-    origin = t->GetOrigin();
-
-    MatrixManager *mm = _glManager->matrixManager;
-
-    mm->Translate(origin[0], origin[1], origin[2]);
-    mm->Rotate(glm::radians(rotations[0]), 1, 0, 0);
-    mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
-    mm->Rotate(glm::radians(rotations[2]), 0, 0, 1);
-    mm->Scale(scales[0], scales[1], scales[2]);
-    mm->Translate(-origin[0], -origin[1], -origin[2]);
-
-    mm->Translate(translations[0], translations[1], translations[2]);
+    Renderer::ApplyDatasetTransform(_glManager, t);
 }
 
 int Visualizer::paintEvent(bool fast)
