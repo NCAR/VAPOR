@@ -440,14 +440,14 @@ protected:
     virtual bool GetUseSingleColorDefault() const { return false; }
 
 private:
-    void                   _init();
-    void                   _calculateStride(string varName);
-    int                    _stride;
-    ParamsContainer *      _TFs;
-    Box *                  _Box;
-    ColorbarPbase *        _Colorbar;
-    Transform *            _transform;
-    bool                   _classInitialized;    //
+    void             _init();
+    void             _calculateStride(string varName);
+    int              _stride;
+    ParamsContainer *_TFs;
+    Box *            _Box;
+    ColorbarPbase *  _Colorbar;
+    Transform *      _transform;
+    bool             _classInitialized;    //
     std::vector<CoordType> _slicePlaneQuad;
 
     static const string _EnabledTag;
