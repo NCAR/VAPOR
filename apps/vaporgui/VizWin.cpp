@@ -874,6 +874,10 @@ void VizWin::updateManip(bool initialize)
 
 void VizWin::_updateOriginGlyph()
 {
+    _glManager->matrixManager->PushMatrix();
+    Renderer::ApplyDatasetTransform(_glManager, _getDataMgrTransform());
+    Renderer::ApplyTransform(_glManager, _getDataMgrTransform(), _getRenderParams()->GetTransform());
+
     VAPoR::RenderParams *rp = _getRenderParams();
     double               xOrigin = rp->GetValueDouble(RenderParams::XSlicePlaneOriginTag, 0.);
     double               yOrigin = rp->GetValueDouble(RenderParams::YSlicePlaneOriginTag, 0.);
@@ -884,10 +888,6 @@ void VizWin::_updateOriginGlyph()
     scales[0] *= scales2[0];
     scales[1] *= scales2[1];
     scales[2] *= scales2[2];
-
-    xOrigin *= scales[0];
-    yOrigin *= scales[1];
-    zOrigin *= scales[2];
 
     int            refLevel = rp->GetRefinementLevel();
     int            lod = rp->GetCompressionLevel();
@@ -902,15 +902,11 @@ void VizWin::_updateOriginGlyph()
 
     CoordType min, max;
     dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, min, max);
-    for (int i = 0; i < min.size(); i++) {
-        min[i] *= scales[i];
-        max[i] *= scales[i];
-    }
 
     // Find the average magnitude of the X and Y axes.  3% of that magnitude will be the size of the
     // origin marker's crosshairs.
     double              p = .03 * ((max[0] - min[0]) + (max[1] - min[1])) / 2;
-    std::vector<double> width = {p, p, p};
+    std::vector<double> width = {p / scales[0], p / scales[1], p / scales[2]};
 
     int depthFunc;
     glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
@@ -937,6 +933,7 @@ void VizWin::_updateOriginGlyph()
     lgl->End();
 
     glDepthFunc(depthFunc);
+    _glManager->matrixManager->PopMatrix();
 }
 
 void VizWin::_drawContourSliceQuad()
