@@ -666,7 +666,7 @@ void VizWin::_renderHelper(bool fast)
 
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
-        if (_getRenderParams() && _getRenderParams()->GetOrientable()) { 
+        if (_getRenderParams() && _getRenderParams()->GetOrientable()) {
             _updateOriginGlyph();
             _drawContourSliceQuad();
         }
