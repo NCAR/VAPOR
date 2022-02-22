@@ -240,12 +240,12 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
         float mult = _params_locked ? _c_vel_mult : _params->GetVelocityMultiplier();
         if (glm::any(hasMissing)) {
             return MISSING_VAL;
-        }
+        }    //
         else {
             velocity *= mult;
-            return 0;
+            return SUCCESS;
         }
-    }   // Finish steady case
+    }    // Finish steady case
     else {
         float mult = _params->GetVelocityMultiplier();
 
@@ -476,8 +476,8 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
     //   then we halve deltaT until the particle can go one step inside of the volume.
     auto smallestD = std::min(std::abs(minxyz.x - maxxyz.x), std::abs(minxyz.y - maxxyz.y));
     smallestD = std::min(smallestD, std::abs(minxyz.z - maxxyz.z));
-    while (maxmag * delT > double(smallestD)) {
-      delT /= 2.0;
+    while (maxmag * delT > double(smallestD)) {    //
+        delT /= 2.0;
     }
 
     return 0;
