@@ -272,6 +272,8 @@ int main(int argc, char **argv)
         if (rc < 0) return (1);
 
         for (int i = 0; i < datanames.size(); i++) {
+            if (find(coordnames.begin(), coordnames.end(), datanames[i])!=coordnames.end()) continue;
+
             DC::DataVar dvar;
             dccf.GetDataVarInfo(datanames[i], dvar);
 

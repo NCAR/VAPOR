@@ -365,12 +365,13 @@ int VDC::DefineCoordVar(string varname, vector<string> dim_names, string time_di
         return (-1);
     }
 
-    if (_mode == A) {
-        if (_coordVars.find(varname) != _coordVars.end()) {
-            SetErrMsg("Variable \"%s\" already defined", varname.c_str());
-            return (-1);
-        }
-    }
+    // No dulicates. Overwrite previous definition
+    //
+    auto ditr = _dataVars.find(varname);
+    if (ditr != _dataVars.end()) _dataVars.erase(ditr);
+
+    auto citr = _coordVars.find(varname);
+    if (citr != _coordVars.end()) _coordVars.erase(citr);
 
     if (axis == 3 && units.empty()) units = "seconds";
 
@@ -448,12 +449,13 @@ int VDC::_DefineDataVar(string varname, vector<string> dim_names, vector<string>
         return (-1);
     }
 
-    if (_mode == A) {
-        if (_dataVars.find(varname) != _dataVars.end()) {
-            SetErrMsg("Variable \"%s\" already defined", varname.c_str());
-            return (-1);
-        }
-    }
+    // No dulicates. Overwrite previous definition
+    //
+    auto ditr = _dataVars.find(varname);
+    if (ditr != _dataVars.end()) _dataVars.erase(ditr);
+
+    auto citr = _coordVars.find(varname);
+    if (citr != _coordVars.end()) _coordVars.erase(citr);
 
     int rc = _DefineImplicitCoordVars(dim_names, coord_vars, coord_vars);
     if (rc < 0) return (-1);
