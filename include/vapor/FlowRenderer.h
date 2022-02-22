@@ -124,7 +124,7 @@ private:
                           double                       newTime) const;                  // New time to assign to particles
 
     // Print return code if it's non-zero and compiled in debug mode.
-    void _printNonZero(int rtn, const char *file, const char *func, int line);
+    void _printNonZero(int rtn, const char *file, const char *func, int line) const;
 
 };    // End of class FlowRenderer
 

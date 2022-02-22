@@ -106,6 +106,9 @@ private:
     // Returns the value after adjustment.
     float _applyPeriodic(float val, float min, float max) const;
 
+    // Print return code if it's non-zero and compiled in debug mode.
+    void _printNonZero(int rtn, const char *file, const char *func, int line) const;
+
     void        _calculateParticleIntegratedValue(Particle &p, const Particle &prev, const Field *scalarField, const bool skipNonZero, const float distScale,
                                                   const std::vector<double> &integrateWithinVolumeMin, const std::vector<double> &integrateWithinVolumeMax) const;
     static bool _isParticleInsideVolume(const Particle &p, const std::vector<double> &min, const std::vector<double> &max);
