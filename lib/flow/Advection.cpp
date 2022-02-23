@@ -76,8 +76,14 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
             Particle p1;
             int      rv = 0;
             switch (method) {
-            case ADVECTION_METHOD::EULER: rv = _advectEuler(velocity, past0, dt, p1); break;
-            case ADVECTION_METHOD::RK4: rv = _advectRK4(velocity, past0, dt, p1); break;
+            case ADVECTION_METHOD::EULER:
+                rv = _advectEuler(velocity, past0, dt, p1);
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
+                break;
+            case ADVECTION_METHOD::RK4:
+                rv = _advectRK4(velocity, past0, dt, p1);
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
+                break;
             }
 
             if (rv == 0) {    // Advection successful!
@@ -239,8 +245,14 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
             Particle p1;
             int      rv = 0;
             switch (method) {
-            case ADVECTION_METHOD::EULER: rv = _advectEuler(velocity, p0, dt, p1); break;
-            case ADVECTION_METHOD::RK4: rv = _advectRK4(velocity, p0, dt, p1); break;
+            case ADVECTION_METHOD::EULER:
+                rv = _advectEuler(velocity, p0, dt, p1);
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
+                break;
+            case ADVECTION_METHOD::RK4:
+                rv = _advectRK4(velocity, p0, dt, p1);
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
+                break;
             }
             if (rv != 0) {    // Advection wasn't successful for some reason...
                 break;
@@ -519,18 +531,22 @@ int Advection::_advectEuler(Field *velocity, const Particle &p0, double dt, Part
 
 int Advection::_advectRK4(Field *velocity, const Particle &p0, double dt, Particle &p1) const
 {
-    glm::vec3 k1, k2, k3, k4;
-    double    dt_half = dt * 0.5;
-    float     dt32 = float(dt);              // glm is strict about data types (which is a good thing).
-    float     dt_half32 = float(dt_half);    // glm is strict about data types (which is a good thing).
-    int       rv;
+    glm::vec3    k1, k2, k3, k4;
+    const double dt_half = dt * 0.5;
+    const float  dt32 = float(dt);              // glm is strict about data types (which is a good thing).
+    const float  dt_half32 = float(dt_half);    // glm is strict about data types (which is a good thing).
+    int          rv = 0;
     rv = velocity->GetVelocity(p0.time, p0.location, k1);
+    _printNonZero(rv, __FILE__, __func__, __LINE__);
     if (rv != 0) return rv;
     rv = velocity->GetVelocity(p0.time + dt_half, p0.location + dt_half32 * k1, k2);
+    _printNonZero(rv, __FILE__, __func__, __LINE__);
     if (rv != 0) return rv;
     rv = velocity->GetVelocity(p0.time + dt_half, p0.location + dt_half32 * k2, k3);
+    _printNonZero(rv, __FILE__, __func__, __LINE__);
     if (rv != 0) return rv;
     rv = velocity->GetVelocity(p0.time + dt, p0.location + dt32 * k3, k4);
+    _printNonZero(rv, __FILE__, __func__, __LINE__);
     if (rv != 0) return rv;
     p1.location = p0.location + dt32 / 6.0f * (k1 + 2.0f * (k2 + k3) + k4);
     p1.time = p0.time + dt;
@@ -654,6 +670,15 @@ float Advection::_applyPeriodic(float val, float min, float max) const
         while (pval > max) pval -= span;
         return pval;
     }
+}
+
+void Advection::_printNonZero(int rtn, const char *file, const char *func, int line) const
+{
+#ifndef NDEBUG
+    if (rtn != 0) {    // only print non-zero values
+        printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line);
+    }
+#endif
 }
 
 auto Advection::GetValueVarName() const -> std::string { return _valueVarName; }

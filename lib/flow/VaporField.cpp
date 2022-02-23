@@ -238,13 +238,15 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
         }
         auto  hasMissing = glm::equal(velocity, missingV);
         float mult = _params_locked ? _c_vel_mult : _params->GetVelocityMultiplier();
-        if (glm::any(hasMissing))
+        if (glm::any(hasMissing)) {
             return MISSING_VAL;
+        }    //
         else {
             velocity *= mult;
-            return 0;
+            return SUCCESS;
         }
-    } else {
+    }    // Finish steady case
+    else {
         float mult = _params->GetVelocityMultiplier();
 
         // First check if the query time is within range
@@ -441,7 +443,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
             return rv;
         else {
             auto mag = glm::length(vel);
-            if (mag > maxmag) maxmag = mag;
+            maxmag = std::max(maxmag, mag);
         }
     }
 
@@ -468,6 +470,17 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
 
     const double actualNum = double(glm::distance(minxyz, maxxyz)) / double(maxmag);
     delT = actualNum / desiredNum;
+
+    // Another logic in determing the size of deltaT:
+    //   if deltaT will send a particle out of the domain in just one step in any direction,
+    //   then we halve deltaT until the particle can go one step inside of the volume.
+    float smallestD = std::numeric_limits<float>::max();
+    if (!VelocityNames[0].empty()) smallestD = std::min(smallestD, std::abs(minxyz.x - maxxyz.x));
+    if (!VelocityNames[1].empty()) smallestD = std::min(smallestD, std::abs(minxyz.y - maxxyz.y));
+    if (!VelocityNames[2].empty()) smallestD = std::min(smallestD, std::abs(minxyz.z - maxxyz.z));
+    while (maxmag * delT > double(smallestD)) {    //
+        delT /= 2.0;
+    }
 
     return 0;
 }

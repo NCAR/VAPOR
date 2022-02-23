@@ -278,14 +278,16 @@ int FlowRenderer::_paintGL(bool fast)
 
             Progress::StartIndefinite("Performing flowline calculations");
             Progress::Update(0);
-            _advection.AdvectSteps(&_velocityField, deltaT, numOfSteps);
+            rv = _advection.AdvectSteps(&_velocityField, deltaT, numOfSteps);
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
 
             // If the advection is bi-directional
             if (_2ndAdvection) {
                 assert(deltaT > 0.0);
                 auto deltaT2 = deltaT * -1.0;
 
-                _2ndAdvection->AdvectSteps(&_velocityField, deltaT2, numOfSteps);
+                rv = _2ndAdvection->AdvectSteps(&_velocityField, deltaT2, numOfSteps);
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
             }
             Progress::Finish();
         }
@@ -1280,7 +1282,7 @@ int FlowRenderer::_updateAdvectionPeriodicity(flow::Advection *advc)
     return 0;
 }
 
-void FlowRenderer::_printNonZero(int rtn, const char *file, const char *func, int line)
+void FlowRenderer::_printNonZero(int rtn, const char *file, const char *func, int line) const
 {
 #ifndef NDEBUG
     if (rtn != 0) {    // only print non-zero values
