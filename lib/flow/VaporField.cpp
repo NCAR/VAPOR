@@ -474,8 +474,10 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
     // Another logic in determing the size of deltaT:
     //   if deltaT will send a particle out of the domain in just one step in any direction,
     //   then we halve deltaT until the particle can go one step inside of the volume.
-    auto smallestD = std::min(std::abs(minxyz.x - maxxyz.x), std::abs(minxyz.y - maxxyz.y));
-    smallestD = std::min(smallestD, std::abs(minxyz.z - maxxyz.z));
+    float smallestD = std::numeric_limits<float>::max();
+    if (!VelocityNames[0].empty()) smallestD = std::min(smallestD, std::abs(minxyz.x - maxxyz.x));
+    if (!VelocityNames[1].empty()) smallestD = std::min(smallestD, std::abs(minxyz.y - maxxyz.y));
+    if (!VelocityNames[2].empty()) smallestD = std::min(smallestD, std::abs(minxyz.z - maxxyz.z));
     while (maxmag * delT > double(smallestD)) {    //
         delT /= 2.0;
     }
