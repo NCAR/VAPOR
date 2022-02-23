@@ -443,7 +443,6 @@ void VDC::_DefineMesh(string meshname, vector<string> dim_names, vector<string> 
 
 int VDC::_DefineDataVar(string varname, vector<string> dim_names, vector<string> coord_vars, string units, XType type, bool compressed, bool has_missing, double mv, string maskvar)
 {
-
     if (!_defineMode) {
         SetErrMsg("Not in define mode");
         return (-1);
@@ -500,11 +499,9 @@ int VDC::_DefineDataVar(string varname, vector<string> dim_names, vector<string>
 
     if (!maskvar.empty()) {
         _dataVars[varname] = DataVar(varname, units, type, wname, cratios, periodic, meshname, time_coord_var, DC::Mesh::NODE, mv, maskvar);
-    } 
-    else if (has_missing) {
+    } else if (has_missing) {
         _dataVars[varname] = DataVar(varname, units, type, wname, cratios, periodic, meshname, time_coord_var, DC::Mesh::NODE, mv);
-    }
-    else {
+    } else {
         _dataVars[varname] = DataVar(varname, units, type, wname, cratios, periodic, meshname, time_coord_var, DC::Mesh::NODE);
     }
 
@@ -1103,7 +1100,7 @@ bool VDC::_ValidDefineDataVar(string varname, vector<string> dim_names, vector<s
 {
     if (compressed && has_missing && maskvar.empty()) {
         SetErrMsg("Mask variable required for compressed data with missing values");
-        return(false);
+        return (false);
     }
 
     if (dim_names.size() > 4) {

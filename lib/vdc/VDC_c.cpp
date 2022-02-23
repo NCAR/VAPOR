@@ -536,7 +536,7 @@ int VDC_DefineDataVar(VDC *p, const char *varname, const char **dimnames, size_t
     for (int i = 0; i < coordvarsCount; i++) coordvars_v.push_back(string(coordvars[i]));
     VDC_DEBUG_printff_nRun(": calling VDC::DefineDataVar(\"%s\", %s, %s, \"%s\", %s, %s);\n", varname, _stringVectorToString(dimnames_v).c_str(), _stringVectorToString(coordvars_v).c_str(), units,
                            _XTypeToString(_IntToXType(xtype)), _boolToStr(compressed));
-    int ret = p->DefineDataVar(string(varname), dimnames_v, coordvars_v, string(units), _IntToXType(xtype), (bool) compressed);
+    int ret = p->DefineDataVar(string(varname), dimnames_v, coordvars_v, string(units), _IntToXType(xtype), (bool)compressed);
     VDC_DEBUG_printff_nRun(": return (%i);\n", ret);
     if (ret < 0) VDC_DEBUG_printff_error(": Error message = \"%s\"\n", Wasp::MyBase::GetErrMsg());
     VDC_DEBUG_printff_nRun(": Current coordvars = %s\n", _stringVectorToString(p->GetCoordVarNames()).c_str());
