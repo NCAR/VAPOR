@@ -576,6 +576,16 @@ public:
     //! \sa DefineDimension(), DefineCoordVar(), SetCompressionBlock()
     //!
     int DefineDataVar(string varname, std::vector<string> dimnames, std::vector<string> coordvars, string units, XType type, double missing_value, string maskvar);
+    //!
+    //! Define a non-compressed data variable with missing data
+    //!
+    //!
+    //! \param[in] missing_value Specifies a value that should be used
+    //! for masked grid locations after a variable is reconstructed.
+    //!
+    //! \sa DefineDimension(), DefineCoordVar(), SetCompressionBlock()
+    //!
+    int DefineDataVar(string varname, std::vector<string> dimnames, std::vector<string> coordvars, string units, XType type, double missing_value);
 
     //! Write an attribute
     //!
@@ -914,7 +924,7 @@ protected:
 
     bool _valid_mask_var(string varname, vector<DC::Dimension> dimensions, vector<size_t> bs, bool compressed, string maskvar) const;
 
-    bool _ValidDefineDataVar(string varname, vector<string> dimnames, vector<string> coordnames, string units, XType type, bool compressed, string maskvar) const;
+    bool _ValidDefineDataVar(string varname, vector<string> dimnames, vector<string> coordnames, string units, XType type, bool compressed, bool has_missing, string maskvar) const;
 
     bool _ValidCompressionBlock(vector<size_t> bs, string wname, vector<size_t> cratios) const;
 
@@ -925,7 +935,7 @@ protected:
 
     void _DefineMesh(string meshname, vector<string> dim_names, vector<string> coord_vars);
 
-    int _DefineDataVar(string varname, std::vector<string> dimnames, std::vector<string> coordvars, string units, XType type, bool compressed, double mv, string maskvar);
+    int _DefineDataVar(string varname, std::vector<string> dimnames, std::vector<string> coordvars, string units, XType type, bool compressed, bool has_missing, double mv, string maskvar);
 
     vector<string> _GetCoordVarDimNames(const CoordVar &var, bool &time_varying) const;
 
