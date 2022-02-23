@@ -517,12 +517,8 @@ int VDC::DefineDataVar(string varname, vector<string> dim_names, vector<string> 
 
 )
 {
-    return (VDC::_DefineDataVar(varname, dim_names, coord_vars, units, type, true, true, mv, maskvar));
-}
-
-int VDC::DefineDataVar(string varname, vector<string> dim_names, vector<string> coord_vars, string units, XType type, double mv)
-{
-    return (VDC::_DefineDataVar(varname, dim_names, coord_vars, units, type, false, true, mv, ""));
+    bool compressed = ! maskvar.empty();
+    return (VDC::_DefineDataVar(varname, dim_names, coord_vars, units, type, compressed, true, mv, maskvar));
 }
 
 bool VDC::getDataVarInfo(string varname, DC::DataVar &datavar) const

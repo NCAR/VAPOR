@@ -301,7 +301,8 @@ int main(int argc, char **argv)
                 rc = vdc.DefineDataVar(dvar.GetName(), dimnames, coordvars, dvar.GetUnits(), dvar.GetXType(), dvar.GetMissingValue(), maskvar_name);
 
             } else if (dvar.GetHasMissing() && !doCompress) {
-                rc = vdc.DefineDataVar(dvar.GetName(), dimnames, coordvars, dvar.GetUnits(), dvar.GetXType(), dvar.GetMissingValue());
+                rc = vdc.DefineDataVar(dvar.GetName(), dimnames, coordvars, dvar.GetUnits(), dvar.GetXType(), dvar.GetMissingValue(), "");
+
 
             } else {
                 rc = vdc.DefineDataVar(dvar.GetName(), dimnames, coordvars, dvar.GetUnits(), dvar.GetXType(), doCompress);

@@ -553,7 +553,7 @@ public:
     int DefineDataVar(string varname, std::vector<string> dimnames, std::vector<string> coordvars, string units, XType type, bool compressed);
 
     //!
-    //! Define a compressed data variable with missing data
+    //! Define a compressed or non-compressed data variable with missing data
     //!
     //! \copydoc VDC::DefineDataVar(
     //! 	string varname, std::vector <string> dimnames,
@@ -571,21 +571,12 @@ public:
     //! variable may be less than or equal to that of \p varname. The dimensions
     //! of \p maskvar must match the fastest varying dimensions of \p varname.
     //! The \p maskvar variable must have been previously defined with
-    //! DefineDataVar().
+    //! DefineDataVar(). If \p maskvar is empty, the variable will
+    //! not be compressed.
     //!
     //! \sa DefineDimension(), DefineCoordVar(), SetCompressionBlock()
     //!
     int DefineDataVar(string varname, std::vector<string> dimnames, std::vector<string> coordvars, string units, XType type, double missing_value, string maskvar);
-    //!
-    //! Define a non-compressed data variable with missing data
-    //!
-    //!
-    //! \param[in] missing_value Specifies a value that should be used
-    //! for masked grid locations after a variable is reconstructed.
-    //!
-    //! \sa DefineDimension(), DefineCoordVar(), SetCompressionBlock()
-    //!
-    int DefineDataVar(string varname, std::vector<string> dimnames, std::vector<string> coordvars, string units, XType type, double missing_value);
 
     //! Write an attribute
     //!
