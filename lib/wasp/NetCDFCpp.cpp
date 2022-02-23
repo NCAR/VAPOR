@@ -14,6 +14,27 @@ using namespace VAPoR;
         return (rc);                                                                                                                                     \
     }
 
+namespace {
+
+bool var_defs_match(int ncid, int varid, int dimids[], int ndimids, nc_type xtype) {
+
+	int mydimids[NC_MAX_DIMS];
+	int myndims;
+	(void) nc_inq_varndims(ncid, varid, &myndims);
+	(void) nc_inq_vardimid(ncid, varid, mydimids);
+	for (int i=0; i<ndimids; i++) {
+		if (mydimids[i] != dimids[i]) return(false);
+	}
+	nc_type myxtype;
+	(void) nc_inq_vartype(ncid, varid, &myxtype);
+	if (myxtype != xtype) return(false);
+
+	return(true);
+}
+
+
+};
+
 NetCDFCpp::NetCDFCpp()
 {
     _ncid = -1;
@@ -108,8 +129,19 @@ int NetCDFCpp::DefVar(string name, nc_type xtype, vector<string> dimnames)
         MY_NC_ERR(rc, _path, "nc_inq_dimid(" + dimnames[i] + ")");
     }
 
+    // Don't error out if variable already exists and has same definition
+    //
     int varid;
-    int rc = nc_def_var(_ncid, name.c_str(), xtype, dimnames.size(), dimids, &varid);
+    int rc = nc_inq_varid(_ncid, name.c_str(), &varid);
+    if (rc == NC_NOERR) {
+        if (! var_defs_match(_ncid, varid, dimids, dimnames.size(), xtype)) {
+            MY_NC_ERR(NC_ENAMEINUSE, _path, "nc_def_var(" + name + ")");
+            return(NC_ENAMEINUSE);
+        }
+        return (NC_NOERR);
+    }
+
+    rc = nc_def_var(_ncid, name.c_str(), xtype, dimnames.size(), dimids, &varid);
     MY_NC_ERR(rc, _path, "nc_def_var(" + name + ")");
     return (NC_NOERR);
 }
