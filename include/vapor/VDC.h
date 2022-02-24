@@ -553,7 +553,7 @@ public:
     int DefineDataVar(string varname, std::vector<string> dimnames, std::vector<string> coordvars, string units, XType type, bool compressed);
 
     //!
-    //! Define a compressed data variable with missing data
+    //! Define a compressed or non-compressed data variable with missing data
     //!
     //! \copydoc VDC::DefineDataVar(
     //! 	string varname, std::vector <string> dimnames,
@@ -571,7 +571,8 @@ public:
     //! variable may be less than or equal to that of \p varname. The dimensions
     //! of \p maskvar must match the fastest varying dimensions of \p varname.
     //! The \p maskvar variable must have been previously defined with
-    //! DefineDataVar().
+    //! DefineDataVar(). If \p maskvar is empty, the variable will
+    //! not be compressed.
     //!
     //! \sa DefineDimension(), DefineCoordVar(), SetCompressionBlock()
     //!
@@ -914,7 +915,7 @@ protected:
 
     bool _valid_mask_var(string varname, vector<DC::Dimension> dimensions, vector<size_t> bs, bool compressed, string maskvar) const;
 
-    bool _ValidDefineDataVar(string varname, vector<string> dimnames, vector<string> coordnames, string units, XType type, bool compressed, string maskvar) const;
+    bool _ValidDefineDataVar(string varname, vector<string> dimnames, vector<string> coordnames, string units, XType type, bool compressed, bool has_missing, string maskvar) const;
 
     bool _ValidCompressionBlock(vector<size_t> bs, string wname, vector<size_t> cratios) const;
 
@@ -925,7 +926,7 @@ protected:
 
     void _DefineMesh(string meshname, vector<string> dim_names, vector<string> coord_vars);
 
-    int _DefineDataVar(string varname, std::vector<string> dimnames, std::vector<string> coordvars, string units, XType type, bool compressed, double mv, string maskvar);
+    int _DefineDataVar(string varname, std::vector<string> dimnames, std::vector<string> coordvars, string units, XType type, bool compressed, bool has_missing, double mv, string maskvar);
 
     vector<string> _GetCoordVarDimNames(const CoordVar &var, bool &time_varying) const;
 
