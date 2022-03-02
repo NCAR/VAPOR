@@ -251,6 +251,8 @@ int GeoImage::TiffReadImage(int dirnum, unsigned char *texture) const
 //
 int GeoImage::CornerExtents(const double srccoords[4], double dstcoords[4], string proj4src) const
 {
+proj4src += " +over";
+
     Proj4API proj4API;
     int      rc = proj4API.Initialize(proj4src, "");
     if (rc < 0) return (-1);
@@ -277,10 +279,12 @@ int GeoImage::CornerExtents(const double srccoords[4], double dstcoords[4], stri
     // entire enclosed region. The inverse Proj4 transform does not prevent
     // wraparound
     //
+#ifdef	DEAD
     for (size_t j = 0; j < ny; j++) {
         GeoUtil::UnwrapLongitude(xsamples.begin() + (j * nx), xsamples.begin() + (j * nx) + nx);
         GeoUtil::ShiftLon(xsamples.begin() + (j * nx), xsamples.begin() + (j * nx) + nx);
     }
+#endif
     double minx = *(std::min_element(xsamples.begin(), xsamples.end()));
     double maxx = *(std::max_element(xsamples.begin(), xsamples.end()));
     double miny = *(std::min_element(ysamples.begin(), ysamples.end()));
