@@ -31,10 +31,9 @@ void ConstantGrid::GetUserExtentsHelper(VAPoR::CoordType &minu, VAPoR::CoordType
 
 bool ConstantGrid::InsideGrid(const VAPoR::CoordType &coords) const { return true; }
 
-std::vector<size_t> ConstantGrid::GetCoordDimensions(size_t) const
+VAPoR::DimsType ConstantGrid::GetCoordDimensions(size_t) const
 {
-    std::vector<size_t> tmp;
-    return tmp;
+    return(VAPoR::DimsType{1,1,1});
 }
 
 size_t ConstantGrid::GetGeometryDim() const { return 3; }

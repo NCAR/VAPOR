@@ -38,7 +38,7 @@ public:
     UnstructuredGrid3D() = default;
     virtual ~UnstructuredGrid3D() = default;
 
-    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
+    virtual DimsType GetCoordDimensions(size_t dim) const override;
 
     virtual size_t GetGeometryDim() const override;
 

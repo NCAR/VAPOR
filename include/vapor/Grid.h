@@ -124,7 +124,7 @@ public:
     //! a vector of length one with its single component equal to
     //! one is returned.
     //!
-    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const = 0;
+    virtual DimsType GetCoordDimensions(size_t dim) const = 0;
 
     virtual std::string GetType() const = 0;
 
