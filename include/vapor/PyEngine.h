@@ -162,8 +162,8 @@ public:
     //! executing \p script. The size of the region copied is given by the
     //! dimensions in \p outputVarDims
     //!
-    static int Calculate(const string &script, vector<string> inputVarNames, vector<vector<size_t>> inputVarDims, vector<float *> inputVarArrays, vector<string> outputVarNames,
-                         vector<vector<size_t>> outputVarDims, vector<float *> outputVarArrays);
+    static int Calculate(const string &script, vector<string> inputVarNames, vector<DimsType> inputVarDims, vector<float *> inputVarArrays, vector<string> outputVarNames,
+                         vector<DimsType> outputVarDims, vector<float *> outputVarArrays);
 
 private:
     class RENDER_API DerivedPythonVar : public DerivedDataVar {
@@ -182,6 +182,8 @@ private:
         int GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
 
         virtual size_t GetNumRefLevels() const;
+
+        virtual std::vector<size_t> GetCRatios() const { return (_varInfo.GetCRatios()); }
 
         int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
 
@@ -206,13 +208,13 @@ private:
         DataMgr *           _dataMgr;
         bool                _coordFlag;
         DC::FileTable       _fileTable;
-        vector<size_t>      _dims;
+        DimsType            _dims;
         bool                _meshMatchFlag;
         string              _stdoutString;
 
-        int _readRegionAll(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+        int _readRegionAll(int fd, const DimsType &min, const DimsType &max, float *region);
 
-        int _readRegionSubset(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+        int _readRegionSubset(int fd, const DimsType &min, const DimsType &max, float *region);
     };
 
     class func_c {
@@ -242,9 +244,9 @@ private:
 
     static void _cleanupDict(PyObject *mainDict, vector<string> keynames);
 
-    static int _c2python(PyObject *dict, vector<string> inputVarNames, vector<vector<size_t>> inputVarDims, vector<float *> inputVarArrays);
+    static int _c2python(PyObject *dict, vector<string> inputVarNames, vector<DimsType> inputVarDims, vector<float *> inputVarArrays);
 
-    static int _python2c(PyObject *dict, vector<string> outputVarNames, vector<vector<size_t>> outputVarDims, vector<float *> outputVarArrays);
+    static int _python2c(PyObject *dict, vector<string> outputVarNames, vector<DimsType> outputVarDims, vector<float *> outputVarArrays);
 
     bool _validOutputVar(string name) const;
     int  _checkOutVars(const vector<string> &outputVarNames) const;

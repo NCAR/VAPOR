@@ -443,6 +443,11 @@ public:
     //!
     virtual void SetInterpolationOrder(int order);
 
+    //! Compute the dimensions of a rectangular region bounded
+    //! by \p min and \p max coordinates
+    //
+    static DimsType Dims(const DimsType &min, const DimsType &max);
+
     //! Return the user coordinates of a grid point
     //!
     //! This method returns the user coordinates of the grid point
@@ -791,6 +796,7 @@ public:
 
         return ((left <= pt[0]) && (right >= pt[0]) && (top <= pt[1]) && (bottom >= pt[1]));
     }
+
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
 

@@ -20,7 +20,7 @@ struct varinfo_t {
     {
         _g = NULL;
         _name.clear();
-        _dims.clear();
+        _dims = {1,1,1};
         _coordNames.clear();
         _coordAxes.clear();
         _coordDims.clear();
@@ -28,10 +28,10 @@ struct varinfo_t {
 
     Grid *                 _g;
     string                 _name;
-    vector<size_t>         _dims;
+    DimsType               _dims;
     vector<string>         _coordNames;
     vector<int>            _coordAxes;
-    vector<vector<size_t>> _coordDims;
+    vector<DimsType>       _coordDims;
 };
 
 void free_arrays(vector<float *> &arrays)
@@ -47,12 +47,12 @@ void free_arrays(vector<float *> &inputVarArrays, vector<float *> &outputVarArra
     free_arrays(outputVarArrays);
 }
 
-int alloc_arrays(const vector<vector<size_t>> &dimsVectors, vector<float *> &arrays)
+int alloc_arrays(const vector<DimsType> &dimsVectors, vector<float *> &arrays)
 {
     arrays.clear();
 
     for (int i = 0; i < dimsVectors.size(); i++) {
-        size_t nElements = VProduct(dimsVectors[i]);
+        size_t nElements = VProduct(dimsVectors[i].data(), dimsVectors[i].size());
 
         float *buf = new (nothrow) float[nElements];
         if (!buf) {
@@ -65,7 +65,7 @@ int alloc_arrays(const vector<vector<size_t>> &dimsVectors, vector<float *> &arr
     return (0);
 }
 
-int alloc_arrays(const vector<vector<size_t>> &inputVarDims, const vector<vector<size_t>> &outputVarDims, vector<float *> &inputVarArrays, vector<float *> &outputVarArrays)
+int alloc_arrays(const vector<DimsType> &inputVarDims, const vector<DimsType> &outputVarDims, vector<float *> &inputVarArrays, vector<float *> &outputVarArrays)
 {
     inputVarArrays.clear();
     outputVarArrays.clear();
@@ -82,39 +82,35 @@ int alloc_arrays(const vector<vector<size_t>> &inputVarDims, const vector<vector
     return (0);
 }
 
-void copy_region(const float *src, float *dst, const vector<size_t> &min, const vector<size_t> &max, const vector<size_t> &dims)
+void copy_region(const float *src, float *dst, const DimsType &min, const DimsType &max, const DimsType &dims)
 {
-    vector<size_t> coord = min;
-    for (size_t i = 0; i < VProduct(Dims(min, max)); i++) {
-        size_t offset = LinearizeCoords(coord, dims);
+    DimsType coord = min;
+    for (size_t i = 0; i < VProduct(Grid::Dims(min, max).data(), min.size()); i++) {
+        size_t offset = LinearizeCoords(coord.data(), dims.data(), coord.size());
 
         dst[i] = src[offset];
 
-        coord = IncrementCoords(min, max, coord);
+        IncrementCoords(min.data(), max.data(), coord.data(), min.size(), 0);
     }
 }
 
 void copy_coord(const Grid *g, int axis, float *dst)
 {
-    vector<size_t> dims = g->GetCoordDimensions(axis);
+    DimsType dims = g->GetCoordDimensions(axis);
 
-    vector<size_t> min;
-    vector<size_t> max;
-    for (int i = 0; i < dims.size(); i++) {
-        min.push_back(0);
-        max.push_back(dims[i] - 1);
-    }
+    DimsType min = {0,0,0};
+    DimsType max = {dims[0]-1, dims[1]-1, dims[2]-1};
 
     // Fetch user coordinates from grid. Note: assumes that if coordinate
     // dimensions are less than grid dimensions than the coordinate
 
-    vector<size_t> index = min;
-    vector<double> coord;
-    for (size_t i = 0; i < VProduct(Dims(min, max)); i++) {
+    DimsType  index = min;
+    CoordType coord;
+    for (size_t i = 0; i < VProduct(Grid::Dims(min, max).data(), min.size()); i++) {
         g->GetUserCoordinates(index, coord);
         dst[i] = coord[axis];
 
-        index = IncrementCoords(min, max, index);
+        IncrementCoords(min.data(), max.data(), index.data(), index.size(), 0);
     }
 }
 
@@ -174,9 +170,7 @@ void get_var_info(DataMgr *dataMgr, const vector<Grid *> &gs, const vector<strin
         varinfo_t varinfo;
         varinfo._g = gs[i];
         varinfo._name = varNames[i];
-        auto tmp = gs[i]->GetDimensions();
-        varinfo._dims = {tmp[0], tmp[1], tmp[2]};
-        varinfo._dims.resize(gs[i]->GetNumDimensions());
+        varinfo._dims = gs[i]->GetDimensions();
 
         varinfo._coordNames.clear();
         varinfo._coordAxes.clear();
@@ -212,6 +206,15 @@ void get_var_info(DataMgr *dataMgr, const vector<Grid *> &gs, const vector<strin
         }
         varinfoVec.push_back(varinfo);
     }
+}
+
+// Remove trailing, degenerate unit dimensions
+//
+size_t number_of_dims(DimsType dims) {
+	size_t n = dims.size();
+	while (n>1 && dims[n-1] <= 1) n--;
+
+    return(n);
 }
 
 };    // namespace
@@ -363,8 +366,8 @@ PyEngine::~PyEngine()
     while ((itr = _functions.begin()) != _functions.end()) { RemoveFunction(itr->first); }
 }
 
-int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vector<vector<size_t>> inputVarDims, vector<float *> inputVarArrays, vector<string> outputVarNames,
-                        vector<vector<size_t>> outputVarDims, vector<float *> outputVarArrays)
+int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vector<DimsType> inputVarDims, vector<float *> inputVarArrays, vector<string> outputVarNames,
+                        vector<DimsType> outputVarDims, vector<float *> outputVarArrays)
 {
     VAssert(inputVarNames.size() == inputVarDims.size());
     VAssert(inputVarNames.size() == inputVarArrays.size());
@@ -428,16 +431,15 @@ void PyEngine::_cleanupDict(PyObject *mainDict, vector<string> keynames)
     }
 }
 
-int PyEngine::_c2python(PyObject *dict, vector<string> inputVarNames, vector<vector<size_t>> inputVarDims, vector<float *> inputVarArrays)
+int PyEngine::_c2python(PyObject *dict, vector<string> inputVarNames, vector<DimsType> inputVarDims, vector<float *> inputVarArrays)
 {
-    npy_intp pyDims[3];
+    npy_intp pyDims[3] = {1,1,1};
     for (int i = 0; i < inputVarNames.size(); i++) {
-        VAssert(inputVarDims[i].size() >= 1 && inputVarDims[i].size() <= 3);
 
-        const vector<size_t> &dims = inputVarDims[i];
-        for (int j = 0; j < dims.size(); j++) { pyDims[dims.size() - j - 1] = dims[j]; }
+        const DimsType &dims = inputVarDims[i];
+        for (int j = 0; j < number_of_dims(dims); j++) { pyDims[number_of_dims(dims) - j - 1] = dims[j]; }
 
-        PyObject *pyArray = PyArray_SimpleNewFromData(dims.size(), pyDims, NPY_FLOAT32, inputVarArrays[i]);
+        PyObject *pyArray = PyArray_SimpleNewFromData(number_of_dims(dims), pyDims, NPY_FLOAT32, inputVarArrays[i]);
 
         PyObject *ky = Py_BuildValue("s", inputVarNames[i].c_str());
         PyObject_SetItem(dict, ky, pyArray);
@@ -448,7 +450,7 @@ int PyEngine::_c2python(PyObject *dict, vector<string> inputVarNames, vector<vec
     return (0);
 }
 
-int PyEngine::_python2c(PyObject *dict, vector<string> outputVarNames, vector<vector<size_t>> outputVarDims, vector<float *> outputVarArrays)
+int PyEngine::_python2c(PyObject *dict, vector<string> outputVarNames, vector<DimsType> outputVarDims, vector<float *> outputVarArrays)
 {
     for (int i = 0; i < outputVarNames.size(); i++) {
         const string &vname = outputVarNames[i];
@@ -468,24 +470,24 @@ int PyEngine::_python2c(PyObject *dict, vector<string> outputVarNames, vector<ve
             return -1;
         }
 
-        const vector<size_t> &dims = outputVarDims[i];
+        const DimsType        &dims = outputVarDims[i];
         int                   nd = PyArray_NDIM(varArray);
 
-        if (nd != dims.size()) {
+        if (nd != number_of_dims(dims)) {
             SetErrMsg("Shape of %s array does not match", vname.c_str());
             return -1;
         }
 
         npy_intp *pyDims = PyArray_DIMS(varArray);
-        for (int j = 0; j < dims.size(); j++) {
-            if (pyDims[dims.size() - j - 1] != dims[j]) {
+        for (int j = 0; j < nd; j++) {
+            if (pyDims[number_of_dims(dims) - j - 1] != dims[j]) {
                 SetErrMsg("Shape of %s array does not match", vname.c_str());
                 return -1;
             }
         }
 
         float *dataArray = (float *)PyArray_DATA(varArray);
-        size_t nelements = VProduct(dims);
+        size_t nelements = VProduct(dims.data(), dims.size());
 
         float *outArray = outputVarArrays[i];
         for (size_t j = 0; j < nelements; j++) { outArray[j] = dataArray[j]; }
@@ -502,7 +504,7 @@ PyEngine::DerivedPythonVar::DerivedPythonVar(string varName, string units, DC::X
     _script = script;
     _dataMgr = dataMgr;
     _coordFlag = coordFlag;
-    _dims.clear();
+    _dims = {1,1,1};
     _meshMatchFlag = false;
     _stdoutString.clear();
     if (hasMissing) {
@@ -521,12 +523,13 @@ int PyEngine::DerivedPythonVar::Initialize()
     }
 
     vector<string> dimNames = m.GetDimNames();
+    VAssert(dimNames.size() <= _dims.size());
     for (int i = 0; i < dimNames.size(); i++) {
         DC::Dimension dim;
         status = _dataMgr->GetDimension(dimNames[i], dim, -1);
         VAssert(status);
 
-        _dims.push_back(dim.GetLength());
+        _dims[i] = dim.GetLength();
     }
 
     string mesh = _varInfo.GetMeshName();
@@ -563,11 +566,16 @@ bool PyEngine::DerivedPythonVar::GetBaseVarInfo(DC::BaseVar &var) const
 
 int PyEngine::DerivedPythonVar::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {
+    dims_at_level.clear();
+    bs_at_level.clear();
+
     if (_meshMatchFlag && _inNames.size()) {
         int rc = _dataMgr->GetDimLensAtLevel(_inNames[0], level, dims_at_level, -1);
         VAssert(rc >= 0);
     } else {
-        dims_at_level = _dims;
+        for(int i=0; i<number_of_dims(_dims) && i<_dims.size(); i++) {
+            dims_at_level.push_back(_dims[i]);
+        }
     }
 
     // No blocking
@@ -586,6 +594,10 @@ size_t PyEngine::DerivedPythonVar::GetNumRefLevels() const
 
 int PyEngine::DerivedPythonVar::OpenVariableRead(size_t ts, int level, int lod)
 {
+    if (level < 0) level = GetNumRefLevels() + level;
+
+    if (lod < 0) lod = _varInfo.GetCRatios().size() + lod;
+ 
     DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, _derivedVarName, level, lod);
 
     return (_fileTable.AddEntry(f));
@@ -605,7 +617,7 @@ int PyEngine::DerivedPythonVar::CloseVariable(int fd)
     return (0);
 }
 
-int PyEngine::DerivedPythonVar::_readRegionAll(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region)
+int PyEngine::DerivedPythonVar::_readRegionAll(int fd, const DimsType &min, const DimsType &max, float *region)
 {
     DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
 
@@ -621,7 +633,7 @@ int PyEngine::DerivedPythonVar::_readRegionAll(int fd, const std::vector<size_t>
     vector<varinfo_t> varInfoVec;
     get_var_info(_dataMgr, variables, _inNames, _coordFlag, varInfoVec);
 
-    vector<vector<size_t>> inputVarDims;
+    vector<DimsType> inputVarDims;
     vector<string>         inputNames;
     for (int i = 0; i < varInfoVec.size(); i++) {
         const varinfo_t &vref = varInfoVec[i];
@@ -634,9 +646,12 @@ int PyEngine::DerivedPythonVar::_readRegionAll(int fd, const std::vector<size_t>
         }
     }
 
-    vector<size_t> dims, dummy;
-    (void)GetDimLensAtLevel(level, dims, dummy);
-    vector<vector<size_t>> outputVarDims = {dims};
+    vector<size_t> dims_vec, dummy;
+    (void)GetDimLensAtLevel(level, dims_vec, dummy);
+
+    DimsType dims = {1,1,1};
+    Grid::CopyToArr3(dims_vec, dims);
+    vector<DimsType> outputVarDims = {dims};
 
     vector<float *> inputVarArrays;
     vector<float *> outputVarArrays;
@@ -673,7 +688,7 @@ int PyEngine::DerivedPythonVar::_readRegionAll(int fd, const std::vector<size_t>
     return (0);
 }
 
-int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size_t> &minVec, const std::vector<size_t> &maxVec, float *region)
+int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const DimsType &min, const DimsType &max, float *region)
 {
     DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
 
@@ -683,18 +698,13 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     int    level = f->GetLevel();
     int    lod = f->GetLOD();
 
-    DimsType min = {0, 0, 0};
-    DimsType max = {0, 0, 0};
-    Grid::CopyToArr3(minVec, min);
-    Grid::CopyToArr3(maxVec, max);
-
     int rc = DataMgrUtils::GetGrids(_dataMgr, ts, _inNames, min, max, false, &level, &lod, variables);
     if (rc < 0) return (-1);
 
     vector<varinfo_t> varInfoVec;
     get_var_info(_dataMgr, variables, _inNames, _coordFlag, varInfoVec);
 
-    vector<vector<size_t>> inputVarDims;
+    vector<DimsType> inputVarDims;
     vector<string>         inputNames;
     for (int i = 0; i < varInfoVec.size(); i++) {
         const varinfo_t &vref = varInfoVec[i];
@@ -710,13 +720,13 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     // output and input variable(s) (if they exist) are all defined
     // on the same mesh (they have same dimensions)
     //
-    vector<vector<size_t>> outputVarDims;
+    vector<DimsType> outputVarDims;
     DimsType               minAbs = {0, 0, 0};
     if (inputVarDims.size()) {
         outputVarDims.push_back(inputVarDims[0]);
         minAbs = variables[0]->GetMinAbs();
     } else {
-        outputVarDims.push_back(Dims(minVec, maxVec));
+        outputVarDims.push_back(Grid::Dims(min, max));
     }
 
     vector<float *> inputVarArrays;
@@ -751,10 +761,10 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     // the entire domain. We need to correct them by substracting off the
     // origin of the ROI contained in the Grid objects
     //
-    vector<size_t> min_roi, max_roi;
+    DimsType min_roi, max_roi;
     for (int i = 0; i < min.size(); i++) {
-        min_roi.push_back(min[i] - minAbs[i]);
-        max_roi.push_back(max[i] - minAbs[i]);
+        min_roi[i] = (min[i] - minAbs[i]);
+        max_roi[i] = (max[i] - minAbs[i]);
     }
     copy_region(outputVarArrays[0], region, min_roi, max_roi, outputVarDims[0]);
 
@@ -763,8 +773,14 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     return (0);
 }
 
-int PyEngine::DerivedPythonVar::ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region)
+int PyEngine::DerivedPythonVar::ReadRegion(int fd, const std::vector<size_t> &minVec, const std::vector<size_t> &maxVec, float *region)
 {
+    DimsType min = {0,0,0};
+    Grid::CopyToArr3(minVec, min);
+
+    DimsType max = {0,0,0};
+    Grid::CopyToArr3(maxVec, max);
+
     if (_meshMatchFlag) {
         return (_readRegionSubset(fd, min, max, region));
     } else {
