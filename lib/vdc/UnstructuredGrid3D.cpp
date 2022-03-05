@@ -52,7 +52,7 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 
 DimsType UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
 {
-    DimsType dims = {1,1,1};
+    DimsType dims = {1, 1, 1};
 
     if (dim == 0) {
         dims = _xug.GetDimensions();
@@ -60,9 +60,9 @@ DimsType UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
         dims = _yug.GetDimensions();
     } else if (dim == 2) {
         dims = _zug.GetDimensions();
-    } 
+    }
 
-    return(dims);
+    return (dims);
 }
 
 

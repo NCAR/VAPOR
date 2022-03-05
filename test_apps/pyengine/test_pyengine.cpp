@@ -66,9 +66,9 @@ void test_calculate()
     //	string script = "C = sqrt(A) + B";
     string                 script = "C = A + B";
     vector<string>         inputVarNames = {"A", "B"};
-    vector<DimsType> inputVarDims = {dims, dims};
+    vector<DimsType>       inputVarDims = {dims, dims};
     vector<string>         outputVarNames = {"C"};
-    vector<DimsType> outputVarDims = {dims};
+    vector<DimsType>       outputVarDims = {dims};
 
     float *A = new float[vproduct(dims)];
     float *B = new float[vproduct(dims)];

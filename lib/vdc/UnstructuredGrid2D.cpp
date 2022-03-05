@@ -55,8 +55,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
 
 DimsType UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
 {
-
-    DimsType dims = {1,1,1};
+    DimsType dims = {1, 1, 1};
 
     if (dim == 0) {
         dims = _xug.GetDimensions();

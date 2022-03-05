@@ -56,7 +56,7 @@ LayeredGrid::LayeredGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv,
 
 DimsType LayeredGrid::GetCoordDimensions(size_t dim) const
 {
-    DimsType dims = {1,1,1};
+    DimsType dims = {1, 1, 1};
 
     if (dim == 0) {
         dims[0] = GetDimensions()[0];
@@ -64,9 +64,9 @@ DimsType LayeredGrid::GetCoordDimensions(size_t dim) const
         dims[0] = GetDimensions()[1];
     } else if (dim == 2) {
         dims = _zrg.GetDimensions();
-    } 
+    }
 
-    return(dims);
+    return (dims);
 }
 
 void LayeredGrid::GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const

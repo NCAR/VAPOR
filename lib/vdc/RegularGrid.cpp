@@ -67,7 +67,7 @@ RegularGrid::RegularGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv,
 
 DimsType RegularGrid::GetCoordDimensions(size_t dim) const
 {
-    DimsType dims = {1,1,1};
+    DimsType dims = {1, 1, 1};
 
     if (dim == 0) {
         dims[0] = GetDimensions()[0];
@@ -77,7 +77,7 @@ DimsType RegularGrid::GetCoordDimensions(size_t dim) const
         dims[0] = GetDimensions()[2];
     }
 
-    return(dims);
+    return (dims);
 }
 
 float RegularGrid::GetValueNearestNeighbor(const CoordType &coords) const

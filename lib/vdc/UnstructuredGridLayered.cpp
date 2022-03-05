@@ -55,7 +55,7 @@ UnstructuredGridLayered::UnstructuredGridLayered(const std::vector<size_t> &vert
 
 DimsType UnstructuredGridLayered::GetCoordDimensions(size_t dim) const
 {
-    DimsType dims = {1,1,1};
+    DimsType dims = {1, 1, 1};
 
     if (dim == 0) {
         dims = _ug2d.GetCoordDimensions(dim);
@@ -63,7 +63,7 @@ DimsType UnstructuredGridLayered::GetCoordDimensions(size_t dim) const
         dims = _ug2d.GetCoordDimensions(dim);
     } else if (dim == 2) {
         dims = _zug.GetDimensions();
-    } 
+    }
 
     return (dims);
 }

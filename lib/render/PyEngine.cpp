@@ -20,7 +20,7 @@ struct varinfo_t {
     {
         _g = NULL;
         _name.clear();
-        _dims = {1,1,1};
+        _dims = {1, 1, 1};
         _coordNames.clear();
         _coordAxes.clear();
         _coordDims.clear();
@@ -98,8 +98,8 @@ void copy_coord(const Grid *g, int axis, float *dst)
 {
     DimsType dims = g->GetCoordDimensions(axis);
 
-    DimsType min = {0,0,0};
-    DimsType max = {dims[0]-1, dims[1]-1, dims[2]-1};
+    DimsType min = {0, 0, 0};
+    DimsType max = {dims[0] - 1, dims[1] - 1, dims[2] - 1};
 
     // Fetch user coordinates from grid. Note: assumes that if coordinate
     // dimensions are less than grid dimensions than the coordinate
@@ -210,11 +210,12 @@ void get_var_info(DataMgr *dataMgr, const vector<Grid *> &gs, const vector<strin
 
 // Remove trailing, degenerate unit dimensions
 //
-size_t number_of_dims(DimsType dims) {
-	size_t n = dims.size();
-	while (n>1 && dims[n-1] <= 1) n--;
+size_t number_of_dims(DimsType dims)
+{
+    size_t n = dims.size();
+    while (n > 1 && dims[n - 1] <= 1) n--;
 
-    return(n);
+    return (n);
 }
 
 };    // namespace
@@ -433,9 +434,8 @@ void PyEngine::_cleanupDict(PyObject *mainDict, vector<string> keynames)
 
 int PyEngine::_c2python(PyObject *dict, vector<string> inputVarNames, vector<DimsType> inputVarDims, vector<float *> inputVarArrays)
 {
-    npy_intp pyDims[3] = {1,1,1};
+    npy_intp pyDims[3] = {1, 1, 1};
     for (int i = 0; i < inputVarNames.size(); i++) {
-
         const DimsType &dims = inputVarDims[i];
         for (int j = 0; j < number_of_dims(dims); j++) { pyDims[number_of_dims(dims) - j - 1] = dims[j]; }
 
@@ -470,7 +470,7 @@ int PyEngine::_python2c(PyObject *dict, vector<string> outputVarNames, vector<Di
             return -1;
         }
 
-        const DimsType        &dims = outputVarDims[i];
+        const DimsType &      dims = outputVarDims[i];
         int                   nd = PyArray_NDIM(varArray);
 
         if (nd != number_of_dims(dims)) {
@@ -504,7 +504,7 @@ PyEngine::DerivedPythonVar::DerivedPythonVar(string varName, string units, DC::X
     _script = script;
     _dataMgr = dataMgr;
     _coordFlag = coordFlag;
-    _dims = {1,1,1};
+    _dims = {1, 1, 1};
     _meshMatchFlag = false;
     _stdoutString.clear();
     if (hasMissing) {
@@ -573,9 +573,7 @@ int PyEngine::DerivedPythonVar::GetDimLensAtLevel(int level, std::vector<size_t>
         int rc = _dataMgr->GetDimLensAtLevel(_inNames[0], level, dims_at_level, -1);
         VAssert(rc >= 0);
     } else {
-        for(int i=0; i<number_of_dims(_dims) && i<_dims.size(); i++) {
-            dims_at_level.push_back(_dims[i]);
-        }
+        for (int i = 0; i < number_of_dims(_dims) && i < _dims.size(); i++) { dims_at_level.push_back(_dims[i]); }
     }
 
     // No blocking
@@ -597,7 +595,7 @@ int PyEngine::DerivedPythonVar::OpenVariableRead(size_t ts, int level, int lod)
     if (level < 0) level = GetNumRefLevels() + level;
 
     if (lod < 0) lod = _varInfo.GetCRatios().size() + lod;
- 
+
     DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, _derivedVarName, level, lod);
 
     return (_fileTable.AddEntry(f));
@@ -633,7 +631,7 @@ int PyEngine::DerivedPythonVar::_readRegionAll(int fd, const DimsType &min, cons
     vector<varinfo_t> varInfoVec;
     get_var_info(_dataMgr, variables, _inNames, _coordFlag, varInfoVec);
 
-    vector<DimsType> inputVarDims;
+    vector<DimsType>       inputVarDims;
     vector<string>         inputNames;
     for (int i = 0; i < varInfoVec.size(); i++) {
         const varinfo_t &vref = varInfoVec[i];
@@ -649,7 +647,7 @@ int PyEngine::DerivedPythonVar::_readRegionAll(int fd, const DimsType &min, cons
     vector<size_t> dims_vec, dummy;
     (void)GetDimLensAtLevel(level, dims_vec, dummy);
 
-    DimsType dims = {1,1,1};
+    DimsType dims = {1, 1, 1};
     Grid::CopyToArr3(dims_vec, dims);
     vector<DimsType> outputVarDims = {dims};
 
@@ -704,7 +702,7 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const DimsType &min, c
     vector<varinfo_t> varInfoVec;
     get_var_info(_dataMgr, variables, _inNames, _coordFlag, varInfoVec);
 
-    vector<DimsType> inputVarDims;
+    vector<DimsType>       inputVarDims;
     vector<string>         inputNames;
     for (int i = 0; i < varInfoVec.size(); i++) {
         const varinfo_t &vref = varInfoVec[i];
@@ -720,7 +718,7 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const DimsType &min, c
     // output and input variable(s) (if they exist) are all defined
     // on the same mesh (they have same dimensions)
     //
-    vector<DimsType> outputVarDims;
+    vector<DimsType>       outputVarDims;
     DimsType               minAbs = {0, 0, 0};
     if (inputVarDims.size()) {
         outputVarDims.push_back(inputVarDims[0]);
@@ -775,10 +773,10 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const DimsType &min, c
 
 int PyEngine::DerivedPythonVar::ReadRegion(int fd, const std::vector<size_t> &minVec, const std::vector<size_t> &maxVec, float *region)
 {
-    DimsType min = {0,0,0};
+    DimsType min = {0, 0, 0};
     Grid::CopyToArr3(minVec, min);
 
-    DimsType max = {0,0,0};
+    DimsType max = {0, 0, 0};
     Grid::CopyToArr3(maxVec, max);
 
     if (_meshMatchFlag) {
