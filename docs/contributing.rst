@@ -345,7 +345,7 @@ To contribute to Vapor's documentation, follow the three steps below.  Python ve
 
     make html
 
-The documentation .html files will be written in the current directory (ie. ~/VAPOR/docs/html) for viewing in a web browser.
+The documentation .html files will be written in the ``html`` directory (ie. ~/VAPOR/docs/html) for viewing in a web browser.
 
 .. _contributing.visGallery:
 
