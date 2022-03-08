@@ -257,6 +257,14 @@ void Grid::SetInterpolationOrder(int order)
     _interpolationOrder = order;
 }
 
+DimsType Grid::Dims(const DimsType &min, const DimsType &max)
+{
+    DimsType dims;
+
+    for (int i = 0; i < min.size(); i++) { dims[i] = (max[i] - min[i] + 1); }
+    return (dims);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Iterators

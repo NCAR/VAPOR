@@ -54,20 +54,19 @@ LayeredGrid::LayeredGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv,
     _layeredGrid(dims, bs, blks, xcoords, ycoords, zrg);
 }
 
-vector<size_t> LayeredGrid::GetCoordDimensions(size_t dim) const
+DimsType LayeredGrid::GetCoordDimensions(size_t dim) const
 {
+    DimsType dims = {1, 1, 1};
+
     if (dim == 0) {
-        return (vector<size_t>(1, GetDimensions()[0]));
+        dims[0] = GetDimensions()[0];
     } else if (dim == 1) {
-        return (vector<size_t>(1, GetDimensions()[1]));
+        dims[0] = GetDimensions()[1];
     } else if (dim == 2) {
-        auto tmp = _zrg.GetDimensions();
-        auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        tmp2.resize(_zrg.GetNumDimensions());
-        return tmp2;
-    } else {
-        return (vector<size_t>(1, 1));
+        dims = _zrg.GetDimensions();
     }
+
+    return (dims);
 }
 
 void LayeredGrid::GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const

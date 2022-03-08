@@ -131,27 +131,19 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dimsv, const vector<size_
     _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), qtr);
 }
 
-vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
+DimsType CurvilinearGrid::GetCoordDimensions(size_t dim) const
 {
-    const Grid *ptr = nullptr;
+    DimsType dims = {1, 1, 1};
+
     if (dim == 0) {
-        ptr = &_xrg;
+        dims = _xrg.GetDimensions();
     } else if (dim == 1) {
-        ptr = &_yrg;
+        dims = _yrg.GetDimensions();
     } else if (dim == 2) {
-        if (_terrainFollowing) {
-            ptr = &_zrg;
-        } else {
-            return (vector<size_t>(1, _zcoords.size()));
-        }
-    } else {
-        return (vector<size_t>(1, 1));
+        if (_terrainFollowing) { dims = _zrg.GetDimensions(); }
     }
 
-    auto tmp = ptr->GetDimensions();
-    auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    tmp2.resize(ptr->GetNumDimensions());
-    return tmp2;
+    return (dims);
 }
 
 void CurvilinearGrid::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const

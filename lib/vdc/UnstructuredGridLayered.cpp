@@ -53,20 +53,19 @@ UnstructuredGridLayered::UnstructuredGridLayered(const std::vector<size_t> &vert
     VAssert(location == NODE);
 }
 
-vector<size_t> UnstructuredGridLayered::GetCoordDimensions(size_t dim) const
+DimsType UnstructuredGridLayered::GetCoordDimensions(size_t dim) const
 {
+    DimsType dims = {1, 1, 1};
+
     if (dim == 0) {
-        return (_ug2d.GetCoordDimensions(dim));
+        dims = _ug2d.GetCoordDimensions(dim);
     } else if (dim == 1) {
-        return (_ug2d.GetCoordDimensions(dim));
+        dims = _ug2d.GetCoordDimensions(dim);
     } else if (dim == 2) {
-        auto tmp = _zug.GetDimensions();
-        auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        dims.resize(_zug.GetNumDimensions());
-        return dims;
-    } else {
-        return (vector<size_t>(1, 1));
+        dims = _zug.GetDimensions();
     }
+
+    return (dims);
 }
 
 size_t UnstructuredGridLayered::GetGeometryDim() const { return (3); }

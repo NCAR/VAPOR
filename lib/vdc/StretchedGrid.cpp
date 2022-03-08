@@ -46,13 +46,13 @@ StretchedGrid::StretchedGrid(const vector<size_t> &dims, const vector<size_t> &b
 
 size_t StretchedGrid::GetGeometryDim() const { return (_zcoords.size() == 0 ? 2 : 3); }
 
-vector<size_t> StretchedGrid::GetCoordDimensions(size_t dim) const
+DimsType StretchedGrid::GetCoordDimensions(size_t dim) const
 {
-    if (dim < 3) {
-        return (vector<size_t>(1, GetDimensions()[dim]));
-    } else {
-        return (vector<size_t>(1, 1));
-    }
+    DimsType dims = {1, 1, 1};
+
+    if (dim < 3) { dims[0] = GetDimensions()[dim]; }
+
+    return (dims);
 }
 
 void StretchedGrid::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const

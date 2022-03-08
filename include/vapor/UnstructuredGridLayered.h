@@ -41,7 +41,7 @@ public:
 
     std::shared_ptr<const QuadTreeRectangleP> GetQuadTreeRectangle() const { return (_ug2d.GetQuadTreeRectangle()); }
 
-    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
+    virtual DimsType GetCoordDimensions(size_t dim) const override;
 
     virtual size_t GetGeometryDim() const override;
 
