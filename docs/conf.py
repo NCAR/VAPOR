@@ -16,15 +16,7 @@
 
 import os
 import sys
-print(sys.executable)
-print("Python " + sys.version)
-sys.path.append( "/usr/local/lib/python3.7/site-packages/" )
 import sphinx_rtd_theme
-print (sphinx_rtd_theme.__file__)
-# sys.path.insert(0, os.path.abspath('.'))
-#sys.path.append( "/usr/local/lib/python3.7/site-packages/breathe/" )
-#import glob
-#print(glob.glob("/usr/local/lib/python3.7/site-packages/breathe/*")
 
 # -- Project information -----------------------------------------------------
 
