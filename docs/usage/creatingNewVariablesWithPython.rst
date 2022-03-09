@@ -3,7 +3,7 @@
 Creating new variables with python
 ----------------------------------
 
-Vapor allows users to create new variables to visualize with customizable Python scripts.  These variables are derived from data that is currently loaded into Vapor.  Additionally, Vapor comes with a set of convenience functions that allow users to easily compute new variables.
+Vapor allows users to create new variables with customizable Python scripts.  These variables can be derived from your data, or be entirely synthetic.  Additionally, Vapor comes with a set of convenience functions that allow users to easily compute new variables.
 
 .. figure:: ../_images/pythonEditor.png
     :align: center
