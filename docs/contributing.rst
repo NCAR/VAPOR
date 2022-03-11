@@ -177,7 +177,7 @@ If you wish to go down this route, you may follow the build instructions for `Wi
 +-----------------+----------------------------------------------------------------+
 | Qt              | 5.13.2                                                         |
 +-----------------+----------------------------------------------------------------+
-| Ospray          | 2.4.0                                                          |
+| Ospray          | 2.8.0                                                          |
 +-----------------+----------------------------------------------------------------+
 
 .. note:: Different versions of Qt have presented bugs.  It's reocmmended that developers use the same library versions as those listed above, especially for Qt.
@@ -318,13 +318,34 @@ Contributing to Vapor's Documentation
 
 Vapor uses the `Sphinx <https://www.sphinx-doc.org/en/master/>`_ documentation generator.  
 
-To contribute to Vapor's documentation, first follow these `instructions for installing Sphinx <https://www.sphinx-doc.org/en/master/usage/installation.html>`_.
+To contribute to Vapor's documentation, follow the three steps below.  Python version 3.7 or higher is required.
 
-After installing sphinx, you will have a program called *sphinx-build* available.  You can find its location by typing the command *which sphinx-build*.  This location needs to be applied to the *SPHINXBUILD* variable, at line 6 in <vapor-install-dir>/docs/sphinx/Makefile.
+1) Install the following requirements.  There is more than one way to do this, and ``pip`` is one recommendation.
 
-Once the makefile has been modified, navigate to <vapor-install-dir/docs/sphinx.  Within this directory you will find .rst files that Sphinx uses to generate the HTML used for Vapor's documentation.  You can modify these .rst files, or add new ones.  
+.. code-block:: python
 
-Once the .rst file changes are complete, type *make ..* from the <vapor-build-dir>/docs/sphinx directory.  This will generate the HTML, which will be saved in <vapor-install-dir>/docs.  The HTML and .rst files can then be committed in Git, and added to a pull request for review.
+    python -m pip install sphinx
+    python -m pip install sphinx_rtd_theme
+    python -m pip install sphinx_gallery
+    python -m pip install xarray
+    python -m pip install numpy
+    python -m pip install matplotlib
+
+2) Checkout Vapor's ``readTheDocs`` branch, then enter the ``docs`` directory.
+
+.. code-block:: python
+
+    cd ~/VAPOR
+    git checkout readTheDocs
+    cd docs
+
+3) Explore Vapor's documentation by reading and editing the .rst files in this directory, then build the documentation
+
+.. code-block:: python
+
+    make html
+
+The documentation .html files will be written in the ``html`` directory (ie. ~/VAPOR/docs/html) for viewing in a web browser.
 
 .. _contributing.visGallery:
 
