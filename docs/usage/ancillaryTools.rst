@@ -48,3 +48,6 @@ Statistical values can help users select meaningful values for renderer color ex
     :width: 500 
     :figclass: align-center
 
+
+.. automodule:: vapor_wrf
+   :members:
