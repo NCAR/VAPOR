@@ -33,6 +33,9 @@ class PARAMS_API FlowParams : public RenderParams {
     FakeRakeBox *_fakeIntegrationBox = nullptr;
     bool         _initialized = false;
 
+    void _setRakeCenter(int dim, double center);
+    double _getRakeCenter(int dim);
+
 public:
     enum RenderType { RenderTypeStream, RenderTypeSamples, RenderTypeDensity };
     enum GlpyhType { GlpyhTypeSphere, GlpyhTypeArrow };
@@ -140,6 +143,13 @@ public:
         else
             return GetColorMapVariableName();
     }
+
+    double GetXRakeCenter();
+    void SetXRakeCenter( double center );
+    double GetYRakeCenter();
+    void SetYRakeCenter( double center );
+    double GetZRakeCenter();
+    void SetZRakeCenter( double center );
 
     static const std::string RenderTypeTag;
     static const std::string RenderRadiusBaseTag;

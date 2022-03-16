@@ -4,6 +4,7 @@
 #include <vapor/FlowRenderer.h>
 
 class PIntegerSliderEdit;
+class PDoubleSliderEdit;
 
 //! \class FlowEventRouter
 //! \ingroup Public_GUI
@@ -14,6 +15,9 @@ class FlowEventRouter : public RenderEventRouterGUI {
     QWidget *           _seedingTab;
     PIntegerSliderEdit *_pathlineLengthSlider;
     PIntegerSliderEdit *_pathlineInjectionSlider;
+    PDoubleSliderEdit* _xRakeCenterSlider;
+    PDoubleSliderEdit* _yRakeCenterSlider;
+    PDoubleSliderEdit* _zRakeCenterSlider;
 
 public:
     static const std::string SeedingTabName;

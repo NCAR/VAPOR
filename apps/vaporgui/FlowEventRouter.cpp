@@ -5,6 +5,7 @@
 #include "PFlowIntegrationRegionSelector.h"
 #include "PMultiVarSelector.h"
 #include "PConstantColorWidget.h"
+#include "PSliderEditHLI.h"
 
 using namespace VAPoR;
 typedef FlowParams FP;
@@ -79,6 +80,11 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
                 new PFlowRakeRegionSelector1D(1),
                 new PFlowRakeRegionSelector1D(2),
             }),
+            new PSection("Rake Center", {
+                _xRakeCenterSlider = new PDoubleSliderEditHLI<FlowParams>("X", &FlowParams::GetXRakeCenter, &FlowParams::SetXRakeCenter),
+                _yRakeCenterSlider = new PDoubleSliderEditHLI<FlowParams>("Y", &FlowParams::GetYRakeCenter, &FlowParams::SetYRakeCenter),
+                _zRakeCenterSlider = new PDoubleSliderEditHLI<FlowParams>("Z", &FlowParams::GetZRakeCenter, &FlowParams::SetZRakeCenter),
+            }),
         }),
         
         new PSection("Write Flowlines to File", {
@@ -89,6 +95,10 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
         }),
     }));
     
+    _xRakeCenterSlider->EnableDynamicUpdate();
+    _yRakeCenterSlider->EnableDynamicUpdate();
+    _zRakeCenterSlider->EnableDynamicUpdate();
+
     AddAppearanceSubtab(new PGroup({
         (new PTFEditor(RenderParams::_colorMapVariableNameTag)),
         new PSection("Appearance", {
@@ -157,6 +167,12 @@ void FlowEventRouter::_updateTab()
     int numTS = GetActiveDataMgr()->GetNumTimeSteps();
     _pathlineLengthSlider->SetRange(0, std::max(1, numTS - 1));
     _pathlineInjectionSlider->SetRange(0, numTS);
+
+    std::vector<double> min, max;
+    GetActiveParams()->GetBox()->GetExtents(min, max);
+    _xRakeCenterSlider->SetRange(min[0],max[0]);
+    _yRakeCenterSlider->SetRange(min[1],max[1]);
+    _zRakeCenterSlider->SetRange(min[2],max[2]);
 }
 
 string FlowEventRouter::_getDescription() const { return "Computes and displays steady or unsteady flow trajectories.\n"; }
