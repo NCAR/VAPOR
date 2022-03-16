@@ -2,6 +2,7 @@
 #include "vapor/BarbParams.h"
 #include "PWidgets.h"
 #include "PConstantColorWidget.h"
+#include "PCheckbox.h"
 
 using namespace VAPoR;
 typedef BarbParams BP;
@@ -25,15 +26,16 @@ BarbEventRouter::BarbEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     }));
     
     AddAppearanceSubtab(new PGroup({
-        new PColormapTFEditor,
         new PSection("Barbs", {
             (new PIntegerSliderEdit(BP::_xBarbsCountTag, "X Barbs"))->SetRange(1, 50),
             (new PIntegerSliderEdit(BP::_yBarbsCountTag, "Y Barbs"))->SetRange(1, 50),
             (new PIntegerSliderEdit(BP::_zBarbsCountTag, "Z Barbs"))->SetRange(1, 50),
             (new PDoubleSliderEdit(BP::_lengthScaleTag, "Length Scale"))->SetRange(0.01, 4)->EnableDynamicUpdate(),
             (new PDoubleSliderEdit(BP::_thicknessScaleTag, "Thickness Scale"))->SetRange(0.01, 4)->EnableDynamicUpdate(),
-            new PConstantColorWidget
+            new PCheckbox(BP::LightingEnabledTag, "Enable Lighting"),
+            new PConstantColorWidget,
         }),
+        new PColormapTFEditor,
     }));
     
     AddGeometrySubtab(new PGeometrySubtab);

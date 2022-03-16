@@ -541,7 +541,7 @@ void BarbRenderer::_setUpLightingAndColor()
     BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
     VAssert(bParams);
     bParams->GetConstantColor(fcolor);
-    if (nLights == 0) {
+    if (nLights == 0 || !bParams->GetValueLong(BarbParams::LightingEnabledTag, 0)) {
         lgl->DisableLighting();
     } else {
         // All the geometry will get a white specular color:
