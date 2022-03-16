@@ -170,9 +170,9 @@ void FlowEventRouter::_updateTab()
 
     std::vector<double> min, max;
     GetActiveParams()->GetBox()->GetExtents(min, max);
-    _xRakeCenterSlider->SetRange(min[0],max[0]);
-    _yRakeCenterSlider->SetRange(min[1],max[1]);
-    _zRakeCenterSlider->SetRange(min[2],max[2]);
+    _xRakeCenterSlider->SetRange(min[0], max[0]);
+    _yRakeCenterSlider->SetRange(min[1], max[1]);
+    _zRakeCenterSlider->SetRange(min[2], max[2]);
 }
 
 string FlowEventRouter::_getDescription() const { return "Computes and displays steady or unsteady flow trajectories.\n"; }

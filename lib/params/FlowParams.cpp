@@ -383,46 +383,36 @@ int FlowParams::GetSeedInjInterval() const
 
 void FlowParams::SetSeedInjInterval(int val) { SetValueLong(_seedInjInterval, "What's the interval of injecting seeds into an unsteady flow advection", val); }
 
-double FlowParams::_getRakeCenter(int dim) {
-    Box* rakeBox = GetRakeBox();
+double FlowParams::_getRakeCenter(int dim)
+{
+    Box *rakeBox = GetRakeBox();
     if (rakeBox == nullptr) return 0.;
     std::vector<double> minExt, maxExt;
     rakeBox->GetExtents(minExt, maxExt);
-    return (maxExt[dim]+minExt[dim])/2.;
+    return (maxExt[dim] + minExt[dim]) / 2.;
 }
 
-void FlowParams::_setRakeCenter(int dim, double center) {
-    Box* rakeBox = GetRakeBox();
+void FlowParams::_setRakeCenter(int dim, double center)
+{
+    Box *rakeBox = GetRakeBox();
     if (rakeBox == nullptr) return;
 
     std::vector<double> minExt, maxExt;
     rakeBox->GetExtents(minExt, maxExt);
-    double length = (maxExt[dim]-minExt[dim])/2.;
+    double length = (maxExt[dim] - minExt[dim]) / 2.;
     maxExt[dim] = center + length;
     minExt[dim] = center - length;
     rakeBox->SetExtents(minExt, maxExt);
 }
 
-double FlowParams::GetXRakeCenter() {
-    return _getRakeCenter(0);
-}
+double FlowParams::GetXRakeCenter() { return _getRakeCenter(0); }
 
-void FlowParams::SetXRakeCenter(double center) {
-    _setRakeCenter(0, center);
-}
+void FlowParams::SetXRakeCenter(double center) { _setRakeCenter(0, center); }
 
-double FlowParams::GetYRakeCenter() {
-    return _getRakeCenter(1);
-}
+double FlowParams::GetYRakeCenter() { return _getRakeCenter(1); }
 
-void FlowParams::SetYRakeCenter(double center) {
-    _setRakeCenter(1, center);
-}
+void FlowParams::SetYRakeCenter(double center) { _setRakeCenter(1, center); }
 
-double FlowParams::GetZRakeCenter() {
-    return _getRakeCenter(2);
-}
+double FlowParams::GetZRakeCenter() { return _getRakeCenter(2); }
 
-void FlowParams::SetZRakeCenter(double center) {
-    _setRakeCenter(2, center);
-}
+void FlowParams::SetZRakeCenter(double center) { _setRakeCenter(2, center); }

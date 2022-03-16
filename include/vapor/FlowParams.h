@@ -23,8 +23,8 @@ public:
     using Box::Box;
     FlowParams *parent = nullptr;
 
-    void        Initialize(string tag);
-    void        SetExtents(const vector<double> &minExt, const vector<double> &maxExt) override;
+    void Initialize(string tag);
+    void SetExtents(const vector<double> &minExt, const vector<double> &maxExt) override;
 };
 
 class PARAMS_API FlowParams : public RenderParams {
@@ -33,7 +33,7 @@ class PARAMS_API FlowParams : public RenderParams {
     FakeRakeBox *_fakeIntegrationBox = nullptr;
     bool         _initialized = false;
 
-    void _setRakeCenter(int dim, double center);
+    void   _setRakeCenter(int dim, double center);
     double _getRakeCenter(int dim);
 
 public:
@@ -144,12 +144,29 @@ public:
             return GetColorMapVariableName();
     }
 
+    //! Get the rake's center position on the X axis
+    //! \retval X rake center
     double GetXRakeCenter();
-    void SetXRakeCenter( double center );
+
+    //! Set the rake's center position on the X axis
+    //! \param[in] Rake center position on X axis
+    void SetXRakeCenter(double center);
+
+    //! Get the rake's center position on the Y axis
+    //! \retval Y rake center
     double GetYRakeCenter();
-    void SetYRakeCenter( double center );
+
+    //! Set the rake's center position on the Y axis
+    //! \param[in] Rake center position on Y axis
+    void SetYRakeCenter(double center);
+
+    //! Get the rake's center position on the Z axis
+    //! \retval Z rake center
     double GetZRakeCenter();
-    void SetZRakeCenter( double center );
+
+    //! Set the rake's center position on the Z axis
+    //! \param[in] Rake center position on Z axis
+    void SetZRakeCenter(double center);
 
     static const std::string RenderTypeTag;
     static const std::string RenderRadiusBaseTag;
