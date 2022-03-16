@@ -3039,26 +3039,6 @@ int DataMgr::_openVariableRead(size_t ts, string varname, int level, int lod)
     return (_dc->OpenVariableRead(ts, _openVarName, level, lod));
 }
 
-template<class T> int DataMgr::_readRegionBlock(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region)
-{
-    vector<size_t> minv, maxv;
-    Grid::CopyFromArr3(min, minv);
-    minv.resize(ndims);
-    Grid::CopyFromArr3(max, maxv);
-    maxv.resize(ndims);
-
-    int         rc = 0;
-    DerivedVar *derivedVar = _getDerivedVar(_openVarName);
-    if (derivedVar) {
-        VAssert((std::is_same<T, float>::value) == true);
-        rc = derivedVar->ReadRegionBlock(fd, minv, maxv, (float *)region);
-    } else {
-        rc = _dc->ReadRegionBlock(fd, minv, maxv, region);
-    }
-
-    _sanitizeFloats(region, vproduct(box_dims(min, max)));
-    return (rc);
-}
 
 template<class T> int DataMgr::_readRegion(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region)
 {

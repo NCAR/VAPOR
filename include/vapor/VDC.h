@@ -425,9 +425,6 @@ protected:
 
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
 
-    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
-    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
-
 public:
     //! Define a coordinate variable
     //!

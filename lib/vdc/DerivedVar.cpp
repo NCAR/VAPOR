@@ -469,20 +469,6 @@ int DerivedVar::_getVarDestagger(DC *dc, size_t ts, string varname, int level, i
     return (0);
 }
 
-int DerivedVar::_getVarBlock(DC *dc, size_t ts, string varname, int level, int lod, const vector<size_t> &min, const vector<size_t> &max, float *region) const
-{
-    int fd = dc->OpenVariableRead(ts, varname, level, lod);
-    if (fd < 0) return (-1);
-
-    int rc = dc->ReadRegionBlock(fd, min, max, region);
-    if (rc < 0) {
-        dc->CloseVariable(fd);
-        return (-1);
-    }
-
-    return (dc->CloseVariable(fd));
-}
-
 //////////////////////////////////////////////////////////////////////////////
 //
 //	DerivedCoordVar_PCSFromLatLon

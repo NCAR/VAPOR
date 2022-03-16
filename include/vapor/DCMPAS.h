@@ -134,12 +134,6 @@ protected:
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
-    //! \copydoc DC::ReadRegionBlock()
-    //!
-    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
-
-    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
-
     //! \copydoc DC::VariableExists()
     //!
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
@@ -232,8 +226,6 @@ private:
 
         int CloseVariable(int fd);
 
-        int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
-
         int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
 
         bool VariableExists(size_t ts, int, int) const;
@@ -269,8 +261,6 @@ private:
         int OpenVariableRead(size_t ts, int, int);
 
         int CloseVariable(int fd);
-
-        int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
 
         int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
 

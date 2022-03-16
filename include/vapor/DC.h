@@ -1536,7 +1536,6 @@ public:
     //! less than the topological dimension returned by DC::Mesh::GetTopologyDim().
     //!
     //! \sa VAPoR::DC, DC::DataVar::GetBS(), DC::GetVarDimLens()
-    //! \sa ReadRegionBlock()
     //
     virtual int GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level, long ts = -1) const
     {
@@ -1687,26 +1686,6 @@ public:
     virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (readRegion(fd, min, max, region)); }
     virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (readRegion(fd, min, max, region)); }
 
-    //! Read in and return a blocked subregion from the currently opened
-    //! variable.
-    //!
-    //! This method is identical to ReadRegion() with the exceptions
-    //! that:
-    //!
-    //! \li The vectors \p start and \p count must be aligned
-    //! with the underlying storage block of the variable. See
-    //! DC::GetDimLensAtLevel()
-    //!
-    //! For data that are not blocked (i.e. the elements of the
-    //! \p bs_at_level parameter returned by GetDimsAtLevel() are all 1)
-    //! this method is identical to ReadRegion()
-    //!
-    //! \li The hyperslab copied to \p region will preserve its underlying
-    //! storage blocking (the data will not be contiguous, unless the
-    //! data are not blocked)
-    //!
-    virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (readRegionBlock(fd, min, max, region)); }
-    virtual int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (readRegionBlock(fd, min, max, region)); }
 
     //! Read an entire variable in one call
     //!
@@ -2222,12 +2201,6 @@ protected:
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
 
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
-
-    //! \copydoc ReadRegionBlock()
-    //
-    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
-
-    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
 
     //! \copydoc VariableExists()
     //

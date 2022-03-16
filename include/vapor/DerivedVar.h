@@ -79,8 +79,6 @@ public:
 
     virtual int CloseVariable(int fd) = 0;
 
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) = 0;
-
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) = 0;
 
     virtual bool VariableExists(size_t ts, int reflevel, int lod) const = 0;
@@ -93,7 +91,6 @@ protected:
 
     int _getVarDestagger(DC *dc, size_t ts, string varname, int level, int lod, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region, int stagDim) const;
 
-    int _getVarBlock(DC *dc, size_t ts, string varname, int level, int lod, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) const;
 };
 
 //!
@@ -269,8 +266,6 @@ public:
 
     virtual int CloseVariable(int fd);
 
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
-
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
     virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
@@ -326,8 +321,6 @@ public:
 
     virtual int CloseVariable(int fd);
 
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
-
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
     virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
@@ -367,8 +360,6 @@ public:
 
     virtual int CloseVariable(int fd);
 
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
-
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
     virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
@@ -407,8 +398,6 @@ public:
     virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
-
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
 
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
@@ -456,8 +445,6 @@ public:
 
     virtual int CloseVariable(int fd);
 
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
-
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
     virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
@@ -502,8 +489,6 @@ public:
 
     virtual int CloseVariable(int fd);
 
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
-
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
     virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
@@ -533,8 +518,6 @@ public:
     virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
-
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
 
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
@@ -567,8 +550,6 @@ public:
     virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
-
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
 
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
@@ -605,8 +586,6 @@ public:
     virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
-
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
 
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
@@ -653,8 +632,6 @@ public:
     virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
-
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
 
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
@@ -716,8 +693,6 @@ public:
     virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
 
     virtual int CloseVariable(int fd);
-
-    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
 
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 

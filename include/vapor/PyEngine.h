@@ -187,8 +187,6 @@ private:
 
         int CloseVariable(int fd);
 
-        int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
-
         int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
         bool VariableExists(size_t ts, int reflevel, int lod) const;

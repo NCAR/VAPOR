@@ -826,7 +826,6 @@ private:
 
     int _openVariableRead(size_t ts, string varname, int level, int lod);
 
-    template<class T> int _readRegionBlock(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region);
     template<class T> int _readRegion(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region);
     int                   _closeVariable(int fd);
 
