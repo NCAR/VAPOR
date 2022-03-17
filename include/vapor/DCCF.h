@@ -170,7 +170,6 @@ private:
     std::map<string, DC::Mesh>                  _meshMap;
     std::map<string, DC::DataVar>               _dataVarsMap;
     std::map<string, DC::AuxVar>                _auxVarsMap;
-    std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
 
     int _initHorizontalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
 
@@ -187,15 +186,6 @@ private:
 
     template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
 
-    ///////////////////////////////////////////////////////////////////////////
-    //
-    //	Specializations of the NetCDFCollection::DerivedVar class used to
-    // support derived variables - required variables that are not
-    // found in the CF data.
-    //
-    ///////////////////////////////////////////////////////////////////////////
-
-    //
 };
 };    // namespace VAPoR
 

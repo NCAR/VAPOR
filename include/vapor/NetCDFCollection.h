@@ -166,17 +166,6 @@ public:
     //
     virtual bool VariableExists(size_t ts, string varname) const;
 
-    //! Returns true if the named variable is a derived variable.
-    //!
-    //! This method returns true if the variable named by \p varname is
-    //! derived from other variables in the data collection.
-    //!
-    //! \param[in] varname A variable name
-    //!
-    //! \retval bool Returns true if \p varname is a derived variable.
-    //!
-    virtual bool IsDerivedVar(string varname) const { return (_derivedVarsMap.find(varname) != _derivedVarsMap.end()); }
-
     //! Returns true if the specified variable has any staggered dimensions
     //!
     //! If the variabled named by \p varname has any staggered dimensions, true
@@ -732,49 +721,6 @@ public:
                                                  // is a time dimension.
     };
 
-    class DerivedVar {
-    public:
-        DerivedVar(NetCDFCollection *ncdfc) { _ncdfc = ncdfc; };
-        virtual ~DerivedVar(){};
-        virtual int                 Open(size_t ts) = 0;
-        virtual int                 ReadSlice(float *slice, int fd) = 0;
-        virtual int                 Read(float *buf, int fd) = 0;
-        virtual int                 SeekSlice(int offset, int whence, int fd) = 0;
-        virtual int                 Close(int fd) { return (0); };
-        virtual bool                TimeVarying() const = 0;
-        virtual std::vector<size_t> GetSpatialDims() const = 0;
-        virtual std::vector<string> GetSpatialDimNames() const = 0;
-        virtual size_t              GetTimeDim() const = 0;
-        virtual string              GetTimeDimName() const = 0;
-        virtual bool                GetMissingValue(double &mv) const = 0;
-        virtual size_t              GetNumTimeSteps() const { return (GetTimeDim()); }
-        virtual std::vector<string> GetAttNames() const { return (std::vector<string>()); }
-        virtual int                 GetAttType(string name) const { return (NC_DOUBLE); }
-        virtual void                GetAtt(string name, std::vector<double> &values) const { values.clear(); }
-        virtual void                GetAtt(string name, std::vector<long> &values) const { values.clear(); }
-        virtual void                GetAtt(string name, string &values) const { values.clear(); }
-
-    protected:
-        NetCDFCollection *_ncdfc;
-    };
-
-    //! Add a derived variable to the list of available variables. The
-    //!
-    //! Add a derived variable to the list of available variables. The new
-    //! variable will appear as part of the collection. Any new dimensions
-    //! defined by the derived variable will be added to the list of dimensions
-    //! for this collection. Unpredictable results may occur if dimension
-    //! lengths defined by the new variable disagree with existing native or
-    //! previously defined derived variables
-    //!
-    void InstallDerivedVar(string varname, DerivedVar *derivedVar);
-
-    void RemoveDerivedVar(string varname)
-    {
-        std::map<string, DerivedVar *>::iterator itr = _derivedVarsMap.find(varname);
-        if (itr != _derivedVarsMap.end()) { _derivedVarsMap.erase(varname); }
-    };
-
 protected:
     bool _GetVariableInfo(string varname, NetCDFSimple::Variable &variable) const;
 
@@ -789,8 +735,6 @@ private:
     std::map<string, vector<double>> _timesMap;      // map variable to time
     std::vector<double>              _times;         // all valid time coordinates
     std::vector<string>              _failedVars;    // Varibles that could not be added
-    std::map<string, DerivedVar *>   _derivedVarsMap;
-    DerivedVar *                     _derivedVar;    // if current opened variable is derived this is it
 
     //
     // file handle for an open variable
@@ -798,7 +742,6 @@ private:
     class fileHandle {
     public:
         fileHandle();
-        DerivedVar *   _derived_var;
         NetCDFSimple * _ncdfptr;
         int            _fd;    // NetCDFSimple open file descriptor
         size_t         _local_ts;

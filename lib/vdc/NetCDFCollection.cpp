@@ -22,35 +22,6 @@ template<class T> vector<T> make_container_unique(vector<T> v)
     return (v);
 }
 
-bool readSliceOK(vector<size_t> dims, size_t start[], size_t count[])
-{
-    if (dims.size() == 3) {
-        if (count[0] != 1) return (false);
-        for (int i = 1; i < dims.size(); i++) {
-            if (count[i] != dims[i]) return (false);
-            if (start[i] != 0) return (false);
-        }
-        return (true);
-    } else if (dims.size() == 2) {
-        for (int i = 0; i < dims.size(); i++) {
-            if (count[i] != dims[i]) return (false);
-            if (start[i] != 0) return (false);
-        }
-        return (true);
-    }
-
-    return (false);
-}
-
-bool readOK(vector<size_t> dims, size_t start[], size_t count[])
-{
-    if (dims.size() == 0) return (true);
-    if (dims.size() != 1) return (false);
-    if (count[0] != dims[0]) return (false);
-    if (start[0] != 0) return (false);
-
-    return (true);
-}
 
 };    // namespace
 
@@ -244,11 +215,6 @@ SEARCH_FINISHED:
 
 bool NetCDFCollection::VariableExists(string varname) const
 {
-    //
-    // Should be checking dependencies for derived variable!
-    //
-    if (NetCDFCollection::IsDerivedVar(varname)) return (true);
-
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
     if (p == _variableList.end()) { return (false); }
     return (true);
@@ -257,11 +223,6 @@ bool NetCDFCollection::VariableExists(string varname) const
 bool NetCDFCollection::VariableExists(size_t ts, string varname) const
 {
     if (ts >= _times.size()) return (false);
-
-    //
-    // Should be checking dependencies for derived variable!
-    //
-    if (NetCDFCollection::IsDerivedVar(varname)) return (true);
 
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
     if (p == _variableList.end()) { return (false); }
@@ -313,30 +274,11 @@ vector<string> NetCDFCollection::GetVariableNames(int ndims, bool spatial) const
         if (myndims == ndims) { names.push_back(p->first); }
     }
 
-    //
-    // Add any derived variables
-    //
-    map<string, DerivedVar *>::const_iterator itr;
-    for (itr = _derivedVarsMap.begin(); itr != _derivedVarsMap.end(); ++itr) {
-        DerivedVar *derivedVar = itr->second;
-
-        int myndim = derivedVar->GetSpatialDims().size();
-
-        if (!spatial && derivedVar->TimeVarying()) { myndim++; }
-
-        if (myndim == ndims) { names.push_back(itr->first); }
-    }
-
     return (names);
 }
 
 vector<size_t> NetCDFCollection::GetSpatialDims(string varname) const
 {
-    if (NetCDFCollection::IsDerivedVar(varname)) {
-        NetCDFCollection::DerivedVar *derivedVar = _derivedVarsMap.find(varname)->second;
-        return (derivedVar->GetSpatialDims());
-    }
-
     vector<size_t> dims;
     dims.clear();
 
@@ -362,11 +304,6 @@ vector<size_t> NetCDFCollection::GetSpatialDims(string varname) const
 
 vector<string> NetCDFCollection::GetSpatialDimNames(string varname) const
 {
-    if (NetCDFCollection::IsDerivedVar(varname)) {
-        NetCDFCollection::DerivedVar *derivedVar = _derivedVarsMap.find(varname)->second;
-        return (derivedVar->GetSpatialDimNames());
-    }
-
     vector<string> dimnames;
 
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
@@ -379,10 +316,6 @@ vector<string> NetCDFCollection::GetSpatialDimNames(string varname) const
 
 size_t NetCDFCollection::GetTimeDim(string varname) const
 {
-    if (NetCDFCollection::IsDerivedVar(varname)) {
-        NetCDFCollection::DerivedVar *derivedVar = _derivedVarsMap.find(varname)->second;
-        return (derivedVar->GetTimeDim());
-    }
 
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
     if (p == _variableList.end()) { return (0); }
@@ -393,11 +326,6 @@ size_t NetCDFCollection::GetTimeDim(string varname) const
 
 string NetCDFCollection::GetTimeDimName(string varname) const
 {
-    if (NetCDFCollection::IsDerivedVar(varname)) {
-        NetCDFCollection::DerivedVar *derivedVar = _derivedVarsMap.find(varname)->second;
-        return (derivedVar->GetTimeDimName());
-    }
-
     string dimname;
 
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
@@ -424,10 +352,6 @@ vector<string> NetCDFCollection::GetDimNames(string varname) const
 
 bool NetCDFCollection::IsTimeVarying(string varname) const
 {
-    if (NetCDFCollection::IsDerivedVar(varname)) {
-        NetCDFCollection::DerivedVar *derivedVar = _derivedVarsMap.find(varname)->second;
-        return (derivedVar->TimeVarying());
-    }
 
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
     if (p == _variableList.end()) { return (false); }
@@ -437,7 +361,6 @@ bool NetCDFCollection::IsTimeVarying(string varname) const
 
 int NetCDFCollection::GetXType(string varname) const
 {
-    if (NetCDFCollection::IsDerivedVar(varname)) { return (NC_FLOAT); }
 
     NetCDFSimple::Variable varinfo;
     int                    rc = NetCDFCollection::GetVariableInfo(varname, varinfo);
@@ -449,8 +372,6 @@ int NetCDFCollection::GetXType(string varname) const
 std::vector<string> NetCDFCollection::GetAttNames(string varname) const
 {
     std::vector<string> attnames;
-
-    if (NetCDFCollection::IsDerivedVar(varname)) { return (attnames); }
 
     //
     // See if global attribute
@@ -470,8 +391,6 @@ std::vector<string> NetCDFCollection::GetAttNames(string varname) const
 
 int NetCDFCollection::GetAttType(string varname, string attname) const
 {
-    if (NetCDFCollection::IsDerivedVar(varname)) { return (-1); }
-
     //
     // See if global attribute
     //
@@ -491,8 +410,6 @@ int NetCDFCollection::GetAttType(string varname, string attname) const
 void NetCDFCollection::GetAtt(string varname, string attname, std::vector<double> &values) const
 {
     values.clear();
-
-    if (NetCDFCollection::IsDerivedVar(varname)) return;
 
     //
     // See if global attribute
@@ -514,8 +431,6 @@ void NetCDFCollection::GetAtt(string varname, string attname, std::vector<long> 
 {
     values.clear();
 
-    if (NetCDFCollection::IsDerivedVar(varname)) return;
-
     //
     // See if global attribute
     //
@@ -535,12 +450,6 @@ void NetCDFCollection::GetAtt(string varname, string attname, std::vector<long> 
 void NetCDFCollection::GetAtt(string varname, string attname, string &values) const
 {
     values.clear();
-
-    if (NetCDFCollection::IsDerivedVar(varname)) {
-        NetCDFCollection::DerivedVar *derivedVar;
-        derivedVar = _derivedVarsMap.find(varname)->second;
-        return (derivedVar->GetAtt(attname, values));
-    }
 
     //
     // See if global attribute
@@ -609,33 +518,6 @@ int NetCDFCollection::GetFile(size_t ts, string varname, string &file, size_t &l
 
 bool NetCDFCollection::_GetVariableInfo(string varname, NetCDFSimple::Variable &varinfo) const
 {
-    if (NetCDFCollection::IsDerivedVar(varname)) {
-        NetCDFCollection::DerivedVar *derivedVar;
-        derivedVar = _derivedVarsMap.find(varname)->second;
-
-        vector<string> dimnames = derivedVar->GetSpatialDimNames();
-        if (derivedVar->TimeVarying()) { dimnames.insert(dimnames.begin(), derivedVar->GetTimeDimName()); }
-
-        varinfo = NetCDFSimple::Variable(varname, dimnames, NC_FLOAT);
-        vector<string> attnames = derivedVar->GetAttNames();
-        for (int i = 0; i < attnames.size(); i++) {
-            string s = attnames[i];
-            if (derivedVar->GetAttType(s) == NC_CHAR) {
-                string values;
-                derivedVar->GetAtt(s, values);
-                varinfo.SetAtt(s, values);
-            } else if (derivedVar->GetAttType(s) == NC_INT64) {
-                vector<long> values;
-                derivedVar->GetAtt(s, values);
-                varinfo.SetAtt(s, values);
-            } else if (derivedVar->GetAttType(s) == NC_DOUBLE) {
-                vector<double> values;
-                derivedVar->GetAtt(s, values);
-                varinfo.SetAtt(s, values);
-            }
-        }
-        return (true);
-    }
 
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
     if (p == _variableList.end()) { return (false); }
@@ -662,11 +544,6 @@ int NetCDFCollection::GetVariableInfo(string varname, NetCDFSimple::Variable &va
 
 bool NetCDFCollection::GetMissingValue(string varname, double &mv) const
 {
-    if (NetCDFCollection::IsDerivedVar(varname)) {
-        NetCDFCollection::DerivedVar *derivedVar = _derivedVarsMap.find(varname)->second;
-        return (derivedVar->GetMissingValue(mv));
-    }
-
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
     if (p == _variableList.end()) {
         SetErrMsg("Invalid variable \"%s\"", varname.c_str());
@@ -688,19 +565,7 @@ int NetCDFCollection::OpenRead(size_t ts, string varname)
     }
     fileHandle fh;
 
-    // Ugh. Reserve the descriptor in _ovr_table before calling
-    // fh._derived_var->Open(ts), which may in turn recursively call
-    // NetCDFCollection::OpenRead()
-    //
     _ovr_table[fd] = fh;
-
-    if (NetCDFCollection::IsDerivedVar(varname)) {
-        fh._derived_var = _derivedVarsMap[varname];
-        fh._fd = fh._derived_var->Open(ts);
-        if (fh._fd < 0) return (-1);
-        _ovr_table[fd] = fh;
-        return (fd);
-    }
 
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
     if (p == _variableList.end()) {
@@ -752,19 +617,6 @@ int NetCDFCollection::ReadNative(size_t start[], size_t count[], float *data, in
     }
     fileHandle &fh = itr->second;
 
-    if (fh._derived_var) {
-        vector<size_t> dims = fh._derived_var->GetSpatialDims();
-
-        if (readSliceOK(dims, start, count)) {
-            return (fh._derived_var->ReadSlice(data, fh._fd));
-        } else if (readOK(dims, start, count)) {
-            return (fh._derived_var->Read(data, fh._fd));
-        } else {
-            SetErrMsg("Not implemented");
-            return (-1);
-        }
-    }
-
     int idx = 0;
     if (fh._tvvars.GetTimeVarying() && !(fh._tvvars.GetTimeDimName().empty() || fh._tvvars.GetTimeDimName() == derivedTimeDimName)) {
         mystart[idx] = fh._local_ts;
@@ -791,11 +643,6 @@ int NetCDFCollection::ReadNative(size_t start[], size_t count[], int *data, int 
         return (-1);
     }
     fileHandle &fh = itr->second;
-
-    if (fh._derived_var) {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
 
     int idx = 0;
     if (fh._tvvars.GetTimeVarying() && !(fh._tvvars.GetTimeDimName().empty() || fh._tvvars.GetTimeDimName() == derivedTimeDimName)) {
@@ -824,11 +671,6 @@ int NetCDFCollection::ReadNative(size_t start[], size_t count[], char *data, int
     }
     fileHandle &fh = itr->second;
 
-    if (fh._derived_var) {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
-
     int idx = 0;
     if (fh._tvvars.GetTimeVarying() && !(fh._tvvars.GetTimeDimName().empty() || fh._tvvars.GetTimeDimName() == derivedTimeDimName)) {
         mystart[idx] = fh._local_ts;
@@ -856,11 +698,6 @@ int NetCDFCollection::ReadNative(float *data, int fd)
     }
     fileHandle &fh = itr->second;
 
-    if (fh._derived_var) {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
-
     vector<size_t> dims = fh._tvvars.GetSpatialDims();
     for (int i = 0; i < dims.size(); i++) {
         start[i] = 0;
@@ -881,11 +718,6 @@ int NetCDFCollection::ReadNative(int *data, int fd)
         return (-1);
     }
     fileHandle &fh = itr->second;
-
-    if (fh._derived_var) {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
 
     vector<size_t> dims = fh._tvvars.GetSpatialDims();
     for (int i = 0; i < dims.size(); i++) {
@@ -1243,11 +1075,6 @@ int NetCDFCollection::ReadSliceNative(float *data, int fd)
     }
     fileHandle &fh = itr->second;
 
-    if (fh._derived_var) {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
-
     const TimeVaryingVar &var = fh._tvvars;
     vector<size_t>        dims = var.GetSpatialDims();
 
@@ -1283,8 +1110,6 @@ int NetCDFCollection::ReadSlice(float *data, int fd)
         return (-1);
     }
     fileHandle &fh = itr->second;
-
-    if (fh._derived_var) { return (fh._derived_var->ReadSlice(data, fh._fd)); }
 
     const TimeVaryingVar &var = fh._tvvars;
     vector<size_t>        dims = var.GetSpatialDims();
@@ -1394,8 +1219,6 @@ int NetCDFCollection::SeekSlice(int offset, int whence, int fd)
     }
     fileHandle &fh = itr->second;
 
-    if (fh._derived_var) { return (fh._derived_var->SeekSlice(offset, whence, fh._fd)); }
-
     if (whence < 0 || whence > 2) {
         SetErrMsg("Invalid whence specification : %d", whence);
         return (-1);
@@ -1433,18 +1256,6 @@ int NetCDFCollection::Read(size_t start[], size_t count[], float *data, int fd)
     }
 
     fileHandle &fh = itr->second;
-    if (fh._derived_var) {
-        vector<size_t> dims = fh._derived_var->GetSpatialDims();
-
-        if (readSliceOK(dims, start, count)) {
-            return (fh._derived_var->ReadSlice(data, fh._fd));
-        } else if (readOK(dims, start, count)) {
-            return (fh._derived_var->Read(data, fh._fd));
-        } else {
-            SetErrMsg("Not implemented");
-            return (-1);
-        }
-    }
 
     const TimeVaryingVar &var = fh._tvvars;
     if (!IsStaggeredVar(var.GetName())) { return (NetCDFCollection::ReadNative(start, count, data, fd)); }
@@ -1475,11 +1286,6 @@ int NetCDFCollection::Read(size_t start[], size_t count[], int *data, int fd)
     }
     fileHandle &fh = itr->second;
 
-    if (fh._derived_var) {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
-
     const TimeVaryingVar &var = fh._tvvars;
     if (!IsStaggeredVar(var.GetName())) { return (NetCDFCollection::ReadNative(start, count, data, fd)); }
 
@@ -1508,8 +1314,6 @@ int NetCDFCollection::Read(float *data, int fd)
         return (-1);
     }
     fileHandle &fh = itr->second;
-
-    if (fh._derived_var) { return (fh._derived_var->Read(data, fh._fd)); }
 
     const TimeVaryingVar &var = fh._tvvars;
     vector<size_t>        dims = var.GetSpatialDims();
@@ -1577,11 +1381,6 @@ template<typename T> int NetCDFCollection::_read_template(T *data, int fd)
     }
     fileHandle &fh = itr->second;
 
-    if (fh._derived_var) {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
-
     const TimeVaryingVar &var = fh._tvvars;
     vector<size_t>        dims = var.GetSpatialDims();
     vector<string>        dimnames = var.GetSpatialDimNames();
@@ -1641,13 +1440,6 @@ int NetCDFCollection::Close(int fd)
     }
     fileHandle &fh = itr->second;
 
-    if (fh._derived_var) {
-        fh._derived_var->Close(fh._fd);
-        fh._derived_var = NULL;
-        _ovr_table.erase(itr);
-        return (0);
-    }
-
     if (!fh._ncdfptr) return (0);
 
     int rc = fh._ncdfptr->Close(fh._fd);
@@ -1657,28 +1449,6 @@ int NetCDFCollection::Close(int fd)
     _ovr_table.erase(itr);
     return (rc);
 }
-
-void NetCDFCollection::InstallDerivedVar(string varname, DerivedVar *derivedVar)
-{
-    vector<string> sdimnames = derivedVar->GetSpatialDimNames();
-    vector<size_t> sdimlens = derivedVar->GetSpatialDims();
-    VAssert(sdimlens.size() == sdimnames.size());
-
-    // Add any new dimensions to the dimensions map. Should be
-    // checking for re-definition of exisiting dimensions, but
-    // being lazy.
-    //
-    for (int i = 0; i < sdimnames.size(); i++) {
-        vector<string>::iterator itr;
-        itr = find(_dimNames.begin(), _dimNames.end(), sdimnames[i]);
-        if (itr == _dimNames.end()) {
-            _dimNames.push_back(sdimnames[i]);
-            _dimLens.push_back(sdimlens[i]);
-        }
-    }
-
-    _derivedVarsMap[varname] = derivedVar;
-};
 
 namespace VAPoR {
 std::ostream &operator<<(std::ostream &o, const NetCDFCollection &ncdfc)
@@ -1873,7 +1643,6 @@ void NetCDFCollection::TimeVaryingVar::Sort()
 
 NetCDFCollection::fileHandle::fileHandle()
 {
-    _derived_var = NULL;
     _ncdfptr = NULL;
     _fd = -1;
     _local_ts = 0;
