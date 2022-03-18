@@ -3,6 +3,8 @@
 #include "PSection.h"
 #include <vapor/DC.h>
 
+// clang-format off
+
 class QTreeWidget;
 class QTreeWidgetItem;
 
@@ -36,3 +38,5 @@ protected:
     void updateGUI() const override;
     bool requireDataMgr() const override { return true; }
 };
+
+// clang-format on
