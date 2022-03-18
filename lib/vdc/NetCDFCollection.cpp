@@ -256,7 +256,7 @@ vector<string> NetCDFCollection::GetVariableNames(int ndims, bool spatial) const
 vector<size_t> NetCDFCollection::GetSpatialDims(string varname) const
 {
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
-    if (p == _variableList.end()) { return (dims); }
+    if (p == _variableList.end()) { return (vector <size_t> ()); }
     const TimeVaryingVar &tvvars = p->second;
 
     return(tvvars.GetSpatialDims());
@@ -964,42 +964,6 @@ int NetCDFCollection::_InitializeTimesMapCase3(const vector<string> &files, cons
     return (0);
 }
 
-void NetCDFCollection::_InterpolateLine(const float *src, size_t n, size_t stride, bool has_missing, float mv, float *dst) const
-{
-    if (!has_missing) {
-        for (size_t i = 0; i < n - 1; i++) { dst[i * stride] = 0.5 * (src[i * stride] + src[(i + 1) * stride]); }
-    } else {
-        for (size_t i = 0; i < n - 1; i++) {
-            if (src[i * stride] == mv || src[(i + 1) * stride] == mv) {
-                dst[i * stride] = mv;
-            } else {
-                dst[i * stride] = 0.5 * (src[i * stride] + src[(i + 1) * stride]);
-            }
-        }
-    }
-}
-
-void NetCDFCollection::_InterpolateSlice(size_t nx, size_t ny, bool xstag, bool ystag, bool has_missing, float mv, float *slice) const
-{
-    if (xstag) {
-        for (int i = 0; i < ny; i++) {
-            float *src = slice + (i * nx);
-            float *dst = slice + (i * (nx - 1));
-            _InterpolateLine(src, nx, 1, has_missing, mv, dst);
-        }
-        nx--;
-    }
-
-    if (ystag) {
-        for (int i = 0; i < nx; i++) {
-            float *src = slice + i;
-            float *dst = slice + i;
-            _InterpolateLine(src, ny, nx, has_missing, mv, dst);
-        }
-        ny--;
-    }
-}
-
 float *NetCDFCollection::_Get1DVar(NetCDFSimple *netcdf, const NetCDFSimple::Variable &variable) const
 {
     if (variable.GetDimNames().size() != 1) return (NULL);
@@ -1128,9 +1092,6 @@ int NetCDFCollection::Read(size_t start[], size_t count[], float *data, int fd)
         return (-1);
     }
 
-    fileHandle &fh = itr->second;
-
-    const TimeVaryingVar &var = fh._tvvars;
     return (NetCDFCollection::ReadNative(start, count, data, fd)); 
 }
 
@@ -1154,9 +1115,6 @@ int NetCDFCollection::Read(size_t start[], size_t count[], int *data, int fd)
         SetErrMsg("Invalid file descriptor : %d", fd);
         return (-1);
     }
-    fileHandle &fh = itr->second;
-
-    const TimeVaryingVar &var = fh._tvvars;
     return (NetCDFCollection::ReadNative(start, count, data, fd)); 
 }
 

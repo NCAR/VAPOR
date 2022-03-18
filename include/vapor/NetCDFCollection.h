@@ -737,10 +737,6 @@ private:
     int _InitializeTimesMapCase3(const std::vector<string> &files, const std::vector<string> &time_dimnames, const std::vector<string> &time_coordvars, std::map<string, std::vector<double>> &timesMap,
                                  map<string, size_t> &timeDimLens) const;
 
-    void _InterpolateLine(const float *src, size_t n, size_t stride, bool has_missing, float mv, float *dst) const;
-
-    void _InterpolateSlice(size_t nx, size_t ny, bool xstag, bool ystag, bool has_missing, float mv, float *slice) const;
-
     int _GetTimesMap(NetCDFSimple *netcdf, const std::vector<string> &time_coordvars, const std::vector<string> &time_dimnames, std::map<string, std::vector<double>> &timesmap) const;
 
     float *_Get1DVar(NetCDFSimple *netcdf, const NetCDFSimple::Variable &variable) const;
