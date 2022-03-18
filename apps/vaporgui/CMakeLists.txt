@@ -277,6 +277,8 @@ set (SRCS
     ParticleEventRouter.h
     PTimestepSliderEdit.cpp
     PTimestepSliderEdit.h
+    PMetadataClasses.cpp
+    PMetadataClasses.h
 
 	# Need to include all files that request .ui files
 	Statistics.h

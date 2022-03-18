@@ -153,6 +153,46 @@ public:
         return (_dc->GetDimensionNames());
     }
 
+    //! \copydoc DC::GetAtt(string, string, vector<double>&)
+    //
+    bool GetAtt (string varname, string attname, vector< double > &values) const
+    {
+        VAssert(_dc);
+        return (_dc->GetAtt(varname, attname, values));
+    }
+
+    //! \copydoc DC::GetAtt(string, string, vector<long>&)
+    //
+    bool GetAtt (string varname, string attname, vector<long> &values) const
+    {
+        VAssert(_dc);
+        return (_dc->GetAtt(varname, attname, values));
+    }
+
+    //! \copydoc DC::GetAtt(string, string, string&)
+    //
+    bool GetAtt (string varname, string attname, string &values) const
+    {
+        VAssert(_dc);
+        return (_dc->GetAtt(varname, attname, values));
+    }
+
+    //! \copydoc DC::GetAttNames(string)
+    //
+    std::vector<string> GetAttNames(string varname) const
+    {
+        VAssert(_dc);
+        return (_dc->GetAttNames(varname));
+    }
+
+    //! \copydoc DC::GetAttType(string, string)
+    //
+    DC::XType GetAttType(string varname, string attname) const
+    {
+        VAssert(_dc);
+        return (_dc->GetAttType(varname, attname));
+    }
+
     //! \copydoc DC::GetDimension()
     //
     bool GetDimension(string dimname, DC::Dimension &dimension, long ts) const

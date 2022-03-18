@@ -4,6 +4,7 @@
 #include "PSliderEditHLI.h"
 #include "PConstantColorWidget.h"
 #include "PSliceController.h"
+#include "PMetadataClasses.h"
 
 using namespace VAPoR;
 typedef ContourParams CP;
@@ -20,7 +21,8 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
             new PScalarVariableSelector,
             new PHeightVariableSelector,
         }),
-        new PFidelitySection
+        new PFidelitySection,
+        new POpenVariableMetadataSection
     }));
     
     AddAppearanceSubtab(new PGroup({

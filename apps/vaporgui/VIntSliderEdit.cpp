@@ -83,7 +83,11 @@ int VIntSliderEdit::GetMinimum() const
 void VIntSliderEdit::SetMinimum(int min)
 {
     // If the new value is unchanged, or illegal, reset the menu and retur
-    if (min == _slider->GetMinimum() || min >= _slider->GetMaximum() || min > _value) {
+    if (min == _slider->GetMinimum() || min > _slider->GetMaximum()) {
+        if (min > _value) {
+            _value = min;
+            SetValue(_value);
+        }
         _menu->SetMinimum(_slider->GetMinimum());
         return;
     }
@@ -101,7 +105,11 @@ int VIntSliderEdit::GetMaximum() const { return _slider->GetMaximum(); }
 void VIntSliderEdit::SetMaximum(int max)
 {
     // If the new value is unchanged, or illegal, reset the menu and return
-    if (max == _slider->GetMaximum() || max <= _slider->GetMinimum() || max < _value) {
+    if (max == _slider->GetMaximum() || max < _slider->GetMinimum()) {
+        if (max < _value) {
+            _value = max;
+            SetValue(_value);
+        }
         _menu->SetMaximum(_slider->GetMaximum());
         return;
     }

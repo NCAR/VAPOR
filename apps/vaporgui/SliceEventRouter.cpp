@@ -2,6 +2,7 @@
 #include <vapor/SliceParams.h>
 #include "PWidgets.h"
 #include "PSliceController.h"
+#include "PMetadataClasses.h"
 
 using namespace VAPoR;
 
@@ -15,7 +16,8 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
         new PSection("Variable Selection", {
             new PScalarVariableSelector
         }),
-        new PFidelitySection
+        new PFidelitySection,
+        new POpenVariableMetadataSection
     }));
     
     AddAppearanceSubtab(new PGroup({

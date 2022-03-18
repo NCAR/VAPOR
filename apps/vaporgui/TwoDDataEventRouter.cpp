@@ -1,6 +1,7 @@
 #include "TwoDDataEventRouter.h"
 #include "vapor/TwoDDataParams.h"
 #include "PWidgets.h"
+#include "PMetadataClasses.h"
 
 using namespace VAPoR;
 
@@ -15,7 +16,8 @@ TwoDDataEventRouter::TwoDDataEventRouter(QWidget *parent, ControlExec *ce) : Ren
             new PScalarVariableSelector,
             new PHeightVariableSelector
         }),
-        new PFidelitySection
+        new PFidelitySection,
+        new POpenVariableMetadataSection
     }));
     
     AddAppearanceSubtab((new PTFEditor));
