@@ -37,9 +37,6 @@ namespace VAPoR {
 //! constructor, then a.nc is assumed to contain "v" at time step 0,
 //! and "b.nc" contains "v" at time step 1.
 //!
-//! The class understands the Arakawa C-Grid ("staggered" variables), and
-//! can interpolate them onto a common (unstaggered) grid.
-//!
 //! \note The specification of dimensions and coordinates in this class
 //! follows the netCDF API convention of ordering from slowest
 //! varying dimension to fastest varying dimension. For example, if
@@ -491,25 +488,20 @@ public:
     //!
     //! \retval status Returns a non-negative file descriptor on success
     //!
-    //! \sa Read(), ReadNative(), ReadSliceNative() ReadSlice()
+    //! \sa Read(), ReadSlice()
     //!
     virtual int OpenRead(size_t ts, string varname);
 
-    //! Read data from the currently opened variable on an unstaggered grid
+    //! Read data from the currently opened variable 
     //!
     //! Read the hyperslice defined by \p start and \p count from
     //! the currently opened variable into the buffer pointed to by \p data.
     //!
     //! This method is identical in functionality to the netCDF function,
-    //! nc_get_var_float, with the following two exceptions:
+    //! nc_get_var_float, with the following exception:
     //!
     //!
-    //! 1. If the opened variable has staggered dimensions, the data are
-    //! resampled onto the non-staggered grid. Moreover, the region coordinates
-    //! (\p start and \p count) should be specified in the
-    //! non-staggered coordinates.
-    //!
-    //! 2. If the currently
+    //! If the currently
     //! opened variable is explicitly time-varying (has a time-varying
     //! dimension), only the spatial dimensions should be provied
     //! by \p start and \p count. I.e. if the variable contains n dimensions
@@ -521,46 +513,27 @@ public:
     //! \param[in] fd A currently opened file descriptor returned by OpenRead().
     //! \retval retval A negative int is returned on failure.
     //!
-    //! \sa ReadNative(), NetCDFSimple::Read(),
+    //! \sa NetCDFSimple::Read(),
     //! SetMissingValueAttName(), SetMissingValueAttName()
     //!
+    virtual int Read(size_t start[], size_t count[], double *data, int fd = 0);
     virtual int Read(size_t start[], size_t count[], float *data, int fd = 0);
     virtual int Read(size_t start[], size_t count[], int *data, int fd = 0);
+    virtual int Read(size_t start[], size_t count[], char *data, int fd = 0);
+    virtual int Read(std::vector<size_t> start, std::vector<size_t> count, double *data, int fd = 0);
     virtual int Read(std::vector<size_t> start, std::vector<size_t> count, float *data, int fd = 0);
     virtual int Read(std::vector<size_t> start, std::vector<size_t> count, int *data, int fd = 0);
 
+    virtual int Read(double *data, int fd = 0);
     virtual int Read(float *data, int fd = 0);
     virtual int Read(char *data, int fd = 0);
     virtual int Read(int *data, int fd = 0);
 
-    //! Read data from the currently opened variable on the native grid
-    //!
-    //! This method is identical to the Read() method except that
-    //! staggered variables are not interpolated to the non-staggered grid.
-    //! Hence, \p start and \p count should be specified in staggered
-    //! coordinates if the variable is staggered, and non-staggerd coordinates
-    //! if the variable is not staggered.
-    //!
-    //! \param[in] start Start vector with one element for each dimension
-    //! \param[in] count Count vector with one element for each dimension
-    //! \param[in] fd A currently opened file descriptor returned by OpenRead().
-    //! \retval retval A negative int is returned on failure.
-    //!
-    //! \sa NetCDFSimple::Read()
-    //!
-    virtual int ReadNative(size_t start[], size_t count[], float *data, int fd = 0);
-    virtual int ReadNative(size_t start[], size_t count[], int *data, int fd = 0);
-    virtual int ReadNative(size_t start[], size_t count[], char *data, int fd = 0);
-
-    virtual int ReadNative(float *data, int fd = 0);
-    virtual int ReadNative(int *data, int fd = 0);
-
     //! Read a 2D slice from a 2D or 3D variable
     //!
     //! The method will read 2D slices from a 2D or 3D variable until all
-    //! slices have been processed. If the variable is staggered the slices
-    //! will be interpolated onto the non-staggered grid for the currently
-    //! opened variable. For 3D data each call to ReadSlice() will return
+    //! slices have been processed. 
+    //! For 3D data each call to ReadSlice() will return
     //! a subsequent slice until all slices have been processed. The total
     //! number of slices is the value of the slowest varying dimension.
     //!
@@ -577,29 +550,11 @@ public:
     //
     virtual int ReadSlice(float *data, int fd = 0);
 
-    //! Read a 2D slice from a 2D or 3D variable on the native grid
-    //!
-    //! This method is identical to ReadSlice() with the exception that
-    //! if the currently opened variable is staggered, the variable will
-    //! not be resampled to a non-staggered grid.
-    //!
-    //! \param[in] fd A currently opened file descriptor returned by OpenRead().
-    //! \param[out] data The possibly resampled 2D data slice. It is the
-    //! caller's responsibility to ensure that \p data points to sufficient
-    //! space.
-    //!
-    //! \retval status Returns 1 if successful, 0 if there are no more
-    //! slices to read, and a negative integer on error.
-    //!
-    //! \sa OpenRead(), Read()
-    //
-    virtual int ReadSliceNative(float *data, int fd = 0);
-
     //! Set the variable slice position indicator
     //!
     //! This method changes the position of the slice indicator
-    //! for an open variable. Subsequent reads with ReadSlice() or
-    //! ReadSliceNative() will position the slice offset based on
+    //! for an open variable. Subsequent reads with ReadSlice() 
+    //! will position the slice offset based on
     //! \p offset. If \p whence is 0 then \p offset is added to
     //! the first variable slice. If \p whence is one then \p offset
     //! is added to the current slice position. If \p whence is 2
@@ -627,8 +582,7 @@ public:
     //!
     //! This method informs the class instance of the name of a netCDF
     //! variable attribute, if one exists, that contains the missing value
-    //! for the variable. During interpolation of staggered variables
-    //! the missing value is needed for correct processing
+    //! for the variable. 
     //!
     //! \param attname Name of netCDF variable attribute specifying the
     //! missing value
@@ -739,11 +693,14 @@ private:
 
     int _GetTimesMap(NetCDFSimple *netcdf, const std::vector<string> &time_coordvars, const std::vector<string> &time_dimnames, std::map<string, std::vector<double>> &timesmap) const;
 
-    float *_Get1DVar(NetCDFSimple *netcdf, const NetCDFSimple::Variable &variable) const;
+    double *_Get1DVar(NetCDFSimple *netcdf, const NetCDFSimple::Variable &variable) const;
 
     int _get_var_index(const vector<NetCDFSimple::Variable> variables, string varname) const;
 
     template<typename T> int _read_template(T *data, int fd);
+    template<typename T> int _read_template(size_t start[], size_t count[], T *data, int fd);
+    template<typename T> int _read_slice_template(T *data, int fd);
+
 };
 };    // namespace VAPoR
 

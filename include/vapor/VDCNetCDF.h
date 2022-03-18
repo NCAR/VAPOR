@@ -180,6 +180,7 @@ protected:
     int closeVariable(int fd);
 
     int readRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+    int readRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, double *region);
     int readRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, int *region);
 
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;

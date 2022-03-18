@@ -469,6 +469,12 @@ int DerivedVar::_getVarDestagger(DC *dc, size_t ts, string varname, int level, i
     return (0);
 }
 
+
+int DerivedVar::ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, double *region) {
+    SetErrMsg("Not implemented");
+    return(-1);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //
 //	DerivedCoordVar_PCSFromLatLon

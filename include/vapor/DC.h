@@ -1632,7 +1632,7 @@ public:
     //! \sa OpenVariableRead()
     //
     int virtual Read(int fd, float *data) { return (_readTemplate(fd, data)); }
-
+    int virtual Read(int fd, double *data) { return (_readTemplate(fd, data)); }
     int virtual Read(int fd, int *data) { return (_readTemplate(fd, data)); }
 
     //! Read a single slice of data from the currently opened variable
@@ -1657,6 +1657,7 @@ public:
     //! \sa OpenVariableRead(), GetHyperSliceInfo()
     //!
     virtual int ReadSlice(int fd, float *slice) { return (_readSliceTemplate(fd, slice)); }
+    virtual int ReadSlice(int fd, double *slice) { return (_readSliceTemplate(fd, slice)); }
     virtual int ReadSlice(int fd, int *slice) { return (_readSliceTemplate(fd, slice)); }
 
     //! Read in and return a subregion from the currently opened
@@ -1684,6 +1685,7 @@ public:
     //! \sa OpenVariableRead(), GetDimLensAtLevel(), GetDimensionNames()
     //
     virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (readRegion(fd, min, max, region)); }
+    virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region) { return (readRegion(fd, min, max, region)); }
     virtual int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (readRegion(fd, min, max, region)); }
 
 
@@ -1712,6 +1714,7 @@ public:
     //!
     //
     virtual int GetVar(string varname, int level, int lod, float *data) { return (_getVarTemplate(varname, level, lod, data)); }
+    virtual int GetVar(string varname, int level, int lod, double *data) { return (_getVarTemplate(varname, level, lod, data)); }
     virtual int GetVar(string varname, int level, int lod, int *data) { return (_getVarTemplate(varname, level, lod, data)); }
 
     //! Read an entire variable at a given time step in one call
@@ -1742,6 +1745,7 @@ public:
     //!
     //
     virtual int GetVar(size_t ts, string varname, int level, int lod, float *data) { return (_getVarTemplate(ts, varname, level, lod, data)); }
+    virtual int GetVar(size_t ts, string varname, int level, int lod, double *data) { return (_getVarTemplate(ts, varname, level, lod, data)); }
     virtual int GetVar(size_t ts, string varname, int level, int lod, int *data) { return (_getVarTemplate(ts, varname, level, lod, data)); }
 
     //! Returns true if indicated data volume is available
@@ -2199,6 +2203,8 @@ protected:
     //! \copydoc ReadRegion()
     //
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region) = 0;
 
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) = 0;
 

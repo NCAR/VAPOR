@@ -732,6 +732,8 @@ template<class T> int VDCNetCDF::_readRegionTemplate(int fd, const vector<size_t
 
 int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
+int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region) { return (_readRegionTemplate(fd, min, max, region)); }
+
 int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
 

@@ -128,8 +128,8 @@ protected:
 
     //! \copydoc ReadRegion()
     //
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region);
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
-
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (-1); }
 
     //! \copydoc VariableExists()

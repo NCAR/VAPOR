@@ -80,6 +80,7 @@ public:
     virtual int CloseVariable(int fd) = 0;
 
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) = 0;
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, double *region);
 
     virtual bool VariableExists(size_t ts, int reflevel, int lod) const = 0;
 

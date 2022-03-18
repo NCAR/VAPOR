@@ -424,6 +424,7 @@ protected:
     virtual int closeVariable(int fd) = 0;
 
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) = 0;
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region) = 0;
 
 public:
     //! Define a coordinate variable

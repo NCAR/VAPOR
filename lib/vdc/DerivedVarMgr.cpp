@@ -233,6 +233,27 @@ int DerivedVarMgr::closeVariable(int fd)
     return (var->CloseVariable(derivedFD));
 }
 
+int DerivedVarMgr::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region)
+{
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    string      varname = f->GetVarname();
+    DerivedVar *var = _getVar(varname);
+    if (!var) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    int derivedFD = f->GetAux();
+
+    return (var->ReadRegion(derivedFD, min, max, region));
+}
+
 int DerivedVarMgr::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
 {
     DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
@@ -291,3 +312,4 @@ DerivedCoordVar *DerivedVarMgr::_getCoordVar(string name) const
 
     return (itr->second);
 }
+
