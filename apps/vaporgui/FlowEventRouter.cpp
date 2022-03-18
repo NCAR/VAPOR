@@ -5,6 +5,7 @@
 #include "PFlowIntegrationRegionSelector.h"
 #include "PMultiVarSelector.h"
 #include "PConstantColorWidget.h"
+#include "PMetadataSection.h"
 
 using namespace VAPoR;
 typedef FlowParams FP;
@@ -25,7 +26,8 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             (new PZFieldVariableSelector)->OnlyShowForDim(3),
             new PColorMapVariableSelector,
         }),
-        new PFidelitySection
+        new PFidelitySection,
+        new PMetadataSection
     }));
     
     _seedingTab =

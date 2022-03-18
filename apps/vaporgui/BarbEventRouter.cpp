@@ -2,6 +2,7 @@
 #include "vapor/BarbParams.h"
 #include "PWidgets.h"
 #include "PConstantColorWidget.h"
+#include "PMetadataSection.h"
 
 using namespace VAPoR;
 typedef BarbParams BP;
@@ -21,7 +22,8 @@ BarbEventRouter::BarbEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             new PHeightVariableSelector,
             new PColorMapVariableSelector,
         }),
-        new PFidelitySection
+        new PFidelitySection,
+        new PMetadataSection
     }));
     
     AddAppearanceSubtab(new PGroup({
