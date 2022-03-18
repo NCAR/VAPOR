@@ -28,7 +28,6 @@ template<class T> vector<T> make_container_unique(vector<T> v)
 NetCDFCollection::NetCDFCollection()
 {
     _variableList.clear();
-    _staggeredDims.clear();
     _dimNames.clear();
     _dimLens.clear();
     _missingValAttName.clear();
@@ -53,7 +52,6 @@ void NetCDFCollection::ReInitialize()
     }
 
     _variableList.clear();
-    _staggeredDims.clear();
     _dimNames.clear();
     _dimLens.clear();
     _missingValAttName.clear();
@@ -239,28 +237,6 @@ bool NetCDFCollection::VariableExists(size_t ts, string varname) const
     return (false);
 }
 
-bool NetCDFCollection::IsStaggeredVar(string varname) const
-{
-    map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
-    if (p == _variableList.end()) { return (false); }
-    const TimeVaryingVar &var = p->second;
-
-    vector<string> dimnames = var.GetSpatialDimNames();
-
-    for (int i = 0; i < dimnames.size(); i++) {
-        if (IsStaggeredDim(dimnames[i])) return (true);
-    }
-    return (false);
-}
-
-bool NetCDFCollection::IsStaggeredDim(string dimname) const
-{
-    for (int i = 0; i < _staggeredDims.size(); i++) {
-        if (dimname.compare(_staggeredDims[i]) == 0) return (true);
-    }
-    return (false);
-}
-
 vector<string> NetCDFCollection::GetVariableNames(int ndims, bool spatial) const
 {
     map<string, TimeVaryingVar>::const_iterator p = _variableList.begin();
@@ -279,27 +255,12 @@ vector<string> NetCDFCollection::GetVariableNames(int ndims, bool spatial) const
 
 vector<size_t> NetCDFCollection::GetSpatialDims(string varname) const
 {
-    vector<size_t> dims;
-    dims.clear();
-
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
     if (p == _variableList.end()) { return (dims); }
     const TimeVaryingVar &tvvars = p->second;
 
-    vector<size_t> mydims = tvvars.GetSpatialDims();
-    vector<string> dimnames = tvvars.GetSpatialDimNames();
+    return(tvvars.GetSpatialDims());
 
-    //
-    // Deal with any staggered dimensions
-    //
-    for (int i = 0; i < mydims.size(); i++) {
-        dims.push_back(mydims[i]);
-        for (int j = 0; j < _staggeredDims.size(); j++) {
-            VAssert(mydims[i] > 0);
-            if (dimnames[i].compare(_staggeredDims[j]) == 0) { dims[i] = mydims[i] - 1; }
-        }
-    }
-    return (dims);
 }
 
 vector<string> NetCDFCollection::GetSpatialDimNames(string varname) const
@@ -1119,95 +1080,8 @@ int NetCDFCollection::ReadSlice(float *data, int fd)
         SetErrMsg("Only 2D and 3D variables supported");
         return (-1);
     }
-    if (!IsStaggeredVar(var.GetName())) { return (NetCDFCollection::ReadSliceNative(data, fd)); }
+    return (NetCDFCollection::ReadSliceNative(data, fd)); 
 
-    bool xstag = IsStaggeredDim(dimnames[dimnames.size() - 1]);
-    bool ystag = IsStaggeredDim(dimnames[dimnames.size() - 2]);
-    bool zstag = dims.size() == 3 ? IsStaggeredDim(dimnames[dimnames.size() - 3]) : false;
-
-    size_t nx = dims[dims.size() - 1];
-    size_t ny = dims[dims.size() - 2];
-
-    size_t nxus = xstag ? nx - 1 : nx;
-    size_t nyus = ystag ? ny - 1 : ny;
-
-    if (fh._slicebufsz < (2 * nx * ny * sizeof(*data))) {
-        if (fh._slicebuf) delete[] fh._slicebuf;
-        fh._slicebuf = (unsigned char *)new float[2 * nx * ny];
-        fh._slicebufsz = 2 * nx * ny * sizeof(*data);
-    }
-
-    float *buffer = (float *)fh._slicebuf;    // cast to float*
-    float *slice1 = buffer;
-    float *slice2 = NULL;
-
-    int firstSlice = 0;    // index of first and second slice read
-    int secondSlice = 1;
-    if (fh._first_slice) {
-        firstSlice = fh._slice;
-        secondSlice = firstSlice + 1;
-        fh._first_slice = false;
-    }
-
-    if (zstag) {
-        //
-        // If this is the first read we read the first slice into
-        // the front (first half) of buffer, and the second into
-        // the back (second half) of
-        // buffer. For all other reads the previous slice is in
-        // the front of buffer, so we read the current slice into
-        // the back of buffer
-        //
-        if (fh._slice == firstSlice) {
-            slice1 = buffer;
-            slice2 = buffer + (nxus * nyus);
-        } else {
-            slice1 = buffer + (nxus * nyus);
-            slice2 = buffer;
-        }
-    }
-
-    int rc = NetCDFCollection::ReadSliceNative(slice1, fd);
-    if (rc < 1) return (rc);    // eof or error
-
-    _InterpolateSlice(nx, ny, xstag, ystag, fh._has_missing, fh._missing_value, slice1);
-
-    if (zstag) {
-        // N.B. ReadSliceNative increments fh._slice
-        //
-        if (fh._slice == secondSlice) {
-            rc = NetCDFCollection::ReadSliceNative(slice2, fd);
-            if (rc < 1)
-                return (rc);    // eof or error
-                                //			fh._slice--;
-
-            _InterpolateSlice(nx, ny, xstag, ystag, fh._has_missing, fh._missing_value, slice2);
-        }
-
-        //
-        // At this point the ith slice is in the front of buffer
-        // and the ith+1 slice is in the back of buffer. Moreover,
-        // any horizontal staggering has be taken care of. Hence, the
-        // horizontal dimensions are given by nxus x nyus.
-        //
-        //
-        for (int i = 0; i < nxus * nyus; i++) {
-            float *src = buffer + i;
-            float *dst = buffer + i;
-            _InterpolateLine(src, 2, nxus * nyus, fh._has_missing, fh._missing_value, dst);
-        }
-    }
-
-    memcpy(data, buffer, sizeof(*data) * nxus * nyus);
-
-    if (zstag) {
-        //
-        // move the ith+1 slice to the front of the buffer
-        //
-        memcpy(buffer, buffer + (nxus * nyus), sizeof(*data) * nxus * nyus);
-    }
-
-    return (1);
 }
 
 int NetCDFCollection::SeekSlice(int offset, int whence, int fd)
@@ -1227,9 +1101,8 @@ int NetCDFCollection::SeekSlice(int offset, int whence, int fd)
     vector<size_t> dims = fh._tvvars.GetSpatialDims();
     vector<string> dimnames = fh._tvvars.GetSpatialDimNames();
 
-    bool   zstag = dims.size() == 3 ? IsStaggeredDim(dimnames[dimnames.size() - 3]) : false;
     size_t nz = dims.size() == 3 ? dims[dims.size() - 3] : 1;
-    long   nzus = zstag ? nz - 1 : nz;
+    long   nzus = nz;
 
     int slice = 0;
     if (whence == 0) {
@@ -1258,10 +1131,7 @@ int NetCDFCollection::Read(size_t start[], size_t count[], float *data, int fd)
     fileHandle &fh = itr->second;
 
     const TimeVaryingVar &var = fh._tvvars;
-    if (!IsStaggeredVar(var.GetName())) { return (NetCDFCollection::ReadNative(start, count, data, fd)); }
-
-    SetErrMsg("Not implemented");
-    return (-1);
+    return (NetCDFCollection::ReadNative(start, count, data, fd)); 
 }
 
 int NetCDFCollection::Read(vector<size_t> start, vector<size_t> count, float *data, int fd)
@@ -1287,10 +1157,7 @@ int NetCDFCollection::Read(size_t start[], size_t count[], int *data, int fd)
     fileHandle &fh = itr->second;
 
     const TimeVaryingVar &var = fh._tvvars;
-    if (!IsStaggeredVar(var.GetName())) { return (NetCDFCollection::ReadNative(start, count, data, fd)); }
-
-    SetErrMsg("Not implemented");
-    return (-1);
+    return (NetCDFCollection::ReadNative(start, count, data, fd)); 
 }
 
 int NetCDFCollection::Read(vector<size_t> start, vector<size_t> count, int *data, int fd)
@@ -1333,35 +1200,17 @@ int NetCDFCollection::Read(float *data, int fd)
         size_t nx = dims[dims.size() - 1];
         size_t start[] = {0};
         size_t count[] = {nx};
-        bool   xstag = IsStaggeredDim(dimnames[dimnames.size() - 1]);
 
-        if (xstag) {    // Deal with staggered data
-
-            if (fh._linebufsz < (nx * sizeof(*data))) {
-                if (fh._linebuf) delete[] fh._linebuf;
-                fh._linebuf = (unsigned char *)new float[nx];
-                fh._linebufsz = nx * sizeof(*data);
-            }
-            int rc = NetCDFCollection::ReadNative(start, count, (float *)fh._linebuf, fd);
-            if (rc < 0) return (-1);
-            _InterpolateLine((const float *)fh._linebuf, nx, 1, fh._has_missing, fh._missing_value, data);
-            return (0);
-        } else {
-            return (NetCDFCollection::ReadNative(start, count, data, fd));
-        }
+        return (NetCDFCollection::ReadNative(start, count, data, fd));
     }
-
-    bool xstag = IsStaggeredDim(dimnames[dimnames.size() - 1]);
-    bool ystag = IsStaggeredDim(dimnames[dimnames.size() - 2]);
-    bool zstag = dims.size() == 3 ? IsStaggeredDim(dimnames[dimnames.size() - 3]) : false;
 
     size_t nx = dims[dims.size() - 1];
     size_t ny = dims[dims.size() - 2];
     size_t nz = dims.size() == 3 ? dims[dims.size() - 3] : 1;
 
-    size_t nxus = xstag ? nx - 1 : nx;
-    size_t nyus = ystag ? ny - 1 : ny;
-    size_t nzus = zstag ? nz - 1 : nz;
+    size_t nxus = nx;
+    size_t nyus = ny;
+    size_t nzus = nz;
 
     float *buf = data;
     for (int i = 0; i < nzus; i++) {
@@ -1384,15 +1233,6 @@ template<typename T> int NetCDFCollection::_read_template(T *data, int fd)
     const TimeVaryingVar &var = fh._tvvars;
     vector<size_t>        dims = var.GetSpatialDims();
     vector<string>        dimnames = var.GetSpatialDimNames();
-
-    bool xstag = IsStaggeredDim(dimnames[dimnames.size() - 1]);
-    bool ystag = dims.size() > 1 ? IsStaggeredDim(dimnames[dimnames.size() - 2]) : false;
-    bool zstag = dims.size() > 2 ? IsStaggeredDim(dimnames[dimnames.size() - 3]) : false;
-
-    if (xstag || ystag || zstag) {
-        SetErrMsg("Not implemented");
-        return (-1);
-    }
 
     //
     // Handle different dimenion cases
@@ -1454,9 +1294,6 @@ namespace VAPoR {
 std::ostream &operator<<(std::ostream &o, const NetCDFCollection &ncdfc)
 {
     o << "NetCDFCollection" << endl;
-    o << " _staggeredDims : ";
-    for (int i = 0; i < ncdfc._staggeredDims.size(); i++) { o << ncdfc._staggeredDims[i] << " "; }
-    o << endl;
     o << " _times : ";
     for (int i = 0; i < ncdfc._times.size(); i++) { o << ncdfc._times[i] << " "; }
     o << endl;

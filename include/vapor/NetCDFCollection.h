@@ -166,30 +166,6 @@ public:
     //
     virtual bool VariableExists(size_t ts, string varname) const;
 
-    //! Returns true if the specified variable has any staggered dimensions
-    //!
-    //! If the variabled named by \p varname has any staggered dimensions, true
-    //! is returned
-    //!
-    //! \param[in] varname Name of variable
-    //! \retval boolean indicating where variable \p varname has any staggered
-    //! dimensions.
-    //!
-    //! \sa SetStaggeredDims()
-    //!
-    virtual bool IsStaggeredVar(string varname) const;
-
-    //! Returns true if the specified dimension is staggered
-    //!
-    //! If the dimension named by \p dimname is a staggered dimension, true
-    //! is returned
-    //!
-    //! \param[in] dimname Name of dimension
-    //!
-    //! \sa SetStaggeredDims()
-    //!
-    virtual bool IsStaggeredDim(string dimname) const;
-
     //! Return a list of variables with a given rank
     //!
     //! Returns a list of variables having a dimension rank
@@ -545,7 +521,7 @@ public:
     //! \param[in] fd A currently opened file descriptor returned by OpenRead().
     //! \retval retval A negative int is returned on failure.
     //!
-    //! \sa SetStaggeredDims(), ReadNative(), NetCDFSimple::Read(),
+    //! \sa ReadNative(), NetCDFSimple::Read(),
     //! SetMissingValueAttName(), SetMissingValueAttName()
     //!
     virtual int Read(size_t start[], size_t count[], float *data, int fd = 0);
@@ -570,7 +546,7 @@ public:
     //! \param[in] fd A currently opened file descriptor returned by OpenRead().
     //! \retval retval A negative int is returned on failure.
     //!
-    //! \sa SetStaggeredDims(), NetCDFSimple::Read()
+    //! \sa NetCDFSimple::Read()
     //!
     virtual int ReadNative(size_t start[], size_t count[], float *data, int fd = 0);
     virtual int ReadNative(size_t start[], size_t count[], int *data, int fd = 0);
@@ -596,7 +572,7 @@ public:
     //! \retval status Returns 1 if successful, 0 if there are no more
     //! slices to read, and a negative integer on error.
     //!
-    //! \sa OpenRead(), Read(), SetStaggeredDims(),
+    //! \sa OpenRead(), Read(), 
     //! SetMissingValueAttName(), SetMissingValueAttName()
     //
     virtual int ReadSlice(float *data, int fd = 0);
@@ -615,7 +591,7 @@ public:
     //! \retval status Returns 1 if successful, 0 if there are no more
     //! slices to read, and a negative integer on error.
     //!
-    //! \sa OpenRead(), Read(), SetStaggeredDims()
+    //! \sa OpenRead(), Read()
     //
     virtual int ReadSliceNative(float *data, int fd = 0);
 
@@ -646,17 +622,6 @@ public:
     //! \sa OpenRead()
     //
     virtual int Close(int fd = 0);
-
-    //! Identify staggered dimensions
-    //!
-    //! This method informs the class instance of any staggered dimensions.
-    //! Class methods that read variable data will use the staggered
-    //! dimension list to identify staggered variables and may interpolate
-    //! the data to a non staggered grid
-    //!
-    //! \param dimnames A list of staggered netCDF dimension names
-    //
-    virtual void SetStaggeredDims(const std::vector<string> dimnames) { _staggeredDims = dimnames; }
 
     //! Identify missing value variable attribute name
     //!
@@ -727,7 +692,6 @@ protected:
 private:
     std::map<string, TimeVaryingVar> _variableList;
     std::map<string, NetCDFSimple *> _ncdfmap;
-    std::vector<string>              _staggeredDims;
     std::vector<string>              _dimNames;    // Names of all dimensions
     std::vector<size_t>              _dimLens;     // Names of all dimensions
     std::vector<bool>                _dimIsTimeVarying;
