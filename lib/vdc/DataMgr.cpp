@@ -3071,7 +3071,7 @@ int DataMgr::_closeVariable(int fd)
     return (_dc->CloseVariable(fd));
 }
 
-template <class T> int DataMgr::_getVar(string varname, int level, int lod, T *data)
+template<class T> int DataMgr::_getVar(string varname, int level, int lod, T *data)
 {
     vector<size_t> dims_at_level, dummy;
 
@@ -3093,7 +3093,7 @@ template <class T> int DataMgr::_getVar(string varname, int level, int lod, T *d
     return (0);
 }
 
-template <class T> int DataMgr::_getVar(size_t ts, string varname, int level, int lod, T *data)
+template<class T> int DataMgr::_getVar(size_t ts, string varname, int level, int lod, T *data)
 {
     vector<size_t> dims_at_level, dummy;
     int            rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);

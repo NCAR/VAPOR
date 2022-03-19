@@ -256,11 +256,10 @@ vector<string> NetCDFCollection::GetVariableNames(int ndims, bool spatial) const
 vector<size_t> NetCDFCollection::GetSpatialDims(string varname) const
 {
     map<string, TimeVaryingVar>::const_iterator p = _variableList.find(varname);
-    if (p == _variableList.end()) { return (vector <size_t> ()); }
+    if (p == _variableList.end()) { return (vector<size_t>()); }
     const TimeVaryingVar &tvvars = p->second;
 
-    return(tvvars.GetSpatialDims());
-
+    return (tvvars.GetSpatialDims());
 }
 
 vector<string> NetCDFCollection::GetSpatialDimNames(string varname) const
@@ -566,8 +565,8 @@ int NetCDFCollection::OpenRead(size_t ts, string varname)
     return (fd);
 }
 
-template<typename T> int NetCDFCollection::_read_template(size_t start[], size_t count[], T *data, int fd) {
-
+template<typename T> int NetCDFCollection::_read_template(size_t start[], size_t count[], T *data, int fd)
+{
     size_t mystart[NC_MAX_VAR_DIMS];
     size_t mycount[NC_MAX_VAR_DIMS];
 
@@ -593,18 +592,10 @@ template<typename T> int NetCDFCollection::_read_template(size_t start[], size_t
     return (fh._ncdfptr->Read(mystart, mycount, data, fh._fd));
 }
 
-int NetCDFCollection::Read(size_t start[], size_t count[], double *data, int fd) {
-    return(_read_template(start, count, data, fd));
-}
-int NetCDFCollection::Read(size_t start[], size_t count[], float *data, int fd) {
-    return(_read_template(start, count, data, fd));
-}
-int NetCDFCollection::Read(size_t start[], size_t count[], int *data, int fd) {
-    return(_read_template(start, count, data, fd));
-}
-int NetCDFCollection::Read(size_t start[], size_t count[], char *data, int fd) {
-    return(_read_template(start, count, data, fd));
-}
+int NetCDFCollection::Read(size_t start[], size_t count[], double *data, int fd) { return (_read_template(start, count, data, fd)); }
+int NetCDFCollection::Read(size_t start[], size_t count[], float *data, int fd) { return (_read_template(start, count, data, fd)); }
+int NetCDFCollection::Read(size_t start[], size_t count[], int *data, int fd) { return (_read_template(start, count, data, fd)); }
+int NetCDFCollection::Read(size_t start[], size_t count[], char *data, int fd) { return (_read_template(start, count, data, fd)); }
 
 
 int NetCDFCollection::_InitializeTimesMap(const vector<string> &files, const vector<string> &time_dimnames, const vector<string> &time_coordvars, map<string, vector<double>> &timesMap,
@@ -910,7 +901,8 @@ int NetCDFCollection::_get_var_index(const vector<NetCDFSimple::Variable> variab
 }
 
 
-template<typename T> int NetCDFCollection::_read_slice_template(T *data, int fd) {
+template<typename T> int NetCDFCollection::_read_slice_template(T *data, int fd)
+{
     std::map<int, fileHandle>::iterator itr;
     if ((itr = _ovr_table.find(fd)) == _ovr_table.end()) {
         SetErrMsg("Invalid file descriptor : %d", fd);
@@ -950,10 +942,7 @@ template<typename T> int NetCDFCollection::_read_slice_template(T *data, int fd)
     return (1);
 }
 
-int NetCDFCollection::ReadSlice(float *data, int fd)
-{
-    return(_read_slice_template(data, fd));
-}
+int NetCDFCollection::ReadSlice(float *data, int fd) { return (_read_slice_template(data, fd)); }
 
 int NetCDFCollection::SeekSlice(int offset, int whence, int fd)
 {

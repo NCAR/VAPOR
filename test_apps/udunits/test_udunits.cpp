@@ -16,12 +16,12 @@ using namespace Wasp;
 using namespace VAPoR;
 
 struct {
-    int year;
-    int month;
-    int day;
-    int hour;
-    int minute;
-    int second;
+    int                     year;
+    int                     month;
+    int                     day;
+    int                     hour;
+    int                     minute;
+    int                     second;
     OptionParser::Boolean_T help;
 } opt;
 
@@ -34,14 +34,10 @@ OptionParser::OptDescRec_T set_opts[] = {{"year", 1, "2020", "year"},
                                          {"help", 0, "", "Print this message and exit"},
                                          {NULL}};
 
-OptionParser::Option_T get_options[] = {{"year", Wasp::CvtToInt, &opt.year, sizeof(opt.year)},
-                                        {"month", Wasp::CvtToInt, &opt.month, sizeof(opt.month)},
-                                        {"day", Wasp::CvtToInt, &opt.day, sizeof(opt.day)},
-                                        {"hour", Wasp::CvtToInt, &opt.hour, sizeof(opt.hour)},
-                                        {"minute", Wasp::CvtToInt, &opt.minute, sizeof(opt.minute)},
-                                        {"second", Wasp::CvtToInt, &opt.second, sizeof(opt.second)},
-                                        {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
-                                        {NULL}};
+OptionParser::Option_T get_options[] = {{"year", Wasp::CvtToInt, &opt.year, sizeof(opt.year)},       {"month", Wasp::CvtToInt, &opt.month, sizeof(opt.month)},
+                                        {"day", Wasp::CvtToInt, &opt.day, sizeof(opt.day)},          {"hour", Wasp::CvtToInt, &opt.hour, sizeof(opt.hour)},
+                                        {"minute", Wasp::CvtToInt, &opt.minute, sizeof(opt.minute)}, {"second", Wasp::CvtToInt, &opt.second, sizeof(opt.second)},
+                                        {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},   {NULL}};
 
 
 const char *ProgName;
@@ -74,8 +70,8 @@ int main(int argc, char **argv)
 
 
     UDUnits udunits;
-    int rc = udunits.Initialize();
-    if (rc < 0) return(1);
+    int     rc = udunits.Initialize();
+    if (rc < 0) return (1);
 
     double seconds_since_epoch = 0.0;
     seconds_since_epoch = udunits.EncodeTime(opt.year, opt.month, opt.day, opt.hour, opt.minute, opt.second);
@@ -100,9 +96,7 @@ int main(int argc, char **argv)
         cerr << minute << ":";
         cerr << second << endl;
 
-        return(1);
+        return (1);
     }
-    return(0);
+    return (0);
 }
-  
-

@@ -470,9 +470,10 @@ int DerivedVar::_getVarDestagger(DC *dc, size_t ts, string varname, int level, i
 }
 
 
-int DerivedVar::ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, double *region) {
+int DerivedVar::ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, double *region)
+{
     SetErrMsg("Not implemented");
-    return(-1);
+    return (-1);
 }
 
 //////////////////////////////////////////////////////////////////////////////

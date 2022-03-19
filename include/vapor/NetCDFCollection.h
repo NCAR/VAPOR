@@ -492,7 +492,7 @@ public:
     //!
     virtual int OpenRead(size_t ts, string varname);
 
-    //! Read data from the currently opened variable 
+    //! Read data from the currently opened variable
     //!
     //! Read the hyperslice defined by \p start and \p count from
     //! the currently opened variable into the buffer pointed to by \p data.
@@ -532,7 +532,7 @@ public:
     //! Read a 2D slice from a 2D or 3D variable
     //!
     //! The method will read 2D slices from a 2D or 3D variable until all
-    //! slices have been processed. 
+    //! slices have been processed.
     //! For 3D data each call to ReadSlice() will return
     //! a subsequent slice until all slices have been processed. The total
     //! number of slices is the value of the slowest varying dimension.
@@ -545,7 +545,7 @@ public:
     //! \retval status Returns 1 if successful, 0 if there are no more
     //! slices to read, and a negative integer on error.
     //!
-    //! \sa OpenRead(), Read(), 
+    //! \sa OpenRead(), Read(),
     //! SetMissingValueAttName(), SetMissingValueAttName()
     //
     virtual int ReadSlice(float *data, int fd = 0);
@@ -553,7 +553,7 @@ public:
     //! Set the variable slice position indicator
     //!
     //! This method changes the position of the slice indicator
-    //! for an open variable. Subsequent reads with ReadSlice() 
+    //! for an open variable. Subsequent reads with ReadSlice()
     //! will position the slice offset based on
     //! \p offset. If \p whence is 0 then \p offset is added to
     //! the first variable slice. If \p whence is one then \p offset
@@ -582,7 +582,7 @@ public:
     //!
     //! This method informs the class instance of the name of a netCDF
     //! variable attribute, if one exists, that contains the missing value
-    //! for the variable. 
+    //! for the variable.
     //!
     //! \param attname Name of netCDF variable attribute specifying the
     //! missing value
@@ -700,7 +700,6 @@ private:
     template<typename T> int _read_template(T *data, int fd);
     template<typename T> int _read_template(size_t start[], size_t count[], T *data, int fd);
     template<typename T> int _read_slice_template(T *data, int fd);
-
 };
 };    // namespace VAPoR
 

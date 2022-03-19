@@ -312,4 +312,3 @@ DerivedCoordVar *DerivedVarMgr::_getCoordVar(string name) const
 
     return (itr->second);
 }
-

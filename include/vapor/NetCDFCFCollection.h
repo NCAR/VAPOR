@@ -328,7 +328,6 @@ public:
     friend std::ostream &operator<<(std::ostream &o, const NetCDFCFCollection &ncdfc);
 
 private:
-
     std::vector<std::string>       _coordinateVars;
     std::vector<std::string>       _auxCoordinateVars;
     std::vector<std::string>       _lonCoordVars;
