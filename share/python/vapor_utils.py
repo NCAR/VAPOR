@@ -776,6 +776,12 @@ def GradFinDif(A,dx,dy,dz,order=6):
 # values interpolated to the surface defined by PR = val
 # Sweep array from bottom to top
 def interp3d(A,PR,val):
+    '''Method that vertically interpolates one 3D variable to a level determined by 
+    another variable.  The second variable (PR) is typically pressure.  
+    The second variable must decrease
+    as a function of z (elevation).  The returned value is a 2D variable having
+    values interpolated to the surface defined by PR = val
+    Sweep array from bottom to top'''
     s = np.shape(PR)    #size of the input arrays
     ss = [s[1],s[2]] # shape of 2d arrays
     interpVal = np.empty(ss,np.float32)
