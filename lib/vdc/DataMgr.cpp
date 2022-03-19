@@ -2531,7 +2531,7 @@ int DataMgr::_initTimeCoord()
 
         _timeCoordinates = derivedVar->GetTimes();
     } else {
-        float *buf = new float[numTS];
+        double *buf = new double[numTS];
         int    rc = _getVar(nativeTimeCoordName, -1, -1, buf);
         if (rc < 0) { return (-1); }
 
@@ -3071,13 +3071,13 @@ int DataMgr::_closeVariable(int fd)
     return (_dc->CloseVariable(fd));
 }
 
-int DataMgr::_getVar(string varname, int level, int lod, float *data)
+template <class T> int DataMgr::_getVar(string varname, int level, int lod, T *data)
 {
     vector<size_t> dims_at_level, dummy;
 
     size_t numts = _dc->GetNumTimeSteps(varname);
 
-    float *ptr = data;
+    T *ptr = data;
     for (size_t ts = 0; ts < numts; ts++) {
         int rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);
         if (rc < 0) return (-1);
@@ -3093,7 +3093,7 @@ int DataMgr::_getVar(string varname, int level, int lod, float *data)
     return (0);
 }
 
-int DataMgr::_getVar(size_t ts, string varname, int level, int lod, float *data)
+template <class T> int DataMgr::_getVar(size_t ts, string varname, int level, int lod, T *data)
 {
     vector<size_t> dims_at_level, dummy;
     int            rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);

@@ -402,13 +402,15 @@ public:
 
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, double *region);
+
     virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
 
     size_t TimeLookup(size_t ts) const { return (ts < _timePerm.size() ? _timePerm[ts] : 0); }
 
 private:
     NetCDFCollection * _ncdfc;
-    std::vector<float> _times;
+    std::vector<double> _times;
     std::vector<int>   _timePerm;
     string             _wrfTimeVar;
     float              _p2si;
@@ -447,6 +449,7 @@ public:
     virtual int CloseVariable(int fd);
 
     virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, double *region);
 
     virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
 

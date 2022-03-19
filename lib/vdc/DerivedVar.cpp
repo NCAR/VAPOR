@@ -1069,30 +1069,8 @@ int DerivedCoordVar_WRFTime::Initialize()
 
     // Encode time stamp string as double precision float
     //
-    vector<double> timesD;
-    rc = _encodeTime(udunits, timeStrings, timesD);
+    rc = _encodeTime(udunits, timeStrings, _times);
     if (rc < 0) return (rc);
-
-    // Convert to single precision because that's what the API supports
-    //
-    for (int i = 0; i < timesD.size(); i++) { _times.push_back((float)timesD[i]); }
-
-    // For high temporal resolution single precision may be insufficient:
-    // converting from double to single may result in non-unique values.
-    // Check to see that the number of unique values is the same for the
-    // double and float vectors. If not, change the year to 2000 to reduce
-    // the precision needed.
-    //
-    if (std::set<double>(timesD.begin(), timesD.end()).size() != std::set<double>(_times.begin(), _times.end()).size()) {
-        _times.clear();
-
-        for (int i = 0; i < timeStrings.size(); i++) { timeStrings[i].replace(0, 4, "2000"); }
-
-        rc = _encodeTime(udunits, timeStrings, timesD);
-        if (rc < 0) return (rc);
-
-        for (int i = 0; i < timesD.size(); i++) { _times.push_back((float)timesD[i]); }
-    }
 
     // The NetCDFCollection class doesn't handle the WRF time
     // variable. Hence, the time steps aren't sorted. Sort them now and
@@ -1172,6 +1150,25 @@ int DerivedCoordVar_WRFTime::ReadRegion(int fd, const vector<size_t> &min, const
     return (0);
 }
 
+int DerivedCoordVar_WRFTime::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region)
+{
+    VAssert(min.size() == 0);
+    VAssert(max.size() == 0);
+
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor: %d", fd);
+        return (-1);
+    }
+
+    size_t ts = f->GetTS();
+
+    *region = _times[ts];
+
+    return (0);
+}
+
 bool DerivedCoordVar_WRFTime::VariableExists(size_t ts, int reflevel, int lod) const { return (ts < _times.size()); }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1216,20 +1213,17 @@ int DerivedCoordVar_TimeInSeconds::Initialize()
 
     size_t numTS = _dc->GetNumTimeSteps(_nativeTimeVar);
 
-    // Need a single precision and double precision buffer. Single for GetVar,
-    // double for udunits.Convert :-(
     //
-    float * buf = new float[numTS];
     double *dbuf = new double[2 * numTS];
     double *dbufptr1 = dbuf;
     double *dbufptr2 = dbuf + numTS;
 
-    rc = _dc->GetVar(_nativeTimeVar, -1, -1, buf);
+    rc = _dc->GetVar(_nativeTimeVar, -1, -1, dbuf);
     if (rc < 0) {
         SetErrMsg("Can't read time variable");
         return (-1);
     }
-    for (int i = 0; i < numTS; i++) { dbufptr1[i] = (double)buf[i]; }
+    for (int i = 0; i < numTS; i++) { dbufptr1[i] = (double)dbuf[i]; }
 
     status = udunits.Convert(cvar.GetUnits(), "seconds", dbufptr1, dbufptr2, numTS);
     if (!status) {
@@ -1239,7 +1233,6 @@ int DerivedCoordVar_TimeInSeconds::Initialize()
 
     _times.clear();
     for (int i = 0; i < numTS; i++) { _times.push_back(dbufptr2[i]); }
-    delete[] buf;
     delete[] dbuf;
 
     return (0);
@@ -1290,6 +1283,25 @@ int DerivedCoordVar_TimeInSeconds::CloseVariable(int fd)
 }
 
 int DerivedCoordVar_TimeInSeconds::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    VAssert(min.size() == 0);
+    VAssert(max.size() == 0);
+
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor: %d", fd);
+        return (-1);
+    }
+
+    size_t ts = f->GetTS();
+
+    *region = _times[ts];
+
+    return (0);
+}
+
+int DerivedCoordVar_TimeInSeconds::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region)
 {
     VAssert(min.size() == 0);
     VAssert(max.size() == 0);
