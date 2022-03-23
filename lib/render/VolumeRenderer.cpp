@@ -191,17 +191,16 @@ void VolumeRenderer::_generateChunkedRenderMesh(const float C)
     vector<vec4> d;
     _nChunks = powf(ceil(C), 2);
     d.reserve(powf(ceil(C), 2) * 6);
-    float s = 2 / (float)C;
     float ts = 1 / (float)C;
     for (int yi = 0; yi < C; yi++) {
-        float y = 2 * yi / (float)C - 1;
+        float y = 2.f * yi / (float)C - 1.f;
         float ty = yi / (float)C;
-        float y2 = min(y + s, 1.0f);
+        float y2 = 2.f * (yi + 1) / (float)C - 1.f;
         float ty2 = min(ty + ts, 1.0f);
         for (int xi = 0; xi < C; xi++) {
-            float x = 2 * xi / (float)C - 1;
+            float x = 2.f * xi / (float)C - 1.f;
             float tx = xi / (float)C;
-            float x2 = min(x + s, 1.0f);
+            float x2 = 2.f * (xi + 1) / (float)C - 1.f;
             float tx2 = min(tx + ts, 1.0f);
 
             d.push_back(vec4(x, y, tx, ty));
