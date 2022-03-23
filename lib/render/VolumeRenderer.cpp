@@ -195,12 +195,12 @@ void VolumeRenderer::_generateChunkedRenderMesh(const float C)
     for (int yi = 0; yi < C; yi++) {
         float y = 2.f * yi / (float)C - 1.f;
         float ty = yi / (float)C;
-        float y2 = 2.f * (yi+1) / (float)C - 1.f;
+        float y2 = 2.f * (yi + 1) / (float)C - 1.f;
         float ty2 = min(ty + ts, 1.0f);
         for (int xi = 0; xi < C; xi++) {
             float x = 2.f * xi / (float)C - 1.f;
             float tx = xi / (float)C;
-            float x2 = 2.f * (xi+1) / (float)C - 1.f;
+            float x2 = 2.f * (xi + 1) / (float)C - 1.f;
             float tx2 = min(tx + ts, 1.0f);
 
             d.push_back(vec4(x, y, tx, ty));
