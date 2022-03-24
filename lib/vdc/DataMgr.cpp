@@ -815,15 +815,6 @@ bool DataMgr::GetDataVarInfo(string varname, VAPoR::DC::DataVar &var) const
     if (!ok) { ok = _dc->GetDataVarInfo(varname, var); }
     if (!ok) return (ok);
 
-    // Replace native time coordinate variables that are not expressed
-    // in units of seconds with derived variables having units of seconds
-    //
-    string time_coord_var = var.GetTimeCoordVar();
-
-    _assignTimeCoord(time_coord_var);
-
-    var.SetTimeCoordVar(time_coord_var);
-
     return (true);
 }
 
@@ -2510,14 +2501,20 @@ int DataMgr::_initTimeCoord()
 
     size_t numTS = _dc->GetNumTimeSteps(nativeTimeCoordName);
 
-    // If we have a time unit try to convert to seconds from EPOCH
+    // If we have a time unit expressed as:
+    //
+    // (<unit > since YYYY-MM-DD hh:mm:ss )
+    //
+    // as supported by the UDUNITS2 package, try to convert to seconds from 
+    // EPOCH. N.B. unforunately the UDUNITS API does not provide an interaface
+    // for programatically detecting a formatted time string. So we simply
+    // look for the keyword "since" :-(
     //
     VAPoR::DC::CoordVar cvar;
     _dc->GetCoordVarInfo(nativeTimeCoordName, cvar);
-    if (_udunits.IsTimeUnit(cvar.GetUnits())) {
-        string derivedTimeCoordName = nativeTimeCoordName;
+    if (_udunits.IsTimeUnit(cvar.GetUnits()) && STLUtils::ContainsIgnoreCase(cvar.GetUnits(), "since")) {
 
-        _assignTimeCoord(derivedTimeCoordName);
+        string derivedTimeCoordName = nativeTimeCoordName;
 
         DerivedCoordVar_TimeInSeconds *derivedVar = new DerivedCoordVar_TimeInSeconds(derivedTimeCoordName, _dc, nativeTimeCoordName, cvar.GetTimeDimName());
 
@@ -2872,17 +2869,6 @@ void DataMgr::_assignHorizontalCoords(vector<string> &coord_vars) const
         if (_udunits.IsLonUnit(varInfo.GetUnits())) { coord_vars[i] = coord_vars[i] + "X"; }
         if (_udunits.IsLatUnit(varInfo.GetUnits())) { coord_vars[i] = coord_vars[i] + "Y"; }
     }
-}
-
-void DataMgr::_assignTimeCoord(string &coord_var) const
-{
-    if (coord_var.empty()) return;
-
-    DC::CoordVar varInfo;
-    bool         ok = GetCoordVarInfo(coord_var, varInfo);
-    VAssert(ok);
-
-    if (varInfo.GetAxis() == 3 && !_udunits.IsTimeUnit(varInfo.GetUnits())) { coord_var = coord_var + "T"; }
 }
 
 bool DataMgr::_getVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const

@@ -796,8 +796,6 @@ private:
 
     void _assignHorizontalCoords(vector<string> &coord_vars) const;
 
-    void _assignTimeCoord(string &coord_var) const;
-
     bool _getVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const;
 
     bool _getDataVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const;
