@@ -2505,7 +2505,7 @@ int DataMgr::_initTimeCoord()
     //
     // (<unit > since YYYY-MM-DD hh:mm:ss )
     //
-    // as supported by the UDUNITS2 package, try to convert to seconds from 
+    // as supported by the UDUNITS2 package, try to convert to seconds from
     // EPOCH. N.B. unforunately the UDUNITS API does not provide an interaface
     // for programatically detecting a formatted time string. So we simply
     // look for the keyword "since" :-(
@@ -2513,7 +2513,6 @@ int DataMgr::_initTimeCoord()
     VAPoR::DC::CoordVar cvar;
     _dc->GetCoordVarInfo(nativeTimeCoordName, cvar);
     if (_udunits.IsTimeUnit(cvar.GetUnits()) && STLUtils::ContainsIgnoreCase(cvar.GetUnits(), "since")) {
-
         string derivedTimeCoordName = nativeTimeCoordName;
 
         DerivedCoordVar_TimeInSeconds *derivedVar = new DerivedCoordVar_TimeInSeconds(derivedTimeCoordName, _dc, nativeTimeCoordName, cvar.GetTimeDimName());
