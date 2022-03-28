@@ -136,7 +136,6 @@ Coordinate Variables:
     ElevationU
     ElevationV
     ElevationW
-    Time
     XLATY
     XLAT_UY
     XLAT_VY
