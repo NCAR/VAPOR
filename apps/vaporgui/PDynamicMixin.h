@@ -10,7 +10,7 @@ class PWidget;
 class PDynamicMixin {
 public:
     //! Turns on dynamic update.
-    PWidget *EnableDynamicUpdate();
+    PWidget *EnableDynamicUpdate(bool enabled=true);
     virtual ~PDynamicMixin() = default;
 
 protected:

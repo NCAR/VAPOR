@@ -3,10 +3,10 @@
 #include "PWidget.h"
 #include <vapor/ParamsBase.h>
 
-PWidget *PDynamicMixin::EnableDynamicUpdate()
+PWidget *PDynamicMixin::EnableDynamicUpdate(bool enabled)
 {
     PWidget *pw = getPWidget();
-    pw->_dynamicUpdateIsOn = true;
+    pw->_dynamicUpdateIsOn = enabled;
     return pw;
 }
 

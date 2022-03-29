@@ -15,21 +15,29 @@ class VSpinBoxAction;
 class VSliderEditInterface : public VHBoxWidget {
     Q_OBJECT
 
-public:
+public slots:
+    //! Emit signal when dynamic update checkbox is toggled
+    virtual void SetDynamicUpdate(bool enabled) = 0;
+
     //! Set use of scientific notation on the current type of line edit
     virtual void SetSciNotation(bool sci) = 0;
 
     //! Set the number of digits shown on the current line edit
     virtual void SetNumDigits(int digits) = 0;
 
+    //! Show the context menu for the slider-edit, triggered on right-click
+    virtual void ShowContextMenu(const QPoint &) = 0;
+
+public:
+    //! Retrieve whether dynamic updates are toggled
+    //virtual bool GetDynamicUpdate() const = 0;
+    virtual void AllowDynamicUpdate() const = 0;
+
     //! Retrieve whether the currnet line edit is using scientific notation
     virtual bool GetSciNotation() const = 0;
 
     //! Get the number of digits in use by the current line edit
     virtual int GetNumDigits() const = 0;
-
-    //! Show the context menu for the slider-edit, triggered on right-click
-    virtual void ShowContextMenu(const QPoint &) = 0;
 
     //! Return the size-hint for the current slider-edit
     virtual QSize sizeHint() const;
@@ -39,8 +47,6 @@ protected:
     virtual void _makeContextMenu() = 0;
 
     VSlider *        _slider;
-    VSpinBoxAction * _decimalAction;
-    VCheckBoxAction *_scientificAction;
 
 signals:
     void FormatChanged();

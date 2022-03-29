@@ -18,6 +18,7 @@ PDoubleSliderEdit::PDoubleSliderEdit(const std::string &tag, const std::string &
     connect(_sliderEdit, &VDoubleSliderEdit::ValueChangedIntermediate, this, &PDoubleSliderEdit::valueChangedIntermediate);
     connect(_sliderEdit, &VDoubleSliderEdit::MinimumChanged, this, &PDoubleSliderEdit::minimumChanged);
     connect(_sliderEdit, &VDoubleSliderEdit::MaximumChanged, this, &PDoubleSliderEdit::maximumChanged);
+    connect(_sliderEdit, &VDoubleSliderEdit::DynamicUpdateChanged, this, &PDoubleSliderEdit::_enableDynamicUpdate);
 }
 
 PDoubleSliderEdit *PDoubleSliderEdit::SetRange(double min, double max)
@@ -33,6 +34,15 @@ PDoubleSliderEdit *PDoubleSliderEdit::AllowUserRange(bool allowed)
 {
     _sliderEdit->AllowUserRange(allowed);
     return this;
+}
+
+PDoubleSliderEdit* PDoubleSliderEdit::AllowDynamicUpdate() {
+    _sliderEdit->AllowDynamicUpdate();
+    return this;
+}
+
+void PDoubleSliderEdit::_enableDynamicUpdate(bool enabled) {
+    EnableDynamicUpdate(enabled);
 }
 
 void PDoubleSliderEdit::updateGUI() const
@@ -69,6 +79,7 @@ PIntegerSliderEdit::PIntegerSliderEdit(const std::string &tag, const std::string
     connect(_sliderEdit, &VIntSliderEdit::ValueChangedIntermediate, this, &PIntegerSliderEdit::valueChangedIntermediate);
     connect(_sliderEdit, &VIntSliderEdit::MinimumChanged, this, &PIntegerSliderEdit::minimumChanged);
     connect(_sliderEdit, &VIntSliderEdit::MaximumChanged, this, &PIntegerSliderEdit::maximumChanged);
+    connect(_sliderEdit, &VIntSliderEdit::DynamicUpdateChanged, this, &PIntegerSliderEdit::_enableDynamicUpdate);
 }
 
 PIntegerSliderEdit *PIntegerSliderEdit::SetRange(int min, int max)
@@ -84,6 +95,15 @@ PIntegerSliderEdit *PIntegerSliderEdit::AllowUserRange(bool allowed)
 {
     _sliderEdit->AllowUserRange(allowed);
     return this;
+}
+
+PIntegerSliderEdit* PIntegerSliderEdit::AllowDynamicUpdate() {
+    _sliderEdit->AllowDynamicUpdate();
+    return this;
+}
+
+void PIntegerSliderEdit::_enableDynamicUpdate(bool enabled) {
+    EnableDynamicUpdate(enabled);
 }
 
 void PIntegerSliderEdit::updateGUI() const
