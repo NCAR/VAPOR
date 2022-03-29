@@ -62,10 +62,10 @@ OptionParser::OptDescRec_T set_opts[] = {
      "delineated list of monotonically increasing Y-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_north)"},
     {"zcoords", 1, "",
      "Path to a file containing a whitespace "
-     "delineated list of monotonically increasing Z-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. hours since 2004-01-01 00:00:00)"},
+     "delineated list of monotonically increasing Z-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters)"},
     {"tcoords", 1, "",
      "Path to a file containing a whitespace "
-     "delineated list of monotonically increasing T-axis (time) user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_east)"},
+     "delineated list of monotonically increasing T-axis (time) user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. hours since 2004-01-01 00:00:00)"},
     {"numts", 1, "1", "Number of timesteps in the data set"},
     {"nthreads", 1, "0",
      "Specify number of execution threads "
