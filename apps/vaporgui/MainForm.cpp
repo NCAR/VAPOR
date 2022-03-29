@@ -69,6 +69,8 @@
 #include <vapor/DCCF.h>
 #include <vapor/DCBOV.h>
 #include <vapor/DCUGRID.h>
+#include <vapor/OpenMPSupport.h>
+
 
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
@@ -1565,6 +1567,11 @@ void MainForm::redo()
 
 void MainForm::helpAbout()
 {
+    int nthreads = 1;
+#pragma omp parallel
+    {
+        nthreads = omp_get_num_threads();
+    }
     std::string banner_file_name = "vapor_banner.png";
     if (_banner) delete _banner;
     std::string banner_text = "Visualization and Analysis Platform for atmospheric, Oceanic and "
@@ -1575,7 +1582,8 @@ void MainForm::helpAbout()
                               "Web site: http://www.vapor.ucar.edu\n"
                               "Contact: vapor@ucar.edu\n"
                               "Version: "
-                            + string(Version::GetFullVersionString().c_str());
+                            + string(Version::GetFullVersionString().c_str()) + "\n"
+                              "OpenMP Threads: " + std::to_string(nthreads);
 
     _banner = new BannerGUI(this, banner_file_name, -1, true, banner_text.c_str(), "http://www.vapor.ucar.edu");
 }
