@@ -37,79 +37,80 @@ struct opt_t {
     OptionParser::Boolean_T     help;
 } opt;
 
-OptionParser::OptDescRec_T set_opts[] = {{"dimension", 1, "512x512x512",
-                                          "Data volume dimensions expressed in "
-                                          "grid points (NXxNYxNZ)"},
-                                         {"bs", 1, "64:64:64", "Internal storage blocking factor expressed in grid points (NX:NY:NZ)"},
-                                         {"cratios", 1, "500:100:10:1",
-                                          "Colon delimited list compression ratios. "
-                                          "The default is 500:100:10:1. The maximum compression ratio "
-                                          "is wavelet and block size dependent."},
-                                         {"wname", 1, "bior4.4",
-                                          "Wavelet family used for compression "
-                                          "Valid values are bior1.1, bior1.3, "
-                                          "bior1.5, bior2.2, bior2.4 ,bior2.6, bior2.8, bior3.1, bior3.3, "
-                                          "bior3.5, bior3.7, bior3.9, bior4.4"},
-                                         {"xtype", 1, "float",
-                                          "External data type representation. "
-                                          "Valid values are uint8 int8 int16 int32 int64 float double"},
-                                         {"xcoords", 1, "",
-                                          "Path to a file containing a whitespace "
-                                          "delineated list of monotonically increasing X-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_east)"},
-                                         {"ycoords", 1, "",
-                                          "Path to a file containing a whitespace "
-                                          "delineated list of monotonically increasing Y-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_north)"},
-                                         {"zcoords", 1, "",
-                                          "Path to a file containing a whitespace "
-                                          "delineated list of monotonically increasing Z-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. hours since 2004-01-01 00:00:00)"},
-                                         {"tcoords", 1, "",
-                                          "Path to a file containing a whitespace "
-                                          "delineated list of monotonically increasing T-axis (time) user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_east)"},
-                                         {"numts", 1, "1", "Number of timesteps in the data set"},
-                                         {"nthreads", 1, "0",
-                                          "Specify number of execution threads "
-                                          "0 => use number of cores"},
-                                         {"vars3d", 1, "",
-                                          "Colon delimited list of 3D variable names (compressed) "
-                                          "to be included in "
-                                          "the VDC"},
-                                         {"vars2dxy", 1, "",
-                                          "Colon delimited list of 2D XY-plane variable "
-                                          "names (compressed) "
-                                          "to be included in the VDC"},
-                                         {"vars2dxz", 1, "",
-                                          "Colon delimited list of 3D XZ-plane variable "
-                                          "names (compressed) "
-                                          "to be included in the VDC"},
-                                         {"vars2dyz", 1, "",
-                                          "Colon delimited list of 3D YZ-plane variable "
-                                          "names (compressed) "
-                                          "to be included in the VDC"},
-                                         {"ncvars3d", 1, "",
-                                          "Colon delimited list of 3D variable names (not compressed) "
-                                          "to be included in "
-                                          "the VDC"},
-                                         {"ncvars2dxy", 1, "",
-                                          "Colon delimited list of 2D XY-plane variable "
-                                          "names (not compressed) "
-                                          "to be included in the VDC"},
-                                         {"ncvars2dxz", 1, "",
-                                          "Colon delimited list of 3D XZ-plane variable "
-                                          "names (not compressed) "
-                                          "to be included in the VDC"},
-                                         {"ncvars2dyz", 1, "",
-                                          "Colon delimited list of 3D YZ-plane variable "
-                                          "names (not compressed) "
-                                          "to be included in the VDC"},
-                                         {"extents", 1, "",
-                                          "Colon delimited 6-element vector "
-                                          "specifying domain extents in user coordinates (X0:Y0:Z0:X1:Y1:Z1)"},
-                                         {"force", 0, "",
-                                          "Create a new VDC master file even if a VDC data "
-                                          "directory already exists. Results may be undefined if settings between "
-                                          "the new master file and old data directory do not match."},
-                                         {"help", 0, "", "Print this message and exit"},
-                                         {NULL}};
+OptionParser::OptDescRec_T set_opts[] = {
+    {"dimension", 1, "512x512x512",
+     "Data volume dimensions expressed in "
+     "grid points (NXxNYxNZ)"},
+    {"bs", 1, "64:64:64", "Internal storage blocking factor expressed in grid points (NX:NY:NZ)"},
+    {"cratios", 1, "500:100:10:1",
+     "Colon delimited list compression ratios. "
+     "The default is 500:100:10:1. The maximum compression ratio "
+     "is wavelet and block size dependent."},
+    {"wname", 1, "bior4.4",
+     "Wavelet family used for compression "
+     "Valid values are bior1.1, bior1.3, "
+     "bior1.5, bior2.2, bior2.4 ,bior2.6, bior2.8, bior3.1, bior3.3, "
+     "bior3.5, bior3.7, bior3.9, bior4.4"},
+    {"xtype", 1, "float",
+     "External data type representation. "
+     "Valid values are uint8 int8 int16 int32 int64 float double"},
+    {"xcoords", 1, "",
+     "Path to a file containing a whitespace "
+     "delineated list of monotonically increasing X-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_east)"},
+    {"ycoords", 1, "",
+     "Path to a file containing a whitespace "
+     "delineated list of monotonically increasing Y-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_north)"},
+    {"zcoords", 1, "",
+     "Path to a file containing a whitespace "
+     "delineated list of monotonically increasing Z-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. hours since 2004-01-01 00:00:00)"},
+    {"tcoords", 1, "",
+     "Path to a file containing a whitespace "
+     "delineated list of monotonically increasing T-axis (time) user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_east)"},
+    {"numts", 1, "1", "Number of timesteps in the data set"},
+    {"nthreads", 1, "0",
+     "Specify number of execution threads "
+     "0 => use number of cores"},
+    {"vars3d", 1, "",
+     "Colon delimited list of 3D variable names (compressed) "
+     "to be included in "
+     "the VDC"},
+    {"vars2dxy", 1, "",
+     "Colon delimited list of 2D XY-plane variable "
+     "names (compressed) "
+     "to be included in the VDC"},
+    {"vars2dxz", 1, "",
+     "Colon delimited list of 3D XZ-plane variable "
+     "names (compressed) "
+     "to be included in the VDC"},
+    {"vars2dyz", 1, "",
+     "Colon delimited list of 3D YZ-plane variable "
+     "names (compressed) "
+     "to be included in the VDC"},
+    {"ncvars3d", 1, "",
+     "Colon delimited list of 3D variable names (not compressed) "
+     "to be included in "
+     "the VDC"},
+    {"ncvars2dxy", 1, "",
+     "Colon delimited list of 2D XY-plane variable "
+     "names (not compressed) "
+     "to be included in the VDC"},
+    {"ncvars2dxz", 1, "",
+     "Colon delimited list of 3D XZ-plane variable "
+     "names (not compressed) "
+     "to be included in the VDC"},
+    {"ncvars2dyz", 1, "",
+     "Colon delimited list of 3D YZ-plane variable "
+     "names (not compressed) "
+     "to be included in the VDC"},
+    {"extents", 1, "",
+     "Colon delimited 6-element vector "
+     "specifying domain extents in user coordinates (X0:Y0:Z0:X1:Y1:Z1)"},
+    {"force", 0, "",
+     "Create a new VDC master file even if a VDC data "
+     "directory already exists. Results may be undefined if settings between "
+     "the new master file and old data directory do not match."},
+    {"help", 0, "", "Print this message and exit"},
+    {NULL}};
 
 OptionParser::Option_T get_options[] = {{"dimension", Wasp::CvtToDimension3D, &opt.dim, sizeof(opt.dim)},
                                         {"bs", Wasp::CvtToSize_tVec, &opt.bs, sizeof(opt.bs)},
@@ -186,16 +187,17 @@ DC::XType parseXType(string xTypeStr)
     return (DC::XType::INVALID);
 }
 
-bool string_to_float(string s, float &f) {
+bool string_to_float(string s, float &f)
+{
     f = 0.0;
-	try {
-		f = std::stof(s);
-	} catch (invalid_argument) {
-        return(false);
-	} catch (out_of_range) {
-        return(false);
-	}
-    return(true);
+    try {
+        f = std::stof(s);
+    } catch (invalid_argument) {
+        return (false);
+    } catch (out_of_range) {
+        return (false);
+    }
+    return (true);
 }
 
 int read_float_vec(string path, size_t n, vector<float> &vec, string &unit)
@@ -214,14 +216,13 @@ int read_float_vec(string path, size_t n, vector<float> &vec, string &unit)
         if (item.empty()) continue;
 
         float f;
-        bool ok = string_to_float(item, f);
+        bool  ok = string_to_float(item, f);
 
-        if (! ok) {
+        if (!ok) {
             if (vec.empty()) {
                 unit = item;
                 continue;
-            }
-            else {
+            } else {
                 MyBase::SetErrMsg("Invalid float %s", item.c_str());
                 return -1;
             }
@@ -314,7 +315,7 @@ int main(int argc, char **argv)
     if (rc < 0) exit(1);
 
     vector<float> xcoords, ycoords, zcoords, tcoords;
-    string xunit, yunit, zunit, tunit;
+    string        xunit, yunit, zunit, tunit;
     if (!opt.xcoords.empty()) {
         rc = read_float_vec(opt.xcoords, opt.dim.nx, xcoords, xunit);
         if (rc < 0) exit(1);
