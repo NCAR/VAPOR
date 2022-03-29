@@ -95,7 +95,6 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
         }),
     }));
     
-
     AddAppearanceSubtab(new PGroup({
         (new PTFEditor(RenderParams::_colorMapVariableNameTag)),
         new PSection("Appearance", {
