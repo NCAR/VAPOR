@@ -2527,7 +2527,7 @@ int DataMgr::_initTimeCoord()
 
         _timeCoordinates = derivedVar->GetTimes();
     } else {
-        float *buf = new float[numTS];
+        double *buf = new double[numTS];
         int    rc = _getVar(nativeTimeCoordName, -1, -1, buf);
         if (rc < 0) { return (-1); }
 
@@ -3024,26 +3024,6 @@ int DataMgr::_openVariableRead(size_t ts, string varname, int level, int lod)
     return (_dc->OpenVariableRead(ts, _openVarName, level, lod));
 }
 
-template<class T> int DataMgr::_readRegionBlock(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region)
-{
-    vector<size_t> minv, maxv;
-    Grid::CopyFromArr3(min, minv);
-    minv.resize(ndims);
-    Grid::CopyFromArr3(max, maxv);
-    maxv.resize(ndims);
-
-    int         rc = 0;
-    DerivedVar *derivedVar = _getDerivedVar(_openVarName);
-    if (derivedVar) {
-        VAssert((std::is_same<T, float>::value) == true);
-        rc = derivedVar->ReadRegionBlock(fd, minv, maxv, (float *)region);
-    } else {
-        rc = _dc->ReadRegionBlock(fd, minv, maxv, region);
-    }
-
-    _sanitizeFloats(region, vproduct(box_dims(min, max)));
-    return (rc);
-}
 
 template<class T> int DataMgr::_readRegion(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region)
 {
@@ -3076,13 +3056,13 @@ int DataMgr::_closeVariable(int fd)
     return (_dc->CloseVariable(fd));
 }
 
-int DataMgr::_getVar(string varname, int level, int lod, float *data)
+template<class T> int DataMgr::_getVar(string varname, int level, int lod, T *data)
 {
     vector<size_t> dims_at_level, dummy;
 
     size_t numts = _dc->GetNumTimeSteps(varname);
 
-    float *ptr = data;
+    T *ptr = data;
     for (size_t ts = 0; ts < numts; ts++) {
         int rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);
         if (rc < 0) return (-1);
@@ -3098,7 +3078,7 @@ int DataMgr::_getVar(string varname, int level, int lod, float *data)
     return (0);
 }
 
-int DataMgr::_getVar(size_t ts, string varname, int level, int lod, float *data)
+template<class T> int DataMgr::_getVar(size_t ts, string varname, int level, int lod, T *data)
 {
     vector<size_t> dims_at_level, dummy;
     int            rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);

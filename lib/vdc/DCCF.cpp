@@ -44,17 +44,11 @@ DCCF::DCCF()
     _dataVarsMap.clear();
     _auxVarsMap.clear();
     _meshMap.clear();
-    _derivedVars.clear();
 }
 
 DCCF::~DCCF()
 {
     if (_ncdfc) delete _ncdfc;
-
-    for (int i = 0; i < _derivedVars.size(); i++) {
-        if (_derivedVars[i]) delete _derivedVars[i];
-    }
-    _derivedVars.clear();
 }
 
 int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options)

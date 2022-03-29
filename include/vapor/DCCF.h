@@ -140,12 +140,8 @@ protected:
     //! \copydoc DC::ReadRegion()
     //
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
+    virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region) { return (_readRegionTemplate(fd, min, max, region)); }
     virtual int readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
-
-    //! \copydoc DC::ReadRegionBlock()
-    //!
-    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); };
-    virtual int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
     //! \copydoc DC::VariableExists()
     //!
@@ -175,7 +171,6 @@ private:
     std::map<string, DC::Mesh>                  _meshMap;
     std::map<string, DC::DataVar>               _dataVarsMap;
     std::map<string, DC::AuxVar>                _auxVarsMap;
-    std::vector<NetCDFCollection::DerivedVar *> _derivedVars;
 
     int _initHorizontalCoordinates(NetCDFCFCollection *ncdfc, std::map<string, DC::CoordVar> &coordVarsMap);
 
@@ -192,15 +187,6 @@ private:
 
     template<class T> bool _getAttTemplate(string varname, string attname, T &values) const;
 
-    ///////////////////////////////////////////////////////////////////////////
-    //
-    //	Specializations of the NetCDFCollection::DerivedVar class used to
-    // support derived variables - required variables that are not
-    // found in the CF data.
-    //
-    ///////////////////////////////////////////////////////////////////////////
-
-    //
 };
 };    // namespace VAPoR
 
