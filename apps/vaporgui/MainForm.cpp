@@ -1582,8 +1582,10 @@ void MainForm::helpAbout()
                               "Web site: http://www.vapor.ucar.edu\n"
                               "Contact: vapor@ucar.edu\n"
                               "Version: "
-                            + string(Version::GetFullVersionString().c_str()) + "\n"
-                              "OpenMP Threads: " + std::to_string(nthreads);
+                            + string(Version::GetFullVersionString().c_str())
+                            + "\n"
+                              "OpenMP Threads: "
+                            + std::to_string(nthreads);
 
     _banner = new BannerGUI(this, banner_file_name, -1, true, banner_text.c_str(), "http://www.vapor.ucar.edu");
 }
