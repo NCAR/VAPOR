@@ -55,16 +55,16 @@ OptionParser::OptDescRec_T set_opts[] = {{"dimension", 1, "512x512x512",
                                           "Valid values are uint8 int8 int16 int32 int64 float double"},
                                          {"xcoords", 1, "",
                                           "Path to a file containing a whitespace "
-                                          "delineated list of monotonically increasing X-axis user coordinates."},
+                                          "delineated list of monotonically increasing X-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_east)"},
                                          {"ycoords", 1, "",
                                           "Path to a file containing a whitespace "
-                                          "delineated list of monotonically increasing Y-axis user coordinates."},
+                                          "delineated list of monotonically increasing Y-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_north)"},
                                          {"zcoords", 1, "",
                                           "Path to a file containing a whitespace "
-                                          "delineated list of monotonically increasing Z-axis user coordinates."},
+                                          "delineated list of monotonically increasing Z-axis user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. hours since 2004-01-01 00:00:00)"},
                                          {"tcoords", 1, "",
                                           "Path to a file containing a whitespace "
-                                          "delineated list of monotonically increasing T-axis (time) user coordinates."},
+                                          "delineated list of monotonically increasing T-axis (time) user coordinates. The list may optionally be preceeded by a UDUNITS style units specification (e.g. meters, degrees_east)"},
                                          {"numts", 1, "1", "Number of timesteps in the data set"},
                                          {"nthreads", 1, "0",
                                           "Specify number of execution threads "
@@ -186,18 +186,49 @@ DC::XType parseXType(string xTypeStr)
     return (DC::XType::INVALID);
 }
 
-int read_float_vec(string path, size_t n, vector<float> &vec)
+bool string_to_float(string s, float &f) {
+    f = 0.0;
+	try {
+		f = std::stof(s);
+	} catch (invalid_argument) {
+        return(false);
+	} catch (out_of_range) {
+        return(false);
+	}
+    return(true);
+}
+
+int read_float_vec(string path, size_t n, vector<float> &vec, string &unit)
 {
+    vec.clear();
+    unit.clear();
+
     ifstream fin(path.c_str());
     if (!fin) {
         MyBase::SetErrMsg("Error opening file %s", path.c_str());
         return (-1);
     }
 
-    vec.clear();
+    string item;
+    while (getline(fin, item)) {
+        if (item.empty()) continue;
 
-    float f;
-    while (fin >> f && vec.size() < n) { vec.push_back(f); }
+        float f;
+        bool ok = string_to_float(item, f);
+
+        if (! ok) {
+            if (vec.empty()) {
+                unit = item;
+                continue;
+            }
+            else {
+                MyBase::SetErrMsg("Invalid float %s", item.c_str());
+                return -1;
+            }
+        }
+
+        vec.push_back(f);
+    }
     if (fin.bad()) {
         MyBase::SetErrMsg("Error reading file %s", path.c_str());
         return (-1);
@@ -283,20 +314,21 @@ int main(int argc, char **argv)
     if (rc < 0) exit(1);
 
     vector<float> xcoords, ycoords, zcoords, tcoords;
+    string xunit, yunit, zunit, tunit;
     if (!opt.xcoords.empty()) {
-        rc = read_float_vec(opt.xcoords, opt.dim.nx, xcoords);
+        rc = read_float_vec(opt.xcoords, opt.dim.nx, xcoords, xunit);
         if (rc < 0) exit(1);
     }
     if (!opt.ycoords.empty()) {
-        rc = read_float_vec(opt.ycoords, opt.dim.ny, ycoords);
+        rc = read_float_vec(opt.ycoords, opt.dim.ny, ycoords, yunit);
         if (rc < 0) exit(1);
     }
     if (!opt.zcoords.empty()) {
-        rc = read_float_vec(opt.zcoords, opt.dim.nz, zcoords);
+        rc = read_float_vec(opt.zcoords, opt.dim.nz, zcoords, zunit);
         if (rc < 0) exit(1);
     }
     if (!opt.tcoords.empty()) {
-        rc = read_float_vec(opt.tcoords, opt.numts, tcoords);
+        rc = read_float_vec(opt.tcoords, opt.numts, tcoords, tunit);
         if (rc < 0) exit(1);
     }
 
@@ -320,10 +352,10 @@ int main(int argc, char **argv)
     rc = vdc.DefineDimension(dimnames[3], dimlens[3], 3);
     if (rc < 0) exit(1);
 
-    if (!opt.xcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[0], vector<string>{dimnames[0]}, "", "", 0, DC::XType::FLOAT, false); }
-    if (!opt.ycoords.empty()) { rc = vdc.DefineCoordVar(dimnames[1], vector<string>{dimnames[1]}, "", "", 1, DC::XType::FLOAT, false); }
-    if (!opt.zcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[2], vector<string>{dimnames[2]}, "", "", 2, DC::XType::FLOAT, false); }
-    if (!opt.tcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[3], vector<string>(), dimnames[3], "", 3, DC::XType::FLOAT, false); }
+    if (!opt.xcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[0], vector<string>{dimnames[0]}, "", xunit, 0, DC::XType::FLOAT, false); }
+    if (!opt.ycoords.empty()) { rc = vdc.DefineCoordVar(dimnames[1], vector<string>{dimnames[1]}, "", yunit, 1, DC::XType::FLOAT, false); }
+    if (!opt.zcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[2], vector<string>{dimnames[2]}, "", zunit, 2, DC::XType::FLOAT, false); }
+    if (!opt.tcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[3], vector<string>(), dimnames[3], tunit, 3, DC::XType::FLOAT, false); }
 
     rc = vdc.SetCompressionBlock(opt.wname, opt.cratios);
     if (rc < 0) exit(1);
