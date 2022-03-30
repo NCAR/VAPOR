@@ -1,47 +1,13 @@
 ''' vapor_wrf module includes following WRF-based utilities:
-	DBZ - radar reflectivity
-	DBZ_MAX - max radar reflectivity over vertical column
 	ETH - equivalent potential temperature
 	RH - relative humidity
-	PV - potential vorticity
 	SHEAR - horizontal wind shear
 	SLP - sea-level pressure (2D)
 	TD - dewpoint temperature
-	TK - temperature in degrees Kelvin.
-	wrf_deriv_findiff - 6th order finite-difference derivative 	wrf_curl_findiff - finite-difference curl
-	wrf_grad_findiff - finite-difference gradient
-	wrf_div_findiff - finite-difference divergence'''
+	TK - temperature in degrees Kelvin.'''
 	
 import numpy 
 import vapor_utils
-
-def ETH(P,PB,T,QVAPOR):
-	''' Program to calculate equivalent potential temperature using WRF
-	variables P, PB, T, QVAPOR.
-	Calling sequence:  WRF_ETH = ETH(P,PB,T,QVAPOR)
-	Result WRF_ETH is a 3D variable on same grid as P,PB,T,QVAPOR.'''
-#Copied from NCL/Fortran source code DEQTHECALC in eqthecalc.f
-	c = 2.0/7.0
-	EPS = 0.622
-	GAMMA = 287.04/1004.0
-	GAMMAMD = 0.608 -0.887
-	TLCLC1 = 2840.0
-	TLCLC2 = 3.5
-	TLCLC3 = 4.805
-	TLCLC4 = 55.0
-	THTECON1 = 3376.0
-	THTECON2 = 2.54
-	THTECON3 = 0.81
-	TH = T+300.0
-#calculate Temp. in Kelvin
-	PRESS = 0.01*(P+PB)
-	TK = TH*numpy.power(PRESS*.001,c)
-	Q = numpy.maximum(QVAPOR, 1.e-15)
-	E = Q*PRESS/(EPS+Q)
-	TLCL = TLCLC4+ TLCLC1/(numpy.log(numpy.power(TK,TLCLC2)/E)-TLCLC3)
-	EXPNT = (THTECON1/TLCL - THTECON2)*Q*(1.0+THTECON3*Q)
-	WRF_ETH = TK*numpy.power(1000.0/PRESS,GAMMA*(1.0+GAMMAMD*Q))*numpy.exp(EXPNT)
-	return WRF_ETH
 
 def RH(P,PB,T,QVAPOR):
 	''' Calculation of relative humidity.
@@ -62,6 +28,27 @@ def RH(P,PB,T,QVAPOR):
 	QVS = EP_3*ES/(0.01*PRESS - (1.-EP_3)*ES)
 	WRF_RH = 100.0*numpy.maximum(numpy.minimum(QVAPOR/QVS,1.0),0)
 	return WRF_RH
+
+
+def SHEAR(U,V,P,PB,level1=200.,level2=850.):
+	'''Program calculates horizontal wind shear
+	Calling sequence: SHR = SHEAR(U,V,P,PB,level1,level2)
+	where U and V are 3D wind velocity components, and
+	result SHR is 3D wind shear.
+	Shear is defined as the RMS difference between the horizontal 
+	velocity interpolated to the specified pressure levels,
+ 	level1 and level2 (in millibars) which default to 200 and 850.'''
+	from numpy import sqrt
+	PR = 0.01*(P+PB)
+	U=vapor_utils.StaggeredToUnstaggeredGrid(U,2) 
+	V=vapor_utils.StaggeredToUnstaggeredGrid(V,1) 
+	uinterp1 = vapor_utils.interp3d(U,PR,level1)
+	uinterp2 = vapor_utils.interp3d(U,PR,level2)
+	vinterp1 = vapor_utils.interp3d(V,PR,level1)
+	vinterp2 = vapor_utils.interp3d(V,PR,level2)
+	result = (uinterp1-uinterp2)*(uinterp1-uinterp2)+(vinterp1-vinterp2)*(vinterp1-vinterp2)
+	result = sqrt(result)
+	return result 
 
 def SLP(P,PB,T,QVAPOR,ELEVATION):
 	'''Calculation of Sea-level pressure.
