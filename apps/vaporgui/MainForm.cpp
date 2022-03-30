@@ -70,6 +70,7 @@
 #include <vapor/DCBOV.h>
 #include <vapor/DCUGRID.h>
 
+
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
@@ -392,7 +393,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     //
     SettingsParams *sP = GetSettingsParams();
     _controlExec->SetCacheSize(sP->GetCacheMB());
-    _controlExec->SetNumThreads(sP->GetNumThreads());
 
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
@@ -487,6 +487,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
 
     if (interactive && GetSettingsParams()->GetAutoCheckForUpdates()) CheckForUpdates();
     if (interactive && GetSettingsParams()->GetAutoCheckForNotices()) CheckForNotices();
+
+    _controlExec->SetNumThreads(GetSettingsParams()->GetNumThreads());
 }
 
 
