@@ -88,7 +88,6 @@ public:
 
 AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(), _params(nullptr)
 {
-
     int nthreads = 1;
 #pragma omp parallel
     {
