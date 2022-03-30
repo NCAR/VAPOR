@@ -796,8 +796,6 @@ private:
 
     void _assignHorizontalCoords(vector<string> &coord_vars) const;
 
-    void _assignTimeCoord(string &coord_var) const;
-
     bool _getVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const;
 
     bool _getDataVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const;
@@ -826,13 +824,12 @@ private:
 
     int _openVariableRead(size_t ts, string varname, int level, int lod);
 
-    template<class T> int _readRegionBlock(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region);
     template<class T> int _readRegion(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region);
     int                   _closeVariable(int fd);
 
-    int _getVar(string varname, int level, int lod, float *data);
+    template<class T> int _getVar(string varname, int level, int lod, T *data);
 
-    int _getVar(size_t ts, string varname, int level, int lod, float *data);
+    template<class T> int _getVar(size_t ts, string varname, int level, int lod, T *data);
 
     void _getLonExtents(std::vector<float> &lons, DimsType dims, float &min, float &max) const;
 

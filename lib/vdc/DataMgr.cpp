@@ -815,15 +815,6 @@ bool DataMgr::GetDataVarInfo(string varname, VAPoR::DC::DataVar &var) const
     if (!ok) { ok = _dc->GetDataVarInfo(varname, var); }
     if (!ok) return (ok);
 
-    // Replace native time coordinate variables that are not expressed
-    // in units of seconds with derived variables having units of seconds
-    //
-    string time_coord_var = var.GetTimeCoordVar();
-
-    _assignTimeCoord(time_coord_var);
-
-    var.SetTimeCoordVar(time_coord_var);
-
     return (true);
 }
 
@@ -2510,14 +2501,19 @@ int DataMgr::_initTimeCoord()
 
     size_t numTS = _dc->GetNumTimeSteps(nativeTimeCoordName);
 
-    // If we have a time unit try to convert to seconds from EPOCH
+    // If we have a time unit expressed as:
+    //
+    // (<unit > since YYYY-MM-DD hh:mm:ss )
+    //
+    // as supported by the UDUNITS2 package, try to convert to seconds from
+    // EPOCH. N.B. unforunately the UDUNITS API does not provide an interaface
+    // for programatically detecting a formatted time string. So we simply
+    // look for the keyword "since" :-(
     //
     VAPoR::DC::CoordVar cvar;
     _dc->GetCoordVarInfo(nativeTimeCoordName, cvar);
-    if (_udunits.IsTimeUnit(cvar.GetUnits())) {
+    if (_udunits.IsTimeUnit(cvar.GetUnits()) && STLUtils::ContainsIgnoreCase(cvar.GetUnits(), "since")) {
         string derivedTimeCoordName = nativeTimeCoordName;
-
-        _assignTimeCoord(derivedTimeCoordName);
 
         DerivedCoordVar_TimeInSeconds *derivedVar = new DerivedCoordVar_TimeInSeconds(derivedTimeCoordName, _dc, nativeTimeCoordName, cvar.GetTimeDimName());
 
@@ -2531,7 +2527,7 @@ int DataMgr::_initTimeCoord()
 
         _timeCoordinates = derivedVar->GetTimes();
     } else {
-        float *buf = new float[numTS];
+        double *buf = new double[numTS];
         int    rc = _getVar(nativeTimeCoordName, -1, -1, buf);
         if (rc < 0) { return (-1); }
 
@@ -2874,17 +2870,6 @@ void DataMgr::_assignHorizontalCoords(vector<string> &coord_vars) const
     }
 }
 
-void DataMgr::_assignTimeCoord(string &coord_var) const
-{
-    if (coord_var.empty()) return;
-
-    DC::CoordVar varInfo;
-    bool         ok = GetCoordVarInfo(coord_var, varInfo);
-    VAssert(ok);
-
-    if (varInfo.GetAxis() == 3 && !_udunits.IsTimeUnit(varInfo.GetUnits())) { coord_var = coord_var + "T"; }
-}
-
 bool DataMgr::_getVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const
 {
     dimensions.clear();
@@ -3039,26 +3024,6 @@ int DataMgr::_openVariableRead(size_t ts, string varname, int level, int lod)
     return (_dc->OpenVariableRead(ts, _openVarName, level, lod));
 }
 
-template<class T> int DataMgr::_readRegionBlock(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region)
-{
-    vector<size_t> minv, maxv;
-    Grid::CopyFromArr3(min, minv);
-    minv.resize(ndims);
-    Grid::CopyFromArr3(max, maxv);
-    maxv.resize(ndims);
-
-    int         rc = 0;
-    DerivedVar *derivedVar = _getDerivedVar(_openVarName);
-    if (derivedVar) {
-        VAssert((std::is_same<T, float>::value) == true);
-        rc = derivedVar->ReadRegionBlock(fd, minv, maxv, (float *)region);
-    } else {
-        rc = _dc->ReadRegionBlock(fd, minv, maxv, region);
-    }
-
-    _sanitizeFloats(region, vproduct(box_dims(min, max)));
-    return (rc);
-}
 
 template<class T> int DataMgr::_readRegion(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region)
 {
@@ -3091,13 +3056,13 @@ int DataMgr::_closeVariable(int fd)
     return (_dc->CloseVariable(fd));
 }
 
-int DataMgr::_getVar(string varname, int level, int lod, float *data)
+template<class T> int DataMgr::_getVar(string varname, int level, int lod, T *data)
 {
     vector<size_t> dims_at_level, dummy;
 
     size_t numts = _dc->GetNumTimeSteps(varname);
 
-    float *ptr = data;
+    T *ptr = data;
     for (size_t ts = 0; ts < numts; ts++) {
         int rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);
         if (rc < 0) return (-1);
@@ -3113,7 +3078,7 @@ int DataMgr::_getVar(string varname, int level, int lod, float *data)
     return (0);
 }
 
-int DataMgr::_getVar(size_t ts, string varname, int level, int lod, float *data)
+template<class T> int DataMgr::_getVar(size_t ts, string varname, int level, int lod, T *data)
 {
     vector<size_t> dims_at_level, dummy;
     int            rc = _dc->GetDimLensAtLevel(varname, level, dims_at_level, dummy, ts);
