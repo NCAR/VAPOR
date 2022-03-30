@@ -5,9 +5,9 @@
 
 class VCheckBoxAction;
 
-//! \class VNumericFormatMenu
+//! \class VIntSliderEditMenu
 //! \ingroup Public_GUI
-//! \brief A menu for VIntSliderEdit and VIntSliderEdit that allows for setting
+//! \brief A menu for VIntSliderEdit that allows for setting
 //! a min/max range, numeric formatting controls, and dynamic update controls
 //! in regard to how many digits are displayed, and whether scientific notation is used.
 
@@ -25,8 +25,9 @@ public:
         double max, 
         bool rangeChangeable
     );
+
+    //! Allow the toggling of the dynamic update checkbox in the right-click menu
     void AllowDynamicUpdate() const;
-    //explicit VIntSliderEditMenu(QWidget *parent, bool sciNotation, int decimalDigits, double min, double max, bool rangeChangeable, bool dynamicUpdateAllowed);
 
 protected:
     VCheckBoxAction *_dynamicUpdateAction;

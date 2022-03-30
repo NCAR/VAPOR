@@ -7,7 +7,6 @@
 
 #include "VDoubleSliderEdit.h"
 #include "VDoubleLineEdit.h"
-//#include "VDoubleRangeMenu.h"
 #include "VDoubleSliderEditMenu.h"
 #include "VSlider.h"
 
@@ -34,7 +33,6 @@ void VDoubleSliderEdit::AllowUserRange(bool allowed)
 
 void VDoubleSliderEdit::_makeContextMenu()
 {
-    //_menu = new VDoubleSliderEditMenu(this, _lineEdit->GetSciNotation(), _lineEdit->GetNumDigits(), _slider->GetMinimum(), _slider->GetMaximum(), _rangeChangable);
     _menu = new VDoubleSliderEditMenu(this);
     connect(_menu, &VNumericFormatMenu::DecimalDigitsChanged, this, &VDoubleSliderEdit::SetNumDigits);
     connect(_menu, &VNumericFormatMenu::SciNotationChanged, this, &VDoubleSliderEdit::SetSciNotation);

@@ -6,7 +6,6 @@
 
 class QMenu;
 class VDoubleLineEdit;
-//class VDoubleRangeMenu;
 class VDoubleSliderEditMenu;
 
 //! \class VDoubleSliderEdit
@@ -46,9 +45,6 @@ public:
     //! Get whether the VDoubleLineEdit is being displayed with scientific notation
     virtual bool GetSciNotation() const;
 
-    //! Get whether the menu has dynamic updates toggled
-    //virtual bool GetDynamicUpdate() const;
-
 public slots:
     //! Set the current value displayed by the slider and line edit
     void SetValue(double value);
@@ -74,7 +70,6 @@ protected:
     bool   _rangeChangable;
 
     VDoubleLineEdit * _lineEdit;
-    //VDoubleRangeMenu *_menu;
     VDoubleSliderEditMenu *_menu;
 
 signals:

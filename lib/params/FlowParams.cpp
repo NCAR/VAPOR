@@ -387,7 +387,7 @@ double FlowParams::_getRakeCenter(int dim)
 {
     Box *rakeBox = GetRakeBox();
     if (rakeBox == nullptr) return 0.;
-    std::vector<double> minExt, maxExt;
+    VAPoR::CoordType minExt, maxExt;
     rakeBox->GetExtents(minExt, maxExt);
     return (maxExt[dim] + minExt[dim]) / 2.;
 }
@@ -397,7 +397,7 @@ void FlowParams::_setRakeCenter(int dim, double center)
     Box *rakeBox = GetRakeBox();
     if (rakeBox == nullptr) return;
 
-    std::vector<double> minExt, maxExt;
+    VAPoR::CoordType minExt, maxExt;
     rakeBox->GetExtents(minExt, maxExt);
     double length = (maxExt[dim] - minExt[dim]) / 2.;
     maxExt[dim] = center + length;

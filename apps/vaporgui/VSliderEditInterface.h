@@ -30,7 +30,6 @@ public slots:
 
 public:
     //! Retrieve whether dynamic updates are toggled
-    //virtual bool GetDynamicUpdate() const = 0;
     virtual void AllowDynamicUpdate() const = 0;
 
     //! Retrieve whether the currnet line edit is using scientific notation

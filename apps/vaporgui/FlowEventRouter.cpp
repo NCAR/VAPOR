@@ -164,7 +164,7 @@ void FlowEventRouter::_updateTab()
     _pathlineLengthSlider->SetRange(0, std::max(1, numTS - 1));
     _pathlineInjectionSlider->SetRange(0, numTS);
 
-    std::vector<double> min, max;
+    VAPoR::CoordType min, max;
     FlowParams *        fp = dynamic_cast<FlowParams *>(GetActiveParams());
     fp->GetBox()->GetExtents(min, max);
     double xCenter = fp->GetXRakeCenter();
