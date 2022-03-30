@@ -69,7 +69,6 @@
 #include <vapor/DCCF.h>
 #include <vapor/DCBOV.h>
 #include <vapor/DCUGRID.h>
-#include <vapor/OpenMPSupport.h>
 
 
 #include "VizWinMgr.h"
@@ -394,7 +393,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     //
     SettingsParams *sP = GetSettingsParams();
     _controlExec->SetCacheSize(sP->GetCacheMB());
-    _controlExec->SetNumThreads(sP->GetNumThreads());
 
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
@@ -489,6 +487,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
 
     if (interactive && GetSettingsParams()->GetAutoCheckForUpdates()) CheckForUpdates();
     if (interactive && GetSettingsParams()->GetAutoCheckForNotices()) CheckForNotices();
+
+    _controlExec->SetNumThreads(GetSettingsParams()->GetNumThreads());
 }
 
 
@@ -1567,11 +1567,6 @@ void MainForm::redo()
 
 void MainForm::helpAbout()
 {
-    int nthreads = 1;
-#pragma omp parallel
-    {
-        nthreads = omp_get_num_threads();
-    }
     std::string banner_file_name = "vapor_banner.png";
     if (_banner) delete _banner;
     std::string banner_text = "Visualization and Analysis Platform for atmospheric, Oceanic and "
@@ -1582,10 +1577,7 @@ void MainForm::helpAbout()
                               "Web site: http://www.vapor.ucar.edu\n"
                               "Contact: vapor@ucar.edu\n"
                               "Version: "
-                            + string(Version::GetFullVersionString().c_str())
-                            + "\n"
-                              "OpenMP Threads: "
-                            + std::to_string(nthreads);
+                            + string(Version::GetFullVersionString().c_str());
 
     _banner = new BannerGUI(this, banner_file_name, -1, true, banner_text.c_str(), "http://www.vapor.ucar.edu");
 }
