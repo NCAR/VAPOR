@@ -5,15 +5,8 @@
 
 // clang-format off
 
-VIntSliderEditMenu::VIntSliderEditMenu(
-    QWidget *parent, 
-    bool sciNotation, 
-    int decimalDigits, 
-    double min, 
-    double max, 
-    bool rangeChangeable
-) : 
-VIntRangeMenu( parent, sciNotation, decimalDigits, min, max, rangeChangeable )
+VIntSliderEditMenu::VIntSliderEditMenu( QWidget *parent ) : 
+VIntRangeMenu( parent, false, 2, 0., 10., false )
 {
     _dynamicUpdateAction = new VCheckBoxAction("Dynamic update enabled", false);
     connect(_dynamicUpdateAction, &VCheckBoxAction::clicked, this, &VIntSliderEditMenu::_dynamicUpdateChanged);

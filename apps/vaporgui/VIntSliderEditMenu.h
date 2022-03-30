@@ -17,14 +17,7 @@ class VIntSliderEditMenu : public VIntRangeMenu {
     Q_OBJECT
 
 public:
-    explicit VIntSliderEditMenu(
-        QWidget *parent, 
-        bool sciNotation, 
-        int decimalDigits, 
-        double min, 
-        double max, 
-        bool rangeChangeable
-    );
+    explicit VIntSliderEditMenu( QWidget *parent );
 
     //! Allow the toggling of the dynamic update checkbox in the right-click menu
     void AllowDynamicUpdate() const;

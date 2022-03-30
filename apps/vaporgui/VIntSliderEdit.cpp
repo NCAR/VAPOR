@@ -31,7 +31,7 @@ void VIntSliderEdit::AllowUserRange(bool allowed)
 
 void VIntSliderEdit::_makeContextMenu()
 {
-    _menu = new VIntSliderEditMenu(this, _lineEdit->GetSciNotation(), _lineEdit->GetNumDigits(), _slider->GetMinimum(), _slider->GetMaximum(), _rangeChangable);
+    _menu = new VIntSliderEditMenu(this);
     connect(_menu, &VNumericFormatMenu::DecimalDigitsChanged, this, &VIntSliderEdit::SetNumDigits);
     connect(_menu, &VNumericFormatMenu::SciNotationChanged, this, &VIntSliderEdit::SetSciNotation);
     connect(_menu, &VIntRangeMenu::MinChanged, this, &VIntSliderEdit::SetMinimum);
