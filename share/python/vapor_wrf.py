@@ -9,6 +9,34 @@
 import numpy 
 import vapor_utils
 
+def ETH(P,PB,T,QVAPOR):
+	''' Program to calculate equivalent potential temperature using WRF
+	variables P, PB, T, QVAPOR.
+	Calling sequence:  WRF_ETH = ETH(P,PB,T,QVAPOR)
+	Result WRF_ETH is a 3D variable on same grid as P,PB,T,QVAPOR.'''
+#Copied from NCL/Fortran source code DEQTHECALC in eqthecalc.f
+	c = 2.0/7.0
+	EPS = 0.622
+	GAMMA = 287.04/1004.0
+	GAMMAMD = 0.608 -0.887
+	TLCLC1 = 2840.0
+	TLCLC2 = 3.5
+	TLCLC3 = 4.805
+	TLCLC4 = 55.0
+	THTECON1 = 3376.0
+	THTECON2 = 2.54
+	THTECON3 = 0.81
+	TH = T+300.0
+#calculate Temp. in Kelvin
+	PRESS = 0.01*(P+PB)
+	TK = TH*numpy.power(PRESS*.001,c)
+	Q = numpy.maximum(QVAPOR, 1.e-15)
+	E = Q*PRESS/(EPS+Q)
+	TLCL = TLCLC4+ TLCLC1/(numpy.log(numpy.power(TK,TLCLC2)/E)-TLCLC3)
+	EXPNT = (THTECON1/TLCL - THTECON2)*Q*(1.0+THTECON3*Q)
+	WRF_ETH = TK*numpy.power(1000.0/PRESS,GAMMA*(1.0+GAMMAMD*Q))*numpy.exp(EXPNT)
+	return WRF_ETH
+
 def RH(P,PB,T,QVAPOR):
 	''' Calculation of relative humidity.
 	Calling sequence WRF_RH = RH(P,PB,T,QVAPOR),
