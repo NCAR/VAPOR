@@ -263,92 +263,6 @@ def _deriv_findiff4(a,axis,dx):
 
     return aprime
 
-def deriv_findiff(a,dir,dx,order=6):
-	''' Function that calculates first-order derivatives 
-	using sixth order finite differences in regular Cartesian grids.
-	Calling sequence: deriv = deriv_findiff(ary,dir,delta, order=6)
-	ary is a 3-dimensional float32 numpy array
-	dir is 1, 2, or 3 (for X, Y, or Z directions in user coordinates)
-	delta is the grid spacing in the direction dir.
-	order is the accuracy order (one of 6,4,2)
-	Returned array 'deriv' is the derivative of ary in the 
-	specified direction dir. '''
-	import numpy 
-
-	if order == 4:
-		return deriv_findiff4(a,dir,dx)
-
-	if order == 2:
-		return deriv_findiff2(a,dir,dx)
-
-	s = numpy.shape(a)	#size of the input array
-	aprime = numpy.array(a)	#output has the same size than input
-
-	#
-	# derivative for user dir=1, in python this is third coordinate
-	#
-	if dir == 1: 
-		if (s[2] < 2):
-			return numpy.zeros_like(a)
-		if (s[2] < 4):
-			return deriv_findiff2(a,dir,dx)
-		if (s[2] < 6):
-			return deriv_findiff4(a,dir,dx)
-
-		#forward differences near the first boundary
-		for i in range(3):
-			aprime[:,:,i] = (-11*a[:,:,i]+18*a[:,:,i+1]-9*a[:,:,i+2]+2*a[:,:,i+3]) / (6*dx)     
-
-		#centered differences
-		for i in range(3,s[2]-3):
-			aprime[:,:,i] = (-a[:,:,i-3]+9*a[:,:,i-2]-45*a[:,:,i-1]+45*a[:,:,i+1] -9*a[:,:,i+2]+a[:,:,i+3])/(60*dx) 
-
-		#backward differences near the second boundary
-		for i in range(s[2]-3,s[2]):
-			aprime[:,:,i] = (-2*a[:,:,i-3]+9*a[:,:,i-2]-18*a[:,:,i-1]+11*a[:,:,i]) /(6*dx)     
-
-	#
-	# derivative for dir=2
-	#
-	if dir == 2: 
-		if (s[1] < 2):
-			return numpy.zeros_like(a)
-		if (s[1] < 4):
-			return deriv_findiff2(a,dir,dx)
-		if (s[1] < 6):
-			return deriv_findiff4(a,dir,dx)
-
-		for i in range(3):
-			aprime[:,i,:] = (-11*a[:,i,:]+18*a[:,i+1,:]-9*a[:,i+2,:]+2*a[:,i+3,:]) /(6*dx)     #forward differences near the first boundary
-
-		for i in range(3,s[1]-3):
-			aprime[:,i,:] = (-a[:,i-3,:]+9*a[:,i-2,:]-45*a[:,i-1,:]+45*a[:,i+1,:] -9*a[:,i+2,:]+a[:,i+3,:])/(60*dx) #centered differences
-
-		for i in range(s[1]-3,s[1]):
-			aprime[:,i,:] = (-2*a[:,i-3,:]+9*a[:,i-2,:]-18*a[:,i-1,:]+11*a[:,i,:]) /(6*dx)     #backward differences near the second boundary
-
-	#
-	# derivative for user dir=3
-	#
-	if dir == 3:
-		if (s[0] < 2):
-			return numpy.zeros_like(a)
-		if (s[0] < 4):
-			return deriv_findiff2(a,dir,dx)
-		if (s[0] < 6):
-			return deriv_findiff4(a,dir,dx)
-
-		for i in range(3):
-			aprime[i,:,:] = (-11*a[i,:,:]+18*a[i+1,:,:]-9*a[i+2,:,:]+2*a[i+3,:,:]) /(6*dx)     #forward differences near the first boundary
-
-		for i in range(3,s[0]-3):
-			aprime[i,:,:] = (-a[i-3,:,:]+9*a[i-2,:,:]-45*a[i-1,:,:]+45*a[i+1,:,:] -9*a[i+2,:,:]+a[i+3,:,:])/(60*dx) #centered differences
-
-		for i in range(s[0]-3,s[0]):
-			aprime[i,:,:] = (-2*a[i-3,:,:]+9*a[i-2,:,:]-18*a[i-1,:,:]+11*a[i,:,:]) /(6*dx)     #backward differences near the second boundary
-
-	return aprime
-
 def DerivFinDiff(a,axis,dx,order=6):
 
     """ Function that calculates first-order derivatives on Cartesian grids.
@@ -805,8 +719,8 @@ def DivFinDiff(M,N,P,dx,dy,dz,order=6):
 
     """
 
-    return deriv_findiff(P,0,dz,order) + \
-        deriv_findiff(N,1,dy,order) + deriv_findiff(M,2,dx,order)
+    return DerivFinDiff(P,0,dz,order) + \
+        DerivFinDiff(N,1,dy,order) + DerivFinDiff(M,2,dx,order)
 
 
 def GradFinDif(A,dx,dy,dz,order=6):
