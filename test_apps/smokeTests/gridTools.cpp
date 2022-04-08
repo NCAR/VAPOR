@@ -70,10 +70,9 @@ vector<float *> AllocateBlocks(const vector<size_t> &bs, const vector<size_t> &d
 void MakeTriangle(Grid *grid, float minVal, float maxVal)
 {
     auto   dims = grid->GetDimensions();
-    size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
-    size_t y = nDims > 1 ? dims[Y] : 1;
-    size_t z = nDims > 2 ? dims[Z] : 1;
+    size_t y = dims[Y];
+    size_t z = dims[Z];
 
     float value = minVal;
     for (size_t k = 0; k < z; k++) {
@@ -89,10 +88,9 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal)
 void MakeConstantField(Grid *grid, float value)
 {
     auto   dims = grid->GetDimensions();
-    size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
-    size_t y = nDims > 1 ? dims[Y] : 1;
-    size_t z = nDims > 2 ? dims[Z] : 1;
+    size_t y = dims[Y];
+    size_t z = dims[Z];
 
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
@@ -104,10 +102,9 @@ void MakeConstantField(Grid *grid, float value)
 void MakeRamp(Grid *grid, float minVal, float maxVal)
 {
     auto   dims = grid->GetDimensions();
-    size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
-    size_t y = nDims > 1 ? dims[Y] : 1;
-    size_t z = nDims > 2 ? dims[Z] : 1;
+    size_t y = dims[Y];
+    size_t z = dims[Z];
 
     float increment = (maxVal - minVal) / ((x * y * z - 1) == 0 ? 1 : (x * y * z - 1));
 
@@ -125,10 +122,9 @@ void MakeRamp(Grid *grid, float minVal, float maxVal)
 void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X)
 {
     auto   dims = grid->GetDimensions();
-    size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
-    size_t y = nDims > 1 ? dims[Y] : 1;
-    size_t z = nDims > 2 ? dims[Z] : 1;
+    size_t y = dims[Y];
+    size_t z = dims[Z];
 
     float xIncrement = axis == X ? (maxVal - minVal) / (dims[X] - 1) : 0;
     float yIncrement = axis == Y ? (maxVal - minVal) / (dims[Y] - 1) : 0;
@@ -164,10 +160,9 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
     numMissingValues = 0;
 
     auto   dims = grid->GetDimensions();
-    size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
-    size_t y = nDims > 1 ? dims[Y] : 1;
-    size_t z = nDims > 2 ? dims[Z] : 1;
+    size_t y = dims[Y];
+    size_t z = dims[Z];
 
     double peak = 0.f;
     double sum = 0;
@@ -202,7 +197,7 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
     return rc;
 }
 
-bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time)
+bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time, bool withCoordBounds)
 {
     bool rc = true;
     count = 0;
@@ -213,7 +208,13 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
     Grid::ConstNodeIterator itr;
     Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
 
-    itr = g->ConstNodeBegin();
+    if (withCoordBounds) {
+        CoordType minu, maxu;
+        g->GetUserExtents(minu, maxu);
+        itr = g->ConstNodeBegin(minu, maxu);
+    } else {
+        itr = g->ConstNodeBegin();
+    }
 
     auto dims = g->GetDimensions();
     for (auto dim : dims) expectedCount *= dim;
@@ -345,10 +346,9 @@ bool RunTest(Grid *grid, bool silenceTime)
 bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal, bool silenceTime)
 {
     auto   dims = grid->GetDimensions();
-    size_t nDims = grid->GetNumDimensions();
     size_t x = dims[X];
-    size_t y = nDims > 1 ? dims[Y] : 1;
-    size_t z = nDims > 2 ? dims[Z] : 1;
+    size_t y = dims[Y];
+    size_t z = dims[Z];
 
     bool        rc = true;
     std::string type = grid->GetType();
@@ -413,9 +413,13 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
 
     PrintGridIteratorResults(type, "ConstCoordIterator", count, expectedCount, disagreements, time, silenceTime);
 
-    if (TestConstNodeIterator(grid, count, expectedCount, disagreements, time) == false) { rc = false; }
+    if (TestConstNodeIterator(grid, count, expectedCount, disagreements, time, false) == false) { rc = false; }
 
     PrintGridIteratorResults(type, "ConstNodeIterator", count, expectedCount, disagreements, time, silenceTime);
+
+    if (TestConstNodeIterator(grid, count, expectedCount, disagreements, time, true) == false) { rc = false; }
+
+    PrintGridIteratorResults(type, "ConstNodeIterator with bounds", count, expectedCount, disagreements, time, silenceTime);
 
     return rc;
 }

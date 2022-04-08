@@ -19,7 +19,7 @@ using namespace std;
 using namespace Wasp;
 using namespace VAPoR;
 
-size_t vproduct(vector<size_t> a)
+size_t vproduct(DimsType a)
 {
     size_t ntotal = 1;
 
@@ -62,13 +62,13 @@ void test_calculate()
     int rc = PyEngine::Initialize();
     if (rc < 0) return;
 
-    vector<size_t> dims = {1000, 1000, 10};
+    DimsType dims = {1000, 1000, 10};
     //	string script = "C = sqrt(A) + B";
     string                 script = "C = A + B";
     vector<string>         inputVarNames = {"A", "B"};
-    vector<vector<size_t>> inputVarDims = {dims, dims};
+    vector<DimsType>       inputVarDims = {dims, dims};
     vector<string>         outputVarNames = {"C"};
-    vector<vector<size_t>> outputVarDims = {dims};
+    vector<DimsType>       outputVarDims = {dims};
 
     float *A = new float[vproduct(dims)];
     float *B = new float[vproduct(dims)];

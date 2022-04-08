@@ -1,7 +1,7 @@
 #include "SliceEventRouter.h"
 #include <vapor/SliceParams.h>
 #include "PWidgets.h"
-#include "PSliceOriginSelector.h"
+#include "PSliceController.h"
 
 using namespace VAPoR;
 
@@ -26,12 +26,7 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     }));
     
     AddGeometrySubtab(new PGroup({
-        new PSection("Slice Rotation", {
-            (new PDoubleSliderEdit( RenderParams::XSlicePlaneRotationTag, "X"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit( RenderParams::YSlicePlaneRotationTag, "Y"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit( RenderParams::ZSlicePlaneRotationTag, "Z"))->SetRange(-90.,90.)->EnableDynamicUpdate(),
-        }),
-        new PSliceOriginSelector,
+        new PSliceController,
         new PGeometrySubtab,
     }));
     AddAnnotationSubtab(new PAnnotationColorbarWidget);

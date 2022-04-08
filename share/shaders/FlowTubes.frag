@@ -61,5 +61,7 @@ void main() {
         discard;
 
     fragment = color;
+    
+    if (color.a < 0.05) discard;
 }
 

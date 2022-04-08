@@ -18,18 +18,26 @@
 using namespace std;
 using namespace VAPoR;
 
-void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &maxu)
+void RegularGrid::_regularGrid(const CoordType &minu, const CoordType &maxu)
 {
     VAssert(minu.size() == maxu.size());
 
     _delta = {0.0, 0.0, 0.0};
-    _geometryDim = minu.size();
 
-    CopyToArr3(minu, _minu);
-    CopyToArr3(maxu, _maxu);
+    _geometryDim = 0;
+    for (int i = 0; i < minu.size(); i++) {
+        if (minu[i] != maxu[i])
+            _geometryDim++;
+        else
+            break;
+    }
+    VAssert(_geometryDim >= GetNumDimensions());
 
-    auto dims = GetDimensions();
-    for (int i = 0; i < GetNumDimensions(); i++) {
+    _minu = minu;
+    _maxu = maxu;
+
+    DimsType dims = GetDimensions();
+    for (int i = 0; i < minu.size(); i++) {
         if (dims[i] > 1) {
             _delta[i] = (_maxu[i] - _minu[i]) / (double)(dims[i] - 1);
         } else {
@@ -38,29 +46,38 @@ void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &
     }
 }
 
-RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const vector<double> &minu, const vector<double> &maxu) : StructuredGrid(dims, bs, blks)
+RegularGrid::RegularGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const CoordType &minu, const CoordType &maxu) : StructuredGrid(dims, bs, blks)
 {
-    VAssert(minu.size() == maxu.size());
-    VAssert(minu.size() >= GetNumDimensions());
-
-    _SetExtents(minu, maxu);
+    _regularGrid(minu, maxu);
 }
 
-vector<size_t> RegularGrid::GetCoordDimensions(size_t dim) const
+RegularGrid::RegularGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks, const vector<double> &minuv, const vector<double> &maxuv)
+: StructuredGrid(dimsv, bsv, blks)
 {
+    VAssert(minuv.size() == maxuv.size());
+    VAssert(minuv.size() >= GetNumDimensions());
+
+    CoordType minu = {0.0, 0.0, 0.0};
+    CoordType maxu = {0.0, 0.0, 0.0};
+    CopyToArr3(minuv, minu);
+    CopyToArr3(maxuv, maxu);
+
+    _regularGrid(minu, maxu);
+}
+
+DimsType RegularGrid::GetCoordDimensions(size_t dim) const
+{
+    DimsType dims = {1, 1, 1};
+
     if (dim == 0) {
-        return (vector<size_t>(1, GetDimensions()[0]));
+        dims[0] = GetDimensions()[0];
     } else if (dim == 1) {
-        return (vector<size_t>(1, GetDimensions()[1]));
+        dims[0] = GetDimensions()[1];
     } else if (dim == 2) {
-        if (GetNumDimensions() == 3) {
-            return (vector<size_t>(1, GetDimensions()[2]));
-        } else {
-            return (vector<size_t>(1, 1));
-        }
-    } else {
-        return (vector<size_t>(1, 1));
+        dims[0] = GetDimensions()[2];
     }
+
+    return (dims);
 }
 
 float RegularGrid::GetValueNearestNeighbor(const CoordType &coords) const
@@ -121,14 +138,12 @@ float RegularGrid::GetValueLinear(const CoordType &coords) const
 
     if (_delta[0] != 0.0) { i = (size_t)floor((cCoords[0] - _minu[0]) / _delta[0]); }
     if (_delta[1] != 0.0) { j = (size_t)floor((cCoords[1] - _minu[1]) / _delta[1]); }
-
-    if (GetGeometryDim() == 3 && _delta[2] != 0.0) { k = (size_t)floor((cCoords[2] - _minu[2]) / _delta[2]); }
+    if (_delta[2] != 0.0) { k = (size_t)floor((cCoords[2] - _minu[2]) / _delta[2]); }
 
     auto dims = GetDimensions();
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
-
-    if (GetNumDimensions() == 3) { VAssert(k < dims[2]); }
+    VAssert(k < dims[2]);
 
     double iwgt = 0.0;
     double jwgt = 0.0;
@@ -136,8 +151,7 @@ float RegularGrid::GetValueLinear(const CoordType &coords) const
 
     if (_delta[0] != 0.0) { iwgt = ((cCoords[0] - _minu[0]) - (i * _delta[0])) / _delta[0]; }
     if (_delta[1] != 0.0) { jwgt = ((cCoords[1] - _minu[1]) - (j * _delta[1])) / _delta[1]; }
-
-    if (GetGeometryDim() == 3 && _delta[2] != 0.0) { kwgt = ((cCoords[2] - _minu[2]) - (k * _delta[2])) / _delta[2]; }
+    if (_delta[2] != 0.0) { kwgt = ((cCoords[2] - _minu[2]) - (k * _delta[2])) / _delta[2]; }
 
     float  missingValue = GetMissingValue();
     double p0, p1, p2, p3, p4, p5, p6, p7;
@@ -220,7 +234,7 @@ void RegularGrid::GetUserCoordinates(const DimsType &indices, CoordType &coords)
 
     auto dims = GetDimensions();
 
-    for (int i = 0; i < GetNumDimensions(); i++) {
+    for (int i = 0; i < dims.size(); i++) {
         size_t index = cIndices[i];
         VAssert(dims[i] > 0);
 
@@ -276,20 +290,19 @@ bool RegularGrid::InsideGrid(const CoordType &coords) const
 RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const RegularGrid *rg, bool begin) : ConstCoordItrAbstract()
 {
     _dims = rg->GetDimensions();
-    _nDims = rg->GetNumDimensions();
     _delta = rg->_delta;
     _minu = rg->_minu;
     _coords = rg->_minu;
     _index = {0, 0, 0};
 
-    if (!begin) { _index[_nDims - 1] = _dims[_nDims - 1]; }
+
+    if (!begin) { _index = {0, 0, _dims[_dims.size() - 1]}; }
 }
 
 RegularGrid::ConstCoordItrRG::ConstCoordItrRG(const ConstCoordItrRG &rhs) : ConstCoordItrAbstract()
 {
     _index = rhs._index;
     _dims = rhs._dims;
-    _nDims = rhs._nDims;
     _minu = rhs._minu;
     _delta = rhs._delta;
     _coords = rhs._coords;
@@ -317,28 +330,23 @@ void RegularGrid::ConstCoordItrRG::next()
 
     if (_index[1] < _dims[1]) { return; }
 
-    if (_nDims == 2) { return; }
-
     _index[1] = 0;
     _coords[1] = _minu[1];
     _index[2]++;
     _coords[2] += _delta[2];
+
+    if (_index[2] < _dims[2]) { return; }
+
+    _index[2] = _dims[2];    // last index;
 }
 
 void RegularGrid::ConstCoordItrRG::next(const long &offset)
 {
-    if (!_nDims) return;
-
-    static DimsType maxIndex = {0, 0, 0};
-    ;
-    for (int i = 0; i < _nDims; i++) maxIndex[i] = _dims[i] - 1;
-
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex.data(), _dims.data(), _dims.size());
+    long maxIndexL = Wasp::VProduct(_dims.data(), _dims.size()) - 1;
     long newIndexL = Wasp::LinearizeCoords(_index.data(), _dims.data(), _dims.size()) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = {0, 0, 0};
-        _index[_nDims - 1] = _dims[_nDims - 1];
+        _index = {0, 0, _dims[_dims.size() - 1]};
         return;
     }
 

@@ -19,6 +19,21 @@
 using namespace std;
 using namespace VAPoR;
 
+UnstructuredGrid3D::UnstructuredGrid3D(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks, const int *vertexOnFace,
+                                       const int *faceOnVertex, const int *faceOnFace,
+                                       Location location,    // node,face, edge
+                                       size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
+                                       const UnstructuredGridCoordless &zug)
+: UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset), _xug(xug), _yug(yug),
+  _zug(zug)
+{
+    VAssert(xug.GetNumDimensions() == 1);
+    VAssert(yug.GetNumDimensions() == 1);
+    VAssert(zug.GetNumDimensions() == 1);
+
+    VAssert(location == NODE);
+}
+
 UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, const std::vector<size_t> &bs,
                                        const std::vector<float *> &blks, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                                        Location location,    // node,face, edge
@@ -35,24 +50,19 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 }
 
 
-vector<size_t> UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
+DimsType UnstructuredGrid3D::GetCoordDimensions(size_t dim) const
 {
-    const Grid *ptr = nullptr;
+    DimsType dims = {1, 1, 1};
 
     if (dim == 0) {
-        ptr = &_xug;
+        dims = _xug.GetDimensions();
     } else if (dim == 1) {
-        ptr = &_yug;
+        dims = _yug.GetDimensions();
     } else if (dim == 2) {
-        ptr = &_zug;
-    } else {
-        return (vector<size_t>(1, 1));
+        dims = _zug.GetDimensions();
     }
 
-    auto tmp = ptr->GetDimensions();
-    auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    dims.resize(ptr->GetNumDimensions());
-    return dims;
+    return (dims);
 }
 
 

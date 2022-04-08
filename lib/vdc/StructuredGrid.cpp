@@ -21,15 +21,25 @@
 using namespace std;
 using namespace VAPoR;
 
-StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks) : Grid(dims, bs, blks, dims.size())
+void StructuredGrid::_structuredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks)
 {
-    VAssert(bs.size() == 2 || bs.size() == 3);
-
     _cellDims = Grid::GetDimensions();
     for (int i = 0; i < _cellDims.size(); i++) {
         _cellDims[i]--;
         if (_cellDims[i] < 1) _cellDims[i] = 1;
     }
+}
+
+StructuredGrid::StructuredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks) : Grid(dims, bs, blks, GetNumDimensions(dims)) { _structuredGrid(dims, bs, blks); }
+
+StructuredGrid::StructuredGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks) : Grid(dimsv, bsv, blks, dimsv.size())
+{
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
+    CopyToArr3(dimsv, dims);
+    CopyToArr3(bsv, bs);
+
+    _structuredGrid(dims, bs, blks);
 }
 
 const DimsType &StructuredGrid::GetNodeDimensions() const { return GetDimensions(); }
@@ -42,14 +52,13 @@ bool StructuredGrid::GetCellNodes(const DimsType &cindices, vector<DimsType> &no
     ClampCellIndex(cindices, cCindices);
 
     auto dims = GetDimensions();
-    auto ndims = GetNumDimensions();
 
     // Cells have the same ID's as their first node
     //
     // walk counter-clockwise order
     //
 
-    if (ndims == 2) {
+    if (dims[0] > 1 && dims[1] > 1 && dims[2] < 2) {
         nodes.resize(4);
         nodes[0][0] = cCindices[0];
         nodes[0][1] = cCindices[1];
@@ -67,7 +76,7 @@ bool StructuredGrid::GetCellNodes(const DimsType &cindices, vector<DimsType> &no
         nodes[3][1] = cCindices[1] + 1;
         nodes[3][2] = 0;
 
-    } else if (ndims == 3) {
+    } else if (dims[0] > 1 && dims[1] > 1 && dims[2] > 1) {
         nodes.resize(8);
         nodes[0][0] = cCindices[0];
         nodes[0][1] = cCindices[1];
@@ -105,7 +114,7 @@ bool StructuredGrid::GetCellNodes(const DimsType &cindices, vector<DimsType> &no
     // Handle dims[i] == 1
     //
     for (int j = 0; j < nodes.size(); j++) {
-        for (int i = 0; i < ndims; i++) {
+        for (int i = 0; i < dims.size(); i++) {
             if (nodes[j][i] >= dims[i]) { nodes[j][i] -= 1; }
         }
     }
@@ -124,6 +133,7 @@ bool StructuredGrid::GetCellNeighbors(const DimsType &cindices, std::vector<Dims
     auto ndims = GetNumDimensions();
 
     VAssert((ndims == 2) && "3D cells not yet supported");
+    VAssert(dims[0] > 1 && dims[1] > 1);
 
     // Cells have the same ID's as their first node
     //
@@ -163,6 +173,7 @@ bool StructuredGrid::GetNodeCells(const DimsType &indices, std::vector<DimsType>
     auto ndims = GetNumDimensions();
 
     VAssert((ndims == 2) && "3D cells not yet supported");
+    VAssert(dims[0] > 1 && dims[1] > 1);
 
     // Check if invalid indices
     //
@@ -199,9 +210,13 @@ bool StructuredGrid::GetNodeCells(const DimsType &indices, std::vector<DimsType>
 
 bool StructuredGrid::GetEnclosingRegion(const CoordType &minu, const CoordType &maxu, DimsType &min, DimsType &max) const
 {
+    const DimsType &dims = GetNodeDimensions();
+
     if (!GetIndicesCell(minu, min)) return (false);
     if (!GetIndicesCell(maxu, max)) return (false);
-    for (int i = 0; i < GetNumDimensions(); i++) { max[i] += 1; }
+    for (int i = 0; i < max.size(); i++) {
+        if (max[i] < dims[i] - 1) max[i] += 1;
+    }
 
     // For curvilinear grids it's possible that minu and maxu components
     // are swapped
@@ -210,7 +225,7 @@ bool StructuredGrid::GetEnclosingRegion(const CoordType &minu, const CoordType &
     GetUserCoordinates(min.data(), newMinu.data());
     GetUserCoordinates(max.data(), newMaxu.data());
 
-    for (int i = 0; i < GetNumDimensions(); i++) {
+    for (int i = 0; i < newMinu.size(); i++) {
         if (newMinu > newMaxu) std::swap(min[i], max[i]);
     }
 

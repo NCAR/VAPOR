@@ -22,7 +22,10 @@ VolumeRegular::~VolumeRegular() {}
 int VolumeRegular::LoadData(const Grid *grid)
 {
     VolumeGLSL::LoadData(grid);
-    assert(grid->GetNumDimensions() == 3);    // Only support 3D grids.
+    if (grid->GetNumDimensions() != 3) {
+        Wasp::MyBase::SetErrMsg("Variable has a volume of 0");
+        return -1;
+    }
     auto tmp = grid->GetDimensions();
     _dataDimensions = {tmp[0], tmp[1], tmp[2]};
     _hasSecondData = false;

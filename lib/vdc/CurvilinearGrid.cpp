@@ -27,13 +27,10 @@ void CurvilinearGrid::_curvilinearGrid(const RegularGrid &xrg, const RegularGrid
     if (!_qtr) { _qtr = _makeQuadTreeRectangle(); }
 }
 
-CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const vector<double> &zcoords,
+CurvilinearGrid::CurvilinearGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const vector<double> &zcoords,
                                  std::shared_ptr<const QuadTreeRectangleP> qtr)
 : StructuredGrid(dims, bs, blks)
 {
-    VAssert(dims.size() == 2 || dims.size() == 3);
-    VAssert(bs.size() == dims.size());
-
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
@@ -45,13 +42,10 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     _curvilinearGrid(xrg, yrg, RegularGrid(), zcoords, qtr);
 }
 
-CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg,
+CurvilinearGrid::CurvilinearGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg,
                                  std::shared_ptr<const QuadTreeRectangleP> qtr)
 : StructuredGrid(dims, bs, blks)
 {
-    VAssert(dims.size() == 3);
-    VAssert(bs.size() == dims.size());
-
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
@@ -63,13 +57,9 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     _curvilinearGrid(xrg, yrg, zrg, vector<double>(), qtr);
 }
 
-CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
-                                 std::shared_ptr<const QuadTreeRectangleP> qtr)
+CurvilinearGrid::CurvilinearGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, std::shared_ptr<const QuadTreeRectangleP> qtr)
 : StructuredGrid(dims, bs, blks)
 {
-    VAssert(dims.size() == 2);
-    VAssert(bs.size() == dims.size());
-
     // Only support 2D X & Y coordinates currently. I.e. only support
     // "layered" curvilinear grids
     //
@@ -80,27 +70,80 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), qtr);
 }
 
-vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
+CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const vector<double> &zcoords,
+                                 std::shared_ptr<const QuadTreeRectangleP> qtr)
+: StructuredGrid(dimsv, bsv, blks)
 {
-    const Grid *ptr = nullptr;
+    VAssert(dimsv.size() == 2 || dimsv.size() == 3);
+    VAssert(bsv.size() == dimsv.size());
+
+    // Only support 2D X & Y coordinates currently. I.e. only support
+    // "layered" curvilinear grids
+    //
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
+    VAssert(zcoords.size() == 0 || zcoords.size() == dimsv[2]);
+
+    _terrainFollowing = false;
+
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
+    CopyToArr3(dimsv, dims);
+    CopyToArr3(bsv, bs);
+    _curvilinearGrid(xrg, yrg, RegularGrid(), zcoords, qtr);
+}
+
+CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg,
+                                 std::shared_ptr<const QuadTreeRectangleP> qtr)
+: StructuredGrid(dimsv, bsv, blks)
+{
+    VAssert(dimsv.size() == 3);
+    VAssert(bsv.size() == dimsv.size());
+
+    _terrainFollowing = true;
+
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
+    CopyToArr3(dimsv, dims);
+    CopyToArr3(bsv, bs);
+    _curvilinearGrid(xrg, yrg, zrg, vector<double>(), qtr);
+}
+
+CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
+                                 std::shared_ptr<const QuadTreeRectangleP> qtr)
+: StructuredGrid(dimsv, bsv, blks)
+{
+    VAssert(dimsv.size() == 2);
+    VAssert(bsv.size() == dimsv.size());
+
+    // Only support 2D X & Y coordinates currently. I.e. only support
+    // "layered" curvilinear grids
+    //
+    VAssert(xrg.GetNumDimensions() == 2);
+    VAssert(yrg.GetNumDimensions() == 2);
+
+    _terrainFollowing = false;
+
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
+    CopyToArr3(dimsv, dims);
+    CopyToArr3(bsv, bs);
+    _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), qtr);
+}
+
+DimsType CurvilinearGrid::GetCoordDimensions(size_t dim) const
+{
+    DimsType dims = {1, 1, 1};
+
     if (dim == 0) {
-        ptr = &_xrg;
+        dims = _xrg.GetDimensions();
     } else if (dim == 1) {
-        ptr = &_yrg;
+        dims = _yrg.GetDimensions();
     } else if (dim == 2) {
-        if (_terrainFollowing) {
-            ptr = &_zrg;
-        } else {
-            return (vector<size_t>(1, _zcoords.size()));
-        }
-    } else {
-        return (vector<size_t>(1, 1));
+        if (_terrainFollowing) { dims = _zrg.GetDimensions(); }
     }
 
-    auto tmp = ptr->GetDimensions();
-    auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    tmp2.resize(ptr->GetNumDimensions());
-    return tmp2;
+    return (dims);
 }
 
 void CurvilinearGrid::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const
@@ -223,7 +266,6 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
 {
     _cg = cg;
     auto dims = _cg->GetDimensions();
-    auto ndims = _cg->GetNumDimensions();
     _index = {0, 0, 0};
     _coords = {0.0, 0.0, 0.0};
     _terrainFollowing = _cg->_terrainFollowing;
@@ -235,18 +277,18 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
         _xCoordItr = _cg->_xrg.cend();
         _yCoordItr = _cg->_yrg.cend();
         if (_terrainFollowing) { _zCoordItr = _cg->_zrg.cend(); }
-        _index[ndims - 1] = dims[ndims - 1];
+
+        _index = {0, 0, dims[dims.size() - 1]};
+
         return;
     }
     _coords[0] = *_xCoordItr;
     _coords[1] = *_yCoordItr;
 
-    if (ndims == 3) {
-        if (_terrainFollowing) {
-            _coords[2] = *_zCoordItr;
-        } else {
-            _coords[2] = _cg->_zcoords[0];
-        }
+    if (_terrainFollowing) {
+        _coords[2] = *_zCoordItr;
+    } else {
+        if (_cg->_zcoords.size()) _coords[2] = _cg->_zcoords[0];
     }
 }
 
@@ -294,8 +336,6 @@ void CurvilinearGrid::ConstCoordItrCG::next()
         return;
     }
 
-    if (_cg->GetNumDimensions() == 2) return;
-
     _index[1] = 0;
     _index[2]++;
     if (_index[2] < dims[2]) {
@@ -311,36 +351,29 @@ void CurvilinearGrid::ConstCoordItrCG::next()
         }
         return;
     }
+
+    _index = {0, 0, dims[dims.size() - 1]};    // last index
 }
 
 void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 {
-
     auto dims = _cg->GetDimensions();
     auto ndims = _cg->GetNumDimensions();
 
     if (!ndims) return;
 
-    DimsType maxIndex = {0, 0, 0};
-
-    for (int i = 0; i < ndims; i++) {
-        VAssert(dims[i] > 0);
-        maxIndex[i] = dims[i] - 1;
-    }
-
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex.data(), dims.data(), ndims);
-    long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), ndims) + offset;
+    long maxIndexL = Wasp::VProduct(dims.data(), dims.size()) - 1;
+    long newIndexL = Wasp::LinearizeCoords(_index.data(), dims.data(), dims.size()) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
-        _index = {0, 0, 0};
-        _index[ndims - 1] = dims[ndims - 1];
+        _index = {0, 0, dims[dims.size() - 1]};
         return;
     }
 
     size_t index2DL = _index[1] * dims[0] + _index[0];
 
     _index = {0, 0, 0};
-    Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), ndims);
+    Wasp::VectorizeCoords(newIndexL, dims.data(), _index.data(), dims.size());
 
     VAssert(_index[1] * dims[0] + _index[0] >= index2DL);
     size_t offset2D = (_index[1] * dims[0] + _index[0]) - index2DL;
@@ -350,8 +383,6 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset)
 
     _coords[0] = *_xCoordItr;
     _coords[1] = *_yCoordItr;
-
-    if (ndims == 2) return;
 
     if (_terrainFollowing) {
         _zCoordItr += offset;
@@ -676,8 +707,8 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
 
 std::shared_ptr<QuadTreeRectangleP> CurvilinearGrid::_makeQuadTreeRectangle() const
 {
-    const DimsType &      dims = GetCellDimensions();
-    size_t                reserve_size = dims[0] * dims[1];
+    const DimsType &dims = GetCellDimensions();
+    size_t          reserve_size = dims[0] * dims[1];
 
     CoordType minu, maxu;
     GetUserExtents(minu, maxu);

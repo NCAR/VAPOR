@@ -52,6 +52,8 @@ public:
     //!
     //! \sa RegularGrid()
     //
+    StretchedGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords,
+                  const std::vector<double> &zcoords);
     StretchedGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords,
                   const std::vector<double> &zcoords);
 
@@ -60,7 +62,7 @@ public:
 
     virtual size_t GetGeometryDim() const override;
 
-    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
+    virtual DimsType GetCoordDimensions(size_t dim) const override;
 
     static std::string GetClassType() { return ("Stretched"); }
     std::string        GetType() const override { return (GetClassType()); }

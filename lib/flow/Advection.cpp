@@ -76,8 +76,14 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
             Particle p1;
             int      rv = 0;
             switch (method) {
-            case ADVECTION_METHOD::EULER: rv = _advectEuler(velocity, past0, dt, p1); break;
-            case ADVECTION_METHOD::RK4: rv = _advectRK4(velocity, past0, dt, p1); break;
+            case ADVECTION_METHOD::EULER:
+                rv = _advectEuler(velocity, past0, dt, p1);
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
+                break;
+            case ADVECTION_METHOD::RK4:
+                rv = _advectRK4(velocity, past0, dt, p1);
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
+                break;
             }
 
             if (rv == 0) {    // Advection successful!
@@ -239,8 +245,14 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
             Particle p1;
             int      rv = 0;
             switch (method) {
-            case ADVECTION_METHOD::EULER: rv = _advectEuler(velocity, p0, dt, p1); break;
-            case ADVECTION_METHOD::RK4: rv = _advectRK4(velocity, p0, dt, p1); break;
+            case ADVECTION_METHOD::EULER:
+                rv = _advectEuler(velocity, p0, dt, p1);
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
+                break;
+            case ADVECTION_METHOD::RK4:
+                rv = _advectRK4(velocity, p0, dt, p1);
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
+                break;
             }
             if (rv != 0) {    // Advection wasn't successful for some reason...
                 break;
@@ -325,6 +337,108 @@ int Advection::CalculateParticleValues(Field *scalar, bool skipNonZero)
     return 0;
 }
 
+
+int Advection::CalculateParticleIntegratedValues(Field *scalar, const bool skipNonZero, const float distScale, const std::vector<double> &integrateWithinVolumeMin,
+                                                 const std::vector<double> &integrateWithinVolumeMax)
+{
+    // For steady fields, we calculate values one stream at a time
+    if (scalar->IsSteady) {
+        if (scalar->LockParams() != 0) return PARAMS_ERROR;
+
+        _valueVarName = scalar->ScalarName;
+
+        for (auto &s : _streams) {
+            if (s.size() && !s[0].IsSpecial()) s[0].value = 0;
+
+            for (int i = 1; i < s.size(); i++) {
+                auto &prev = s[i - 1];
+                auto &p = s[i];
+                _calculateParticleIntegratedValue(p, prev, scalar, skipNonZero, distScale, integrateWithinVolumeMin, integrateWithinVolumeMax);
+            }
+        }
+
+        scalar->UnlockParams();
+    }
+    // For unsteady fields, we calculate values at one timestep at a time
+    else {
+        size_t mostSteps = 0;
+        for (auto &s : _streams) {
+            if (s.size() > mostSteps) mostSteps = s.size();
+        }
+
+        _valueVarName = scalar->ScalarName;
+
+        for (auto &s : _streams)
+            if (s.size() && !s[0].IsSpecial()) s[0].value = 0;
+
+        for (size_t i = 1; i < mostSteps; i++) {
+            for (auto &s : _streams) {
+                if (i < s.size()) {
+                    auto &prev = s[i - 1];
+                    auto &p = s[i];
+                    _calculateParticleIntegratedValue(p, prev, scalar, skipNonZero, distScale, integrateWithinVolumeMin, integrateWithinVolumeMax);
+                }
+            }    // end of a stream
+        }        // end of all steps
+    }
+
+    return 0;
+}
+
+void Advection::_calculateParticleIntegratedValue(Particle &p, const Particle &prev, const Field *scalarField, const bool skipNonZero, const float distScale,
+                                                  const std::vector<double> &integrateWithinVolumeMin, const std::vector<double> &integrateWithinVolumeMax) const
+{
+    // Skip this particle if it is a separator
+    if (p.IsSpecial()) return;
+    if (prev.IsSpecial()) {
+        p.value = 0;
+        return;
+    }
+
+    // Do not evaluate this particle if its value is non-zero
+    if (skipNonZero && p.value != 0.0f) return;
+
+    if (!_isParticleInsideVolume(p, integrateWithinVolumeMin, integrateWithinVolumeMax)) {
+        p.value = prev.value;
+        return;
+    }
+
+    float value;
+    int   rv = scalarField->GetScalar(p.time, p.location, value);
+    if (rv != 0) {    // If non-0, then outside the volume
+        p.value = prev.value;
+        return;
+    }
+
+    float dist = glm::distance(prev.location, p.location);
+    p.value = prev.value + value * dist * distScale;
+}
+
+void Advection::SetAllStreamValuesToFinalValue(int realNSamples)
+{
+    for (auto &s : _streams) {
+        float finalValue = 0;
+
+        int sampleCount = 0;
+        for (auto &p : s) {
+            if (!p.IsSpecial()) {
+                finalValue = p.value;
+                sampleCount++;
+            }
+            if (sampleCount == realNSamples) break;
+        }
+
+        int setCount = 0;
+        for (auto &p : s) {
+            if (!p.IsSpecial()) {
+                p.value = finalValue;
+                setCount++;
+            }
+            if (setCount == sampleCount) break;
+        }
+    }
+}
+
 int Advection::CalculateParticleProperties(Field *scalar)
 {
     // Test if this scalar property is already calculated.
@@ -380,6 +494,30 @@ int Advection::CalculateParticleProperties(Field *scalar)
     return 0;
 }
 
+void Advection::CalculateParticleHistogram(std::vector<double> &outBounds, std::vector<long> &bins)
+{
+    std::vector<float> samples;
+
+    for (const auto &s : _streams)
+        for (const auto &p : s)
+            if (!p.IsSpecial()) samples.push_back(p.value);
+
+    auto  bounds = std::minmax_element(samples.begin(), samples.end());
+    float minValue = *bounds.first;
+    float maxValue = *bounds.second;
+    float range = maxValue - minValue;
+
+    int nBins = bins.size();
+    assert(nBins != 0);
+    std::fill(bins.begin(), bins.end(), 0);
+
+    for (const auto &s : samples) { bins[std::min(nBins - 1, std::max(0, (int)((nBins - 1) * (s - minValue) / range)))]++; }
+
+    outBounds.resize(2);
+    outBounds[0] = minValue;
+    outBounds[1] = maxValue;
+}
+
 int Advection::_advectEuler(Field *velocity, const Particle &p0, double dt, Particle &p1) const
 {
     glm::vec3 v0;
@@ -393,18 +531,22 @@ int Advection::_advectEuler(Field *velocity, const Particle &p0, double dt, Part
 
 int Advection::_advectRK4(Field *velocity, const Particle &p0, double dt, Particle &p1) const
 {
-    glm::vec3 k1, k2, k3, k4;
-    double    dt_half = dt * 0.5;
-    float     dt32 = float(dt);              // glm is strict about data types (which is a good thing).
-    float     dt_half32 = float(dt_half);    // glm is strict about data types (which is a good thing).
-    int       rv;
+    glm::vec3    k1, k2, k3, k4;
+    const double dt_half = dt * 0.5;
+    const float  dt32 = float(dt);              // glm is strict about data types (which is a good thing).
+    const float  dt_half32 = float(dt_half);    // glm is strict about data types (which is a good thing).
+    int          rv = 0;
     rv = velocity->GetVelocity(p0.time, p0.location, k1);
+    _printNonZero(rv, __FILE__, __func__, __LINE__);
     if (rv != 0) return rv;
     rv = velocity->GetVelocity(p0.time + dt_half, p0.location + dt_half32 * k1, k2);
+    _printNonZero(rv, __FILE__, __func__, __LINE__);
     if (rv != 0) return rv;
     rv = velocity->GetVelocity(p0.time + dt_half, p0.location + dt_half32 * k2, k3);
+    _printNonZero(rv, __FILE__, __func__, __LINE__);
     if (rv != 0) return rv;
     rv = velocity->GetVelocity(p0.time + dt, p0.location + dt32 * k3, k4);
+    _printNonZero(rv, __FILE__, __func__, __LINE__);
     if (rv != 0) return rv;
     p1.location = p0.location + dt32 / 6.0f * (k1 + 2.0f * (k2 + k3) + k4);
     p1.time = p0.time + dt;
@@ -476,8 +618,11 @@ void Advection::RemoveParticleProperty(const std::string &varToRemove)
 
 void Advection::ResetParticleValues()
 {
-    for (auto &stream : _streams)
-        for (auto &part : stream) part.value = 0.0f;
+    for (auto &stream : _streams) {
+        std::for_each(stream.begin(), stream.end(), [](Particle &p) {
+            if (!p.IsSpecial()) p.value = 0.0f;
+        });
+    }
 }
 
 void Advection::SetXPeriodicity(bool isPeri, float min, float max)
@@ -527,6 +672,22 @@ float Advection::_applyPeriodic(float val, float min, float max) const
     }
 }
 
+void Advection::_printNonZero(int rtn, const char *file, const char *func, int line) const
+{
+#ifdef VPRINT
+    if (rtn != 0) {    // only print non-zero values
+        printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line);
+    }
+#endif
+}
+
 auto Advection::GetValueVarName() const -> std::string { return _valueVarName; }
 
 auto Advection::GetPropertyVarNames() const -> std::vector<std::string> { return _propertyVarNames; }
+
+bool Advection::_isParticleInsideVolume(const Particle &p, const std::vector<double> &min, const std::vector<double> &max)
+{
+    if (p.location[0] < min[0] || p.location[1] < min[1] || p.location[0] > max[0] || p.location[1] > max[1]) { return false; }
+    if (min.size() > 2 && (p.location[2] < min[2] || p.location[2] > max[2])) { return false; }
+    return true;
+}

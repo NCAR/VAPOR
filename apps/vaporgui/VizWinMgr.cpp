@@ -382,10 +382,8 @@ void VizWinMgr::Reinit()
     ParamsMgr * paramsMgr = _controlExec->GetParamsMgr();
     size_t      ts = _getAnimationParams()->GetCurrentTimestep();
 
-    vector<double> minExts, maxExts;
+    VAPoR::CoordType minExts, maxExts;
     dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
-    VAssert(minExts.size() == 3);
-    VAssert(maxExts.size() == 3);
 
     double scale[3];
     scale[0] = scale[1] = scale[2] = max(maxExts[0] - minExts[0], (maxExts[1] - minExts[1]));

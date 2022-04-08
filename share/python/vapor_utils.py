@@ -769,6 +769,7 @@ def GradFinDif(A,dx,dy,dz,order=6):
     
     return aux1,aux2,aux3 # return in user coordinate (x,y,z) order
 
+
 def Interp3d(A,PR,val):
     '''Method that vertically interpolates one 3D variable to a level determined by 
     another variable.  The second variable (PR) is typically pressure.  

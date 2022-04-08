@@ -1,5 +1,6 @@
 #include <vapor/ImageParams.h>
 #include <vapor/ResourcePath.h>
+#include <vapor/DataMgrUtils.h>
 
 using namespace VAPoR;
 
@@ -32,7 +33,19 @@ int ImageParams::Initialize()
     int rc = RenderParams::Initialize();
     if (rc < 0) return (rc);
     if (_initialized) return 0;
-    _initialized = true;
+
+    // RenderParams will initialize the Box class based on the dimensionality
+    // of the variable's supported by a particular renderer. The image renderer
+    // is unique in that it operates on 2D variables if they exist. If they
+    // don't we'll use any 3D variables to set up the Box correctly
+    //
+    for (int ndim = 2; ndim < 4; ndim++) {
+        size_t ts;
+        string varname;
+        if (DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, ndim, varname, ts)) {
+            if (InitBoxFromVariable(ts, varname)) break;
+        }
+    }
 
     // The image renderer behaves like a 2D renderer, but it doesn't operate
     // on any data variables. Make sure the box is planar.
@@ -43,6 +56,8 @@ int ImageParams::Initialize()
     SetImagePath(Wasp::GetSharePath("images/NaturalEarth.tms"));
     SetIsGeoRef(true);
     SetIgnoreTransparency(false);
+
+    _initialized = true;
 
     return (0);
 }

@@ -3,7 +3,7 @@
 #include <vapor/ParamsBase.h>
 #include <vapor/VAssert.h>
 
-PShowIf::PShowIf(std::string tag) : PWidgetWrapper(tag, _group = new PGroup) {}
+PShowIf::PShowIf(std::string tag) : PWidgetWrapper(tag, _group = new PGroup) { _test = std::unique_ptr<Test>(new TestLongEquals(getTag(), true)); }
 
 PShowIf *PShowIf::Equals(long l)
 {
@@ -14,6 +14,12 @@ PShowIf *PShowIf::Equals(long l)
 PShowIf *PShowIf::Equals(std::string s)
 {
     _test = std::unique_ptr<Test>(new TestStringEquals(getTag(), s));
+    return this;
+}
+
+PShowIf *PShowIf::DimensionEquals(unsigned int dim)
+{
+    _test = std::unique_ptr<Test>(new TestDimensionEquals(dim));
     return this;
 }
 
@@ -60,3 +66,11 @@ bool PShowIf::Helper::isShown() const { return _parent->evaluate() != _negate; }
 bool PShowIf::TestLongEquals::Evaluate(VAPoR::ParamsBase *params) const { return params->GetValueLong(_tag, 0) == _val; }
 
 bool PShowIf::TestStringEquals::Evaluate(VAPoR::ParamsBase *params) const { return params->GetValueString(_tag, "") == _val; }
+
+#include <vapor/RenderParams.h>
+
+bool PShowIf::TestDimensionEquals::Evaluate(VAPoR::ParamsBase *params) const
+{
+    VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams *>(params);
+    return rp->GetRenderDim() == _val;
+}

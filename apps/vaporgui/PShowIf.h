@@ -25,6 +25,7 @@ public:
     PShowIf(std::string tag);
     PShowIf *Equals(long l);
     PShowIf *Equals(std::string s);
+    PShowIf *DimensionEquals(unsigned int dim);
     //    PShowIf *Or(PShowIf *);
     PShowIf *Not();
     PShowIf *Then(PWidget *p);
@@ -65,6 +66,12 @@ private:
     struct TestStringEquals : public Test {
         const std::string _val;
         TestStringEquals(std::string tag, std::string val) : Test(tag), _val(val) {}
+        bool Evaluate(VAPoR::ParamsBase *params) const override;
+    };
+
+    struct TestDimensionEquals : public Test {
+        const long _val;
+        TestDimensionEquals(long val) : Test(""), _val(val) {}
         bool Evaluate(VAPoR::ParamsBase *params) const override;
     };
 

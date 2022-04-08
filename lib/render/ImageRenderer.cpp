@@ -159,6 +159,7 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
     // If we are terrain mapping the image or if both the image and the
     // data are geo-referenced
     //
+    double defaultZ = GetDefaultZ(dataMgr, myParams->GetCurrentTimestep());
     if (!myParams->GetHeightVariableName().empty() || (myParams->GetIsGeoRef() && !dataMgr->GetMapProjection().empty())) {
         // Get the width and height of the image texture. These
         // will be used to set the width and height of the mesh.
@@ -166,11 +167,11 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
         _getTexture(dataMgr);    // Ugh, this function is more than a get method...
         _vertsWidth = min(_maxResamplingResolution, _texWidth);
         _vertsHeight = min(_maxResamplingResolution, _texHeight);
-        rc = _getMeshDisplaced(dataMgr, _vertsWidth, _vertsHeight, minBoxReq, maxBoxReq);
+        rc = _getMeshDisplaced(dataMgr, _vertsWidth, _vertsHeight, minBoxReq, maxBoxReq, defaultZ);
     } else {
         _vertsWidth = 2;
         _vertsHeight = 2;
-        rc = _getMeshPlane(minBoxReq, maxBoxReq);
+        rc = _getMeshPlane(minBoxReq, maxBoxReq, defaultZ);
     }
 
     if (rc < 0) {
@@ -457,7 +458,7 @@ unsigned char *ImageRenderer::_getImage(GeoImage *geoimage, size_t ts, string pr
     return (tex);
 }
 
-int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei height, const vector<double> &minBox, const vector<double> &maxBox)
+int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei height, const vector<double> &minBox, const vector<double> &maxBox, double defaultZ)
 {
     // Construct the displaced (terrain following) grid using
     // a map projection, if specified.
@@ -491,10 +492,9 @@ int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei he
 
     int rc;
     if (myParams->GetIsGeoRef()) {
-        double defaultZ = GetDefaultZ(dataMgr, myParams->GetCurrentTimestep());
         rc = _getMeshDisplacedGeo(dataMgr, hgtGrid, width, height, defaultZ);
     } else {
-        rc = _getMeshDisplacedNoGeo(dataMgr, hgtGrid, width, height, minBox, maxBox);
+        rc = _getMeshDisplacedNoGeo(dataMgr, hgtGrid, width, height, minBox, maxBox, defaultZ);
     }
 
     if (hgtGrid) { delete hgtGrid; }
@@ -552,13 +552,12 @@ int ImageRenderer::_getMeshDisplacedGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei
             // extents are out side of extents for height variable, or if
             // height variable itself contains missing values.
             //
-            float deltaZ = 0.0;
+            float deltaZ = (float)defaultZ;
             if (hgtGrid) {
                 deltaZ = hgtGrid->GetValue(x, y, 0.0);
-                if (deltaZ == mv) deltaZ = 0.0;
+                if (deltaZ == mv) deltaZ = defaultZ;
             }
-
-            z = deltaZ + defaultZ;
+            z = deltaZ;
 
             verts[j * width * 3 + i * 3 + 2] = z;
         }
@@ -574,13 +573,12 @@ int ImageRenderer::_getMeshDisplacedGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei
 
 // Compute verts  for displayed, non-georeferenced image
 //
-int ImageRenderer::_getMeshDisplacedNoGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei width, GLsizei height, const vector<double> &minExt, const vector<double> &maxExt)
+int ImageRenderer::_getMeshDisplacedNoGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei width, GLsizei height, const vector<double> &minExt, const vector<double> &maxExt, double defaultZ)
 {
     // Delta between pixels in image in Image PCS coordinates
     //
     double deltax = (maxExt[0] - minExt[0]) / (double)(width - 1);
     double deltay = (maxExt[1] - minExt[1]) / (double)(height - 1);
-    double defaultZ = minExt[2];
 
     // Compute horizontal coordinates in Image PCS space. Ignore
     // vertical coordinate for now.
@@ -602,12 +600,12 @@ int ImageRenderer::_getMeshDisplacedNoGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsiz
             // extents are out side of extents for height variable, or if
             // height variable itself contains missing values.
             //
-            float deltaZ = 0;
+            float deltaZ = (float)defaultZ;
             if (hgtGrid) {
                 deltaZ = hgtGrid->GetValue(x, y, 0.0);
-                if (deltaZ == mv) deltaZ = 0.0;
+                if (deltaZ == mv) deltaZ = defaultZ;
             }
-            z = deltaZ + defaultZ;
+            z = deltaZ;
 
             verts[j * width * 3 + i * 3 + 2] = z;
         }
@@ -616,7 +614,7 @@ int ImageRenderer::_getMeshDisplacedNoGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsiz
     return (0);
 }
 
-int ImageRenderer::_getMeshPlane(const vector<double> &minBox, const vector<double> &maxBox)
+int ImageRenderer::_getMeshPlane(const vector<double> &minBox, const vector<double> &maxBox, double defaultZ)
 {
     // determine the corners of the textured plane.
     // If it's X-Y (orientation = 2)
@@ -636,19 +634,19 @@ int ImageRenderer::_getMeshPlane(const vector<double> &minBox, const vector<doub
     if (orient == 2) {    // X-Y
         verts[0] = minBox[0];
         verts[1] = minBox[1];
-        verts[2] = minBox[2];
+        verts[2] = defaultZ;
 
         verts[3] = maxBox[0];
         verts[4] = minBox[1];
-        verts[5] = minBox[2];
+        verts[5] = defaultZ;
 
         verts[6] = minBox[0];
         verts[7] = maxBox[1];
-        verts[8] = minBox[2];
+        verts[8] = defaultZ;
 
         verts[9] = maxBox[0];
         verts[10] = maxBox[1];
-        verts[11] = minBox[2];
+        verts[11] = defaultZ;
     } else {    // X-Z
         SetErrMsg("Orientation == %d  not supported", orient);
         return (-1);

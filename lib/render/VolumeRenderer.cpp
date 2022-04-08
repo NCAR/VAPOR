@@ -42,7 +42,7 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::s
 
     if (_needToSetDefaultAlgorithm()) {
         VolumeParams * vp = (VolumeParams *)GetActiveParams();
-        vector<double> minExt, maxExt;
+        CoordType      minExt, maxExt;
         vp->GetBox()->GetExtents(minExt, maxExt);
 
         Grid *grid = _dataMgr->GetVariable(vp->GetCurrentTimestep(), vp->GetVariableName(), vp->GetRefinementLevel(), vp->GetCompressionLevel(), minExt, maxExt);
@@ -191,17 +191,16 @@ void VolumeRenderer::_generateChunkedRenderMesh(const float C)
     vector<vec4> d;
     _nChunks = powf(ceil(C), 2);
     d.reserve(powf(ceil(C), 2) * 6);
-    float s = 2 / (float)C;
     float ts = 1 / (float)C;
     for (int yi = 0; yi < C; yi++) {
-        float y = 2 * yi / (float)C - 1;
+        float y = 2.f * yi / (float)C - 1.f;
         float ty = yi / (float)C;
-        float y2 = min(y + s, 1.0f);
+        float y2 = 2.f * (yi + 1) / (float)C - 1.f;
         float ty2 = min(ty + ts, 1.0f);
         for (int xi = 0; xi < C; xi++) {
-            float x = 2 * xi / (float)C - 1;
+            float x = 2.f * xi / (float)C - 1.f;
             float tx = xi / (float)C;
-            float x2 = min(x + s, 1.0f);
+            float x2 = 2.f * (xi + 1) / (float)C - 1.f;
             float tx2 = min(tx + ts, 1.0f);
 
             d.push_back(vec4(x, y, tx, ty));
@@ -322,19 +321,23 @@ int VolumeRenderer::_initializeAlgorithm()
 int VolumeRenderer::_loadData()
 {
     VolumeParams * RP = (VolumeParams *)GetActiveParams();
-    vector<double> minExt, maxExt;
-    RP->GetBox()->GetExtents(minExt, maxExt);
+    vector<double> minExtVec, maxExtVec;
+    RP->GetBox()->GetExtents(minExtVec, maxExtVec);
 
     CheckCache(_cache.var, RP->GetVariableName());
     CheckCache(_cache.ts, RP->GetCurrentTimestep());
     CheckCache(_cache.refinement, RP->GetRefinementLevel());
     CheckCache(_cache.compression, RP->GetCompressionLevel());
-    CheckCache(_cache.minExt, minExt);
-    CheckCache(_cache.maxExt, maxExt);
+    CheckCache(_cache.minExt, minExtVec);
+    CheckCache(_cache.maxExt, maxExtVec);
     CheckCache(_cache.ospMaxCells, RP->GetValueLong("osp_max_cells", 1));
     if (!_cache.needsUpdate) return 0;
 
-    Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression, _cache.minExt, _cache.maxExt);
+    CoordType minExt, maxExt;
+    Grid::CopyToArr3(_cache.minExt, minExt);
+    Grid::CopyToArr3(_cache.maxExt, maxExt);
+
+    Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression, minExt, maxExt);
     if (!grid) return -1;
 
     if (dynamic_cast<const UnstructuredGrid *>(grid) && !dynamic_cast<VolumeOSPRay *>(_algorithm)) {
@@ -369,7 +372,11 @@ int VolumeRenderer::_loadSecondaryData()
     if (!_cache.needsUpdate) return 0;
 
     if (_cache.useColorMapVar) {
-        Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.colorMapVar, _cache.refinement, _cache.compression, _cache.minExt, _cache.maxExt);
+        CoordType minExt, maxExt;
+        Grid::CopyToArr3(_cache.minExt, minExt);
+        Grid::CopyToArr3(_cache.maxExt, maxExt);
+
+        Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.colorMapVar, _cache.refinement, _cache.compression, minExt, maxExt);
         if (!grid) return -1;
         int ret = _algorithm->LoadSecondaryData(grid);
         delete grid;

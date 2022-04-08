@@ -25,6 +25,12 @@ public:
     //! Construct a unstructured grid sampling 2D scalar function
     //!
     //
+    UnstructuredGrid2D(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks, const int *vertexOnFace,
+                       const int *faceOnVertex, const int *faceOnFace,
+                       Location location,    // node,face, edge
+                       size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
+                       const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangleP> qtr);
+
     UnstructuredGrid2D(const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, const std::vector<size_t> &bs, const std::vector<float *> &blks,
                        const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                        Location location,    // node,face, edge
@@ -39,7 +45,7 @@ public:
 
     std::shared_ptr<const QuadTreeRectangleP> GetQuadTreeRectangle() const { return (_qtr); }
 
-    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
+    virtual DimsType GetCoordDimensions(size_t dim) const override;
 
     virtual size_t GetGeometryDim() const override;
 

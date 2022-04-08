@@ -44,7 +44,7 @@ void RenderManager::getNearFarDist(const double posVec[3], const double dirVec[3
     AnimationParams *ap = ((AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType()));
     size_t           ts = ap->GetCurrentTimestep();
 
-    vector<double> minExts, maxExts;
+    CoordType minExts, maxExts;
     dataStatus->GetActiveExtents(paramsMgr, _winName, ts, minExts, maxExts);
 
     for (int i = 0; i < 3; i++) camPosBox[i] = posVec[i];

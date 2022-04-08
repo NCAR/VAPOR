@@ -23,6 +23,7 @@
 #include <string>
 #include <cstring>
 #include <string>
+#include <float.h>
 #include "vapor/VAssert.h"
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
@@ -46,6 +47,8 @@ const string RenderParams::_variableNameTag = "VariableName";
 const string RenderParams::_useSingleColorTag = "UseSingleColor";
 const string RenderParams::_constantColorTag = "ConstantColor";
 const string RenderParams::_constantOpacityTag = "ConstantOpacity";
+const string RenderParams::CustomHistogramDataTag = "CustomHistogramData";
+const string RenderParams::CustomHistogramRangeTag = "CustomHistogramRange";
 const string RenderParams::_CompressionLevelTag = "CompressionLevel";
 const string RenderParams::_RefinementLevelTag = "RefinementLevel";
 const string RenderParams::_transferFunctionsTag = "MapperFunctions";
@@ -58,6 +61,11 @@ const string RenderParams::XSlicePlaneRotationTag = "XSlicePlaneRotation";
 const string RenderParams::YSlicePlaneRotationTag = "YSlicePlaneRotation";
 const string RenderParams::ZSlicePlaneRotationTag = "ZSlicePlaneRotation";
 const string RenderParams::SampleRateTag = "SampleRate";
+const string RenderParams::SliceOffsetTag = "SliceOffsetTag";
+const string RenderParams::SlicePlaneNormalXTag = "SlicePlaneNormalXTag";
+const string RenderParams::SlicePlaneNormalYTag = "SlicePlaneNormalYTag";
+const string RenderParams::SlicePlaneNormalZTag = "SlicePlaneNormalZTag";
+const string RenderParams::SlicePlaneOrientationModeTag = "SlicePlaneOrientationModeTag";
 
 #define REQUIRED_SAMPLE_SIZE 1000000
 
@@ -131,8 +139,6 @@ int RenderParams::Initialize()
 {
     if (_classInitialized) return (0);
 
-    vector<double> minExt, maxExt;
-
     //
     // Initialize box with bounds of a single variable. First check
     // variable returned by GetVariableName(). If not available,
@@ -140,36 +146,30 @@ int RenderParams::Initialize()
     //
     string varname = GetVariableName();
     size_t ts = 0;
-    if (!_dataMgr->VariableExists(ts, varname, 0, 0)) {
-        for (int ndim = 3; ndim > 0; ndim--) {
-            bool ok = DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, ndim, varname, ts);
-            if (ok)
-                break;
-            else
-                varname = "";
+    int    ndim = _maxDim;
+    bool   foundVar = false;
+    if (!varname.empty()) {
+        for (size_t ts = 0; ts < _dataMgr->GetNumTimeSteps() && !foundVar; ts++) {
+            if (!_dataMgr->VariableExists(ts, varname, 0, 0)) { foundVar = true; }
         }
     }
 
-    if (varname.empty()) return (0);
-
-    int rc = _dataMgr->GetVariableExtents(ts, varname, 0, 0, minExt, maxExt);
-    if (rc < 0) return (-1);
-
-    VAssert(minExt.size() == maxExt.size() && (minExt.size() == 2 || minExt.size() == 3));
-
-    bool planar = minExt.size() == 2;
-    if (planar) {
-        _Box->SetOrientation(VAPoR::Box::XY);
-    } else {
-        _Box->SetOrientation(VAPoR::Box::XYZ);
+    if (!foundVar) {
+        // Probably should have a _minDim here..
+        //
+        varname.clear();
+        for (; ndim > 0; ndim--) {
+            bool ok = DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, ndim, varname, ts);
+            if (ok) {
+                foundVar = true;
+                break;
+            }
+        }
     }
 
-    _Box->SetExtents(minExt, maxExt);
-    _Box->SetPlanar(planar);
+    if (!foundVar) return (0);
 
-    vector<double> origin(minExt.size());
-    for (int i = 0; i < minExt.size(); i++) { origin[i] = minExt[i] + (maxExt[i] - minExt[i]) * 0.5; }
-    _transform->SetOrigin(origin);
+    (void)InitBoxFromVariable(ts, varname);
 
     _classInitialized = true;
     return (0);
@@ -377,7 +377,7 @@ MapperFunction *RenderParams::GetMapperFunc(string varname)
     int    level = 0;
     int    lod = 0;
     if (_dataMgr->VariableExists(ts, varname, level, lod)) {
-        vector<double> minExt, maxExt;
+        CoordType minExt, maxExt;
         _Box->GetExtents(minExt, maxExt);
 
         vector<double> range;
@@ -850,3 +850,113 @@ vector<string> RenParamsContainer::GetNames() const
 }
 
 bool RenderParams::GetOrientable() const { return false; }
+
+vector<double> RenderParams::GetSlicePlaneRotation() const
+{
+    vector<double> v;
+    v.push_back(GetValueDouble(XSlicePlaneRotationTag, 0));
+    v.push_back(GetValueDouble(YSlicePlaneRotationTag, 0));
+    v.push_back(GetValueDouble(ZSlicePlaneRotationTag, 0));
+    return v;
+}
+
+vector<double> RenderParams::GetSlicePlaneOrigin() const
+{
+    vector<double> v;
+    v.push_back(GetXSlicePlaneOrigin());
+    v.push_back(GetYSlicePlaneOrigin());
+    v.push_back(GetZSlicePlaneOrigin());
+    return v;
+}
+
+vector<double> RenderParams::GetSlicePlaneNormal() const
+{
+    vector<double> v;
+    v.push_back(GetValueDouble(SlicePlaneNormalXTag, 0));
+    v.push_back(GetValueDouble(SlicePlaneNormalYTag, 0));
+    v.push_back(GetValueDouble(SlicePlaneNormalZTag, 1));
+
+    float l = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    if (abs(l) < FLT_EPSILON) l = 1;
+    v[0] /= l;
+    v[1] /= l;
+    v[2] /= l;
+
+    return v;
+}
+
+void RenderParams::SetXSlicePlaneOrigin(double xOrigin) { SetValueDouble(XSlicePlaneOriginTag, "Set origin of plane on X axis", xOrigin); }
+
+void RenderParams::SetYSlicePlaneOrigin(double yOrigin) { SetValueDouble(YSlicePlaneOriginTag, "Set origin of plane on Y axis", yOrigin); }
+
+void RenderParams::SetZSlicePlaneOrigin(double zOrigin) { SetValueDouble(ZSlicePlaneOriginTag, "Set origin of plane on Z axis", zOrigin); }
+
+double RenderParams::GetXSlicePlaneOrigin() const
+{
+    VAPoR::CoordType min, max;
+    GetBox()->GetExtents(min, max);
+    double defaultVal = (min[0] + max[0]) / 2.;
+    return GetValueDouble(XSlicePlaneOriginTag, defaultVal);
+}
+
+double RenderParams::GetYSlicePlaneOrigin() const
+{
+    VAPoR::CoordType min, max;
+    GetBox()->GetExtents(min, max);
+    double defaultVal = (min[1] + max[1]) / 2.;
+    return GetValueDouble(YSlicePlaneOriginTag, defaultVal);
+}
+
+double RenderParams::GetZSlicePlaneOrigin() const
+{
+    VAPoR::CoordType min, max;
+    GetBox()->GetExtents(min, max);
+    double defaultVal = (min[2] + max[2]) / 2.;
+    return GetValueDouble(ZSlicePlaneOriginTag, defaultVal);
+}
+
+bool RenderParams::InitBoxFromVariable(size_t ts, string varName)
+{
+    bool enabled = _ssave->GetEnabled();
+    _ssave->SetEnabled(false);
+
+    CoordType minExt, maxExt;
+    int       rc = _dataMgr->GetVariableExtents(ts, varName, 0, 0, minExt, maxExt);
+    if (rc < 0) {
+        _ssave->SetEnabled(enabled);
+        return (false);
+    }
+    _ssave->SetEnabled(enabled);
+
+    // Configure box as planar or volumetric.
+    //
+    // N.B.Not handling case where ndim == 1!!!
+    //
+    size_t ndim = _dataMgr->GetVarTopologyDim(varName);
+    bool   planar = ndim == 2;
+    if (planar) {
+        _Box->SetOrientation(VAPoR::Box::XY);
+    } else {
+        _Box->SetOrientation(VAPoR::Box::XYZ);
+    }
+
+    vector<double> minExtVec = {minExt[0], minExt[1], minExt[2]};
+    vector<double> maxExtVec = {maxExt[0], maxExt[1], maxExt[2]};
+    _Box->SetExtents(minExtVec, maxExtVec);
+    _Box->SetPlanar(planar);
+
+    vector<double> origin(minExt.size());
+    for (int i = 0; i < minExt.size(); i++) { origin[i] = minExt[i] + (maxExt[i] - minExt[i]) * 0.5; }
+    _transform->SetOrigin(origin);
+
+    SetValueDouble(XSlicePlaneOriginTag, "", origin[0]);
+    SetValueDouble(YSlicePlaneOriginTag, "", origin[1]);
+    SetValueDouble(ZSlicePlaneOriginTag, "", origin[2]);
+    SetValueDouble(SampleRateTag, "", 200);
+    SetValueDouble(SlicePlaneNormalZTag, "", 0);
+    SetValueDouble(SlicePlaneNormalYTag, "", 0);
+    SetValueDouble(SlicePlaneNormalZTag, "", 1);
+    SetValueLong(SlicePlaneOrientationModeTag, "", (int)SlicePlaneOrientationMode::Rotation);
+
+    return (true);
+}

@@ -22,6 +22,7 @@
 #define BOX_H
 
 #include <vapor/ParamsBase.h>
+#include <vapor/Grid.h>
 
 namespace VAPoR {
 
@@ -60,6 +61,7 @@ public:
     //!
     //
     virtual void SetExtents(const vector<double> &minExt, const vector<double> &maxExt);
+    virtual void SetExtents(const VAPoR::CoordType &minExt, const VAPoR::CoordType &maxExt);
 
     //! Get the box min and max extents
     //!
@@ -77,6 +79,7 @@ public:
     //! \sa IsPlanar(), GetOrientation(), SetExtents()
     //
     void GetExtents(vector<double> &minExt, vector<double> &maxExt) const;
+    void GetExtents(VAPoR::CoordType &minExt, VAPoR::CoordType &maxExt) const;
 
     //! Indicate whether or not the box is constrained to be planar.
     //!

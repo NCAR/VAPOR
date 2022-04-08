@@ -172,6 +172,23 @@ int NetCDFSimple::OpenRead(const NetCDFSimple::Variable &variable)
     return (fd);
 }
 
+int NetCDFSimple::Read(const size_t start[], const size_t count[], double *data, int fd) const
+{
+    std::map<int, int>::const_iterator itr;
+    if ((itr = _ovr_table.find(fd)) == _ovr_table.end()) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+    int varid = itr->second;
+
+    int rc = nc_get_vara_double(_ncid, varid, start, count, data);
+    if (rc != 0) {
+        SetErrMsg("nc_get_vara_double(%d, %d) : %s", _ncid, varid, nc_strerror(rc));
+        return (-1);
+    }
+    return (0);
+}
+
 int NetCDFSimple::Read(const size_t start[], const size_t count[], float *data, int fd) const
 {
     std::map<int, int>::const_iterator itr;

@@ -23,6 +23,12 @@ public:
     //! Construct a unstructured grid sampling Layered scalar function
     //!
     //
+    UnstructuredGrid3D(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks, const int *vertexOnFace,
+                       const int *faceOnVertex, const int *faceOnFace,
+                       Location location,    // node,face, edge
+                       size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
+                       const UnstructuredGridCoordless &zug);
+
     UnstructuredGrid3D(const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, const std::vector<size_t> &bs, const std::vector<float *> &blks,
                        const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                        Location location,    // node,face, edge
@@ -32,7 +38,7 @@ public:
     UnstructuredGrid3D() = default;
     virtual ~UnstructuredGrid3D() = default;
 
-    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
+    virtual DimsType GetCoordDimensions(size_t dim) const override;
 
     virtual size_t GetGeometryDim() const override;
 

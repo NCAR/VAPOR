@@ -2,6 +2,7 @@
 #include "vapor/FlowParams.h"
 #include "PWidgets.h"
 #include "PFlowRakeRegionSelector.h"
+#include "PFlowIntegrationRegionSelector.h"
 #include "PMultiVarSelector.h"
 #include "PConstantColorWidget.h"
 
@@ -10,6 +11,7 @@ typedef FlowParams FP;
 
 static RenderEventRouterRegistrar<FlowEventRouter> registrar(FlowEventRouter::GetClassType());
 const string                                       FlowEventRouter::SeedingTabName = "Seeding";
+const string                                       FlowEventRouter::IntegrationTabName = "Integration";
 
 FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, FlowParams::GetClassType())
 {
@@ -88,7 +90,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     }));
     
     AddAppearanceSubtab(new PGroup({
-        (new PTFEditor(RenderParams::_colorMapVariableNameTag))->ShowOpacityBasedOnParam("NULL", 1),
+        (new PTFEditor(RenderParams::_colorMapVariableNameTag)),
         new PSection("Appearance", {
             new PConstantColorWidget,
             new PEnumDropdown(FP::RenderTypeTag, {"Tubes", "Samples", "KLGWTH"}, {FP::RenderTypeStream, FP::RenderTypeSamples, FP::RenderTypeDensity}, "Render Type"),
@@ -126,6 +128,20 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             new PCheckbox("old_render", "Old Render Code (Regressing Testing)")
         }))->SetTooltip("Only accessible in debug build."),
 #endif
+    }));
+    
+    AddSubtab(IntegrationTabName, new PGroup({
+        new PSection("Integration Settings", {
+            new PCheckbox(FP::_doIntegrationTag, "Integrate particle values along trajectory"),
+            new PCheckbox(FP::_integrationSetAllToFinalValueTag, "Set entire stream value to integrated total"),
+            (new PVariableSelector(RenderParams::_colorMapVariableNameTag, "Scalar to Integrate"))->EnableBasedOnParam(FP::_doIntegrationTag),
+            (new PDoubleInput(FP::_integrationScalarTag, "Integration distance scale"))->EnableBasedOnParam(FP::_doIntegrationTag),
+        }),
+        (new PSection("Integration Region", {
+            new PFlowIntegrationRegionSelector1D(0),
+            new PFlowIntegrationRegionSelector1D(1),
+            new PFlowIntegrationRegionSelector1D(2),
+        }))->EnableBasedOnParam(FP::_doIntegrationTag),
     }));
 
     AddGeometrySubtab(new PGeometrySubtab);

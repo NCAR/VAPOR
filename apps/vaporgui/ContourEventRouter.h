@@ -14,7 +14,7 @@ class ContourEventRouter : public RenderEventRouterGUI {
 public:
     ContourEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
     bool          Supports2DVariables() const { return true; }
-    bool          Supports3DVariables() const { return false; }
+    bool          Supports3DVariables() const { return true; }
     static string GetClassType() { return VAPoR::ContourRenderer::GetClassType(); }
     string        GetType() const { return GetClassType(); }
 

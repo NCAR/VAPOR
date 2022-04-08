@@ -23,6 +23,13 @@ public:
     //! Construct a unstructured grid sampling 2D scalar function
     //!
     //
+    UnstructuredGridCoordless(const DimsType &vertexDims, const DimsType &faceDims, const DimsType &edgeDims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension,
+                              const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
+                              Location location,    // node,face, edge
+                              size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
+    : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, topology_dimension, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset)
+    {
+    }
     UnstructuredGridCoordless(const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, const std::vector<size_t> &bs,
                               const std::vector<float *> &blks, size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                               Location location,    // node,face, edge
@@ -34,7 +41,7 @@ public:
     UnstructuredGridCoordless() = default;
     virtual ~UnstructuredGridCoordless() = default;
 
-    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override { return (std::vector<size_t>(1, 1)); }
+    virtual DimsType GetCoordDimensions(size_t dim) const override { return (DimsType{1, 1, 1}); }
 
     static std::string GetClassType() { return ("UnstructuredCoordless"); }
     std::string        GetType() const override { return (GetClassType()); }

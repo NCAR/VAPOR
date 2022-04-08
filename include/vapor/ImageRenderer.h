@@ -91,11 +91,11 @@ private:
 
     // Compute _verts  for displayed, non-georeferenced image
     //
-    int _getMeshDisplacedNoGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei width, GLsizei height, const vector<double> &minExt, const vector<double> &maxExt);
+    int _getMeshDisplacedNoGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei width, GLsizei height, const vector<double> &minExt, const vector<double> &maxExt, double defaultZ);
 
-    int _getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei height, const vector<double> &minBox, const vector<double> &maxBox);
+    int _getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei height, const vector<double> &minBox, const vector<double> &maxBox, double defaultZ);
 
-    int _getMeshPlane(const vector<double> &minBox, const vector<double> &maxBox);
+    int _getMeshPlane(const vector<double> &minBox, const vector<double> &maxBox, double defaultZ);
 
     // Get the selected horizontal ROI in PCS data coordinates
     //

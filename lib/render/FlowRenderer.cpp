@@ -278,14 +278,16 @@ int FlowRenderer::_paintGL(bool fast)
 
             Progress::StartIndefinite("Performing flowline calculations");
             Progress::Update(0);
-            _advection.AdvectSteps(&_velocityField, deltaT, numOfSteps);
+            rv = _advection.AdvectSteps(&_velocityField, deltaT, numOfSteps);
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
 
             // If the advection is bi-directional
             if (_2ndAdvection) {
                 assert(deltaT > 0.0);
                 auto deltaT2 = deltaT * -1.0;
 
-                _2ndAdvection->AdvectSteps(&_velocityField, deltaT2, numOfSteps);
+                rv = _2ndAdvection->AdvectSteps(&_velocityField, deltaT2, numOfSteps);
+                _printNonZero(rv, __FILE__, __func__, __LINE__);
             }
             Progress::Finish();
         }
@@ -303,10 +305,45 @@ int FlowRenderer::_paintGL(bool fast)
     }
 
     if (!_coloringComplete) {
-        rv = _advection.CalculateParticleValues(&_colorField, true);
-        _printNonZero(rv, __FILE__, __func__, __LINE__);
-        if (_2ndAdvection)    // bi-directional advection
-            rv = _2ndAdvection->CalculateParticleValues(&_colorField, true);
+        bool integrate = params->GetValueLong(params->_doIntegrationTag, false);
+        bool setAllToFinalValue = params->GetValueLong(params->_integrationSetAllToFinalValueTag, false);
+
+        if (integrate) {
+            vector<double> integrationVolumeMin, integrationVolumeMax;
+            params->GetIntegrationBox()->GetExtents(integrationVolumeMin, integrationVolumeMax);
+            float distScale = params->GetValueDouble(params->_integrationScalarTag, 1.f);
+            rv = _advection.CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
+            if (_2ndAdvection)    // bi-directional advection
+                rv = _2ndAdvection->CalculateParticleIntegratedValues(&_colorField, true, distScale, integrationVolumeMin, integrationVolumeMax);
+
+            if (setAllToFinalValue) {
+                int numSamplesPerStream;
+                if (_cache_isSteady)
+                    numSamplesPerStream = _cache_steadyNumOfSteps;
+                else
+                    numSamplesPerStream = _cache_currentTS;
+                _advection.SetAllStreamValuesToFinalValue(numSamplesPerStream);
+                if (_2ndAdvection) _2ndAdvection->SetAllStreamValuesToFinalValue(numSamplesPerStream);
+            }
+
+            vector<double> histoRange;
+            vector<long>   histo(256);
+            _advection.CalculateParticleHistogram(histoRange, histo);
+
+            params->SetValueLongVec(RenderParams::CustomHistogramDataTag, "", histo);
+            params->SetValueDoubleVec(RenderParams::CustomHistogramRangeTag, "", histoRange);
+        } else {
+            rv = _advection.CalculateParticleValues(&_colorField, true);
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
+            if (_2ndAdvection)    // bi-directional advection
+                rv = _2ndAdvection->CalculateParticleValues(&_colorField, true);
+
+            if (params->GetValueDoubleVec(RenderParams::CustomHistogramRangeTag).size()) {
+                params->SetValueLongVec(RenderParams::CustomHistogramDataTag, "", {});
+                params->SetValueDoubleVec(RenderParams::CustomHistogramRangeTag, "", {});
+            }
+        }
         _printNonZero(rv, __FILE__, __func__, __LINE__);
         _coloringComplete = true;
     }
@@ -449,7 +486,7 @@ int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     bool  geom3d = rp->GetValueLong(FlowParams::RenderGeom3DTag, false);
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
-        vector<double> mind, maxd;
+        CoordType mind, maxd;
 
         // Need to find a non-empty variable from color mapping or velocity variables.
         std::string nonEmptyVarName = rp->GetColorMapVariableName();
@@ -856,6 +893,19 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
         }
     }
 
+    const auto doIntegration = params->GetValueLong(params->_doIntegrationTag, false);
+    const auto integrationSetAllToFinalValue = params->GetValueLong(params->_integrationSetAllToFinalValueTag, false);
+    const auto integrationDistScalar = params->GetValueDouble(params->_integrationScalarTag, false);
+    const auto integrationVolume = params->GetValueDoubleVec(params->_integrationBoxTag);
+    if (doIntegration != _cache_doIntegration || integrationSetAllToFinalValue != _cache_integrationSetAllToFinalValue || integrationDistScalar != _cache_integrationDistScalar
+        || integrationVolume != _cache_integrationVolume) {
+        _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+    _cache_doIntegration = doIntegration;
+    _cache_integrationSetAllToFinalValue = integrationSetAllToFinalValue;
+    _cache_integrationDistScalar = integrationDistScalar;
+    _cache_integrationVolume = integrationVolume;
+
     //
     // Now we branch into steady and unsteady cases, and treat them separately
     //
@@ -867,6 +917,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
                 if (_velocityStatus == FlowStatus::UPTODATE) _velocityStatus = FlowStatus::TIME_STEP_OOD;
             }
             if (params->GetSteadyNumOfSteps() != _cache_steadyNumOfSteps) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
+            if (params->GetSteadyNumOfSteps() < _cache_steadyNumOfSteps && doIntegration) _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
             _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
 
             if (_cache_currentTS != params->GetCurrentTimestep()) {
@@ -1063,8 +1114,8 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     VAssert(_cache_rake.size() == 6 || _cache_rake.size() == 4);
     int dim = _cache_rake.size() / 2;
     for (int i = 0; i < dim; i++) VAssert(_cache_rake[i * 2 + 1] >= _cache_rake[i * 2]);
-    std::vector<double> rakeExtMin(dim, 0);
-    std::vector<double> rakeExtMax(dim, 0);
+    CoordType rakeExtMin = {0.0, 0.0, 0.0};
+    CoordType rakeExtMax = {0.0, 0.0, 0.0};
     for (int i = 0; i < dim; i++) {
         rakeExtMin[i] = _cache_rake[i * 2];
         rakeExtMax[i] = _cache_rake[i * 2 + 1];
@@ -1231,9 +1282,9 @@ int FlowRenderer::_updateAdvectionPeriodicity(flow::Advection *advc)
     return 0;
 }
 
-void FlowRenderer::_printNonZero(int rtn, const char *file, const char *func, int line)
+void FlowRenderer::_printNonZero(int rtn, const char *file, const char *func, int line) const
 {
-#ifndef NDEBUG
+#ifdef VPRINT
     if (rtn != 0) {    // only print non-zero values
         printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line);
     }

@@ -174,6 +174,7 @@ public:
     //! \sa OpenRead()
     //! \sa NetCDF documentation for nc_get_vara
     //!
+    int Read(const size_t start[], const size_t count[], double *data, int fd = 0) const;
     int Read(const size_t start[], const size_t count[], float *data, int fd = 0) const;
     int Read(const size_t start[], const size_t count[], int *data, int fd = 0) const;
     int Read(const size_t start[], const size_t count[], char *data, int fd = 0) const;

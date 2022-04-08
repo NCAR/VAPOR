@@ -32,6 +32,7 @@ ViewpointTab::ViewpointTab(ControlExec *ce) : EventRouter(ce, ViewpointParams::G
 
 void ViewpointTab::_updateTab()
 {
-    if (isEnabled())
+    auto vp = NavigationUtils::GetActiveViewpointParams(_controlExec);
+    if (isEnabled() && vp)
         if (_pg) _pg->Update(GetStateParams());
 }

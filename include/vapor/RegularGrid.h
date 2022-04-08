@@ -40,6 +40,7 @@ public:
     //! equal to corresponding elements in \p minu.
     //!
     //
+    RegularGrid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, const CoordType &minu, const CoordType &maxu);
     RegularGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const std::vector<double> &minu, const std::vector<double> &maxu);
 
     RegularGrid() = default;
@@ -47,7 +48,7 @@ public:
 
     virtual size_t GetGeometryDim() const override { return (_geometryDim); }
 
-    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
+    virtual DimsType GetCoordDimensions(size_t dim) const override;
 
     static std::string GetClassType() { return ("Regular"); }
     std::string        GetType() const override { return (GetClassType()); }
@@ -98,7 +99,6 @@ public:
     private:
         DimsType  _index;
         DimsType  _dims;
-        size_t    _nDims;
         CoordType _minu;
         CoordType _delta;
         CoordType _coords;
@@ -119,12 +119,12 @@ protected:
     virtual void GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const override;
 
 private:
-    void _SetExtents(const std::vector<double> &minu, const std::vector<double> &maxu);
+    void _regularGrid(const CoordType &minu, const CoordType &maxu);
 
-    CoordType           _minu = {{0.0, 0.0, 0.0}};
-    CoordType           _maxu = {{0.0, 0.0, 0.0}};
-    size_t              _geometryDim;
-    CoordType           _delta;    // increment between grid points in user coords
+    CoordType _minu = {{0.0, 0.0, 0.0}};
+    CoordType _maxu = {{0.0, 0.0, 0.0}};
+    size_t    _geometryDim;
+    CoordType _delta;    // increment between grid points in user coords
 };
 };    // namespace VAPoR
 #endif

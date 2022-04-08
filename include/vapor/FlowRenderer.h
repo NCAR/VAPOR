@@ -76,6 +76,10 @@ private:
     FlowStatus         _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
     std::string        _cache_rakeBiasVariable;
     std::string        _cache_seedInputFilename;
+    bool                _cache_doIntegration;
+    bool                _cache_integrationSetAllToFinalValue;
+    float               _cache_integrationDistScalar;
+    std::vector<double> _cache_integrationVolume;
 
     // This Advection class is only used in bi-directional advection mode
     std::unique_ptr<flow::Advection> _2ndAdvection;
@@ -120,7 +124,7 @@ private:
                           double                       newTime) const;                  // New time to assign to particles
 
     // Print return code if it's non-zero and compiled in debug mode.
-    void _printNonZero(int rtn, const char *file, const char *func, int line);
+    void _printNonZero(int rtn, const char *file, const char *func, int line) const;
 
 };    // End of class FlowRenderer
 

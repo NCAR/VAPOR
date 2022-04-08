@@ -11,6 +11,7 @@ set (SRC
 	UnstructuredGrid2D.cpp
 	UnstructuredGrid3D.cpp
 	UnstructuredGridLayered.cpp
+	ArbitrarilyOrientedRegularGrid.cpp
 	NetCDFSimple.cpp
 	NetCDFCollection.cpp
 	NetCDFCFCollection.cpp
@@ -56,6 +57,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/UnstructuredGrid2D.h
 	${PROJECT_SOURCE_DIR}/include/vapor/UnstructuredGrid3D.h
 	${PROJECT_SOURCE_DIR}/include/vapor/UnstructuredGridLayered.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ArbitrarilyOrientedRegularGrid.h
 	${PROJECT_SOURCE_DIR}/include/vapor/NetCDFSimple.h
 	${PROJECT_SOURCE_DIR}/include/vapor/NetCDFCollection.h
 	${PROJECT_SOURCE_DIR}/include/vapor/NetCDFCFCollection.h

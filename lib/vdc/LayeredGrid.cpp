@@ -12,10 +12,7 @@
 using namespace std;
 using namespace VAPoR;
 
-LayeredGrid::LayeredGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords,
-                         const RegularGrid &zrg)
-: StructuredGrid(dims, bs, blks), _sg2d(vector<size_t>(dims.begin(), dims.begin() + 2), vector<size_t>(bs.begin(), bs.begin() + 2), vector<float *>(), xcoords, ycoords, vector<double>()), _zrg(zrg),
-  _xcoords(xcoords), _ycoords(ycoords)
+void LayeredGrid::_layeredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords, const RegularGrid &zrg)
 {
     VAssert(GetDimensions().size() == 3);
     VAssert(xcoords.size() == GetDimensions()[0]);
@@ -37,20 +34,39 @@ LayeredGrid::LayeredGrid(const vector<size_t> &dims, const vector<size_t> &bs, c
     _maxu[2] = (double)range[1];
 }
 
-vector<size_t> LayeredGrid::GetCoordDimensions(size_t dim) const
+LayeredGrid::LayeredGrid(const DimsType &dims, const DimsType &bs, const vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords, const RegularGrid &zrg)
+: StructuredGrid(dims, bs, blks), _sg2d(DimsType{dims[0], dims[1], 1}, DimsType{bs[0], bs[1], 1}, vector<float *>(), xcoords, ycoords, vector<double>()), _zrg(zrg), _xcoords(xcoords),
+  _ycoords(ycoords)
 {
+    _layeredGrid(dims, bs, blks, xcoords, ycoords, zrg);
+}
+
+LayeredGrid::LayeredGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv, const vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords,
+                         const RegularGrid &zrg)
+: StructuredGrid(dimsv, bsv, blks), _sg2d(vector<size_t>(dimsv.begin(), dimsv.begin() + 2), vector<size_t>(bsv.begin(), bsv.begin() + 2), vector<float *>(), xcoords, ycoords, vector<double>()),
+  _zrg(zrg), _xcoords(xcoords), _ycoords(ycoords)
+{
+    DimsType dims = {1, 1, 1};
+    DimsType bs = {1, 1, 1};
+    CopyToArr3(dimsv, dims);
+    CopyToArr3(bsv, bs);
+
+    _layeredGrid(dims, bs, blks, xcoords, ycoords, zrg);
+}
+
+DimsType LayeredGrid::GetCoordDimensions(size_t dim) const
+{
+    DimsType dims = {1, 1, 1};
+
     if (dim == 0) {
-        return (vector<size_t>(1, GetDimensions()[0]));
+        dims[0] = GetDimensions()[0];
     } else if (dim == 1) {
-        return (vector<size_t>(1, GetDimensions()[1]));
+        dims[0] = GetDimensions()[1];
     } else if (dim == 2) {
-        auto tmp = _zrg.GetDimensions();
-        auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        tmp2.resize(_zrg.GetNumDimensions());
-        return tmp2;
-    } else {
-        return (vector<size_t>(1, 1));
+        dims = _zrg.GetDimensions();
     }
+
+    return (dims);
 }
 
 void LayeredGrid::GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const
@@ -163,7 +179,7 @@ bool LayeredGrid::_insideGrid(const CoordType &coords, DimsType &indices, double
     z0 = zcoords[indices[2]];
     z1 = indices[2] < nz - 1 ? zcoords[indices[2] + 1] : z0;
 
-    wgts[2] = 1.0 - (coords[2] - z0) / (z1 - z0);
+    wgts[2] = z0 == z1 ? 1.0 : (1.0 - (coords[2] - z0) / (z1 - z0));
 
     return (true);
 }

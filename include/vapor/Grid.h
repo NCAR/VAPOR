@@ -79,11 +79,12 @@ public:
     //! until the class instance is destroyed.
     //!
     //! \param[in] topology_dimension Topological dimension of
-    //! grid: 2 or 3, for 2D or 3D, respectively. Grids with 2D
-    //! topology are described by 2D spatial coordiantes, while
-    //! grids with 2D topology are described by 3D spatial coordinates.
+    //! grid: 1, 2 or 3, for 1D, 2D or 3D, respectively. Grids with 2D
+    //! topology are composed of 2D polygons, while
+    //! grids with 3D topology are composed of 3D polyhedron
     //!
     Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, size_t topology_dimension);
+    Grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension);
 
     Grid();
     virtual ~Grid() = default;
@@ -94,14 +95,24 @@ public:
     //! the constructor. If the parameter has less than 3 values, then
     //! number 1 will be filled.
     //!
+    //! \sa GetGeometryDim(), GetTopologyDim()
+    //!
     const DimsType &GetDimensions() const { return _dims; }
 
     //! Return the useful number of dimensions of grid connectivity array
     //!
-    //! \param[out] dims The number of values of \p dims parameter provided to
+    //! \param[out] dims The number of non-unit components of \p dims parameter provided to
     //! the constructor.
     //!
-    size_t GetNumDimensions() const { return _nDims; }
+    size_t GetNumDimensions() const { return GetNumDimensions(_dims); }
+
+    //! Return the number of non-unit dimensions
+    //!
+    //! Return the number of non-unit dimensions in \p dims
+    //!
+    //! \param[in] dims
+    //!
+    static size_t GetNumDimensions(DimsType dims);
 
     //! Return the dimensions of the specified coordinate variable
     //!
@@ -113,7 +124,7 @@ public:
     //! a vector of length one with its single component equal to
     //! one is returned.
     //!
-    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const = 0;
+    virtual DimsType GetCoordDimensions(size_t dim) const = 0;
 
     virtual std::string GetType() const = 0;
 
@@ -128,10 +139,10 @@ public:
     //
     virtual size_t GetGeometryDim() const = 0;
 
-    virtual const DimsType &           GetNodeDimensions() const = 0;
-    virtual const size_t               GetNumNodeDimensions() const = 0;
-    virtual const DimsType &           GetCellDimensions() const = 0;
-    virtual const size_t               GetNumCellDimensions() const = 0;
+    virtual const DimsType &GetNodeDimensions() const = 0;
+    virtual const size_t    GetNumNodeDimensions() const = 0;
+    virtual const DimsType &GetCellDimensions() const = 0;
+    virtual const size_t    GetNumCellDimensions() const = 0;
 
     //! Return the ijk dimensions of grid in blocks
     //!
@@ -431,6 +442,11 @@ public:
     //! \sa GetInterpolationOrder()
     //!
     virtual void SetInterpolationOrder(int order);
+
+    //! Compute the dimensions of a rectangular region bounded
+    //! by \p min and \p max coordinates
+    //
+    static DimsType Dims(const DimsType &min, const DimsType &max);
 
     //! Return the user coordinates of a grid point
     //!
@@ -736,7 +752,7 @@ public:
     //! \note The value of returned is not used within the Grid class
     //! and any value can be stored here using SetMinAbs().
     //!
-    virtual std::vector<size_t> GetMinAbs() const { return (_minAbs); }
+    virtual DimsType GetMinAbs() const { return (_minAbs); }
 
     //! Set the absolute minimum grid coordinate
     //!
@@ -745,11 +761,7 @@ public:
     //! the offset to the first grid point in the mesh. The default is the
     //! zero vector
     //
-    virtual void SetMinAbs(const std::vector<size_t> &minAbs)
-    {
-        VAssert(minAbs.size() == this->GetNumDimensions());
-        _minAbs = minAbs;
-    }
+    virtual void SetMinAbs(const DimsType &minAbs) { _minAbs = minAbs; }
 
     //! Test whether a point is contained in a bounding rectangle
     //!
@@ -784,6 +796,7 @@ public:
 
         return ((left <= pt[0]) && (right >= pt[0]) && (top <= pt[1]) && (bottom >= pt[1]));
     }
+
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
 
@@ -975,7 +988,6 @@ public:
 
     protected:
         DimsType _dims;
-        size_t   _nDims;
         DimsType _index;
         DimsType _lastIndex;
     };
@@ -1050,7 +1062,6 @@ public:
 
     protected:
         DimsType _dims;
-        size_t   _nDims;
         DimsType _index;
         DimsType _lastIndex;
     };
@@ -1139,14 +1150,13 @@ public:
         ForwardIterator<T> &operator=(ForwardIterator<T> rhs);
         ForwardIterator<T> &operator=(ForwardIterator<T> &rhs) = delete;
 
-        bool operator==(const ForwardIterator<T> &rhs) const { return (_indexL == rhs._indexL); }
-        bool operator!=(const ForwardIterator<T> &rhs) { return (_indexL != rhs._indexL); }
+        bool operator==(const ForwardIterator<T> &rhs) const { return (_index == rhs._index); }
+        bool operator!=(const ForwardIterator<T> &rhs) { return (_index != rhs._index); }
 
         const ConstCoordItr &GetCoordItr() { return (_coordItr); }
 
         friend void swap(Grid::ForwardIterator<T> &a, Grid::ForwardIterator<T> &b)
         {
-            std::swap(a._ndims, b._ndims);
             std::swap(a._blks, b._blks);
             std::swap(a._dims3d, b._dims3d);
             std::swap(a._bdims3d, b._bdims3d);
@@ -1154,25 +1164,22 @@ public:
             std::swap(a._blocksize, b._blocksize);
             std::swap(a._coordItr, b._coordItr);
             std::swap(a._index, b._index);
-            std::swap(a._indexL, b._indexL);
-            std::swap(a._end_indexL, b._end_indexL);
+            std::swap(a._lastIndex, b._lastIndex);
             std::swap(a._xb, b._xb);
             std::swap(a._itr, b._itr);
             std::swap(a._pred, b._pred);
         }
 
     private:
-        size_t               _ndims;
         std::vector<float *> _blks;
         DimsType             _dims3d;
         DimsType             _bdims3d;
         DimsType             _bs3d;
         size_t               _blocksize;
         ConstCoordItr        _coordItr;
-        DimsType             _index;         // current index into grid
-        size_t               _indexL;        // current index into grid
-        size_t               _end_indexL;    // Last valid index
-        size_t               _xb;            // x index within a block
+        DimsType             _index;        // current index into grid
+        DimsType             _lastIndex;    // Last valid index
+        size_t               _xb;           // x index within a block
         float *              _itr;
         InsideBox            _pred;
     };
@@ -1263,15 +1270,14 @@ protected:
     }
 
 private:
-    DimsType             _dims;    // dimensions of grid arrays
-    size_t               _nDims;
+    DimsType             _dims;                   // dimensions of grid arrays
     DimsType             _bs = {{1, 1, 1}};       // dimensions of each block
     DimsType             _bdims = {{1, 1, 1}};    // dimensions (specified in blocks) of ROI
     std::vector<size_t>  _bsDeprecated;           // legacy API
     std::vector<size_t>  _bdimsDeprecated;        // legacy API
     std::vector<float *> _blks;
     std::vector<bool>    _periodic;    // periodicity of boundaries
-    std::vector<size_t>  _minAbs;      // Offset to start of grid
+    DimsType             _minAbs;      // Offset to start of grid
     size_t               _topologyDimension = 0;
     float                _missingValue = std::numeric_limits<float>::infinity();
     bool                 _hasMissing = false;
@@ -1281,7 +1287,7 @@ private:
     mutable CoordType    _minuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
     mutable CoordType    _maxuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
 
-    virtual void _getUserCoordinatesHelper(const std::vector<double> &coords, double &x, double &y, double &z) const;
+    void _grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension);
 };
 
 template void Grid::CopyToArr3<size_t>(const std::vector<size_t> &src, std::array<size_t, 3> &dst);

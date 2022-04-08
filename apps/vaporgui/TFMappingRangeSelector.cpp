@@ -3,6 +3,8 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/DataMgrUtils.h>
 
+using VAPoR::RenderParams;
+
 TFMappingRangeSelector::TFMappingRangeSelector(const std::string &variableNameTag) : _variableNameTag(variableNameTag)
 {
     AllowCustomRange();
@@ -27,7 +29,7 @@ void TFMappingRangeSelector::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
         min = range[0];
         max = range[1];
     } else {
-        _getDataRange(dataMgr, rParams, &min, &max);
+        _getDefaultRange(dataMgr, rParams, &min, &max);
     }
     SetRange(min, max);
 
@@ -35,9 +37,20 @@ void TFMappingRangeSelector::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
     SetValue(mapperRange[0], mapperRange[1]);
 }
 
+void TFMappingRangeSelector::_getDefaultRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
+{
+    if (r->GetValueDoubleVec(RenderParams::CustomHistogramRangeTag).size() == 2) {
+        auto range = r->GetValueDoubleVec(RenderParams::CustomHistogramRangeTag);
+        *min = range[0];
+        *max = range[1];
+    } else {
+        _getDataRange(d, r, min, max);
+    }
+}
+
 void TFMappingRangeSelector::_getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
 {
-    vector<double> minExt, maxExt;
+    VAPoR::CoordType minExt, maxExt;
     r->GetBox()->GetExtents(minExt, maxExt);
 
     std::vector<double> range;

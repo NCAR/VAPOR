@@ -16,7 +16,6 @@ public:
     virtual int                 OpenVariableRead(size_t ts, int level = 0, int lod = 0) override;
     virtual int                 CloseVariable(int fd) override;
     virtual int                 ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) override;
-    virtual int                 ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) override;
     virtual int                 GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const override;
     virtual bool                VariableExists(size_t ts, int reflevel, int lod) const override;
     virtual bool                GetBaseVarInfo(DC::BaseVar &var) const override;

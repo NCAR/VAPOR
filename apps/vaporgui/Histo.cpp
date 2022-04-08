@@ -59,6 +59,8 @@ void Histo::reset(int newNumBins)
         if (_above) delete[] _above;
         _below = nullptr;
         _above = nullptr;
+        _nBinsBelow = 0;
+        _nBinsAbove = 0;
     }
     for (int i = 0; i < _numBins; i++) _binArray[i] = 0;
     if (_below) memset(_below, 0, _nBinsBelow * sizeof(*_below));
@@ -76,6 +78,12 @@ void Histo::reset(int newNumBins, float mnData, float mxData)
     _maxMapData = mxData;
     if (_maxMapData < _minMapData) _maxMapData = _minMapData;
     _range = _maxMapData - _minMapData;
+}
+
+void Histo::setBins(const vector<long> &bins)
+{
+    VAssert(bins.size() == _numBins);
+    for (int i = 0; i < _numBins; i++) _binArray[i] = bins[i];
 }
 
 void Histo::addToBin(float val)
@@ -134,12 +142,12 @@ int Histo::getMaxBinSizeBetweenIndices(const int start, const int end) const
 {
     int maxBin = 0;
 
-    if (start < 0)
+    if (start < 0 && _below)
         for (int i = max(0, start + _nBinsBelow); i < min(end + _nBinsBelow, _nBinsBelow); i++) maxBin = maxBin < _below[i] ? _below[i] : maxBin;
 
     for (int i = max(start, 0); i < min(end, _numBins); i++) maxBin = maxBin < _binArray[i] ? _binArray[i] : maxBin;
 
-    if (end >= _numBins)
+    if (end >= _numBins && _above)
         for (int i = max(start - _numBins, 0); i < min(end - _numBins, _nBinsAbove); i++) maxBin = maxBin < _above[i] ? _above[i] : maxBin;
 
     if (maxBin == 0)
@@ -206,14 +214,19 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
     size_t         ts = rp->GetCurrentTimestep();
     int            refLevel = rp->GetRefinementLevel();
     int            lod = rp->GetCompressionLevel();
-    vector<double> minExts, maxExts;
-    rp->GetBox()->GetExtents(minExts, maxExts);
+    vector<double> minExtsVec, maxExtsVec;
+    rp->GetBox()->GetExtents(minExtsVec, maxExtsVec);
+
+    CoordType minExts = {0.0, 0.0, 0.0};
+    CoordType maxExts = {0.0, 0.0, 0.0};
+    Grid::CopyToArr3(minExtsVec, minExts);
+    Grid::CopyToArr3(maxExtsVec, maxExts);
 
     if (autoSetProperties) {
         MapperFunction *mf = rp->GetMapperFunc(varName);
         setProperties(mf->getMinMapValue(), mf->getMaxMapValue(), varName, ts);
-        _minExts = minExts;
-        _maxExts = maxExts;
+        _minExts = minExtsVec;
+        _maxExts = maxExtsVec;
         _lod = lod;
         _refLevel = refLevel;
     }
@@ -221,10 +234,12 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
     if (_below) {
         delete[] _below;
         _below = nullptr;
+        _nBinsBelow = 0;
     }
     if (_above) {
         delete[] _above;
         _above = nullptr;
+        _nBinsAbove = 0;
     }
 
     _getDataRange(varName, dm, rp, &_minData, &_maxData);
@@ -254,7 +269,7 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
     grid->SetInterpolationOrder(1);
 
     if (shouldUseSampling(varName, dm, rp))
-        populateSamplingHistogram(grid, minExts, maxExts);
+        populateSamplingHistogram(grid, minExtsVec, maxExtsVec);
     else
         populateIteratingHistogram(grid, calculateStride(varName, dm, rp));
 
@@ -397,7 +412,8 @@ void Histo::calculateMaxBinSize()
 
 void Histo::_getDataRange(const std::string &varName, VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
 {
-    vector<double> minExt, maxExt;
+    CoordType minExt = {0.0, 0.0, 0.0};
+    CoordType maxExt = {0.0, 0.0, 0.0};
     r->GetBox()->GetExtents(minExt, maxExt);
 
     std::vector<double> range;

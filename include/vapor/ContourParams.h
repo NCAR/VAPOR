@@ -73,7 +73,8 @@ public:
 
     //! \copydoc RenderParams::GetRenderDim()
     //
-    virtual size_t GetRenderDim() const override { return (2); }
+    virtual size_t GetRenderDim() const override { return _dataMgr->GetVarTopologyDim(GetVariableName()); }
+    virtual bool   GetOrientable() const override { return true; }
 
     //! \copydoc RenderParams::GetActualColorMapVariableName()
     virtual string GetActualColorMapVariableName() const override { return GetColorMapVariableName(); }
@@ -108,6 +109,8 @@ private:
     static const string _textEnabledTag;
     static const string _lockToTFTag;
     ParamsContainer *   _contours;
+
+    vector<CoordType> _slicePlaneQuad;
 
 public:
     class PARAMS_API Contours : public ParamsBase {

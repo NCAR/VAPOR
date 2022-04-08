@@ -70,6 +70,7 @@
 #include <vapor/DCBOV.h>
 #include <vapor/DCUGRID.h>
 
+
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
@@ -321,7 +322,7 @@ public:
 
 // Only the main program should call the constructor:
 //
-MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, QWidget *parent) : QMainWindow(parent)
+MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, string filesType, QWidget *parent) : QMainWindow(parent)
 {
     _initMembers();
 
@@ -392,7 +393,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
     //
     SettingsParams *sP = GetSettingsParams();
     _controlExec->SetCacheSize(sP->GetCacheMB());
-    _controlExec->SetNumThreads(sP->GetNumThreads());
 
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
@@ -465,11 +465,17 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
         for (auto &f : files) paths.push_back(f.toStdString());
 
         string fmt;
-        if (determineDatasetFormat(paths, &fmt)) {
-            loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
+
+        if (filesType == "auto") {
+            if (!determineDatasetFormat(paths, &fmt)) {
+                fmt = "";
+                MSG_ERR("Could not determine dataset format for command line parameters");
+            }
         } else {
-            MSG_ERR("Could not determine dataset format for command line parameters");
+            fmt = filesType;
         }
+
+        if (!fmt.empty()) loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
 
         _stateChangeCB();
     }
@@ -481,6 +487,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, Q
 
     if (interactive && GetSettingsParams()->GetAutoCheckForUpdates()) CheckForUpdates();
     if (interactive && GetSettingsParams()->GetAutoCheckForNotices()) CheckForNotices();
+
+    _controlExec->SetNumThreads(GetSettingsParams()->GetNumThreads());
 }
 
 
@@ -559,23 +567,21 @@ template<class T> bool MainForm::isDatasetValidFormat(const std::vector<std::str
 
 bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const
 {
-    if (isDatasetValidFormat<VDCNetCDF>(paths))
-        *fmt = "vdc";
-    else if (isDatasetValidFormat<DCWRF>(paths))
-        *fmt = "wrf";
-    else if (isDatasetValidFormat<DCMPAS>(paths))
-        *fmt = "mpas";
-    else if (isDatasetValidFormat<DCP>(paths))
-        *fmt = "dcp";
-    else if (isDatasetValidFormat<DCUGRID>(paths))
-        *fmt = "ugrid";
-    else if (isDatasetValidFormat<DCCF>(paths))
-        *fmt = "cf";
-    else if (isDatasetValidFormat<DCBOV>(paths))
-        *fmt = "bov";
-    else
-        return false;
-    return true;
+    vector<pair<string, bool>> formats = {
+        {"vdc", isDatasetValidFormat<VDCNetCDF>(paths)}, {"wrf", isDatasetValidFormat<DCWRF>(paths)}, {"mpas", isDatasetValidFormat<DCMPAS>(paths)}, {"dcp", isDatasetValidFormat<DCP>(paths)},
+        {"ugrid", isDatasetValidFormat<DCUGRID>(paths)}, {"cf", isDatasetValidFormat<DCCF>(paths)},   {"bov", isDatasetValidFormat<DCBOV>(paths)},
+    };
+
+    int nOk = 0;
+    for (auto &f : formats) {
+        if (f.second) {
+            nOk++;
+            *fmt = f.first;
+        }
+    }
+    if (nOk == 1) return true;
+    MyBase::SetErrMsg("Unable to confidently determine the dataset format. Please load it manually in the GUI");
+    return false;
 }
 
 void MainForm::CheckForUpdates()

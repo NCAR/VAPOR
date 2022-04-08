@@ -215,8 +215,8 @@ set (SRCS
 	PCopyRegionAnnotationWidget.h
 	PCopyRegionWidget.cpp
 	PCopyRegionWidget.h
-	PSliceOriginSelector.cpp
-	PSliceOriginSelector.h
+	PSliceController.cpp
+	PSliceController.h
 	PAnnotationColorbarWidget.cpp
 	PAnnotationColorbarWidget.h
 	PStringInput.cpp
@@ -237,6 +237,8 @@ set (SRCS
 	PButton.h
 	PFlowRakeRegionSelector.cpp
 	PFlowRakeRegionSelector.h
+    PFlowIntegrationRegionSelector.cpp
+    PFlowIntegrationRegionSelector.h
 	PMultiVarSelector.cpp
 	PMultiVarSelector.h
 	AppSettingsMenu.cpp
@@ -316,6 +318,7 @@ set (SRCS
 	VizSelectCombo.h
 	WireFrameEventRouter.h
 	Flags.h
+	QMontereySlider.h
 )
 
 set (UIS 

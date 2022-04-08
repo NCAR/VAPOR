@@ -283,9 +283,14 @@ int main(int argc, char **argv)
             ok = dccf.GetVarCoordVars(datanames[i], false, coordvars);
             VAssert(ok);
 
-            if (!dvar.GetHasMissing() || !compress) {
-                rc = vdc.DefineDataVar(dvar.GetName(), dimnames, coordvars, dvar.GetUnits(), dvar.GetXType(), compress);
-            } else {
+            // Don't compress the variable if it is also a coordinate variable
+            // Compression errors in coordinate variables can lead to
+            // non-conformant meshes
+            //
+            bool doCompress = compress;
+            if (find(coordnames.begin(), coordnames.end(), datanames[i]) != coordnames.end()) { doCompress = false; }
+
+            if (dvar.GetHasMissing() && doCompress) {
                 vector<string> sdimnames;
                 bool           ok = dccf.GetVarDimNames(datanames[i], true, sdimnames);
                 VAssert(ok);
@@ -294,6 +299,13 @@ int main(int argc, char **argv)
                 maskvar(sdimnames, maskvar_name);
 
                 rc = vdc.DefineDataVar(dvar.GetName(), dimnames, coordvars, dvar.GetUnits(), dvar.GetXType(), dvar.GetMissingValue(), maskvar_name);
+
+            } else if (dvar.GetHasMissing() && !doCompress) {
+                rc = vdc.DefineDataVar(dvar.GetName(), dimnames, coordvars, dvar.GetUnits(), dvar.GetXType(), dvar.GetMissingValue(), "");
+
+
+            } else {
+                rc = vdc.DefineDataVar(dvar.GetName(), dimnames, coordvars, dvar.GetUnits(), dvar.GetXType(), doCompress);
             }
 
             if (rc < 0) { return (1); }

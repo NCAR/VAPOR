@@ -44,17 +44,11 @@ DCCF::DCCF()
     _dataVarsMap.clear();
     _auxVarsMap.clear();
     _meshMap.clear();
-    _derivedVars.clear();
 }
 
 DCCF::~DCCF()
 {
     if (_ncdfc) delete _ncdfc;
-
-    for (int i = 0; i < _derivedVars.size(); i++) {
-        if (_derivedVars[i]) delete _derivedVars[i];
-    }
-    _derivedVars.clear();
 }
 
 int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options)
@@ -669,10 +663,6 @@ int DCCF::initDataVars(NetCDFCFCollection *ncdfc, std::map<string, DC::DataVar> 
     // For each variable add a member to dataVarsMap
     //
     for (auto varName : vars) {
-        // A variable can't be both a data variable and a coordinate variable
-        //
-        auto itr = _coordVarsMap.find(varName);
-        if (itr != _coordVarsMap.end()) continue;
 
         // variable type must be float or int
         //

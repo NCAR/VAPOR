@@ -393,21 +393,62 @@ public:
     //! Return whether a renderer can be oriented - IE, can this renderer be rotated about an origin point?
     virtual bool GetOrientable() const;
 
+    //! Return the renderer's 3 axis rotation for creating ArbitrarilyOrientedRegularGrids.
+    vector<double> GetSlicePlaneRotation() const;
+
+    //! Return the renderer's 3 axis origin for creating ArbitrarilyOrientedRegularGrids.
+    vector<double> GetSlicePlaneOrigin() const;
+
+    //! Return the renderer's 3 axis normal for creating ArbitrarilyOrientedRegularGrids.
+    vector<double> GetSlicePlaneNormal() const;
+
+    //! Return the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
+    double GetXSlicePlaneOrigin() const;
+
+    //! Return the renderer's origin value on the Y axis for creating ArbitrarilyOrientedRegularGrids.
+    double GetYSlicePlaneOrigin() const;
+
+    //! Return the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
+    double GetZSlicePlaneOrigin() const;
+
+    //! Set the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \param[in] Value to use for the plane origin on the X axis.
+    void SetXSlicePlaneOrigin(double xOrigin);
+
+    //! Set the renderer's origin value on the Y axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \param[in] Value to use for the plane origin on the Y axis.
+    void SetYSlicePlaneOrigin(double yOrigin);
+
+    //! Set the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \param[in] Value to use for the plane origin on the Z axis.
+    void SetZSlicePlaneOrigin(double zOrigin);
+
+    //! Set the values for a quad that encloses an arbitrary user-defined plane
+    //! \param[in] A std::vector<CoordType> of size 4, containing the locations of four vertices.
+    void SetSlicePlaneQuad(const std::vector<CoordType> &quad) { _slicePlaneQuad = quad; }
+
+    //! Return the values for a quad that encloses an arbitrary user-defined plane
+    //! \retval A std::vector<CoordType> of size 4, containing the locations of four vertices.
+    std::vector<CoordType> GetSlicePlaneQuad() const { return _slicePlaneQuad; }
+
 protected:
     DataMgr *_dataMgr;
     int      _maxDim;
 
+    bool InitBoxFromVariable(size_t ts, string varName);
+
     virtual bool GetUseSingleColorDefault() const { return false; }
 
 private:
-    void             _init();
-    void             _calculateStride(string varName);
-    int              _stride;
-    ParamsContainer *_TFs;
-    Box *            _Box;
-    ColorbarPbase *  _Colorbar;
-    Transform *      _transform;
-    bool             _classInitialized;    //
+    void                   _init();
+    void                   _calculateStride(string varName);
+    int                    _stride;
+    ParamsContainer *      _TFs;
+    Box *                  _Box;
+    ColorbarPbase *        _Colorbar;
+    Transform *            _transform;
+    bool                   _classInitialized;    //
+    std::vector<CoordType> _slicePlaneQuad;
 
     static const string _EnabledTag;
     static const string _histoScaleTag;
@@ -436,6 +477,8 @@ public:
     static const string _yFieldVariableNameTag;
     static const string _zFieldVariableNameTag;
     static const string _constantOpacityTag;
+    static const string CustomHistogramDataTag;
+    static const string CustomHistogramRangeTag;
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's
@@ -471,6 +514,16 @@ public:
     //! this string identifies the parameter for how many samples
     //! to take along that vector.
     static const string SampleRateTag;
+
+    static const string SliceOffsetTag;
+    static const string SlicePlaneNormalXTag;
+    static const string SlicePlaneNormalYTag;
+    static const string SlicePlaneNormalZTag;
+    static const string SlicePlaneOrientationModeTag;
+    enum class SlicePlaneOrientationMode {
+        Rotation = 0,
+        Normal = 1,
+    };
 };
 
 //////////////////////////////////////////////////////////////////////////
