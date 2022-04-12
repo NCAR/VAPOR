@@ -20,7 +20,7 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce) : RenderE
             new PColorMapVariableSelector
         }),
         new PFidelitySection,
-        new POpenVariableMetadataSection
+        new POpenVariableMetadataWidget
     }));
     
     AddAppearanceSubtab(new PGroup({

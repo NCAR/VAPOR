@@ -18,7 +18,7 @@ ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
             new PHeightVariableSelector
         }),
         new PFidelitySection,
-        new POpenVariableMetadataSection
+        new POpenVariableMetadataWidget
     }));
     
     AddAppearanceSubtab(new PSection("Image", {

@@ -19,7 +19,7 @@ WireFrameEventRouter::WireFrameEventRouter(QWidget *parent, ControlExec *ce) : R
             new PHeightVariableSelector
         }),
         new PFidelitySection,
-        new POpenVariableMetadataSection
+        new POpenVariableMetadataWidget
     }));
     
     AddAppearanceSubtab(new PGroup({

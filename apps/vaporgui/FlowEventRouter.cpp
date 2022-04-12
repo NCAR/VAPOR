@@ -27,7 +27,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             new PColorMapVariableSelector,
         }),
         new PFidelitySection,
-        new POpenVariableMetadataSection
+        new POpenVariableMetadataWidget
     }));
     
     _seedingTab =

@@ -17,7 +17,7 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
             new PScalarVariableSelector
         }),
         new PFidelitySection,
-        new POpenVariableMetadataSection
+        new POpenVariableMetadataWidget
     }));
     
     AddAppearanceSubtab(new PGroup({

@@ -17,7 +17,7 @@ TwoDDataEventRouter::TwoDDataEventRouter(QWidget *parent, ControlExec *ce) : Ren
             new PHeightVariableSelector
         }),
         new PFidelitySection,
-        new POpenVariableMetadataSection
+        new POpenVariableMetadataWidget
     }));
     
     AddAppearanceSubtab((new PTFEditor));

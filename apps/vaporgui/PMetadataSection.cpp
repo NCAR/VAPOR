@@ -17,7 +17,7 @@ namespace {
     std::vector<std::string> axisLookup  = { "X", "Y", "Z", "T"};
 }
 
-POpenVariableMetadataSection::POpenVariableMetadataSection()
+POpenVariableMetadataWidget::POpenVariableMetadataWidget()
 : PSection("Metadata", { new POpenVariableMetadataTree() } ) {}
 
 PFullVariableMetadataSection::PFullVariableMetadataSection()

@@ -26,10 +26,10 @@ const std::string PMetadataSection::MetadataCLevelTag   = "metadataCLevelTag";
 const std::string PMetadataSection::MetadataTimestepTag = "metadataTimestepTag";
 
 POpenVariableMetadataWidget::POpenVariableMetadataWidget()
-: PWidget("", _varTree = new POpenVariableMetadataTree())
+: PWidget("", _varTree = new VOpenVariableMetadataTree())
 {}
 
-void POpenVariableMetadataSection::updateGUI() const {
+void POpenVariableMetadataWidget::updateGUI() const {
     _varTree->Update(getParams(),nullptr,getDataMgr());
 }
 
@@ -38,7 +38,7 @@ PMetadataSection::PMetadataSection(VAPoR::ControlExec* ce)
                                            {
                                                 _metadataDataset = new PStringDropdown(SelectedDatasetTag, {}, "Dataset"),
                                                 (_metadataTimestep = new PIntegerSliderEdit(MetadataTimestepTag, "Generate metadata\nfor timestep #"))->AllowUserRange(false),
-                                                _varTree = new VFullDataVariableMetadataTree(),
+                                                _varTree = new VVariableMetadataTree(),
                                                 _coordTree = new VCoordinateVariableMetadataTree(),
                                                 _globalTree = new VGlobalAttributeMetadataTree(),
                                             })
@@ -46,7 +46,7 @@ PMetadataSection::PMetadataSection(VAPoR::ControlExec* ce)
     VAssert(ce != nullptr);
     _ce = ce;
 
-    connect(_varTree, &VFullDataVariableMetadataTree::_timestepRejected, this, &PMetadataSection::updateGUI);
+    connect(_varTree, &VVariableMetadataTree::_timestepRejected, this, &PMetadataSection::updateGUI);
 }
 
 void PMetadataSection::updateGUI() const {
@@ -120,7 +120,7 @@ void VMetadataTree::Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::Da
         _generateMetadata(qvar);
 }
 
-void VMetadataTree::_generateMetadata(const QString& qvar) const {
+void VVariableMetadataTree::_generateMetadata(const QString& qvar) const {
     std::vector<double> range;
     int rc = _dm->GetDataRange(_ts, qvar.toStdString(), -1, -1, range);
     if (rc < 0) return;
@@ -190,7 +190,7 @@ bool VMetadataTree::_checkNeedUpdate(VAPoR::ParamsBase* p, VAPoR::DataMgr* dm) {
     return needsUpdate;
 }
 
-void VMetadataTree::_generateCoordVarInfo(QTreeWidgetItem* parent, const QString& qCoordVar) const {
+void VVariableMetadataTree::_generateCoordVarInfo(QTreeWidgetItem* parent, const QString& qCoordVar) const {
     VAPoR::DC::CoordVar coordVar;
     if (!_dm->GetCoordVarInfo(qCoordVar.toStdString(), coordVar)) return;
 
@@ -211,7 +211,7 @@ void VMetadataTree::_generateCoordVarInfo(QTreeWidgetItem* parent, const QString
     new QTreeWidgetItem(coord, {"Units:", QString::fromStdString(coordVar.GetUnits())});
 }
 
-void VMetadataTree::_generateAttributeInfo(QTreeWidgetItem* parent, const VAPoR::DC::BaseVar baseVar) const {
+void VVariableMetadataTree::_generateAttributeInfo(QTreeWidgetItem* parent, const VAPoR::DC::BaseVar baseVar) const {
     QTreeWidgetItem* attrs = new QTreeWidgetItem(parent, {"Attributes"});
     std::map<std::string, VAPoR::DC::Attribute> attributes = baseVar.GetAttributes();
     std::map<std::string, VAPoR::DC::Attribute>::iterator it;
@@ -241,11 +241,11 @@ void VMetadataTree::_generateAttributeInfo(QTreeWidgetItem* parent, const VAPoR:
     }
 }
 
-POpenVariableMetadataTree::POpenVariableMetadataTree() : VMetadataTree() {
+VOpenVariableMetadataTree::VOpenVariableMetadataTree() : VVariableMetadataTree() {
     setTabText(0,"Open Variable Metadata");
 }
 
-void POpenVariableMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p) const {
+void VOpenVariableMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p) const {
     VAPoR::RenderParams* rp = dynamic_cast<VAPoR::RenderParams*>(p);
     vars.clear();
     vars.push_back( rp->GetVariableName() );
@@ -258,17 +258,17 @@ void POpenVariableMetadataTree::_gatherBranches(std::vector<std::string> &vars, 
     vars.insert(vars.end(), auxs.begin(), auxs.end());
 }
 
-VFullDataVariableMetadataTree::VFullDataVariableMetadataTree() : VMetadataTree() {
+VVariableMetadataTree::VVariableMetadataTree() : VMetadataTree() {
     setTabText(0,"Variable Metadata");
 }
 
-void VFullDataVariableMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p) const {
+void VVariableMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p) const {
     vars.clear();
     std::vector<std::string> v = _dm->GetDataVarNames();
     vars.insert(vars.end(),v.begin(),v.end());
 }
 
-VCoordinateVariableMetadataTree::VCoordinateVariableMetadataTree() : VMetadataTree() {
+VCoordinateVariableMetadataTree::VCoordinateVariableMetadataTree() : VVariableMetadataTree() {
     setTabText(0,"Coordinate Variable Metadata");
 }
 
