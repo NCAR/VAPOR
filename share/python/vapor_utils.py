@@ -6,8 +6,8 @@
     CurlFinDiff - calculate curl using finite differences
     DivFinDiff - calculate divergence using finite differences
     GradFinDiff - calculate gradient using finite differences.
-    interp3d - interpolate a 3D variable to a vertical level surface of another variable.
-    vector_rotate - rotate and scale vector field for lat-lon grid.    
+    Interp3d - interpolate a 3D variable to a vertical level surface of another variable.
+    VectorRotate - rotate and scale vector field for lat-lon grid.    
 """
 
 import numpy as np
@@ -316,9 +316,9 @@ def DerivFinDiff(a,axis,dx,order=6):
         if (s[2] < 2):
             return np.zeros_like(a)
         if (s[2] < 4):
-            return deriv_findiff2(a,axis,dx)
+            return _deriv_findiff2(a,axis,dx)
         if (s[2] < 6):
-            return deriv_findiff4(a,axis,dx)
+            return _deriv_findiff4(a,axis,dx)
 
         #forward differences near the first boundary
         for i in range(3):
@@ -339,9 +339,9 @@ def DerivFinDiff(a,axis,dx,order=6):
         if (s[1] < 2):
             return np.zeros_like(a)
         if (s[1] < 4):
-            return deriv_findiff2(a,axis,dx)
+            return _deriv_findiff2(a,axis,dx)
         if (s[1] < 6):
-            return deriv_findiff4(a,axis,dx)
+            return _deriv_findiff4(a,axis,dx)
 
         for i in range(3):
             aprime[:,i,:] = (-11*a[:,i,:]+18*a[:,i+1,:]-9*a[:,i+2,:]+2*a[:,i+3,:]) /(6*dx)     #forward differences near the first boundary
@@ -359,9 +359,9 @@ def DerivFinDiff(a,axis,dx,order=6):
         if (s[0] < 2):
             return np.zeros_like(a)
         if (s[0] < 4):
-            return deriv_findiff2(a,axis,dx)
+            return _deriv_findiff2(a,axis,dx)
         if (s[0] < 6):
-            return deriv_findiff4(a,axis,dx)
+            return _deriv_findiff4(a,axis,dx)
 
         for i in range(3):
             aprime[i,:,:] = (-11*a[i,:,:]+18*a[i+1,:,:]-9*a[i+2,:,:]+2*a[i+3,:,:]) /(6*dx)     #forward differences near the first boundary
@@ -719,8 +719,8 @@ def DivFinDiff(M,N,P,dx,dy,dz,order=6):
 
     """
 
-    return deriv_findiff(P,0,dz,order) + \
-        deriv_findiff(N,1,dy,order) + deriv_findiff(M,2,dx,order)
+    return DerivFinDiff(P,0,dz,order) + \
+        DerivFinDiff(N,1,dy,order) + DerivFinDiff(M,2,dx,order)
 
 
 def GradFinDif(A,dx,dy,dz,order=6):
@@ -769,13 +769,14 @@ def GradFinDif(A,dx,dy,dz,order=6):
     
     return aux1,aux2,aux3 # return in user coordinate (x,y,z) order
 
-# Method that vertically interpolates one 3D variable to a level determined by 
-# another variable.  The second variable (PR) is typically pressure.  
-# The second variable must decrease
-# as a function of z (elevation).  The returned value is a 2D variable having
-# values interpolated to the surface defined by PR = val
-# Sweep array from bottom to top
-def interp3d(A,PR,val):
+
+def Interp3d(A,PR,val):
+    '''Method that vertically interpolates one 3D variable to a level determined by 
+    another variable.  The second variable (PR) is typically pressure.  
+    The second variable must decrease
+    as a function of z (elevation).  The returned value is a 2D variable having
+    values interpolated to the surface defined by PR = val
+    Sweep array from bottom to top'''
     s = np.shape(PR)    #size of the input arrays
     ss = [s[1],s[2]] # shape of 2d arrays
     interpVal = np.empty(ss,np.float32)
@@ -796,11 +797,11 @@ def interp3d(A,PR,val):
     interpVal[LEVNEED] = A[s[0]-1,LEVNEED]
     return interpVal
 
-def vector_rotate(angleRad, latDeg, u, v):
+def VectorRotate(angleRad, latDeg, u, v):
     '''Rotate and scale vectors u,v for integration on
     lon-lat grid.
     Calling sequence: 
-    rotfield=vector_rotate(angleRad, latDeg, u,v)
+    rotfield=VectorRotate(angleRad, latDeg, u,v)
     Where:  
     angleRad: 2D var, rotation from East in radians
     latDeg: 2D var, latitude in degrees
@@ -813,8 +814,6 @@ def vector_rotate(angleRad, latDeg, u, v):
     vmod = -np.sin(angleRad)*u + np.cos(angleRad)*v
     umod = umod/np.cos(latDeg*math.pi/180.)
     return umod,vmod
-
-
 
 def mag3d(a1,a2,a3): 
     '''Calculate the magnitude of a 3-vector.

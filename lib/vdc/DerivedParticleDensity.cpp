@@ -144,7 +144,6 @@ void DerivedParticleDensity::compute(Grid *inGrid, float *output, int xd, int yd
     delete[] bins;
 }
 
-int DerivedParticleDensity::ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return ReadRegion(fd, min, max, region); }
 
 int DerivedParticleDensity::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {

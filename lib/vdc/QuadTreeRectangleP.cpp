@@ -19,7 +19,7 @@ QuadTreeRectangleP::QuadTreeRectangleP(float left, float top, float right, float
     int nthreads = 1;
 #pragma omp parallel
     {
-        nthreads = omp_get_num_threads();
+        if (omp_get_thread_num() == 0) nthreads = omp_get_num_threads();
     }
 
     // We split the quadtree along the X-axis to create one subtree for

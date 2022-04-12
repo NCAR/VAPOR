@@ -20,6 +20,7 @@ public:
     //! @copydoc VSliderEdit::SetRange
     PDoubleSliderEdit *SetRange(double min, double max);
     PDoubleSliderEdit *AllowUserRange(bool allowed = true);
+    PDoubleSliderEdit *AllowDynamicUpdate();
 
 protected:
     void updateGUI() const override;
@@ -29,6 +30,9 @@ private:
     void valueChangedIntermediate(double v);
     void minimumChanged(double v);
     void maximumChanged(double v);
+
+private slots:
+    void _enableDynamicUpdate(bool enabled);
 };
 
 //! \class PIntegerSliderEdit
@@ -45,6 +49,7 @@ public:
     //! @copydoc VSliderEdit::SetRange
     PIntegerSliderEdit *SetRange(int min, int max);
     PIntegerSliderEdit *AllowUserRange(bool allowed = true);
+    PIntegerSliderEdit *AllowDynamicUpdate();
 
 protected:
     void updateGUI() const override;
@@ -54,4 +59,7 @@ private:
     void valueChangedIntermediate(int v);
     void minimumChanged(int v);
     void maximumChanged(int v);
+
+private slots:
+    void _enableDynamicUpdate(bool enabled);
 };
