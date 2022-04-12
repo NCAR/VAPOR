@@ -56,8 +56,6 @@ public:
     PMetadataSection(VAPoR::ControlExec* ce);
 
     static const std::string SelectedDatasetTag;
-    static const std::string MetadataRLevelTag;
-    static const std::string MetadataCLevelTag;
     static const std::string MetadataTimestepTag;
 
 protected:

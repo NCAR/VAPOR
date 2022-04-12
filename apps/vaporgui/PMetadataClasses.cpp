@@ -21,8 +21,6 @@ namespace {
 }
 
 const std::string PMetadataSection::SelectedDatasetTag  = "metadataDatasetTag";
-const std::string PMetadataSection::MetadataRLevelTag   = "metadataRLevelTag";
-const std::string PMetadataSection::MetadataCLevelTag   = "metadataCLevelTag";
 const std::string PMetadataSection::MetadataTimestepTag = "metadataTimestepTag";
 
 POpenVariableMetadataWidget::POpenVariableMetadataWidget()
