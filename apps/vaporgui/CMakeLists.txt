@@ -122,6 +122,10 @@ set (SRCS
     VDoubleLineEdit.cpp
     VDoubleSliderEdit.cpp
     VDoubleSliderEdit.h
+    VDoubleSliderEditMenu.cpp
+    VDoubleSliderEditMenu.h
+    VIntSliderEditMenu.cpp
+    VIntSliderEditMenu.h
     VIntSliderEdit.cpp
     VIntSliderEdit.h
     VNumericLineEdit.cpp

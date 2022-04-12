@@ -6,7 +6,7 @@
 
 class QMenu;
 class VDoubleLineEdit;
-class VDoubleRangeMenu;
+class VDoubleSliderEditMenu;
 
 //! \class VDoubleSliderEdit
 //! \ingroup Public_GUI
@@ -28,6 +28,7 @@ public:
     void SetMaximum(double max);
 
     void AllowUserRange(bool allowed = true);
+    void AllowDynamicUpdate() const;
 
     //! Get the value associated with the VSlider and VDoubleLineEdit
     double GetValue() const;
@@ -54,6 +55,9 @@ public slots:
     //! Set whether the VDoubleLineEdit is being displayed with scientific notation
     virtual void SetSciNotation(bool sciNotation);
 
+    //! Set the dynamic update menu item's toggle state
+    virtual void SetDynamicUpdate(bool enabled);
+
     //! Show the context menu options for the entire widget, triggered on right-click
     virtual void ShowContextMenu(const QPoint &pos);
 
@@ -66,11 +70,12 @@ protected:
     bool   _rangeChangable;
 
     VDoubleLineEdit * _lineEdit;
-    VDoubleRangeMenu *_menu;
+    VDoubleSliderEditMenu *_menu;
 
 signals:
     void ValueChanged(double value);
     void ValueChangedIntermediate(double value);
     void MinimumChanged(double min);
     void MaximumChanged(double max);
+    void DynamicUpdateChanged(bool enabled);
 };

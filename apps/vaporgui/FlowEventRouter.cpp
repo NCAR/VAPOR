@@ -5,6 +5,7 @@
 #include "PFlowIntegrationRegionSelector.h"
 #include "PMultiVarSelector.h"
 #include "PConstantColorWidget.h"
+#include "PSliderEditHLI.h"
 
 using namespace VAPoR;
 typedef FlowParams FP;
@@ -79,6 +80,11 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
                 new PFlowRakeRegionSelector1D(1),
                 new PFlowRakeRegionSelector1D(2),
             }),
+            (new PSection("Rake Center", {
+                (_xRakeCenterSlider = new PDoubleSliderEditHLI<FlowParams>("X", &FlowParams::GetXRakeCenter, &FlowParams::SetXRakeCenter))->AllowDynamicUpdate(),
+                (_yRakeCenterSlider = new PDoubleSliderEditHLI<FlowParams>("Y", &FlowParams::GetYRakeCenter, &FlowParams::SetYRakeCenter))->AllowDynamicUpdate(),
+                (_zRakeCenterSlider = new PDoubleSliderEditHLI<FlowParams>("Z", &FlowParams::GetZRakeCenter, &FlowParams::SetZRakeCenter))->AllowDynamicUpdate(),
+            }))->SetTooltip("Controls the location of the Rake's Center.  To control\n the range of values that the Rake Center can traverse, adjust\n the Flow Renderer's Region in the Geometry tab"),
         }),
         
         new PSection("Write Flowlines to File", {
@@ -157,6 +163,25 @@ void FlowEventRouter::_updateTab()
     int numTS = GetActiveDataMgr()->GetNumTimeSteps();
     _pathlineLengthSlider->SetRange(0, std::max(1, numTS - 1));
     _pathlineInjectionSlider->SetRange(0, numTS);
+
+    VAPoR::CoordType min, max;
+    FlowParams *        fp = dynamic_cast<FlowParams *>(GetActiveParams());
+    fp->GetBox()->GetExtents(min, max);
+    double xCenter = fp->GetXRakeCenter();
+    double yCenter = fp->GetYRakeCenter();
+    double zCenter = fp->GetZRakeCenter();
+
+    if (xCenter > max[0]) fp->SetXRakeCenter(max[0]);
+    if (xCenter < min[0]) fp->SetXRakeCenter(min[0]);
+    _xRakeCenterSlider->SetRange(min[0], max[0]);
+
+    if (yCenter > max[1]) fp->SetYRakeCenter(max[1]);
+    if (yCenter < min[1]) fp->SetYRakeCenter(min[1]);
+    _yRakeCenterSlider->SetRange(min[1], max[1]);
+
+    if (zCenter > max[2]) fp->SetZRakeCenter(max[2]);
+    if (zCenter < min[2]) fp->SetZRakeCenter(min[2]);
+    _zRakeCenterSlider->SetRange(min[2], max[2]);
 }
 
 string FlowEventRouter::_getDescription() const { return "Computes and displays steady or unsteady flow trajectories.\n"; }

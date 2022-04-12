@@ -4,7 +4,7 @@
 #include "VHBoxWidget.h"
 #include "VSliderEditInterface.h"
 
-class VIntRangeMenu;
+class VIntSliderEditMenu;
 class VIntLineEdit;
 
 //! \class VIntSliderEdit
@@ -20,6 +20,9 @@ class VIntSliderEdit : public VSliderEditInterface {
 public:
     VIntSliderEdit(int min = 0, int max = 10, int value = 3, bool rangeChangable = false);
 
+    //! Set the dynamic update menu item's toggle state
+    virtual void SetDynamicUpdate(bool enabled);
+
     //! Set the minimum allowable value for the VSlider and VIntLineEdit
     void SetMinimum(int min);
 
@@ -27,6 +30,9 @@ public:
     void SetMaximum(int max);
 
     void AllowUserRange(bool allowed = true);
+
+    //! Allow the toggling of dynamic updating widgets
+    void AllowDynamicUpdate() const;
 
     //! Get the value associated with the VSlider and VIntLineEdit
     int GetValue() const;
@@ -64,7 +70,7 @@ protected:
     int  _value;
     bool _rangeChangable;
 
-    VIntRangeMenu *_menu;
+    VIntSliderEditMenu *_menu;
     VIntLineEdit * _lineEdit;
 
 signals:
@@ -72,4 +78,5 @@ signals:
     void ValueChangedIntermediate(int value);
     void MinimumChanged(int min);
     void MaximumChanged(int max);
+    void DynamicUpdateChanged(bool enabled);
 };
