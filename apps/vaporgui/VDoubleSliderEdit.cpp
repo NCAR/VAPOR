@@ -91,7 +91,7 @@ void VDoubleSliderEdit::SetMinimum(double min)
 {
     // If the new value is unchanged, or illegal, reset the menu and return
     if (min == _slider->GetMinimum() || min > _slider->GetMaximum()) {
-        if (min < _value) {
+        if (min > _value) {
             _value = min;
             SetValue(_value);
         }
