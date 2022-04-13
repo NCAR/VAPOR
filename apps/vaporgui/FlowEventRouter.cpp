@@ -102,7 +102,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             new PEnumDropdown(FP::RenderTypeTag, {"Tubes", "Samples", "KLGWTH"}, {FP::RenderTypeStream, FP::RenderTypeSamples, FP::RenderTypeDensity}, "Render Type"),
             (new PShowIf(FP::RenderTypeTag))->Equals(FP::RenderTypeStream)->Then({
                 new PCheckbox(FP::RenderGeom3DTag, "3D Geometry"),
-                (new PDoubleSliderEdit(FP::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit(FP::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->AllowUserRange(true)->EnableDynamicUpdate(),
                 new PCheckbox(FP::RenderShowStreamDirTag, "Show Stream Direction"),
                 (new PSubGroup({(new PIntegerSliderEdit(FP::RenderGlyphStrideTag, "Every N Samples"))->SetRange(1, 20)->EnableDynamicUpdate()}))->ShowBasedOnParam(FP::RenderShowStreamDirTag),
             }),
