@@ -233,7 +233,7 @@ int DerivedVarMgr::closeVariable(int fd)
     return (var->CloseVariable(derivedFD));
 }
 
-int DerivedVarMgr::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+int DerivedVarMgr::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region)
 {
     DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
 
@@ -254,7 +254,7 @@ int DerivedVarMgr::readRegion(int fd, const vector<size_t> &min, const vector<si
     return (var->ReadRegion(derivedFD, min, max, region));
 }
 
-int DerivedVarMgr::readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+int DerivedVarMgr::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
 {
     DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
 
@@ -272,7 +272,7 @@ int DerivedVarMgr::readRegionBlock(int fd, const vector<size_t> &min, const vect
 
     int derivedFD = f->GetAux();
 
-    return (var->ReadRegionBlock(derivedFD, min, max, region));
+    return (var->ReadRegion(derivedFD, min, max, region));
 }
 
 bool DerivedVarMgr::variableExists(size_t ts, string varname, int reflevel, int lod) const

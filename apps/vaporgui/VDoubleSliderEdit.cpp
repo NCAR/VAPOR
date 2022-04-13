@@ -7,7 +7,7 @@
 
 #include "VDoubleSliderEdit.h"
 #include "VDoubleLineEdit.h"
-#include "VDoubleRangeMenu.h"
+#include "VDoubleSliderEditMenu.h"
 #include "VSlider.h"
 
 VDoubleSliderEdit::VDoubleSliderEdit(double min, double max, double value, bool rangeChangable) : VSliderEditInterface(), _value(value), _rangeChangable(rangeChangable)
@@ -33,12 +33,17 @@ void VDoubleSliderEdit::AllowUserRange(bool allowed)
 
 void VDoubleSliderEdit::_makeContextMenu()
 {
-    _menu = new VDoubleRangeMenu(this, _lineEdit->GetSciNotation(), _lineEdit->GetNumDigits(), _slider->GetMinimum(), _slider->GetMaximum(), _rangeChangable);
+    _menu = new VDoubleSliderEditMenu(this);
     connect(_menu, &VNumericFormatMenu::DecimalDigitsChanged, this, &VDoubleSliderEdit::SetNumDigits);
     connect(_menu, &VNumericFormatMenu::SciNotationChanged, this, &VDoubleSliderEdit::SetSciNotation);
     connect(_menu, &VDoubleRangeMenu::MinChanged, this, &VDoubleSliderEdit::SetMinimum);
     connect(_menu, &VDoubleRangeMenu::MaxChanged, this, &VDoubleSliderEdit::SetMaximum);
+    connect(_menu, &VDoubleSliderEditMenu::DynamicUpdateChanged, this, &VDoubleSliderEdit::SetDynamicUpdate);
 }
+
+void VDoubleSliderEdit::AllowDynamicUpdate() const { _menu->AllowDynamicUpdate(); }
+
+void VDoubleSliderEdit::SetDynamicUpdate(bool enabled) { emit DynamicUpdateChanged(enabled); }
 
 bool VDoubleSliderEdit::GetSciNotation() const { return _lineEdit->GetSciNotation(); }
 
