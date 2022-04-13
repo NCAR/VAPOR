@@ -549,6 +549,13 @@ void BarbRenderer::_setUpLightingAndColor()
         specColor[0] = specColor[1] = specColor[2] = 0.8f;
         specColor[3] = 1.f;
         lgl->EnableLighting();
+
+        double m[16];
+        double cameraPosD[3], cameraUpD[3], cameraDirD[3];
+        _paramsMgr->GetViewpointParams(_winName)->GetModelViewMatrix(m);
+        _paramsMgr->GetViewpointParams(_winName)->ReconstructCamera(m, cameraPosD, cameraUpD, cameraDirD);
+        float cameraDirF[3] = {(float)cameraDirD[0], (float)cameraDirD[1], (float)cameraDirD[2]};
+        lgl->LightDirectionfv(cameraDirF);
     }
     lgl->Color3fv(fcolor);
 }
