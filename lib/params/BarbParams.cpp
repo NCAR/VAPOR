@@ -25,7 +25,6 @@ const string BarbParams::_zBarbsCountTag = "BarbsCountTag_Z";
 const string BarbParams::_alignGridTag = "GridAlignedToData";
 const string BarbParams::_alignGridStridesTag = "GridAlignedStrides";
 const string BarbParams::_varsAre3dTag = "VarsAre3D";
-const string BarbParams::LightingEnabledTag = "LightingEnabled";
 
 BarbParams::BarbParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, BarbParams::GetClassType())
 {
@@ -56,5 +55,5 @@ void BarbParams::_init()
     SetGrid(grid);
     SetLineThickness(1);
     SetLengthScale(1);
-    SetValueLong(LightingEnabledTag, "Disable Barb lighting by default", 0);
+    SetValueLong(RenderParams::LightingEnabledTag, "Enable Barb lighting by default", 1);
 }

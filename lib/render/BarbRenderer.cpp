@@ -541,7 +541,7 @@ void BarbRenderer::_setUpLightingAndColor()
     BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
     VAssert(bParams);
     bParams->GetConstantColor(fcolor);
-    if (nLights == 0 || !bParams->GetValueLong(BarbParams::LightingEnabledTag, 0)) {
+    if (nLights == 0 || !bParams->GetValueLong(RenderParams::LightingEnabledTag, 0)) {
         lgl->DisableLighting();
     } else {
         // All the geometry will get a white specular color:
@@ -554,7 +554,8 @@ void BarbRenderer::_setUpLightingAndColor()
         double cameraPosD[3], cameraUpD[3], cameraDirD[3];
         _paramsMgr->GetViewpointParams(_winName)->GetModelViewMatrix(m);
         _paramsMgr->GetViewpointParams(_winName)->ReconstructCamera(m, cameraPosD, cameraUpD, cameraDirD);
-        float cameraDirF[3] = {(float)cameraDirD[0], (float)cameraDirD[1], (float)cameraDirD[2]};
+        // Why do we need to multipl the camera direction by -1 here?  Are the barb normals backwards or something?
+        float cameraDirF[3] = {(float)cameraDirD[0]*-1, (float)cameraDirD[1]*-1, (float)cameraDirD[2]*-1};
         lgl->LightDirectionfv(cameraDirF);
     }
     lgl->Color3fv(fcolor);

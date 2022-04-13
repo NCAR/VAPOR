@@ -95,7 +95,6 @@ public:
     static const string _alignGridTag;
     static const string _alignGridStridesTag;
     static const string _varsAre3dTag;
-    static const string LightingEnabledTag;
 
 };    // End of Class BarbParams
 };    // namespace VAPoR

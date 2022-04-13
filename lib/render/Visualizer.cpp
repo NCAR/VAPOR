@@ -401,8 +401,7 @@ int Visualizer::_configureLighting()
     LegacyGL *lgl = _glManager->legacy;
 
     float lightDir[4];
-    for (int i = 0; i < 4; i++) { lightDir[i] = vpParams->getLightDirection(0, i); std::cout << lightDir[i] << " ";}
-    std::cout << endl;
+    for (int i = 0; i < 4; i++) { lightDir[i] = vpParams->getLightDirection(0, i); }
 
     if (nLights > 0) {
         // TODO GL
