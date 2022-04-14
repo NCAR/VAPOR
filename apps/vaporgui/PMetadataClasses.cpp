@@ -120,6 +120,7 @@ void VMetadataTree::Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::Da
         QTreeWidgetItem* varItem = new QTreeWidgetItem(_tree, {qbranch});
         // Add a blank "leaf" on each branch so they can be expanded (and therefore populated)
         QTreeWidgetItem* leaf = new QTreeWidgetItem(varItem, {""});
+        (void)leaf; // Silence unused variable warning
         _tree->insertTopLevelItem(0,varItem);
     }
 }
@@ -212,7 +213,17 @@ void VVariableMetadataTree::_generateCoordVarInfo(QTreeWidgetItem* parent, const
     QString qDimNames;
     for (auto dimName : dimNames)
         qDimNames += QString::fromStdString(dimName) + " ";
-    new QTreeWidgetItem(coordItem, {"Spatial dims:", qDimNames});
+    new QTreeWidgetItem(coordItem, {"Dimension names:", qDimNames});
+    
+    std::vector<size_t> dims;
+    _dm->GetDimLensAtLevel(qCoordVar.toStdString(), -1, dims, _ts);
+    QString qDims = QString::number(dims[0]);
+    if (dims.size()>1) 
+        qDims = qDims + ":" + QString::number(dims[1]);
+    if (dims.size()>2) 
+        qDims = qDims + ":" + QString::number(dims[2]);
+    new QTreeWidgetItem(coordItem, {"Dimension sizes:", qDims});
+
     new QTreeWidgetItem(coordItem, {"Time dim:", QString::fromStdString(coordVar.GetTimeDimName())});
     new QTreeWidgetItem(coordItem, {"Axis:", QString::fromStdString(axisLookup[coordVar.GetAxis()])});
     new QTreeWidgetItem(coordItem, {"Data type:", QString::fromStdString(xtypeLookup[coordVar.GetXType()+1])});
