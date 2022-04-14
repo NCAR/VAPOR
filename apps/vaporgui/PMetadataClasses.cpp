@@ -36,6 +36,7 @@ PMetadataSection::PMetadataSection(VAPoR::ControlExec* ce)
                                            {
                                                 _metadataDataset = new PStringDropdown(SelectedDatasetTag, {}, "Dataset"),
                                                 (_metadataTimestep = new PIntegerSliderEdit(MetadataTimestepTag, "Generate metadata\nfor timestep #"))->AllowUserRange(false),
+                                                _dimTree = new VDimensionMetadataTree(),
                                                 _varTree = new VVariableMetadataTree(),
                                                 _coordTree = new VCoordinateVariableMetadataTree(),
                                                 _globalTree = new VGlobalAttributeMetadataTree(),
@@ -79,6 +80,7 @@ void PMetadataSection::updateGUI() const {
     if (!STLUtils::Contains(datasets, dataset)) dataset = datasets[0];
     dm = _ce->GetDataStatus()->GetDataMgr(dataset);
 
+    _dimTree->Update(getParams(), nullptr, dm);
     _varTree->Update(getParams(), nullptr, dm);
     _coordTree->Update(getParams(), nullptr, dm);
     _globalTree->Update(getParams(), nullptr, dm);
@@ -320,8 +322,6 @@ void VGlobalAttributeMetadataTree::_generateMetadata(QTreeWidgetItem* item) cons
     if (leaf != 0) delete leaf;
 
     QString qattribute = item->text(0);
-    //QTreeWidgetItem* attribute = new QTreeWidgetItem(item, {qattribute});
-    //_tree->insertTopLevelItem(0, attribute = new QTreeWidgetItem(_tree, {qattribute}));
 
     VAPoR::DC::XType xType = _dm->GetAttType("",qattribute.toStdString());
     QString qvalue;
@@ -353,4 +353,24 @@ void VGlobalAttributeMetadataTree::_gatherBranches(std::vector<std::string> &var
     vars.clear();
     std::vector<std::string> v = _dm->GetAttNames("");
     vars.insert(vars.end(),v.begin(),v.end());
+}
+
+VDimensionMetadataTree::VDimensionMetadataTree() : VMetadataTree() {
+    setTabText(0,"Dimension Metadata");
+}
+
+void VDimensionMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
+    std::vector<size_t> dims;
+    _dm->GetDimLens(item->text(0).toStdString(), dims, _ts);
+    QString dimLens;
+    for (auto dim : dims) {
+        dimLens = dimLens + QString::number(dim) + ":";
+    }
+    item->setText(1,dimLens);
+}
+
+void VDimensionMetadataTree::_gatherBranches(std::vector<std::string> &dims, VAPoR::ParamsBase* p) const {
+    dims.clear();
+    std::vector<std::string> d = _dm->GetDimensionNames();
+    dims.insert(dims.end(),d.begin(),d.end());
 }

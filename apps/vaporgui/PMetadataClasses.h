@@ -9,6 +9,7 @@ class QTreeWidget;
 class QTreeWidgetItem;
 class PStringDropdown;
 class PIntegerSliderEdit;
+class VDimensionMetadataTree;
 class VVariableMetadataTree;
 class VOpenVariableMetadataTree;
 class VCoordinateVariableMetadataTree;
@@ -46,7 +47,8 @@ class PMetadataSection : public PWidget {
 
     VAPoR::ControlExec*              _ce;
     VSection*                        _section;
-    VVariableMetadataTree*   _varTree;
+    VDimensionMetadataTree*          _dimTree;
+    VVariableMetadataTree*           _varTree;
     VCoordinateVariableMetadataTree* _coordTree;
     VGlobalAttributeMetadataTree*    _globalTree;
     PStringDropdown*                 _metadataDataset;
@@ -98,7 +100,7 @@ public:
     VVariableMetadataTree();
 
 protected:
-    void _gatherBranches(std::vector<std::string> &branches, VAPoR::ParamsBase* rp = nullptr) const override;
+    void _gatherBranches(std::vector<std::string> &branches, VAPoR::ParamsBase* p = nullptr) const override;
     void _generateMetadata(QTreeWidgetItem* item) const override;
 
     void _generateCoordVarInfo(QTreeWidgetItem* parent, const QString& qCoordVar) const;
@@ -126,7 +128,20 @@ public:
     VCoordinateVariableMetadataTree();
 
 protected:
-    void _gatherBranches(std::vector<std::string> &branches, VAPoR::ParamsBase* rp) const override;
+    void _gatherBranches(std::vector<std::string> &branches, VAPoR::ParamsBase* p) const override;
+    void _generateMetadata(QTreeWidgetItem* item) const override;
+};
+
+//! \class VDimensionMetadataTree
+//! Displays dimension metadata for a given DataMgr instance.
+class VDimensionMetadataTree : public VMetadataTree {
+    Q_OBJECT
+
+public:
+    VDimensionMetadataTree();
+
+protected:
+    void _gatherBranches(std::vector<std::string> &dims, VAPoR::ParamsBase* p) const override;
     void _generateMetadata(QTreeWidgetItem* item) const override;
 };
 
@@ -139,6 +154,6 @@ public:
     VGlobalAttributeMetadataTree();
 
 protected:
-    void _gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* rp) const override;
+    void _gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p) const override;
     void _generateMetadata(QTreeWidgetItem* item) const override;
 };
