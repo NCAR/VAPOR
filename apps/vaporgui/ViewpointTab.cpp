@@ -21,7 +21,7 @@ ViewpointTab::ViewpointTab(ControlExec *ce) : EventRouter(ce, ViewpointParams::G
         new PCameraControlsSection(_controlExec),
         new PFramebufferSettingsSection(_controlExec),
         proj = new PProjectionStringSection(_controlExec),
-        new PMetadataSection(_controlExec),
+//        new PMetadataSection(_controlExec),
     });
 
     connect(proj, &PProjectionStringSection::Proj4StringChanged, this, &ViewpointTab::Proj4StringChanged);

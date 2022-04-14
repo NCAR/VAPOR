@@ -100,6 +100,14 @@ VMetadataTree::VMetadataTree()
     _tree->header()->setStretchLastSection(false);
     _tree->setColumnCount(2);
     _tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    connect(_tree, &QTreeWidget::itemExpanded, this, &VMetadataTree::foo);
+}
+
+void VMetadataTree::foo(QTreeWidgetItem* item){//, int column) {
+    if (item->childCount() > 1) return;
+    _generateMetadata(item);//item->text(0));
+    std::cout << item->text(0).toStdString() << std::endl;
 }
 
 void VMetadataTree::Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::DataMgr* dm) {
@@ -107,33 +115,44 @@ void VMetadataTree::Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::Da
     // Note: This function also generates the _topLevelBranches variable list, who's metadata will be shown.
     if (!_checkNeedUpdate(p, dm)) return;
 
-    QStringList qvars;
-    for (auto var : _topLevelBranches)
-        qvars << QString::fromStdString(var);
-    qvars.removeDuplicates();
-    qvars.removeAll(QString(""));
+    QStringList qbranches;
+    for (auto branch : _topLevelBranches)
+        qbranches << QString::fromStdString(branch);
+    qbranches.removeDuplicates();
+    qbranches.removeAll(QString(""));
 
     _tree->clear();
-    for (auto qvar : qvars)
-        _generateMetadata(qvar);
+    for (auto qbranch : qbranches){
+        QTreeWidgetItem* varItem = new QTreeWidgetItem(_tree, {qbranch});
+        // Add a blank "leaf" on each branch so they can be expanded (and therefore populated)
+        QTreeWidgetItem* leaf = new QTreeWidgetItem(varItem, {""});
+        _tree->insertTopLevelItem(0,varItem);
+    }
 }
 
-void VVariableMetadataTree::_generateMetadata(const QString& qvar) const {
+//void VVariableMetadataTree::_generateMetadata(const QString& qvar) const {
+void VVariableMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
+    QTreeWidgetItem* leaf = item->takeChild(0);
+    if (leaf != 0) delete leaf;
+
+    QString qvar = item->text(0);
     std::vector<double> range;
     int rc = _dm->GetDataRange(_ts, qvar.toStdString(), -1, -1, range);
     if (rc < 0) return;
 
-    QTreeWidgetItem* varItem = new QTreeWidgetItem(_tree, {qvar});
+    QTreeWidgetItem* varItem = item;//_tree->topLevelItem(0);
+    //QTreeWidgetItem* varItem = new QTreeWidgetItem(_tree, {qvar});
+    //_tree->insertTopLevelItem(0,varItem);
+
     new QTreeWidgetItem(varItem, {"Min:", QString::number(range[0])});
     new QTreeWidgetItem(varItem, {"Max:", QString::number(range[1])});
 
     std::vector<size_t> dims;
     _dm->GetDimLensAtLevel(qvar.toStdString(), -1, dims, _ts);
-    QString qDims = QString::number(dims[0]) + ":" + QString::number(dims[1]);
+    QString qDims = QString::number(dims[0]);
+    if (dims.size()==2) qDims += ":" + QString::number(dims[1]);
     if (dims.size()==3) qDims += ":" + QString::number(dims[2]);
     new QTreeWidgetItem(varItem, {"Dims (XYZ):", qDims});
-
-    _tree->insertTopLevelItem(0,varItem);
 
     VAPoR::DC::Mesh mesh;
     QTreeWidgetItem* coords = new QTreeWidgetItem(varItem, {"Coordinates"});
@@ -165,6 +184,7 @@ bool VMetadataTree::_checkNeedUpdate(VAPoR::ParamsBase* p, VAPoR::DataMgr* dm) {
     size_t ts;
     if (rp != nullptr) {
         ts = rp->GetCurrentTimestep();
+        std::cout << "rp " << ts << std::endl;
     }
     else {
         ts = p->GetValueLong(PMetadataSection::MetadataTimestepTag, 0);
@@ -184,7 +204,9 @@ bool VMetadataTree::_checkNeedUpdate(VAPoR::ParamsBase* p, VAPoR::DataMgr* dm) {
         _topLevelBranches = topLevelBranches;
         needsUpdate = true;
     }
-   
+  
+    std::cout << "TS " << ts << std::endl;
+ 
     return needsUpdate;
 }
 
@@ -270,7 +292,9 @@ VCoordinateVariableMetadataTree::VCoordinateVariableMetadataTree() : VVariableMe
     setTabText(0,"Coordinate Variable Metadata");
 }
 
-void VCoordinateVariableMetadataTree::_generateMetadata(const QString& qvar) const {
+//void VCoordinateVariableMetadataTree::_generateMetadata(const QString& qvar) const {
+void VCoordinateVariableMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
+    QString qvar = item->text(0);
     _generateCoordVarInfo(nullptr, qvar);
 }
 
@@ -284,7 +308,9 @@ VGlobalAttributeMetadataTree::VGlobalAttributeMetadataTree() : VMetadataTree() {
     setTabText(0,"Global Attributes");
 }
 
-void VGlobalAttributeMetadataTree::_generateMetadata(const QString& qattribute) const {
+//void VGlobalAttributeMetadataTree::_generateMetadata(const QString& qattribute) const {
+void VGlobalAttributeMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
+    QString qattribute = item->text(0);
     QTreeWidgetItem* attribute;
     _tree->insertTopLevelItem(0, attribute = new QTreeWidgetItem(_tree, {qattribute}));
 
