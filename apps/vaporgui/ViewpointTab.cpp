@@ -7,8 +7,6 @@
 #include "PProjectionStringSection.h"
 #include "PCameraControlsSection.h"
 #include "PFramebufferSettingsSection.h"
-#include "PMetadataClasses.h"
-#include "PTimestepSliderEdit.h"
 
 using namespace VAPoR;
 
@@ -21,7 +19,6 @@ ViewpointTab::ViewpointTab(ControlExec *ce) : EventRouter(ce, ViewpointParams::G
         new PCameraControlsSection(_controlExec),
         new PFramebufferSettingsSection(_controlExec),
         proj = new PProjectionStringSection(_controlExec),
-        new PMetadataSection(_controlExec),
     });
 
     connect(proj, &PProjectionStringSection::Proj4StringChanged, this, &ViewpointTab::Proj4StringChanged);
