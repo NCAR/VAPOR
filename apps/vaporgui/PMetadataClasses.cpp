@@ -207,7 +207,11 @@ void VVariableMetadataTree::_generateCoordVarInfo(QTreeWidgetItem* parent, const
     VAPoR::DC::CoordVar coordVar;
     if (!_dm->GetCoordVarInfo(qCoordVar.toStdString(), coordVar)) return;
 
-    QTreeWidgetItem* coordItem = new QTreeWidgetItem(parent, {qCoordVar});
+    QTreeWidgetItem* coordItem;
+    if (parent->text(0) == qCoordVar)
+        coordItem = parent;
+    else
+        coordItem = new QTreeWidgetItem(parent, {qCoordVar});
 
     std::vector<std::string> dimNames = coordVar.GetDimNames();
     QString qDimNames;
@@ -215,7 +219,7 @@ void VVariableMetadataTree::_generateCoordVarInfo(QTreeWidgetItem* parent, const
         qDimNames += QString::fromStdString(dimName) + " ";
     new QTreeWidgetItem(coordItem, {"Dimension names:", qDimNames});
     
-    std::vector<size_t> dims;
+    std::vector<size_t> dims = {1};
     _dm->GetDimLensAtLevel(qCoordVar.toStdString(), -1, dims, _ts);
     QString qDims = QString::number(dims[0]);
     if (dims.size()>1) 
@@ -310,9 +314,14 @@ VGlobalAttributeMetadataTree::VGlobalAttributeMetadataTree() : VMetadataTree() {
 }
 
 void VGlobalAttributeMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
+    if (item->childCount() > 1) return; // This branch contains more than an empty leaf, and has already been computed
+
+    QTreeWidgetItem* leaf = item->takeChild(0);
+    if (leaf != 0) delete leaf;
+
     QString qattribute = item->text(0);
-    QTreeWidgetItem* attribute;
-    _tree->insertTopLevelItem(0, attribute = new QTreeWidgetItem(_tree, {qattribute}));
+    //QTreeWidgetItem* attribute = new QTreeWidgetItem(item, {qattribute});
+    //_tree->insertTopLevelItem(0, attribute = new QTreeWidgetItem(_tree, {qattribute}));
 
     VAPoR::DC::XType xType = _dm->GetAttType("",qattribute.toStdString());
     QString qvalue;
@@ -336,8 +345,8 @@ void VGlobalAttributeMetadataTree::_generateMetadata(QTreeWidgetItem* item) cons
             qvalue += QString::number(value) + " ";
     }
 
-    new QTreeWidgetItem(attribute, {"Value:", qvalue});
-    new QTreeWidgetItem(attribute, {"Type:", QString::fromStdString(xtypeLookup[_dm->GetAttType("",qattribute.toStdString())+1])});
+    new QTreeWidgetItem(item, {"Value:", qvalue});
+    new QTreeWidgetItem(item, {"Type:", QString::fromStdString(xtypeLookup[_dm->GetAttType("",qattribute.toStdString())+1])});
 }
 
 void VGlobalAttributeMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p) const {
