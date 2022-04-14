@@ -234,6 +234,11 @@ std::vector<string> DCCF::getAuxVarNames() const
 
 template<class T> bool DCCF::_getAttTemplate(string varname, string attname, T &values) const
 {
+    if (varname.empty()) {
+        _ncdfc->GetAtt("", attname, values);
+        return (true);
+    }
+
     DC::BaseVar var;
     bool        status = getBaseVarInfo(varname, var);
     if (!status) return (status);
@@ -270,6 +275,8 @@ bool DCCF::getAtt(string varname, string attname, string &values) const
 
 std::vector<string> DCCF::getAttNames(string varname) const
 {
+    if (varname.empty()) return (_ncdfc->GetAttNames(""));
+
     DC::BaseVar var;
     bool        status = getBaseVarInfo(varname, var);
     if (!status) return (vector<string>());
