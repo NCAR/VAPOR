@@ -125,7 +125,7 @@ void VMetadataTree::Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::Da
 }
 
 void VVariableMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
-    if (item->childCount() > 1) return; // This branch contains more than an empty leave, and has already been computed
+    if (item->childCount() > 1) return; // This branch contains more than an empty leaf, and has already been computed
 
     QTreeWidgetItem* leaf = item->takeChild(0);
     if (leaf != 0) delete leaf;
@@ -203,8 +203,6 @@ bool VMetadataTree::_checkNeedUpdate(VAPoR::ParamsBase* p, VAPoR::DataMgr* dm) {
 }
 
 void VVariableMetadataTree::_generateCoordVarInfo(QTreeWidgetItem* parent, const QString& qCoordVar) const {
-    //if (parent->childCount() > 0) return; // This branch has already been computed
-
     VAPoR::DC::CoordVar coordVar;
     if (!_dm->GetCoordVarInfo(qCoordVar.toStdString(), coordVar)) return;
 
@@ -282,7 +280,6 @@ VCoordinateVariableMetadataTree::VCoordinateVariableMetadataTree() : VVariableMe
     setTabText(0,"Coordinate Variable Metadata");
 }
 
-//void VCoordinateVariableMetadataTree::_generateMetadata(const QString& qvar) const {
 void VCoordinateVariableMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
     if (item->childCount() > 1) return; // This branch has already been computed
     QTreeWidgetItem* leaf = item->takeChild(0);
@@ -301,7 +298,6 @@ VGlobalAttributeMetadataTree::VGlobalAttributeMetadataTree() : VMetadataTree() {
     setTabText(0,"Global Attributes");
 }
 
-//void VGlobalAttributeMetadataTree::_generateMetadata(const QString& qattribute) const {
 void VGlobalAttributeMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
     QString qattribute = item->text(0);
     QTreeWidgetItem* attribute;

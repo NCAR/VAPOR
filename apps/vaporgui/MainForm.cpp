@@ -2425,7 +2425,6 @@ void MainForm::launchMetadata()
         _metadataDialog->setLayout(new QVBoxLayout);
         _metadataDialog->layout()->addWidget(_metadata);
     }
-    //_metadataDialog->open();
     _metadataDialog->show();
 }
 

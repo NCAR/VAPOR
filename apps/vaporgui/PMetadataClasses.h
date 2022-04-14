@@ -85,7 +85,6 @@ protected:
     std::vector<std::string> _topLevelBranches;
 
     virtual void _gatherBranches(std::vector<std::string> &branches, VAPoR::ParamsBase* rp = nullptr) const = 0;
-    //virtual void _generateMetadata(const QString& qvar) const = 0;
     virtual void _generateMetadata(QTreeWidgetItem* item) const = 0;
     bool _checkNeedUpdate(VAPoR::ParamsBase* p, VAPoR::DataMgr* dm);
 };
@@ -100,7 +99,6 @@ public:
 
 protected:
     void _gatherBranches(std::vector<std::string> &branches, VAPoR::ParamsBase* rp = nullptr) const override;
-    //void _generateMetadata(const QString& qvar) const override;
     void _generateMetadata(QTreeWidgetItem* item) const override;
 
     void _generateCoordVarInfo(QTreeWidgetItem* parent, const QString& qCoordVar) const;
@@ -129,7 +127,6 @@ public:
 
 protected:
     void _gatherBranches(std::vector<std::string> &branches, VAPoR::ParamsBase* rp) const override;
-    //virtual void _generateMetadata(const QString& qvar) const override;
     void _generateMetadata(QTreeWidgetItem* item) const override;
 };
 
@@ -143,6 +140,5 @@ public:
 
 protected:
     void _gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* rp) const override;
-    //void _generateMetadata(const QString& qvar) const override;
     void _generateMetadata(QTreeWidgetItem* item) const override;
 };
