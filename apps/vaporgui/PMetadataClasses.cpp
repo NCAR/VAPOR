@@ -101,13 +101,7 @@ VMetadataTree::VMetadataTree()
     _tree->setColumnCount(2);
     _tree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-    connect(_tree, &QTreeWidget::itemExpanded, this, &VMetadataTree::foo);
-}
-
-void VMetadataTree::foo(QTreeWidgetItem* item){//, int column) {
-    if (item->childCount() > 1) return;
-    _generateMetadata(item);//item->text(0));
-    std::cout << item->text(0).toStdString() << std::endl;
+    connect(_tree, &QTreeWidget::itemExpanded, this, &VMetadataTree::_generateMetadata);
 }
 
 void VMetadataTree::Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::DataMgr* dm) {
@@ -130,8 +124,9 @@ void VMetadataTree::Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::Da
     }
 }
 
-//void VVariableMetadataTree::_generateMetadata(const QString& qvar) const {
 void VVariableMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
+    if (item->childCount() > 1) return; // This branch contains more than an empty leave, and has already been computed
+
     QTreeWidgetItem* leaf = item->takeChild(0);
     if (leaf != 0) delete leaf;
 
@@ -140,9 +135,7 @@ void VVariableMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
     int rc = _dm->GetDataRange(_ts, qvar.toStdString(), -1, -1, range);
     if (rc < 0) return;
 
-    QTreeWidgetItem* varItem = item;//_tree->topLevelItem(0);
-    //QTreeWidgetItem* varItem = new QTreeWidgetItem(_tree, {qvar});
-    //_tree->insertTopLevelItem(0,varItem);
+    QTreeWidgetItem* varItem = item;
 
     new QTreeWidgetItem(varItem, {"Min:", QString::number(range[0])});
     new QTreeWidgetItem(varItem, {"Max:", QString::number(range[1])});
@@ -150,8 +143,10 @@ void VVariableMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
     std::vector<size_t> dims;
     _dm->GetDimLensAtLevel(qvar.toStdString(), -1, dims, _ts);
     QString qDims = QString::number(dims[0]);
-    if (dims.size()==2) qDims += ":" + QString::number(dims[1]);
-    if (dims.size()==3) qDims += ":" + QString::number(dims[2]);
+    if (dims.size()>1) 
+        qDims = qDims + ":" + QString::number(dims[1]);
+    if (dims.size()>2) 
+        qDims = qDims + ":" + QString::number(dims[2]);
     new QTreeWidgetItem(varItem, {"Dims (XYZ):", qDims});
 
     VAPoR::DC::Mesh mesh;
@@ -184,7 +179,6 @@ bool VMetadataTree::_checkNeedUpdate(VAPoR::ParamsBase* p, VAPoR::DataMgr* dm) {
     size_t ts;
     if (rp != nullptr) {
         ts = rp->GetCurrentTimestep();
-        std::cout << "rp " << ts << std::endl;
     }
     else {
         ts = p->GetValueLong(PMetadataSection::MetadataTimestepTag, 0);
@@ -205,30 +199,26 @@ bool VMetadataTree::_checkNeedUpdate(VAPoR::ParamsBase* p, VAPoR::DataMgr* dm) {
         needsUpdate = true;
     }
   
-    std::cout << "TS " << ts << std::endl;
- 
     return needsUpdate;
 }
 
 void VVariableMetadataTree::_generateCoordVarInfo(QTreeWidgetItem* parent, const QString& qCoordVar) const {
+    //if (parent->childCount() > 0) return; // This branch has already been computed
+
     VAPoR::DC::CoordVar coordVar;
     if (!_dm->GetCoordVarInfo(qCoordVar.toStdString(), coordVar)) return;
 
-    QTreeWidgetItem* coord;
-    if (parent == nullptr)
-        _tree->insertTopLevelItem(0, coord = new QTreeWidgetItem(_tree, {qCoordVar}));
-    else
-        coord = new QTreeWidgetItem(parent, {qCoordVar});
+    QTreeWidgetItem* coordItem = new QTreeWidgetItem(parent, {qCoordVar});
 
     std::vector<std::string> dimNames = coordVar.GetDimNames();
     QString qDimNames;
     for (auto dimName : dimNames)
         qDimNames += QString::fromStdString(dimName) + " ";
-    new QTreeWidgetItem(coord, {"Spatial dims:", qDimNames});
-    new QTreeWidgetItem(coord, {"Time dim:", QString::fromStdString(coordVar.GetTimeDimName())});
-    new QTreeWidgetItem(coord, {"Axis:", QString::fromStdString(axisLookup[coordVar.GetAxis()])});
-    new QTreeWidgetItem(coord, {"Data type:", QString::fromStdString(xtypeLookup[coordVar.GetXType()+1])});
-    new QTreeWidgetItem(coord, {"Units:", QString::fromStdString(coordVar.GetUnits())});
+    new QTreeWidgetItem(coordItem, {"Spatial dims:", qDimNames});
+    new QTreeWidgetItem(coordItem, {"Time dim:", QString::fromStdString(coordVar.GetTimeDimName())});
+    new QTreeWidgetItem(coordItem, {"Axis:", QString::fromStdString(axisLookup[coordVar.GetAxis()])});
+    new QTreeWidgetItem(coordItem, {"Data type:", QString::fromStdString(xtypeLookup[coordVar.GetXType()+1])});
+    new QTreeWidgetItem(coordItem, {"Units:", QString::fromStdString(coordVar.GetUnits())});
 }
 
 void VVariableMetadataTree::_generateAttributeInfo(QTreeWidgetItem* parent, const VAPoR::DC::BaseVar baseVar) const {
@@ -294,8 +284,11 @@ VCoordinateVariableMetadataTree::VCoordinateVariableMetadataTree() : VVariableMe
 
 //void VCoordinateVariableMetadataTree::_generateMetadata(const QString& qvar) const {
 void VCoordinateVariableMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
+    if (item->childCount() > 1) return; // This branch has already been computed
+    QTreeWidgetItem* leaf = item->takeChild(0);
+    if (leaf != 0) delete leaf;
     QString qvar = item->text(0);
-    _generateCoordVarInfo(nullptr, qvar);
+    _generateCoordVarInfo(item, qvar);
 }
 
 void VCoordinateVariableMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p) const {

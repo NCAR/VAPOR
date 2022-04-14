@@ -88,9 +88,6 @@ protected:
     //virtual void _generateMetadata(const QString& qvar) const = 0;
     virtual void _generateMetadata(QTreeWidgetItem* item) const = 0;
     bool _checkNeedUpdate(VAPoR::ParamsBase* p, VAPoR::DataMgr* dm);
-
-private slots:
-    void foo(QTreeWidgetItem* item);//, int column);
 };
 
 //! \class VVariableMetadataTree
