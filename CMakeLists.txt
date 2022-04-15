@@ -13,6 +13,8 @@ include (buildutils/OpenMPInstaller.cmake)
 
 set (CMAKE_CXX_STANDARD 11)
 
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
 	# Set the possible values of build type for cmake-gui
@@ -109,8 +111,8 @@ include (site_files/site.NCAR OPTIONAL)
 include (site.local           OPTIONAL)
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
-include_directories (${THIRD_PARTY_INC_DIR})
-include_directories (${THIRD_PARTY_INC_DIR}/freetype2)
+include_directories (SYSTEM ${THIRD_PARTY_INC_DIR})
+include_directories (SYSTEM ${THIRD_PARTY_INC_DIR}/freetype2)
 link_directories (${THIRD_PARTY_LIB_DIR})
 link_directories (${PYTHONPATH})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
@@ -120,11 +122,11 @@ if (WIN32)
 	include_directories (${NUMPY_INCLUDE_DIR})
 	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 else ()
-	include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m)
+	include_directories (SYSTEM ${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m)
 
     # I'm not sure why we only have include files for python3.6, and not python3.6m.
     # 
-	include_directories (${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}/site-packages/numpy/core/include)
+	include_directories (SYSTEM ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}/site-packages/numpy/core/include)
 endif ()
 if (BUILD_VDC)
 	link_directories (${PYTHONPATH}/lib-dynload)
@@ -138,7 +140,7 @@ find_library(JPEG jpeg)
 
 if (BUILD_GUI)
 	find_package (OpenGL REQUIRED)
-	include_directories (${OPENGL_INCLUDE_DIRS})
+	include_directories (SYSTEM ${OPENGL_INCLUDE_DIRS})
 	if (WIN32)
 		find_library (GLEW glew32)
 	else ()

@@ -199,6 +199,72 @@ jobs:
           paths:
             - installers
 
+  clang-tidy:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - checkout
+     
+      - run:
+          name: ensure we are up to date
+          command: |
+            git branch --set-upstream-to=origin/$CIRCLE_BRANCH $CIRCLE_BRANCH 
+            git pull
+
+      - run:
+          name: install clang-tidy
+          command: |
+            apt-get update
+            apt-get install -y clang
+            apt-get install -y clang-tidy
+
+      - run:
+          name: clang-tidy
+          command: |
+            cd /root/project
+            cmake .            
+            make -j4
+            git diff origin/main | /usr/bin/clang-tidy-diff -p1 -checks=cppcoreguidelines* 2>&1 | tee /tmp/clangTidyOutput.txt
+
+      - run:
+          name: check for clang-tidy warnings
+          command: |
+            while read line; do
+              if [[ "$line" == *"warning"* ]]; then
+                if [[ "$line" != *"generated"* || "$line" != *"Supressed"* ]]; then
+                  #exit -1
+                  exit 0 
+                fi
+              fi
+            done < /tmp/clangTidyOutput.txt
+
+      - store_artifacts:
+          path: /tmp/clangTidyOutput.txt
+
+      - run:
+          name: Post Stats to GitHub PR
+          command: |
+            apt-get install -y jq
+
+            pr_response=$(curl --location --request GET "https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pulls?head=$CIRCLE_PROJECT_USERNAME:$CIRCLE_BRANCH&state=open" \
+            -u $GH_USER:$GH_TOKEN)
+
+            if [ $(echo $pr_response | jq length) -eq 0 ]; then
+              echo "No PR found to update"
+              exit 0
+            else
+              pr_comment_url=$(echo $pr_response | jq -r ".[]._links.comments.href")
+            fi
+
+            curl --location --request POST "$pr_comment_url" \
+            -u $GH_USER:$CLANG_TIDY_TOKEN \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+             "body": "This would be the data to add"
+            }'
+
+
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -470,8 +536,10 @@ workflows:
   version: 2
   build:
     jobs:
-      - build_ubuntu18
-      - build_centos7
+      - clang-tidy
+      #- build_ubuntu18
+      #- build_centos7
+      #- foo
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer
