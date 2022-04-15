@@ -21,6 +21,16 @@ using namespace std;
 
 namespace {
 
+DC::XType netcdf_to_dc_xtype(int t)
+{
+    switch (t) {
+    case NC_DOUBLE: return (DC::XType::DOUBLE);
+    case NC_INT64: return (DC::XType::INT64);
+    case NC_CHAR: return (DC::XType::TEXT);
+    default: return (DC::XType::INVALID);
+    }
+}
+
 #ifdef UNUSED_FUNCTION
 // Product of elements in a vector
 //
@@ -292,6 +302,8 @@ std::vector<string> DCCF::getAttNames(string varname) const
 
 DC::XType DCCF::getAttType(string varname, string attname) const
 {
+    if (varname.empty()) { return (netcdf_to_dc_xtype(_ncdfc->GetAttType("", attname))); }
+
     DC::BaseVar var;
     bool        status = getBaseVarInfo(varname, var);
     if (!status) return (DC::INVALID);
