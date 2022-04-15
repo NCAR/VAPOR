@@ -37,12 +37,13 @@ float read_scalar_float_attr(NetCDFCollection *ncdfc, string varname, string att
     return ((float)dvalues[0]);
 }
 
-DC::XType netcdf_to_dc_xtype(int t) {
+DC::XType netcdf_to_dc_xtype(int t)
+{
     switch (t) {
-    case NC_DOUBLE: return(DC::XType::DOUBLE);
-    case NC_INT64: return(DC::XType::INT64);
-    case NC_CHAR: return(DC::XType::TEXT);
-    default: return(DC::XType::INVALID);
+    case NC_DOUBLE: return (DC::XType::DOUBLE);
+    case NC_INT64: return (DC::XType::INT64);
+    case NC_CHAR: return (DC::XType::TEXT);
+    default: return (DC::XType::INVALID);
     }
 }
 
@@ -332,9 +333,7 @@ std::vector<string> DCWRF::getAttNames(string varname) const
 
 DC::XType DCWRF::getAttType(string varname, string attname) const
 {
-    if (varname.empty()) {
-        return(netcdf_to_dc_xtype(_ncdfc->GetAttType("", attname)));
-    }
+    if (varname.empty()) { return (netcdf_to_dc_xtype(_ncdfc->GetAttType("", attname))); }
 
     DC::BaseVar var;
     bool        status = getBaseVarInfo(varname, var);

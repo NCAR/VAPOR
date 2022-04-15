@@ -216,12 +216,13 @@ template<class T> int _xgetVar(NetCDFCollection *ncdfc, size_t ts, string varnam
     return (ncdfc->Close(fd));
 }
 
-DC::XType netcdf_to_dc_xtype(int t) {
+DC::XType netcdf_to_dc_xtype(int t)
+{
     switch (t) {
-    case NC_DOUBLE: return(DC::XType::DOUBLE);
-    case NC_INT64: return(DC::XType::INT64);
-    case NC_CHAR: return(DC::XType::TEXT);
-    default: return(DC::XType::INVALID);
+    case NC_DOUBLE: return (DC::XType::DOUBLE);
+    case NC_INT64: return (DC::XType::INT64);
+    case NC_CHAR: return (DC::XType::TEXT);
+    default: return (DC::XType::INVALID);
     }
 }
 
@@ -404,9 +405,7 @@ std::vector<string> DCMPAS::getAttNames(string varname) const
 
 DC::XType DCMPAS::getAttType(string varname, string attname) const
 {
-    if (varname.empty()) {
-        return(netcdf_to_dc_xtype(_ncdfc->GetAttType("", attname)));
-    }
+    if (varname.empty()) { return (netcdf_to_dc_xtype(_ncdfc->GetAttType("", attname))); }
 
     DC::BaseVar var;
     bool        status = getBaseVarInfo(varname, var);
