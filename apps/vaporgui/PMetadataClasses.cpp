@@ -335,11 +335,8 @@ void VGlobalAttributeMetadataTree::_generateMetadata(QTreeWidgetItem* item) cons
     VAPoR::DC::XType xType = _dm->GetAttType("",qattribute.toStdString());
     QString qvalue;
     if (xType == VAPoR::DC::XType::INVALID) {
-        std::cout << "INVALID" << std::endl;
         return;
     }
-    else 
-        std::cout << "VALID" << std::endl;
     if (xType == VAPoR::DC::XType::TEXT) {
         std::string values;
         if (!_dm->GetAtt("", qattribute.toStdString(), values)) return;
