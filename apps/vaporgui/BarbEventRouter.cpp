@@ -32,6 +32,7 @@ BarbEventRouter::BarbEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             (new PIntegerSliderEdit(BP::_zBarbsCountTag, "Z Barbs"))->SetRange(1, 50),
             (new PDoubleSliderEdit(BP::_lengthScaleTag, "Length Scale"))->SetRange(0.01, 4)->EnableDynamicUpdate(),
             (new PDoubleSliderEdit(BP::_thicknessScaleTag, "Thickness Scale"))->SetRange(0.01, 4)->EnableDynamicUpdate(),
+            new PCheckbox(BP::LightingEnabledTag, "Enable Lighting"),
             new PConstantColorWidget
         }),
     }));
