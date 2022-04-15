@@ -197,6 +197,14 @@ bool VMetadataTree::_checkNeedUpdate(VAPoR::ParamsBase* p, VAPoR::DataMgr* dm) {
     
     std::vector<std::string> topLevelBranches;
     _gatherBranches(topLevelBranches, p);
+
+    // Sort branches alphabetically
+    std::sort(
+        topLevelBranches.begin(), 
+        topLevelBranches.end(), 
+        [](const std::string& a, const std::string& b) -> bool { return a<b; }
+    );
+
     if (topLevelBranches!= _topLevelBranches) {
         _topLevelBranches = topLevelBranches;
         needsUpdate = true;
@@ -219,7 +227,7 @@ void VVariableMetadataTree::_generateCoordVarInfo(QTreeWidgetItem* parent, const
     QString qDimNames;
     for (auto dimName : dimNames)
         qDimNames += QString::fromStdString(dimName) + " ";
-    new QTreeWidgetItem(coordItem, {"Dimension names:", qDimNames});
+    new QTreeWidgetItem(coordItem, {"Dimension name(s):", qDimNames});
     
     std::vector<size_t> dims = {1};
     _dm->GetDimLensAtLevel(qCoordVar.toStdString(), -1, dims, _ts);
@@ -228,12 +236,13 @@ void VVariableMetadataTree::_generateCoordVarInfo(QTreeWidgetItem* parent, const
         qDims = qDims + ":" + QString::number(dims[1]);
     if (dims.size()>2) 
         qDims = qDims + ":" + QString::number(dims[2]);
-    new QTreeWidgetItem(coordItem, {"Dimension sizes:", qDims});
+    new QTreeWidgetItem(coordItem, {"Dimension size(s):", qDims});
 
-    new QTreeWidgetItem(coordItem, {"Time dim:", QString::fromStdString(coordVar.GetTimeDimName())});
+    new QTreeWidgetItem(coordItem, {"Unit:", QString::fromStdString(coordVar.GetUnits())});
     new QTreeWidgetItem(coordItem, {"Axis:", QString::fromStdString(axisLookup[coordVar.GetAxis()])});
+    new QTreeWidgetItem(coordItem, {"Time dim:", QString::fromStdString(coordVar.GetTimeDimName())});
     new QTreeWidgetItem(coordItem, {"Data type:", QString::fromStdString(xtypeLookup[coordVar.GetXType()+1])});
-    new QTreeWidgetItem(coordItem, {"Units:", QString::fromStdString(coordVar.GetUnits())});
+    new QTreeWidgetItem(coordItem, {"Uniform sampling:", QVariant(coordVar.GetUniform()).toString()});
 }
 
 void VVariableMetadataTree::_generateAttributeInfo(QTreeWidgetItem* parent, const VAPoR::DC::BaseVar baseVar) const {
@@ -287,7 +296,7 @@ VVariableMetadataTree::VVariableMetadataTree() : VMetadataTree() {
     setTabText(0,"Variable Metadata");
 }
 
-void VVariableMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p) const {
+void VVariableMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p /*unused*/) const {
     vars.clear();
     std::vector<std::string> v = _dm->GetDataVarNames();
     vars.insert(vars.end(),v.begin(),v.end());
@@ -305,7 +314,7 @@ void VCoordinateVariableMetadataTree::_generateMetadata(QTreeWidgetItem* item) c
     _generateCoordVarInfo(item, qvar);
 }
 
-void VCoordinateVariableMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p) const {
+void VCoordinateVariableMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p /*unused*/) const {
     vars.clear();
     std::vector<std::string> v = _dm->GetCoordVarNames();
     vars.insert(vars.end(),v.begin(),v.end());
@@ -325,7 +334,12 @@ void VGlobalAttributeMetadataTree::_generateMetadata(QTreeWidgetItem* item) cons
 
     VAPoR::DC::XType xType = _dm->GetAttType("",qattribute.toStdString());
     QString qvalue;
-    if (xType == VAPoR::DC::XType::INVALID) return;
+    if (xType == VAPoR::DC::XType::INVALID) {
+        std::cout << "INVALID" << std::endl;
+        return;
+    }
+    else 
+        std::cout << "VALID" << std::endl;
     if (xType == VAPoR::DC::XType::TEXT) {
         std::string values;
         if (!_dm->GetAtt("", qattribute.toStdString(), values)) return;
@@ -349,7 +363,7 @@ void VGlobalAttributeMetadataTree::_generateMetadata(QTreeWidgetItem* item) cons
     new QTreeWidgetItem(item, {"Type:", QString::fromStdString(xtypeLookup[_dm->GetAttType("",qattribute.toStdString())+1])});
 }
 
-void VGlobalAttributeMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p) const {
+void VGlobalAttributeMetadataTree::_gatherBranches(std::vector<std::string> &vars, VAPoR::ParamsBase* p /*unused*/) const {
     vars.clear();
     std::vector<std::string> v = _dm->GetAttNames("");
     vars.insert(vars.end(),v.begin(),v.end());
@@ -360,16 +374,29 @@ VDimensionMetadataTree::VDimensionMetadataTree() : VMetadataTree() {
 }
 
 void VDimensionMetadataTree::_generateMetadata(QTreeWidgetItem* item) const {
-    std::vector<size_t> dims;
+    if (item->childCount() > 1) return; // This branch contains more than an empty leaf, and has already been computed
+    QTreeWidgetItem* leaf = item->takeChild(0);
+    if (leaf != 0) delete leaf;
+
+    VAPoR::DC::Dimension dim;
+    _dm->GetDimension(item->text(0).toStdString(), dim, _ts);
+
+    new QTreeWidgetItem(item, {"Length:", QString::number(dim.GetLength())});
+    new QTreeWidgetItem(item, {"Is time varying:", QVariant(dim.IsTimeVarying()).toString()});
+
+    /*std::vector<size_t> dims;
     _dm->GetDimLens(item->text(0).toStdString(), dims, _ts);
+
     QString dimLens;
-    for (auto dim : dims) {
-        dimLens = dimLens + QString::number(dim) + ":";
-    }
-    item->setText(1,dimLens);
+    if (dims.size())
+        dimLens = " = " + QString::number(dims[0]);
+    else if (item->text(0).toStdString() == "Time" || item->text(0).toStdString() == "time")
+        dimLens = " = UNLIMITED";
+
+    item->setText(1,dimLens);*/
 }
 
-void VDimensionMetadataTree::_gatherBranches(std::vector<std::string> &dims, VAPoR::ParamsBase* p) const {
+void VDimensionMetadataTree::_gatherBranches(std::vector<std::string> &dims, VAPoR::ParamsBase* p /*unused*/) const {
     dims.clear();
     std::vector<std::string> d = _dm->GetDimensionNames();
     dims.insert(dims.end(),d.begin(),d.end());

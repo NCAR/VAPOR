@@ -139,6 +139,7 @@ class VDimensionMetadataTree : public VMetadataTree {
 
 public:
     VDimensionMetadataTree();
+    //void Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::DataMgr* dm) override;
 
 protected:
     void _gatherBranches(std::vector<std::string> &dims, VAPoR::ParamsBase* p) const override;
