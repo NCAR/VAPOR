@@ -28,7 +28,7 @@ jobs:
             python3 -m pip install netCDF4
             python3 -m pip install matplotlib
             python3 -m pip install sphinx_gallery
-            sudo pip install -r /root/project/docs/requirements.txt
+            pip install -r /root/project/docs/requirements.txt
           no_output_timeout: 30m
       
       - checkout
