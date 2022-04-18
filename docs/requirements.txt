@@ -1,4 +1,4 @@
-sphinx==4.2.0
+Sphinx~=4.2.0
 jinja==3.0.3
 xarray==0.18.2
 numpy==1.19.2
