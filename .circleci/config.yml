@@ -32,12 +32,6 @@ jobs:
       
       - checkout
       
-      #- run:
-      #    name: get the docs
-      #    command: |
-      #      git clone https://github.com/NCAR/VAPOR.git
-      #      git checkout $CIRCLE_BRANCH
-
       - run:
           name: build sphinx
           command: |
@@ -47,4 +41,4 @@ jobs:
 workflows:
   build:
     jobs:
-      #- build_sphinx
+      - build_sphinx
