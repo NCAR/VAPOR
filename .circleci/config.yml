@@ -42,7 +42,7 @@ jobs:
           name: build sphinx
           command: |
             cd ~/project/docs
-            make ..
+            make html
 
 workflows:
   build:
