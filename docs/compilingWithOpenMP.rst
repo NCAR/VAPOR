@@ -6,6 +6,8 @@ Compiling with OpenMP
 
 Some of Vapor's libraries have been optimized with the OpenMP API.  To build Vapor with these optimizations, ensure that your compiler supports OpenMP, and enable the following flags through `ccmake`,or by passing the arguments into `cmake`.
 
+Our team builds Vapor with OpenMP with LLVM 13+ and GCC 4.2+.
+
 Manually setting flags with ccmake
 ----------------------------------
 
