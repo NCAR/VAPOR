@@ -217,8 +217,6 @@ UNIX:
 
 .. note:: Some libraries have been optimized with the optional OpenMP API.  If you wish to compile with these optimizations, you'll need a compiler that supports OpenMP, as well as a few compiler flags which are documented :ref:`here <compilingWithOpenMP>`.
 
-:ref:`Bug reports <contributing.bugReports>`
-
 If compilation is successful, you can find Vapor's executable in the *bin* directory within your *build* directory.
 
 Changing CMake Variables
@@ -321,7 +319,7 @@ To contribute to Vapor's documentation, follow the three steps below.  Python ve
 
 .. code-block:: python
 
-    python -m pip install sphinx
+    ython -m pip install sphinx
     python -m pip install sphinx_rtd_theme
     python -m pip install sphinx_gallery
     python -m pip install xarray
