@@ -6,8 +6,6 @@ jobs:
       - image: ubuntu:20.04
 
     steps:
-      - checkout
-      
       - run:
           name: install prerequisites
           command: |
@@ -30,12 +28,14 @@ jobs:
             python3 -m pip install netCDF4
             python3 -m pip install matplotlib
             python3 -m pip install sphinx_gallery
-            pip install -r /root/project/docs/requirements.txt
           no_output_timeout: 30m
+      
+      - checkout
       
       - run:
           name: build sphinx
           command: |
+            pip install -r /root/project/docs/requirements.txt
             cd ~/project/docs
             make html
 
