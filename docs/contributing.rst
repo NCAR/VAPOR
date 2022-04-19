@@ -319,7 +319,7 @@ To contribute to Vapor's documentation, follow the three steps below.  Python ve
 
 .. code-block:: python
 
-    ython -m pip install sphinx
+    python -m pip install sphinx
     python -m pip install sphinx_rtd_theme
     python -m pip install sphinx_gallery
     python -m pip install xarray
