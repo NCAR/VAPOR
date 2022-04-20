@@ -215,6 +215,8 @@ UNIX:
 
     cmake .. && make
 
+.. note:: Some libraries have been optimized with the optional OpenMP API.  If you wish to compile with these optimizations, you'll need a compiler that supports OpenMP, as well as a few compiler flags which are documented :ref:`here <compilingWithOpenMP>`.
+
 If compilation is successful, you can find Vapor's executable in the *bin* directory within your *build* directory.
 
 Changing CMake Variables
