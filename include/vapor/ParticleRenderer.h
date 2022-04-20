@@ -32,6 +32,7 @@
 #include "vapor/VAssert.h"
 
 #include <vapor/Renderer.h>
+#include <vapor/FlowRenderer.h>
 #include <vapor/ParticleParams.h>
 #include <vapor/ShaderProgram.h>
 #include <vapor/Texture.h>
@@ -59,7 +60,23 @@ public:
     virtual int _paintGL(bool fast);
 
 private:
+    std::vector<int> _streamSizes;
+
+    unsigned int _VAO = 0;
+    unsigned int _VBO = 0;
+
+    GLuint         _colorMapTexId = 0;
+    const GLint    _colorMapTexOffset;
+    ShaderProgram *_shader = nullptr;
+    GLuint         _vertexArrayId = 0;
+    GLuint         _vertexBufferId = 0;
+
+    //friend int FlowRenderer::_renderAdvection(const flow::Advection *adv);
     void _clearCache() {}
+
+    //int _renderAdvection(const flow::Advection *adv);
+    int _renderAdvection(const glm::vec3& p);
+    int _renderAdvectionHelper(bool renderDirection = false);
 };
 
 };    // namespace VAPoR
