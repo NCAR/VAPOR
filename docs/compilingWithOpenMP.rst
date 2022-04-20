@@ -13,19 +13,19 @@ Manually setting flags with ccmake
 
 To generate an optimized release build with OpenMP, set the following fields with ccmake.
 
-+------------------------+------------------------+
-| CPACK_BINARY_DRAGNDROP | ON                     |
-+------------------------+------------------------+
-| CMAKE_BUILD_TYPE       | Release                |
-+------------------------+------------------------+
-| DIST_INSTALLER         | ON                     |
-+------------------------+------------------------+
-| CMAKE_CXX_COMPILER     | /opt/local/bin/clang++ |
-+------------------------+------------------------+
-| CMAKE_C_COMPILER       | /opt/local/bin/clang   |
-+------------------------+------------------------+
-| USE_OMP                | ON                     |
-+------------------------+------------------------+
++------------------------+----------------------------+
+| CPACK_BINARY_DRAGNDROP | ON                         |
++------------------------+----------------------------+
+| CMAKE_BUILD_TYPE       | Release                    |
++------------------------+----------------------------+
+| DIST_INSTALLER         | ON                         |
++------------------------+----------------------------+
+| CMAKE_CXX_COMPILER     | /path/to/your/c++/compiler |
++------------------------+----------------------------+
+| CMAKE_C_COMPILER       | /path/to/your/c/compiler   |
++------------------------+----------------------------+
+| USE_OMP                | ON                         |
++------------------------+----------------------------+
 
 Command line CMake build incantation
 ------------------------------------
