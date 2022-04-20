@@ -17,6 +17,7 @@
 
 #include <vapor/utils.h>
 #include <vapor/Grid.h>
+#include <vapor/OpenMPSupport.h>
 
 using namespace std;
 using namespace VAPoR;
@@ -141,24 +142,55 @@ void Grid::SetValueIJK(size_t i, size_t j, size_t k, float v)
 
 void Grid::GetRange(float range[2]) const
 {
-    float               missingValue = GetMissingValue();
-    Grid::ConstIterator itr = this->cbegin();
-    Grid::ConstIterator enditr = this->cend();
+    float missingVal = GetMissingValue();
+    const auto num_vals = _dims[0] * _dims[1] * _dims[2];
+    auto num_threads = size_t{0};
+#pragma omp parallel
+    {
+      if (omp_get_thread_num() == 0)
+        num_threads = omp_get_num_threads();
+    }
+    assert(num_vals > num_threads);
+    const auto stride_size = num_vals / num_threads;
 
-    // Edge case: all values are missing values.
-    //
-    range[0] = range[1] = missingValue;
-    while (*itr == missingValue && itr != enditr) { ++itr; }
-    if (itr == enditr) return;
+    auto min_vec = std::vector<float>(num_threads, missingVal);
+    auto max_vec = std::vector<float>(num_threads, missingVal);
 
-    range[0] = *itr;
-    range[1] = range[0];
-    while (itr != enditr) {
-        if (*itr < range[0] && *itr != missingValue)
-            range[0] = *itr;
-        else if (*itr > range[1] && *itr != missingValue)
-            range[1] = *itr;
-        ++itr;
+#pragma omp parallel for
+    for (size_t i = 0; i < num_threads; i++) {
+      auto beg = this->cbegin() + i * stride_size;
+      auto end = beg;
+      if (i < num_threads - 1) 
+          end += stride_size;
+      else
+          end = this->cend();
+
+      while (*beg == missingVal && beg != end) { ++beg; }
+
+      if (beg != end) {
+        auto min = *beg;
+        auto max = *beg;
+        for (auto itr  = beg + 1; itr != end; ++itr) {
+          if (*itr != missingVal) {
+            min = std::min(*itr, min);      
+            max = std::max(*itr, max);      
+          }
+        }
+        min_vec[i] = min;
+        max_vec[i] = max;
+      }
+    }
+
+    if (std::all_of(min_vec.begin(), min_vec.end(), 
+        [missingVal](float v){return v == missingVal;})) {
+      range[0] = missingVal;
+      range[1] = missingVal;
+    }
+    else {
+      auto it = std::remove(min_vec.begin(), min_vec.end(), missingVal);
+      range[0] = *std::min_element(min_vec.begin(), it);
+      it = std::remove(max_vec.begin(), max_vec.end(), missingVal);
+      range[1] = *std::max_element(max_vec.begin(), it);
     }
 }
 
