@@ -68,7 +68,6 @@ private:
     GLuint              _vertexArrayId = 0;
     GLuint              _vertexBufferId = 0;
     const GLint         _colorMapTexOffset;
-    ShaderProgram*      _shader = nullptr;
     float               _colorMapRange[3];
     std::vector<float>  _colorMap;
 

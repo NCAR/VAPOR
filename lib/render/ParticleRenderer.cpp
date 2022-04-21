@@ -26,7 +26,6 @@
 
 #include <vapor/Renderer.h>
 #include <vapor/ParticleRenderer.h>
-#include <vapor/FlowRenderer.h>
 #include <vapor/ParticleParams.h>
 #include <vapor/regionparams.h>
 #include <vapor/ViewpointParams.h>
@@ -87,7 +86,6 @@ int ParticleRenderer::_paintGL(bool)
     mf->makeLut(LUT);
     float mapMin = mf->getMinMapValue();
     float mapMax = mf->getMaxMapValue();
-    float mapDif = mapMax - mapMin;
 
     CoordType minExt = {0.0, 0.0, 0.0};
     CoordType maxExt = {0.0, 0.0, 0.0};
@@ -289,7 +287,7 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
 {
     auto rp = GetActiveParams();
 
-    float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
+    float radiusBase = rp->GetValueDouble(ParticleParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
         CoordType mind, maxd;
 
@@ -303,7 +301,7 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
         glm::vec3  lens = max - min;
         float largestDim = glm::max(lens.x, glm::max(lens.y, lens.z));
         radiusBase = largestDim / 560.f;
-        rp->SetValueDouble(FlowParams::RenderRadiusBaseTag, "", radiusBase);
+        rp->SetValueDouble(ParticleParams::RenderRadiusBaseTag, "", radiusBase);
     }
     float radiusScalar = rp->GetValueDouble(ParticleParams::RadiusTag, 1.);
     float radius = radiusBase * radiusScalar;
@@ -330,10 +328,7 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
     shader->SetUniform("lightingEnabled", true);
     shader->SetUniform("scales", _getScales());
     shader->SetUniform("cameraPos", cameraPos);
-    if (rp->GetValueLong(FlowParams::RenderLightAtCameraTag, true))
-        shader->SetUniform("lightDir", cameraDir);
-    else
-        shader->SetUniform("lightDir", glm::vec3(0, 0, -1));
+    shader->SetUniform("lightDir", cameraDir);
     shader->SetUniform("phongAmbient", (float)rp->GetValueDouble(ParticleParams::PhongAmbientTag, 0.4));
     shader->SetUniform("phongDiffuse", (float)rp->GetValueDouble(ParticleParams::PhongDiffuseTag, 0.8));
     shader->SetUniform("phongSpecular", (float)rp->GetValueDouble(ParticleParams::PhongSpecularTag, 0.0));
