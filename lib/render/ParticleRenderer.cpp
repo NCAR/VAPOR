@@ -76,12 +76,6 @@ ParticleRenderer::~ParticleRenderer() {
 
 int ParticleRenderer::_paintGL(bool)
 {
-    //FlowRenderer fr(_paramsMgr,_winName,_dataSetName,_instName,_dataMgr);
-    //fr._print();
-
-    //flow::Advection* adv;
-    //fr._renderAdvection(adv);
-
     int rc = 0;
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
@@ -186,7 +180,7 @@ int ParticleRenderer::_paintGL(bool)
     }
 
     _prepareColormap();
-    _renderAdvection(particles);
+    _renderParticles(particles);
 
     //    printf("Rendered %li particles\n", renderedParticles);
 
@@ -229,85 +223,72 @@ int ParticleRenderer::_initializeGL() {
     return 0; 
 }
 
-int ParticleRenderer::_renderAdvection(const std::vector<glm::vec4>& particles)
+int ParticleRenderer::_renderParticles(const std::vector<glm::vec4>& particles)
 {
-        int nStreams = particles.size();
+    typedef struct {
+        glm::vec3  p;
+        float v;
+    } Vertex;
+    vector<Vertex> vertices;
+    vector<int>    sizes;
+    vector<Vertex> sv;
 
-        typedef struct {
-            glm::vec3  p;
-            float v;
-        } Vertex;
-        vector<Vertex> vertices;
-        vector<int>    sizes;
-        vector<Vertex> sv;
+    int nStreams = particles.size();
+    for (int s = 0; s < nStreams; s+=2) {
+        glm::vec4 p = particles[s];
+        glm::vec4 p2 = particles[s+1];
+        const vector<flow::Particle> stream = {flow::Particle(p[0],p[1],p[2],0.,p[3]), flow::Particle(p2[0],p2[1],p2[2],0.,p2[3])};
+        sv.clear();
+        int sn = stream.size();
 
-        // If streams are larger than this then need to skip remaining
-        //size_t maxSamples = rp->GetSteadyNumOfSteps() + 1;
-        size_t maxSamples = 1;
+        for (int i = 0; i < sn + 1; i++) {
+            // "IsSpecial" means don't render this sample.
+            if (i == sn || stream[i].IsSpecial()) {
+                int svn = sv.size();
 
-        // First calculate the starting time stamp. Copied from legacy.
-        //double startingTime = _timestamps[0];
-        double startingTime = 0;
-
-        for (int s = 0; s < nStreams; s+=2) {
-            glm::vec4 p = particles[s];
-            glm::vec4 p2 = particles[s+1];
-            const vector<flow::Particle> stream = {flow::Particle(p[0],p[1],p[2],0.,p[3]), flow::Particle(p2[0],p2[1],p2[2],0.,p2[3])};
-            sv.clear();
-            int sn = stream.size();
-
-            for (int i = 0; i < sn + 1; i++) {
-                // "IsSpecial" means don't render this sample.
-                if (i == sn || stream[i].IsSpecial()) {
-                    int svn = sv.size();
-
-                    if (svn < 2) {
-                        sv.clear();
-                        continue;
-                    }
-
-                    glm::vec3 prep(-normalize(sv[1].p - sv[0].p) + sv[0].p);
-                    glm::vec3 post(normalize(sv[svn - 1].p - sv[svn - 2].p) + sv[svn - 1].p);
-
-                    size_t vn = vertices.size();
-                    vertices.resize(vn + svn + 2);
-                    vertices[vn] = {prep, sv[0].v};
-                    vertices[vertices.size() - 1] = {post, sv[svn - 1].v};
-
-                    memcpy(vertices.data() + vn + 1, sv.data(), sizeof(Vertex) * svn);
-
-                    sizes.push_back(svn + 2);
+                if (svn < 2) {
                     sv.clear();
-                } else {
-                    const flow::Particle &p = stream[i];
-                    sv.push_back({p.location, p.value});
+                    continue;
                 }
+
+                glm::vec3 prep(-normalize(sv[1].p - sv[0].p) + sv[0].p);
+                glm::vec3 post(normalize(sv[svn - 1].p - sv[svn - 2].p) + sv[svn - 1].p);
+
+                size_t vn = vertices.size();
+                vertices.resize(vn + svn + 2);
+                vertices[vn] = {prep, sv[0].v};
+                vertices[vertices.size() - 1] = {post, sv[svn - 1].v};
+
+                memcpy(vertices.data() + vn + 1, sv.data(), sizeof(Vertex) * svn);
+
+                sizes.push_back(svn + 2);
+                sv.clear();
+            } else {
+                const flow::Particle &p = stream[i];
+                sv.push_back({p.location, p.value});
             }
         }
+    }
 
-        assert(glIsVertexArray(_VAO) == GL_TRUE);
-        assert(glIsBuffer(_VBO) == GL_TRUE);
+    assert(glIsVertexArray(_VAO) == GL_TRUE);
+    assert(glIsBuffer(_VBO) == GL_TRUE);
 
-        glBindVertexArray(_VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STREAM_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        _streamSizes = sizes;
+    _streamSizes = sizes;
 
-    _renderAdvectionHelper();
+    _renderParticlesHelper();
 
     return 0;
 }
 
-int ParticleRenderer::_renderAdvectionHelper(bool renderDirection)
+int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
 {
     auto rp = GetActiveParams();
 
-    FlowParams::RenderType renderType = (FlowParams::RenderType)rp->GetValueLong(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream);
-    FlowParams::GlpyhType  glyphType = (FlowParams::GlpyhType)rp->GetValueLong(FlowParams::RenderGlyphTypeTag, FlowParams::GlpyhTypeSphere);
-
-    bool  geom3d = rp->GetValueLong(FlowParams::RenderGeom3DTag, true);
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
         CoordType mind, maxd;
@@ -326,15 +307,12 @@ int ParticleRenderer::_renderAdvectionHelper(bool renderDirection)
     }
     float radiusScalar = rp->GetValueDouble(ParticleParams::RadiusTag, 1.);
     float radius = radiusBase * radiusScalar;
-    int   glyphStride = rp->GetValueLong(FlowParams::RenderGlyphStrideTag, 5);
 
     ShaderProgram *shader = nullptr;
-
     if (rp->GetValueLong(ParticleParams::ShowDirectionTag, 0))
         shader = _glManager->shaderManager->GetShader("FlowTubes"); 
     else
         shader = _glManager->shaderManager->GetShader("FlowGlyphsSphereSplat");
-
     if (!shader) return -1;
 
     double m[16];
@@ -350,18 +328,16 @@ int ParticleRenderer::_renderAdvectionHelper(bool renderDirection)
     shader->SetUniform("aspect", _glManager->matrixManager->GetProjectionAspectRatio());
     shader->SetUniform("radius", radius);
     shader->SetUniform("lightingEnabled", true);
-    shader->SetUniform("glyphStride", glyphStride);
-    shader->SetUniform("showOnlyLeadingSample", (bool)rp->GetValueLong(FlowParams::RenderGlyphOnlyLeadingTag, false));
     shader->SetUniform("scales", _getScales());
     shader->SetUniform("cameraPos", cameraPos);
     if (rp->GetValueLong(FlowParams::RenderLightAtCameraTag, true))
         shader->SetUniform("lightDir", cameraDir);
     else
         shader->SetUniform("lightDir", glm::vec3(0, 0, -1));
-    shader->SetUniform("phongAmbient", (float)rp->GetValueDouble(FlowParams::PhongAmbientTag, 0.4));
-    shader->SetUniform("phongDiffuse", (float)rp->GetValueDouble(FlowParams::PhongDiffuseTag, 0.8));
-    shader->SetUniform("phongSpecular", (float)rp->GetValueDouble(FlowParams::PhongSpecularTag, 0.0));
-    shader->SetUniform("phongShininess", (float)rp->GetValueDouble(FlowParams::PhongShininessTag, 2.));
+    shader->SetUniform("phongAmbient", (float)rp->GetValueDouble(ParticleParams::PhongAmbientTag, 0.4));
+    shader->SetUniform("phongDiffuse", (float)rp->GetValueDouble(ParticleParams::PhongDiffuseTag, 0.8));
+    shader->SetUniform("phongSpecular", (float)rp->GetValueDouble(ParticleParams::PhongSpecularTag, 0.0));
+    shader->SetUniform("phongShininess", (float)rp->GetValueDouble(ParticleParams::PhongShininessTag, 2.));
 
 
     VAPoR::MapperFunction *mapperFunc = rp->GetMapperFunc(rp->GetColorMapVariableName());
@@ -376,25 +352,6 @@ int ParticleRenderer::_renderAdvectionHelper(bool renderDirection)
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
     shader->SetUniform("mapRange", glm::make_vec2(_colorMapRange));
 
-    shader->SetUniform("fade_tails", (bool)rp->GetValueLong(FlowParams::RenderFadeTailTag, 0));
-    shader->SetUniform("fade_start", (int)rp->GetValueLong(FlowParams::RenderFadeTailStartTag, 10));
-    shader->SetUniform("fade_length", (int)rp->GetValueLong(FlowParams::RenderFadeTailLengthTag, 10));
-    shader->SetUniform("fade_stop", (int)rp->GetValueLong(FlowParams::RenderFadeTailStopTag, 0));
-
-    shader->SetUniform("density", renderType == FlowParams::RenderTypeDensity);
-    shader->SetUniform("falloff", (float)rp->GetValueDouble(FlowParams::RenderDensityFalloffTag, 1));
-    shader->SetUniform("tone", (float)rp->GetValueDouble(FlowParams::RenderDensityToneMappingTag, 1));
-
-    //    Features supported by shaders but not implemented in GUI/not finished
-    //
-    //    shader->SetUniform("constantColorEnabled", false);
-    //    shader->SetUniform("Color", vec3(1.0f));
-    //    shader->SetUniform("antiAlias", (bool)rp->GetValueLong("anti_alias", 0));
-    //    auto bcd = rp->GetValueDoubleVec("border_color");
-    //    if (bcd.size())
-    //        shader->SetUniform("borderColor", vec3((float)bcd[0], bcd[1], bcd[2]));
-    //    shader->SetUniform("border", (float)rp->GetValueDouble("border", 0));
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _colorMapTexId);
     shader->SetUniform("LUT", 0);
@@ -405,15 +362,6 @@ int ParticleRenderer::_renderAdvectionHelper(bool renderDirection)
     glFrontFace(GL_CCW);
     glEnable(GL_BLEND);
     glBindVertexArray(_VAO);
-
-    if (renderType == FlowParams::RenderTypeDensity) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        if (rp->GetValueLong("invert", false))
-            glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);
-        else
-            glBlendEquation(GL_FUNC_ADD);
-        glDepthMask(GL_FALSE);
-    }
 
     size_t offset = 0;
     for (int n : _streamSizes) {

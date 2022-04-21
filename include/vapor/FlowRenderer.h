@@ -29,9 +29,6 @@ protected:
     virtual std::string _getColorbarVariableName() const override;
 
 private:
-    void _print() {std::cout << "FlowRenderer _print()" << std::endl;}
-    friend class ParticleRenderer;
-
     // Define two enums for this class use only
     enum class FlowStatus {
         SIMPLE_OUTOFDATE,    // When variable name or compression is out of date,

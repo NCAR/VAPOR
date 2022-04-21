@@ -415,22 +415,18 @@ int FlowRenderer::_renderAdvection(const flow::Advection *adv)
         }
 
         for (int s = 0; s < nStreams; s++) {
-            std::cout << "Foo " << nStreams << std::endl;
             const vector<flow::Particle> &stream = adv->GetStreamAt(s);
             sv.clear();
             int sn = stream.size();
             if (_cache_isSteady) sn = std::min(sn, (int)maxSamples);
 
             for (int i = 0; i < sn + 1; i++) {
-                std::cout << "Bar " << i << " " << sn+1 << std::endl;
                 // "IsSpecial" means don't render this sample.
                 if (i == sn || stream[i].IsSpecial()) {
-                    std::cout << "Baz" << std::endl;
                     int svn = sv.size();
 
                     if (svn < 2) {
                         sv.clear();
-                        std::cout << "done" << std::endl;
                         continue;
                     }
 
@@ -447,7 +443,6 @@ int FlowRenderer::_renderAdvection(const flow::Advection *adv)
                     sizes.push_back(svn + 2);
                     sv.clear();
                 } else {
-                    std::cout << "Boo" << std::endl;
                     const flow::Particle &p = stream[i];
 
                     if (_cache_isSteady) {
@@ -483,7 +478,6 @@ int FlowRenderer::_renderAdvection(const flow::Advection *adv)
 
 int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
 {
-    std::cout << "_renderAdvectionHelper() " << std::endl;
     auto rp = GetActiveParams();
 
     FlowParams::RenderType renderType = (FlowParams::RenderType)rp->GetValueLong(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream);

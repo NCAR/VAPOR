@@ -32,7 +32,6 @@
 #include "vapor/VAssert.h"
 
 #include <vapor/Renderer.h>
-#include <vapor/FlowRenderer.h>
 #include <vapor/ParticleParams.h>
 #include <vapor/ShaderProgram.h>
 #include <vapor/Texture.h>
@@ -65,19 +64,18 @@ private:
     unsigned int _VAO = 0;
     unsigned int _VBO = 0;
 
-    GLuint         _colorMapTexId = 0;
-    const GLint    _colorMapTexOffset;
-    ShaderProgram *_shader = nullptr;
-    GLuint         _vertexArrayId = 0;
-    GLuint         _vertexBufferId = 0;
+    GLuint              _colorMapTexId = 0;
+    GLuint              _vertexArrayId = 0;
+    GLuint              _vertexBufferId = 0;
+    const GLint         _colorMapTexOffset;
+    ShaderProgram*      _shader = nullptr;
+    float               _colorMapRange[3];
     std::vector<float>  _colorMap;
-    float          _colorMapRange[3];
 
-    //friend int FlowRenderer::_renderAdvection(const flow::Advection *adv);
     void _clearCache() {}
 
-    int _renderAdvection(const std::vector<glm::vec4>& p);
-    int _renderAdvectionHelper(bool renderDirection = false);
+    int _renderParticles(const std::vector<glm::vec4>& p);
+    int _renderParticlesHelper(bool renderDirection = false);
     void _prepareColormap();
     glm::vec3 _getScales();
 };
