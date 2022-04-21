@@ -2,6 +2,7 @@
 #include <vapor/ImageParams.h>
 #include "PWidgets.h"
 #include "PTMSLODInput.h"
+#include "PMetadataClasses.h"
 
 using namespace VAPoR;
 typedef ImageParams IP;
@@ -16,7 +17,8 @@ ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
         new PSection("Variable Selection", {
             new PHeightVariableSelector
         }),
-        new PFidelitySection
+        new PFidelitySection,
+        new POpenVariableMetadataWidget
     }));
     
     AddAppearanceSubtab(new PSection("Image", {
