@@ -11,8 +11,6 @@ static RenderEventRouterRegistrar<VolumeEventRouter> registrar(VolumeEventRouter
 
 VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, VolumeParams::GetClassType())
 {
-    // clang-format off
-
     AddVariablesSubtab(new PGroup({
         new PSection("Variable Selection", {
             new PScalarVariableSelector,
@@ -50,8 +48,6 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce) : RenderE
     
     AddGeometrySubtab(new PGeometrySubtab);
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
-
-    // clang-format on
 }
 
 string VolumeEventRouter::_getDescription() const

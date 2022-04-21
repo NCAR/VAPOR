@@ -25,13 +25,22 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
     
     AddAppearanceSubtab(new PGroup({
         new PTFEditor,
-        new PSection("Direction", {
-            new PCheckbox(ParticleParams::ShowDirectionTag, "Show"),
-            (new PDoubleSliderEdit(ParticleParams::DirectionScaleTag, "Scale"))->SetRange(0.0001, 10)->EnableDynamicUpdate(),
-            (new PXFieldVariableSelector)->ShowParticleVars(),
-            (new PYFieldVariableSelector)->ShowParticleVars(),
-            (new PZFieldVariableSelector)->ShowParticleVars(),
+        new PSection("Particles", {
+            (new PDoubleSliderEdit(ParticleParams::RadiusTag, "Radius"))->SetRange(0.5, 25)->AllowUserRange(true)->EnableDynamicUpdate(),
+            new PCheckbox(ParticleParams::ShowDirectionTag, "Show direction"),
+            (new PShowIf(ParticleParams::ShowDirectionTag))->Equals(true)->Then({
+                (new PDoubleSliderEdit(ParticleParams::DirectionScaleTag, "Length scale"))->SetRange(0.0001, 10)->AllowUserRange(true)->EnableDynamicUpdate(),
+                (new PXFieldVariableSelector)->ShowParticleVars(),
+                (new PYFieldVariableSelector)->ShowParticleVars(),
+                (new PZFieldVariableSelector)->ShowParticleVars(),
+            }),
         }),
+        new PSection("Lighting", {
+            (new PDoubleSliderEdit(ParticleParams::PhongAmbientTag,   "Ambient"  ))->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(ParticleParams::PhongDiffuseTag,   "Diffuse"  ))->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(ParticleParams::PhongSpecularTag,  "Specular" ))->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(ParticleParams::PhongShininessTag, "Shininess"))->EnableDynamicUpdate()
+        })
     }));
     
     AddGeometrySubtab(new PGeometrySubtab);

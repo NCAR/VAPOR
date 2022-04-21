@@ -26,6 +26,13 @@ public:
     static const std::string ShowDirectionTag;
     static const std::string DirectionScaleTag;
     static const std::string StrideTag;
+    static const std::string RadiusTag;
+
+    static const std::string LightingEnabledTag;
+    static const std::string PhongAmbientTag;
+    static const std::string PhongDiffuseTag;
+    static const std::string PhongSpecularTag;
+    static const std::string PhongShininessTag;
 };
 
 };    // namespace VAPoR

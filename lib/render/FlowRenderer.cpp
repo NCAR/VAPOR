@@ -483,6 +483,7 @@ int FlowRenderer::_renderAdvection(const flow::Advection *adv)
 
 int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
 {
+    std::cout << "_renderAdvectionHelper() " << std::endl;
     auto rp = GetActiveParams();
 
     FlowParams::RenderType renderType = (FlowParams::RenderType)rp->GetValueLong(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream);

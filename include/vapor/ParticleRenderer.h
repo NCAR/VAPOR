@@ -70,13 +70,16 @@ private:
     ShaderProgram *_shader = nullptr;
     GLuint         _vertexArrayId = 0;
     GLuint         _vertexBufferId = 0;
+    std::vector<float>  _colorMap;
+    float          _colorMapRange[3];
 
     //friend int FlowRenderer::_renderAdvection(const flow::Advection *adv);
     void _clearCache() {}
 
-    //int _renderAdvection(const flow::Advection *adv);
-    int _renderAdvection(const glm::vec3& p);
+    int _renderAdvection(const std::vector<glm::vec4>& p);
     int _renderAdvectionHelper(bool renderDirection = false);
+    void _prepareColormap();
+    glm::vec3 _getScales();
 };
 
 };    // namespace VAPoR
