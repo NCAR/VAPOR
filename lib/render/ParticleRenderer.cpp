@@ -25,6 +25,7 @@
 #include <vapor/glutil.h>    // Must be included first!!!
 
 #include <vapor/Renderer.h>
+#include <vapor/Particle.h>
 #include <vapor/ParticleRenderer.h>
 #include <vapor/ParticleParams.h>
 #include <vapor/regionparams.h>
@@ -84,8 +85,6 @@ int ParticleRenderer::_paintGL(bool)
     MapperFunction *mf = p->GetMapperFunc(p->GetVariableName());
     float           LUT[256 * 4];
     mf->makeLut(LUT);
-    float mapMin = mf->getMinMapValue();
-    float mapMax = mf->getMaxMapValue();
 
     CoordType minExt = {0.0, 0.0, 0.0};
     CoordType maxExt = {0.0, 0.0, 0.0};
