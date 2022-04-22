@@ -314,6 +314,31 @@ void PrintStats(double rms, size_t numMissingValues, size_t disagreements, doubl
     cout << endl;
 }
 
+// Copy of Grid::GetRange() function from VAPOR release 3.6
+//
+void GetRange_36(VAPoR::Grid* g, float range[2])
+{
+    float missingValue = g->GetMissingValue();
+    auto itr = g->cbegin();
+    auto enditr = g->cend();
+
+    // Edge case: all values are missing values.
+    //
+    range[0] = range[1] = missingValue;
+    while (*itr == missingValue && itr != enditr) { ++itr; }
+    if (itr == enditr) return;
+
+    range[0] = *itr;
+    range[1] = range[0];
+    while (itr != enditr) {
+        if (*itr < range[0] && *itr != missingValue)
+            range[0] = *itr;
+        else if (*itr > range[1] && *itr != missingValue)
+            range[1] = *itr;
+        ++itr;
+    }
+}
+
 bool RunTest(Grid *grid, bool silenceTime)
 {
     bool   rc = true;
@@ -333,6 +358,23 @@ bool RunTest(Grid *grid, bool silenceTime)
     double time = Wasp::GetTime() - t0;
 
     PrintStats(rms, numMissingValues, disagreements, time, silenceTime);
+
+    // Test OpenMP implementation of Grid::GetRange()
+    float range_36[2] = {0.0, 1.1};
+    float range_omp[2] = {2.2, 3.3};
+    auto serial_start = std::chrono::steady_clock::now();
+    GetRange_36(grid, range_36);
+    auto serial_end = std::chrono::steady_clock::now();
+    grid->GetRange(range_omp);
+    auto omp_end = std::chrono::steady_clock::now();
+    bool omp_good = (range_36[0] == range_omp[0] && range_36[1] == range_omp[1]);
+ 
+    rc = rc && omp_good;
+
+    const auto serial_time = std::chrono::duration_cast<std::chrono::milliseconds>(serial_end - serial_start).count();
+    const auto omp_time = std::chrono::duration_cast<std::chrono::milliseconds>(omp_end - serial_end).count();
+    std::cout << "    GetRange() in serial time (milliseconds): " << serial_time << std::endl;
+    std::cout << "    GetRange() in OpenMP time (milliseconds): " << omp_time << std::endl;
 
     if (rc == false) {
         cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl << endl;

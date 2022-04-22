@@ -196,8 +196,8 @@ int main(int argc, char **argv)
 
 #pragma omp parallel
     {
-        if (omp_get_thread_num() == 0) cout << "Num threads: " << omp_get_num_threads() << endl;
-        ;
+        if (omp_get_thread_num() == 0)
+          cout << "Num threads: " << omp_get_num_threads() << endl;
     }
 
     // Test Regular Grid
