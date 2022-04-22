@@ -142,7 +142,7 @@ void Grid::SetValueIJK(size_t i, size_t j, size_t k, float v)
 
 void Grid::GetRange(float range[2]) const
 {
-    float missingVal = GetMissingValue();
+    const auto missingVal = GetMissingValue();
     const auto num_vals = _dims[0] * _dims[1] * _dims[2];
     auto num_threads = size_t{0};
 #pragma omp parallel
