@@ -239,8 +239,7 @@ int ParticleRenderer::_renderParticles(const std::vector<glm::vec4>& particles)
         int sn = stream.size();
 
         for (int i = 0; i < sn + 1; i++) {
-            // "IsSpecial" means don't render this sample.
-            if (i == sn || stream[i].IsSpecial()) {
+            if (i == sn) {
                 int svn = sv.size();
 
                 if (svn < 2) {
