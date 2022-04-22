@@ -72,6 +72,7 @@ gridSizes = [
 #    "8x8x1",
     "7x7x7",
     "8x8x8"
+    "64x64x64"
 ]
 
 resultsDir = "".join( args['resultsDir'] )
