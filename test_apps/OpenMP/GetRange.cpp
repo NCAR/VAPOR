@@ -2,6 +2,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <vector>
+#include <random>
 #include <array>
 
 #include "vapor/RegularGrid.h"
@@ -77,6 +78,15 @@ int main(int argc, char* argv[])
   const auto blk_size = std::array<size_t, 3>{128, 128, 128};
   auto blks = AllocateBlocks(blk_size, dims);
   auto* grid = new VAPoR::RegularGrid(dims, blk_size, blks, {0.0, 0.0, 0.0}, {100.0, 100.0, 100.0}); 
+
+  // Fill in random values
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<float> dist(-1.0, 20.0);
+  for (size_t k = 0; k < dim; k++)
+    for (size_t j = 0; j < dim; j++)
+      for (size_t i = 0; i < dim; i++)
+        grid->SetValueIJK(i, j, k, dist(gen));
 
   // Time a serial run
   float range_36[2] = {0.0, 1.1};
