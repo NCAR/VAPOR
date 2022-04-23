@@ -8,7 +8,6 @@
 #include <string>
 #include <algorithm>
 #include <memory>
-#include <chrono>
 
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
@@ -360,22 +359,14 @@ bool RunTest(Grid *grid, bool silenceTime)
 
     PrintStats(rms, numMissingValues, disagreements, time, silenceTime);
 
-    // Test OpenMP implementation of Grid::GetRange()
+    // Test the correctness of OpenMP implementation of Grid::GetRange()
     float range_36[2] = {0.0, 1.1};
     float range_omp[2] = {2.2, 3.3};
-    auto serial_start = std::chrono::steady_clock::now();
     GetRange_36(grid, range_36);
-    auto serial_end = std::chrono::steady_clock::now();
     grid->GetRange(range_omp);
-    auto omp_end = std::chrono::steady_clock::now();
     bool omp_good = (range_36[0] == range_omp[0] && range_36[1] == range_omp[1]);
  
     rc = rc && omp_good;
-
-    const auto serial_time = std::chrono::duration_cast<std::chrono::milliseconds>(serial_end - serial_start).count();
-    const auto omp_time = std::chrono::duration_cast<std::chrono::milliseconds>(omp_end - serial_end).count();
-    std::cout << "    GetRange() in serial time (milliseconds): " << serial_time << std::endl;
-    std::cout << "    GetRange() in OpenMP time (milliseconds): " << omp_time << std::endl;
 
     if (rc == false) {
         cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
