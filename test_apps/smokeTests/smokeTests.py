@@ -26,7 +26,7 @@ parser.add_argument(
     '-testDataRoot', 
     nargs=1,
     type=str,
-    default="/Users/pearse/Data/smokeTestData", 
+    default="~/Data/smokeTestData", 
     required=False,
     metavar='/path/to/data',
     help='Directory where DataMgr test data is stored.'
@@ -35,7 +35,7 @@ parser.add_argument(
     '-binaryRoot', 
     nargs=1,
     type=str,
-    default="/Users/pearse/VAPOR/build/test_binaries", 
+    default="~/VAPOR/build/test_binaries", 
     required=False,
     metavar='/path/to/binaries',
     help='Directory where binary test programs (testGrid, testDataMgr) are stored.'
@@ -44,7 +44,7 @@ parser.add_argument(
     '-resultsDir', 
     nargs=1,
     type=str,
-    default="/Users/pearse/VAPOR/test_apps/smokeTests/testResults", 
+    default="~/VAPOR/test_apps/smokeTests/testResults", 
     required=False,
     metavar='/path/to/write/results/to',
     help='Directory where test results are stored.'
@@ -74,15 +74,15 @@ gridSizes = [
     "8x8x8"
 ]
 
-resultsDir = "".join( args['resultsDir'] )
+resultsDir = os.path.expanduser("".join( args['resultsDir'] ))
 if (resultsDir[-1] != r'/'):
     resultsDir += r'/'
 
-testDataRoot = "".join( args['testDataRoot'] )
+testDataRoot = os.path.expanduser("".join( args['testDataRoot'] ))
 if (testDataRoot[-1] != r'/'):
     testDataRoot += r'/'
 
-binaryRoot = "".join( args['binaryRoot'] )
+binaryRoot = os.path.expanduser("".join( args['binaryRoot'] ))
 if (binaryRoot[-1] != r'/'):
     binaryRoot += r'/'
 
