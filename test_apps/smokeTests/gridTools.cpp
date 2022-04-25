@@ -67,7 +67,7 @@ template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, co
 
 vector<float *> AllocateBlocks(const vector<size_t> &bs, const vector<size_t> &dims) { return (AllocateBlocksType<float>(bs, dims)); }
 
-void MakeTriangle(Grid *grid, float minVal, float maxVal)
+void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -79,13 +79,17 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal)
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
                 value = value == minVal ? maxVal : minVal;
-                grid->SetValueIJK(i, j, k, value);
+                if (addMissingValues) {
+                    if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
+                    else grid->SetValueIJK(i, j, k, value);
+                }
+                else grid->SetValueIJK(i, j, k, value);
             }
         }
     }
 }
 
-void MakeConstantField(Grid *grid, float value)
+void MakeConstantField(Grid *grid, float value, bool addMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -94,12 +98,18 @@ void MakeConstantField(Grid *grid, float value)
 
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
-            for (size_t i = 0; i < x; i++) { grid->SetValueIJK(i, j, k, value); }
+            for (size_t i = 0; i < x; i++) { 
+                if (addMissingValues) {
+                    if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
+                    else grid->SetValueIJK(i, j, k, value);
+                }
+                else grid->SetValueIJK(i, j, k, value);
+            }
         }
     }
 }
 
-void MakeRamp(Grid *grid, float minVal, float maxVal)
+void MakeRamp(Grid *grid, float minVal, float maxVal, bool addMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -112,14 +122,18 @@ void MakeRamp(Grid *grid, float minVal, float maxVal)
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
-                grid->SetValueIJK(i, j, k, value);
+                if (addMissingValues) {
+                    if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
+                    else grid->SetValueIJK(i, j, k, value);
+                }
+                else grid->SetValueIJK(i, j, k, value);
                 value += increment;
             }
         }
     }
 }
 
-void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X)
+void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X, bool addMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -136,7 +150,11 @@ void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X)
         for (size_t j = 0; j < y; j++) {
             value = axis == X ? minVal : value;    // reset value if we're ramping on X
             for (size_t i = 0; i < x; i++) {
-                grid->SetValueIJK(i, j, k, value);
+                if (addMissingValues) {
+                    if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
+                    else grid->SetValueIJK(i, j, k, value);
+                }
+                else grid->SetValueIJK(i, j, k, value);
                 value += xIncrement;
             }
             value += yIncrement;
@@ -369,7 +387,7 @@ bool RunTest(Grid *grid, bool silenceTime)
     rc = rc && omp_good;
 
     if (rc == false) {
-        cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
+        cout << "    *** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
     } else {
         cout << endl;
     }

@@ -148,4 +148,4 @@ Time Coordinates:
 
 Time coordinate variable name: Time
 Number of time steps: 1
-Elapsed time: 73.9334
+Elapsed time: 8.63176

@@ -35,7 +35,7 @@ parser.add_argument(
     '-binaryRoot', 
     nargs=1,
     type=str,
-    default="/Users/pearse/VAPOR/build/bin", 
+    default="/Users/pearse/VAPOR/build/test_binaries", 
     required=False,
     metavar='/path/to/binaries',
     help='Directory where binary test programs (testGrid, testDataMgr) are stored.'
