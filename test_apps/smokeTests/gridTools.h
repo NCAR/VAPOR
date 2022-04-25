@@ -8,13 +8,13 @@
 
 std::vector<float *> AllocateBlocks(const std::vector<size_t> &bs, const std::vector<size_t> &dims);
 
-void MakeTriangle(VAPoR::Grid *grid, float minVal, float maxVal, bool addMissingValues=true);
+void MakeTriangle(VAPoR::Grid *grid, float minVal, float maxVal, bool addRandomMissingValues=true);
 
-void MakeConstantField(VAPoR::Grid *grid, float value, bool addMissingValues=true);
+void MakeConstantField(VAPoR::Grid *grid, float value, bool addRandomMissingValues=true);
 
-void MakeRamp(VAPoR::Grid *grid, float minVal, float maxVal, bool addMissingValues=true);
+void MakeRamp(VAPoR::Grid *grid, float minVal, float maxVal, bool addRandomMissingValues=true);
 
-void MakeRampOnAxis(VAPoR::Grid *grid, float minVal, float maxVal, size_t axis, bool addMissingValues=true);
+void MakeRampOnAxis(VAPoR::Grid *grid, float minVal, float maxVal, size_t axis, bool addRandomMissingValues=true);
 
 bool CompareIndexToCoords(VAPoR::Grid *grid,
                           double &     rms,                 // Root Mean Square error

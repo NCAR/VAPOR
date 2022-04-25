@@ -67,7 +67,7 @@ template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, co
 
 vector<float *> AllocateBlocks(const vector<size_t> &bs, const vector<size_t> &dims) { return (AllocateBlocksType<float>(bs, dims)); }
 
-void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addMissingValues)
+void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addRandomMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -79,7 +79,7 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addMissingValues)
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
                 value = value == minVal ? maxVal : minVal;
-                if (addMissingValues) {
+                if (addRandomMissingValues) {
                     if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
                     else grid->SetValueIJK(i, j, k, value);
                 }
@@ -89,7 +89,7 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addMissingValues)
     }
 }
 
-void MakeConstantField(Grid *grid, float value, bool addMissingValues)
+void MakeConstantField(Grid *grid, float value, bool addRandomMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -99,7 +99,7 @@ void MakeConstantField(Grid *grid, float value, bool addMissingValues)
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) { 
-                if (addMissingValues) {
+                if (addRandomMissingValues) {
                     if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
                     else grid->SetValueIJK(i, j, k, value);
                 }
@@ -109,7 +109,7 @@ void MakeConstantField(Grid *grid, float value, bool addMissingValues)
     }
 }
 
-void MakeRamp(Grid *grid, float minVal, float maxVal, bool addMissingValues)
+void MakeRamp(Grid *grid, float minVal, float maxVal, bool addRandomMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -122,7 +122,7 @@ void MakeRamp(Grid *grid, float minVal, float maxVal, bool addMissingValues)
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
-                if (addMissingValues) {
+                if (addRandomMissingValues) {
                     if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
                     else grid->SetValueIJK(i, j, k, value);
                 }
@@ -133,7 +133,7 @@ void MakeRamp(Grid *grid, float minVal, float maxVal, bool addMissingValues)
     }
 }
 
-void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X, bool addMissingValues)
+void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X, bool addRandomMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -150,7 +150,7 @@ void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X, boo
         for (size_t j = 0; j < y; j++) {
             value = axis == X ? minVal : value;    // reset value if we're ramping on X
             for (size_t i = 0; i < x; i++) {
-                if (addMissingValues) {
+                if (addRandomMissingValues) {
                     if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
                     else grid->SetValueIJK(i, j, k, value);
                 }
@@ -450,6 +450,16 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
         if (RunTest(grid, silenceTime) == false) { rc = false; }
     }
 
+    if (std::find(tests.begin(), tests.end(), "AllMissingValues") != tests.end()) {
+        cout << type << " " << x << "x" << y << "x" << z << " All missing values:" << endl;
+        MakeConstantField(grid, grid->GetMissingValue());
+
+        grid->SetInterpolationOrder(linear);
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
+
+        grid->SetInterpolationOrder(nearestNeighbor);
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
+    }
     // Iterator tests
 
     size_t count;
