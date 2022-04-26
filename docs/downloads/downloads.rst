@@ -8,6 +8,8 @@ See below for our current release, as well as links to sample data and installat
 
 .. include:: ../announcements/3.6.0.rst
 
+.. include:: sampleData.rst
+
 Installation Instructions
 -------------------------
 
@@ -17,14 +19,3 @@ Installation Instructions
     installationInstructions/osxInstallation.rst
     installationInstructions/linuxInstallation.rst
     installationInstructions/windowsInstallation.rst
-
-.. include:: ../installationInstructions.rst
-
-Additional Downloads
---------------------
-
-.. toctree::
-    :maxdepth: 1
-
-    officialReleases.rst
-    sampleData.rst

@@ -22,6 +22,7 @@ Vapor's "natively supported" data formats are:
    NetCDF (CF-Compliant) <netCDF/cfComplianceBrief>
    brickOfValues
    dcp
+   ugrid
 
 .. note::
 
