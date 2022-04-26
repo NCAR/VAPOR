@@ -16,7 +16,9 @@ The following datasets are provided for user experimentation.
 +-----------------------------+-----------+--------------------------------------+-------------------+-----------+
 | UGRIDsmall_                 | UGRID     | :ref:`UGRID <ugrid>`                 | Unstructured      | 5.1 MB    |
 +-----------------------------+-----------+--------------------------------------+-------------------+-----------+
-| Brick_                      | Synthetic | :ref:`BOV <brickOfValues>`           | 10 x 10 x 10      | 12 KB     |
+| MultiTimeMultiVar_          | Synthetic | :ref:`BOV <brickOfValues>`           | 10 x 10 x 10      | 12 KB     |
++-----------------------------+-----------+--------------------------------------+-------------------+-----------+
+| wmag_                       | LES       | :ref:`BOV <brickOfValues>`           | 128 x 128 x 128   | 7.1 MB    |
 +-----------------------------+-----------+--------------------------------------+-------------------+-----------+
 | Particles_                  | Synthetic | :ref:`DCP <dcp>`                     | N/A               | 119 KB    |
 +-----------------------------+-----------+--------------------------------------+-------------------+-----------+
@@ -29,7 +31,9 @@ The following datasets are provided for user experimentation.
 
 .. _Tornado: https://drive.google.com/file/d/18T7Ss01YjufK3_ScdUlxz9ljAJ8nL_-b/view?usp=sharing
 
-.. _Brick: https://drive.google.com/file/d/1cp-oNVaLej6jzcDo2sOYec56svfX0sGc/view?usp=sharing
+.. _MultiTimeMultiVar: https://drive.google.com/file/d/1cp-oNVaLej6jzcDo2sOYec56svfX0sGc/view?usp=sharing
+
+.. _wmag: https://drive.google.com/file/d/1H6sfOd9uh6Lk3RbAbDkTzKt7NWt7AcoJ/view?usp=sharing
 
 .. _Particles: https://drive.google.com/file/d/1DoC8EJEp9oCaBfTCJUj12vgR6-ykhK48/view?usp=sharing
 
