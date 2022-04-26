@@ -22,6 +22,7 @@
 
 #include <float.h>
 #include <cmath>
+#include <random>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -39,6 +40,13 @@ std::vector<void *> Heap;
 void DeleteHeap()
 {
     for (size_t i = 0; i < Heap.size(); i++) std::free(Heap[i]);
+}
+
+bool RandomizeMissingValue() {
+    std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_int_distribution<> distrib(0,1);
+    return distrib(gen);
 }
 
 template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, const vector<size_t> &dims)
@@ -80,7 +88,7 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addRandomMissingV
             for (size_t i = 0; i < x; i++) {
                 value = value == minVal ? maxVal : minVal;
                 if (addRandomMissingValues) {
-                    if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
+                    if (RandomizeMissingValue()) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -100,7 +108,7 @@ void MakeConstantField(Grid *grid, float value, bool addRandomMissingValues)
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) { 
                 if (addRandomMissingValues) {
-                    if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
+                    if (RandomizeMissingValue()) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -123,7 +131,7 @@ void MakeRamp(Grid *grid, float minVal, float maxVal, bool addRandomMissingValue
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
                 if (addRandomMissingValues) {
-                    if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
+                    if (RandomizeMissingValue()) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -151,7 +159,7 @@ void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X, boo
             value = axis == X ? minVal : value;    // reset value if we're ramping on X
             for (size_t i = 0; i < x; i++) {
                 if (addRandomMissingValues) {
-                    if (rand()%2) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
+                    if (RandomizeMissingValue()) grid->SetValueIJK(i,j,k, grid->GetMissingValue());
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);

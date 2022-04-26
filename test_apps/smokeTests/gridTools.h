@@ -8,6 +8,8 @@
 
 std::vector<float *> AllocateBlocks(const std::vector<size_t> &bs, const std::vector<size_t> &dims);
 
+bool RandomizeMissingValue();
+
 void MakeTriangle(VAPoR::Grid *grid, float minVal, float maxVal, bool addRandomMissingValues=true);
 
 void MakeConstantField(VAPoR::Grid *grid, float value, bool addRandomMissingValues=true);
