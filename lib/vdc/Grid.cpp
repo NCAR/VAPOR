@@ -144,13 +144,12 @@ void Grid::GetRange(float range[2]) const
 {
     const auto missingVal = GetMissingValue();
     const auto num_vals = _dims[0] * _dims[1] * _dims[2];
-    auto num_threads = size_t{0};
+    auto num_threads = size_t{1};
 #pragma omp parallel
     {
       if (omp_get_thread_num() == 0)
         num_threads = omp_get_num_threads();
     }
-    assert(num_vals > num_threads);
     const auto stride_size = num_vals / num_threads;
 
     auto min_vec = std::vector<float>(num_threads, missingVal);
@@ -161,11 +160,12 @@ void Grid::GetRange(float range[2]) const
       auto beg = this->cbegin() + i * stride_size;
       auto end = beg;
       if (i < num_threads - 1) 
-          end += stride_size;
+        end += stride_size;
       else
-          end = this->cend();
+        end = this->cend();
 
-      while (*beg == missingVal && beg != end) { ++beg; }
+      while (*beg == missingVal && beg != end)
+        ++beg;
 
       if (beg != end) {
         auto min = *beg;
@@ -179,7 +179,7 @@ void Grid::GetRange(float range[2]) const
         min_vec[i] = min;
         max_vec[i] = max;
       }
-    }
+    } // finish omp section
 
     if (std::all_of(min_vec.begin(), min_vec.end(), 
         [missingVal](float v){return v == missingVal;})) {
