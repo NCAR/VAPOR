@@ -83,10 +83,8 @@ int main(int argc, char* argv[])
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dist(-1.0, 20.0);
-  for (size_t k = 0; k < dim; k++)
-    for (size_t j = 0; j < dim; j++)
-      for (size_t i = 0; i < dim; i++)
-        grid->SetValueIJK(i, j, k, dist(gen));
+  for (auto itr = grid->begin(); itr != grid->end(); ++itr)
+    *itr = dist(gen);
 
   // Time a serial run
   float range_36[2] = {0.0, 1.1};
@@ -105,6 +103,8 @@ int main(int argc, char* argv[])
   std::cout << "GetRange() in OpenMP time (milliseconds): " << omp_time << std::endl;
 
   // Clean up
+  delete grid;
+  grid = nullptr;
   for (size_t i = 0; i < blks.size(); i++) {
     delete[](blks[i]);
     blks[i] = nullptr;
