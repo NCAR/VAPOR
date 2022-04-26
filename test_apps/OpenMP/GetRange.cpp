@@ -82,9 +82,20 @@ int main(int argc, char* argv[])
   // Fill in random values
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_real_distribution<float> dist(-1.0, 20.0);
-  for (auto itr = grid->begin(); itr != grid->end(); ++itr)
-    *itr = dist(gen);
+  std::uniform_real_distribution<float> dist(-1.0, 10.0);
+  const auto stride_size = dim * dim * dim / num_threads;
+
+#pragma omp parallel for
+  for (size_t i = 0; i < num_threads; i++) {
+    auto beg = grid->begin() + i * stride_size;
+    auto end = beg;
+    if (i < num_threads - 1)
+      end += stride_size;
+    else
+      end = grid->end();
+    for (auto itr = beg; itr != end; ++itr)
+      *itr = dist(gen);
+  }
 
   // Time a serial run
   float range_36[2] = {0.0, 1.1};
