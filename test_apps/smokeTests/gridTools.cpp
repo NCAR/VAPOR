@@ -81,7 +81,6 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addRandomMissingV
 
     float value = minVal;
     float missingValue = grid->GetMissingValue();
-    int missing=0;
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
