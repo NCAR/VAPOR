@@ -21,8 +21,6 @@ The following datasets are provided for user experimentation.
 | Particles_                  | Synthetic | :ref:`DCP <dcp>`                     | N/A               | 119 KB    |
 +-----------------------------+-----------+--------------------------------------+-------------------+-----------+
 
-:ref:`Renderer <Renderers>`
-
 .. _DUKU: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/dukuSample.tar.gz
 
 .. _Kauffman: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/kauffmanSample.tar.gz
