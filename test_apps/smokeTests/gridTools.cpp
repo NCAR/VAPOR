@@ -87,21 +87,13 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addRandomMissingV
             for (size_t i = 0; i < x; i++) {
                 value = value == minVal ? maxVal : minVal;
                 if (addRandomMissingValues) {
-                    if (distrib(gen)) {
-                        grid->SetValueIJK(i,j,k,missingValue);
-                        missing++;
-                        std::cout << "1 " << grid->GetMissingValue() << std::endl;
-                    }
-                    else {
-                        grid->SetValueIJK(i, j, k, value);
-                        std::cout << "0 " << value << std::endl;
-                    }
+                    if (distrib(gen)) grid->SetValueIJK(i,j,k,missingValue);
+                    else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
             }
         }
     }
-    std::cout << missing << " / " << x*y*z << " misssing" << std::endl;
 }
 
 void MakeConstantField(Grid *grid, float value, bool addRandomMissingValues)
@@ -437,7 +429,7 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
 
     cout << "=======================================================" << endl << endl;
     if (std::find(tests.begin(), tests.end(), "Constant") != tests.end()) {
-        cout << type << " " << x << "x" << y << "x" << z << " Constant field:" << endl;
+        cout << type << " " << x << ":" << y << ":" << z << " Constant field:" << endl;
         MakeConstantField(grid, maxVal);
 
         grid->SetInterpolationOrder(linear);
@@ -448,7 +440,7 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
     }
 
     if (std::find(tests.begin(), tests.end(), "Ramp") != tests.end()) {
-        cout << type << " " << x << "x" << y << "x" << z << " Ramp up through domain:" << endl;
+        cout << type << " " << x << ":" << y << ":" << z << " Ramp up through domain:" << endl;
         MakeRamp(grid, minVal, maxVal);
 
         grid->SetInterpolationOrder(linear);
@@ -459,7 +451,7 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
     }
 
     if (std::find(tests.begin(), tests.end(), "RampOnAxis") != tests.end()) {
-        cout << type << " " << x << "x" << y << "x" << z << " Ramp up on Z axis:" << endl;
+        cout << type << " " << x << ":" << y << ":" << z << " Ramp up on Z axis:" << endl;
         MakeRampOnAxis(grid, minVal, maxVal, Z);
         grid->SetInterpolationOrder(linear);
         if (RunTest(grid, silenceTime) == false) { rc = false; }
@@ -469,7 +461,7 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
     }
 
     if (std::find(tests.begin(), tests.end(), "Triangle") != tests.end()) {
-        cout << type << " " << x << "x" << y << "x" << z << " Triangle signal:" << endl;
+        cout << type << " " << x << ":" << y << ":" << z << " Triangle signal:" << endl;
         MakeTriangle(grid, minVal, maxVal);
 
         grid->SetInterpolationOrder(linear);
@@ -481,7 +473,7 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
     }
 
     if (std::find(tests.begin(), tests.end(), "AllMissingValues") != tests.end()) {
-        cout << type << " " << x << "x" << y << "x" << z << " All missing values:" << endl;
+        cout << type << " " << x << ":" << y << ":" << z << " All missing values:" << endl;
         MakeConstantField(grid, grid->GetMissingValue());
 
         grid->SetInterpolationOrder(linear);
