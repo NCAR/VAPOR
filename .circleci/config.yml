@@ -199,6 +199,115 @@ jobs:
           paths:
             - installers
 
+  clang-tidy:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - run:
+          name: Check for PR
+          command: |
+            apt-get update
+            apt-get install -y jq
+
+            pr_response=$(curl --location --request GET \
+                "https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pulls?head=$CIRCLE_PROJECT_USERNAME:$CIRCLE_BRANCH&state=open" \
+                -u $GH_USER:$GITHUB_TOKEN)
+
+            if [ $(echo $pr_response | jq length) -eq 0 ]; then
+              echo "No PR found to update"
+              exit 0
+            fi
+
+      - checkout
+ 
+      #- run:
+      #    name: ensure we are up to date
+      #    command: |
+      #      git branch --set-upstream-to=origin/$CIRCLE_BRANCH $CIRCLE_BRANCH 
+      #      git pull
+
+      - run:
+          name: install clang-tidy
+          command: |
+            apt-get update
+            apt-get install -y clang
+            apt-get install -y clang-tidy-10
+
+      - run:
+          name: clang-tidy
+          command: |
+            cd /root/project
+            cmake .            
+            make -j4
+            git diff $(git merge-base --fork-point main HEAD) HEAD /root/project | \
+            /usr/lib/llvm-10/share/clang/clang-tidy-diff.py -path /root/project -p1 -checks=cppcoreguidelines* 2>&1    | \
+            tee /tmp/clangTidyOutput.txt
+
+      - run:
+          name: check for clang-tidy warnings
+          command: |
+            while read line; do
+              if [[ "$line" == *"warning"* ]]; then
+                if [[ "$line" != *"generated"* || "$line" != *"Supressed"* ]]; then
+                  #exit -1
+                  exit 0 
+                fi
+              fi
+            done < /tmp/clangTidyOutput.txt
+
+      - store_artifacts:
+          path: /tmp/clangTidyOutput.txt
+
+      - run:
+          name: Copy artifact link to PR
+          command: |
+            # acquire clang-tidy report artifact
+            artifacts=$(curl \
+            -X GET "https://circleci.com/api/v2/project/github/NCAR/VAPOR/$CIRCLE_BUILD_NUM/artifacts" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -u "$GITHUB_TOKEN:" | jq '.items[0].url')
+            artifacts="${artifacts//\"}"                         # remove quotes from string
+            artifacts=" [clangTidyOutput.txt]($artifacts)"       # make hyperlink
+
+            # Temporarily remove windows carraige return \r
+            originalBody=$(curl https://api.github.com/repos/NCAR/VAPOR/pulls/${CIRCLE_PULL_REQUEST##*/} | jq '.body')
+            lineArray=(${originalBody//\\r\\n/\\n})
+
+            # Remove leading " at the start of the first element
+            firstElement=${lineArray[0]}
+            if [[ ${firstElement::1} == "\"" ]]
+            then
+                lineArray[0]="${firstElement:1}"
+            fi
+
+            # Remove trailing " at the end of the last element
+            lastElement=${lineArray[-1]}
+            if [[ ${lastElement: -1} == "\"" ]]
+            then
+                lineArray[-1]=${lastElement::-1}
+            fi
+
+            # If clang-tidy has already been reported in this PR, remove that report
+            if [[ "${lineArray[-1]}" == *"clangTidyOutput.txt"* ]]; then
+                echo "  *** Previous clangTidyOutput.txt report found.  Replacing with new version. ***"
+                unset lineArray[-1]
+            fi
+
+            newBody=""
+            newBody=${lineArray[@]//\\n/\\r\\n}              # Add windows carraige return \r on line endings
+
+            newBody="${newBody}${artifacts}"
+            json="{\"body\":\"$newBody\"}"                   # Apply our re-written PR body in json format
+
+            # Add linke to PR
+            curl \
+            -X PATCH \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token $CIRCLE_CLANG_TIDY_TOKEN" \
+            https://api.github.com/repos/NCAR/VAPOR/issues/${CIRCLE_PULL_REQUEST##*/} \
+            -d "$json"
+
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -470,8 +579,10 @@ workflows:
   version: 2
   build:
     jobs:
-      - build_ubuntu18
-      - build_centos7
+      - clang-tidy
+      #- build_ubuntu18
+      #- build_centos7
+      #- foo
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer

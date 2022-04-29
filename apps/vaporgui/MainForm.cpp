@@ -1797,7 +1797,7 @@ vector<string> MainForm::myGetOpenFileNames(string prompt, string dir, string fi
     for (int i = 0; i < files.size(); i++) {
         QFileInfo fInfo(files[i].c_str());
         if (!fInfo.isReadable() || !fInfo.isFile()) {
-            MyBase::SetErrMsg("Load Data Error \n Invalid data set\n");
+            MyBase::SetErrMsg("Load  Data Error \n Invalid data set\n");
             MSG_ERR("Failed to load data");
             return (vector<string>());
         }
