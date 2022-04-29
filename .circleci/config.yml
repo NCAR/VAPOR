@@ -232,7 +232,7 @@ jobs:
           command: |
             apt-get update
             apt-get install -y clang
-            apt-get install -y clang-tidy
+            apt-get install -y clang-tidy-10
 
       - run:
           name: clang-tidy
@@ -240,8 +240,8 @@ jobs:
             cd /root/project
             cmake .            
             make -j4
-            git diff $(git merge-base --fork-point main HEAD) /root/project | \
-            /usr/bin/clang-tidy-diff -p1 -path /root/project -checks=cppcoreguidelines* 2>&1    | \
+            git diff $(git merge-base --fork-point main HEAD) HEAD /root/project | \
+            /usr/lib/llvm-10/share/clang/clang-tidy-diff.py -path /root/project -p1 -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
 
       - run:
