@@ -286,6 +286,8 @@ jobs:
             if [[ "${lineArray[-1]}" == *"clangTidyOutput.txt"* ]]; then
                 echo "  *** Previous clangTidyOutput.txt report found.  Replacing with new version. ***"
                 unset lineArray[-1]
+            else
+                lineArray+=("\\n\\n")
             fi
 
             newBody=""
