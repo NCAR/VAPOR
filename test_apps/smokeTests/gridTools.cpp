@@ -216,7 +216,7 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
                 float sampleValue = grid->GetValue(coords);
 
                 if (sampleValue == grid->GetMissingValue()) {
-                    numMissingValues++;
+                    if (trueValue == grid->GetMissingValue()) numMissingValues++;
                     continue;
                 }
 
