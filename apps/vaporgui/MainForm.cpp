@@ -50,6 +50,8 @@
 #include <QStatusBar>
 #include <QDebug>
 #include <QScreen>
+#include <QDialog>
+#include <QVBoxLayout>
 
 #include <vapor/Version.h>
 #include <vapor/DataMgr.h>
@@ -87,6 +89,7 @@
 #include "CheckForUpdate.h"
 #include "NoticeBoard.h"
 #include "CheckForNotices.h"
+#include "PMetadataClasses.h"
 
 #include <QProgressDialog>
 #include <QProgressBar>
@@ -215,6 +218,7 @@ void MainForm::_initMembers()
     _plotAction = NULL;
     _statsAction = NULL;
     _pythonAction = NULL;
+    _metadataAction = nullptr;
 
     _singleImageMenu = NULL;
     _captureSingleJpegAction = NULL;
@@ -243,6 +247,8 @@ void MainForm::_initMembers()
     _stats = NULL;
     _plot = NULL;
     _pythonVariables = NULL;
+    _metadataDialog = nullptr;
+    _metadata = nullptr;
     _banner = NULL;
     _windowSelector = NULL;
     _controlExec = NULL;
@@ -1003,6 +1009,10 @@ void MainForm::_createToolsMenu()
     _pythonAction->setText("Python Variables");
     _pythonAction->setEnabled(false);
 
+    _metadataAction = new QAction(this);
+    _metadataAction->setText("Dataset Metadata");
+    _metadataAction->setEnabled(false);
+
     _installCLIToolsAction = new QAction(this);
     _installCLIToolsAction->setText("Install Command Line Tools");
     _installCLIToolsAction->setToolTip("Add VAPOR_HOME to environment and add current utilities "
@@ -1012,6 +1022,7 @@ void MainForm::_createToolsMenu()
     _Tools->addAction(_plotAction);
     _Tools->addAction(_statsAction);
     _Tools->addAction(_pythonAction);
+    _Tools->addAction(_metadataAction);
 #ifdef WIN32
     #define ADD_INSTALL_CLI_TOOLS_ACTION 1
 #endif
@@ -1031,6 +1042,7 @@ void MainForm::_createToolsMenu()
     connect(_statsAction, SIGNAL(triggered()), this, SLOT(launchStats()));
     connect(_plotAction, SIGNAL(triggered()), this, SLOT(launchPlotUtility()));
     connect(_pythonAction, SIGNAL(triggered()), this, SLOT(launchPythonVariables()));
+    connect(_metadataAction, SIGNAL(triggered()), this, SLOT(launchMetadata()));
 }
 
 void MainForm::_createCaptureMenu()
@@ -2024,6 +2036,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         if (_stats) { _stats->Update(); }
         if (_plot) { _plot->Update(); }
         if (_pythonVariables) { _pythonVariables->Update(); }
+        if (_metadata) { _metadata->Update(GetStateParams()); }
         if (_appSettingsMenu) { _appSettingsMenu->Update(GetSettingsParams()); }
 
         setUpdatesEnabled(false);
@@ -2181,6 +2194,7 @@ void MainForm::enableWidgets(bool onOff)
     _statsAction->setEnabled(onOff);
     _plotAction->setEnabled(onOff);
     _pythonAction->setEnabled(onOff);
+    _metadataAction->setEnabled(onOff);
 
     _tabMgr->EnableRouters(onOff);
 }
@@ -2398,6 +2412,20 @@ void MainForm::launchPythonVariables()
     if (!_pythonVariables) { _pythonVariables = new PythonVariables(this); }
     if (_controlExec) { _pythonVariables->InitControlExec(_controlExec); }
     _pythonVariables->ShowMe();
+}
+
+void MainForm::launchMetadata()
+{
+    if (_metadata == nullptr ) { 
+        _metadata = new PMetadataSection(_controlExec); 
+        _metadata->Update(GetStateParams());
+    }
+    if (_metadataDialog == nullptr) { 
+        _metadataDialog = new QDialog(this);
+        _metadataDialog->setLayout(new QVBoxLayout);
+        _metadataDialog->layout()->addWidget(_metadata);
+    }
+    _metadataDialog->show();
 }
 
 void MainForm::_setTimeStep()
