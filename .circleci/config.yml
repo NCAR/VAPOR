@@ -241,8 +241,8 @@ jobs:
             cd /root/project
             cmake .            
             make -j4
-            git diff $(git merge-base --fork-point main HEAD) /root/project   | \
-            /usr/bin/clang-tidy-diff -p1 -checks=cppcoreguidelines* 2>&1 | \
+            git diff $(git merge-base --fork-point main HEAD) /root/project | \
+            /usr/bin/clang-tidy-diff -p1 /root/project/build -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
 
       - run:
