@@ -220,7 +220,6 @@ jobs:
             fi
 
       - checkout
-    
  
       - run:
           name: ensure we are up to date
@@ -242,7 +241,7 @@ jobs:
             cmake .            
             make -j4
             git diff $(git merge-base --fork-point main HEAD) /root/project | \
-            /usr/bin/clang-tidy-diff -p1 -path /root/project/build -checks=cppcoreguidelines* 2>&1    | \
+            /usr/bin/clang-tidy-diff -p1 -path /root/project -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
 
       - run:
