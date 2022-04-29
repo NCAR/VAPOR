@@ -235,7 +235,7 @@ jobs:
             cmake .            
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
-            /usr/lib/llvm-10/share/clang/clang-tidy-diff.py -path /root/project -p1 -checks=cppcoreguidelines* 2>&1    | \
+            /usr/lib/llvm-10/share/clang/clang-tidy-diff.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
 
       - run:
