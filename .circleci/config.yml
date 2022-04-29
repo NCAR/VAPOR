@@ -229,8 +229,8 @@ jobs:
       - run:
           name: clang-tidy
           command: |
-            git clone https://github.com/NCAR/VAPOR.git
-            cd VAPOR
+            git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
+            cd /root/VAPOR
             git checkout $CIRCLE_BRANCH
             cmake .            
             make -j4
