@@ -226,17 +226,18 @@ jobs:
             apt-get install -y clang
             apt-get install -y clang-tidy-10
 
-      - checkout
+
 
       - run:
           name: clang-tidy
           command: |
-            cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+            git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
+            cd /root/VAPOR
+            git checkout $CIRCLE_BRANCH
+            cmake . -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
-            #/usr/lib/llvm-10/share/clang/clang-tidy-diff.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
-            /usr/lib/llvm-10/share/clang/clang-tidy-diff.py -path /root/project/build -p1 -checks=cppcoreguidelines* 2>&1    | \
+            /usr/lib/llvm-10/share/clang/clang-tidy-diff.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
 
       - run:
