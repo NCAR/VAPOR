@@ -75,8 +75,7 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addRandomMissingV
     size_t y = dims[Y];
     size_t z = dims[Z];
 
-    std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::mt19937 engine(0); // Fixed seed of 0
     std::uniform_int_distribution<> distrib(0,1);
 
     float value = minVal;
@@ -86,7 +85,7 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addRandomMissingV
             for (size_t i = 0; i < x; i++) {
                 value = value == minVal ? maxVal : minVal;
                 if (addRandomMissingValues) {
-                    if (distrib(gen)) grid->SetValueIJK(i,j,k,missingValue);
+                    if (distrib(engine)) grid->SetValueIJK(i,j,k,missingValue);
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -102,8 +101,7 @@ void MakeConstantField(Grid *grid, float value, bool addRandomMissingValues)
     size_t y = dims[Y];
     size_t z = dims[Z];
 
-    std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::mt19937 engine(0); // Fixed seed of 0
     std::uniform_int_distribution<> distrib(0,1);
 
     float missingValue = grid->GetMissingValue();
@@ -111,7 +109,7 @@ void MakeConstantField(Grid *grid, float value, bool addRandomMissingValues)
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) { 
                 if (addRandomMissingValues) {
-                    if (distrib(gen)) grid->SetValueIJK(i,j,k,missingValue); // Generate random 1 or 0
+                    if (distrib(engine)) grid->SetValueIJK(i,j,k,missingValue); // Generate random 1 or 0
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -129,8 +127,7 @@ void MakeRamp(Grid *grid, float minVal, float maxVal, bool addRandomMissingValue
 
     float increment = (maxVal - minVal) / ((x * y * z - 1) == 0 ? 1 : (x * y * z - 1));
 
-    std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::mt19937 engine(0); // Fixed seed of 0
     std::uniform_int_distribution<> distrib(0,1);
 
     float value = minVal; 
@@ -139,7 +136,7 @@ void MakeRamp(Grid *grid, float minVal, float maxVal, bool addRandomMissingValue
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
                 if (addRandomMissingValues) {
-                    if (distrib(gen)) grid->SetValueIJK(i,j,k,missingValue); // Generate random 1 or 0
+                    if (distrib(engine)) grid->SetValueIJK(i,j,k,missingValue); // Generate random 1 or 0
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -160,8 +157,7 @@ void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X, boo
     float yIncrement = axis == Y ? (maxVal - minVal) / (dims[Y] - 1) : 0;
     float zIncrement = axis == Z ? (maxVal - minVal) / (dims[Z] - 1) : 0;
     
-    std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::mt19937 engine(0); // Fixed seed of 0
     std::uniform_int_distribution<> distrib(0,1);
 
     float value = minVal;
@@ -172,7 +168,7 @@ void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X, boo
             value = axis == X ? minVal : value;    // reset value if we're ramping on X
             for (size_t i = 0; i < x; i++) {
                 if (addRandomMissingValues) {
-                    if (distrib(gen)) grid->SetValueIJK(i,j,k,missingValue);  // Generate random 1 or 0
+                    if (distrib(engine)) grid->SetValueIJK(i,j,k,missingValue);  // Generate random 1 or 0
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -531,15 +527,15 @@ VAPoR::CurvilinearGrid *MakeCurvilinearTerrainGrid(const std::vector<size_t> &bs
 
     std::vector<float *> xblks = AllocateBlocks(bs2d, dims2d);
     auto                 xrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims2d, bs2d, xblks, minu2d, maxu2d));
-    MakeRampOnAxis(xrg.get(), minu[X], maxu[X], X);
+    MakeRampOnAxis(xrg.get(), minu[X], maxu[X], X, false);
 
     std::vector<float *> yblks = AllocateBlocks(bs2d, dims2d);
     auto                 yrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims2d, bs2d, yblks, minu2d, maxu2d));
-    MakeRampOnAxis(yrg.get(), minu[Y], maxu[Y], Y);
+    MakeRampOnAxis(yrg.get(), minu[Y], maxu[Y], Y, false);
 
     std::vector<float *> zblks = AllocateBlocks(bs, dims);
     auto                 zrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims, bs, zblks, minu, maxu));
-    MakeRampOnAxis(zrg.get(), minu[Z], maxu[Z], Z);
+    MakeRampOnAxis(zrg.get(), minu[Z], maxu[Z], Z, false);
 
     std::vector<float *> blks = AllocateBlocks(bs, dims);
     CurvilinearGrid *    cg = new CurvilinearGrid(dims, bs, blks, *xrg, *yrg, *zrg, NULL);
@@ -552,7 +548,7 @@ LayeredGrid *MakeLayeredGrid(const vector<size_t> &dims, const vector<size_t> &b
     std::vector<float *> zCoordBlocks = AllocateBlocks(bs, dims);
 
     RegularGrid rg(dims, bs, zCoordBlocks, minu, maxu);
-    MakeRampOnAxis(&rg, minu[Z], maxu[Z], Z);
+    MakeRampOnAxis(&rg, minu[Z], maxu[Z], Z, false);
 
     double         deltax = dims[X] > 1 ? maxu[X] - minu[X] / (dims[X] - 1) : 1;
     vector<double> xcoords;
