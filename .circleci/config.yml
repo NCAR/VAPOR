@@ -221,11 +221,11 @@ jobs:
 
       - checkout
  
-      - run:
-          name: ensure we are up to date
-          command: |
-            git branch --set-upstream-to=origin/$CIRCLE_BRANCH $CIRCLE_BRANCH 
-            git pull
+      #- run:
+      #    name: ensure we are up to date
+      #    command: |
+      #      git branch --set-upstream-to=origin/$CIRCLE_BRANCH $CIRCLE_BRANCH 
+      #      git pull
 
       - run:
           name: install clang-tidy
