@@ -586,7 +586,7 @@ bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std
         }
     }
     if (nOk == 1) return true;
-    MyBase::SetErrMsg("Unable to confidently determine the dataset format. Please load it manually in the GUI");
+    MyBase::SetErrMsg("    Unable to confidently determine the dataset format. Please load it manually in the GUI");
     return false;
 }
 
