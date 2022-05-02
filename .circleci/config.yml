@@ -278,6 +278,7 @@ jobs:
             https://api.github.com/repos/NCAR/VAPOR/issues/${CIRCLE_PULL_REQUEST##*/} \
             -d "$json"
 
+
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
