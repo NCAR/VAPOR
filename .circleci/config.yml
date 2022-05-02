@@ -205,35 +205,12 @@ jobs:
 
     steps:
       - run:
-          name: Check for PR
-          command: |
-            apt-get update
-            apt-get install -y jq
-
-            pr_response=$(curl --location --request GET \
-                "https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pulls?head=$CIRCLE_PROJECT_USERNAME:$CIRCLE_BRANCH&state=open" \
-                -u $GH_USER:$GITHUB_TOKEN)
-
-            if [ $(echo $pr_response | jq length) -eq 0 ]; then
-              echo "No PR found to update"
-              exit 0
-            fi
-
-      - run:
           name: install clang-tidy
           command: |
             apt-get update
             apt upgrade -y
             apt install -y aptitude
-            aptitude install -y clang-10 clang-tidy-10
-            #aptitude install -y lsb-release wget software-properties-common
-            #aptitude install -y clang-14 lldb-14 lld-14 clangd-14 clang-tidy-14
-            #aptitude install -y clang-tidy-10
-            #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
-            #apt-get install -y clang
-            #apt-get install -y clang-tidy-10
-
-
+            aptitude install -y jq clang-10 clang-tidy-10
 
       - run:
           name: clang-tidy
@@ -242,23 +219,10 @@ jobs:
             cd /root/VAPOR
             git checkout $CIRCLE_BRANCH
             cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER=clang++-10 -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_FLAGS=-isystem\ /usr/lib/llvm-10/lib/clang/10.0.0/include -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
-            #cmake . -DCMAKE_BUILD_TYPE:String=Release -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
             /usr/bin/clang-tidy-diff-10.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
-
-      - run:
-          name: check for clang-tidy warnings
-          command: |
-            while read line; do
-              if [[ "$line" == *"warning"* ]]; then
-                if [[ "$line" != *"generated"* || "$line" != *"Supressed"* ]]; then
-                  #exit -1
-                  exit 0 
-                fi
-              fi
-            done < /tmp/clangTidyOutput.txt
 
       - store_artifacts:
           path: /tmp/clangTidyOutput.txt
