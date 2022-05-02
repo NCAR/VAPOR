@@ -212,7 +212,8 @@ jobs:
             apt upgrade -y
             apt install -y aptitude
             #aptitude install -y jq clang-10 clang-tidy-10
-            aptitude install -y clang-14 clang-tidy-14 xz-utils pip git curl jq cmake freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3
+            #aptitude install -y clang-14 clang-tidy-14 xz-utils pip git curl jq cmake freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3
+            aptitude install -y xz-utils pip git curl jq cmake freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3
             pip install gdown
 
       - run: 
@@ -230,7 +231,19 @@ jobs:
             cd /root/VAPOR
             git checkout $CIRCLE_BRANCH
             #cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER=clang++-10 -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_FLAGS=-isystem\ /usr/lib/llvm-10/lib/clang/10.0.0/include -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
-            cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER=clang++-14 -DCMAKE_C_COMPILER=clang-14 -DCMAKE_CXX_FLAGS=-isystem\ /usr/lib/llvm-10/lib/clang/14.0.0/include -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
+            cmake . \
+            -DCMAKE_BUILD_TYPE:String=Release \
+            -DCMAKE_CXX_COMPILER=clang++-14 \
+            -DCMAKE_CXX_FLAGS="-isystem\ /usr/lib/llvm-14/lib/clang/14.0.0/include" \
+            -DOpenMP_CXX_FLAGS="-Xclang\ -fopenmp" \
+            -DOpenMP_CXX_LIB_NAMES=libomp \
+            -DCMAKE_C_COMPILER=clang-14 \
+            -DOpenMP_C_FLAGS="-Xclang\ -fopenmp" \
+            -DOpenMP_C_LIB_NAMES=libomp \
+            -DOpenMP_libomp_LIBRARY=/usr/lib/llvm-14/lib/clang/14.0.0/lib/libomp.so
+            -DOpenMP_libomp_LIBARARY=libLLVMFrontendOpenMP.a \
+            -DBUILD_TEST_APPS=ON \
+            -DUSE_OMP=ON
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
             /usr/bin/clang-tidy-diff-10.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
