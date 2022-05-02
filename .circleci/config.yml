@@ -212,24 +212,15 @@ jobs:
             apt upgrade -y
             apt install -y aptitude
             #aptitude install -y jq clang-10 clang-tidy-10
-            aptitude install -y curl jq clang-14 clang-tidy-14
+            aptitude install -y curl jq clang-14 clang-tidy-14 xz-utils pip
+            pip install gdown
 
       - run: 
           name: Get third party libraries
           command: |
             mkdir -p /usr/local/VAPOR-Deps
-            fileid="1v0AwfOnDsf8hMzBqg4OcEtcEyH5YpnIn" \
-            && filename="/usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz" \
-            && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
-            && curl -Lb ./cookie \
-            "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
-            -o ${filename}
-            chmod -R 777 /usr
-            chown -R root:root /usr
-            tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz \
-            -C /usr/local/VAPOR-Deps \
-            && chown -R root:root /usr
-            chmod -R 777 /usr
+            cd /usr/local/VAPOR-Deps
+            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
 
       - run:
           name: clang-tidy
