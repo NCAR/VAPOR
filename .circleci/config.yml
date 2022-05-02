@@ -201,7 +201,8 @@ jobs:
 
   clang-tidy:
     docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
+      - image: ubuntu:latest
+        #sgpearse/vapor3-ubuntu18:latest
 
     steps:
       - run:
@@ -210,7 +211,24 @@ jobs:
             apt-get update
             apt upgrade -y
             apt install -y aptitude
-            aptitude install -y jq clang-10 clang-tidy-10
+            #aptitude install -y jq clang-10 clang-tidy-10
+            aptitude install -y jq clang-14 clang-tidy-14
+
+      - run: Get third party libraries
+          command: |
+            mkdir -p /usr/local/VAPOR-Deps
+            fileid="1v0AwfOnDsf8hMzBqg4OcEtcEyH5YpnIn" \
+            && filename="/usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz" \
+            && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
+            && curl -Lb ./cookie \
+            "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
+            -o ${filename}
+            chmod -R 777 /usr
+            chown -R root:root /usr
+            tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz \
+            -C /usr/local/VAPOR-Deps \
+            && chown -R root:root /usr
+            chmod -R 777 /usr
 
       - run:
           name: clang-tidy
@@ -218,7 +236,8 @@ jobs:
             git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
             cd /root/VAPOR
             git checkout $CIRCLE_BRANCH
-            cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER=clang++-10 -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_FLAGS=-isystem\ /usr/lib/llvm-10/lib/clang/10.0.0/include -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
+            #cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER=clang++-10 -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_FLAGS=-isystem\ /usr/lib/llvm-10/lib/clang/10.0.0/include -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
+            cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER=clang++-14 -DCMAKE_C_COMPILER=clang-14 -DCMAKE_CXX_FLAGS=-isystem\ /usr/lib/llvm-10/lib/clang/14.0.0/include -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
             /usr/bin/clang-tidy-diff-10.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
