@@ -214,7 +214,8 @@ jobs:
             #aptitude install -y jq clang-10 clang-tidy-10
             aptitude install -y jq clang-14 clang-tidy-14
 
-      - run: Get third party libraries
+      - run: 
+          name: Get third party libraries
           command: |
             mkdir -p /usr/local/VAPOR-Deps
             fileid="1v0AwfOnDsf8hMzBqg4OcEtcEyH5YpnIn" \
