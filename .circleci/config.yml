@@ -240,10 +240,11 @@ jobs:
             git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
             cd /root/VAPOR
             git checkout $CIRCLE_BRANCH
-            cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER= -DCMAKE_C_COMPILER= -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
+            #cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER=clang++-10 -DCMAKE_C_COMPILER=clang-10 -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
+            cmake . -DCMAKE_BUILD_TYPE:String=Release -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
-            /usr/lib/llvm-14/share/clang/clang-tidy-diff.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
+            /usr/bin/clang-tidy-diff-10.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
 
       - run:
