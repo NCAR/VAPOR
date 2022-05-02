@@ -210,8 +210,7 @@ jobs:
             apt-get update
             apt upgrade -y
             apt install -y aptitude
-            #aptitude install -y jq clang-10 clang-tidy-10
-            aptitude install -y jq clang-tidy-10
+            aptitude install -y jq clang-10 clang-tidy-10
 
       - run:
           name: clang-tidy
@@ -219,8 +218,7 @@ jobs:
             git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
             cd /root/VAPOR
             git checkout $CIRCLE_BRANCH
-            #cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER=clang++-10 -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_FLAGS=-isystem\ /usr/lib/llvm-10/lib/clang/10.0.0/include -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
-            cmake . -DCMAKE_BUILD_TYPE:String=Release #-DBUILD_TEST_APPS=ON -DUSE_OMP=ON
+            cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER=clang++-10 -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_FLAGS=-isystem\ /usr/lib/llvm-10/lib/clang/10.0.0/include -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
             /usr/bin/clang-tidy-diff-10.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
