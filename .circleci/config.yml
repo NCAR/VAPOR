@@ -206,13 +206,13 @@ jobs:
 
     steps:
       - run:
-          name: install clang-tidy
+          name: Install dependencies
           command: |
             apt-get update
             apt upgrade -y
             apt install -y aptitude
             #aptitude install -y jq clang-10 clang-tidy-10
-            aptitude install -y curl jq clang-14 clang-tidy-14 xz-utils pip git
+            aptitude install -y clang-14 clang-tidy-14 xz-utils pip git curl jq
             pip install gdown
 
       - run: 
@@ -221,9 +221,10 @@ jobs:
             mkdir -p /usr/local/VAPOR-Deps
             cd /usr/local/VAPOR-Deps
             gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
+            tar xf 2019-Aug-Ubuntu.tar.xz
 
       - run:
-          name: clang-tidy
+          name: Run clang-tidy
           command: |
             git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
             cd /root/VAPOR
