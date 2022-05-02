@@ -213,7 +213,7 @@ jobs:
             apt install -y aptitude
             #aptitude install -y jq clang-10 clang-tidy-10
             #aptitude install -y clang-14 clang-tidy-14 xz-utils pip git curl jq cmake freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3
-            aptitude install -y xz-utils pip git curl jq cmake freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3
+            aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget libomp-14-dev
             pip install gdown
 
       - run: 
@@ -241,7 +241,6 @@ jobs:
             -DOpenMP_C_FLAGS="-Xclang\ -fopenmp" \
             -DOpenMP_C_LIB_NAMES=libomp \
             -DOpenMP_libomp_LIBRARY=/usr/lib/llvm-14/lib/clang/14.0.0/lib/libomp.so
-            -DOpenMP_libomp_LIBARARY=libLLVMFrontendOpenMP.a \
             -DBUILD_TEST_APPS=ON \
             -DUSE_OMP=ON
             make -j4
