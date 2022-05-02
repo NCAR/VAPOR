@@ -224,6 +224,7 @@ jobs:
             /usr/bin/clang-tidy-diff-10.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
 
+
       - store_artifacts:
           path: /tmp/clangTidyOutput.txt
 
