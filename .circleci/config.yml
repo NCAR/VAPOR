@@ -212,7 +212,7 @@ jobs:
             apt upgrade -y
             apt install -y aptitude
             #aptitude install -y jq clang-10 clang-tidy-10
-            aptitude install -y curl jq clang-14 clang-tidy-14 xz-utils pip
+            aptitude install -y curl jq clang-14 clang-tidy-14 xz-utils pip git
             pip install gdown
 
       - run: 
