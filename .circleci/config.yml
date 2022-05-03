@@ -210,7 +210,7 @@ jobs:
             apt-get update
             apt upgrade -y
             apt install -y aptitude
-            aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common
+            aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common clang-tidy
             pip install gdown
 
       - run:
