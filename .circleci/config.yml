@@ -226,7 +226,7 @@ jobs:
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
             #(yes || true) | ./llvm.sh 14   # Feed "yes" to all shell script options, and ignore exit code 141
-            yes '' | ./llvm.sh 14.0.0 || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+            yes '' | ./llvm.sh 14 || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
             #yes '' | ./llvm.sh 14
 
