@@ -573,8 +573,8 @@ workflows:
   build:
     jobs:
       - clang-tidy
-      #- build_ubuntu18
-      #- build_centos7
+      - build_ubuntu18
+      - build_centos7
       #- foo
       #- test_clang_format
       #- build_win10_installer
