@@ -247,13 +247,13 @@ jobs:
             cmake . \
             -DCMAKE_BUILD_TYPE:String=Release \
             -DCMAKE_CXX_COMPILER=clang++-14 \
-            -DCMAKE_CXX_FLAGS="-isystem\ /usr/lib/llvm-14/lib/clang/14.0.0/include" \
+            #-DCMAKE_CXX_FLAGS="-isystem\ /usr/lib/llvm-14/lib/clang/14.0.0/include" \
             #-DOpenMP_CXX_FLAGS="-Xclang\ -fopenmp" \
-            -DOpenMP_CXX_LIB_NAMES=libomp \
+            #-DOpenMP_CXX_LIB_NAMES=libomp \
             -DCMAKE_C_COMPILER=clang-14 \
             #-DOpenMP_C_FLAGS="-Xclang\ -fopenmp" \
-            -DOpenMP_C_LIB_NAMES=libomp \
-            -DOpenMP_libomp_LIBRARY=/usr/lib/llvm-14/lib/clang/14.0.0/lib/libomp.so \
+            #-DOpenMP_C_LIB_NAMES=libomp \
+            #-DOpenMP_libomp_LIBRARY=/usr/lib/llvm-14/lib/clang/14.0.0/lib/libomp.so \
             -DBUILD_TEST_APPS=ON \
             -DUSE_OMP=ON
             make -j4
@@ -315,7 +315,6 @@ jobs:
             -H "Authorization: token $CIRCLE_CLANG_TIDY_TOKEN" \
             https://api.github.com/repos/NCAR/VAPOR/issues/${CIRCLE_PULL_REQUEST##*/} \
             -d "$json"
-
 
   build_ubuntu18:
     docker:
