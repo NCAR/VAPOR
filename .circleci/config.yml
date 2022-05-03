@@ -202,7 +202,6 @@ jobs:
   clang-tidy:
     docker:
       - image: ubuntu:latest
-        #sgpearse/vapor3-ubuntu18:latest
 
     steps:
       - run:
@@ -210,26 +209,17 @@ jobs:
           command: |
             apt-get update
             apt upgrade -y
-            #apt install -y libomp-dev
             apt install -y aptitude
-            #aptitude install -y jq clang-10 clang-tidy-10
-            #aptitude install -y clang-14 clang-tidy-14 xz-utils pip git curl jq cmake freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3
-            #aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common libomp-dev
             aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common
-            #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
             pip install gdown
 
       - run:
           name: Install llvm
           command: |
             add-apt-repository -y universe
-            #add-apt-repository -y 'deb http://apt.llvm.org/jammy/     llvm-toolchain-jammy-14 main'
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
-            #(yes || true) | ./llvm.sh 14   # Feed "yes" to all shell script options, and ignore exit code 141
-            yes '' | ./llvm.sh 14 || if [[ $? -eq 141 ]]; then true; else exit $?; fi
-
-            #yes '' | ./llvm.sh 14
+            yes '' | ./llvm.sh 14 || if [[ $? -eq 141 ]]; then true; else exit $?; fi # Feed "yes" to all of the script's questions and igore error 141
 
       - run: 
           name: Get third party libraries
@@ -246,7 +236,6 @@ jobs:
             cd /root/VAPOR
             git checkout $CIRCLE_BRANCH
             apt install -y libomp-dev
-            #cmake . -DCMAKE_BUILD_TYPE:String=Release -DCMAKE_CXX_COMPILER=clang++-10 -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_FLAGS=-isystem\ /usr/lib/llvm-10/lib/clang/10.0.0/include -DBUILD_TEST_APPS=ON -DUSE_OMP=ON
             cmake . \
             -DCMAKE_BUILD_TYPE:String=Release \
             -DCMAKE_CXX_COMPILER=clang++-14 \
@@ -255,23 +244,10 @@ jobs:
             -DUSE_OMP=ON \
             -DOpenMP_CXX_FLAGS=-fopenmp \
             -DOpenMP_C_FLAGS=-fopenmp \
-            #-DOpenMP_C_LIB_NAMES=libomp \
-            #-DOpenMP_CXX_LIB_NAMES=libomp
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
-            /usr/bin/clang-tidy-diff-10.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
+            /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
-
-            #-DOpenMP_C_LIB_NAMES=/usr/lib/llvm-14/lib/libomp.so
-            #-DOpenMP_CXX_LIB_NAMES=/usr/lib/llvm-14/lib/libomp.so
-
-            #-DCMAKE_CXX_FLAGS="-isystem\ /usr/lib/llvm-14/lib/clang/14.0.0/include" \
-            #-DOpenMP_CXX_FLAGS="-Xclang\ -fopenmp" \
-            #-DOpenMP_CXX_FLAGS=-fopenmp \
-            #-DOpenMP_CXX_LIB_NAMES=libomp \
-            #-DOpenMP_C_FLAGS="-Xclang\ -fopenmp" \
-            #-DOpenMP_C_LIB_NAMES=libomp \
-            #-DOpenMP_libomp_LIBRARY=/usr/lib/llvm-14/lib/clang/14.0.0/lib/libomp.so \
 
       - store_artifacts:
           path: /tmp/clangTidyOutput.txt
