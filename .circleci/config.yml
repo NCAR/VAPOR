@@ -224,7 +224,7 @@ jobs:
             #add-apt-repository -y 'deb http://apt.llvm.org/jammy/     llvm-toolchain-jammy-14 main'
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
-            (yes ''; e="$?"; [ "$e" -eq 141 ] && exit 0; exit "$e") | ./llvm.sh 14   # Feed "yes" to all shell script options, and ignore exit code 141
+            (yes || true) | ./llvm.sh 14   # Feed "yes" to all shell script options, and ignore exit code 141
             #yes '' | ./llvm.sh 14
 
       - run: 
