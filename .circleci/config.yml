@@ -215,8 +215,11 @@ jobs:
             #aptitude install -y clang-14 clang-tidy-14 xz-utils pip git curl jq cmake freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3
             aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common libomp-14-dev
             #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+
+      - run:
+          name: Install llvm
             add-apt-repository -y universe
-            add-apt-repository -y 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-14 main'
+            add-apt-repository -y 'deb http://apt.llvm.org/jammy/     llvm-toolchain-jammy-14 main'
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
             ./llvm.sh 14
