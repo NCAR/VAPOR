@@ -219,7 +219,7 @@ jobs:
       - run:
           name: Install llvm
           command: |
-            #add-apt-repository -y universe
+            add-apt-repository -y universe
             #add-apt-repository -y 'deb http://apt.llvm.org/jammy/     llvm-toolchain-jammy-14 main'
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
