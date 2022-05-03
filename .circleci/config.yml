@@ -219,7 +219,7 @@ jobs:
             add-apt-repository -y universe
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
-            yes '' | ./llvm.sh 14 || if [[ $? -eq 141 ]]; then true; else exit $?; fi # Feed "yes" to all of the script's questions and igore error 141
+            yes '' | ./llvm.sh 12 || if [[ $? -eq 141 ]]; then true; else exit $?; fi # Feed "yes" to all of the script's questions and igore error 141
 
       - run: 
           name: Get third party libraries
@@ -238,15 +238,16 @@ jobs:
             apt install -y libomp-dev
             cmake . \
             -DCMAKE_BUILD_TYPE:String=Release \
-            -DCMAKE_CXX_COMPILER=clang++-14 \
-            -DCMAKE_C_COMPILER=clang-14 \
+            #-DCMAKE_CXX_COMPILER=clang++-14 \
+            #-DCMAKE_C_COMPILER=clang-14 \
+            -DCMAKE_CXX_COMPILER=clang++-12 \
+            -DCMAKE_C_COMPILER=clang-12 \
             -DBUILD_TEST_APPS=ON \
             -DUSE_OMP=ON
-            #-DOpenMP_CXX_FLAGS=-fopenmp \
-            #-DOpenMP_C_FLAGS=-fopenmp
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
-            /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
+            #/usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
+            /usr/bin/clang-tidy-diff-12.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
 
       - store_artifacts:
