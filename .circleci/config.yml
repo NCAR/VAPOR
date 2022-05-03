@@ -210,7 +210,7 @@ jobs:
           command: |
             apt-get update
             apt upgrade -y
-            apt install -y aptitude
+            apt install -y aptitude libomp-dev
             #aptitude install -y jq clang-10 clang-tidy-10
             #aptitude install -y clang-14 clang-tidy-14 xz-utils pip git curl jq cmake freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3
             #aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common libomp-dev
