@@ -235,7 +235,7 @@ jobs:
             git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
             cd /root/VAPOR
             git checkout $CIRCLE_BRANCH
-            apt install -y libomp-dev
+            apt install -y libomp-dev-12
             cmake . \
             -DCMAKE_BUILD_TYPE:String=Release \
             #-DCMAKE_CXX_COMPILER=clang++-14 \
