@@ -214,7 +214,11 @@ jobs:
             #aptitude install -y jq clang-10 clang-tidy-10
             #aptitude install -y clang-14 clang-tidy-14 xz-utils pip git curl jq cmake freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3
             aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common libomp-14-dev
-            bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+            #bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+            add-apt-repository -y universe
+            wget https://apt.llvm.org/llvm.sh
+            chmod +x llvm.sh
+            sudo ./llvm.sh 13
             pip install gdown
 
       - run: 
