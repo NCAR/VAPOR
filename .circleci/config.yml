@@ -243,7 +243,7 @@ jobs:
             -DBUILD_TEST_APPS=ON \
             -DUSE_OMP=ON \
             -DOpenMP_CXX_FLAGS=-fopenmp \
-            -DOpenMP_C_FLAGS=-fopenmp \
+            -DOpenMP_C_FLAGS=-fopenmp
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
             /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
