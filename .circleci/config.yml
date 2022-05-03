@@ -248,10 +248,10 @@ jobs:
             -DCMAKE_BUILD_TYPE:String=Release \
             -DCMAKE_CXX_COMPILER=clang++-14 \
             -DCMAKE_CXX_FLAGS="-isystem\ /usr/lib/llvm-14/lib/clang/14.0.0/include" \
-            -DOpenMP_CXX_FLAGS="-Xclang\ -fopenmp" \
+            #-DOpenMP_CXX_FLAGS="-Xclang\ -fopenmp" \
             -DOpenMP_CXX_LIB_NAMES=libomp \
             -DCMAKE_C_COMPILER=clang-14 \
-            -DOpenMP_C_FLAGS="-Xclang\ -fopenmp" \
+            #-DOpenMP_C_FLAGS="-Xclang\ -fopenmp" \
             -DOpenMP_C_LIB_NAMES=libomp \
             -DOpenMP_libomp_LIBRARY=/usr/lib/llvm-14/lib/clang/14.0.0/lib/libomp.so \
             -DBUILD_TEST_APPS=ON \
