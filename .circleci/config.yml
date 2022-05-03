@@ -225,7 +225,7 @@ jobs:
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
             #(yes || true) | ./llvm.sh 14   # Feed "yes" to all shell script options, and ignore exit code 141
-            yes '' | ./llvm.sh 14 || if [[ $? -eq 141 ]]; then true; else exit $?; fi
+            yes '' | ./llvm.sh 14.0.1 || if [[ $? -eq 141 ]]; then true; else exit $?; fi
 
             #yes '' | ./llvm.sh 14
 
@@ -249,11 +249,16 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++-14 \
             -DCMAKE_C_COMPILER=clang-14 \
             -DBUILD_TEST_APPS=ON \
-            -DUSE_OMP=ON
+            -DUSE_OMP=ON \
+            #-DOpenMP_C_LIB_NAMES=libomp \
+            #-DOpenMP_CXX_LIB_NAMES=libomp
             make -j4
             git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
             /usr/bin/clang-tidy-diff-10.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
+
+            #-DOpenMP_C_LIB_NAMES=/usr/lib/llvm-14/lib/libomp.so
+            #-DOpenMP_CXX_LIB_NAMES=/usr/lib/llvm-14/lib/libomp.so
 
             #-DCMAKE_CXX_FLAGS="-isystem\ /usr/lib/llvm-14/lib/clang/14.0.0/include" \
             #-DOpenMP_CXX_FLAGS="-Xclang\ -fopenmp" \
