@@ -3,6 +3,7 @@
 #include <vapor/VolumeOSPRay.h>
 #include "PWidgets.h"
 #include "PStringDropdownHLI.h"
+#include "PMetadataClasses.h"
 
 using namespace VAPoR;
 typedef VolumeParams VP;
@@ -18,7 +19,8 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce) : RenderE
             new PScalarVariableSelector,
             new PColorMapVariableSelector
         }),
-        new PFidelitySection
+        new PFidelitySection,
+        new POpenVariableMetadataWidget
     }));
     
     AddAppearanceSubtab(new PGroup({

@@ -44,14 +44,16 @@ private:
 //! \author Stas Jaroszynski
 
 class VSectionGroup : public VSection, public WidgetGroupWrapper<VSectionGroup, QWidget, VGroup> {
-    VGroup *_vgroup;
-
 public:
     VSectionGroup(const std::string &title, List children = {}) : VSection(title), WidgetGroupWrapper(_vgroup = new VGroup())
     {
         layout()->addWidget(_vgroup);
         _vgroup->AddM(children);
     }
+
+protected:
+    VGroup *_vgroup;
+
 };
 
 class VSection::SettingsMenuButton : public QToolButton {
