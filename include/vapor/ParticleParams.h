@@ -26,7 +26,7 @@ public:
     static const std::string ShowDirectionTag;
     static const std::string DirectionScaleTag;
     static const std::string StrideTag;
-    static const std::string RadiusTag;
+    static const std::string RenderRadiusScalarTag;
     static const std::string RenderRadiusBaseTag;
 
     static const std::string LightingEnabledTag;

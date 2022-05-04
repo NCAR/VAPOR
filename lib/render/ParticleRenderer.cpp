@@ -86,107 +86,31 @@ int ParticleRenderer::_paintGL(bool)
     float           LUT[256 * 4];
     mf->makeLut(LUT);
 
-    CoordType minExt = {0.0, 0.0, 0.0};
+    /*CoordType minExt = {0.0, 0.0, 0.0};
     CoordType maxExt = {0.0, 0.0, 0.0};
     p->GetBox()->GetExtents(minExt, maxExt);
 
 #define PD3(v) printf("%s = %f, %f, %f\n", #v, v[0], v[1], v[2])
     string varName = p->GetVariableName();
     Grid * grid = _dataMgr->GetVariable(p->GetCurrentTimestep(), varName, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt, true);
-    if (!grid) return -1;
+    if (!grid) return -1;*/
 
-    vector<long> values;
-
-    size_t         stride = max(1L, p->GetValueLong(ParticleParams::StrideTag, 1));
-    bool           showDir = p->GetValueLong(ParticleParams::ShowDirectionTag, 0);
-    float          dirScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1);
-    vector<Grid *> vecGrids;
-    if (showDir) {
-        vector<string> vecNames = p->GetFieldVariableNames();
-        vector<string> mainVarCoords;
-        _dataMgr->GetVarCoordVars(varName, true, mainVarCoords);
-
-        for (auto var : vecNames) {
-            vector<string> varCoords;
-            _dataMgr->GetVarCoordVars(var, true, varCoords);
-
-            if (mainVarCoords != varCoords) {
-                if (grid) {
-                    _dataMgr->UnlockGrid(grid);
-                    delete grid;
-                }
-                for (auto g : vecGrids) {
-                    _dataMgr->UnlockGrid(g);
-                    delete g;
-                }
-                SetErrMsg("Variable \"%s\" on different grid from main variable", var.c_str());
-                return -1;
-            }
-
-            Grid *ng = _dataMgr->GetVariable(p->GetCurrentTimestep(), var, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt, true);
-            if (!ng) {
-                if (grid) {
-                    _dataMgr->UnlockGrid(grid);
-                    delete grid;
-                }
-                for (auto g : vecGrids) {
-                    _dataMgr->UnlockGrid(g);
-                    delete g;
-                }
-                SetErrMsg("Cannot read var \"%s\"", var.c_str());
-                return -1;
-            }
-
-            vecGrids.push_back(ng);
-        }
+    //std::vector<glm::vec4> particles;
+    //_generateParticles(particles);
+    if (_particleCacheIsDirty()) {
+        _resetParticleCache();
+        _generateParticles();
     }
 
-    auto   dims = grid->GetDimensions();
-    size_t nCoords = 1;
-    for (const auto d : dims) nCoords *= d;
-
-    long                        renderedParticles = 0;
-    auto                        node = grid->ConstNodeBegin(minExt, maxExt);
-    auto                        nodeEnd = grid->ConstNodeEnd();
-    CoordType                   coordsBuf;
-    vector<Grid::ConstIterator> dirs;
-    std::vector<glm::vec4>      particles;
-    for (auto g : vecGrids) dirs.push_back(g->cbegin(minExt, maxExt));
-    for (size_t i = 0; node != nodeEnd; ++node, ++i) {
-        if (i % stride) {
-            if (showDir)
-                for (auto &it : dirs) ++it;
-            continue;
-        }
-
-        const float value = grid->GetValueAtIndex(*node);
-        grid->GetUserCoordinates(*node, coordsBuf);
-        const glm::vec3 p(coordsBuf[0], coordsBuf[1], coordsBuf[2]);
-        particles.push_back(glm::vec4(p[0], p[1], p[2], value));
-
-        renderedParticles++;
-
-        if (showDir) {
-            const glm::vec3 n(*(dirs[0]), *(dirs[1]), *(dirs[2]));
-            const glm::vec3 p2 = p + n * dirScale;
-            particles.push_back(glm::vec4(p2[0], p2[1], p2[2], value));
-            for (auto &it : dirs) ++it;
-        }
-        else 
-            particles.push_back(glm::vec4(p[0], p[1], p[2], value));
+    if (_colormapCacheIsDirty()) {
+        _resetColormapCache();
+        _prepareColormap();
     }
-
-    _prepareColormap();
-    _renderParticles(particles);
+    //_renderParticles(particles);
+    _renderParticles();
 
     //    printf("Rendered %li particles\n", renderedParticles);
 
-    _dataMgr->UnlockGrid(grid);
-    delete grid;
-    for (auto g : vecGrids) {
-        _dataMgr->UnlockGrid(g);
-        delete g;
-    }
     return rc;
 }
 
@@ -220,58 +144,124 @@ int ParticleRenderer::_initializeGL() {
     return 0; 
 }
 
-int ParticleRenderer::_renderParticles(const std::vector<glm::vec4>& particles)
+bool ParticleRenderer::_particleCacheIsDirty() const {
+    auto p = GetActiveParams();
+
+    if (_cacheParams.ts        != p->GetCurrentTimestep()    ) return true;
+    if (_cacheParams.rLevel    != p->GetRefinementLevel()    ) return true;
+    if (_cacheParams.cLevel    != p->GetCompressionLevel()   ) return true;
+
+    VAPoR::CoordType min, max;
+    p->GetBox()->GetExtents(min, max);
+    if (_cacheParams.boxMin != min) return true;
+    if (_cacheParams.boxMax != max) return true;
+
+    if (_cacheParams.radius    != p->GetValueDouble( ParticleParams::RenderRadiusScalarTag, -1.)) return true;
+    if (_cacheParams.stride    != p->GetValueLong( ParticleParams::StrideTag, 1)) return true;
+    if (_cacheParams.varName   != p->GetVariableName()       ) return true;
+    if (_cacheParams.fieldVars != p->GetFieldVariableNames() ) return true;
+    if (_cacheParams.direction != (bool)p->GetValueLong( ParticleParams::ShowDirectionTag, false)) return true;
+    if (_cacheParams.directionScale != p->GetValueDouble( ParticleParams::DirectionScaleTag, false)) return true;
+
+    return false;
+}
+
+void ParticleRenderer::_resetParticleCache() {
+    auto p = GetActiveParams();
+    std::cout << "Reset cache " << _cacheParams.ts << " " << p->GetCurrentTimestep() << std::endl;
+    _cacheParams.ts      = p->GetCurrentTimestep();
+    _cacheParams.rLevel  = p->GetRefinementLevel();
+    _cacheParams.cLevel  = p->GetCompressionLevel();
+
+    VAPoR::CoordType min, max;
+    p->GetBox()->GetExtents(min, max);
+    _cacheParams.boxMin = min;
+    _cacheParams.boxMax = max;
+   
+    _cacheParams.radius = p->GetValueDouble(ParticleParams::RenderRadiusScalarTag, -1.); 
+    _cacheParams.direction = (bool)p->GetValueLong(ParticleParams::ShowDirectionTag, false); 
+    _cacheParams.directionScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1.);
+    _cacheParams.stride = p->GetValueLong(ParticleParams::StrideTag, 1);
+    _cacheParams.varName = p->GetVariableName();
+    _cacheParams.fieldVars = p->GetFieldVariableNames();
+}
+
+bool ParticleRenderer::_colormapCacheIsDirty() const {
+    auto p = GetActiveParams();
+    std::vector<float> tf_lut;
+    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
+    tf->makeLut(tf_lut);
+    if (_cacheParams.tf_lut    != tf_lut)                  return true;
+    if (_cacheParams.tf_minMax != tf->getMinMaxMapValue()) return true;
+    return false;
+}
+
+void ParticleRenderer::_resetColormapCache() {
+    auto p = GetActiveParams();
+    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
+    std::vector<float> tf_lut;
+    tf->makeLut(tf_lut);
+    std::vector<double> minMax = tf->getMinMaxMapValue();
+    _cacheParams.tf_lut    = tf_lut;
+    _cacheParams.tf_minMax = minMax;
+}
+
+//int ParticleRenderer::_renderParticles(const std::vector<glm::vec4>& particles)
+int ParticleRenderer::_renderParticles()
 {
-    typedef struct {
+    /*typedef struct {
         glm::vec3  p;
         float v;
-    } Vertex;
-    vector<Vertex> vertices;
+    } Vertex;*/
+    //vector<Vertex> vertices;
     vector<int>    sizes;
     vector<Vertex> sv;
 
-    int nStreams = particles.size();
-    for (int s = 0; s < nStreams; s+=2) {
-        glm::vec4 p = particles[s];
-        glm::vec4 p2 = particles[s+1];
-        const vector<flow::Particle> stream = {flow::Particle(p[0],p[1],p[2],0.,p[3]), flow::Particle(p2[0],p2[1],p2[2],0.,p2[3])};
-        sv.clear();
-        int sn = stream.size();
+    //if (_cacheIsDirty()) {
+    //    _resetCache();
+        int nStreams = _particles.size();
+        for (int s = 0; s < nStreams; s+=2) {
+            glm::vec4 p = _particles[s];
+            glm::vec4 p2 = _particles[s+1];
+            const vector<flow::Particle> stream = {flow::Particle(p[0],p[1],p[2],0.,p[3]), flow::Particle(p2[0],p2[1],p2[2],0.,p2[3])};
+            sv.clear();
+            int sn = stream.size();
 
-        for (int i = 0; i < sn + 1; i++) {
-            if (i == sn) {
-                int svn = sv.size();
+            for (int i = 0; i < sn + 1; i++) {
+                if (i == sn) {
+                    int svn = sv.size();
 
-                if (svn < 2) {
+                    if (svn < 2) {
+                        sv.clear();
+                        continue;
+                    }
+
+                    glm::vec3 prep(-normalize(sv[1].p - sv[0].p) + sv[0].p);
+                    glm::vec3 post(normalize(sv[svn - 1].p - sv[svn - 2].p) + sv[svn - 1].p);
+
+                    size_t vn = _vertices.size();
+                    _vertices.resize(vn + svn + 2);
+                    _vertices[vn] = {prep, sv[0].v};
+                    _vertices[_vertices.size() - 1] = {post, sv[svn - 1].v};
+
+                    memcpy(_vertices.data() + vn + 1, sv.data(), sizeof(Vertex) * svn);
+
+                    sizes.push_back(svn + 2);
                     sv.clear();
-                    continue;
+                } else {
+                    const flow::Particle &p = stream[i];
+                    sv.push_back({p.location, p.value});
                 }
-
-                glm::vec3 prep(-normalize(sv[1].p - sv[0].p) + sv[0].p);
-                glm::vec3 post(normalize(sv[svn - 1].p - sv[svn - 2].p) + sv[svn - 1].p);
-
-                size_t vn = vertices.size();
-                vertices.resize(vn + svn + 2);
-                vertices[vn] = {prep, sv[0].v};
-                vertices[vertices.size() - 1] = {post, sv[svn - 1].v};
-
-                memcpy(vertices.data() + vn + 1, sv.data(), sizeof(Vertex) * svn);
-
-                sizes.push_back(svn + 2);
-                sv.clear();
-            } else {
-                const flow::Particle &p = stream[i];
-                sv.push_back({p.location, p.value});
             }
         }
-    }
+    //}
 
     assert(glIsVertexArray(_VAO) == GL_TRUE);
     assert(glIsBuffer(_VBO) == GL_TRUE);
 
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _vertices.size(), _vertices.data(), GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     _streamSizes = sizes;
@@ -301,7 +291,7 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
         radiusBase = largestDim / 560.f;
         rp->SetValueDouble(ParticleParams::RenderRadiusBaseTag, "", radiusBase);
     }
-    float radiusScalar = rp->GetValueDouble(ParticleParams::RadiusTag, 1.);
+    float radiusScalar = rp->GetValueDouble(ParticleParams::RenderRadiusScalarTag, 1.);
     float radius = radiusBase * radiusScalar;
 
     ShaderProgram *shader = nullptr;
@@ -371,6 +361,116 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
     shader->UnBind();
     DisableClippingPlanes();
 
+    return 0;
+}
+
+//int ParticleRenderer::_generateParticles(std::vector<glm::vec4> &particles) const {
+int ParticleRenderer::_generateParticles() {
+    std::cout << "Generating particles" << std::endl;
+    /*auto p = GetActiveParams();
+    CoordType minExt = {0.0, 0.0, 0.0};
+    CoordType maxExt = {0.0, 0.0, 0.0};
+    p->GetBox()->GetExtents(minExt, maxExt);*/
+
+#define PD3(v) printf("%s = %f, %f, %f\n", #v, v[0], v[1], v[2])
+    //string varName = p->GetVariableName();
+    string varName = _cacheParams.varName;
+    //Grid * grid = _dataMgr->GetVariable(p->GetCurrentTimestep(), varName, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt, true);
+    Grid * grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
+    if (!grid) return -1;
+
+    //size_t         stride = max(1L, p->GetValueLong(ParticleParams::StrideTag, 1));
+    //bool           showDir = p->GetValueLong(ParticleParams::ShowDirectionTag, 0);
+    //float          dirScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1);
+    size_t         stride = max(1L, (long)_cacheParams.stride);
+    bool           showDir = _cacheParams.direction;
+    float          dirScale = _cacheParams.directionScale;
+    vector<Grid *> vecGrids;
+    if (showDir) {
+        //vector<string> vecNames = p->GetFieldVariableNames();
+        vector<string> vecNames = _cacheParams.fieldVars;
+        vector<string> mainVarCoords;
+        _dataMgr->GetVarCoordVars(_cacheParams.varName, true, mainVarCoords);
+
+        for (auto var : vecNames) {
+            vector<string> varCoords;
+            _dataMgr->GetVarCoordVars(var, true, varCoords);
+
+            if (mainVarCoords != varCoords) {
+                if (grid) {
+                    _dataMgr->UnlockGrid(grid);
+                    delete grid;
+                }
+                for (auto g : vecGrids) {
+                    _dataMgr->UnlockGrid(g);
+                    delete g;
+                }
+                SetErrMsg("Variable \"%s\" on different grid from main variable", var.c_str());
+                return -1;
+            }
+
+          //Grid *ng = _dataMgr->GetVariable(p->GetCurrentTimestep(), var, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt, true);
+            Grid *ng = _dataMgr->GetVariable(_cacheParams.ts, var, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
+            if (!ng) {
+                if (grid) {
+                    _dataMgr->UnlockGrid(grid);
+                    delete grid;
+                }
+                for (auto g : vecGrids) {
+                    _dataMgr->UnlockGrid(g);
+                    delete g;
+                }
+                SetErrMsg("Cannot read var \"%s\"", var.c_str());
+                return -1;
+            }
+
+            vecGrids.push_back(ng);
+        }
+    }
+
+    auto   dims = grid->GetDimensions();
+    size_t nCoords = 1;
+    for (const auto d : dims) nCoords *= d;
+    (void)nCoords; // Silence unused variable warning
+
+    long                        renderedParticles = 0;
+    auto                        node = grid->ConstNodeBegin(_cacheParams.boxMin, _cacheParams.boxMax);
+    auto                        nodeEnd = grid->ConstNodeEnd();
+    CoordType                   coordsBuf;
+    vector<Grid::ConstIterator> dirs;
+    //std::vector<glm::vec4>      particles;
+    _particles.clear();
+    for (auto g : vecGrids) dirs.push_back(g->cbegin(_cacheParams.boxMin, _cacheParams.boxMax));
+    for (size_t i = 0; node != nodeEnd; ++node, ++i) {
+        if (i % stride) {
+            if (showDir)
+                for (auto &it : dirs) ++it;
+            continue;
+        }
+
+        const float value = grid->GetValueAtIndex(*node);
+        grid->GetUserCoordinates(*node, coordsBuf);
+        const glm::vec3 p(coordsBuf[0], coordsBuf[1], coordsBuf[2]);
+        _particles.push_back(glm::vec4(p[0], p[1], p[2], value));
+
+        renderedParticles++;
+
+        if (showDir) {
+            const glm::vec3 n(*(dirs[0]), *(dirs[1]), *(dirs[2]));
+            const glm::vec3 p2 = p + n * dirScale;
+            _particles.push_back(glm::vec4(p2[0], p2[1], p2[2], value));
+            for (auto &it : dirs) ++it;
+        }
+        else 
+            _particles.push_back(glm::vec4(p[0], p[1], p[2], value));
+    }
+
+    _dataMgr->UnlockGrid(grid);
+    delete grid;
+    for (auto g : vecGrids) {
+        _dataMgr->UnlockGrid(g);
+        delete g;
+    }
     return 0;
 }
 

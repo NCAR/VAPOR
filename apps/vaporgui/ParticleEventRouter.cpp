@@ -26,7 +26,7 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
     AddAppearanceSubtab(new PGroup({
         new PTFEditor,
         new PSection("Particles", {
-            (new PDoubleSliderEdit(ParticleParams::RadiusTag, "Radius"))->SetRange(0.5, 25)->AllowUserRange(true)->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(ParticleParams::RenderRadiusScalarTag, "Radius"))->SetRange(0.5, 25)->AllowUserRange(true)->EnableDynamicUpdate(),
             new PCheckbox(ParticleParams::ShowDirectionTag, "Show direction"),
             (new PShowIf(ParticleParams::ShowDirectionTag))->Equals(true)->Then({
                 (new PDoubleSliderEdit(ParticleParams::DirectionScaleTag, "Length scale"))->SetRange(0.0001, 10)->AllowUserRange(true)->EnableDynamicUpdate(),
