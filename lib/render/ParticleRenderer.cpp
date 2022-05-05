@@ -76,7 +76,6 @@ ParticleRenderer::~ParticleRenderer() {
 
 int ParticleRenderer::_paintGL(bool)
 {
-    int rc = 0;
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
 
@@ -86,32 +85,25 @@ int ParticleRenderer::_paintGL(bool)
     float           LUT[256 * 4];
     mf->makeLut(LUT);
 
-    /*CoordType minExt = {0.0, 0.0, 0.0};
-    CoordType maxExt = {0.0, 0.0, 0.0};
-    p->GetBox()->GetExtents(minExt, maxExt);
-
-#define PD3(v) printf("%s = %f, %f, %f\n", #v, v[0], v[1], v[2])
-    string varName = p->GetVariableName();
-    Grid * grid = _dataMgr->GetVariable(p->GetCurrentTimestep(), varName, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt, true);
-    if (!grid) return -1;*/
-
-    //std::vector<glm::vec4> particles;
-    //_generateParticles(particles);
     if (_particleCacheIsDirty()) {
         _resetParticleCache();
-        _generateParticles();
+        int rc = _generateParticles();
+        if (rc != 0) {
+            SetErrMsg("Cannot generate particles");
+            return rc;
+        }
     }
 
     if (_colormapCacheIsDirty()) {
         _resetColormapCache();
         _prepareColormap();
     }
-    //_renderParticles(particles);
+
     _renderParticles();
 
     //    printf("Rendered %li particles\n", renderedParticles);
 
-    return rc;
+    return 0;
 }
 
 int ParticleRenderer::_initializeGL() { 
@@ -156,7 +148,7 @@ bool ParticleRenderer::_particleCacheIsDirty() const {
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
 
-    if (_cacheParams.radius    != p->GetValueDouble( ParticleParams::RenderRadiusScalarTag, -1.)) return true;
+    //if (_cacheParams.radius    != p->GetValueDouble( ParticleParams::RenderRadiusScalarTag, -1.)) return true;
     if (_cacheParams.stride    != p->GetValueLong( ParticleParams::StrideTag, 1)) return true;
     if (_cacheParams.varName   != p->GetVariableName()       ) return true;
     if (_cacheParams.fieldVars != p->GetFieldVariableNames() ) return true;
@@ -178,7 +170,7 @@ void ParticleRenderer::_resetParticleCache() {
     _cacheParams.boxMin = min;
     _cacheParams.boxMax = max;
    
-    _cacheParams.radius = p->GetValueDouble(ParticleParams::RenderRadiusScalarTag, -1.); 
+    //_cacheParams.radius = p->GetValueDouble(ParticleParams::RenderRadiusScalarTag, -1.); 
     _cacheParams.direction = (bool)p->GetValueLong(ParticleParams::ShowDirectionTag, false); 
     _cacheParams.directionScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1.);
     _cacheParams.stride = p->GetValueLong(ParticleParams::StrideTag, 1);
@@ -206,69 +198,63 @@ void ParticleRenderer::_resetColormapCache() {
     _cacheParams.tf_minMax = minMax;
 }
 
-//int ParticleRenderer::_renderParticles(const std::vector<glm::vec4>& particles)
-int ParticleRenderer::_renderParticles()
+void ParticleRenderer::_renderParticles()
 {
-    /*typedef struct {
+    typedef struct {
         glm::vec3  p;
         float v;
-    } Vertex;*/
-    //vector<Vertex> vertices;
+    } Vertex;
+    vector<Vertex> vertices;
     vector<int>    sizes;
     vector<Vertex> sv;
 
-    //if (_cacheIsDirty()) {
-    //    _resetCache();
-        int nStreams = _particles.size();
-        for (int s = 0; s < nStreams; s+=2) {
-            glm::vec4 p = _particles[s];
-            glm::vec4 p2 = _particles[s+1];
-            const vector<flow::Particle> stream = {flow::Particle(p[0],p[1],p[2],0.,p[3]), flow::Particle(p2[0],p2[1],p2[2],0.,p2[3])};
-            sv.clear();
-            int sn = stream.size();
+    int nStreams = _particles.size();
+    for (int s = 0; s < nStreams; s+=2) {
+        glm::vec4 p = _particles[s];
+        glm::vec4 p2 = _particles[s+1];
+        const vector<flow::Particle> stream = {flow::Particle(p[0],p[1],p[2],0.,p[3]), flow::Particle(p2[0],p2[1],p2[2],0.,p2[3])};
+        sv.clear();
+        int sn = stream.size();
 
-            for (int i = 0; i < sn + 1; i++) {
-                if (i == sn) {
-                    int svn = sv.size();
+        for (int i = 0; i < sn + 1; i++) {
+            if (i == sn) {
+                int svn = sv.size();
 
-                    if (svn < 2) {
-                        sv.clear();
-                        continue;
-                    }
-
-                    glm::vec3 prep(-normalize(sv[1].p - sv[0].p) + sv[0].p);
-                    glm::vec3 post(normalize(sv[svn - 1].p - sv[svn - 2].p) + sv[svn - 1].p);
-
-                    size_t vn = _vertices.size();
-                    _vertices.resize(vn + svn + 2);
-                    _vertices[vn] = {prep, sv[0].v};
-                    _vertices[_vertices.size() - 1] = {post, sv[svn - 1].v};
-
-                    memcpy(_vertices.data() + vn + 1, sv.data(), sizeof(Vertex) * svn);
-
-                    sizes.push_back(svn + 2);
+                if (svn < 2) {
                     sv.clear();
-                } else {
-                    const flow::Particle &p = stream[i];
-                    sv.push_back({p.location, p.value});
+                    continue;
                 }
+
+                glm::vec3 prep(-normalize(sv[1].p - sv[0].p) + sv[0].p);
+                glm::vec3 post(normalize(sv[svn - 1].p - sv[svn - 2].p) + sv[svn - 1].p);
+
+                size_t vn = vertices.size();
+                vertices.resize(vn + svn + 2);
+                vertices[vn] = {prep, sv[0].v};
+                vertices[vertices.size() - 1] = {post, sv[svn - 1].v};
+
+                memcpy(vertices.data() + vn + 1, sv.data(), sizeof(Vertex) * svn);
+
+                sizes.push_back(svn + 2);
+                sv.clear();
+            } else {
+                const flow::Particle &p = stream[i];
+                sv.push_back({p.location, p.value});
             }
         }
-    //}
+    }
 
     assert(glIsVertexArray(_VAO) == GL_TRUE);
     assert(glIsBuffer(_VBO) == GL_TRUE);
 
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _vertices.size(), _vertices.data(), GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     _streamSizes = sizes;
 
     _renderParticlesHelper();
-
-    return 0;
 }
 
 int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
@@ -283,7 +269,7 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
         std::string nonEmptyVarName = rp->GetColorMapVariableName();
         assert(!nonEmptyVarName.empty());
 
-        _dataMgr->GetVariableExtents(rp->GetCurrentTimestep(), nonEmptyVarName, rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd);
+        _dataMgr->GetVariableExtents(_cacheParams.ts, nonEmptyVarName, _cacheParams.rLevel, _cacheParams.cLevel, mind, maxd);
         glm::vec3  min(mind[0], mind[1], mind[2]);
         glm::vec3  max(maxd[0], maxd[1], maxd[2]);
         glm::vec3  lens = max - min;
@@ -291,11 +277,12 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
         radiusBase = largestDim / 560.f;
         rp->SetValueDouble(ParticleParams::RenderRadiusBaseTag, "", radiusBase);
     }
-    float radiusScalar = rp->GetValueDouble(ParticleParams::RenderRadiusScalarTag, 1.);
-    float radius = radiusBase * radiusScalar;
+    //float radiusScalar = _cacheParams.radius;
+    //float radius = radiusBase * radiusScalar;
+    float radius = radiusBase * rp->GetValueDouble(ParticleParams::RenderRadiusScalarTag, 1.);
 
     ShaderProgram *shader = nullptr;
-    if (rp->GetValueLong(ParticleParams::ShowDirectionTag, 0))
+    if (_cacheParams.direction)
         shader = _glManager->shaderManager->GetShader("FlowTubes"); 
     else
         shader = _glManager->shaderManager->GetShader("FlowGlyphsSphereSplat");
@@ -322,17 +309,6 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
     shader->SetUniform("phongSpecular", (float)rp->GetValueDouble(ParticleParams::PhongSpecularTag, 0.0));
     shader->SetUniform("phongShininess", (float)rp->GetValueDouble(ParticleParams::PhongShininessTag, 2.));
 
-
-    VAPoR::MapperFunction *mapperFunc = rp->GetMapperFunc(rp->GetColorMapVariableName());
-    mapperFunc->makeLut(_colorMap);
-    assert(_colorMap.size() % 4 == 0);
-    std::vector<double> range = mapperFunc->getMinMaxMapValue();
-    _colorMapRange[0] = float(range[0]);
-    _colorMapRange[1] = float(range[1]);
-    _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
-    glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
-    glBindTexture(GL_TEXTURE_1D, _colorMapTexId);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
     shader->SetUniform("mapRange", glm::make_vec2(_colorMapRange));
 
     glActiveTexture(GL_TEXTURE0);
@@ -350,6 +326,7 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
     for (int n : _streamSizes) {
         shader->SetUniform("nVertices", n);
         glDrawArrays(GL_LINE_STRIP_ADJACENCY, offset, n);
+        //glDrawArrays(GL_LINES, offset, n);
         offset += n;
     }
 
@@ -364,30 +341,22 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
     return 0;
 }
 
-//int ParticleRenderer::_generateParticles(std::vector<glm::vec4> &particles) const {
 int ParticleRenderer::_generateParticles() {
-    std::cout << "Generating particles" << std::endl;
-    /*auto p = GetActiveParams();
-    CoordType minExt = {0.0, 0.0, 0.0};
-    CoordType maxExt = {0.0, 0.0, 0.0};
-    p->GetBox()->GetExtents(minExt, maxExt);*/
+    std::cout << "Generating particles at " << _cacheParams.ts << std::endl;
 
 #define PD3(v) printf("%s = %f, %f, %f\n", #v, v[0], v[1], v[2])
-    //string varName = p->GetVariableName();
     string varName = _cacheParams.varName;
-    //Grid * grid = _dataMgr->GetVariable(p->GetCurrentTimestep(), varName, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt, true);
     Grid * grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
-    if (!grid) return -1;
+    if (!grid) {
+        SetErrMsg("Cannot acquire grid for variable \"%s\"", _cacheParams.varName.c_str());
+        return -1;
+    }
 
-    //size_t         stride = max(1L, p->GetValueLong(ParticleParams::StrideTag, 1));
-    //bool           showDir = p->GetValueLong(ParticleParams::ShowDirectionTag, 0);
-    //float          dirScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1);
     size_t         stride = max(1L, (long)_cacheParams.stride);
     bool           showDir = _cacheParams.direction;
     float          dirScale = _cacheParams.directionScale;
     vector<Grid *> vecGrids;
     if (showDir) {
-        //vector<string> vecNames = p->GetFieldVariableNames();
         vector<string> vecNames = _cacheParams.fieldVars;
         vector<string> mainVarCoords;
         _dataMgr->GetVarCoordVars(_cacheParams.varName, true, mainVarCoords);
@@ -409,7 +378,6 @@ int ParticleRenderer::_generateParticles() {
                 return -1;
             }
 
-          //Grid *ng = _dataMgr->GetVariable(p->GetCurrentTimestep(), var, p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt, true);
             Grid *ng = _dataMgr->GetVariable(_cacheParams.ts, var, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
             if (!ng) {
                 if (grid) {
@@ -438,7 +406,6 @@ int ParticleRenderer::_generateParticles() {
     auto                        nodeEnd = grid->ConstNodeEnd();
     CoordType                   coordsBuf;
     vector<Grid::ConstIterator> dirs;
-    //std::vector<glm::vec4>      particles;
     _particles.clear();
     for (auto g : vecGrids) dirs.push_back(g->cbegin(_cacheParams.boxMin, _cacheParams.boxMax));
     for (size_t i = 0; node != nodeEnd; ++node, ++i) {
@@ -475,16 +442,13 @@ int ParticleRenderer::_generateParticles() {
 }
 
 void ParticleRenderer::_prepareColormap() {
-    VAPoR::MapperFunction *mapperFunc = GetActiveParams()->GetMapperFunc(GetActiveParams()->GetColorMapVariableName()); // This is the line that's not const
-    mapperFunc->makeLut(_colorMap);
-    assert(_colorMap.size() % 4 == 0);
-    std::vector<double> range = mapperFunc->getMinMaxMapValue();
-    _colorMapRange[0] = float(range[0]);
-    _colorMapRange[1] = float(range[1]);
+    assert(_cacheParams.tf_lut.size() % 4 == 0);
+    _colorMapRange[0] = _cacheParams.tf_minMax[0];
+    _colorMapRange[1] = _cacheParams.tf_minMax[1];
     _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
     glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTexId);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _cacheParams.tf_lut.size() / 4, 0, GL_RGBA, GL_FLOAT, _cacheParams.tf_lut.data());
 }
 
 glm::vec3 ParticleRenderer::_getScales() {

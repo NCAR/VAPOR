@@ -78,12 +78,6 @@ private:
         std::vector<std::string> fieldVars;
     } _cacheParams;
 
-    typedef struct {
-        glm::vec3 p;
-        float v;
-    } Vertex;
-    std::vector<Vertex> _vertices;
-
     std::vector<glm::vec4> _particles;
 
     std::vector<int> _streamSizes;
@@ -104,10 +98,9 @@ private:
     bool _colormapCacheIsDirty() const;
     void _resetParticleCache();
     void _resetColormapCache();
-    //int _renderParticles(const std::vector<glm::vec4>& p);
-    int _generateParticles();
-    int _renderParticles();
-    int _renderParticlesHelper(bool renderDirection = false);
+    int  _generateParticles();
+    void _renderParticles();
+    int  _renderParticlesHelper(bool renderDirection = false);
     void _prepareColormap();
     glm::vec3 _getScales();
 };

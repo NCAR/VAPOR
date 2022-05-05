@@ -48,9 +48,9 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
         new PSection("Seed Distribution Settings", {
             new PEnumDropdown(FP::_seedGenModeTag, {"Gridded", "Random", "Random w/ Bias", "List of seeds"}, {(int)FlowSeedMode::UNIFORM, (int)FlowSeedMode::RANDOM, (int)FlowSeedMode::RANDOM_BIAS, (int)FlowSeedMode::LIST}, "Seed distribution type"),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::UNIFORM)->Then({
-                (new PIntegerSliderEdit(FP::_xGridNumOfSeedsTag, "X axis seeds"))->SetRange(1, 50),
-                (new PIntegerSliderEdit(FP::_yGridNumOfSeedsTag, "Y axis seeds"))->SetRange(1, 50),
-                (new PIntegerSliderEdit(FP::_zGridNumOfSeedsTag, "Z axis seeds"))->SetRange(1, 50),
+                (new PIntegerSliderEdit(FP::_xGridNumOfSeedsTag, "X axis seeds"))->SetRange(1, 5000),
+                (new PIntegerSliderEdit(FP::_yGridNumOfSeedsTag, "Y axis seeds"))->SetRange(1, 5000),
+                (new PIntegerSliderEdit(FP::_zGridNumOfSeedsTag, "Z axis seeds"))->SetRange(1, 5000),
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM)->Then({
                 (new PIntegerSliderEdit(FP::_randomNumOfSeedsTag, "Seed count"))->SetRange(1, 500),
