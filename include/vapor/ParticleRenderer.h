@@ -58,10 +58,6 @@ public:
     //! \copydoc Renderer::_paintGL()
     virtual int _paintGL(bool fast);
 
-    /*struct {
-        glm::vec3 p;
-        float v;
-    } Vertex;*/
 private:
     struct {
         size_t              ts;

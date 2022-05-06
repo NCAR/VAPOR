@@ -83,8 +83,6 @@ ParticleRenderer::~ParticleRenderer() {
 
 int ParticleRenderer::_paintGL(bool)
 {
-    auto start = chrono::steady_clock::now();
-
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
 
@@ -111,11 +109,6 @@ int ParticleRenderer::_paintGL(bool)
     _renderParticles();
 
     //    printf("Rendered %li particles\n", renderedParticles);
-
-    auto end = chrono::steady_clock::now();
-    cout << "Glyph time in milliseconds: "
-        << chrono::duration_cast<chrono::milliseconds>(end - start).count()
-        << " ms" << endl;
 
     return 0;
 }
@@ -162,7 +155,6 @@ bool ParticleRenderer::_particleCacheIsDirty() const {
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
 
-    //if (_cacheParams.radius    != p->GetValueDouble( ParticleParams::RenderRadiusScalarTag, -1.)) return true;
     if (_cacheParams.stride    != p->GetValueLong( ParticleParams::StrideTag, 1)) return true;
     if (_cacheParams.varName   != p->GetVariableName()       ) return true;
     if (_cacheParams.fieldVars != p->GetFieldVariableNames() ) return true;
@@ -184,7 +176,6 @@ void ParticleRenderer::_resetParticleCache() {
     _cacheParams.boxMin = min;
     _cacheParams.boxMax = max;
    
-    //_cacheParams.radius = p->GetValueDouble(ParticleParams::RenderRadiusScalarTag, -1.); 
     _cacheParams.direction = (bool)p->GetValueLong(ParticleParams::ShowDirectionTag, false); 
     _cacheParams.directionScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1.);
     _cacheParams.stride = p->GetValueLong(ParticleParams::StrideTag, 1);
@@ -291,8 +282,6 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
         radiusBase = largestDim / 560.f;
         rp->SetValueDouble(ParticleParams::RenderRadiusBaseTag, "", radiusBase);
     }
-    //float radiusScalar = _cacheParams.radius;
-    //float radius = radiusBase * radiusScalar;
     float radius = radiusBase * rp->GetValueDouble(ParticleParams::RenderRadiusScalarTag, 1.);
 
     ShaderProgram *shader = nullptr;
@@ -340,7 +329,6 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
     for (int n : _streamSizes) {
         shader->SetUniform("nVertices", n);
         glDrawArrays(GL_LINE_STRIP_ADJACENCY, offset, n);
-        //glDrawArrays(GL_LINES, offset, n);
         offset += n;
     }
 
