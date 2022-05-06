@@ -49,6 +49,7 @@ void ParticleParams::_init()
     SetValueDouble(RenderRadiusScalarTag, "", 8.);
     SetValueDouble(RenderRadiusBaseTag, "", -1);
     SetValueLong(Render3DTag, "", true);
+    SetValueLong(LightingEnabledTag, "", true);
     SetValueDouble(PhongAmbientTag, "", .4);
     SetValueDouble(PhongDiffuseTag, "", .8);
     SetValueDouble(PhongSpecularTag, "", 0.);

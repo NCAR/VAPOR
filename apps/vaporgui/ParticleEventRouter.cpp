@@ -38,12 +38,15 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
                     (new PZFieldVariableSelector)->ShowParticleVars(),
                 }),
             }),
-            new PSection("Lighting", {
-                (new PDoubleSliderEdit(ParticleParams::PhongAmbientTag,   "Ambient"  ))->EnableDynamicUpdate(),
-                (new PDoubleSliderEdit(ParticleParams::PhongDiffuseTag,   "Diffuse"  ))->EnableDynamicUpdate(),
-                (new PDoubleSliderEdit(ParticleParams::PhongSpecularTag,  "Specular" ))->EnableDynamicUpdate(),
-                (new PDoubleSliderEdit(ParticleParams::PhongShininessTag, "Shininess"))->EnableDynamicUpdate()
-            })
+            new PCheckbox(ParticleParams::LightingEnabledTag,"Enable Lighting"),
+            (new PShowIf(ParticleParams::LightingEnabledTag))->Equals(true)->Then({
+                new PSection("Lighting", {
+                    (new PDoubleSliderEdit(ParticleParams::PhongAmbientTag,   "Ambient"  ))->EnableDynamicUpdate(),
+                    (new PDoubleSliderEdit(ParticleParams::PhongDiffuseTag,   "Diffuse"  ))->EnableDynamicUpdate(),
+                    (new PDoubleSliderEdit(ParticleParams::PhongSpecularTag,  "Specular" ))->EnableDynamicUpdate(),
+                    (new PDoubleSliderEdit(ParticleParams::PhongShininessTag, "Shininess"))->EnableDynamicUpdate()
+                })
+            }),
         }),
     }));
     

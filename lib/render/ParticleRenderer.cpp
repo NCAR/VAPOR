@@ -43,6 +43,8 @@
 
 using namespace VAPoR;
 
+//#define DEBUG
+
 #pragma pack(push, 4)
 // struct ParticleRenderer::VertexData {
 //    float x, y, z;
@@ -83,13 +85,24 @@ ParticleRenderer::~ParticleRenderer() {
 
 int ParticleRenderer::_paintGL(bool)
 {
+#ifdef DEBUG
+    auto start = chrono::steady_clock::now();
+#endif
+
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
 
     auto p = GetActiveParams();
 
     if (!p->GetValueLong(ParticleParams::Render3DTag, false)) {
-        return _renderLegacyParticles();
+        int rc = _renderLegacyParticles();
+#ifdef DEBUG
+        auto end = chrono::steady_clock::now();
+        cout << "Legacy time in milliseconds: "
+            << chrono::duration_cast<chrono::milliseconds>(end - start).count()
+            << " ms" << endl;
+#endif
+        return rc;
     }   
 
     MapperFunction *mf = p->GetMapperFunc(p->GetVariableName());
@@ -114,6 +127,12 @@ int ParticleRenderer::_paintGL(bool)
 
     //    printf("Rendered %li particles\n", renderedParticles);
 
+#ifdef DEBUG
+    auto end = chrono::steady_clock::now();
+    cout << "Glyph time in milliseconds: "
+        << chrono::duration_cast<chrono::milliseconds>(end - start).count()
+        << " ms" << endl;
+#endif
     return 0;
 }
 
@@ -306,7 +325,7 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
     shader->SetUniform("MV", _glManager->matrixManager->GetModelViewMatrix());
     shader->SetUniform("aspect", _glManager->matrixManager->GetProjectionAspectRatio());
     shader->SetUniform("radius", radius);
-    shader->SetUniform("lightingEnabled", true);
+    shader->SetUniform("lightingEnabled", (bool)rp->GetValueLong(ParticleParams::LightingEnabledTag, true));
     shader->SetUniform("scales", _getScales());
     shader->SetUniform("cameraPos", cameraPos);
     shader->SetUniform("lightDir", cameraDir);
