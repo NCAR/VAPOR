@@ -28,6 +28,7 @@ public:
     static const std::string StrideTag;
     static const std::string RenderRadiusScalarTag;
     static const std::string RenderRadiusBaseTag;
+    static const std::string Render3DTag;
 
     static const std::string LightingEnabledTag;
     static const std::string PhongAmbientTag;

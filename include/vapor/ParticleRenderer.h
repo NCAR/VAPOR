@@ -99,6 +99,7 @@ private:
     int  _renderParticlesHelper(bool renderDirection = false);
     void _prepareColormap();
     glm::vec3 _getScales();
+    int _renderLegacyParticles();
 };
 
 };    // namespace VAPoR
