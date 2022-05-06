@@ -56,6 +56,13 @@ ParticleRenderer::ParticleRenderer(const ParamsMgr *pm, string winName, string d
 : Renderer(pm, winName, dataSetName, ParticleParams::GetClassType(), ParticleRenderer::GetClassType(), instName, dataMgr),
   _colorMapTexOffset(0)
 {
+    _cacheParams.ts=0;
+    _cacheParams.rLevel=0;
+    _cacheParams.cLevel=0;
+    _cacheParams.stride=0;
+    _cacheParams.radius=1.0;
+    _cacheParams.directionScale=0.;
+    _cacheParams.direction=false;
 }
 
 ParticleRenderer::~ParticleRenderer() {
@@ -76,6 +83,8 @@ ParticleRenderer::~ParticleRenderer() {
 
 int ParticleRenderer::_paintGL(bool)
 {
+    auto start = chrono::steady_clock::now();
+
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
 
@@ -102,6 +111,11 @@ int ParticleRenderer::_paintGL(bool)
     _renderParticles();
 
     //    printf("Rendered %li particles\n", renderedParticles);
+
+    auto end = chrono::steady_clock::now();
+    cout << "Glyph time in milliseconds: "
+        << chrono::duration_cast<chrono::milliseconds>(end - start).count()
+        << " ms" << endl;
 
     return 0;
 }
@@ -342,8 +356,6 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
 }
 
 int ParticleRenderer::_generateParticles() {
-    std::cout << "Generating particles at " << _cacheParams.ts << std::endl;
-
 #define PD3(v) printf("%s = %f, %f, %f\n", #v, v[0], v[1], v[2])
     string varName = _cacheParams.varName;
     Grid * grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
