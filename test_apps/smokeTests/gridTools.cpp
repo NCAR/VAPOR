@@ -76,7 +76,7 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addRandomMissingV
     size_t z = dims[Z];
 
     std::mt19937 engine(0); // Fixed seed of 0
-    std::uniform_int_distribution<> distrib(0,1);
+    std::uniform_int_distribution<> distrib(0,9);
 
     float value = minVal;
     float missingValue = grid->GetMissingValue();
@@ -85,7 +85,7 @@ void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addRandomMissingV
             for (size_t i = 0; i < x; i++) {
                 value = value == minVal ? maxVal : minVal;
                 if (addRandomMissingValues) {
-                    if (distrib(engine)) grid->SetValueIJK(i,j,k,missingValue);
+                    if (! distrib(engine)) grid->SetValueIJK(i,j,k,missingValue);
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -102,14 +102,14 @@ void MakeConstantField(Grid *grid, float value, bool addRandomMissingValues)
     size_t z = dims[Z];
 
     std::mt19937 engine(0); // Fixed seed of 0
-    std::uniform_int_distribution<> distrib(0,1);
+    std::uniform_int_distribution<> distrib(0,9);
 
     float missingValue = grid->GetMissingValue();
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) { 
                 if (addRandomMissingValues) {
-                    if (distrib(engine)) grid->SetValueIJK(i,j,k,missingValue); // Generate random 1 or 0
+                    if (! distrib(engine)) grid->SetValueIJK(i,j,k,missingValue); // Generate random 1 or 0
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -128,7 +128,7 @@ void MakeRamp(Grid *grid, float minVal, float maxVal, bool addRandomMissingValue
     float increment = (maxVal - minVal) / ((x * y * z - 1) == 0 ? 1 : (x * y * z - 1));
 
     std::mt19937 engine(0); // Fixed seed of 0
-    std::uniform_int_distribution<> distrib(0,1);
+    std::uniform_int_distribution<> distrib(0,9);
 
     float value = minVal; 
     float missingValue = grid->GetMissingValue();
@@ -136,7 +136,7 @@ void MakeRamp(Grid *grid, float minVal, float maxVal, bool addRandomMissingValue
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
                 if (addRandomMissingValues) {
-                    if (distrib(engine)) grid->SetValueIJK(i,j,k,missingValue); // Generate random 1 or 0
+                    if (! distrib(engine)) grid->SetValueIJK(i,j,k,missingValue); // Generate random 1 or 0
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -158,7 +158,7 @@ void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X, boo
     float zIncrement = axis == Z ? (maxVal - minVal) / (dims[Z] - 1) : 0;
     
     std::mt19937 engine(0); // Fixed seed of 0
-    std::uniform_int_distribution<> distrib(0,1);
+    std::uniform_int_distribution<> distrib(0,9);
 
     float value = minVal;
     float missingValue = grid->GetMissingValue();
@@ -168,7 +168,7 @@ void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X, boo
             value = axis == X ? minVal : value;    // reset value if we're ramping on X
             for (size_t i = 0; i < x; i++) {
                 if (addRandomMissingValues) {
-                    if (distrib(engine)) grid->SetValueIJK(i,j,k,missingValue);  // Generate random 1 or 0
+                    if (! distrib(engine)) grid->SetValueIJK(i,j,k,missingValue);  // Generate random 1 or 0
                     else grid->SetValueIJK(i, j, k, value);
                 }
                 else grid->SetValueIJK(i, j, k, value);
@@ -211,14 +211,24 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
                 grid->GetUserCoordinates(indices, coords);
                 float sampleValue = grid->GetValue(coords);
 
-                if (sampleValue == grid->GetMissingValue()) {
+                float mv = grid->GetMissingValue();
+                if (trueValue == mv || sampleValue == mv) {
                     numMissingValues++;
+
+                    // If missing value is not finite we can't do 
+                    // floating point operations (i.e. computer error)
+                    //
+                    if (sampleValue != trueValue) {
+                        disagreements++;
+                    }
                     continue;
                 }
 
                 double error = abs(sampleValue - trueValue);
 
-                if (!Wasp::NearlyEqual(error, 0.0)) { disagreements++; }
+                if (!Wasp::NearlyEqual(error, 0.0)) {
+                    disagreements++;
+                }
 
                 if (error > peak) peak = error;
                 sum += error * error;
@@ -470,6 +480,16 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
     if (std::find(tests.begin(), tests.end(), "AllMissingValues") != tests.end()) {
         cout << type << " " << x << ":" << y << ":" << z << " All missing values:" << endl;
         MakeConstantField(grid, grid->GetMissingValue());
+
+        grid->SetInterpolationOrder(linear);
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
+
+        grid->SetInterpolationOrder(nearestNeighbor);
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
+    }
+    if (std::find(tests.begin(), tests.end(), "NoMissingValues") != tests.end()) {
+        cout << type << " " << x << ":" << y << ":" << z << " No missing values:" << endl;
+        MakeRamp(grid, minVal, maxVal, false);
 
         grid->SetInterpolationOrder(linear);
         if (RunTest(grid, silenceTime) == false) { rc = false; }
