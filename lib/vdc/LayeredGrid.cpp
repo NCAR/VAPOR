@@ -205,70 +205,7 @@ float LayeredGrid::GetValueLinear(const CoordType &coords) const
     bool     found = _insideGrid(coords, indices, wgts);
     if (!found) return (GetMissingValue());
 
-    size_t i0 = indices[0];
-    size_t j0 = indices[1];
-    size_t k0 = indices[2];
-    size_t i1 = indices[0] + 1;
-    size_t j1 = indices[1] + 1;
-    size_t k1 = indices[2] + 1;
-
-    //
-    // perform tri-linear interpolation
-    //
-    double p0, p1, p2, p3, p4, p5, p6, p7;
-    double iwgt = 1.0 - wgts[0];    // Oops. Weights reversed.
-    double jwgt = 1.0 - wgts[1];
-    double kwgt = 1.0 - wgts[2];
-
-    p0 = AccessIJK(i0, j0, k0);
-    if (p0 == GetMissingValue()) return (GetMissingValue());
-
-    if (iwgt != 0.0) {
-        p1 = AccessIJK(i1, j0, k0);
-        if (p1 == GetMissingValue()) return (GetMissingValue());
-    } else
-        p1 = 0.0;
-
-    if (jwgt != 0.0) {
-        p2 = AccessIJK(i0, j1, k0);
-        if (p2 == GetMissingValue()) return (GetMissingValue());
-    } else
-        p2 = 0.0;
-
-    if (iwgt != 0.0 && jwgt != 0.0) {
-        p3 = AccessIJK(i1, j1, k0);
-        if (p3 == GetMissingValue()) return (GetMissingValue());
-    } else
-        p3 = 0.0;
-
-    if (kwgt != 0.0) {
-        p4 = AccessIJK(i0, j0, k1);
-        if (p4 == GetMissingValue()) return (GetMissingValue());
-    } else
-        p4 = 0.0;
-
-    if (kwgt != 0.0 && iwgt != 0.0) {
-        p5 = AccessIJK(i1, j0, k1);
-        if (p5 == GetMissingValue()) return (GetMissingValue());
-    } else
-        p5 = 0.0;
-
-    if (kwgt != 0.0 && jwgt != 0.0) {
-        p6 = AccessIJK(i0, j1, k1);
-        if (p6 == GetMissingValue()) return (GetMissingValue());
-    } else
-        p6 = 0.0;
-
-    if (kwgt != 0.0 && iwgt != 0.0 && jwgt != 0.0) {
-        p7 = AccessIJK(i1, j1, k1);
-        if (p7 == GetMissingValue()) return (GetMissingValue());
-    } else
-        p7 = 0.0;
-
-    double c0 = p0 + iwgt * (p1 - p0) + jwgt * ((p2 + iwgt * (p3 - p2)) - (p0 + iwgt * (p1 - p0)));
-    double c1 = p4 + iwgt * (p5 - p4) + jwgt * ((p6 + iwgt * (p7 - p6)) - (p4 + iwgt * (p5 - p4)));
-
-    return (c0 + kwgt * (c1 - c0));
+    return(TrilinearInterpolate(indices[0],indices[1],indices[2], wgts[0], wgts[1], wgts[2]));
 }
 
 float LayeredGrid::GetValue(const CoordType &coords) const

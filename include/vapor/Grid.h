@@ -1269,6 +1269,10 @@ protected:
         }
     }
 
+    float BilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt) const;
+
+    float TrilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt, const double zwgt) const;
+
 private:
     DimsType             _dims;                   // dimensions of grid arrays
     DimsType             _bs = {{1, 1, 1}};       // dimensions of each block
