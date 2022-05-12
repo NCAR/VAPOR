@@ -230,12 +230,12 @@ float UnstructuredGridLayered::GetValueLinear(const CoordType &coords) const
     size_t k0 = indices[1];
     for (int i = 0; i < lambda.size(); i++) {
         float v = AccessIJK(nodes2D[i], k0, 0);
-        if (v == mv) { 
+        if (v == mv) {
             if (lambda[i] != 0.0) {
                 z0 = mv;
                 break;
-            }
-            else v = 0.0;
+            } else
+                v = 0.0;
         }
 
         z0 += v * lambda[i];
@@ -244,19 +244,19 @@ float UnstructuredGridLayered::GetValueLinear(const CoordType &coords) const
     if (z0 == mv) return (mv);
 
     size_t k1 = k0 + 1;
-    if (k1 >= GetDimensions()[1] || zwgt[1] == 0.0) return(z0);
-  
+    if (k1 >= GetDimensions()[1] || zwgt[1] == 0.0) return (z0);
+
     // Interpolate value inside top face
     //
     float z1 = 0.0;
     for (int i = 0; i < lambda.size(); i++) {
         float v = AccessIJK(nodes2D[i], k1, 0);
-        if (v == mv) { 
+        if (v == mv) {
             if (lambda[i] != 0.0) {
                 z1 = mv;
                 break;
-            }
-            else v = 0.0;
+            } else
+                v = 0.0;
         }
 
         z1 += v * lambda[i];

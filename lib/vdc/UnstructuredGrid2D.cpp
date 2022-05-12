@@ -251,12 +251,14 @@ float UnstructuredGrid2D::GetValueLinear(const CoordType &coords) const
     VAssert(face < GetCellDimensions()[0]);
 
     double value = 0;
-    float mv = GetMissingValue();
+    float  mv = GetMissingValue();
     for (int i = 0; i < nodes.size(); i++) {
         float v = AccessIJK(nodes[i], 0, 0);
         if (v == mv) {
-            if (lambda[i] != 0.0) return(mv);
-            else v = 0.0;
+            if (lambda[i] != 0.0)
+                return (mv);
+            else
+                v = 0.0;
         }
 
         value += v * lambda[i];

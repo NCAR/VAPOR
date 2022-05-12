@@ -110,8 +110,10 @@ bool StretchedGrid::GetIndicesCell(const CoordType &coords, DimsType &indices, d
     double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
 
     size_t i, j, k;
-    wgts[0] = 0.0; wgts[1] = 0.0; wgts[2] = 0.0;
-    bool   inside = _insideGrid(x, y, z, i, j, k, wgts[0], wgts[1], wgts[2]);
+    wgts[0] = 0.0;
+    wgts[1] = 0.0;
+    wgts[2] = 0.0;
+    bool inside = _insideGrid(x, y, z, i, j, k, wgts[0], wgts[1], wgts[2]);
 
     if (!inside) return (false);
 
@@ -277,8 +279,7 @@ float StretchedGrid::GetValueLinear(const CoordType &coords) const
     float mv = GetMissingValue();
     if (!inside) return (mv);
 
-    return(TrilinearInterpolate(i,j,k, wgts[0], wgts[1], wgts[2]));
-
+    return (TrilinearInterpolate(i, j, k, wgts[0], wgts[1], wgts[2]));
 }
 
 void StretchedGrid::GetUserExtentsHelper(CoordType &minext, CoordType &maxext) const
@@ -308,9 +309,9 @@ void StretchedGrid::GetUserExtentsHelper(CoordType &minext, CoordType &maxext) c
 //
 bool StretchedGrid::_insideGrid(double x, double y, double z, size_t &i, size_t &j, size_t &k, double &xwgt, double &ywgt, double &zwgt) const
 {
-	xwgt = 0.0;
-	ywgt = 0.0;
-	zwgt = 0.0;
+    xwgt = 0.0;
+    ywgt = 0.0;
+    zwgt = 0.0;
     i = j = k = 0;
 
     if (!Wasp::BinarySearchRange(_xcoords, x, i)) return (false);

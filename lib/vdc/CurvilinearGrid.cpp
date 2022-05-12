@@ -436,18 +436,16 @@ namespace {
 
 float interpolateQuad(const float values[4], const double lambda[4], float mv)
 {
-
     // Special handling for any missing values
     //
-    if (std::any_of(values,values+4, [&mv](float v) {return(mv==v);})) {
-
+    if (std::any_of(values, values + 4, [&mv](float v) { return (mv == v); })) {
         double lambda0[] = {lambda[0], lambda[1], lambda[2], lambda[3]};
-        float values0[] = {values[0], values[1], values[2], values[3]};
+        float  values0[] = {values[0], values[1], values[2], values[3]};
 
         // Find missing values. Zero out weight
         //
         double wTotal = 0.0;
-        int   nMissing = 0;
+        int    nMissing = 0;
         for (int i = 0; i < 4; i++) {
             if (values0[i] == mv) {
                 lambda0[i] = 0.0;
@@ -458,8 +456,8 @@ float interpolateQuad(const float values[4], const double lambda[4], float mv)
             }
         }
 
-        if (nMissing == 4) return(mv);
-        if (wTotal == 0.0) return(mv);
+        if (nMissing == 4) return (mv);
+        if (wTotal == 0.0) return (mv);
 
         // Re-normalize weights if we have missing values
         //
@@ -468,19 +466,13 @@ float interpolateQuad(const float values[4], const double lambda[4], float mv)
             for (int i = 0; i < 4; i++) { lambda0[i] *= wTotal; }
         }
         float v = 0.0;
-        for (int i = 0; i < 4; i++) { 
-            v += values0[i] * lambda0[i];
-        }
+        for (int i = 0; i < 4; i++) { v += values0[i] * lambda0[i]; }
         return (v);
-    }
-    else {
+    } else {
         float v = 0.0;
-        for (int i = 0; i < 4; i++) { 
-            v += values[i] * lambda[i];
-        }
+        for (int i = 0; i < 4; i++) { v += values[i] * lambda[i]; }
         return (v);
     }
-
 }
 };    // namespace
 
@@ -521,13 +513,13 @@ float CurvilinearGrid::GetValueLinear(const CoordType &coords) const
 
     if (GetGeometryDim() == 2 || dims[2] < 2) return (v0);
 
-    if (v0 == mv && zwgt[0] != 0.0) return(mv);
+    if (v0 == mv && zwgt[0] != 0.0) return (mv);
 
     float v1s[] = {AccessIJK(i, j, k + 1), AccessIJK(i + 1, j, k + 1), AccessIJK(i + 1, j + 1, k + 1), AccessIJK(i, j + 1, k + 1)};
 
     float v1 = interpolateQuad(v1s, lambda, mv);
 
-    if (v1 == mv && zwgt[1] != 0.0) return(mv);
+    if (v1 == mv && zwgt[1] != 0.0) return (mv);
 
     // Linearly interpolate along Z axis
     //

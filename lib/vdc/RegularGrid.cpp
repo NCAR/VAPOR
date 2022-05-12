@@ -154,8 +154,7 @@ float RegularGrid::GetValueLinear(const CoordType &coords) const
     if (_delta[1] != 0.0) { ywgt = 1.0 - (((cCoords[1] - _minu[1]) - (j * _delta[1])) / _delta[1]); }
     if (_delta[2] != 0.0) { zwgt = 1.0 - (((cCoords[2] - _minu[2]) - (k * _delta[2])) / _delta[2]); }
 
-    return(TrilinearInterpolate(i,j,k, xwgt, ywgt, zwgt));
-
+    return (TrilinearInterpolate(i, j, k, xwgt, ywgt, zwgt));
 }
 
 void RegularGrid::GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const

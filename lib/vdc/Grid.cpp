@@ -24,55 +24,42 @@ using namespace VAPoR;
 
 namespace {
 
-bool interpolate_point_on_node(
-    const std::array<float, 4> &verts, double xwgt, double ywgt,
-    float mv, float &v
-) {
+bool interpolate_point_on_node(const std::array<float, 4> &verts, double xwgt, double ywgt, float mv, float &v)
+{
     if (xwgt == 1.0 && ywgt == 1.0) {
         v = verts[0];
-        return(true);
+        return (true);
     }
     if (xwgt == 0.0 && ywgt == 1.0) {
         v = verts[1];
-        return(true);
+        return (true);
     }
     if (xwgt == 1.0 && ywgt == 0.0) {
         v = verts[2];
-        return(true);
+        return (true);
     }
     if (xwgt == 0.0 && ywgt == 0.0) {
         v = verts[3];
-        return(true);
+        return (true);
     }
 
-    return(mv);
+    return (mv);
 }
 
-bool interpolate_point_on_edge(
-    const std::array<float, 4> &verts, double xwgt, double ywgt,
-    float mv, float &v
-) {
+bool interpolate_point_on_edge(const std::array<float, 4> &verts, double xwgt, double ywgt, float mv, float &v)
+{
+    if (ywgt == 1.0 && xwgt > 0.0 && xwgt < 1.0 && verts[0] != mv && verts[1] != mv) { v = (verts[0] * xwgt) + (verts[1] * (1.0 - xwgt)); }
 
-    if (ywgt == 1.0 && xwgt > 0.0 && xwgt < 1.0 && verts[0] != mv && verts[1] != mv) { 
-        v = (verts[0] * xwgt) + (verts[1] * (1.0 - xwgt));
-    }
+    if (xwgt == 0.0 && ywgt > 0.0 && ywgt < 1.0 && verts[1] != mv && verts[3] != mv) { v = (verts[1] * ywgt) + (verts[3] * (1.0 - ywgt)); }
 
-    if (xwgt == 0.0 && ywgt > 0.0 && ywgt < 1.0 && verts[1] != mv && verts[3] != mv) { 
-        v = (verts[1] * ywgt) + (verts[3] * (1.0 - ywgt));
-    }
+    if (ywgt == 0.0 && xwgt > 0.0 && xwgt < 1.0 && verts[2] != mv && verts[3] != mv) { v = (verts[2] * xwgt) + (verts[3] * (1.0 - xwgt)); }
 
-    if (ywgt == 0.0 && xwgt > 0.0 && xwgt < 1.0 && verts[2] != mv && verts[3] != mv) { 
-        v = (verts[2] * xwgt) + (verts[3] * (1.0 - xwgt));
-    }
+    if (xwgt == 1.0 && ywgt > 0.0 && ywgt < 1.0 && verts[0] != mv && verts[2] != mv) { v = (verts[0] * ywgt) + (verts[2] * (1.0 - ywgt)); }
 
-    if (xwgt == 1.0 && ywgt > 0.0 && ywgt < 1.0 && verts[0] != mv && verts[2] != mv) { 
-        v = (verts[0] * ywgt) + (verts[2] * (1.0 - ywgt));
-    }
-
-    return(mv);
+    return (mv);
 }
 
-}
+}    // namespace
 
 Grid::Grid() { _dims = {1, 1, 1}; }
 
@@ -349,8 +336,8 @@ DimsType Grid::Dims(const DimsType &min, const DimsType &max)
     return (dims);
 }
 
-float Grid::BilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt) const {
-
+float Grid::BilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt) const
+{
     auto dims = GetDimensions();
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
@@ -364,22 +351,20 @@ float Grid::BilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt,
     verts[2] = dims[1] > 1 ? AccessIJK(i, j + 1, k) : 0.0;
     verts[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i + 1, j + 1, k) : 0.0;
 
-    if (std::any_of(verts.begin(),verts.end(), [&mv](float v) {return(mv==v);})){
-
+    if (std::any_of(verts.begin(), verts.end(), [&mv](float v) { return (mv == v); })) {
         float v = 0.0;
-        if (interpolate_point_on_node(verts, xwgt, ywgt, mv, v)) return(v);
-        
-        if (interpolate_point_on_edge(verts, xwgt, ywgt, mv, v)) return(v);
+        if (interpolate_point_on_node(verts, xwgt, ywgt, mv, v)) return (v);
 
-        return(mv);
+        if (interpolate_point_on_edge(verts, xwgt, ywgt, mv, v)) return (v);
+
+        return (mv);
     }
 
     return (((verts[0] * xwgt + verts[1] * (1.0 - xwgt)) * ywgt) + ((verts[2] * xwgt + verts[3] * (1.0 - xwgt)) * (1.0 - ywgt)));
-
 }
 
-float Grid::TrilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt, const double zwgt) const {
-
+float Grid::TrilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt, const double zwgt) const
+{
     auto dims = GetDimensions();
     VAssert(i < dims[0]);
     VAssert(j < dims[1]);
@@ -387,17 +372,22 @@ float Grid::TrilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt
 
     float mv = GetMissingValue();
 
-    float v0 = BilinearInterpolate(i,j,k,xwgt,ywgt);
+    float v0 = BilinearInterpolate(i, j, k, xwgt, ywgt);
 
-    if (dims[2] > 1 && k < (dims[2]-1)) k++;
-    else return(v0);
+    if (dims[2] > 1 && k < (dims[2] - 1))
+        k++;
+    else
+        return (v0);
 
-    float v1 = BilinearInterpolate(i,j,k,xwgt,ywgt);
+    float v1 = BilinearInterpolate(i, j, k, xwgt, ywgt);
 
-    if (v0 == mv || v1 == mv) { 
-        if (zwgt == 1.0) return(v0);
-        else if (zwgt == 0.0) return(v1);
-        else return(mv);
+    if (v0 == mv || v1 == mv) {
+        if (zwgt == 1.0)
+            return (v0);
+        else if (zwgt == 0.0)
+            return (v1);
+        else
+            return (mv);
     }
 
 

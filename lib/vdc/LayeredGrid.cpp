@@ -205,7 +205,7 @@ float LayeredGrid::GetValueLinear(const CoordType &coords) const
     bool     found = _insideGrid(coords, indices, wgts);
     if (!found) return (GetMissingValue());
 
-    return(TrilinearInterpolate(indices[0],indices[1],indices[2], wgts[0], wgts[1], wgts[2]));
+    return (TrilinearInterpolate(indices[0], indices[1], indices[2], wgts[0], wgts[1], wgts[2]));
 }
 
 float LayeredGrid::GetValue(const CoordType &coords) const
