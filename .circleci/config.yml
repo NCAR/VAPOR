@@ -291,7 +291,7 @@ jobs:
             newBody=""
             newBody=${lineArray[@]//\\n/\\r\\n}              # Add windows carraige return \r on line endings
 
-            newBody="${newBody}\r\n\r\nStatic analysis for committ ${CIRCLE_SHA1}:\r\n${artifacts}"
+            newBody="${newBody}\r\n\r\nStatic analysis for commit ${CIRCLE_SHA1}:\r\n${artifacts}"
             json="{\"body\":\"$newBody\"}"                   # Apply our re-written PR body in json format
 
             # Add linke to PR
