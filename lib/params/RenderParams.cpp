@@ -66,6 +66,7 @@ const string RenderParams::SlicePlaneNormalXTag = "SlicePlaneNormalXTag";
 const string RenderParams::SlicePlaneNormalYTag = "SlicePlaneNormalYTag";
 const string RenderParams::SlicePlaneNormalZTag = "SlicePlaneNormalZTag";
 const string RenderParams::SlicePlaneOrientationModeTag = "SlicePlaneOrientationModeTag";
+const string RenderParams::LightingEnabledTag = "LightingEnabled";
 
 #define REQUIRED_SAMPLE_SIZE 1000000
 
@@ -110,7 +111,10 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
     vector<string> fieldVarNames(3, "");
     fieldVarNames[0] = _findVarStartingWithLetter(varnames, 'u');
     fieldVarNames[1] = _findVarStartingWithLetter(varnames, 'v');
-    if (dim == 3) fieldVarNames[2] = _findVarStartingWithLetter(varnames, 'w');
+    if (dim == 3) {
+        fieldVarNames[2] = _findVarStartingWithLetter(varnames, 'w');
+        SetHeightVariableName("");
+    }
 
     SetFieldVariableNames(fieldVarNames);
 

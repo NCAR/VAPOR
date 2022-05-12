@@ -48,11 +48,12 @@ void BarbParams::_init()
     SetDiagMsg("BarbParams::_init()");
 
     SetVariableName("");
-    SetUseSingleColor(true);
+    SetUseSingleColor(false);
     float rgb[] = {1.f, 1.f, 1.f};
     SetConstantColor(rgb);
     int grid[] = {10, 10, 1};
     SetGrid(grid);
     SetLineThickness(1);
     SetLengthScale(1);
+    SetValueLong(RenderParams::LightingEnabledTag, "Enable Barb lighting by default", 1);
 }

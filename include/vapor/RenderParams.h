@@ -479,6 +479,7 @@ public:
     static const string _constantOpacityTag;
     static const string CustomHistogramDataTag;
     static const string CustomHistogramRangeTag;
+    static const string LightingEnabledTag;
 
     //! If a renderer supports rotation about a point of origin,
     //! this string identifies the parameter for the origin's
