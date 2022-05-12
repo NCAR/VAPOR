@@ -94,12 +94,11 @@ private:
     bool _colormapCacheIsDirty() const;
     void _resetParticleCache();
     void _resetColormapCache();
-    int  _generateParticles();
+    int  _generateParticles(bool legacy=false);
     void _renderParticles();
     int  _renderParticlesHelper(bool renderDirection = false);
     void _prepareColormap();
     glm::vec3 _getScales();
-    int _renderLegacyParticles();
 };
 
 };    // namespace VAPoR
