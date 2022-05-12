@@ -282,7 +282,8 @@ jobs:
             # If clang-tidy has already been reported in this PR, remove that report
             if [[ "${lineArray[-1]}" == *"clangTidyOutput.txt"* ]]; then
                 echo "  *** Previous clangTidyOutput.txt report found.  Replacing with new version. ***"
-                unset lineArray[-1]
+                unset lineArray[-1]  # delete line with commit hash
+                unset lineArray[-1]  # delete line with clangTidyOutput.txt
             else
                 lineArray+=("\\n\\n")
             fi
