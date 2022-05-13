@@ -199,6 +199,109 @@ jobs:
           paths:
             - installers
 
+  clang-tidy:
+    docker:
+      - image: ubuntu:latest
+
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            apt-get update
+            apt upgrade -y
+            apt install -y aptitude
+            aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common clang-tidy
+            pip install gdown
+
+      - run:
+          name: Install llvm
+          command: |
+            add-apt-repository -y universe
+            wget https://apt.llvm.org/llvm.sh
+            chmod +x llvm.sh
+            yes '' | ./llvm.sh 14 || if [[ $? -eq 141 ]]; then true; else exit $?; fi # Feed "yes" to all of the script's questions and igore error 141
+
+      - run: 
+          name: Get third party libraries
+          command: |
+            mkdir -p /usr/local/VAPOR-Deps
+            cd /usr/local/VAPOR-Deps
+            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
+            tar xf 2019-Aug-Ubuntu.tar.xz
+
+      - run:
+          name: Run clang-tidy
+          command: |
+            git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
+            cd /root/VAPOR
+            git checkout $CIRCLE_BRANCH
+            apt install -y libomp-dev
+            cmake . \
+            -DCMAKE_BUILD_TYPE:String=Release \
+            -DCMAKE_CXX_COMPILER=clang++-14 \
+            -DCMAKE_C_COMPILER=clang-14 \
+            -DBUILD_TEST_APPS=ON \
+            -DUSE_OMP=ON
+            make -j4
+            git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
+            /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
+            tee /tmp/clangTidyOutput.txt
+
+      - store_artifacts:
+          path: /tmp/clangTidyOutput.txt
+
+      - run:
+          name: Copy artifact link to PR
+          command: |
+            # acquire clang-tidy report artifact
+            artifacts=$(curl \
+            -X GET "https://circleci.com/api/v2/project/github/NCAR/VAPOR/$CIRCLE_BUILD_NUM/artifacts" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -u "$GITHUB_TOKEN:" | jq '.items[0].url')
+            artifacts="${artifacts//\"}"                         # remove quotes from string
+            artifacts=" [clangTidyOutput.txt]($artifacts)"       # make hyperlink 
+
+            # Temporarily remove windows carraige return \r
+            originalBody=$(curl https://api.github.com/repos/NCAR/VAPOR/pulls/${CIRCLE_PULL_REQUEST##*/} | jq '.body')
+            lineArray=(${originalBody//\\r\\n/\\n})
+
+            # Remove leading " at the start of the first element
+            firstElement=${lineArray[0]}
+            if [[ ${firstElement::1} == "\"" ]]
+            then
+                lineArray[0]="${firstElement:1}"
+            fi
+
+            # Remove trailing " at the end of the last element
+            lastElement=${lineArray[-1]}
+            if [[ ${lastElement: -1} == "\"" ]]
+            then
+                lineArray[-1]=${lastElement::-1}
+            fi
+
+            # If clang-tidy has already been reported in this PR, remove that report
+            if [[ "${lineArray[-1]}" == *"clangTidyOutput.txt"* ]]; then
+                echo "  *** Previous clangTidyOutput.txt report found.  Replacing with new version. ***"
+                unset lineArray[-1]  # delete line with commit hash
+                unset lineArray[-1]  # delete line with clangTidyOutput.txt
+            else
+                lineArray+=("\\n\\n")
+            fi
+
+            newBody=""
+            newBody=${lineArray[@]//\\n/\\r\\n}              # Add windows carraige return \r on line endings
+
+            newBody="${newBody}\r\n\r\n${CIRCLE_SHA1}:${artifacts}"
+            json="{\"body\":\"$newBody\"}"                   # Apply our re-written PR body in json format
+
+            # Add linke to PR
+            curl \
+            -X PATCH \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token $CIRCLE_CLANG_TIDY_TOKEN" \
+            https://api.github.com/repos/NCAR/VAPOR/issues/${CIRCLE_PULL_REQUEST##*/} \
+            -d "$json"
+
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -470,8 +573,10 @@ workflows:
   version: 2
   build:
     jobs:
+      - clang-tidy
       - build_ubuntu18
       - build_centos7
+      #- foo
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer
