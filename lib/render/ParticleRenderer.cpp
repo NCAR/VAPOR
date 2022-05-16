@@ -369,7 +369,9 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
 int ParticleRenderer::_generateParticles(bool legacy) {
     MapperFunction* mf;
     float LUT[256*4];
-    float mapMin, mapMax, mapDif;
+    float mapMin = 0.;
+    float mapMax = 0.;
+    float mapDif = 0.;
 
     if(legacy) {
         glDepthMask(true);
@@ -441,9 +443,8 @@ int ParticleRenderer::_generateParticles(bool legacy) {
     for (const auto d : dims) nCoords *= d;
     (void)nCoords; // Silence unused variable warning
 
-    LegacyGL* lgl;
+    LegacyGL* lgl = _glManager->legacy;
     if (legacy) {
-        lgl = _glManager->legacy;
         lgl->Color3f(1, 1, 1);
         lgl->Begin(showDir ? GL_LINES : GL_POINTS);
     }
