@@ -24,6 +24,8 @@ using namespace VAPoR;
 
 namespace {
 
+// Check for point on a quadralateral vertex
+//
 bool interpolate_point_on_node(const std::array<float, 4> &verts, double xwgt, double ywgt, float mv, float &v)
 {
     if (xwgt == 1.0 && ywgt == 1.0) {
@@ -43,20 +45,42 @@ bool interpolate_point_on_node(const std::array<float, 4> &verts, double xwgt, d
         return (true);
     }
 
-    return (mv);
+    return (false);
 }
 
+// Check for point on a quad edge, linear interplate along edge if found
+//
 bool interpolate_point_on_edge(const std::array<float, 4> &verts, double xwgt, double ywgt, float mv, float &v)
 {
-    if (ywgt == 1.0 && xwgt > 0.0 && xwgt < 1.0 && verts[0] != mv && verts[1] != mv) { v = (verts[0] * xwgt) + (verts[1] * (1.0 - xwgt)); }
+    // X edge, bottom
+    //
+    if (ywgt == 1.0 && xwgt > 0.0 && xwgt < 1.0 && verts[0] != mv && verts[1] != mv) {
+        v = (verts[0] * xwgt) + (verts[1] * (1.0 - xwgt));
+        return(true);
+    }
 
-    if (xwgt == 0.0 && ywgt > 0.0 && ywgt < 1.0 && verts[1] != mv && verts[3] != mv) { v = (verts[1] * ywgt) + (verts[3] * (1.0 - ywgt)); }
+    // Y edge, right
+    //
+    if (xwgt == 0.0 && ywgt > 0.0 && ywgt < 1.0 && verts[1] != mv && verts[3] != mv) {
+        v = (verts[1] * ywgt) + (verts[3] * (1.0 - ywgt));
+        return(true);
+    }
 
-    if (ywgt == 0.0 && xwgt > 0.0 && xwgt < 1.0 && verts[2] != mv && verts[3] != mv) { v = (verts[2] * xwgt) + (verts[3] * (1.0 - xwgt)); }
+    // X edge, top
+    //
+    if (ywgt == 0.0 && xwgt > 0.0 && xwgt < 1.0 && verts[2] != mv && verts[3] != mv) {
+        v = (verts[2] * xwgt) + (verts[3] * (1.0 - xwgt));
+        return(true);
+    }
 
-    if (xwgt == 1.0 && ywgt > 0.0 && ywgt < 1.0 && verts[0] != mv && verts[2] != mv) { v = (verts[0] * ywgt) + (verts[2] * (1.0 - ywgt)); }
+    // Y edge, left
+    //
+    if (xwgt == 1.0 && ywgt > 0.0 && ywgt < 1.0 && verts[0] != mv && verts[2] != mv) {
+        v = (verts[0] * ywgt) + (verts[2] * (1.0 - ywgt));
+        return(true);
+    }
 
-    return (mv);
+    return (false);
 }
 
 }    // namespace

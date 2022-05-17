@@ -228,7 +228,7 @@ float UnstructuredGridLayered::GetValueLinear(const CoordType &coords) const
 
     float  z0 = 0.0;
     size_t k0 = indices[1];
-    for (int i = 0; i < lambda.size(); i++) {
+    for (size_t i = 0; i < lambda.size(); i++) {
         float v = AccessIJK(nodes2D[i], k0, 0);
         if (v == mv) {
             if (lambda[i] != 0.0) {
