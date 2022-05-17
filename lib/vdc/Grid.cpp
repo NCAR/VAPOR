@@ -56,28 +56,28 @@ bool interpolate_point_on_edge(const std::array<float, 4> &verts, double xwgt, d
     //
     if (ywgt == 1.0 && xwgt > 0.0 && xwgt < 1.0 && verts[0] != mv && verts[1] != mv) {
         v = (verts[0] * xwgt) + (verts[1] * (1.0 - xwgt));
-        return(true);
+        return (true);
     }
 
     // Y edge, right
     //
     if (xwgt == 0.0 && ywgt > 0.0 && ywgt < 1.0 && verts[1] != mv && verts[3] != mv) {
         v = (verts[1] * ywgt) + (verts[3] * (1.0 - ywgt));
-        return(true);
+        return (true);
     }
 
     // X edge, top
     //
     if (ywgt == 0.0 && xwgt > 0.0 && xwgt < 1.0 && verts[2] != mv && verts[3] != mv) {
         v = (verts[2] * xwgt) + (verts[3] * (1.0 - xwgt));
-        return(true);
+        return (true);
     }
 
     // Y edge, left
     //
     if (xwgt == 1.0 && ywgt > 0.0 && ywgt < 1.0 && verts[0] != mv && verts[2] != mv) {
         v = (verts[0] * ywgt) + (verts[2] * (1.0 - ywgt));
-        return(true);
+        return (true);
     }
 
     return (false);

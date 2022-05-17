@@ -148,7 +148,7 @@ bool UnstructuredGrid2D::GetIndicesCell(const CoordType &coords, DimsType &cindi
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    std::vector <double> lambda(_maxVertexPerFace);
+    std::vector<double> lambda(_maxVertexPerFace);
     int     nlambda;
 
     // See if point is inside any cells (faces)
@@ -173,7 +173,7 @@ bool UnstructuredGrid2D::InsideGrid(const CoordType &coords) const
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    std::vector <double> lambda(_maxVertexPerFace);
+    std::vector<double> lambda(_maxVertexPerFace);
     int            nlambda;
     size_t         face;
     vector<size_t> nodes;
@@ -193,7 +193,7 @@ float UnstructuredGrid2D::GetValueNearestNeighbor(const CoordType &coords) const
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    std::vector <double> lambda(_maxVertexPerFace);
+    std::vector<double> lambda(_maxVertexPerFace);
     int            nlambda;
     size_t         face;
     vector<size_t> nodes;
@@ -226,7 +226,7 @@ float UnstructuredGrid2D::GetValueLinear(const CoordType &coords) const
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    std::vector <double> lambda(_maxVertexPerFace);
+    std::vector<double> lambda(_maxVertexPerFace);
     int            nlambda;
     size_t         face;
     vector<size_t> nodes;
