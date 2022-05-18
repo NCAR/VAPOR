@@ -22,6 +22,69 @@
 using namespace std;
 using namespace VAPoR;
 
+namespace {
+
+// Check for point on a quadralateral vertex
+//
+bool interpolate_point_on_node(const std::array<float, 4> &verts, double xwgt, double ywgt, float mv, float &v)
+{
+    if (xwgt == 1.0 && ywgt == 1.0) {
+        v = verts[0];
+        return (true);
+    }
+    if (xwgt == 0.0 && ywgt == 1.0) {
+        v = verts[1];
+        return (true);
+    }
+    if (xwgt == 1.0 && ywgt == 0.0) {
+        v = verts[2];
+        return (true);
+    }
+    if (xwgt == 0.0 && ywgt == 0.0) {
+        v = verts[3];
+        return (true);
+    }
+
+    return (false);
+}
+
+// Check for point on a quad edge, linear interplate along edge if found
+//
+bool interpolate_point_on_edge(const std::array<float, 4> &verts, double xwgt, double ywgt, float mv, float &v)
+{
+    // X edge, bottom
+    //
+    if (ywgt == 1.0 && xwgt > 0.0 && xwgt < 1.0 && verts[0] != mv && verts[1] != mv) {
+        v = (verts[0] * xwgt) + (verts[1] * (1.0 - xwgt));
+        return (true);
+    }
+
+    // Y edge, right
+    //
+    if (xwgt == 0.0 && ywgt > 0.0 && ywgt < 1.0 && verts[1] != mv && verts[3] != mv) {
+        v = (verts[1] * ywgt) + (verts[3] * (1.0 - ywgt));
+        return (true);
+    }
+
+    // X edge, top
+    //
+    if (ywgt == 0.0 && xwgt > 0.0 && xwgt < 1.0 && verts[2] != mv && verts[3] != mv) {
+        v = (verts[2] * xwgt) + (verts[3] * (1.0 - xwgt));
+        return (true);
+    }
+
+    // Y edge, left
+    //
+    if (xwgt == 1.0 && ywgt > 0.0 && ywgt < 1.0 && verts[0] != mv && verts[2] != mv) {
+        v = (verts[0] * ywgt) + (verts[2] * (1.0 - ywgt));
+        return (true);
+    }
+
+    return (false);
+}
+
+}    // namespace
+
 Grid::Grid() { _dims = {1, 1, 1}; }
 
 void Grid::_grid(const DimsType &dims, const DimsType &bs, const std::vector<float *> &blks, size_t topology_dimension)
@@ -295,6 +358,66 @@ DimsType Grid::Dims(const DimsType &min, const DimsType &max)
 
     for (int i = 0; i < min.size(); i++) { dims[i] = (max[i] - min[i] + 1); }
     return (dims);
+}
+
+float Grid::BilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt) const
+{
+    auto dims = GetDimensions();
+    VAssert(i < dims[0]);
+    VAssert(j < dims[1]);
+    VAssert(k < dims[2]);
+
+    float mv = GetMissingValue();
+
+    std::array<float, 4> verts{0.0, 0.0, 0.0, 0.0};
+    verts[0] = AccessIJK(i, j, k);
+    verts[1] = dims[0] > 1 ? AccessIJK(i + 1, j, k) : 0.0;
+    verts[2] = dims[1] > 1 ? AccessIJK(i, j + 1, k) : 0.0;
+    verts[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i + 1, j + 1, k) : 0.0;
+
+    if (std::any_of(verts.begin(), verts.end(), [&mv](float v) { return (mv == v); })) {
+        float v = 0.0;
+        if (interpolate_point_on_node(verts, xwgt, ywgt, mv, v)) return (v);
+
+        if (interpolate_point_on_edge(verts, xwgt, ywgt, mv, v)) return (v);
+
+        return (mv);
+    }
+
+    return (((verts[0] * xwgt + verts[1] * (1.0 - xwgt)) * ywgt) + ((verts[2] * xwgt + verts[3] * (1.0 - xwgt)) * (1.0 - ywgt)));
+}
+
+float Grid::TrilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt, const double zwgt) const
+{
+    auto dims = GetDimensions();
+    VAssert(i < dims[0]);
+    VAssert(j < dims[1]);
+    VAssert(k < dims[2]);
+
+    float mv = GetMissingValue();
+
+    float v0 = BilinearInterpolate(i, j, k, xwgt, ywgt);
+
+    if (dims[2] > 1 && k < (dims[2] - 1))
+        k++;
+    else
+        return (v0);
+
+    float v1 = BilinearInterpolate(i, j, k, xwgt, ywgt);
+
+    if (v0 == mv || v1 == mv) {
+        if (zwgt == 1.0)
+            return (v0);
+        else if (zwgt == 0.0)
+            return (v1);
+        else
+            return (mv);
+    }
+
+
+    // Linearly interpolate along Z axis
+    //
+    return (v0 * zwgt + v1 * (1.0 - zwgt));
 }
 
 /////////////////////////////////////////////////////////////////////////////

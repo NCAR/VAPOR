@@ -22,6 +22,7 @@
 
 #include <float.h>
 #include <cmath>
+#include <random>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -67,39 +68,59 @@ template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, co
 
 vector<float *> AllocateBlocks(const vector<size_t> &bs, const vector<size_t> &dims) { return (AllocateBlocksType<float>(bs, dims)); }
 
-void MakeTriangle(Grid *grid, float minVal, float maxVal)
+void MakeTriangle(Grid *grid, float minVal, float maxVal, bool addRandomMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
     size_t y = dims[Y];
     size_t z = dims[Z];
 
+    std::mt19937                    engine(0);    // Fixed seed of 0
+    std::uniform_int_distribution<> distrib(0, 9);
+
     float value = minVal;
+    float missingValue = grid->GetMissingValue();
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
                 value = value == minVal ? maxVal : minVal;
-                grid->SetValueIJK(i, j, k, value);
+                if (addRandomMissingValues) {
+                    if (!distrib(engine))
+                        grid->SetValueIJK(i, j, k, missingValue);
+                    else grid->SetValueIJK(i, j, k, value);
+                }
+                else grid->SetValueIJK(i, j, k, value);
             }
         }
     }
 }
 
-void MakeConstantField(Grid *grid, float value)
+void MakeConstantField(Grid *grid, float value, bool addRandomMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
     size_t y = dims[Y];
     size_t z = dims[Z];
 
+    std::mt19937                    engine(0);    // Fixed seed of 0
+    std::uniform_int_distribution<> distrib(0, 9);
+
+    float missingValue = grid->GetMissingValue();
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
-            for (size_t i = 0; i < x; i++) { grid->SetValueIJK(i, j, k, value); }
+            for (size_t i = 0; i < x; i++) { 
+                if (addRandomMissingValues) {
+                    if (!distrib(engine))
+                        grid->SetValueIJK(i, j, k, missingValue);    // Generate random 1 or 0
+                    else grid->SetValueIJK(i, j, k, value);
+                }
+                else grid->SetValueIJK(i, j, k, value);
+            }
         }
     }
 }
 
-void MakeRamp(Grid *grid, float minVal, float maxVal)
+void MakeRamp(Grid *grid, float minVal, float maxVal, bool addRandomMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -108,18 +129,27 @@ void MakeRamp(Grid *grid, float minVal, float maxVal)
 
     float increment = (maxVal - minVal) / ((x * y * z - 1) == 0 ? 1 : (x * y * z - 1));
 
-    float value = minVal;
+    std::mt19937                    engine(0);    // Fixed seed of 0
+    std::uniform_int_distribution<> distrib(0, 9);
+
+    float value = minVal; 
+    float missingValue = grid->GetMissingValue();
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
-                grid->SetValueIJK(i, j, k, value);
+                if (addRandomMissingValues) {
+                    if (!distrib(engine))
+                        grid->SetValueIJK(i, j, k, missingValue);    // Generate random 1 or 0
+                    else grid->SetValueIJK(i, j, k, value);
+                }
+                else grid->SetValueIJK(i, j, k, value);
                 value += increment;
             }
         }
     }
 }
 
-void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X)
+void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X, bool addRandomMissingValues)
 {
     auto   dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -130,13 +160,22 @@ void MakeRampOnAxis(Grid *grid, float minVal, float maxVal, size_t axis = X)
     float yIncrement = axis == Y ? (maxVal - minVal) / (dims[Y] - 1) : 0;
     float zIncrement = axis == Z ? (maxVal - minVal) / (dims[Z] - 1) : 0;
 
+    std::mt19937                    engine(0);    // Fixed seed of 0
+    std::uniform_int_distribution<> distrib(0, 9);
+
     float value = minVal;
+    float missingValue = grid->GetMissingValue();
     for (size_t k = 0; k < z; k++) {
         value = axis == Y ? minVal : value;    // reset value if we're ramping on Y
         for (size_t j = 0; j < y; j++) {
             value = axis == X ? minVal : value;    // reset value if we're ramping on X
             for (size_t i = 0; i < x; i++) {
-                grid->SetValueIJK(i, j, k, value);
+                if (addRandomMissingValues) {
+                    if (!distrib(engine))
+                        grid->SetValueIJK(i, j, k, missingValue);    // Generate random 1 or 0
+                    else grid->SetValueIJK(i, j, k, value);
+                }
+                else grid->SetValueIJK(i, j, k, value);
                 value += xIncrement;
             }
             value += yIncrement;
@@ -176,8 +215,14 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
                 grid->GetUserCoordinates(indices, coords);
                 float sampleValue = grid->GetValue(coords);
 
-                if (sampleValue == grid->GetMissingValue()) {
+                float mv = grid->GetMissingValue();
+                if (trueValue == mv || sampleValue == mv) {
                     numMissingValues++;
+
+                    // If missing value is not finite we can't do
+                    // floating point operations (i.e. computer error)
+                    //
+                    if (sampleValue != trueValue) { disagreements++; }
                     continue;
                 }
 
@@ -369,7 +414,7 @@ bool RunTest(Grid *grid, bool silenceTime)
     rc = rc && omp_good;
 
     if (rc == false) {
-        cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
+        cout << "    *** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
     } else {
         cout << endl;
     }
@@ -389,7 +434,7 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
 
     cout << "=======================================================" << endl << endl;
     if (std::find(tests.begin(), tests.end(), "Constant") != tests.end()) {
-        cout << type << " " << x << "x" << y << "x" << z << " Constant field:" << endl;
+        cout << type << " " << x << ":" << y << ":" << z << " Constant field:" << endl;
         MakeConstantField(grid, maxVal);
 
         grid->SetInterpolationOrder(linear);
@@ -400,7 +445,7 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
     }
 
     if (std::find(tests.begin(), tests.end(), "Ramp") != tests.end()) {
-        cout << type << " " << x << "x" << y << "x" << z << " Ramp up through domain:" << endl;
+        cout << type << " " << x << ":" << y << ":" << z << " Ramp up through domain:" << endl;
         MakeRamp(grid, minVal, maxVal);
 
         grid->SetInterpolationOrder(linear);
@@ -411,7 +456,7 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
     }
 
     if (std::find(tests.begin(), tests.end(), "RampOnAxis") != tests.end()) {
-        cout << type << " " << x << "x" << y << "x" << z << " Ramp up on Z axis:" << endl;
+        cout << type << " " << x << ":" << y << ":" << z << " Ramp up on Z axis:" << endl;
         MakeRampOnAxis(grid, minVal, maxVal, Z);
         grid->SetInterpolationOrder(linear);
         if (RunTest(grid, silenceTime) == false) { rc = false; }
@@ -421,7 +466,7 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
     }
 
     if (std::find(tests.begin(), tests.end(), "Triangle") != tests.end()) {
-        cout << type << " " << x << "x" << y << "x" << z << " Triangle signal:" << endl;
+        cout << type << " " << x << ":" << y << ":" << z << " Triangle signal:" << endl;
         MakeTriangle(grid, minVal, maxVal);
 
         grid->SetInterpolationOrder(linear);
@@ -432,6 +477,26 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
         if (RunTest(grid, silenceTime) == false) { rc = false; }
     }
 
+    if (std::find(tests.begin(), tests.end(), "AllMissingValues") != tests.end()) {
+        cout << type << " " << x << ":" << y << ":" << z << " All missing values:" << endl;
+        MakeConstantField(grid, grid->GetMissingValue());
+
+        grid->SetInterpolationOrder(linear);
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
+
+        grid->SetInterpolationOrder(nearestNeighbor);
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
+    }
+    if (std::find(tests.begin(), tests.end(), "NoMissingValues") != tests.end()) {
+        cout << type << " " << x << ":" << y << ":" << z << " No missing values:" << endl;
+        MakeRamp(grid, minVal, maxVal, false);
+
+        grid->SetInterpolationOrder(linear);
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
+
+        grid->SetInterpolationOrder(nearestNeighbor);
+        if (RunTest(grid, silenceTime) == false) { rc = false; }
+    }
     // Iterator tests
 
     size_t count;
@@ -482,15 +547,15 @@ VAPoR::CurvilinearGrid *MakeCurvilinearTerrainGrid(const std::vector<size_t> &bs
 
     std::vector<float *> xblks = AllocateBlocks(bs2d, dims2d);
     auto                 xrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims2d, bs2d, xblks, minu2d, maxu2d));
-    MakeRampOnAxis(xrg.get(), minu[X], maxu[X], X);
+    MakeRampOnAxis(xrg.get(), minu[X], maxu[X], X, false);
 
     std::vector<float *> yblks = AllocateBlocks(bs2d, dims2d);
     auto                 yrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims2d, bs2d, yblks, minu2d, maxu2d));
-    MakeRampOnAxis(yrg.get(), minu[Y], maxu[Y], Y);
+    MakeRampOnAxis(yrg.get(), minu[Y], maxu[Y], Y, false);
 
     std::vector<float *> zblks = AllocateBlocks(bs, dims);
     auto                 zrg = std::unique_ptr<RegularGrid>(new RegularGrid(dims, bs, zblks, minu, maxu));
-    MakeRampOnAxis(zrg.get(), minu[Z], maxu[Z], Z);
+    MakeRampOnAxis(zrg.get(), minu[Z], maxu[Z], Z, false);
 
     std::vector<float *> blks = AllocateBlocks(bs, dims);
     CurvilinearGrid *    cg = new CurvilinearGrid(dims, bs, blks, *xrg, *yrg, *zrg, NULL);
@@ -503,7 +568,7 @@ LayeredGrid *MakeLayeredGrid(const vector<size_t> &dims, const vector<size_t> &b
     std::vector<float *> zCoordBlocks = AllocateBlocks(bs, dims);
 
     RegularGrid rg(dims, bs, zCoordBlocks, minu, maxu);
-    MakeRampOnAxis(&rg, minu[Z], maxu[Z], Z);
+    MakeRampOnAxis(&rg, minu[Z], maxu[Z], Z, false);
 
     double         deltax = dims[X] > 1 ? maxu[X] - minu[X] / (dims[X] - 1) : 1;
     vector<double> xcoords;

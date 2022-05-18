@@ -109,13 +109,13 @@ bool StretchedGrid::GetIndicesCell(const CoordType &coords, DimsType &indices, d
     double y = cCoords[1];
     double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
 
-    double xwgt[2], ywgt[2], zwgt[2];
     size_t i, j, k;
-    bool   inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
+    wgts[0] = 0.0;
+    wgts[1] = 0.0;
+    wgts[2] = 0.0;
+    bool inside = _insideGrid(x, y, z, i, j, k, wgts[0], wgts[1], wgts[2]);
 
     if (!inside) return (false);
-    wgts[0] = xwgt[0];
-    wgts[1] = ywgt[0];
 
     indices[0] = i;
     indices[1] = j;
@@ -123,7 +123,6 @@ bool StretchedGrid::GetIndicesCell(const CoordType &coords, DimsType &indices, d
     if (GetGeometryDim() == 2) return (true);
 
     indices[2] = k;
-    wgts[2] = zwgt[0];
 
     return (true);
 }
@@ -144,7 +143,7 @@ bool StretchedGrid::InsideGrid(const CoordType &coords) const
         if (cCoords[i] < _minu[i] || cCoords[i] > _maxu[i]) return (false);
     }
 
-    double xwgt[2], ywgt[2], zwgt[2];
+    double xwgt, ywgt, zwgt;
     size_t i, j, k;    // not used
     double x = cCoords[0];
     double y = cCoords[1];
@@ -243,16 +242,16 @@ float StretchedGrid::GetValueNearestNeighbor(const CoordType &coords) const
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    double xwgt[2], ywgt[2], zwgt[2];
+    double wgts[] = {0.0, 0.0, 0.0};
     size_t i, j, k;
     double x = cCoords[0];
     double y = cCoords[1];
     double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
-    bool   inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
+    bool   inside = _insideGrid(x, y, z, i, j, k, wgts[0], wgts[1], wgts[2]);
 
-    if (xwgt[1] > xwgt[0]) i++;
-    if (ywgt[1] > ywgt[0]) j++;
-    if (zwgt[1] > zwgt[0]) k++;
+    if (wgts[0] < 0.5) i++;
+    if (wgts[1] < 0.5) j++;
+    if (wgts[2] < 0.5) k++;
 
     if (!inside) return (GetMissingValue());
 
@@ -269,42 +268,18 @@ float StretchedGrid::GetValueLinear(const CoordType &coords) const
     // handlese case where grid is 2D. I.e. if 2d then zwgt[0] == 1 &&
     // zwgt[1] = 0.0
     //
-    double xwgt[2], ywgt[2], zwgt[2];
+    double wgts[] = {0.0, 0.0, 0.0};
     size_t i, j, k;
     double x = cCoords[0];
     double y = cCoords[1];
     double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
-    bool   inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
-
-    if (!inside) return (GetMissingValue());
-
-    auto dims = GetDimensions();
-    VAssert(i < dims[0]);
-    VAssert(j < dims[1]);
-    VAssert(k < dims[2]);
-
-    float verts0[4];
-    verts0[0] = AccessIJK(i, j, k);
-    verts0[1] = dims[0] > 1 ? AccessIJK(i + 1, j, k) : 0.0;
-    verts0[2] = dims[1] > 1 ? AccessIJK(i, j + 1, k) : 0.0;
-    verts0[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i + 1, j + 1, k) : 0.0;
-
-    float v0 = ((verts0[0] * xwgt[0] + verts0[1] * xwgt[1]) * ywgt[0]) + ((verts0[2] * xwgt[0] + verts0[3] * xwgt[1]) * ywgt[1]);
-
-    if (dims[2] > 1) k++;
-
-    float verts1[4];
-    verts1[0] = AccessIJK(i, j, k);
-    verts1[1] = dims[0] > 1 ? AccessIJK(i + 1, j, k) : 0.0;
-    verts1[2] = dims[1] > 1 ? AccessIJK(i, j + 1, k) : 0.0;
-    verts1[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i + 1, j + 1, k) : 0.0;
-
-    float v1 = ((verts1[0] * xwgt[0] + verts1[1] * xwgt[1]) * ywgt[0]) + ((verts1[2] * xwgt[0] + verts1[3] * xwgt[1]) * ywgt[1]);
+    bool   inside = _insideGrid(x, y, z, i, j, k, wgts[0], wgts[1], wgts[2]);
 
 
-    // Linearly interpolate along Z axis
-    //
-    return (v0 * zwgt[0] + v1 * zwgt[1]);
+    float mv = GetMissingValue();
+    if (!inside) return (mv);
+
+    return (TrilinearInterpolate(i, j, k, wgts[0], wgts[1], wgts[2]));
 }
 
 void StretchedGrid::GetUserExtentsHelper(CoordType &minext, CoordType &maxext) const
@@ -332,37 +307,32 @@ void StretchedGrid::GetUserExtentsHelper(CoordType &minext, CoordType &maxext) c
 // If the point is outside of the
 // grid the values of 'xwgt', 'ywgt', and 'zwgt' are not defined
 //
-bool StretchedGrid::_insideGrid(double x, double y, double z, size_t &i, size_t &j, size_t &k, double xwgt[2], double ywgt[2], double zwgt[2]) const
+bool StretchedGrid::_insideGrid(double x, double y, double z, size_t &i, size_t &j, size_t &k, double &xwgt, double &ywgt, double &zwgt) const
 {
-    for (int l = 0; l < 2; l++) {
-        xwgt[l] = 0.0;
-        ywgt[l] = 0.0;
-        zwgt[l] = 0.0;
-    }
+    xwgt = 0.0;
+    ywgt = 0.0;
+    zwgt = 0.0;
     i = j = k = 0;
 
     if (!Wasp::BinarySearchRange(_xcoords, x, i)) return (false);
 
     if (_xcoords.size() > 1) {
-        xwgt[0] = 1.0 - (x - _xcoords[i]) / (_xcoords[i + 1] - _xcoords[i]);
-        xwgt[1] = 1.0 - xwgt[0];
+        xwgt = 1.0 - (x - _xcoords[i]) / (_xcoords[i + 1] - _xcoords[i]);
     } else {
-        xwgt[0] = 1.0;
+        xwgt = 1.0;
     }
 
 
     if (!Wasp::BinarySearchRange(_ycoords, y, j)) return (false);
 
     if (_ycoords.size() > 1) {
-        ywgt[0] = 1.0 - (y - _ycoords[j]) / (_ycoords[j + 1] - _ycoords[j]);
-        ywgt[1] = 1.0 - ywgt[0];
+        ywgt = 1.0 - (y - _ycoords[j]) / (_ycoords[j + 1] - _ycoords[j]);
     } else {
-        ywgt[0] = 1.0;
+        ywgt = 1.0;
     }
 
     if (GetGeometryDim() == 2) {
-        zwgt[0] = 1.0;
-        zwgt[1] = 0.0;
+        zwgt = 1.0;
         return (true);
     }
 
@@ -372,10 +342,9 @@ bool StretchedGrid::_insideGrid(double x, double y, double z, size_t &i, size_t 
     if (!Wasp::BinarySearchRange(_zcoords, z, k)) return (false);
 
     if (_zcoords.size() > 1) {
-        zwgt[0] = 1.0 - (z - _zcoords[k]) / (_zcoords[k + 1] - _zcoords[k]);
-        zwgt[1] = 1.0 - zwgt[0];
+        zwgt = 1.0 - (z - _zcoords[k]) / (_zcoords[k + 1] - _zcoords[k]);
     } else {
-        zwgt[0] = 1.0;
+        zwgt = 1.0;
     }
 
     return (true);

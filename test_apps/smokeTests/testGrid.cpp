@@ -106,7 +106,7 @@ struct opt_t {
 } opt;
 
 OptionParser::OptDescRec_T set_opts[] = {{"grids", 1, "Regular:Stretched:Layered:Curvilinear:Unstructured2D", "Colon delimited list of grids to test"},
-                                         {"arrangements", 1, "Constant:Ramp:RampOnAxis:Triangle",
+                                         {"arrangements", 1, "Constant:Ramp:RampOnAxis:Triangle:AllMissingValues:NoMissingValues",
                                           "Colon delimited list of "
                                           "data arrangements to test synthetic grids with"},
                                          {"dims", 1, "8:8:8",
