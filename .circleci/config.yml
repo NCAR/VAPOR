@@ -259,7 +259,7 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -u "$GITHUB_TOKEN:" | jq '.items[0].url')
             artifacts="${artifacts//\"}"                         # remove quotes from string
-            artifacts=" [clangTidyOutput.txt]($artifacts)"       # make hyperlink
+            artifacts=" [clangTidyOutput.txt]($artifacts)"       # make hyperlink 
 
             # Temporarily remove windows carraige return \r
             originalBody=$(curl https://api.github.com/repos/NCAR/VAPOR/pulls/${CIRCLE_PULL_REQUEST##*/} | jq '.body')
@@ -282,7 +282,8 @@ jobs:
             # If clang-tidy has already been reported in this PR, remove that report
             if [[ "${lineArray[-1]}" == *"clangTidyOutput.txt"* ]]; then
                 echo "  *** Previous clangTidyOutput.txt report found.  Replacing with new version. ***"
-                unset lineArray[-1]
+                unset lineArray[-1]  # delete line with commit hash
+                unset lineArray[-1]  # delete line with clangTidyOutput.txt
             else
                 lineArray+=("\\n\\n")
             fi
@@ -290,7 +291,7 @@ jobs:
             newBody=""
             newBody=${lineArray[@]//\\n/\\r\\n}              # Add windows carraige return \r on line endings
 
-            newBody="${newBody}\r\n\r\n${artifacts}"
+            newBody="${newBody}\r\n\r\n${CIRCLE_SHA1}:${artifacts}"
             json="{\"body\":\"$newBody\"}"                   # Apply our re-written PR body in json format
 
             # Add linke to PR
