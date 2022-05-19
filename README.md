@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/NCAR/VAPOR.svg?style=svg)](https://circleci.com/gh/NCAR/VAPOR) 
+[![DOI](https://img.shields.io/badge/DOI-<10.5065/d6j38qhc>)](https://doi.org/<10.5065/d6j38qhc>)
 
 ## User Survey:
 
