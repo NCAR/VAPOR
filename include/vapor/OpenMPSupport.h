@@ -1,13 +1,14 @@
-#pragma once
+#ifndef OPENMPSUPPORT_H
+#define OPENMPSUPPORT_H
 
 #ifdef USE_OMP
     #include <omp.h>
 #else
 
-int omp_get_num_threads() { return (1); }
+#define omp_get_num_threads() (1)
+#define omp_set_num_threads(x) (void(x))
+#define omp_get_thread_num() (0)
 
-void omp_set_num_threads(int) {}
-
-int omp_get_thread_num() { return (0); }
+#endif
 
 #endif

@@ -161,7 +161,7 @@ private:
 
     void _stretchedGrid(const std::vector<double> &xcoords, const std::vector<double> &ycoords, const std::vector<double> &zcoords);
 
-    bool _insideGrid(double x, double y, double z, size_t &i, size_t &j, size_t &k, double xwgt[2], double ywgt[2], double zwgt[2]) const;
+    bool _insideGrid(double x, double y, double z, size_t &i, size_t &j, size_t &k, double &xwgt, double &ywgt, double &zwgt) const;
 };
 };    // namespace VAPoR
 #endif

@@ -26,7 +26,7 @@ parser.add_argument(
     '-testDataRoot', 
     nargs=1,
     type=str,
-    default="/Users/pearse/Data/smokeTestData", 
+    default="~/Data/smokeTestData", 
     required=False,
     metavar='/path/to/data',
     help='Directory where DataMgr test data is stored.'
@@ -35,7 +35,7 @@ parser.add_argument(
     '-binaryRoot', 
     nargs=1,
     type=str,
-    default="/Users/pearse/VAPOR/build/bin", 
+    default="~/VAPOR/build/test_binaries", 
     required=False,
     metavar='/path/to/binaries',
     help='Directory where binary test programs (testGrid, testDataMgr) are stored.'
@@ -44,7 +44,7 @@ parser.add_argument(
     '-resultsDir', 
     nargs=1,
     type=str,
-    default="/Users/pearse/VAPOR/test_apps/smokeTests/testResults", 
+    default="~/VAPOR/test_apps/smokeTests/testResults", 
     required=False,
     metavar='/path/to/write/results/to',
     help='Directory where test results are stored.'
@@ -63,26 +63,26 @@ args = vars(parser.parse_args())
 #
 
 gridSizes = [
-#    "1x1x1",
-    "2x2x2",
-    "4x2x2",
-    "8x2x2",
-#    "1x8x8",
-#    "8x1x8",
-#    "8x8x1",
-    "7x7x7",
-    "8x8x8"
+#    "1:1:1",
+    "2:2:2",
+    "4:2:2",
+    "8:2:2",
+#    "1:8:8",
+#    "8:1:8",
+#    "8:8:1",
+    "7:7:7",
+    "8:8:8"
 ]
 
-resultsDir = "".join( args['resultsDir'] )
+resultsDir = os.path.expanduser("".join( args['resultsDir'] ))
 if (resultsDir[-1] != r'/'):
     resultsDir += r'/'
 
-testDataRoot = "".join( args['testDataRoot'] )
+testDataRoot = os.path.expanduser("".join( args['testDataRoot'] ))
 if (testDataRoot[-1] != r'/'):
     testDataRoot += r'/'
 
-binaryRoot = "".join( args['binaryRoot'] )
+binaryRoot = os.path.expanduser("".join( args['binaryRoot'] ))
 if (binaryRoot[-1] != r'/'):
     binaryRoot += r'/'
 
