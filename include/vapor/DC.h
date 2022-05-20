@@ -715,11 +715,11 @@ public:
         //! Get the value(s) for an attribute, performing type conversion
         //! as necessary from the external storage type to the desired type
         //!
-        void GetValues(std::vector<float> &values) const;
-        void GetValues(std::vector<double> &values) const;
-        void GetValues(std::vector<int> &values) const;
-        void GetValues(std::vector<long> &values) const;
-        void GetValues(string &values) const;
+		VDF_API void GetValues(std::vector<float> &values) const;
+		VDF_API void GetValues(std::vector<double> &values) const;
+		VDF_API void GetValues(std::vector<int> &values) const;
+		VDF_API void GetValues(std::vector<long> &values) const;
+		VDF_API void GetValues(string &values) const;
 
         //! Set an attribute's value(s)
         //!
