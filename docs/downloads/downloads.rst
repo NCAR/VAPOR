@@ -19,3 +19,5 @@ Installation Instructions
     installationInstructions/osxInstallation.rst
     installationInstructions/linuxInstallation.rst
     installationInstructions/windowsInstallation.rst
+
+.. include:: ../citation.rst
