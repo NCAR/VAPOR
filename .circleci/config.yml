@@ -83,7 +83,7 @@ jobs:
             cd /usr/local/VAPOR-Deps
             gdown https://drive.google.com/uc?id=1KnUoBfOLuF6VJMXG6KcljjKMpr4VGxQ6
             cd /usr/local/VAPOR-Deps
-            tar xf 2019-Aug-Darwin-post2022.tar.xz -C /usr/local/VAPOR-Deps
+            tar xf 2019-Aug-Darwin-2022.tar.xz -C /usr/local/VAPOR-Deps
             chmod -R 777 /usr/local/VAPOR-Deps
 
       - run:
@@ -161,7 +161,7 @@ jobs:
             apt install -y python3-pip
             pip3 install gdown
             gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
-            filename="/root/project/2019-Aug-Ubuntu-post2022.tar.xz"
+            filename="/root/project/2019-Aug-Ubuntu-2022.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
  
       - run:
@@ -197,7 +197,7 @@ jobs:
             rm -rf /usr/local/VAPOR-Deps/2019-Aug
             pip3 install gdown --upgrade
             gdown https://drive.google.com/uc?id=1In3Q8fA0VCm2en1ncBQI6dzUfatLDA0y
-            filename="/root/project/2019-Aug-CentOS-post2022.tar.xz"
+            filename="/root/project/2019-Aug-CentOS-2022.tar.xz"
             bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
  
       - run:
@@ -339,9 +339,9 @@ jobs:
           name: update 3rd party libraries
           command: |
             rm -rf /usr/local/VAPOR-Deps/2019-Aug
-            pip install gdown --upgrade
+            pip3 install gdown --upgrade
             gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
-            filename="/root/project/2019-Aug-CentOS-post2022.tar.xz"
+            filename="/root/project/2019-Aug-CentOS-2022.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
  
       - run:
@@ -443,7 +443,7 @@ jobs:
               rm -rf /usr/local/VAPOR-Deps/2019-Aug
               pip3 install gdown --upgrade
               gdown https://drive.google.com/uc?id=1In3Q8fA0VCm2en1ncBQI6dzUfatLDA0y
-              filename="/root/project/2019-Aug-CentOS-post2022.tar.xz"
+              filename="/root/project/2019-Aug-CentOS-2022.tar.xz"
               bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
  
         - run:
