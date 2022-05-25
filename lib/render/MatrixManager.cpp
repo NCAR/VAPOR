@@ -103,7 +103,7 @@ float MatrixManager::GetProjectionAspectRatio() const
     return _projectionAspectRatio;
 }
 
-#ifndef NDEBUG
+#ifdef LEGACY_GL_DEBUG
 
 int MatrixManager::GetGLMatrixMode()
 {

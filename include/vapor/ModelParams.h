@@ -7,6 +7,10 @@ namespace VAPoR {
 
 class PARAMS_API ModelParams : public RenderParams {
 public:
+    //! Path to a 3D model file or Vapor vms scene file.
+    //! 3D models can be in formats supported by the ASSIMP library.
+    //! A description of the Vapor vms scene format can be found at
+    //! https://vapor.readthedocs.io/en/readthedocs/usage/modelRenderer.html
     static const std::string FileTag;
 
     ModelParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave);

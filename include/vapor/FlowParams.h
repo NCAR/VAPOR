@@ -168,18 +168,28 @@ public:
     //! \param[in] Rake center position on Z axis
     void SetZRakeCenter(double center);
 
+    //! The rendering type that represents the flow paths.
+    //! See RenderType enum class.
     static const std::string RenderTypeTag;
     static const std::string RenderRadiusBaseTag;
+    //! Scales the radius of the flow tube rendering
     static const std::string RenderRadiusScalarTag;
+    //! Toggles between rendering 2d glyphes and 3d geometry of the render type
     static const std::string RenderGeom3DTag;
     static const std::string RenderLightAtCameraTag;
+    //! Draws the direction of the flow stream
     static const std::string RenderShowStreamDirTag;
-
+    
+    //! When rendering samples, determines whether samples are rendered as circles or arrows
     static const std::string RenderGlyphTypeTag;
+    //! When rendering samples, draw every N samples
     static const std::string RenderGlyphStrideTag;
+    //! When rendering samples, only draw the leading sample in a path
     static const std::string RenderGlyphOnlyLeadingTag;
 
+    //! Falloff parameter for density rendering
     static const std::string RenderDensityFalloffTag;
+    //! ToneMapping parameter for density rendering
     static const std::string RenderDensityToneMappingTag;
 
     static const std::string RenderFadeTailTag;

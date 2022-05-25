@@ -6,6 +6,9 @@
 #include <glm/glm.hpp>
 #include <vapor/common.h>
 
+//! \brief OSPRay integration interface and utility functions
+//! \author Stanislaw Jaroszynski
+
 namespace VOSP {
 RENDER_API int Initialize(int *argc, char **argv);
 RENDER_API int Shutdown();

@@ -34,6 +34,7 @@ set (SRC
     MouseModeParams.cpp
     BookmarkParams.cpp
     GUIStateParams.cpp
+    SettingsParams.cpp
 )
 
 set (HEADERS
@@ -72,6 +73,7 @@ set (HEADERS
     ${PROJECT_SOURCE_DIR}/include/vapor/MouseModeParams.h
     ${PROJECT_SOURCE_DIR}/include/vapor/BookmarkParams.h
     ${PROJECT_SOURCE_DIR}/include/vapor/GUIStateParams.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/SettingsParams.h
 )
 
 add_library (params SHARED ${SRC} ${HEADERS})

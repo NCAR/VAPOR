@@ -200,6 +200,20 @@ public:
         VAssert(_dc);
         return (_dc->GetDimension(dimname, dimension, ts));
     }
+    
+    //! Returns the length of a dimension at a given timestep
+    //!
+    //! \retval length A negative int is returned on failure
+    //!
+    long GetDimensionLength(string name, long ts) const
+    {
+        VAssert(_dc);
+        DC::Dimension dimension;
+        bool ok = GetDimension(name, dimension, ts);
+        if (ok)
+            return dimension.GetLength();
+        return -1;
+    }
 
     //! \copydoc DC::GetMeshNames()
     //
@@ -293,6 +307,7 @@ public:
     //!
     //
     virtual bool GetVarCoordVars(string varname, bool spatial, std::vector<string> &coord_vars) const;
+    vector<string> GetVarCoordVars(string varname, bool spatial) const;
 
     //! Return a data variable's definition
     //!
@@ -342,8 +357,8 @@ public:
 
     //! Return a boolean indicating whether a variable is time varying
     //!
-    //! This method returns \b true if the variable named by \p varname is defined
-    //! and it has a time axis dimension. If either of these conditions
+    //! This method returns \b true if the variable named by \p varname
+    //! is defined and it has a time axis dimension. If either of these conditions
     //! is not true the method returns false.
     //!
     //! \param[in] varname A string specifying the name of the variable.
@@ -639,7 +654,7 @@ public:
         std::vector<CoordType> _maxs;
     };
 
-private:
+protected:
     //
     // Cache for various metadata attributes
     //

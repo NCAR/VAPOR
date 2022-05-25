@@ -335,6 +335,7 @@ int WireFrameRenderer::_paintGL(bool fast)
 {
     int rc = 0;
     if (_isCacheDirty()) { rc = _buildCache(); }
+    if (rc != 0) return rc;
 
     if (Progress::Cancelled()) {
         _cacheParams.varName = "";
@@ -348,6 +349,7 @@ int WireFrameRenderer::_paintGL(bool fast)
 
     RenderParams *  rp = GetActiveParams();
     MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());
+    if (!tf) return -1;
     float           lut[4 * 256];
     tf->makeLut(lut);
     if (rp->UseSingleColor()) {

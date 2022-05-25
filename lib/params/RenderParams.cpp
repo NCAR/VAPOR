@@ -179,6 +179,37 @@ int RenderParams::Initialize()
     return (0);
 }
 
+
+int RenderParams::ResetUserExtentsToDataExents(string var)
+{
+    if (var.empty())
+        var = GetVariableName();
+    
+    CoordType minExt, maxExt;
+    
+    int rc = _dataMgr->GetVariableExtents(GetCurrentTimestep(), var, 0, 0, minExt, maxExt);
+    if (rc < 0) return (-1);
+
+    VAssert(minExt.size() == maxExt.size() && (minExt.size() == 2 || minExt.size() == 3));
+
+    bool planar = _dataMgr->GetNumDimensions(var) == 2;
+    if (planar) {
+        _Box->SetOrientation(VAPoR::Box::XY);
+    } else {
+        _Box->SetOrientation(VAPoR::Box::XYZ);
+    }
+
+    _Box->SetExtents(minExt, maxExt);
+    _Box->SetPlanar(planar);
+
+    vector<double> origin(minExt.size());
+    for (int i = 0; i < minExt.size(); i++) { origin[i] = minExt[i] + (maxExt[i] - minExt[i]) * 0.5; }
+    _transform->SetOrigin(origin);
+    
+    return 0;
+}
+
+
 RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &classname, int maxdim) : ParamsBase(ssave, classname)
 {
     _classInitialized = false;
@@ -575,6 +606,12 @@ void RenderParams::SetConstantColor(const float rgb[3])
         rgbv.push_back(v);
     }
     SetValueDoubleVec(_constantColorTag, "Specify constant color in RGB", rgbv);
+}
+
+void RenderParams::SetConstantColor(vector<float> rgb)
+{
+    rgb.resize(3, 0);
+    SetConstantColor(rgb.data());
 }
 
 void RenderParams::GetConstantColor(float rgb[3]) const

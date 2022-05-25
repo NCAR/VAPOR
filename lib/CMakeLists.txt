@@ -8,10 +8,12 @@ if (BUILD_VDC OR BUILD_GUI)
 endif()
 
 
-if (BUILD_GUI)
+if (BUILD_GUI OR BUILD_PYTHON)
+    add_subdirectory(osgl)
 	add_subdirectory (params)
     add_subdirectory( flow )
 	add_subdirectory (render)
-	export (TARGETS render params flow NAMESPACE VAPOR:: APPEND FILE vapor-exports.cmake)
+	add_subdirectory (vapi)
+	export (TARGETS render params flow osgl vapi NAMESPACE VAPOR:: APPEND FILE vapor-exports.cmake)
 endif()
 

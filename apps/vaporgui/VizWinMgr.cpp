@@ -29,7 +29,6 @@
 #include <sstream>
 #include <typeinfo>
 #include "vapor/VAssert.h"
-#include "GL/glew.h"
 #include <qapplication.h>
 #include <QMdiArea>
 #include <QMdiSubWindow>

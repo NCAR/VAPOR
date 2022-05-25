@@ -57,6 +57,7 @@ set (SRC
     ParticleRenderer.cpp
     TrackBall.cpp
     NavigationUtils.cpp
+    Histo.cpp
 )
 
 set (HEADERS
@@ -120,6 +121,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ParticleRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TrackBall.h
 	${PROJECT_SOURCE_DIR}/include/vapor/NavigationUtils.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/Histo.h
 )
 
 if(BUILD_OSP)
@@ -130,17 +132,25 @@ endif()
 
 add_library (render SHARED ${SRC} ${HEADERS})
 
-if (WIN32)
-    set (PYTHON_LIB_DIR python${PYTHONVERSION})
-else ()
-    set (PYTHON_LIB_DIR python${PYTHONVERSION}m)
-endif()
+target_link_libraries (render PUBLIC common vdc params flow osgl ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} ${ASSIMP})
+# Omitted
+# - ${Python_LIBRARIES} 
+# - ${GLEW} 
+# - ${OPENGL_LIBRARIES} 
 
-target_link_libraries (render PUBLIC common vdc params flow ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} ${PYTHON_LIB_DIR} ${GLEW} ${OPENGL_LIBRARIES} ${ASSIMP})
-
-if (UNIX AND NOT APPLE)
-	target_link_libraries (render PUBLIC GLU)
+if (APPLE)
+    # Required to load library from python
+    # Binaries using this library need to link python
+    SET_TARGET_PROPERTIES(
+        render
+        PROPERTIES
+        LINK_FLAGS "-undefined dynamic_lookup"
+    )
 endif ()
+
+# if (UNIX AND NOT APPLE)
+# 	target_link_libraries (render PUBLIC GLU)
+# endif ()
 
 
 if(BUILD_OSP)

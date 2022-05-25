@@ -149,6 +149,7 @@ int           main(int argc, char **argv)
     setlocale(LC_ALL, "C");
 
 // For Mac and Linux, set the PYTHONHOME in this app
+#if 0
 #ifndef WIN32
 
     const char *s = getenv("PYTHONHOME");
@@ -172,6 +173,7 @@ int           main(int argc, char **argv)
     }
     MyBase::SetDiagMsg("PYTHONHOME = %s", phome.c_str());
 
+#endif
 #endif
 
     app = &a;

@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QFrame>
 #include <vapor/VAssert.h>
-#include "Histo.h"
+#include <vapor/Histo.h>
 #include "TFMapWidget.h"
 
 class ParamsDropdownMenuItem;
