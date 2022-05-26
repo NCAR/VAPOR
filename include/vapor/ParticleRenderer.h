@@ -94,8 +94,13 @@ private:
     bool _colormapCacheIsDirty() const;
     void _resetParticleCache();
     void _resetColormapCache();
-    int  _generateParticles(bool legacy=false);
-    void _renderParticles();
+    //int  _generateParticles(bool legacy=false);
+    int  _generateParticlesLegacy(Grid*& grid, std::vector<Grid*>& vecGrids);
+    int  _getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const;
+    void _renderParticleGlyphs();
+    void _generateParticleGlyphs(const Grid* grid, const std::vector<Grid*>& vecGrids);
+    //void _generateParticleGlyphs();
+    void _renderParticlesLegacy(const Grid* grid, const std::vector<Grid*>& vecGrids) const;
     int  _renderParticlesHelper(bool renderDirection = false);
     void _prepareColormap();
     glm::vec3 _getScales();
