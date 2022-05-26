@@ -94,11 +94,6 @@ int ParticleRenderer::_paintGL(bool)
 
     if (_particleCacheIsDirty()) {
         _resetParticleCache();
-        /*int rc = _generateParticles();
-        if (rc != 0) {
-            SetErrMsg("Cannot generate particles");
-            return rc;
-        }*/
     }
 
     if (_colormapCacheIsDirty()) {
@@ -106,8 +101,6 @@ int ParticleRenderer::_paintGL(bool)
         _prepareColormap();
     }
 
-    //auto p = GetActiveParams();
-    //if (!p->GetValueLong(ParticleParams::Render3DTag, false)) {
     Grid* grid = nullptr;
     std::vector<Grid*> vecGrids;
     int rc = _getGrids(grid, vecGrids);
@@ -122,11 +115,6 @@ int ParticleRenderer::_paintGL(bool)
         _renderParticleGlyphs();
     }
     else {
-        /*rc = _generateParticlesLegacy(grid, vecGrids);
-        if (rc != 0) {
-            SetErrMsg("Cannot generate particles");
-            return rc;
-        }*/
         _renderParticlesLegacy(grid, vecGrids);
     }
 
@@ -249,11 +237,10 @@ void ParticleRenderer::_renderParticleGlyphs()
     for (int s = 0; s < nStreams; s+=2) {
         glm::vec4 p = _particles[s];
         glm::vec4 p2 = _particles[s+1];
-        //const vector<flow::Particle> stream = {flow::Particle(p[0],p[1],p[2],0.,p[3]), flow::Particle(p2[0],p2[1],p2[2],0.,p2[3])};
         const std::array<flow::Particle,2> stream = {flow::Particle(p[0],p[1],p[2],0.,p[3]), flow::Particle(p2[0],p2[1],p2[2],0.,p2[3])};
         
         sv.clear();
-        int sn = stream.size();
+        int sn = 2;
 
         for (int i = 0; i < sn + 1; i++) {
             if (i == sn) {
@@ -377,37 +364,15 @@ int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
     return 0;
 }
 
-//int ParticleRenderer::_generateParticles(bool legacy) {
 int ParticleRenderer::_getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const {
-    /*MapperFunction* mf;
-    float LUT[256*4];
-    float mapMin = 0.;
-    float mapMax = 0.;
-    float mapDif = 0.;
-
-    if(legacy) {
-        glDepthMask(true);
-        glEnable(GL_DEPTH_TEST);
-
-        auto p = GetActiveParams();
-
-        mf = p->GetMapperFunc(p->GetVariableName());
-        mf->makeLut(LUT);
-        mapMin = mf->getMinMapValue();
-        mapMax = mf->getMaxMapValue();
-        mapDif = mapMax - mapMin;
-    }*/
-
 #define PD3(v) printf("%s = %f, %f, %f\n", #v, v[0], v[1], v[2])
     string varName = _cacheParams.varName;
-    //Grid * grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
     grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
     if (!grid) {
         SetErrMsg("Cannot acquire grid for variable \"%s\"", _cacheParams.varName.c_str());
         return -1;
     }
 
-    //vector<Grid *> vecGrids;
     vector<string> vecNames = _cacheParams.fieldVars;
     vector<string> mainVarCoords;
     _dataMgr->GetVarCoordVars(_cacheParams.varName, true, mainVarCoords);
@@ -446,75 +411,6 @@ int ParticleRenderer::_getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const
         vecGrids.push_back(ng);
     }
 
-//    auto   dims = grid->GetDimensions();
-//    size_t nCoords = 1;
-//    for (const auto d : dims) nCoords *= d;
-//    (void)nCoords; // Silence unused variable warning
-
-    //if (legacy) _renderParticlesLegacy(grid, vecGrids);
-    //else _generateParticleGlyphs(grid, vecGrids);
-
-    /*LegacyGL* lgl = _glManager->legacy;  // Assign lgl to silence uninitialized variable warning
-    if (legacy) {
-        glDepthMask(true);
-        glEnable(GL_DEPTH_TEST);
-        lgl->Color3f(1, 1, 1);
-        lgl->Begin(showDir ? GL_LINES : GL_POINTS);
-
-        auto p = GetActiveParams();
-        mf = p->GetMapperFunc(p->GetVariableName());
-        mf->makeLut(LUT);
-
-        mapMin = mf->getMinMapValue();
-        mapMax = mf->getMaxMapValue();
-        mapDif = mapMax - mapMin;
-    }
-    else _particles.clear();
-
-    auto                        node = grid->ConstNodeBegin(_cacheParams.boxMin, _cacheParams.boxMax);
-    auto                        nodeEnd = grid->ConstNodeEnd();
-    CoordType                   coordsBuf;
-    vector<Grid::ConstIterator> dirs;
-    //if (!legacy) _particles.clear();
-    for (auto g : vecGrids) dirs.push_back(g->cbegin(_cacheParams.boxMin, _cacheParams.boxMax));
-
-    for (size_t i = 0; node != nodeEnd; ++node, ++i) {
-        if (i % stride) {
-            if (showDir)
-                for (auto &it : dirs) ++it;
-            continue;
-        }
-
-        const float value = grid->GetValueAtIndex(*node);
-        grid->GetUserCoordinates(*node, coordsBuf);
-        const glm::vec3 p(coordsBuf[0], coordsBuf[1], coordsBuf[2]);
-
-        if (legacy) {
-            lgl->Color4fv(&LUT[4 * glm::clamp((int)(255 * (value - mapMin) / mapDif), 0, 255)]);
-            lgl->Vertex3fv((float *)&p);
-        }
-        else
-            _particles.push_back(glm::vec4(p[0], p[1], p[2], value));
-
-        if (showDir) {
-            const glm::vec3 n(*(dirs[0]), *(dirs[1]), *(dirs[2]));
-            const glm::vec3 p2 = p + n * dirScale;
-            if (legacy) lgl->Vertex3fv((float *)&p2);
-            else _particles.push_back(glm::vec4(p2[0], p2[1], p2[2], value));
-
-            for (auto &it : dirs) ++it;
-        }
-        else if (!legacy) _particles.push_back(glm::vec4(p[0], p[1], p[2], value));
-    }
-
-    if (legacy) lgl->End();*/
-
-    /*_dataMgr->UnlockGrid(grid);
-    delete grid;
-    for (auto g : vecGrids) {
-        _dataMgr->UnlockGrid(g);
-        delete g;
-    }*/
     return 0;
 }
 
