@@ -74,7 +74,13 @@ private:
         std::vector<std::string> fieldVars;
     } _cacheParams;
 
-    std::vector<glm::vec4> _particles;
+    struct _vertex {
+        glm::vec3  point;
+        float      value;
+    };
+
+    //std::vector<glm::vec4> _particles;
+    std::vector<_vertex> _particles;
 
     std::vector<int> _streamSizes;
 
