@@ -82,8 +82,8 @@ private:
 
     const float      _lowerAngle, _upperAngle;          // Thresholds for step size adjustment
     float            _lowerAngleCos, _upperAngleCos;    // Cosine values of the threshold angles
-    std::vector<int> _separatorCount;                   // how many separators does each stream have.
-                                                        // Useful to determine how many steps are there in a stream.
+    std::vector<int> _separatorCount; // how many separators does each stream have.
+                                      // Useful to determine how many steps are there in a stream.
     // If the advection is performed in a periodic fashion along one or more dimensions.
     // These variables are **not** intended to be decided by Advection, but by someone
     // who's more knowledgeable about the field.
@@ -113,6 +113,6 @@ private:
                                                   const std::vector<double> &integrateWithinVolumeMin, const std::vector<double> &integrateWithinVolumeMax) const;
     static bool _isParticleInsideVolume(const Particle &p, const std::vector<double> &min, const std::vector<double> &max);
 };
-};    // namespace flow
+}; // namespace flow
 
 #endif

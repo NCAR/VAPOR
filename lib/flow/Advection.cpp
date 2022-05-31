@@ -159,7 +159,7 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
                             separator.SetSpecial(true);
                             auto it = s.end();
                             --it;
-                            s.insert(it, std::move(separator));
+                            s.insert(it, separator);
                             _separatorCount[streamIdx]++;
                         } else {
                             past0.SetSpecial(true);
@@ -224,13 +224,13 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
 
                     Particle separator;
                     separator.SetSpecial(true);
-                    s.insert(itr, std::move(separator));
+                    s.insert(itr, separator);
                     _separatorCount[streamIdx]++;
                 } else {
                     break;    // break the while loop
                 }
 
-            }    // Finish of the if condition
+            } // Finish the out-of-volume condition
 
             double dt = deltaT;
             if (s.size() > 2)    // If there are at least 3 particles in the stream,
@@ -263,7 +263,7 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
             } else {    // Advection successful, keep the new particle.
                 happened = true;
                 s.push_back(p1);
-                p0 = std::move(p1);
+                p0 = p1;
             }
 
             // Another termination criterion: when advecting at least 10,000 steps and
