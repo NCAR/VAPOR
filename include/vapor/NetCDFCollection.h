@@ -643,8 +643,6 @@ public:
 
 protected:
     bool _GetVariableInfo(string varname, NetCDFSimple::Variable &variable) const;
-    
-    virtual NetCDFSimple *newNetCDFSimple() const;
 
 private:
     std::map<string, TimeVaryingVar> _variableList;

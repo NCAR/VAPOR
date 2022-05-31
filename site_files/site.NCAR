@@ -36,3 +36,5 @@ if (WIN32)
 else ()
 	set (NUMPY_INCLUDE_DIR "${PYTHONPATH}/site-packages/numpy/core/include")
 endif ()
+
+include (../vapor-site/site.cmake OPTIONAL)

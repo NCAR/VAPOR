@@ -22,33 +22,20 @@ using namespace VAPoR;
 
 DCRAM::DCRAM()
 {
-    _ncdfc = NULL;
-
     _dimsMap.clear();
     _coordVarsMap.clear();
-    _dataVarsMap.clear();
     _meshMap.clear();
-    _coordVarKeys.clear();
 }
 
 DCRAM::~DCRAM()
 {
-    if (_ncdfc) delete _ncdfc;
     for (const auto &it : _dataMap)
         delete [] it.second;
     _dataMap.clear();
 }
 
-static void ReplaceAll(string *s, char a, char b)
-{
-    for (auto &c : *s) c = c == a ? b : c;
-}
-
 int DCRAM::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
-    NetCDFCollection *ncdfc = new NetCDFCollection();
-
-
 #ifdef DCRAM_GENERATE_TEST_DATA
     // Dimensions
     // ==================
@@ -80,9 +67,9 @@ int DCRAM::initialize(const vector<string> &paths, const std::vector<string> &op
     // ==================
     {
     vector<bool> periodic(3, false);
-//    _dataVarsMap["sphere"] = DC::DataVar("sphere", "", DC::FLOAT, periodic, mesh.GetName(), /*timeCoordVar*/"", DC::Mesh::NODE);
-//    _dataVarsMap["empty"]  = DC::DataVar("empty",  "", DC::FLOAT, periodic, mesh.GetName(), /*timeCoordVar*/"", DC::Mesh::NODE);
-//    _dataVarsMap["xval"]   = DC::DataVar("xval",   "", DC::FLOAT, periodic, mesh.GetName(), /*timeCoordVar*/"", DC::Mesh::NODE);
+    _dataVarsMap["sphere"] = DC::DataVar("sphere", "", DC::FLOAT, periodic, mesh.GetName(), /*timeCoordVar*/"", DC::Mesh::NODE);
+    _dataVarsMap["empty"]  = DC::DataVar("empty",  "", DC::FLOAT, periodic, mesh.GetName(), /*timeCoordVar*/"", DC::Mesh::NODE);
+    _dataVarsMap["xval"]   = DC::DataVar("xval",   "", DC::FLOAT, periodic, mesh.GetName(), /*timeCoordVar*/"", DC::Mesh::NODE);
     }
 #endif
 
@@ -152,21 +139,18 @@ void DCRAM::Test()
 
 void DCRAM::AddDimension(const DC::Dimension &dim)
 {
-//    assert(_dimsMap.find(dim.GetName()) == _dimsMap.end());
     _dimsMap[dim.GetName()] = dim;
 }
 
 
 void DCRAM::AddMesh(const DC::Mesh &mesh)
 {
-//    assert(_meshMap.find(mesh.GetName()) == _meshMap.end());
     _meshMap[mesh.GetName()] = mesh;
 }
 
 
 void DCRAM::AddCoordVar(const DC::CoordVar &var, const float *buf)
 {
-//    assert(_coordVarsMap.find(var.GetName()) == _coordVarsMap.end());
     _coordVarsMap[var.GetName()] = var;
     
     size_t size = 1;
@@ -182,7 +166,6 @@ void DCRAM::AddCoordVar(const DC::CoordVar &var, const float *buf)
 
 void DCRAM::AddDataVar(const DC::DataVar &var, const float *buf)
 {
-//    assert(_dataVarsMap.find(var.GetName()) == _dataVarsMap.end());
     _dataVarsMap[var.GetName()] = var;
     
     size_t size = 1;
@@ -218,8 +201,9 @@ bool DCRAM::getDimension(string dimname, DC::Dimension &dimension, long ts) cons
     dimension = itr->second;
 
     if (dimension.IsTimeVarying()) {
-        long len = _ncdfc->GetDimLengthAtTime(dimname, ts);
-        if (len >= 0) { dimension = Dimension(dimname, len); }
+#ifndef NDEBUG
+        printf("WARNING: RAM dimension '%s' is time varying", dimname.c_str());
+#endif
     }
 
     return true;
@@ -316,13 +300,19 @@ std::vector<string> DCRAM::getCoordVarNames() const
 
 template<class T> bool DCRAM::_getAttTemplate(string varname, string attname, T &values) const
 {
-    //    printf("%s(%s, %s, %s&)\n", __func__, varname.c_str(), attname.c_str(), TypeToChar(values));
+    DC::BaseVar var;
+    bool status = getBaseVarInfo(varname, var);
+    if (!status)
+        return false;
 
-    if (_ncdfc->GetAttType(varname, attname) < 0) return false;
+    const std::map<string, Attribute> &atts = var.GetAttributes();
+    
+    if (!atts.count(attname))
+        return false;
+    
+    atts.at(attname).GetValues(values);
 
-    _ncdfc->GetAtt(varname, attname, values);
-
-    return (true);
+    return true;
 }
 
 bool DCRAM::getAtt(string varname, string attname, vector<double> &values) const
@@ -348,15 +338,12 @@ bool DCRAM::getAtt(string varname, string attname, string &values) const
 
 std::vector<string> DCRAM::getAttNames(string varname) const
 {
-    //    printf("%s(%s) = ", __func__, varname.c_str());
-
     if (varname.empty()) {
-        return _ncdfc->GetAttNames("");
+        return {};
     } else {
         DC::BaseVar var;
         bool        status = getBaseVarInfo(varname, var);
         if (!status) {
-            //            printf("{} (ERR)\n");
             return (vector<string>());
         }
 
@@ -365,15 +352,12 @@ std::vector<string> DCRAM::getAttNames(string varname) const
         const std::map<string, Attribute> &         atts = var.GetAttributes();
         std::map<string, Attribute>::const_iterator itr;
         for (itr = atts.begin(); itr != atts.end(); ++itr) { names.push_back(itr->first); }
-
-        //        printf("%s\n", ToStr(names).c_str());
         return (names);
     }
 }
 
 DC::XType DCRAM::getAttType(string varname, string attname) const
 {
-    //    printf("%s(%s, %s)\n", __func__, varname.c_str(), attname.c_str());
     DC::BaseVar var;
     bool        status = getBaseVarInfo(varname, var);
     if (!status) return (DC::INVALID);
@@ -412,8 +396,6 @@ int DCRAM::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_l
 
 int DCRAM::openVariableRead(size_t ts, string varname)
 {
-    //    printf("DCRAM::%s(%li, %s) = ", __func__, ts, varname.c_str());
-
     int ret = _fakeVarsFileCounter++;
     _fdMap[ret] = varname;
     return ret;
@@ -422,8 +404,6 @@ int DCRAM::openVariableRead(size_t ts, string varname)
 
 int DCRAM::closeVariable(int fd)
 {
-    //    printf("DCRAM::%s(%i)\n", __func__, fd);
-
     auto fdIt = _fdMap.find(fd);
     if (fdIt != _fdMap.end()) _fdMap.erase(fdIt);
 
@@ -432,7 +412,7 @@ int DCRAM::closeVariable(int fd)
         return 0;
     }
 
-    VAssert(0);
+    assert(0);
     return -1;
 }
 
@@ -455,7 +435,9 @@ template<class T> int DCRAM::_readRegionTemplate(int fd, const vector<size_t> &m
     const size_t h = 1 + max[1] - min[1];
     const size_t d = 1 + max[2] - min[2];
     vec3 s(w,h,d);
+#ifdef DCRAM_GENERATE_TEST_DATA
     vec3 c = s/2.f;
+#endif
     
     auto var3d = [=](function<float(vec3 p)> f)
     {
@@ -544,7 +526,7 @@ template<class T> int DCRAM::_readRegionTemplate(int fd, const vector<size_t> &m
     
     
     if (fake) {
-        // Regular Coords
+        // Generate Regular Coords
         for (size_t i = min[0]; i <= max[0]; i++) region[i] = i / (double)(max[0] - 1);
         return 0;
     }
@@ -569,9 +551,6 @@ bool DCRAM::variableExists(size_t ts, string varname, int, int) const
         if (found) break;
         if (it.first == varname) found = true;
     }
-
-    //    if (found == false)
-    //        printf("WARNING %s(%li, %s) = %s\n", __func__, ts, varname.c_str(), found?"true":"false");
     return found;
 }
 

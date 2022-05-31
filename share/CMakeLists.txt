@@ -18,8 +18,10 @@ if (BUILD_VDC AND ${GENERATE_FULL_INSTALLER})
 		python
 		palettes
 		examples
-		${THIRD_PARTY_DIR}/share/images
 	)
+    if (NOT INSTALLER_OMIT_MAPS)
+	    set (SHARE_DIRS ${SHARE_DIRS} ${THIRD_PARTY_DIR}/share/images)
+    endif()
 	install (
 		DIRECTORY ${SHARE_DIRS}
 		DESTINATION ${INSTALL_SHARE_DIR}

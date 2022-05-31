@@ -84,7 +84,7 @@ int NetCDFCollection::Initialize(const vector<string> &files, const vector<strin
     }
 
     for (int i = 0; i < files.size(); i++) {
-        NetCDFSimple *netcdf = newNetCDFSimple();
+        NetCDFSimple *netcdf = new NetCDFSimple();
         _ncdfmap[files[i]] = netcdf;
 
         rc = netcdf->Initialize(files[i]);
@@ -491,11 +491,6 @@ bool NetCDFCollection::_GetVariableInfo(string varname, NetCDFSimple::Variable &
     return (true);
 }
 
-NetCDFSimple *NetCDFCollection::newNetCDFSimple() const
-{
-    return new NetCDFSimple;
-}
-
 int NetCDFCollection::GetVariableInfo(string varname, NetCDFSimple::Variable &varinfo) const
 {
     bool ok = NetCDFCollection::_GetVariableInfo(varname, varinfo);
@@ -667,7 +662,7 @@ int NetCDFCollection::_InitializeTimesMapCase1(const vector<string> &files, map<
     //
 
     for (int i = 0; i < files.size(); i++) {
-        NetCDFSimple *netcdf = newNetCDFSimple();
+        NetCDFSimple *netcdf = new NetCDFSimple();
 
         int rc = netcdf->Initialize(files[i]);
         if (rc < 0) {
@@ -718,7 +713,7 @@ int NetCDFCollection::_InitializeTimesMapCase2(const vector<string> &files, cons
     //
 
     for (int i = 0; i < files.size(); i++) {
-        NetCDFSimple *netcdf = newNetCDFSimple();
+        NetCDFSimple *netcdf = new NetCDFSimple();
 
         int rc = netcdf->Initialize(files[i]);
         if (rc < 0) {
@@ -789,7 +784,7 @@ int NetCDFCollection::_InitializeTimesMapCase3(const vector<string> &files, cons
     for (int i = 0; i < time_coordvars.size(); i++) { tcvcount[time_coordvars[i]] = 0; }
 
     for (int i = 0; i < files.size(); i++) {
-        NetCDFSimple *netcdf = newNetCDFSimple();
+        NetCDFSimple *netcdf = new NetCDFSimple();
 
         int rc = netcdf->Initialize(files[i]);
         if (rc < 0) return (-1);

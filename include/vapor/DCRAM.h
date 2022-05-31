@@ -96,9 +96,7 @@ protected:
     //!
     virtual string getMapProjection() const
     {
-        // Projections not supported yet :-(
-        //
-        return (_proj4String);
+        return "";
     }
 
     //! \copydoc DC::GetAtt()
@@ -149,21 +147,12 @@ protected:
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
 private:
-    NetCDFCollection *_ncdfc;
-
-    string                          _proj4String;
     std::map<string, DC::Dimension> _dimsMap;
     std::map<string, DC::CoordVar>  _coordVarsMap;
     std::map<string, DC::AuxVar>    _auxVarsMap;
     std::map<string, DC::Mesh>      _meshMap;
     std::map<string, DC::DataVar>   _dataVarsMap;
-    std::map<string, string>        _coordVarKeys;
-    std::map<string, string>        _sanitizedToOriginalMap;
 
-    const string          _nodeFaceVar = "cellsOnVertex";
-    const string          _faceNodeVar = "verticesOnCell";
-    const string          _fakeEmptyVar = "empty";
-    vector<string>        _fakeVars = {_nodeFaceVar, _faceNodeVar};
     int                   _fakeVarsFileCounterStart = 10000;
     int                   _fakeVarsFileCounter = _fakeVarsFileCounterStart;
     std::map<int, string> _fdMap;
