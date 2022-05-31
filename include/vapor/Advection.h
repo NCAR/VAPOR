@@ -87,8 +87,8 @@ private:
     // If the advection is performed in a periodic fashion along one or more dimensions.
     // These variables are **not** intended to be decided by Advection, but by someone
     // who's more knowledgeable about the field.
-    bool      _isPeriodic[3];        // is it periodic in X, Y, Z dimensions ?
-    glm::vec2 _periodicBounds[3];    // periodic boundaries in X, Y, Z dimensions
+    std::array<bool, 3> _isPeriodic;          // is it periodic in X, Y, Z dimensions?
+    std::array<glm::vec2, 3> _periodicBounds; // periodic boundaries in X, Y, Z dimensions
 
     // Advection methods here could assume all input is valid.
     int _advectEuler(Field *, const Particle &, double deltaT,    // Input
