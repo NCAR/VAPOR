@@ -19,16 +19,18 @@ GLContext *GLContextProvider::CreateContext()
     returnIfSupportedContext(GLContextProviderMacOS);
 #endif
 
-#if Linux
 #if BUILD_EGL
     returnIfSupportedContext(GLContextProviderNvidia);
     returnIfSupportedContext(GLContextProviderEGL);
 #endif
+
+#if BUILD_MESA
     LogWarning("Could not get an OpenGL context from the display manager. Is one running?");
     LogWarning("Falling back to software rendering");
     returnIfSupportedContext(GLContextProviderMesa);
 #endif
 
+    LogWarning("Could not create OpenGL context");
     return nullptr;
 }
 

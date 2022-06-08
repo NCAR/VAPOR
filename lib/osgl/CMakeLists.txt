@@ -2,6 +2,11 @@ set(LIB osgl)
 
 include(CMakeCopy.cmake)
 
+set(BUILD_MESA OFF)
+if (BUILD_PYTHON AND (UNIX AND NOT APPLE))
+    set(BUILD_MESA ON)
+endif()
+
 set(SOFTWARE_ONLY OFF)
 if (NOT SOFTWARE_ONLY)
     if (UNIX AND NOT APPLE)
@@ -52,10 +57,14 @@ if (APPLE)
 endif ()
 
 if (UNIX AND NOT APPLE)
-    target_link_libraries (${LIB} OSMesa rt dl)
+    target_link_libraries (${LIB} rt dl)
     if (BUILD_EGL)
         # target_link_libraries(${LIB} EGL)
         target_compile_definitions(${LIB} PRIVATE BUILD_EGL)
+    endif ()
+    if (BUILD_MESA)
+        target_link_libraries (${LIB} OSMesa)
+        target_compile_definitions(${LIB} PRIVATE BUILD_MESA)
     endif ()
 endif ()
 

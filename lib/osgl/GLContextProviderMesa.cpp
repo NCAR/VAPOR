@@ -1,6 +1,6 @@
 #include <vapor/GLContextProviderMesa.h>
 
-#if Linux
+#if BUILD_MESA
     #include <vapor/GLAD.h>
     #include <GL/osmesa.h>
 
