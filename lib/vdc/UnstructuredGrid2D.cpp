@@ -148,14 +148,14 @@ bool UnstructuredGrid2D::GetIndicesCell(const CoordType &coords, DimsType &cindi
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    double *lambda = new double[_maxVertexPerFace];
+    std::vector<double> lambda(_maxVertexPerFace);
     int     nlambda;
 
     // See if point is inside any cells (faces)
     //
     size_t              my_index;
     std::vector<size_t> my_nodes;
-    bool                status = _insideGridNodeCentered(cCoords, my_index, my_nodes, lambda, nlambda);
+    bool                status = _insideGridNodeCentered(cCoords, my_index, my_nodes, lambda.data(), nlambda);
 
     if (status) {
         cindices[0] = my_index;
@@ -165,8 +165,6 @@ bool UnstructuredGrid2D::GetIndicesCell(const CoordType &coords, DimsType &cindi
         }
     }
 
-    delete[] lambda;
-
     return (status);
 }
 
@@ -175,16 +173,14 @@ bool UnstructuredGrid2D::InsideGrid(const CoordType &coords) const
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    double *       lambda = new double[_maxVertexPerFace];
+    std::vector<double> lambda(_maxVertexPerFace);
     int            nlambda;
     size_t         face;
     vector<size_t> nodes;
 
     // See if point is inside any cells (faces)
     //
-    bool status = _insideGridNodeCentered(cCoords, face, nodes, lambda, nlambda);
-
-    delete[] lambda;
+    bool status = _insideGridNodeCentered(cCoords, face, nodes, lambda.data(), nlambda);
 
     return (status);
 }
@@ -197,17 +193,16 @@ float UnstructuredGrid2D::GetValueNearestNeighbor(const CoordType &coords) const
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    double *       lambda = new double[_maxVertexPerFace];
+    std::vector<double> lambda(_maxVertexPerFace);
     int            nlambda;
     size_t         face;
     vector<size_t> nodes;
 
     // See if point is inside any cells (faces)
     //
-    bool inside = _insideGrid(cCoords, face, nodes, lambda, nlambda);
+    bool inside = _insideGrid(cCoords, face, nodes, lambda.data(), nlambda);
 
     if (!inside) {
-        delete[] lambda;
         return (GetMissingValue());
     }
     VAssert(nodes.size() == nlambda);
@@ -220,8 +215,6 @@ float UnstructuredGrid2D::GetValueNearestNeighbor(const CoordType &coords) const
 
     float value = AccessIJK(nodes[maxindx], 0, 0);
 
-    delete[] lambda;
-
     return ((float)value);
 }
 
@@ -233,17 +226,16 @@ float UnstructuredGrid2D::GetValueLinear(const CoordType &coords) const
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    double *       lambda = new double[_maxVertexPerFace];
+    std::vector<double> lambda(_maxVertexPerFace);
     int            nlambda;
     size_t         face;
     vector<size_t> nodes;
 
     // See if point is inside any cells (faces)
     //
-    bool inside = _insideGrid(cCoords, face, nodes, lambda, nlambda);
+    bool inside = _insideGrid(cCoords, face, nodes, lambda.data(), nlambda);
 
     if (!inside) {
-        delete[] lambda;
         return (GetMissingValue());
     }
 
@@ -251,9 +243,18 @@ float UnstructuredGrid2D::GetValueLinear(const CoordType &coords) const
     VAssert(face < GetCellDimensions()[0]);
 
     double value = 0;
-    for (int i = 0; i < nodes.size(); i++) { value += AccessIJK(nodes[i], 0, 0) * lambda[i]; }
+    float  mv = GetMissingValue();
+    for (int i = 0; i < nodes.size(); i++) {
+        float v = AccessIJK(nodes[i], 0, 0);
+        if (v == mv) {
+            if (lambda[i] != 0.0)
+                return (mv);
+            else
+                v = 0.0;
+        }
 
-    delete[] lambda;
+        value += v * lambda[i];
+    }
 
     return ((float)value);
 }
