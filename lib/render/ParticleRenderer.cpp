@@ -225,13 +225,20 @@ void ParticleRenderer::_resetColormapCache() {
 
 void ParticleRenderer::_renderParticleGlyphs()
 {
-    vector<_vertex> vertices;
+    typedef struct {
+        glm::vec3  p;
+        float v;
+    } Vertex;
+    vector<Vertex> vertices;
     vector<int>    sizes;
-    vector<_vertex> sv;
+    vector<Vertex> sv;
 
     int nStreams = _particles.size();
     for (int s = 0; s < nStreams; s+=2) {
-        _vertex p = _particles[s];
+        glm::vec4 p = _particles[s];
+        glm::vec4 p2 = _particles[s+1];
+        const std::array<flow::Particle,2> stream = {flow::Particle(p[0],p[1],p[2],0.,p[3]), flow::Particle(p2[0],p2[1],p2[2],0.,p2[3])};
+        
         sv.clear();
         int sn = 2;
 
@@ -244,20 +251,21 @@ void ParticleRenderer::_renderParticleGlyphs()
                     continue;
                 }
 
-                glm::vec3 prep(-normalize(sv[1].point - sv[0].point) + sv[0].point);
-                glm::vec3 post(normalize(sv[svn - 1].point - sv[svn - 2].point) + sv[svn - 1].point);
+                glm::vec3 prep(-normalize(sv[1].p - sv[0].p) + sv[0].p);
+                glm::vec3 post(normalize(sv[svn - 1].p - sv[svn - 2].p) + sv[svn - 1].p);
 
                 size_t vn = vertices.size();
                 vertices.resize(vn + svn + 2);
-                vertices[vn] = {prep, sv[0].value};
-                vertices[vertices.size() - 1] = {post, sv[svn - 1].value};
+                vertices[vn] = {prep, sv[0].v};
+                vertices[vertices.size() - 1] = {post, sv[svn - 1].v};
 
-                memcpy(vertices.data() + vn + 1, sv.data(), sizeof(_vertex) * svn);
+                memcpy(vertices.data() + vn + 1, sv.data(), sizeof(Vertex) * svn);
 
                 sizes.push_back(svn + 2);
                 sv.clear();
             } else {
-                sv.push_back({p.point, p.value});
+                const flow::Particle &p = stream[i];
+                sv.push_back({p.location, p.value});
             }
         }
     }
@@ -267,7 +275,7 @@ void ParticleRenderer::_renderParticleGlyphs()
 
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(_vertex) * _particles.size(), _particles.data(), GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     _streamSizes = sizes;
@@ -430,16 +438,16 @@ void ParticleRenderer::_generateParticleGlyphs(const Grid* grid, const std::vect
         grid->GetUserCoordinates(*node, coordsBuf);
         const glm::vec3 p(coordsBuf[0], coordsBuf[1], coordsBuf[2]);
 
-        _particles.push_back({glm::vec3(p[0], p[1], p[2]), value});
+        _particles.push_back(glm::vec4(p[0], p[1], p[2], value));
 
         if (showDir) {
             const glm::vec3 n(*(dirs[0]), *(dirs[1]), *(dirs[2]));
             const glm::vec3 p2 = p + n * dirScale;
-            _particles.push_back({glm::vec3(p2[0], p2[1], p2[2]), value});
+            _particles.push_back(glm::vec4(p2[0], p2[1], p2[2], value));
 
             for (auto &it : dirs) ++it;
         }
-        else _particles.push_back({glm::vec3(p[0], p[1], p[2]), value});
+        else _particles.push_back(glm::vec4(p[0], p[1], p[2], value));
     }
 }
 
