@@ -262,7 +262,7 @@ jobs:
             else
                 echo "Merge-base found with --fork-point at $mergeBase"
             fi
-            git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
+            git diff $mergeBase HEAD | \
             /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
             tee /tmp/clangTidyOutput.txt
 
