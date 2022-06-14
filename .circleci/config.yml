@@ -312,6 +312,10 @@ jobs:
             newBody=${lineArray[@]//\\n/\\r\\n}              # Add windows carraige return \r on line endings
 
             newBody="${newBody}\r\n\r\n${CIRCLE_SHA1}:${artifacts}"
+
+            # if no best-ancestor was found with 'git merge-base --fork-point origin/main HEAD', add a warning for the user
+            if [ ! -z $NO_FORK_POINT ] && newBody="${newBody}\r\n${NO_FORK_POINT}"
+
             json="{\"body\":\"$newBody\"}"                   # Apply our re-written PR body in json format
 
             # Add linke to PR
