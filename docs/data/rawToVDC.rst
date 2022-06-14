@@ -12,7 +12,7 @@ In the directory where Vapor 3 is installed, there is a command line utility cal
 
 .. code-block:: c
 
-   vdccreate -dimension 512x512x512 -vars3d U:V:W binaryFile.vdc
+   vdccreate -dimension 512x512x512 -vars3d U:V:W myVDCFile.vdc
 
 Advanced options for ``vdccreate``:
 
@@ -25,9 +25,9 @@ Once we have a .vdc file, the metadata has been recorded and we can transform th
 
 .. code-block:: c
 
-   raw2vdc -ts 1 -varname U binaryFile.bin
-   raw2vdc -ts 1 -varname V binaryFile.bin
-   raw2vdc -ts 1 -varname W binaryFile.bin
+   raw2vdc -ts 1 -varname U myVDCFile.vdc binaryFile.bin
+   raw2vdc -ts 1 -varname V myVDCFile.vdc binaryFile.bin
+   raw2vdc -ts 1 -varname W myVDCFile.vdc binaryFile.bin
 
 Advanced options for ``raw2vdc``:
 
