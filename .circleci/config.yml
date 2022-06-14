@@ -230,7 +230,7 @@ jobs:
             tar xf 2019-Aug-Ubuntu.tar.xz
 
       - run:
-          name: Run clang-tidy
+          name: Build Vapor
           command: |
             git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
             cd /root/VAPOR
@@ -243,8 +243,28 @@ jobs:
             -DBUILD_TEST_APPS=ON \
             -DUSE_OMP=ON
             make -j4
-            git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
-            /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
+
+      - run:
+          name: Run clang-tidy
+          command: |
+            cd /root/VAPOR
+            mergeBase=$(git merge-base --fork-point origin/main HEAD)
+            if [ -z "$mergeBase" ]
+            then
+                mergeBase=$(git merge-base origin/main HEAD)
+                if [ -z "$mergeBase" ]
+                then
+                    echo "Cannot find common ancestor for origin/main and HEAD"
+                    exit 1
+                else
+                    echo "Merge-base found with --fork-point at $mergeBase"
+                fi
+            else
+                echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base --fork-point"' >> $BASH_ENV
+                echo "Merge-base found with $mergeBase"
+            fi
+            git diff $mergeBase HEAD | \
+            /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | \
             tee /tmp/clangTidyOutput.txt
 
       - store_artifacts:
@@ -292,6 +312,13 @@ jobs:
             newBody=${lineArray[@]//\\n/\\r\\n}              # Add windows carraige return \r on line endings
 
             newBody="${newBody}\r\n\r\n${CIRCLE_SHA1}:${artifacts}"
+
+            # if no best-ancestor was found with 'git merge-base --fork-point origin/main HEAD', add a warning for the user
+            if [ ! -z $NO_FORK_POINT ] 
+            then
+                newBody="${newBody}\r\n${NO_FORK_POINT}"
+            fi
+
             json="{\"body\":\"$newBody\"}"                   # Apply our re-written PR body in json format
 
             # Add linke to PR
