@@ -260,7 +260,7 @@ jobs:
                     echo "Merge-base found with --fork-point at $mergeBase"
                 fi
             else
-                echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base --fork-point"'
+                echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base --fork-point"' >> $BASH_ENV
                 echo "Merge-base found with $mergeBase"
             fi
             git diff $mergeBase HEAD | \
@@ -314,7 +314,12 @@ jobs:
             newBody="${newBody}\r\n\r\n${CIRCLE_SHA1}:${artifacts}"
 
             # if no best-ancestor was found with 'git merge-base --fork-point origin/main HEAD', add a warning for the user
-            if [ ! -z $NO_FORK_POINT ] && newBody="${newBody}\r\n${NO_FORK_POINT}"
+            if [ ! -z $NO_FORK_POINT ] 
+            then
+                newBody="${newBody}\r\n${NO_FORK_POINT}"
+            else
+                :
+            fi
 
             json="{\"body\":\"$newBody\"}"                   # Apply our re-written PR body in json format
 
