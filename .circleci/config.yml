@@ -314,10 +314,10 @@ jobs:
             newBody="${newBody}\r\n\r\n${CIRCLE_SHA1}:${artifacts}"
 
             # if no best-ancestor was found with 'git merge-base --fork-point origin/main HEAD', add a warning for the user
-            #if [ ! -z $NO_FORK_POINT ] 
-            #then
-            #    newBody="${newBody}\r\n${NO_FORK_POINT}"
-            #fi
+            if [ ! -z ${NO_FORK_POINT} ] 
+            then
+                newBody="${newBody}\r\n${NO_FORK_POINT}"
+            fi
 
             json="{\"body\":\"$newBody\"}"                   # Apply our re-written PR body in json format
 
