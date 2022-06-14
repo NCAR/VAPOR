@@ -257,7 +257,7 @@ jobs:
                     echo "Cannot find common ancestor for origin/main and HEAD"
                     exit 1
                 else
-                    echo "Merge-base found with at $mergeBase"
+                    echo "Merge-base found at $mergeBase"
                 fi
             else
                 echo "Merge-base found with --fork-point at $mergeBase"
