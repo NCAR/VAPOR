@@ -260,7 +260,7 @@ jobs:
                     echo "Merge-base found with --fork-point at $mergeBase"
                 fi
             else
-                echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base --fork-point"'
+                #echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base --fork-point"'
                 echo "Merge-base found with $mergeBase"
             fi
             #git diff $mergeBase HEAD | \
