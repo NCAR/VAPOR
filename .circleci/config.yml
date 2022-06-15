@@ -210,8 +210,9 @@ jobs:
             apt-get update
             apt upgrade -y
             apt install -y aptitude
-            aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common clang-tidy
-            pip install gdown
+            aptitude install -y git
+            #aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common clang-tidy
+            #pip install gdown
 
       #- run:
       #    name: Install llvm
@@ -256,6 +257,7 @@ jobs:
                 #echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base --fork-point"' >> $BASH_ENV
                 echo "Merge-base found with $mergeBase"
             fi
+            git diff $mergeBase HEAD | \
             #git diff $mergeBase HEAD | \
             #/usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* > /tmp/clangTidyOutput.txt
             #/usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | \
