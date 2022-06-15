@@ -270,7 +270,7 @@ jobs:
           command: |
             cd /root/VAPOR
             mergeBase=$(git merge-base --fork-point origin/main HEAD)
-            git diff $mergeBase HEAD | /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | tee /tmp/clangTidyOutput.txt || true
+            (git diff $mergeBase HEAD | /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | tee /tmp/clangTidyOutput.txt) || true
 
       - store_artifacts:
           path: /tmp/clangTidyOutput.txt
