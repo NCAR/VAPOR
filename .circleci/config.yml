@@ -245,21 +245,27 @@ jobs:
             make -j4
 
       - run:
-          name: Run clang-tidy
+          name: Run clang-tidy || true
           command: |
             cd /root/VAPOR
             mergeBase=$(git merge-base --fork-point origin/main HEAD)
             if [ -z "$mergeBase" ]
             then
                 mergeBase=$(git merge-base origin/main HEAD)
+                if [ -z "$mergeBase" ]
+                then
+                    echo "Cannot find common ancestor for origin/main and HEAD"
+                    exit 1
+                else
+                    echo "Merge-base found with --fork-point at $mergeBase"
+                fi
             else
                 echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base --fork-point"' >> $BASH_ENV
                 echo "Merge-base found with $mergeBase"
             fi
-            git diff $mergeBase HEAD | /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* &> /tmp/clangTidyOutput.txt
-            #git diff $mergeBase HEAD | \
-            #/usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | \
-            #tee /tmp/clangTidyOutput.txt
+            git diff $mergeBase HEAD | \
+            /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | \
+            tee /tmp/clangTidyOutput.txt
 
       - store_artifacts:
           path: /tmp/clangTidyOutput.txt
