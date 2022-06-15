@@ -229,20 +229,20 @@ jobs:
             gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
             tar xf 2019-Aug-Ubuntu.tar.xz
 
-      - run:
-          name: Build Vapor
-          command: |
-            git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
-            cd /root/VAPOR
-            git checkout $CIRCLE_BRANCH
-            apt install -y libomp-dev
-            cmake . \
-            -DCMAKE_BUILD_TYPE:String=Release \
-            -DCMAKE_CXX_COMPILER=clang++-14 \
-            -DCMAKE_C_COMPILER=clang-14 \
-            -DBUILD_TEST_APPS=ON \
-            -DUSE_OMP=ON
-            make -j4
+      #- run:
+      #    name: Build Vapor
+      #    command: |
+      #      git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
+      #      cd /root/VAPOR
+      #      git checkout $CIRCLE_BRANCH
+      #      apt install -y libomp-dev
+      #      cmake . \
+      #      -DCMAKE_BUILD_TYPE:String=Release \
+      #      -DCMAKE_CXX_COMPILER=clang++-14 \
+      #      -DCMAKE_C_COMPILER=clang-14 \
+      #      -DBUILD_TEST_APPS=ON \
+      #      -DUSE_OMP=ON
+      #      make -j4
 
       - run:
           name: Run clang-tidy
@@ -263,8 +263,8 @@ jobs:
                 #echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base --fork-point"' >> $BASH_ENV
                 echo "Merge-base found with $mergeBase"
             fi
-            git diff $mergeBase HEAD | \
-            /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* > /tmp/clangTidyOutput.txt
+            #git diff $mergeBase HEAD | \
+            #/usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* > /tmp/clangTidyOutput.txt
             #/usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | \
 
       - store_artifacts:
