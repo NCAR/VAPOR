@@ -264,8 +264,8 @@ jobs:
                 echo "Merge-base found with $mergeBase"
             fi
             git diff $mergeBase HEAD | \
-            #/usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | \
             /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* > /tmp/clangTidyOutput.txt
+            #/usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | \
 
       - store_artifacts:
           path: /tmp/clangTidyOutput.txt
