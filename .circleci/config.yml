@@ -204,35 +204,35 @@ jobs:
       - image: ubuntu:latest
 
     steps:
-      - run:
-          name: Install dependencies
-          command: |
-            apt-get update
-            apt upgrade -y
-            apt install -y aptitude
-            aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common clang-tidy
-            pip install gdown
-
-      - run:
-          name: Install llvm
-          command: |
-            add-apt-repository -y universe
-            wget https://apt.llvm.org/llvm.sh
-            chmod +x llvm.sh
-            yes '' | ./llvm.sh 14 || if [[ $? -eq 141 ]]; then true; else exit $?; fi # Feed "yes" to all of the script's questions and igore error 141
-
-      - run: 
-          name: Get third party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            cd /usr/local/VAPOR-Deps
-            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
-            tar xf 2019-Aug-Ubuntu.tar.xz
+      #- run:
+      #    name: Install dependencies
+      #    command: |
+      #      apt-get update
+      #      apt upgrade -y
+      #      apt install -y aptitude
+      #      aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common clang-tidy
+      #      pip install gdown
 
       #- run:
-      #    name: Build Vapor
+      #    name: Install llvm
       #    command: |
-      #      git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
+      #      add-apt-repository -y universe
+      #      wget https://apt.llvm.org/llvm.sh
+      #      chmod +x llvm.sh
+      #      yes '' | ./llvm.sh 14 || if [[ $? -eq 141 ]]; then true; else exit $?; fi # Feed "yes" to all of the script's questions and igore error 141
+
+      #- run: 
+      #    name: Get third party libraries
+      #    command: |
+      #      mkdir -p /usr/local/VAPOR-Deps
+      #      cd /usr/local/VAPOR-Deps
+      #      gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
+      #      tar xf 2019-Aug-Ubuntu.tar.xz
+
+      - run:
+          name: Build Vapor
+          command: |
+            git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
       #      cd /root/VAPOR
       #      git checkout $CIRCLE_BRANCH
       #      apt install -y libomp-dev
