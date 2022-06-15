@@ -255,7 +255,7 @@ jobs:
                 if [ -z "$mergeBase" ]
                 then
                     echo "Cannot find common ancestor for origin/main and HEAD"
-                    exit 1
+                    echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base"' >> $BASH_ENV
                 else
                     echo "Merge-base found with --fork-point at $mergeBase"
                 fi
