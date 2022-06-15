@@ -253,7 +253,7 @@ jobs:
             then
                 mergeBase=$(git merge-base origin/main HEAD)
             else
-                #echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base --fork-point"' >> $BASH_ENV
+                echo 'export NO_FORK_POINT="Could not find best common ancestor with git merge-base --fork-point"' >> $BASH_ENV
                 echo "Merge-base found with $mergeBase"
             fi
             #git diff $mergeBase HEAD
