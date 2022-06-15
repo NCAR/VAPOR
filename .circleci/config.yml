@@ -319,6 +319,8 @@ jobs:
                 newBody="${newBody}\r\n${NO_FORK_POINT}"
             fi
 
+            echo ${newBody}
+
             json="{\"body\":\"$newBody\"}"                   # Apply our re-written PR body in json format
 
             # Add linke to PR
