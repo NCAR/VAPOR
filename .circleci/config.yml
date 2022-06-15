@@ -245,7 +245,7 @@ jobs:
             make -j4
 
       - run:
-          name: Run clang-tidy || true
+          name: Run clang-tidy
           command: |
             cd /root/VAPOR
             mergeBase=$(git merge-base --fork-point origin/main HEAD)
@@ -264,8 +264,7 @@ jobs:
                 echo "Merge-base found with $mergeBase"
             fi
             git diff $mergeBase HEAD | \
-            /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | \
-            tee /tmp/clangTidyOutput.txt
+            /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1 | tee /tmp/clangTidyOutput.txt || true
 
       - store_artifacts:
           path: /tmp/clangTidyOutput.txt
