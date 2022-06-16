@@ -166,7 +166,7 @@ function(FIND_BUNDLED_PYTHON)
         find_library(
             Python_LIBRARIES
             NAMES Python${PYTHONVERSION}
-            PATHS "${THIRD_PARTY_LIB_DIR}"
+            PATHS "${PYTHONPATH}"
             NO_DEFAULT_PATH
         )
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")
