@@ -25,7 +25,6 @@
 #include <vapor/glutil.h>    // Must be included first!!!
 
 #include <vapor/Renderer.h>
-#include <vapor/Particle.h>
 #include <vapor/ParticleRenderer.h>
 #include <vapor/ParticleParams.h>
 #include <vapor/regionparams.h>
@@ -42,8 +41,6 @@
 #include <vapor/LegacyGL.h>
 
 using namespace VAPoR;
-
-//#define DEBUG
 
 #pragma pack(push, 4)
 // struct ParticleRenderer::VertexData {
@@ -92,8 +89,10 @@ int ParticleRenderer::_paintGL(bool)
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
 
+    bool regenerateParticles = false;
     if (_particleCacheIsDirty()) {
         _resetParticleCache();
+        regenerateParticles = true;
     }
 
     if (_colormapCacheIsDirty()) {
@@ -111,7 +110,7 @@ int ParticleRenderer::_paintGL(bool)
 
     bool renderGlyphs = GetActiveParams()->GetValueLong(ParticleParams::Render3DTag, true);
     if (renderGlyphs) {
-        _generateParticleGlyphs(grid, vecGrids);
+        if (regenerateParticles) _generateParticleGlyphs(grid, vecGrids);
         _renderParticleGlyphs();
     }
     else {
@@ -275,7 +274,7 @@ void ParticleRenderer::_renderParticleGlyphs()
     _renderParticlesHelper();
 }
 
-int ParticleRenderer::_renderParticlesHelper(bool renderDirection)
+int ParticleRenderer::_renderParticlesHelper()
 {
     auto rp = GetActiveParams();
 

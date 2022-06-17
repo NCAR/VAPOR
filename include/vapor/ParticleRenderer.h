@@ -20,6 +20,7 @@
 #ifndef ParticleRENDERER_H
 #define ParticleRENDERER_H
 
+#include <glm/glm.hpp>
 #include <GL/glew.h>
 #ifdef Darwin
     #include <OpenGL/gl.h>
@@ -42,7 +43,7 @@ class DataMgr;
 
 //! \class ParticleRenderer
 //! \brief Class that draws the Particles (Particles) as specified by IsolineParams
-//! \author Stas Jaroszynski
+//! \author Stas Jaroszynski, Scott Pearse
 //! \version 1.0
 //! \date March 2018
 class RENDER_API ParticleRenderer : public Renderer {
@@ -79,7 +80,6 @@ private:
         float      value;
     };
 
-    //std::vector<glm::vec4> _particles;
     std::vector<_vertex> _particles;
 
     std::vector<int> _streamSizes;
@@ -100,14 +100,12 @@ private:
     bool _colormapCacheIsDirty() const;
     void _resetParticleCache();
     void _resetColormapCache();
-    //int  _generateParticles(bool legacy=false);
     int  _generateParticlesLegacy(Grid*& grid, std::vector<Grid*>& vecGrids);
     int  _getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const;
     void _renderParticleGlyphs();
     void _generateParticleGlyphs(const Grid* grid, const std::vector<Grid*>& vecGrids);
-    //void _generateParticleGlyphs();
     void _renderParticlesLegacy(const Grid* grid, const std::vector<Grid*>& vecGrids) const;
-    int  _renderParticlesHelper(bool renderDirection = false);
+    int  _renderParticlesHelper();
     void _prepareColormap();
     glm::vec3 _getScales();
 };
