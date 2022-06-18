@@ -174,7 +174,7 @@ public:
     static const std::string RenderRadiusBaseTag;
     //! Scales the radius of the flow tube rendering
     static const std::string RenderRadiusScalarTag;
-    //! Toggles between rendering 2d glyphes and 3d geometry of the render type
+    //! Toggles between rendering 2d glyphs and 3d geometry of the render type
     static const std::string RenderGeom3DTag;
     static const std::string RenderLightAtCameraTag;
     //! Draws the direction of the flow stream

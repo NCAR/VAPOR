@@ -149,7 +149,7 @@ int           main(int argc, char **argv)
     setlocale(LC_ALL, "C");
 
 // For Mac and Linux, set the PYTHONHOME in this app
-#if 0
+#if PRE_PYTHON_API_REFACTOR
 #ifndef WIN32
 
     const char *s = getenv("PYTHONHOME");
