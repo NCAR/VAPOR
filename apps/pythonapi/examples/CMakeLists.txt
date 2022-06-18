@@ -25,24 +25,31 @@ endfunction()
 # copy(vapor ${PYTHON_API_DIR} EXCLUDE cmake.py __pycache__)
 # copy(setup.py ${PYTHON_API_DIR})
 
-set(EXAMPLE_NOTEBOOK_OUT_DIR "${PYTHON_API_DIR}/example_notebooks")
-file(MAKE_DIRECTORY ${EXAMPLE_NOTEBOOK_OUT_DIR})
+find_program(JUPYTEXT "jupytext")
+if (JUPYTEXT)
+    set(EXAMPLE_NOTEBOOK_OUT_DIR "${PYTHON_API_DIR}/example_notebooks")
+    file(MAKE_DIRECTORY ${EXAMPLE_NOTEBOOK_OUT_DIR})
 
-copy(example_utils.py ${EXAMPLE_NOTEBOOK_OUT_DIR})
-notebook(numpy_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/numpy_example.ipynb)
-notebook(xarray_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/xarray_example.ipynb)
-notebook(dataset_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/dataset_example.ipynb)
-notebook(flow_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/flow_example.ipynb)
-notebook(annotation_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/annotation_example.ipynb)
-notebook(camera_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/camera_example.ipynb)
-notebook(transfer_function_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/transfer_function_example.ipynb)
-notebook(katrina_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/katrina_example.ipynb)
+    copy(example_utils.py ${EXAMPLE_NOTEBOOK_OUT_DIR})
+    notebook(numpy_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/numpy_example.ipynb)
+    notebook(xarray_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/xarray_example.ipynb)
+    notebook(dataset_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/dataset_example.ipynb)
+    notebook(flow_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/flow_example.ipynb)
+    notebook(annotation_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/annotation_example.ipynb)
+    notebook(camera_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/camera_example.ipynb)
+    notebook(transfer_function_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/transfer_function_example.ipynb)
+    notebook(katrina_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/katrina_example.ipynb)
 
-add_custom_target(
-    example_notebooks
-    ALL
-    DEPENDS ${ALL_NOTEBOOKS}
-)
+    add_custom_target(
+        example_notebooks
+        ALL
+        DEPENDS ${ALL_NOTEBOOKS}
+    )
+else()
+    message(WARNING "jupytext not found")
+    message(WARNING "Skipping generation of jupyter notebooks")
+endif()
+
 
 if (CONDA_BUILD)
     set(CONDA_SITE_PACKAGE_DIR "$ENV{SP_DIR}")
@@ -51,10 +58,12 @@ if (CONDA_BUILD)
 		DESTINATION "${CONDA_SITE_PACKAGE_DIR}/vapor"
 		COMPONENT Dependencies
 	)
-    install(
-        DIRECTORY "${EXAMPLE_NOTEBOOK_OUT_DIR}"
-		DESTINATION "${CONDA_SITE_PACKAGE_DIR}/vapor"
-		COMPONENT Dependencies
-	)
+    if (JUPYTEXT)
+        install(
+            DIRECTORY "${EXAMPLE_NOTEBOOK_OUT_DIR}"
+		    DESTINATION "${CONDA_SITE_PACKAGE_DIR}/vapor"
+		    COMPONENT Dependencies
+	    )
+    endif()
 endif()
 
