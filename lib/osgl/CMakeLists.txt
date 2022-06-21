@@ -50,6 +50,7 @@ add_library (${LIB} SHARED ${SRCS} ${HDRS})
 # if (NOT SOFTWARE_ONLY)
 #     target_link_libraries (${LIB} ${OPENGL_LIBRARIES})
 # endif()
+target_link_libraries (${LIB} common)
 
 if (APPLE)
 	find_library (APPKIT AppKit)
