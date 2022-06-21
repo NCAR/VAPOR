@@ -2,8 +2,6 @@
 #
 # # Vapor Python Tutorial
 #
-# This example uses Vapor's Katrina example dataset.
-#
 # This shows an example workflow with vapor.
 # We begin by creating a session and opening a dataset.
 # You can have multiple sessions open at the same time.
@@ -13,13 +11,8 @@ import example_utils
 from vapor import session, renderer, dataset, camera, utils
 
 # %%
-data_files = [
-    '/Users/stasj/data/Katrina/min_wrfout_d02_2005-08-29_01',
-    '/Users/stasj/data/Katrina/min_wrfout_d02_2005-08-29_02',
-]
-
 ses = session.Session()
-data = ses.OpenDataset(dataset.WRF, data_files)
+data = example_utils.OpenExampleDataset(ses)
 
 # %% [md]
 #
@@ -51,8 +44,8 @@ print(f"Rendering 2D variable {first_2d_var}")
 
 ren = data.NewRenderer(renderer.TwoDDataRenderer)
 ren.SetVariableName(first_2d_var)
-ren.GetPrimaryTransferFunction().SetMinMapValue(-60)
-ren.GetPrimaryTransferFunction().SetMaxMapValue(50)
+ren.GetPrimaryTransferFunction().SetMinMapValue(-1)
+ren.GetPrimaryTransferFunction().SetMaxMapValue(1)
 
 ses.GetCamera().ViewAll()
 ses.Show()
@@ -65,9 +58,10 @@ ses.DeleteRenderer(ren)
 #
 # %%
 # If your dataset is geo-referenced, this will automatically render a geographically correct map.
-map_ren = data.NewRenderer(renderer.ImageRenderer)
+# map_ren = data.NewRenderer(renderer.ImageRenderer)
 
 barbs = data.NewRenderer(renderer.BarbRenderer)
+barbs.SetDimensions(2)
 barbs.SetFieldVariableNames(['U10', 'V10'])
 barbs.SetLineThickness(2)
 
@@ -92,15 +86,16 @@ ses.DeleteRenderer(flow)
 #
 # %%
 volume = data.NewRenderer(renderer.VolumeRenderer)
-volume.SetVariableName("QCLOUD")
+volume.SetVariableName("V")
 
 tf = volume.GetPrimaryTransferFunction()
-tf.SetOpacityList([0, 1, 1])
+tf.SetOpacityList([1, 0, 0, 1])
 
+ses.GetCamera().ViewAll()
 ses.Show()
 
 # Show a colorbar for the volume rendering
-tf.ShowMatPlotLibColorbar(label="QCLOUD")
+tf.ShowMatPlotLibColorbar(label="V")
 
 # %% [md]
 #
@@ -112,8 +107,9 @@ tf.ShowMatPlotLibColorbar(label="QCLOUD")
 # %%
 scales = data.GetTransform().GetScales()
 print("Default dataset scaling =", scales);
-scales[2] *= 2
+scales[2] *= 0.3
 data.GetTransform().SetScales(scales)
+print("New dataset scaling =", data.GetTransform().GetScales());
 ses.Show()
 
 # %% [md]
@@ -132,6 +128,10 @@ ses.Show()
 # Sessions created in Python can be saved as a .vs3 file.
 # These files can then be opened in the Vapor GUI application and explored interactively.
 # Conversely, sessions created in the Vapor GUI can be loaded into Python with `Session.Load(path)`
+# 
+# Since this example uses a dynamically generated dataset, the session cannot be saved as
+# it would point to a dataset that does not exist on disk. If you were using a physical dataset,
+# this would work.
 #
 # %%
 ses.Save("tutorial.vs3")

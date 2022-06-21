@@ -38,7 +38,7 @@ if (JUPYTEXT)
     notebook(annotation_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/annotation_example.ipynb)
     notebook(camera_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/camera_example.ipynb)
     notebook(transfer_function_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/transfer_function_example.ipynb)
-    notebook(katrina_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/katrina_example.ipynb)
+    notebook(workflow_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/workflow_example.ipynb)
 
     add_custom_target(
         example_notebooks

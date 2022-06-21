@@ -89,7 +89,7 @@ class Renderer(ParamsWrapper, wrap=RenderParams):
     def GetColorbarAnnotation(self) -> ColorbarAnnotation:
         return ColorbarAnnotation(self._params.GetColorbarPbase())
 
-    def __setDimensions(self, dim:int):
+    def SetDimensions(self, dim:int):
         assert dim == 2 or dim == 3
         self._params.BeginGroup("Change dim")
         if dim == 2:
