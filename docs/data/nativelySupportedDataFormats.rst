@@ -19,7 +19,7 @@ Vapor's "natively supported" data formats are:
 
    wrf
    mpas
-   NetCDF (CF-Compliant) <netCDF/cfComplianceBrief>
+   NetCDF (CF-Compliant) <netCDF/cfCompliance>
    brickOfValues
    dcp
    ugrid
