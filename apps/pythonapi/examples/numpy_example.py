@@ -4,6 +4,7 @@
 #
 # Vapor supports rendering 2D and 3D numpy data.
 # In order to pass Numpy data to Vapor, create a data set of the type `vapor.dataset.PYTHON`
+# This can also be done with the convenience function `Session.CreatePythonDataset()`.
 # You can add numpy arrays as variables to that dataset by using `Dataset.AddNumpyData`.
 #
 # These variables can then be rendered normally using any of Vapor's renderers.

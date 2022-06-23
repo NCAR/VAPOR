@@ -4,6 +4,7 @@
 #
 # Vapor supports render XArray data in a similar fashion to Numpy data
 # In order to pass XArray data to Vapor, create a data set of the type `vapor.dataset.PYTHON`
+# This can also be done with the convenience function `Session.CreatePythonDataset()`.
 # You can add XArray variables as vapor variables to that dataset by using `Dataset.AddXArrayData`.
 #
 # These variables can then be rendered normally using any of Vapor's renderers.

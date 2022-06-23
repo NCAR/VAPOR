@@ -35,9 +35,11 @@ class Camera():
         NavigationUtils.ViewAll(self.ce)
 
     def LookAt(self, camera_position:Vec3, target:Vec3, up:Vec3 = (0, 0, 1)):
+        """Moves the camera to camera_position facing target. up can be used to adjust the camera roll."""
         NavigationUtils.LookAt(self.ce, camera_position, target, up)
 
     def Zoom(self, fractionOfDistanceToTarget:float):
+        """Moves the camera a fractionOfDistanceToTarget with positive zooming in and negative zooming out."""
         tgt = self.GetTarget()
         pos = self.GetPosition()
         dist = np.linalg.norm(tgt - pos)

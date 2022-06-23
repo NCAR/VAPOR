@@ -17,17 +17,23 @@ ses.GetSceneAnnotations().SetAxisArrowEnabled(True)
 
 # %%
 cam = ses.GetCamera()
+
+# %%
+help(cam.ViewAll)
 cam.ViewAll()
 ses.Show()
 
 # %%
+help(cam.AlignView)
 cam.AlignView("-X")
 ses.Show()
 
 # %%
+help(cam.Zoom)
 cam.Zoom(-0.4)
 ses.Show()
 
 # %%
+help(cam.LookAt)
 cam.LookAt((32, -100, 100), ren.GetTransform().GetOrigin())
 ses.Show()
