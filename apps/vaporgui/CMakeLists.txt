@@ -354,6 +354,7 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (ASSIMP_LIB assimp)
 set (PYTHON_LIB python${PYTHONVERSION}m)
 set (TIFF_LIB tiff)
+set (HDF5_LIB hdf5)
 
 if (APPLE)
 	set (SRCS ${SRCS} core_profile_attributes.mm)
@@ -369,6 +370,7 @@ elseif (WIN32)
     set (ASSIMP_LIB assimp-vc140-mt)
     set (PYTHON_LIB python${PYTHONVERSION})
     set (TIFF_LIB libtiff)
+    set (TIFF_LIB libhdf5)
 
 	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/share/images/vapor-win-icon.ico")
 	configure_file (vapor.rc.in ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
@@ -379,7 +381,7 @@ endif()
 
 target_link_libraries (
         vapor common vdc wasp render params jpeg ${GLEW} 
-        ${TIFF_LIB} geotiff ${ASSIMP_LIB} Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus Qt5::Network
+        ${HDF5_LIB} ${TIFF_LIB} geotiff ${ASSIMP_LIB} Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus Qt5::Network
         ${PYTHON_LIB}
 )
 
