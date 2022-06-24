@@ -33,7 +33,10 @@
 #include <vapor/OSPRay.h>
 #ifdef WIN32
     #include "Windows.h"
+#else
+    #include <H5PLpublic.h>
 #endif
+
 using namespace std;
 using namespace VAPoR;
 using namespace Wasp;
@@ -148,9 +151,9 @@ int           main(int argc, char **argv)
     //
     setlocale(LC_ALL, "C");
 
-// For Mac and Linux, set the PYTHONHOME in this app
+// For Mac and Linux, set the PYTHONHOME and HDF5 plugin path in this app
 #ifndef WIN32
-
+    // PYTHON
     const char *s = getenv("PYTHONHOME");
     string      phome = s ? s : "";
     if (!phome.empty()) {
@@ -172,6 +175,9 @@ int           main(int argc, char **argv)
     }
     MyBase::SetDiagMsg("PYTHONHOME = %s", phome.c_str());
 
+    // HDF5
+    string plugins = GetResourcePath("lib");
+    H5PLreplace(plugins.c_str(), 0);
 #endif
 
     app = &a;

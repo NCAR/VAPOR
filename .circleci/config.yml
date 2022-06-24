@@ -81,9 +81,9 @@ jobs:
             sudo mkdir -p /usr/local/VAPOR-Deps
             sudo chmod 777 /usr/local/VAPOR-Deps
             cd /usr/local/VAPOR-Deps
-            gdown https://drive.google.com/uc?id=1KnUoBfOLuF6VJMXG6KcljjKMpr4VGxQ6
+            gdown https://drive.google.com/uc?id=1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg
             cd /usr/local/VAPOR-Deps
-            tar xf 2019-Aug-Darwin-2022.tar.xz -C /usr/local/VAPOR-Deps
+            tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
             chmod -R 777 /usr/local/VAPOR-Deps
 
       - run:
@@ -160,8 +160,8 @@ jobs:
             apt update
             apt install -y python3-pip
             pip3 install gdown
-            gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
-            filename="/root/project/2019-Aug-Ubuntu-2022.tar.xz"
+            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
+            filename="/root/project/2019-Aug-Ubuntu.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
  
       - run:
@@ -196,8 +196,8 @@ jobs:
           command: |
             rm -rf /usr/local/VAPOR-Deps/2019-Aug
             pip3 install gdown --upgrade
-            gdown https://drive.google.com/uc?id=1In3Q8fA0VCm2en1ncBQI6dzUfatLDA0y
-            filename="/root/project/2019-Aug-CentOS-2022.tar.xz"
+            gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
+            filename="/root/project/2019-Aug-CentOS.tar.xz"
             bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
  
       - run:
@@ -340,8 +340,8 @@ jobs:
           command: |
             rm -rf /usr/local/VAPOR-Deps/2019-Aug
             pip3 install gdown --upgrade
-            gdown https://drive.google.com/uc?id=1CD3qrPuj03S8x1XshDI_3GRqCeUVLvpm
-            filename="/root/project/2019-Aug-Ubuntu-2022.tar.xz"
+            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
+            filename="/root/project/2019-Aug-Ubuntu.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
  
       - run:
@@ -442,8 +442,8 @@ jobs:
             command: |
               rm -rf /usr/local/VAPOR-Deps/2019-Aug
               pip3 install gdown --upgrade
-              gdown https://drive.google.com/uc?id=1In3Q8fA0VCm2en1ncBQI6dzUfatLDA0y
-              filename="/root/project/2019-Aug-CentOS-2022.tar.xz"
+              gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
+              filename="/root/project/2019-Aug-CentOS.tar.xz"
               bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
  
         - run:
@@ -612,15 +612,15 @@ workflows:
   version: 2
   build:
     jobs:
-      - clang-tidy
-      - build_ubuntu18
-      - build_centos7
+      #- clang-tidy
+      #- build_ubuntu18
+      #- build_centos7
       #- foo
       #- test_clang_format
-      #- build_win10_installer
-      #- build_osx_installer
-      #- build_ubuntu18_installer
-      #- build_centos7_installer
+      - build_win10_installer
+      - build_osx_installer
+      - build_ubuntu18_installer
+      - build_centos7_installer
       #- release_weekly_installers:
       #    requires:
       #      - build_ubuntu18_installer
