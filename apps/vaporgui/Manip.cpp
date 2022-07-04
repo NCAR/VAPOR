@@ -491,7 +491,7 @@ bool TranslateStretchManip::pixelToVector(double winCoords[2], double dirVec[3],
 {
     GLdouble pt[3];
     // Project handleMid to find its z screen coordinate:
-    GLdouble screenx, screeny, screenz;
+    GLdouble screenz;
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -506,8 +506,6 @@ bool TranslateStretchManip::pixelToVector(double winCoords[2], double dirVec[3],
     glm::vec4 vp(viewport[0], viewport[1], viewport[2], viewport[3]);
     
     vec3 screen = glm::project(obj, model, proj, vp);
-    screenx = screen.x;
-    screeny = screen.y;
     screenz = screen.z;
     // Obtain the coords of a point in view:
 //    bool success = (0 != gluUnProject((GLdouble)winCoords[0], (GLdouble)winCoords[1], screenz, _modelViewMatrix, _projectionMatrix, viewport, pt, pt + 1, pt + 2));

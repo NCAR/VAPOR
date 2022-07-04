@@ -148,9 +148,10 @@ if (APPLE)
     )
 endif ()
 
-# if (UNIX AND NOT APPLE)
-# 	target_link_libraries (render PUBLIC GLU)
-# endif ()
+if (UNIX AND NOT APPLE)
+	target_compile_options(render PRIVATE -Wno-conversion-null)
+#   target_link_libraries (render PUBLIC GLU)
+endif ()
 
 
 if(BUILD_OSP)

@@ -75,7 +75,8 @@ endif ()
 
 
 target_compile_options(${LIB} PRIVATE -Wno-deprecated-declarations)
-target_compile_options(${LIB} PRIVATE -Wno-conversion-null)
+# target_compile_options(${LIB} PRIVATE -Wno-conversion-null)
+# target_compile_options(${LIB} PRIVATE -Wno-unknown-warning-option)
 
 # file(COPY ${HDRS} DESTINATION ${CMAKE_BINARY_DIR}/include/vapor)
 # foreach (HDR ${HDRS})

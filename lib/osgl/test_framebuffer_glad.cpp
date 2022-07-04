@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadPixels(0, 0, 100, 100, GL_RGB, GL_UNSIGNED_BYTE, pixels);
     
-    int ret = stbi_write_png("out-framebuffer-red.png", 100, 100, 3, pixels, 0);
+    stbi_write_png("out-framebuffer-red.png", 100, 100, 3, pixels, 0);
     
     GLERRTEST;
 

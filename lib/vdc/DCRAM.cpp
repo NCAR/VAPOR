@@ -462,7 +462,7 @@ template<class T> int DCRAM::_readRegionTemplate(int fd, const vector<size_t> &m
         GetVarDimLens(varname, true, dimLens);
         assert((dimLens.size() == min.size()) && (min.size() == max.size()));
         int nDims = dimLens.size();
-        size_t rw, rh, sx, sy, sz;
+        size_t rw=0, rh=0, sx=0, sy=0, sz=0;
         rw = dimLens[0];
         sx = min[0];
         if (nDims > 1) {

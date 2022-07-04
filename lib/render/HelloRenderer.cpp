@@ -127,7 +127,7 @@ int HelloRenderer::_paintGL(bool)
     }
 
     // Obtain the line width
-    float width = (float)rParams->GetLineThickness();
+    // float width = (float)rParams->GetLineThickness();
 
     // Set up lighting and color.  We will use the lighting settings from the viewpoint params for rendering the lines,
     // but lighting will be disabled for rendering the max and min points.

@@ -33,8 +33,8 @@ endif ()
 file (GLOB GLContextLibFiles ./GLContext*.cpp ./GLContext*.h ./GLContext*.mm)
 source_group (GLContextLib FILES ${GLContextLibFiles})
 
-add_executable (vapitest main.cpp)
-target_link_libraries (vapitest vapi ${Python_LIBRARIES})
+# add_executable (vapitest main.cpp)
+# target_link_libraries (vapitest vapi ${Python_LIBRARIES})
 
 
 file (
