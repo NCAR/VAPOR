@@ -176,10 +176,9 @@ int           main(int argc, char **argv)
     MyBase::SetDiagMsg("PYTHONHOME = %s", phome.c_str());
 
     // HDF5
-    string plugins = GetResourcePath("lib");
+    string plugins = Wasp::GetResourcePath("lib/hdf/HDF_Group/HDF5/1.12.2/lib/plugin");
     H5PLreplace(plugins.c_str(), 0);
 #endif
-
     app = &a;
 
     vector<QString> files;
