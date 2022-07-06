@@ -1,31 +1,24 @@
-#!/bin/bash
+#!/bin/sh
 
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-export
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
+DEBUG_BUILD=true
+CMAKE_EXTRA=""
 
+# The env can be either PREFIX or BUILD_PREFIX depending on the build requirements.
+# Conda does not configure its variables accordingly.
+export ENV="$BUILD_PREFIX"
 
-# Our third party libs have a non-standard copy of the GTE library so it is packaged and extracted here.
-unzip -d include buildutils/GTE.zip
+export PATH="$ENV/bin:$PATH"
 
+# Conda will sometimes set PYTHON to a path that does not exist
+export PYTHON="`which python`"
 
-mkdir build
-cd build
-
-# Vapor legacy configuration
-export CPPFLAGS="-isystem $PREFIX/include/freetype2 $CPPFLAGS"
-
-# Since optimizations are disabled, need to disable fortify source otherwise will get barraged with warnings
-export CPPFLAGS="`echo $CPPFLAGS|sed 's/-D_FORTIFY_SOURCE=2//g'`"
+if $DEBUG_BUILD; then
+    # If optimizations are disabled, need to disable fortify source otherwise will get barraged with warnings
+    export CPPFLAGS="`echo $CPPFLAGS|sed 's/-D_FORTIFY_SOURCE=2//g'`"
+    
+    CMAKE_EXTRA="$CMAKE_EXTRA -DCMAKE_BUILD_TYPE=Debug"
+    CMAKE_EXTRA="$CMAKE_EXTRA -DINSTALLER_OMIT_MAPS=ON"
+fi
 
 # Ignore extra warnings
 export CPPFLAGS=" \
@@ -34,49 +27,55 @@ export CPPFLAGS=" \
     -Wno-conversion-null \
     -Wno-deprecated-declarations \
     -Wno-catch-value \
+    -Wno-unknown-warning-option \
     "
 
-# Conda does not properly set CMake flags. This should fix it.
-export CXXFLAGS="$CPPFLAGS $CXXFLAGS"
-export CFLAGS="$CPPFLAGS $CFLAGS"
+# Vapor legacy configuration
+export CPPFLAGS="-isystem $ENV/include/freetype2 $CPPFLAGS"
+
+export CPPFLAGS="$CPPFLAGS -isystem $ENV/include"
+
+# cmake ignores CPPFLAGS
+export CXXFLAGS="$CXXFLAGS $CPPFLAGS"
+export CFLAGS="$CFLAGS $CPPFLAGS"
+
+# Conda will sometimes set these to invalid values which end up breaking the build
+unset CMAKE_ARGS
+unset CMAKE_PREFIX_PATH
+
+# When conda messes up the build environment it not only points the python install target to the wrong root,
+# it also sometimes points it to the wrong version of python.
+SP_DIR="`python -c 'import site; print(site.getsitepackages()[0].replace(\"'$BUILD_PREFIX'\", \"'$PREFIX'\"))'`"
+
+# Our third party libs have a non-standard copy of the GTE library so it is packaged and extracted here.
+unzip -d include buildutils/GTE.zip
+
+if false ; then
+	echo "============================================================"
+	echo "====================     EXPORTS      ======================"
+	echo "============================================================"
+	export
+	echo "============================================================"
+	echo "Python = `python --version`"
+fi
+
+mkdir build
+cd build
 
 cmake .. \
-    -DBUILD_PYTHON=ON \
-    -DBUILD_GUI=OFF \
-    -DBUILD_UTL=ON \
-    -DBUILD_DOC=ON \
-    -DBUILD_OSP=OFF \
     -DCONDA_BUILD=ON \
-    -DCMAKE_INSTALL_PREFIX:PATH="$PREFIX" \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    -DBUILD_SHARED_LIBS=ON \
-    -DCMAKE_BUILD_TYPE=DEBUG \
-    -DCMAKE_C_FLAGS_DEBUG="-g -O0" \
-    -DCMAKE_CXX_FLAGS_DEBUG="-g -O0" \
+    -DBUILD_PYTHON=ON \
+    -DBUILD_DOC=ON \
+    -DBUILD_UTL=OFF \
+    -DBUILD_GUI=OFF \
+    -DBUILD_OSP=OFF \
     -DPython_EXECUTABLE="$PYTHON" \
-    ${CMAKE_ARGS}
+    -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+    $CMAKE_EXTRA \
 
 
-# Show build command
-make -j$(($CPU_COUNT+1)) VERBOSE=1 common
 
-# make -j$((nproc`+1))
 make -j$(($CPU_COUNT+1))
-
 make doc
 make install
 
-
-# Copy python to SP_DIR
-
-
-echo pwd=`pwd`
-echo pwdsed=`pwd|sed 's/\//_/g'`
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
-echo build =======================================================================================
