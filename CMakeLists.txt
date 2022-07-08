@@ -155,7 +155,7 @@ find_library(JPEG jpeg)
 #   https://cmake.org/cmake/help/v3.12/module/FindPython.html
 
 function(FIND_BUNDLED_PYTHON)
-    # FindPython supports Python_ROOT_DIR however vapor's bundled python distribution
+    # Find_Python supports Python_ROOT_DIR however vapor's bundled python distribution
     # does not conform to its requirements so this manually configures the results
     message("Using bundled python")
     set(Python_VERSION "${PYTHONVERSION}")
