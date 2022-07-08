@@ -159,24 +159,19 @@ function(FIND_BUNDLED_PYTHON)
     # does not conform to its requirements so this manually configures the results
     message("Using bundled python")
     set(Python_VERSION "${PYTHONVERSION}")
-    set(Python_SITELIB "${PYTHONPATH}/site-packages")
     set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
     unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
+    find_library(
+        Python_LIBRARIES
+	NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
+	PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
+        NO_DEFAULT_PATH
+    )
     if (WIN32)
-        find_library(
-            Python_LIBRARIES
-            NAMES Python${PYTHONVERSION}
-            PATHS "${THIRD_PARTY_LIB_DIR}"
-            NO_DEFAULT_PATH
-        )
+        set(Python_SITELIB "${PYTHONPATH}/Lib/site-packages")
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")
     else()
-        find_library(
-            Python_LIBRARIES
-            NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-            PATHS "${THIRD_PARTY_LIB_DIR}"
-            NO_DEFAULT_PATH
-        )
+        set(Python_SITELIB "${PYTHONPATH}/site-packages")
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m")
     endif()
 
