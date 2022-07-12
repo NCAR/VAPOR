@@ -151,9 +151,9 @@ int           main(int argc, char **argv)
     //
     setlocale(LC_ALL, "C");
 
-// For Mac and Linux, set the PYTHONHOME and HDF5 plugin path in this app
+// For Mac and Linux, set the PYTHONHOME
+// PYTHON
 #ifndef WIN32
-    // PYTHON
     const char *s = getenv("PYTHONHOME");
     string      phome = s ? s : "";
     if (!phome.empty()) {
@@ -174,10 +174,16 @@ int           main(int argc, char **argv)
         setenv("PYTHONHOME", phome.c_str(), 1);
     }
     MyBase::SetDiagMsg("PYTHONHOME = %s", phome.c_str());
+#endif
 
-    // HDF5
-    string plugins = Wasp::GetResourcePath("lib/hdf/HDF_Group/HDF5/1.12.2/lib/plugin");
-    H5PLreplace(plugins.c_str(), 0);
+// Programatically set the hdf5 plugin path
+#ifndef WIN32
+	string plugins = Wasp::GetResourcePath("lib/hdf/HDF_Group/HDF5/1.12.2/lib/plugin");
+	H5PLreplace(plugins.c_str(), 0);
+#else
+    string envVar = "HDF5_PLUGIN_PATH=" + Wasp::GetResourcePath("plugin");
+    int rc=_putenv(envVar.c_str());
+	if (rc != 0) MyBase::SetDiagMsg("Unable to set environtment variable %s", envVar.c_str());
 #endif
     app = &a;
 
