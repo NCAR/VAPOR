@@ -3,12 +3,6 @@
 
 #include <vapor/glutil.h>
 
-#ifdef Darwin
-    #include <OpenGL/gl.h>
-#else
-    #include <GL/gl.h>
-#endif
-
 #include <glm/glm.hpp>
 #include <vapor/DataMgr.h>
 #include <vapor/utils.h>

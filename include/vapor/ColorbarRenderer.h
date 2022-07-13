@@ -8,6 +8,11 @@ struct GLManager;
 class RenderParams;
 class MapperFunction;
 
+//! \class ColorbarRenderer
+//! \ingroup Public_Render
+//! \brief Renders annotation colorbar for a given Mapper Function
+//! \author Stanislaw Jaroszynski
+//!
 class ColorbarRenderer {
 public:
     static void Render(GLManager *glm, RenderParams *rp);

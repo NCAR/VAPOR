@@ -32,7 +32,7 @@
 #include "ErrorReporter.h"
 #include "RenderHolder.h"
 #include "QPushButtonWithDoubleClick.h"
-#include <SettingsParams.h>
+#include <vapor/SettingsParams.h>
 #include <vapor/VolumeRenderer.h>
 #include <vapor/VolumeIsoRenderer.h>
 #include <vapor/DataStatus.h>
@@ -485,58 +485,7 @@ void RenderHolder::_copyInstanceTo(int item)
 
 std::string RenderHolder::uniqueName(std::string name)
 {
-    string newname = name;
-
-    ParamsMgr *pm = _controlExec->GetParamsMgr();
-
-    vector<string> allInstNames;
-
-    // Get ALL of the renderer instance names defined
-    //
-    vector<string> vizNames = pm->GetVisualizerNames();
-    for (int i = 0; i < vizNames.size(); i++) {
-        vector<string> classNames = _controlExec->GetRenderClassNames(vizNames[i]);
-
-        for (int j = 0; j < classNames.size(); j++) {
-            vector<string> rendererNames = _controlExec->GetRenderInstances(vizNames[i], classNames[j]);
-
-            allInstNames.insert(allInstNames.begin(), rendererNames.begin(), rendererNames.end());
-        }
-    }
-
-    while (1) {
-        bool match = false;
-        for (int i = 0; i < allInstNames.size(); i++) {
-            string usedName = allInstNames[i];
-
-            if (newname != usedName) continue;
-
-            match = true;
-
-            // found a match.  Modify newname
-            // If newname ends with a number, increase the number.
-            // Otherwise just append _1
-            //
-            size_t lastnonint = newname.find_last_not_of("0123456789");
-            if (lastnonint < newname.length() - 1) {
-                // remove terminating int
-                string endchars = newname.substr(lastnonint + 1);
-                // Convert to int:
-                int termInt = atoi(endchars.c_str());
-                // int termInt = std::stoi(endchars);
-                termInt++;
-                // convert termInt to a string
-                std::stringstream ss;
-                ss << termInt;
-                endchars = ss.str();
-                newname.replace(lastnonint + 1, string::npos, endchars);
-            } else {
-                newname = newname + "_1";
-            }
-        }
-        if (!match) break;
-    }
-    return newname;
+    return _controlExec->MakeRendererNameUnique(name);
 }
 
 string RenderHolder::_getActiveRendererClass()

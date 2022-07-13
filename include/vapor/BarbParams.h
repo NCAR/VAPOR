@@ -89,8 +89,11 @@ public:
     static const string _needToRecalculateScalesTag;
     static const string _lengthScaleTag;
     static const string _thicknessScaleTag;
+    //! Number of barbs displayed on X axis
     static const string _xBarbsCountTag;
+    //! Number of barbs displayed on Y axis
     static const string _yBarbsCountTag;
+    //! Number of barbs displayed on Z axis
     static const string _zBarbsCountTag;
     static const string _alignGridTag;
     static const string _alignGridStridesTag;

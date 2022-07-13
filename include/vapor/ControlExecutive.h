@@ -168,6 +168,9 @@ public:
     //! current prior to calling this method.
     //
     int ResizeViz(string name, int width, int height);
+    
+    void ClearRenderCache(const string &winName, const string &inst);
+    void ClearAllRenderCaches();
 
     GLManager::Vendor GetGPUVendor() const;
 
@@ -378,6 +381,8 @@ public:
     //
     bool RenderLookup(string instName, string &winName, string &dataSetName, string &rendererType) const;
 
+    string MakeRendererNameUnique(string name) const;
+    
     //! Draw 2D text on the screen
     //!
     //! This method provides a simple interface for rendering text on

@@ -127,7 +127,7 @@ int HelloRenderer::_paintGL(bool)
     }
 
     // Obtain the line width
-    float width = (float)rParams->GetLineThickness();
+    // float width = (float)rParams->GetLineThickness();
 
     // Set up lighting and color.  We will use the lighting settings from the viewpoint params for rendering the lines,
     // but lighting will be disabled for rendering the max and min points.
@@ -137,20 +137,20 @@ int HelloRenderer::_paintGL(bool)
     float            fcolor[3];
     rParams->GetConstantColor(fcolor);
     if (nLights == 0) {
-        glDisable(GL_LIGHTING);
+//        glDisable(GL_LIGHTING);
     } else {
-        glShadeModel(GL_SMOOTH);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
-        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent());
-        // The line geometry will get a white specular color:
-        float specColor[4];
-        specColor[0] = specColor[1] = specColor[2] = 0.8f;
-        specColor[3] = 1.f;
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor);
-        glEnable(GL_LIGHTING);
-        glEnable(GL_COLOR_MATERIAL);
+//        glShadeModel(GL_SMOOTH);
+//        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
+//        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent());
+//        // The line geometry will get a white specular color:
+//        float specColor[4];
+//        specColor[0] = specColor[1] = specColor[2] = 0.8f;
+//        specColor[3] = 1.f;
+//        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor);
+//        glEnable(GL_LIGHTING);
+//        glEnable(GL_COLOR_MATERIAL);
     }
-    glColor3fv(fcolor);
+//    glColor3fv(fcolor);
     // glLineWidth(width);
 
     // Calculate the normal vector as orthogonal to the line and projected to the viewer direction
@@ -188,27 +188,27 @@ int HelloRenderer::_paintGL(bool)
     // Now render the line
     // translate to as to render in local user coordinates
     //
-    glBegin(GL_LINES);
-    glNormal3dv(normvec);
-    glVertex3d(point1[0], point1[1], point1[2]);
-    glNormal3dv(normvec);
-    glVertex3d(point2[0], point2[1], point2[2]);
-    glEnd();
-
-    // Then render the Max and Min points:
-    glDisable(GL_LIGHTING);
-    glPointSize(4. * width);
-    // Max will be white
-    glColor3f(1.f, 1.f, 1.f);
-    glBegin(GL_POINTS);
-    glVertex3d(maxPoint[0], maxPoint[1], maxPoint[2]);
-    glEnd();
-
-    // Set min point to be yellow
-    glColor3f(1.f, 1.f, 0.f);
-    glBegin(GL_POINTS);
-    glVertex3d(minPoint[0], minPoint[1], minPoint[2]);
-    glEnd();
+//    glBegin(GL_LINES);
+//    glNormal3dv(normvec);
+//    glVertex3d(point1[0], point1[1], point1[2]);
+//    glNormal3dv(normvec);
+//    glVertex3d(point2[0], point2[1], point2[2]);
+//    glEnd();
+//
+//    // Then render the Max and Min points:
+//    glDisable(GL_LIGHTING);
+//    glPointSize(4. * width);
+//    // Max will be white
+//    glColor3f(1.f, 1.f, 1.f);
+//    glBegin(GL_POINTS);
+//    glVertex3d(maxPoint[0], maxPoint[1], maxPoint[2]);
+//    glEnd();
+//
+//    // Set min point to be yellow
+//    glColor3f(1.f, 1.f, 0.f);
+//    glBegin(GL_POINTS);
+//    glVertex3d(minPoint[0], minPoint[1], minPoint[2]);
+//    glEnd();
 
     return 0;
 }

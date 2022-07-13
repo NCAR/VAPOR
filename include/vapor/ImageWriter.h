@@ -7,6 +7,11 @@ namespace VAPoR {
 
 class ImageWriterFactory;
 
+//! \class ImageWriter
+//! \ingroup Public_Render
+//! \brief Interface for image writers
+//! \author Stanislaw Jaroszynski
+//!
 class RENDER_API ImageWriter : public Wasp::MyBase {
 public:
     enum class Format { RGB };

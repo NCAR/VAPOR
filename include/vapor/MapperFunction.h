@@ -114,6 +114,7 @@ public:
     void makeLut(float *clut) const;
 
     void makeLut(std::vector<float> &clut) const;
+    std::vector<float> makeLut() const;
 
     //! Obtain minimum mapping (histo) value
     //! \return Minimum mapping value
@@ -190,6 +191,7 @@ public:
     //! \param[in] rgb (RGB as float[3] array)
     //! \param[out] hsv (HSV as float[3] array)
     static void rgbToHsv(float *rgb, float *hsv);
+    static vector<float> rgbToHsv(vector<float> rgb);
 
     //! Obtain the number of entries in the color/opacity map
     //! \return number of entries

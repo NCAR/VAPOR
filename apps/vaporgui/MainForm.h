@@ -38,7 +38,7 @@
 #include <chrono>
 #include <vapor/ControlExecutive.h>
 #include <vapor/GUIStateParams.h>
-#include "SettingsParams.h"
+#include <vapor/SettingsParams.h>
 #include <vapor/AnimationParams.h>
 #include "AnimationController.h"
 //#include "MiscParams.h"

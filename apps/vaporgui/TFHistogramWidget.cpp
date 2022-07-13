@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <QPicture>
 #include <glm/glm.hpp>
-#include <Histo.h>
+#include <vapor/Histo.h>
 #include "ErrorReporter.h"
 #include <vapor/RenderParams.h>
 #include <vapor/ParamsMgr.h>

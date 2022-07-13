@@ -28,6 +28,7 @@
 #include <vapor/DataStatus.h>
 #include <vapor/DataMgr.h>
 #include <vapor/DataMgrUtils.h>
+#include <vapor/PythonDataMgr.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/Proj4API.h>
 #include <vapor/UDUnitsClass.h>
@@ -73,8 +74,12 @@ int DataStatus::Open(const std::vector<string> &files, const std::vector<string>
     vector<string> myOptions = options;
 
     Close(name);
-
-    DataMgr *dataMgr = new DataMgr(format, _cacheSize, _nThreads);
+    
+    DataMgr *dataMgr;
+    if (format == "ram")
+        dataMgr = new PythonDataMgr(format, _cacheSize, _nThreads);
+    else
+        dataMgr = new DataMgr(format, _cacheSize, _nThreads);
 
     // Ensure all data managers use the same proj4 string. Note, it's
     // possible that 'options' will already have a -proj4 string argument.

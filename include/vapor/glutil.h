@@ -47,12 +47,7 @@
     #define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
 #endif
 
-#include <GL/glew.h>
-#ifdef Darwin
-    #include <OpenGL/gl3.h>
-#else
-    #include <GL/gl.h>
-#endif
+#include <vapor/GLInclude.h>
 #include <cmath>
 #include <vector>
 #include <string>
@@ -85,10 +80,6 @@
 namespace VAPoR {
 
 /* glutil.c */
-
-void ViewMatrix(float *m);
-void StereoPerspective(int fovy, float aspect, float nearDist, float farDist, float converge, float eye);
-int  ViewAxis(int *direction);
 
 RENDER_API int __CheckGLError(const char *file, int line, const char *msg = 0);
 

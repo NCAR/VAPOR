@@ -19,14 +19,7 @@
 //
 #pragma once
 
-#include <GL/glew.h>
-#ifdef Darwin
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
-#else
-    #include <GL/gl.h>
-    #include <GL/glu.h>
-#endif
+#include <vapor/glutil.h>
 
 #include <vapor/Renderer.h>
 #include <vapor/ModelParams.h>

@@ -69,6 +69,8 @@ public:
     //! \retval returns integer >= 0 on success, otherwise failure
     //
     virtual int Initialize();
+    
+    int ResetUserExtentsToDataExents(string var="");
 
     //! Determine if this params has been enabled for rendering
     //!
@@ -313,6 +315,7 @@ public:
     //! \sa GetConstantColor()
     //
     void SetConstantColor(const float rgb[3]);
+    void SetConstantColor(vector<float> rgb);
 
     //! Get the constant color (in r,g,b)
     //!

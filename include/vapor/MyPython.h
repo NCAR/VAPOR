@@ -59,6 +59,8 @@ namespace Wasp {
 //
 class RENDER_API MyPython : public Wasp::MyBase {
 public:
+    static bool IsRunningFromPython;
+    
     static MyPython *Instance();
 
     //! Initialize the Python interpreter
@@ -108,6 +110,9 @@ private:
     static MyPython *  m_instance;
     static bool        m_isInitialized;
     static std::string m_pyHome;
+    
+    int pyImport(string lib);
+    int rerouteSTDIO();
 
     MyPython() {}                        // Don't implement
     MyPython(MyPython const &);          // Don't Implement

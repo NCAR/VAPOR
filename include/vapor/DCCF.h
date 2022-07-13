@@ -14,6 +14,7 @@
 
 namespace VAPoR {
 
+
 //!
 //! \class DCCF
 //! \ingroup Public_VDCCF
@@ -32,9 +33,13 @@ public:
     //!
     DCCF();
     virtual ~DCCF();
+    
+    int BuildCache();
+    int Reinitialize();
 
 protected:
-    NetCDFCFCollection *_ncdfc;
+    NetCDFCFCollection *_ncdfc = nullptr;
+    vector<string> _paths;
 
     //! Initialize the DCCF class
     //!
@@ -53,6 +58,7 @@ protected:
     //! \sa EndDefine();
     //
     virtual int initialize(const vector<string> &paths, const std::vector<string> &options);
+    virtual int initialize(const vector<string> &paths, const std::vector<string> &options, NetCDFCFCollection *ncdfc);
 
     //! \copydoc DC::getDimension()
     //!
