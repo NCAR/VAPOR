@@ -177,12 +177,12 @@ int           main(int argc, char **argv)
 #endif
 
 // Programatically set the hdf5 plugin path
+string plugins = Wasp::GetResourcePath("plugin");
 #ifndef WIN32
-	string plugins = Wasp::GetResourcePath("lib/hdf/HDF_Group/HDF5/1.12.2/lib/plugin");
 	H5PLreplace(plugins.c_str(), 0);
 #else
-    string envVar = "HDF5_PLUGIN_PATH=" + Wasp::GetResourcePath("plugin");
-    int rc=_putenv(envVar.c_str());
+    plugins = "HDF5_PLUGIN_PATH=" + plugins;
+    int rc=_putenv(plugins.c_str());
 	if (rc != 0) MyBase::SetDiagMsg("Unable to set environtment variable %s", envVar.c_str());
 #endif
     app = &a;
