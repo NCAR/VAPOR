@@ -201,8 +201,6 @@ int NetCDFSimple::Read(const size_t start[], const size_t count[], float *data, 
     int rc = nc_get_vara_float(_ncid, varid, start, count, data);
     if (rc != 0) {
         std::string error = nc_strerror(rc);
-        if (error.find("NetCDF: Filter error: unimplemented filter encountered") != std::string::npos)
-            SetErrMsg("\nHave you set the environment variable HDF5_PLUGIN_PATH to Vapor's /lib directory?\n");
         SetErrMsg("nc_get_vara_float(%d, %d) : %s", _ncid, varid, error.c_str());
         return (-1);
     }
