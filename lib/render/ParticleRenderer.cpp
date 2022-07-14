@@ -110,8 +110,11 @@ int ParticleRenderer::_paintGL(bool)
 
     bool renderGlyphs = GetActiveParams()->GetValueLong(ParticleParams::Render3DTag, true);
     if (renderGlyphs) {
-        if (regenerateParticles) _generateParticleGlyphs(grid, vecGrids);
-        _renderParticleGlyphs();
+        if (regenerateParticles) {
+            _generateParticleGlyphs(grid, vecGrids);
+            _renderParticleGlyphs();
+        }
+        _renderParticlesHelper();
     }
     else {
         _renderParticlesLegacy(grid, vecGrids);
@@ -271,7 +274,7 @@ void ParticleRenderer::_renderParticleGlyphs()
 
     _streamSizes = sizes;
 
-    _renderParticlesHelper();
+    //_renderParticlesHelper();
 }
 
 int ParticleRenderer::_renderParticlesHelper()
