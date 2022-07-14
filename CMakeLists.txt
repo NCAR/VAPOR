@@ -263,8 +263,8 @@ if (WIN32)
 			DESTINATION platforms
 		)
 		install (
-			DIRECTORY ${THIRD_PARTY_DIR}/lib/plugin
-			DESTINATION ${INSTALL_LIB_DIR}
+			DIRECTORY ${THIRD_PARTY_DIR}/lib/plugins
+			DESTINATION ${INSTALL_LIB_DIR}/lib/plugins
 			COMPONENT Dependencies
 		)
 	endif (GENERATE_FULL_INSTALLER)
@@ -321,10 +321,10 @@ if (APPLE)
                 COMPONENT Dependencies
                 )
         endif ()
-        file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/hdf/*.so")
+        file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
 		install (
 			FILES ${HDF5_PLUGINS}
-			DESTINATION ${INSTALL_LIB_DIR}
+			DESTINATION "${INSTALL_LIB_DIR}/share/plugins"
 			COMPONENT Dependencies
 			)
 
@@ -396,11 +396,11 @@ if (UNIX AND NOT APPLE)
 				)
 		endif ()
 
-		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/hdf/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
+		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/share/plugins/*.so")
 		message(STATUS "HDF5_PLUGINS ${HDF5_PLUGINS}")
 			install (
 				FILES ${HDF5_PLUGINS}
-				DESTINATION ${INSTALL_LIB_DIR}
+				DESTINATION "${INSTALL_LIB_DIR}/share/plugins"
 				COMPONENT Dependencies
 				)
 
