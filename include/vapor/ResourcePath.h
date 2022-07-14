@@ -4,6 +4,8 @@
 #include <string>
 
 namespace Wasp {
+COMMON_API void SetHDF5PluginPath();
+
 COMMON_API std::string GetResourcePath(const std::string &name);
 COMMON_API std::string GetSharePath(const std::string &name);
 

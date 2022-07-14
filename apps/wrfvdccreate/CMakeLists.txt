@@ -1,6 +1,8 @@
 add_executable (wrfvdccreate wrfvdccreate.cpp)
 
-target_link_libraries (wrfvdccreate common vdc)
+find_library(HDF5_LIB hdf5)
+
+target_link_libraries (wrfvdccreate common vdc ${HDF5_LIB})
 
 OpenMPInstall (
 	TARGETS wrfvdccreate

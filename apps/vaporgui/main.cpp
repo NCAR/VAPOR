@@ -33,8 +33,6 @@
 #include <vapor/OSPRay.h>
 #ifdef WIN32
     #include "Windows.h"
-#else
-    #include <H5PLpublic.h>
 #endif
 
 using namespace std;
@@ -176,15 +174,8 @@ int           main(int argc, char **argv)
     MyBase::SetDiagMsg("PYTHONHOME = %s", phome.c_str());
 #endif
 
-// Programatically set the hdf5 plugin path
-string plugins = Wasp::GetResourcePath("plugin");
-#ifndef WIN32
-	H5PLreplace(plugins.c_str(), 0);
-#else
-    plugins = "HDF5_PLUGIN_PATH=" + plugins;
-    int rc=_putenv(plugins.c_str());
-	if (rc != 0) MyBase::SetDiagMsg("Unable to set environtment variable %s", envVar.c_str());
-#endif
+    Wasp::SetHDF5PluginPath();
+
     app = &a;
 
     vector<QString> files;

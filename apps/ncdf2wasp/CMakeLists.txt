@@ -1,6 +1,8 @@
 add_executable (ncdf2wasp ncdf2wasp.cpp)
 
-target_link_libraries (ncdf2wasp common wasp)
+find_library(HDF5_LIB hdf5)
+
+target_link_libraries (ncdf2wasp common wasp ${HDF5_LIB})
 
 OpenMPInstall (
 	TARGETS ncdf2wasp

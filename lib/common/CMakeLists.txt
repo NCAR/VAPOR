@@ -43,7 +43,8 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Base16StringStream.h
 )
 
-add_library (common SHARED ${SRC} ${HEADERS})
+find_library(HDF5_LIB hdf5)
+add_library (common SHARED ${SRC} ${HEADERS} ${HDF5_LIB})
 
 if (APPLE)
 	find_library (COREFOUNDATION CoreFoundation)
@@ -51,7 +52,7 @@ if (APPLE)
 endif()
 
 if (NOT WIN32)
-	target_link_libraries (common pthread)
+	target_link_libraries (common pthread ${HDF5_LIB})
 	add_definitions (-DENABLE_THREADS)
 endif()
 
@@ -63,6 +64,8 @@ target_include_directories (common
 	PUBLIC "${THIRD_PARTY_INC_DIR}"
 	PUBLIC "${THIRD_PARTY_INC_DIR}/freetype2"
 	)
+
+#target_link_libraries(${HDF5_LIB})
 
 install (
 	TARGETS common

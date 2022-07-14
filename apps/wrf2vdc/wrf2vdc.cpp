@@ -9,6 +9,7 @@
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCWRF.h>
 #include <vapor/FileUtils.h>
+#include <vapor/ResourcePath.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -54,6 +55,8 @@ string ProgName;
 
 int main(int argc, char **argv)
 {
+    Wasp::SetHDF5PluginPath();
+
     OptionParser op;
 
     MyBase::SetErrMsgFilePtr(stderr);

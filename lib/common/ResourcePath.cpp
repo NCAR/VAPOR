@@ -4,6 +4,10 @@
 #include <vapor/FileUtils.h>
 #include <vapor/CFuncs.h>
 
+#ifndef WIN32
+    #include <H5PLpublic.h>
+#endif
+
 #define INCLUDE_DEPRECATED_GET_APP_PATH
 #include "vapor/GetAppPath.h"
 
@@ -116,4 +120,16 @@ std::string Wasp::GetPythonDir()
 
     if (!FileUtils::Exists(FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH}))) path = string(PYTHON_DIR);
     return path;
+}
+
+void Wasp::SetHDF5PluginPath() {
+    string plugins = Wasp::GetResourcePath("share/plugins");
+
+#ifndef WIN32
+    H5PLreplace(plugins.c_str(), 0);
+#else
+    plugins = "HDF5_PLUGIN_PATH=" + plugins;
+    int rc=_putenv(plugins.c_str());
+    if (rc != 0) MyBase::SetDiagMsg("Unable to set environtment variable %s", envVar.c_str());
+#endif
 }

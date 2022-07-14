@@ -9,6 +9,7 @@
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCCF.h>
 #include <vapor/FileUtils.h>
+#include <vapor/ResourcePath.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -223,6 +224,8 @@ vector<string> remove_vector(vector<string> v1, vector<string> v2)
 
 int main(int argc, char **argv)
 {
+    Wasp::SetHDF5PluginPath();
+
     OptionParser op;
 
     MyBase::SetErrMsgFilePtr(stderr);
