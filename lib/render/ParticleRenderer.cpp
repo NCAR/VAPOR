@@ -273,8 +273,6 @@ void ParticleRenderer::_renderParticleGlyphs()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     _streamSizes = sizes;
-
-    //_renderParticlesHelper();
 }
 
 int ParticleRenderer::_renderParticlesHelper()
