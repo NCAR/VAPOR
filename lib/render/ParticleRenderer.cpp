@@ -111,8 +111,8 @@ int ParticleRenderer::_paintGL(bool)
     bool renderGlyphs = GetActiveParams()->GetValueLong(ParticleParams::Render3DTag, true);
     if (renderGlyphs) {
         if (regenerateParticles) {
-            _generateParticleGlyphs(grid, vecGrids);
-            _renderParticleGlyphs();
+            _generateParticleData(grid, vecGrids);
+            _generateTextureData();
         }
         _renderParticlesHelper();
     }
@@ -225,7 +225,7 @@ void ParticleRenderer::_resetColormapCache() {
     _cacheParams.tf_minMax = minMax;
 }
 
-void ParticleRenderer::_renderParticleGlyphs()
+void ParticleRenderer::_generateTextureData()
 {
     vector<_vertex> vertices;
     vector<int>    sizes;
@@ -406,7 +406,7 @@ int ParticleRenderer::_getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const
     return 0;
 }
 
-void ParticleRenderer::_generateParticleGlyphs(const Grid* grid, const std::vector<Grid*>& vecGrids) {
+void ParticleRenderer::_generateParticleData(const Grid* grid, const std::vector<Grid*>& vecGrids) {
     _particles.clear();
 
     bool      showDir = _cacheParams.direction;
