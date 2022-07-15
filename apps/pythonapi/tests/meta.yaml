@@ -1,0 +1,29 @@
+package:
+  name: vapor
+  version: "@VERSION_STRING@"
+
+source:
+  path: .
+
+requirements:
+  build:
+    - python
+
+  run:
+    - python=@Python_VERSION@
+    - numpy=@Python_NumPy_VERSION@
+    - cppyy
+    - xarray
+    - scipy # Required for NetCDF support in xarray
+    - matplotlib
+    - ipython
+    - jupyter
+
+# Conda will try to compile every python file in the proejct by default
+# Vapor has some misc python2 files left over which fail to compile
+build:
+  skip_compile_pyc:
+    - "*.py"
+
+about:
+  home: "https://www.vapor.ucar.edu"

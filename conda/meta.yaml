@@ -1,0 +1,64 @@
+package:
+  name: vapor
+  version: "3.6.0"
+
+source:
+  path: ..
+
+#build:
+#  script: |
+#    pwd
+#    echo unused
+
+build:
+  skip_compile_pyc:
+    - "*.py"
+
+requirements:
+  build:
+    # Build-Only
+    # ==========================================
+    - {{ compiler('cxx') }}
+    - make=4.3
+    - cmake=3.21.3
+    - unzip=6.0
+    - jupytext=1.13.8 # Generate notebooks
+    - doxygen=1.9.1
+    # Both
+    # (Needs to be specified manually in both rather than just in host because otherwise conda will install multiple versions of some packages and break the install)
+    # ==========================================
+    - python=3.9.5
+    - numpy=1.21.4
+    - assimp=5.0.1
+    - freetype=2.10.4
+    - hdf5=1.12.1
+    - jpeg=9e
+    - geotiff=1.6.0
+    - udunits2=2.2.26
+    - netcdf4=1.5.8
+    - libtiff=4.3.0
+    - proj=7.2.0
+    - glm=0.9.9.4
+    - mesalib=21.2.5
+  run:
+    # Run only
+    - xarray=2022.3.0
+    - matplotlib=3.3.2 #=3.3.4
+    - ipython=8.3.0 #=8.1.1
+    - jupyter=1.0.0
+    - py-opencv=4.5.3
+    - cppyy=2.2.0 # If this is in build conda will load an old clang compiler which fails to compile macOS headers
+    # Both
+    - python=3.9.5
+    - numpy=1.21.4
+    - assimp=5.0.1
+    - freetype=2.10.4
+    - hdf5=1.12.1
+    - jpeg=9e
+    - geotiff=1.6.0
+    - udunits2=2.2.26
+    - netcdf4=1.5.8
+    - libtiff=4.3.0
+    - proj=7.2.0
+    - glm=0.9.9.4
+    - mesalib=21.2.5

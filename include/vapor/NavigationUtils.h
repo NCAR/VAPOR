@@ -23,11 +23,26 @@ public:
     static void AlignView(ControlExec *ce, int axis);
 
     static void SetAllCameras(ControlExec *ce, const double position[3], const double direction[3], const double up[3], const double origin[3]);
+    static void SetAllCameras(ControlExec *ce, const double position[3], const double direction[3], const double up[3]);
     static void SetAllCameras(ControlExec *ce, const vector<double> &position, const vector<double> &direction, const vector<double> &up, const vector<double> &origin);
+    static void SetAllCameras(ControlExec *ce, const vector<double> &position, const vector<double> &direction, const vector<double> &up);
     static void SetAllCameras(ControlExec *ce, const double matrix[16], const double origin[3]);
     static void SetAllCameras(ControlExec *ce, const vector<double> &matrix, const vector<double> &origin);
 
+    static void LookAt(ControlExec *ce, const vector<double> &position, const vector<double> &target, const vector<double> &up);
+    
     static void SetTimestep(ControlExec *ce, size_t ts);
+    
+    static void GetCameraProperties(ControlExec *ce, vector<double> *position, vector<double> *direction, vector<double> *up, vector<double> *target);
+    static vector<double> GetCameraPosition(ControlExec *ce);
+    static vector<double> GetCameraDirection(ControlExec *ce);
+    static vector<double> GetCameraUp(ControlExec *ce);
+    static vector<double> GetCameraTarget(ControlExec *ce);
+    
+    static void SetCameraPosition(ControlExec *ce, const vector<double> &v);
+    static void SetCameraDirection(ControlExec *ce, const vector<double> &v);
+    static void SetCameraUp(ControlExec *ce, const vector<double> &v);
+    static void SetCameraTarget(ControlExec *ce, const vector<double> &v);
 
     static long                    GetCurrentTimeStep(ControlExec *ce);
     static VAPoR::ViewpointParams *GetActiveViewpointParams(ControlExec *ce);

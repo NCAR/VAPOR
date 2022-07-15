@@ -20,8 +20,10 @@
 #ifndef ParticleRENDERER_H
 #define ParticleRENDERER_H
 
+//<<<<<<< HEAD
+//#include <GL/glew.h>
 #include <glm/glm.hpp>
-#include <GL/glew.h>
+#include <vapor/glutil.h>
 #ifdef Darwin
     #include <OpenGL/gl.h>
     #include <OpenGL/glu.h>
@@ -30,6 +32,9 @@
     #include <GL/glu.h>
 #endif
 
+//=======
+//#include <vapor/glutil.h>
+//>>>>>>> main
 #include "vapor/VAssert.h"
 
 #include <vapor/Renderer.h>

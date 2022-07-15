@@ -1,0 +1,47 @@
+package:
+  name: osgl
+  version: "0.01"
+
+source:
+  path: /osgl
+
+#build:
+#  script: |
+#    echo build =======================================================================================
+#    echo build =======================================================================================
+#    echo build =======================================================================================
+#    echo build =======================================================================================
+#    echo SRC_DIR=${SRC_DIR}
+#    echo PREFIX=${PREFIX}
+#    cd ${SRC_DIR}
+#    pwd
+#    echo build =======================================================================================
+#    echo build =======================================================================================
+#    echo build =======================================================================================
+#    echo build =======================================================================================
+
+build:
+  skip_compile_pyc:
+    - "*.py"
+
+requirements:
+  build:
+    - make
+    - cmake=3.21.3
+    - cppyy=2.2.0
+      # missing from vapor website
+    - glm
+      # This does not provide opengl apparently
+    - mesalib
+    - libglu
+    - {{ cdt('mesa-libgl-devel') }}  # [linux]
+    - {{ cdt('mesa-libgl') }}  # [linux]
+    - {{ cdt('mesa-libegl-devel') }}  # [linux]
+      # - mesa-libegl-devel-cos6-x86_64
+      # - {{ cdt('mesa-dri-drivers') }}  # [linux]
+      # - {{ cdt('libselinux') }}  # [linux]
+      # - {{ cdt('libxdamage') }}  # [linux]
+      # - {{ cdt('libxxf86vm') }}  # [linux]
+      # - {{ cdt('libxext') }}     # [linux]
+  run:
+    - mesalib

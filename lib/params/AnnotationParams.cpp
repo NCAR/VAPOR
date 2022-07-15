@@ -206,9 +206,9 @@ std::vector<double> AnnotationParams::GetTimeColor() const
 
 void AnnotationParams::SetTimeColor(vector<double> color) { SetValueDoubleVec(_timeColorTag, "Timestep color", color); }
 
-int AnnotationParams::GetTimeType() const { return (int)GetValueDouble(_timeTypeTag, 0); }
+int AnnotationParams::GetTimeType() const { return (int)GetValueLong(_timeTypeTag, 0); }
 
-void AnnotationParams::SetTimeType(int type) { SetValueDouble(_timeTypeTag, "Timestep annotation type", type); }
+void AnnotationParams::SetTimeType(int type) { SetValueLong(_timeTypeTag, "Timestep annotation type", type); }
 
 int AnnotationParams::GetTimeSize() const { return (int)GetValueDouble(_timeSizeTag, 24); }
 

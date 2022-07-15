@@ -27,7 +27,7 @@ struct opt_t {
 } opt;
 
 OptionParser::OptDescRec_T set_opts[] = {{"varname", 1, "var1", "Name of variable"},
-                                         {"type", 1, "float32", "Primitive type of input data"},
+                                         {"type", 1, "float32", "Primitive type of input data.  Valid types are int8, float32, float64, and double"},
                                          {"lod", 1, "-1",
                                           "Compression levels saved. 0 => coarsest, 1 => "
                                           "next refinement, etc. -1 => all levels defined by the netcdf file"},
@@ -54,6 +54,7 @@ size_t size_of_type(string type)
 {
     if (type.compare("float32") == 0) return (4);
     if (type.compare("float64") == 0) return (8);
+    if (type.compare("double") == 0) return (8);
     if (type.compare("int8") == 0) return (1);
     return (1);
 }
@@ -101,7 +102,7 @@ int read_data(FILE * fp,
     if (type.compare("float32") == 0) {
         float *sptr = (float *)buffer;
         for (size_t i = 0; i < n; i++) { *dptr++ = (float)*sptr++; }
-    } else if (type.compare("float64") == 0) {
+    } else if ((type.compare("float64") == 0) || (type.compare("double") == 0)) {
         double *sptr = (double *)buffer;
         for (size_t i = 0; i < n; i++) { *dptr++ = (float)*sptr++; }
     } else if (type.compare("int8") == 0) {

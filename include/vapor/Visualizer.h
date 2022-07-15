@@ -166,6 +166,8 @@ public:
     //! This method calls ClearCache on every renderer
     //
     void ClearRenderCache();
+    
+    void ClearRenderCache(const string &inst);
 
 private:
     //! Render all the colorbars enabled in this visualizer.
@@ -222,8 +224,8 @@ private:
     vector<Renderer *> _renderersToDestroy;
 
     Framebuffer  _framebuffer;
-    unsigned int _screenQuadVAO;
-    unsigned int _screenQuadVBO;
+    unsigned int _screenQuadVAO = NULL;
+    unsigned int _screenQuadVBO = NULL;
 };
 
 };    // namespace VAPoR

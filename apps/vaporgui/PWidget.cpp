@@ -4,7 +4,7 @@
 #include <vapor/ParamsBase.h>
 #include <vapor/ParamsMgr.h>
 #include <QHBoxLayout>
-#include "SettingsParams.h"
+#include <vapor/SettingsParams.h>
 
 PWidget::PWidget(const std::string &tag, QWidget *widget) : UWidget(widget), _tag(tag) { this->setDisabled(true); }
 

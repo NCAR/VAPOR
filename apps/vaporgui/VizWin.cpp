@@ -320,6 +320,13 @@ void VizWin::resizeGL(int width, int height)
 
 void VizWin::initializeGL()
 {
+    bool ok = gladLoaderLoadGL();
+    VAssert(GLManager::CheckError());
+    if (!ok) {
+        MyBase::SetErrMsg("Error: Unable to initialize GLAD");
+        MSG_ERR("OpenGL Error");
+    }
+    
     _glManager = new GLManager;
     _manip = new TranslateStretchManip(_glManager);
     bool initialize = true;

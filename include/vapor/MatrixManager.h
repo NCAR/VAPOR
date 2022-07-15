@@ -57,7 +57,7 @@ public:
 
     float GetProjectionAspectRatio() const;
 
-#ifndef NDEBUG
+#ifdef LEGACY_GL_DEBUG
     int         GetGLMatrixMode();
     const char *GetGLMatrixModeStr();
     int         GetGLModelViewStackDepth();

@@ -26,7 +26,6 @@
 #include <qrect.h>
 #include <qmessagebox.h>
 #include <qlineedit.h>
-#include "GL/glew.h"
 #include "AppSettingsParams.h"
 #include "StartupParams.h"
 #include "qcolordialog.h"
