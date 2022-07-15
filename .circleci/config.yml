@@ -154,7 +154,6 @@ jobs:
       - checkout
 
       - run:
-<<<<<<< HEAD
           name: update 3rd party libraries
           command: |
             rm -rf /usr/local/VAPOR-Deps/2019-Aug
@@ -165,7 +164,6 @@ jobs:
             filename="/root/project/2019-Aug-Ubuntu.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
  
-=======
           name: update cmake
           command: |
             apt-get update
@@ -173,7 +171,6 @@ jobs:
             apt-get install -y python3-pip
             pip3 install cmake --upgrade
 
->>>>>>> main
       - run:
           name: make installer
           command: |
@@ -354,7 +351,6 @@ jobs:
       - checkout
 
       - run:
-<<<<<<< HEAD
           name: update 3rd party libraries
           command: |
             rm -rf /usr/local/VAPOR-Deps/2019-Aug
@@ -363,7 +359,6 @@ jobs:
             filename="/root/project/2019-Aug-Ubuntu.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
  
-=======
           name: update cmake
           command: |
             apt-get update
@@ -371,7 +366,6 @@ jobs:
             apt-get install -y python3-pip
             pip3 install cmake --upgrade
 
->>>>>>> main
       - run:
           name: make debug
           command: |
