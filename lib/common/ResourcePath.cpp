@@ -140,7 +140,7 @@ void Wasp::SetHDF5PluginPath() {
 #else
     plugins = "HDF5_PLUGIN_PATH=" + plugins;
     int rc=_putenv(plugins.c_str());
-    if (rc != 0) MyBase::SetDiagMsg("Unable to set environtment variable %s", envVar.c_str());
+    if (rc != 0) MyBase::SetDiagMsg("Unable to set environtment variable %s", plugins.c_str());
 #endif
 }
 

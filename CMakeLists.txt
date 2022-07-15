@@ -343,8 +343,8 @@ if (WIN32)
 			DESTINATION platforms
 		)
 		install (
-			DIRECTORY ${THIRD_PARTY_DIR}/lib/plugins
-			DESTINATION ${INSTALL_LIB_DIR}/lib/plugins
+			DIRECTORY ${THIRD_PARTY_DIR}/share/plugins
+			DESTINATION ${INSTALL_LIB_DIR}/share
 			COMPONENT Dependencies
 		)
 	endif (GENERATE_FULL_INSTALLER)
