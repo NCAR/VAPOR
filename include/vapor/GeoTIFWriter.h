@@ -8,6 +8,12 @@
 #endif
 
 namespace VAPoR {
+
+//! \class GeoTIFWriter
+//! \ingroup Public_Render
+//! \brief Writes a TIF image with GeoTIF metadata
+//! \author Stanislaw Jaroszynski
+//!
 class RENDER_API GeoTIFWriter : public TIFWriter {
     GTIF *gtif;
     bool  _hasTiePoint;

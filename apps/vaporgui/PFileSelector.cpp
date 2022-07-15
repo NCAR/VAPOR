@@ -4,7 +4,7 @@
 #include <QFileDialog>
 #include <vapor/ParamsBase.h>
 #include <vapor/FileUtils.h>
-#include "SettingsParams.h"
+#include <vapor/SettingsParams.h>
 
 PFileSelector::PFileSelector(const std::string &tag, const std::string &label) : PLineItem(tag, label, _pathTexbox = new VLineEdit_Deprecated, _button = new VPushButton("Select"))
 {

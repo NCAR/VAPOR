@@ -2,7 +2,7 @@
 #include <vapor/MapperFunction.h>
 #include <vapor/FileUtils.h>
 #include <vapor/ParamsMgr.h>
-#include "SettingsParams.h"
+#include <vapor/SettingsParams.h>
 #include "ErrorReporter.h"
 #include <QFileDialog>
 #include <cassert>

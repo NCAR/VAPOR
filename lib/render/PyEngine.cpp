@@ -231,7 +231,11 @@ int PyEngine::Initialize()
     // Secret numpy incantation required to use NumPy's C API. Hope this
     // crap works.
     //
+#ifndef DISABLE_EXTRA_PYTHON_MATH_IMPORTS
     if (PyArray_API == NULL) { import_array1(-1) }
+#else
+    fprintf(stderr, "WARNING Vapor python array import disabled\n");
+#endif
 
     return (0);
 }

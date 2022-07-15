@@ -1,16 +1,6 @@
 #ifndef IMAGERENDERER_H
 #define IMAGERENDERER_H
 
-#include <GL/glew.h>
-
-#ifdef Darwin
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
-#else
-    #include <GL/gl.h>
-    #include <GL/glu.h>
-#endif
-
 #include <vapor/TwoDRenderer.h>
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>

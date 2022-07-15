@@ -60,6 +60,7 @@ void init_signals(void)
 MyPython *  MyPython::m_instance = NULL;
 bool        MyPython::m_isInitialized = false;
 std::string MyPython::m_pyHome = "";
+bool MyPython::IsRunningFromPython = false;
 
 MyPython *MyPython::Instance()
 {
@@ -109,7 +110,7 @@ int MyPython::Initialize()
 
     // This is dependent on the environmental variable PYTHONHOME which is
     // set in vaporgui/main.cpp
-    Py_Initialize();
+    Py_InitializeEx(0);
 
 #ifdef VAPOR3_0_0
     if (pyIntFailed) {
@@ -118,6 +119,59 @@ int MyPython::Initialize()
     }
 #endif
 
+#ifdef PYTHON_API_DEBUG
+    printf("Vapor Linked Python Version = %s (%s)\n", GetPythonVersion().c_str(), GetPythonPath().c_str());
+    PyRun_SimpleString("import sys; print(f\"Vapor Runtime Python Version = {sys.version.split(' ')[0]} ({sys.prefix})\")");
+#endif
+    
+    int rc;
+    
+    if (!IsRunningFromPython) {
+        MyBase::SetErrMsg("Redirecting Python IO");
+        rc = rerouteSTDIO();
+        if (rc < 0) return rc;
+    }
+
+    if ((rc = pyImport("sys")) < 0) return rc;
+#ifndef DISABLE_EXTRA_PYTHON_MATH_IMPORTS
+    if ((rc = pyImport("matplotlib")) < 0) return rc;
+#else
+    fprintf(stderr, "WARNING Vapor python matplotlib import disabled\n");
+#endif
+
+    // Add vapor modules to search path
+    //
+    std::string path = Wasp::GetSharePath("python");
+    path = "sys.path.append('" + path + "')\n";
+    rc = PyRun_SimpleString(path.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+        return (-1);
+    }
+
+    m_isInitialized = true;
+
+    return (0);
+}
+
+int MyPython::pyImport(string lib)
+{
+    std::string importMPL = string() +
+                            "try:\n"
+                            "    import "+lib+"\n"
+                            "except: \n"
+                            "    print('Failed to import "+lib+"', file=sys.stderr)\n"
+                            "    raise\n";
+    int rc = PyRun_SimpleString(importMPL.c_str());
+    if (rc < 0) {
+        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+    }
+    
+    return rc;
+}
+
+int MyPython::rerouteSTDIO()
+{
     // Ugh. Have to define a python object to enable capturing of
     // stderr to a string. Python API doesn't support a version of
     // PyErr_Print() that fetches the error to a C++ string. Give me
@@ -164,33 +218,8 @@ int MyPython::Initialize()
         MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
         return (-1);
     }
-
-    // Import matplotlib
-    //
-    std::string importMPL = "try:\n"
-                            "	import matplotlib\n"
-                            "except: \n"
-                            "	print('Failed to import matplotlib', file=sys.stderr)\n"
-                            "	raise\n";
-    rc = PyRun_SimpleString(importMPL.c_str());
-    if (rc < 0) {
-        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
-        return (-1);
-    }
-
-    // Add vapor modules to search path
-    //
-    std::string path = Wasp::GetSharePath("python");
-    path = "sys.path.append('" + path + "')\n";
-    rc = PyRun_SimpleString(path.c_str());
-    if (rc < 0) {
-        MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
-        return (-1);
-    }
-
-    m_isInitialized = true;
-
-    return (0);
+    
+    return 0;
 }
 
 // Fetch an error message genereated by Python API.
@@ -210,7 +239,7 @@ string MyPython::PyErr()
     if (!catcher) { return ("Failed to initialize Python error catcher!!!"); }
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");
-    char *    s = PyUnicode_AsUTF8(output);
+    const char *    s = PyUnicode_AsUTF8(output);
 
     // Erase the string
     //
@@ -233,7 +262,7 @@ string MyPython::PyOut()
     if (!catcher) { return (""); }
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");
-    char *    s = PyUnicode_AsUTF8(output);
+    const char *    s = PyUnicode_AsUTF8(output);
 
     // Erase the string
     //

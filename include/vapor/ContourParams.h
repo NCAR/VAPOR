@@ -77,7 +77,7 @@ public:
     virtual bool   GetOrientable() const override { return true; }
 
     //! \copydoc RenderParams::GetActualColorMapVariableName()
-    virtual string GetActualColorMapVariableName() const override { return GetColorMapVariableName(); }
+    virtual string GetActualColorMapVariableName() const override { return GetVariableName(); }
 
     int GetNumDigits() const
     {

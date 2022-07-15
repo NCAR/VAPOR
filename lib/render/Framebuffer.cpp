@@ -20,6 +20,7 @@ int Framebuffer::Generate()
 
     glGenFramebuffers(1, &_id);
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
+    VAssert(_id);
 
     _colorBuffer.Generate();
     _colorBuffer.TexImage(GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);

@@ -254,7 +254,10 @@ void FakeRakeBox::SetExtents(const vector<double> &min, const vector<double> &ma
         rake.push_back(max[2]);
     }
 
+    BeginGroup("Set fake region");
     parent->SetValueDoubleVec(_tag, "", rake);
+    Initialize(_tag);
+    EndGroup();
 }
 
 Box *FlowParams::GetRakeBox()

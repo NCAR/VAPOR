@@ -31,6 +31,7 @@
 #include <vapor/ColorMap.h>
 #include <vapor/XmlNode.h>
 #include <vapor/ParamsBase.h>
+#include <cassert>
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -306,6 +307,13 @@ void MapperFunction::makeLut(std::vector<float> &clut) const
     delete[] cluta;
 }
 
+std::vector<float> MapperFunction::makeLut() const
+{
+    vector<float> v;
+    makeLut(v);
+    return v;
+}
+
 //! Set both minimum and maximum mapping (histo) values
 //! \param[in] val1 minimum value
 //! \param[in] val2 maximum value
@@ -482,6 +490,16 @@ void MapperFunction::rgbToHsv(float *rgb, float *hsv)
         hsv[0] /= 6.f;    // Put between 0 and 1
     }
     return;
+}
+
+vector<float> MapperFunction::rgbToHsv(vector<float> rgb)
+{
+    assert(rgb.size() == 3);
+    vector<float> hsv;
+    rgb.resize(3, 0);
+    hsv.resize(3, 0);
+    rgbToHsv(rgb.data(), hsv.data());
+    return hsv;
 }
 
 //----------------------------------------------------------------------------

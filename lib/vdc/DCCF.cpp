@@ -63,11 +63,14 @@ DCCF::~DCCF()
 
 int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
+    return initialize(paths, options, new NetCDFCFCollection());
+}
+
+int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options, NetCDFCFCollection *ncdfc)
+{
     if (_ncdfc) delete _ncdfc;
-    _ncdfc = nullptr;
-
-    NetCDFCFCollection *ncdfc = new NetCDFCFCollection();
-
+    _paths = paths;
+    
     // Initialize the NetCDFCFCollection class.
     //
     int rc = ncdfc->Initialize(paths);
@@ -84,9 +87,24 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
         return (-1);
     }
 
+    _ncdfc = ncdfc;
+
+    return BuildCache();
+}
+
+int DCCF::Reinitialize()
+{
+    return Initialize(_paths, {});
+}
+
+int DCCF::BuildCache()
+{
+    auto ncdfc = _ncdfc;
+    int rc;
+    
     //
     //  Get the dimensions of the grid.
-    //	Initializes members: _dimsMap
+    //    Initializes members: _dimsMap
     //
     rc = initDimensions(ncdfc, _dimsMap);
     if (rc < 0) {
@@ -118,10 +136,8 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
     //
     rc = initDataVars(ncdfc, _dataVarsMap);
     if (rc < 0) return (-1);
-
-    _ncdfc = ncdfc;
-
-    return (0);
+    
+    return 0;
 }
 
 bool DCCF::getDimension(string dimname, DC::Dimension &dimension) const
@@ -616,6 +632,7 @@ int DCCF::getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<st
 //
 int DCCF::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMap)
 {
+    meshMap.clear();
     //
     // Get names of variables  in the CF data set that have 0 to 3
     // spatial dimensions

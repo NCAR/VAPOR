@@ -29,7 +29,7 @@ if (BUILD_GUI)
 endif()
 
 if (BUILD_PYTHON)
-    add_subdirectory (vapi)
+    add_subdirectory (pythonapi)
 endif()
  
 if (UNIX AND NOT APPLE AND DIST_INSTALLER)

@@ -149,8 +149,8 @@ int           main(int argc, char **argv)
     //
     setlocale(LC_ALL, "C");
 
-// For Mac and Linux, set the PYTHONHOME
-// PYTHON
+// For Mac and Linux, set the PYTHONHOME in this app
+#if PRE_PYTHON_API_REFACTOR
 #ifndef WIN32
     const char *s = getenv("PYTHONHOME");
     string      phome = s ? s : "";
@@ -172,6 +172,7 @@ int           main(int argc, char **argv)
         setenv("PYTHONHOME", phome.c_str(), 1);
     }
     MyBase::SetDiagMsg("PYTHONHOME = %s", phome.c_str());
+#endif
 #endif
 
     Wasp::SetHDF5PluginPath();

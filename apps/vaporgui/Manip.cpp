@@ -491,25 +491,36 @@ bool TranslateStretchManip::pixelToVector(double winCoords[2], double dirVec[3],
 {
     GLdouble pt[3];
     // Project handleMid to find its z screen coordinate:
-    GLdouble screenx, screeny, screenz;
+    GLdouble screenz;
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    gluProject(strHandleMid[0], strHandleMid[1], strHandleMid[2], _modelViewMatrix, _projectionMatrix, viewport, &screenx, &screeny, &screenz);
+//    gluProject(strHandleMid[0], strHandleMid[1], strHandleMid[2], _modelViewMatrix, _projectionMatrix, viewport, &screenx, &screeny, &screenz);
+    glm::vec3 obj(strHandleMid[0], strHandleMid[1], strHandleMid[2]);
+    glm::mat4 model, proj;
+    for (int i = 0; i < 16; i++) ((float *)glm::value_ptr(model))[i] = _modelViewMatrix[i];
+    for (int i = 0; i < 16; i++) ((float *)glm::value_ptr(proj ))[i] = _projectionMatrix[i];
+    glm::vec4 vp(viewport[0], viewport[1], viewport[2], viewport[3]);
+    
+    vec3 screen = glm::project(obj, model, proj, vp);
+    screenz = screen.z;
     // Obtain the coords of a point in view:
-    bool success = (0 != gluUnProject((GLdouble)winCoords[0], (GLdouble)winCoords[1], screenz, _modelViewMatrix, _projectionMatrix, viewport, pt, pt + 1, pt + 2));
+//    bool success = (0 != gluUnProject((GLdouble)winCoords[0], (GLdouble)winCoords[1], screenz, _modelViewMatrix, _projectionMatrix, viewport, pt, pt + 1, pt + 2));
+    glm::vec3 win(winCoords[0], winCoords[1], screenz);
+    auto r = glm::unProject(win, model, proj, vp);
+    pt[0] = r.x;
+    pt[1] = r.y;
+    pt[2] = r.z;
     _dragDistance = pt[2] - strHandleMid[2];
     if (mouseWorldPos) memcpy(mouseWorldPos, pt, sizeof(double) * 3);
 #pragma GCC diagnostic pop
-    if (success) {
-        // Subtract camera coords to get a direction vector:
-        vsub(pt, _cameraPosition, dirVec);
-    }
+    // Subtract camera coords to get a direction vector:
+    vsub(pt, _cameraPosition, dirVec);
     GL_ERR_BREAK();
-    return success;
+    return true;
 }
 
 // Find the handle extents using the boxExtents in world coords
@@ -1158,10 +1169,19 @@ bool TranslateStretchManip::_projectPointToWin(const double cubeCoords[3], doubl
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    bool success = (0 != gluProject(cbCoords[0], cbCoords[1], cbCoords[2], _modelViewMatrix, _projectionMatrix, viewport, wCoords, (wCoords + 1), (GLdouble *)(&depth)));
+//    bool success = (0 != gluProject(cbCoords[0], cbCoords[1], cbCoords[2], _modelViewMatrix, _projectionMatrix, viewport, wCoords, (wCoords + 1), (GLdouble *)(&depth)));
+    glm::vec3 obj(cbCoords[0], cbCoords[1], cbCoords[2]);
+    glm::mat4 model, proj;
+    for (int i = 0; i < 16; i++) ((float *)glm::value_ptr(model))[i] = _modelViewMatrix[i];
+    for (int i = 0; i < 16; i++) ((float *)glm::value_ptr(proj ))[i] = _projectionMatrix[i];
+    glm::vec4 vp(viewport[0], viewport[1], viewport[2], viewport[3]);
+    auto r = glm::project(obj, model, proj, vp);
+    wCoords[0] = r.x;
+    wCoords[1] = r.y;
+    depth = r.z;
 #pragma GCC diagnostic pop
 
-    if (!success) return false;
+//    if (!success) return false;
     winCoords[0] = wCoords[0];
     winCoords[1] = wCoords[1];
     return (depth > 0.0);

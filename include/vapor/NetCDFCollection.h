@@ -15,6 +15,7 @@
 
 namespace VAPoR {
 
+
 //
 //! \class NetCDFCollection
 //! \brief Wrapper for a collection of netCDF files
@@ -121,7 +122,7 @@ public:
     //! time step of a variable.
     //!
     virtual int Initialize(const std::vector<string> &files, const std::vector<string> &time_dimnames, const std::vector<string> &time_coordvar);
-
+    
     //! Return a boolean indicating whether a variable exists in the
     //! data collection.
     //!

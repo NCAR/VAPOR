@@ -22,4 +22,8 @@ COMMON_API std::string GetPythonVersion();
 //! this will return /home on Linux/Mac but it will return
 //! /home/lib/python2.7 on Windows
 COMMON_API std::string GetPythonDir();
+
+//! Register an additional function which returns a path for a given resource.
+//! This function will be given precidence over the default resource search paths.
+COMMON_API void RegisterResourceFinder(std::string (*cb)(const std::string &));
 };    // namespace Wasp

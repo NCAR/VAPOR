@@ -14,6 +14,7 @@
 #include <vapor/DCMPAS.h>
 #include <vapor/DCBOV.h>
 #include <vapor/DCP.h>
+#include <vapor/DCRAM.h>
 #include <vapor/DCMelanie.h>
 #include <vapor/DerivedVar.h>
 #if DCP_ENABLE_PARTICLE_DENSITY
@@ -597,6 +598,8 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
         _dc = new DCBOV();
     } else if (_format.compare("dcp") == 0) {
         _dc = new DCP();
+    } else if (_format.compare("ram") == 0) {
+        _dc = new DCRAM();
     } else if (_format.compare("ugrid") == 0) {
         _dc = new DCUGRID();
 #ifdef BUILD_DC_MELANIE
@@ -805,6 +808,13 @@ bool DataMgr::GetVarCoordVars(string varname, bool spatial, std::vector<string> 
     if (!dvar.GetTimeCoordVar().empty()) { coord_vars.push_back(dvar.GetTimeCoordVar()); }
 
     return (true);
+}
+
+vector<string> DataMgr::GetVarCoordVars(string varname, bool spatial) const
+{
+    vector<string> v;
+    GetVarCoordVars(varname, spatial, v);
+    return v;
 }
 
 bool DataMgr::GetDataVarInfo(string varname, VAPoR::DC::DataVar &var) const

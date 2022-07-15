@@ -1,7 +1,7 @@
 #include <vapor/OpenMPSupport.h>
 #include <QVBoxLayout>
 #include <AppSettingsMenu.h>
-#include <SettingsParams.h>
+#include <vapor/SettingsParams.h>
 #include "PWidgets.h"
 #include "PGroup.h"
 #include "PFileSelectorHLI.h"

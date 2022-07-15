@@ -11,14 +11,16 @@ Advection::Advection() : _lowerAngle(3.0f), _upperAngle(15.0f)
     _lowerAngleCos = glm::cos(glm::radians(_lowerAngle));
     _upperAngleCos = glm::cos(glm::radians(_upperAngle));
 
-    for (int i = 0; i < 3; i++) { _isPeriodic[i] = false; }
+    std::fill(_isPeriodic.begin(), _isPeriodic.end(), false);
+    std::fill(_periodicBounds.begin(), _periodicBounds.end(), glm::vec2(0.0, 0.0));
 }
 
 void Advection::UseSeedParticles(const std::vector<Particle> &seeds)
 {
     _streams.clear();
     _streams.resize(seeds.size());
-    for (size_t i = 0; i < seeds.size(); i++) _streams[i].push_back(seeds[i]);
+    for (size_t i = 0; i < seeds.size(); i++)
+      _streams[i].push_back(seeds[i]);
 
     _separatorCount.assign(seeds.size(), 0);
 }
@@ -40,13 +42,14 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
 
     // Observation: user parameters are not gonna change while this function executes.
     // Action: lock these parameters.
-    if (velocity->LockParams() != 0) return PARAMS_ERROR;
+    if (velocity->LockParams() != 0) 
+      return PARAMS_ERROR;
 
     // The particle advection process can be parallelized per particle
     // Each stream represents a trajectory for a single particle
-    // #pragma omp parallel for
+    #pragma omp parallel for
     for (size_t streamIdx = 0; streamIdx < _streams.size(); streamIdx++) {
-        auto & s = _streams[streamIdx];
+        auto& s = _streams[streamIdx];
         size_t numberOfSteps = s.size() - _separatorCount[streamIdx];
         while (numberOfSteps < maxSteps) {
             auto &past0 = s.back();
@@ -115,8 +118,8 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
                 //   by the rendering code to break a pathline into segments.
 
                 glm::vec3 vel;
-                bool      isMissing = (velocity->GetVelocity(past0.time, past0.location, vel) == MISSING_VAL);
-                bool      isInside = velocity->InsideVolumeVelocity(past0.time, past0.location);
+                bool isMissing = (velocity->GetVelocity(past0.time, past0.location, vel) == MISSING_VAL);
+                bool isInside = velocity->InsideVolumeVelocity(past0.time, past0.location);
 
                 if (isInside && isMissing) {    // Case 1)
                     // We identified a particle at a bad location.
@@ -143,7 +146,8 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
                     } else {
                         auto loc = past0.location;
                         for (int i = 0; i < 3; i++) {
-                            if (_isPeriodic[i]) loc[i] = _applyPeriodic(loc[i], _periodicBounds[i][0], _periodicBounds[i][1]);
+                            if (_isPeriodic[i]) 
+                              loc[i] = _applyPeriodic(loc[i], _periodicBounds[i][0], _periodicBounds[i][1]);
                         }
 
                         // Notice that loc isn't guaranteed to be inside the volume right now,
@@ -155,7 +159,7 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
                             separator.SetSpecial(true);
                             auto it = s.end();
                             --it;
-                            s.insert(it, std::move(separator));
+                            s.insert(it, separator);
                             _separatorCount[streamIdx]++;
                         } else {
                             past0.SetSpecial(true);
@@ -220,13 +224,13 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
 
                     Particle separator;
                     separator.SetSpecial(true);
-                    s.insert(itr, std::move(separator));
+                    s.insert(itr, separator);
                     _separatorCount[streamIdx]++;
                 } else {
                     break;    // break the while loop
                 }
 
-            }    // Finish of the if condition
+            } // Finish the out-of-volume condition
 
             double dt = deltaT;
             if (s.size() > 2)    // If there are at least 3 particles in the stream,
@@ -259,7 +263,7 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
             } else {    // Advection successful, keep the new particle.
                 happened = true;
                 s.push_back(p1);
-                p0 = std::move(p1);
+                p0 = p1;
             }
 
             // Another termination criterion: when advecting at least 10,000 steps and

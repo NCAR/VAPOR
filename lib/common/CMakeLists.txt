@@ -51,6 +51,10 @@ if (APPLE)
 	target_link_libraries (common ${COREFOUNDATION})
 endif()
 
+if (CONDA_BUILD AND UNIX AND NOT APPLE)
+    target_link_libraries (common rt)
+endif()
+
 if (NOT WIN32)
 	target_link_libraries (common pthread ${HDF5_LIB})
 	add_definitions (-DENABLE_THREADS)
