@@ -20,7 +20,21 @@
 #ifndef ParticleRENDERER_H
 #define ParticleRENDERER_H
 
+//<<<<<<< HEAD
+//#include <GL/glew.h>
+#include <glm/glm.hpp>
 #include <vapor/glutil.h>
+#ifdef Darwin
+    #include <OpenGL/gl.h>
+    #include <OpenGL/glu.h>
+#else
+    #include <GL/gl.h>
+    #include <GL/glu.h>
+#endif
+
+//=======
+//#include <vapor/glutil.h>
+//>>>>>>> main
 #include "vapor/VAssert.h"
 
 #include <vapor/Renderer.h>
@@ -34,7 +48,7 @@ class DataMgr;
 
 //! \class ParticleRenderer
 //! \brief Class that draws the Particles (Particles) as specified by IsolineParams
-//! \author Stas Jaroszynski
+//! \author Stas Jaroszynski, Scott Pearse
 //! \version 1.0
 //! \date March 2018
 class RENDER_API ParticleRenderer : public Renderer {
@@ -51,7 +65,54 @@ public:
     virtual int _paintGL(bool fast);
 
 private:
+    struct {
+        size_t              ts;
+        int                 rLevel;
+        int                 cLevel;
+        std::vector<float>  tf_lut;
+        std::vector<double> tf_minMax;
+        VAPoR::CoordType    boxMin, boxMax;
+        float               radius;
+        bool                direction;
+        float               directionScale;
+        size_t              stride;
+        string              varName;
+        std::vector<std::string> fieldVars;
+    } _cacheParams;
+
+    struct _vertex {
+        glm::vec3  point;
+        float      value;
+    };
+
+    std::vector<_vertex> _particles;
+
+    std::vector<int> _streamSizes;
+
+    unsigned int _VAO = 0;
+    unsigned int _VBO = 0;
+
+    GLuint              _colorMapTexId = 0;
+    GLuint              _vertexArrayId = 0;
+    GLuint              _vertexBufferId = 0;
+    const GLint         _colorMapTexOffset;
+    float               _colorMapRange[3];
+    std::vector<float>  _colorMap;
+
     void _clearCache() {}
+
+    bool _particleCacheIsDirty() const;
+    bool _colormapCacheIsDirty() const;
+    void _resetParticleCache();
+    void _resetColormapCache();
+    int  _generateParticlesLegacy(Grid*& grid, std::vector<Grid*>& vecGrids);
+    int  _getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const;
+    void _generateTextureData();
+    void _generateParticleData(const Grid* grid, const std::vector<Grid*>& vecGrids);
+    void _renderParticlesLegacy(const Grid* grid, const std::vector<Grid*>& vecGrids) const;
+    int  _renderParticlesHelper();
+    void _prepareColormap();
+    glm::vec3 _getScales();
 };
 
 };    // namespace VAPoR
