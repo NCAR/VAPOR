@@ -163,7 +163,8 @@ jobs:
             gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
             filename="/root/project/2019-Aug-Ubuntu.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
- 
+
+      - run: 
           name: update cmake
           command: |
             apt-get update
@@ -348,6 +349,7 @@ jobs:
             apt-get update
             apt-get install -y python3
             apt install -y python3-pip
+
       - checkout
 
       - run:
@@ -358,7 +360,8 @@ jobs:
             gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
             filename="/root/project/2019-Aug-Ubuntu.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
- 
+
+      - run: 
           name: update cmake
           command: |
             apt-get update
