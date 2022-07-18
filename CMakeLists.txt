@@ -423,7 +423,7 @@ if (APPLE)
         file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
 		install (
 			FILES ${HDF5_PLUGINS}
-			DESTINATION "${INSTALL_LIB_DIR}/share/plugins"
+			DESTINATION "${INSTALL_SHARE_DIR}/plugins"
 			COMPONENT Dependencies
 			)
 
