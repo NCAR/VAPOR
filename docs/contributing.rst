@@ -54,7 +54,7 @@ If you've found an issue you'd like to fix, you'll need to compile Vapor, fix th
 
     * Git for Vapor's version control
       
-    * CMake (version 3.2 or higher) for Vapor's build system
+    * CMake (version 3.20 or higher) for Vapor's build system
       
     * One of the following compilers, dependent on which operating system you're using:
 
@@ -110,8 +110,8 @@ For more information on the Forking Workflow, please see `Atlassian has a tutori
 Third-Party Libraries
 _____________________
 
-Download pre-built Third-Party Libraries
-****************************************
+Download pre-built Third-Party Libraries (Recommended)
+******************************************************
 
 This is the recommended approach for acquiring the third-party libraries that Vapor depends on.  If you require additional libraries, or custom settings to the libraries currently used by vapor, see the :ref:`Building Third-Party Libraries section <contributing.build3rdParty>`.
 
@@ -137,16 +137,16 @@ If building on Linux or OSX, the third party libraries must be placed in /usr/lo
 
 .. _contributing.build3rdParty:
 
-Building Third-Party Libraries
-******************************
+Building Third-Party Libraries (Not recommended)
+************************************************
 
 This is an alternative to downloading our pre-built libraries that allows you to configure and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor's CMake configuration to point to your custom directory.  
 
 If you wish to go down this route, you may follow the build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
 
-.. note:: In order for Vapor to generate installers, all third-party libraries must be built in the same directory.
+.. note:: The source code for these libraries may be downloaded `here <https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI>`_.
 
-.. note:: The file <vapor-source>/site_files/site.NCAR may be used in lieu of CMake to specify the location of your party libraries.  Edit this file to specify your choice.  CMake variables passed over the command line may be overwritten by this file's presets.
+.. note:: The file <vapor-source>/site_files/site.NCAR may be used to specifiy the location of the libraries.  To do this, build your version of the libraries in /usr/local/VAPOR-Deps/2019-Aug, or change the THIRD_PARTY_LIB_DIR path in site.NCAR.
 
 +-----------------+----------------------------------------------------------------+
 | *Vapor 3 was built with the following third party library configuration.*        |
@@ -179,10 +179,6 @@ If you wish to go down this route, you may follow the build instructions for `Wi
 +-----------------+----------------------------------------------------------------+
 | Ospray          | 2.8.0                                                          |
 +-----------------+----------------------------------------------------------------+
-
-.. note:: Different versions of Qt have presented bugs.  It's reocmmended that developers use the same library versions as those listed above, especially for Qt.
-
-The source code for these libraries may be downloaded `here <https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI>`_.
 
 Install System Libraries
 ________________________
