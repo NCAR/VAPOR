@@ -130,6 +130,8 @@ else()
 endif()
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
+include_directories ("${PROJECT_SOURCE_DIR}/lib/osgl/include")
+include_directories ("${PROJECT_SOURCE_DIR}/lib/osgl/glad/include")
 
 if (WIN32)
 	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
@@ -159,18 +161,19 @@ function(FIND_BUNDLED_PYTHON)
     # does not conform to its requirements so this manually configures the results
     message("Using bundled python")
     set(Python_VERSION "${PYTHONVERSION}")
-    set(Python_SITELIB "${PYTHONPATH}/site-packages")
     set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
     unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
     find_library(
         Python_LIBRARIES
-        NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-        PATHS "${THIRD_PARTY_LIB_DIR}"
+	NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
+	PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
         NO_DEFAULT_PATH
     )
     if (WIN32)
+        set(Python_SITELIB "${PYTHONPATH}/Lib/site-packages")
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")
     else()
+        set(Python_SITELIB "${PYTHONPATH}/site-packages")
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m")
     endif()
 
