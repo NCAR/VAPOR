@@ -8,6 +8,10 @@
 #endif
 
 namespace VAPoR {
+//! \class TIFWriter
+//! \ingroup Public_Render
+//! \brief Writes TIF image files
+//! \author Stanislaw Jaroszynski
 class RENDER_API TIFWriter : public ImageWriter {
 protected:
     TIFF *tif;

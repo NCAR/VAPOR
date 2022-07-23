@@ -9,8 +9,10 @@
 #include <vapor/AnimationParams.h>
 #include <cassert>
 #include <cfloat>
+#include <glm/glm.hpp>
 
 using namespace VAPoR;
+using glm::vec3;
 
 void NavigationUtils::SetHomeViewpoint(ControlExec *ce)
 {
@@ -92,6 +94,7 @@ void NavigationUtils::AlignView(ControlExec *ce, int axis)
     double upvec[3] = {0.0, 1.0, 0.0};
     (void)(upvec);
     ViewpointParams *vpParams = GetActiveViewpointParams(ce);
+    assert(vpParams);
     if (!vpParams) return;
 
     double m[16], curPosVec[3], curViewDir[3], curUpVec[3], curCenter[3];
@@ -99,6 +102,8 @@ void NavigationUtils::AlignView(ControlExec *ce, int axis)
     bool status = vpParams->ReconstructCamera(m, curPosVec, curUpVec, curViewDir);
     vpParams->GetRotationCenter(curCenter);
     if (!status) return;
+    
+#define V3S(v) (string("[")+to_string(v[0])+","+to_string(v[1])+","+to_string(v[2])+"]").c_str()
 
     if (axis == 1) {    // Special case to align to closest axis.
         // determine the closest view direction and up vector to the current viewpoint.
@@ -189,9 +194,28 @@ void NavigationUtils::SetAllCameras(ControlExec *ce, const double position[3], c
 }
 
 
+void NavigationUtils::SetAllCameras(ControlExec *ce, const double position[3], const double direction[3], const double up[3])
+{
+    ViewpointParams *vpParams = GetActiveViewpointParams(ce);
+    assert(vpParams);
+    if (!vpParams) return;
+
+    double curCenter[3];
+    vpParams->GetRotationCenter(curCenter);
+    
+    SetAllCameras(ce, position, direction, up, curCenter);
+}
+
+
 void NavigationUtils::SetAllCameras(ControlExec *ce, const vector<double> &position, const vector<double> &direction, const vector<double> &up, const vector<double> &origin)
 {
     SetAllCameras(ce, position.data(), direction.data(), up.data(), origin.data());
+}
+
+
+void NavigationUtils::SetAllCameras(ControlExec *ce, const vector<double> &position, const vector<double> &direction, const vector<double> &up)
+{
+    SetAllCameras(ce, position.data(), direction.data(), up.data());
 }
 
 
@@ -213,6 +237,15 @@ void NavigationUtils::SetAllCameras(ControlExec *ce, const vector<double> &m, co
 {
     assert(m.size() == 16);
     SetAllCameras(ce, m.data(), origin.data());
+}
+
+void NavigationUtils::LookAt(ControlExec *ce, const vector<double> &position, const vector<double> &target, const vector<double> &up)
+{
+    vec3 pos(position[0], position[1], position[2]);
+    vec3 tar(target[0], target[1], target[2]);
+    vec3 dir = glm::normalize(tar - pos);
+    vector<double> direction = {dir.x, dir.y, dir.z};
+    SetAllCameras(ce, position, direction, up, target);
 }
 
 
@@ -272,6 +305,103 @@ void NavigationUtils::SetTimestep(ControlExec *ce, size_t ts)
     }
 
     paramsMgr->EndSaveStateGroup();
+}
+
+
+static vector<double> DoubleArr3ToVector(double a[3])
+{
+    vector<double> v(3);
+    v[0] = a[0];
+    v[1] = a[1];
+    v[2] = a[2];
+    return v;
+}
+
+
+void NavigationUtils::GetCameraProperties(ControlExec *ce, vector<double> *position, vector<double> *direction, vector<double> *up, vector<double> *target)
+{
+    position->resize(3, 0);
+    direction->resize(3, 0);
+    up->resize(3, 0);
+    target->resize(3, 0);
+    
+    ViewpointParams *vpParams = GetActiveViewpointParams(ce);
+    assert(vpParams);
+    if (!vpParams) return;
+    
+    double m[16], posD[3] = {0}, dirD[3] = {0}, upD[3] = {0}, targetD[3] = {0};
+    vpParams->GetModelViewMatrix(m);
+    vpParams->ReconstructCamera(m, posD, upD, dirD);
+    vpParams->GetRotationCenter(targetD);
+    
+    *position = DoubleArr3ToVector(posD);
+    *direction = DoubleArr3ToVector(dirD);
+    *up = DoubleArr3ToVector(upD);
+    *target = DoubleArr3ToVector(targetD);
+}
+
+
+vector<double> NavigationUtils::GetCameraPosition(ControlExec *ce)
+{
+    vector<double> pos, dir, up, tgt;
+    GetCameraProperties(ce, &pos, &dir, &up, &tgt);
+    return pos;
+}
+
+
+vector<double> NavigationUtils::GetCameraDirection(ControlExec *ce)
+{
+    vector<double> pos, dir, up, tgt;
+    GetCameraProperties(ce, &pos, &dir, &up, &tgt);
+    return dir;
+}
+
+
+vector<double> NavigationUtils::GetCameraUp(ControlExec *ce)
+{
+    vector<double> pos, dir, up, tgt;
+    GetCameraProperties(ce, &pos, &dir, &up, &tgt);
+    return up;
+}
+
+
+vector<double> NavigationUtils::GetCameraTarget(ControlExec *ce)
+{
+    vector<double> pos, dir, up, tgt;
+    GetCameraProperties(ce, &pos, &dir, &up, &tgt);
+    return tgt;
+}
+
+
+void NavigationUtils::SetCameraPosition(ControlExec *ce, const vector<double> &v)
+{
+    vector<double> pos, dir, up, tgt;
+    GetCameraProperties(ce, &pos, &dir, &up, &tgt);
+    SetAllCameras(ce, v, dir, up, tgt);
+}
+
+
+void NavigationUtils::SetCameraDirection(ControlExec *ce, const vector<double> &v)
+{
+    vector<double> pos, dir, up, tgt;
+    GetCameraProperties(ce, &pos, &dir, &up, &tgt);
+    SetAllCameras(ce, pos, v, up, tgt);
+}
+
+
+void NavigationUtils::SetCameraUp(ControlExec *ce, const vector<double> &v)
+{
+    vector<double> pos, dir, up, tgt;
+    GetCameraProperties(ce, &pos, &dir, &up, &tgt);
+    SetAllCameras(ce, pos, dir, v, tgt);
+}
+
+
+void NavigationUtils::SetCameraTarget(ControlExec *ce, const vector<double> &v)
+{
+    vector<double> pos, dir, up, tgt;
+    GetCameraProperties(ce, &pos, &dir, &up, &tgt);
+    SetAllCameras(ce, pos, dir, up, v);
 }
 
 

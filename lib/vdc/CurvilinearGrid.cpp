@@ -131,27 +131,19 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dimsv, const vector<size_
     _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), qtr);
 }
 
-vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
+DimsType CurvilinearGrid::GetCoordDimensions(size_t dim) const
 {
-    const Grid *ptr = nullptr;
+    DimsType dims = {1, 1, 1};
+
     if (dim == 0) {
-        ptr = &_xrg;
+        dims = _xrg.GetDimensions();
     } else if (dim == 1) {
-        ptr = &_yrg;
+        dims = _yrg.GetDimensions();
     } else if (dim == 2) {
-        if (_terrainFollowing) {
-            ptr = &_zrg;
-        } else {
-            return (vector<size_t>(1, _zcoords.size()));
-        }
-    } else {
-        return (vector<size_t>(1, 1));
+        if (_terrainFollowing) { dims = _zrg.GetDimensions(); }
     }
 
-    auto tmp = ptr->GetDimensions();
-    auto tmp2 = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-    tmp2.resize(ptr->GetNumDimensions());
-    return tmp2;
+    return (dims);
 }
 
 void CurvilinearGrid::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const
@@ -444,36 +436,43 @@ namespace {
 
 float interpolateQuad(const float values[4], const double lambda[4], float mv)
 {
-    double lambda0[] = {lambda[0], lambda[1], lambda[2], lambda[3]};
-
-    // Look for missing values. If found, zero out weight
+    // Special handling for any missing values
     //
-    float wTotal = 0.0;
-    int   nMissing = 0;
-    for (int i = 0; i < 4; i++) {
-        if (values[i] == mv) {
-            lambda0[i] = 0.0;
-            nMissing++;
-        } else {
-            wTotal += lambda0[i];
+    if (std::any_of(values, values + 4, [&mv](float v) { return (mv == v); })) {
+        double lambda0[] = {lambda[0], lambda[1], lambda[2], lambda[3]};
+        float  values0[] = {values[0], values[1], values[2], values[3]};
+
+        // Find missing values. Zero out weight
+        //
+        double wTotal = 0.0;
+        int    nMissing = 0;
+        for (int i = 0; i < 4; i++) {
+            if (values0[i] == mv) {
+                lambda0[i] = 0.0;
+                values0[i] = 0.0;
+                nMissing++;
+            } else {
+                wTotal += lambda0[i];
+            }
         }
-    }
 
-    // Re-normalize weights if we have missing values
-    //
-    if (nMissing) {
-        wTotal = 1.0 / wTotal;
-        for (int i = 0; i < 4; i++) { lambda0[i] *= wTotal; }
-    }
+        if (nMissing == 4) return (mv);
+        if (wTotal == 0.0) return (mv);
 
-    float v = 0.0;
-    if (nMissing == 4) {
-        v = mv;
+        // Re-normalize weights if we have missing values
+        //
+        if (nMissing) {
+            wTotal = 1.0 / wTotal;
+            for (int i = 0; i < 4; i++) { lambda0[i] *= wTotal; }
+        }
+        float v = 0.0;
+        for (int i = 0; i < 4; i++) { v += values0[i] * lambda0[i]; }
+        return (v);
     } else {
-        for (int i = 0; i < 4; i++) { v += values[i] * lambda0[i]; }
+        float v = 0.0;
+        for (int i = 0; i < 4; i++) { v += values[i] * lambda[i]; }
+        return (v);
     }
-
-    return (v);
 }
 };    // namespace
 
@@ -514,13 +513,13 @@ float CurvilinearGrid::GetValueLinear(const CoordType &coords) const
 
     if (GetGeometryDim() == 2 || dims[2] < 2) return (v0);
 
-    if (v0 == mv) zwgt[0] = 0.0;
+    if (v0 == mv && zwgt[0] != 0.0) return (mv);
 
     float v1s[] = {AccessIJK(i, j, k + 1), AccessIJK(i + 1, j, k + 1), AccessIJK(i + 1, j + 1, k + 1), AccessIJK(i, j + 1, k + 1)};
 
     float v1 = interpolateQuad(v1s, lambda, mv);
 
-    if (v1 == mv) zwgt[1] = 0.0;
+    if (v1 == mv && zwgt[1] != 0.0) return (mv);
 
     // Linearly interpolate along Z axis
     //

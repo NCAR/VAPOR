@@ -24,6 +24,7 @@ set (SRC
 	DCBOV.cpp
 	DCMPAS.cpp
 	DCP.cpp
+    DCRAM.cpp
     DCMelanie.cpp
 	VDC.cpp
 	VDCNetCDF.cpp
@@ -31,6 +32,7 @@ set (SRC
     DerivedParticleDensity.cpp
 	DerivedVarMgr.cpp
 	DataMgr.cpp
+	PythonDataMgr.cpp
 	GridHelper.cpp
 	DataMgrUtils.cpp
 	GeoUtil.cpp
@@ -70,10 +72,12 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/DCBOV.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCMPAS.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCP.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/DCRAM.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCMelanie.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VDC.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VDCNetCDF.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DataMgr.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/PythonDataMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DataMgrUtils.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GeoUtil.h
 	${PROJECT_SOURCE_DIR}/include/vapor/vizutil.h
@@ -87,6 +91,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/QuadTreeRectangleP.h
 	${PROJECT_SOURCE_DIR}/include/vapor/OpenMPSupport.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCUGRID.h
+	${PROJECT_SOURCE_DIR}/include/vapor/UnstructuredGridCoordless.h
 )
 
 add_library (vdc SHARED ${SRC} ${HEADERS})

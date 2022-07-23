@@ -17,9 +17,73 @@
 
 #include <vapor/utils.h>
 #include <vapor/Grid.h>
+#include <vapor/OpenMPSupport.h>
 
 using namespace std;
 using namespace VAPoR;
+
+namespace {
+
+// Check for point on a quadralateral vertex
+//
+bool interpolate_point_on_node(const std::array<float, 4> &verts, double xwgt, double ywgt, float mv, float &v)
+{
+    if (xwgt == 1.0 && ywgt == 1.0) {
+        v = verts[0];
+        return (true);
+    }
+    if (xwgt == 0.0 && ywgt == 1.0) {
+        v = verts[1];
+        return (true);
+    }
+    if (xwgt == 1.0 && ywgt == 0.0) {
+        v = verts[2];
+        return (true);
+    }
+    if (xwgt == 0.0 && ywgt == 0.0) {
+        v = verts[3];
+        return (true);
+    }
+
+    return (false);
+}
+
+// Check for point on a quad edge, linear interplate along edge if found
+//
+bool interpolate_point_on_edge(const std::array<float, 4> &verts, double xwgt, double ywgt, float mv, float &v)
+{
+    // X edge, bottom
+    //
+    if (ywgt == 1.0 && xwgt > 0.0 && xwgt < 1.0 && verts[0] != mv && verts[1] != mv) {
+        v = (verts[0] * xwgt) + (verts[1] * (1.0 - xwgt));
+        return (true);
+    }
+
+    // Y edge, right
+    //
+    if (xwgt == 0.0 && ywgt > 0.0 && ywgt < 1.0 && verts[1] != mv && verts[3] != mv) {
+        v = (verts[1] * ywgt) + (verts[3] * (1.0 - ywgt));
+        return (true);
+    }
+
+    // X edge, top
+    //
+    if (ywgt == 0.0 && xwgt > 0.0 && xwgt < 1.0 && verts[2] != mv && verts[3] != mv) {
+        v = (verts[2] * xwgt) + (verts[3] * (1.0 - xwgt));
+        return (true);
+    }
+
+    // Y edge, left
+    //
+    if (xwgt == 1.0 && ywgt > 0.0 && ywgt < 1.0 && verts[0] != mv && verts[2] != mv) {
+        v = (verts[0] * ywgt) + (verts[2] * (1.0 - ywgt));
+        return (true);
+    }
+
+    return (false);
+}
+
+}    // namespace
 
 Grid::Grid() { _dims = {1, 1, 1}; }
 
@@ -141,24 +205,55 @@ void Grid::SetValueIJK(size_t i, size_t j, size_t k, float v)
 
 void Grid::GetRange(float range[2]) const
 {
-    float               missingValue = GetMissingValue();
-    Grid::ConstIterator itr = this->cbegin();
-    Grid::ConstIterator enditr = this->cend();
+    const auto missingVal = GetMissingValue();
+    const auto num_vals = _dims[0] * _dims[1] * _dims[2];
+    auto num_threads = size_t{1};
+#pragma omp parallel
+    {
+      if (omp_get_thread_num() == 0)
+        num_threads = omp_get_num_threads();
+    }
+    const auto stride_size = num_vals / num_threads;
 
-    // Edge case: all values are missing values.
-    //
-    range[0] = range[1] = missingValue;
-    while (*itr == missingValue && itr != enditr) { ++itr; }
-    if (itr == enditr) return;
+    auto min_vec = std::vector<float>(num_threads, missingVal);
+    auto max_vec = std::vector<float>(num_threads, missingVal);
 
-    range[0] = *itr;
-    range[1] = range[0];
-    while (itr != enditr) {
-        if (*itr < range[0] && *itr != missingValue)
-            range[0] = *itr;
-        else if (*itr > range[1] && *itr != missingValue)
-            range[1] = *itr;
-        ++itr;
+#pragma omp parallel for
+    for (size_t i = 0; i < num_threads; i++) {
+      auto beg = this->cbegin() + i * stride_size;
+      auto end = beg;
+      if (i < num_threads - 1) 
+        end += stride_size;
+      else
+        end = this->cend();
+
+      while (*beg == missingVal && beg != end)
+        ++beg;
+
+      if (beg != end) {
+        auto min = *beg;
+        auto max = *beg;
+        for (auto itr  = beg + 1; itr != end; ++itr) {
+          if (*itr != missingVal) {
+            min = std::min(*itr, min);      
+            max = std::max(*itr, max);      
+          }
+        }
+        min_vec[i] = min;
+        max_vec[i] = max;
+      }
+    } // finish omp section
+
+    if (std::all_of(min_vec.begin(), min_vec.end(), 
+        [missingVal](float v){return v == missingVal;})) {
+      range[0] = missingVal;
+      range[1] = missingVal;
+    }
+    else {
+      auto it = std::remove(min_vec.begin(), min_vec.end(), missingVal);
+      range[0] = *std::min_element(min_vec.begin(), it);
+      it = std::remove(max_vec.begin(), max_vec.end(), missingVal);
+      range[1] = *std::max_element(max_vec.begin(), it);
     }
 }
 
@@ -255,6 +350,74 @@ void Grid::SetInterpolationOrder(int order)
 {
     if (order < 0 || order > 2) order = 1;
     _interpolationOrder = order;
+}
+
+DimsType Grid::Dims(const DimsType &min, const DimsType &max)
+{
+    DimsType dims;
+
+    for (int i = 0; i < min.size(); i++) { dims[i] = (max[i] - min[i] + 1); }
+    return (dims);
+}
+
+float Grid::BilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt) const
+{
+    auto dims = GetDimensions();
+    VAssert(i < dims[0]);
+    VAssert(j < dims[1]);
+    VAssert(k < dims[2]);
+
+    float mv = GetMissingValue();
+
+    std::array<float, 4> verts{0.0, 0.0, 0.0, 0.0};
+    verts[0] = AccessIJK(i, j, k);
+    verts[1] = dims[0] > 1 ? AccessIJK(i + 1, j, k) : 0.0;
+    verts[2] = dims[1] > 1 ? AccessIJK(i, j + 1, k) : 0.0;
+    verts[3] = dims[0] > 1 && dims[1] > 1 ? AccessIJK(i + 1, j + 1, k) : 0.0;
+
+    if (std::any_of(verts.begin(), verts.end(), [&mv](float v) { return (mv == v); })) {
+        float v = 0.0;
+        if (interpolate_point_on_node(verts, xwgt, ywgt, mv, v)) return (v);
+
+        if (interpolate_point_on_edge(verts, xwgt, ywgt, mv, v)) return (v);
+
+        return (mv);
+    }
+
+    return (((verts[0] * xwgt + verts[1] * (1.0 - xwgt)) * ywgt) + ((verts[2] * xwgt + verts[3] * (1.0 - xwgt)) * (1.0 - ywgt)));
+}
+
+float Grid::TrilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt, const double zwgt) const
+{
+    auto dims = GetDimensions();
+    VAssert(i < dims[0]);
+    VAssert(j < dims[1]);
+    VAssert(k < dims[2]);
+
+    float mv = GetMissingValue();
+
+    float v0 = BilinearInterpolate(i, j, k, xwgt, ywgt);
+
+    if (dims[2] > 1 && k < (dims[2] - 1))
+        k++;
+    else
+        return (v0);
+
+    float v1 = BilinearInterpolate(i, j, k, xwgt, ywgt);
+
+    if (v0 == mv || v1 == mv) {
+        if (zwgt == 1.0)
+            return (v0);
+        else if (zwgt == 0.0)
+            return (v1);
+        else
+            return (mv);
+    }
+
+
+    // Linearly interpolate along Z axis
+    //
+    return (v0 * zwgt + v1 * (1.0 - zwgt));
 }
 
 /////////////////////////////////////////////////////////////////////////////

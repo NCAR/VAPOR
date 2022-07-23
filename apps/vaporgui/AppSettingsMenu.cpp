@@ -1,6 +1,7 @@
+#include <vapor/OpenMPSupport.h>
 #include <QVBoxLayout>
 #include <AppSettingsMenu.h>
-#include <SettingsParams.h>
+#include <vapor/SettingsParams.h>
 #include "PWidgets.h"
 #include "PGroup.h"
 #include "PFileSelectorHLI.h"
@@ -87,6 +88,12 @@ public:
 
 AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(), _params(nullptr)
 {
+    int nthreads = 1;
+#pragma omp parallel
+    {
+        if (omp_get_thread_num() == 0) nthreads = omp_get_num_threads();
+    }
+
     _settings = new PGroup({
         new PSection("Automatic Session Recovery",
                      {
@@ -101,7 +108,7 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
                      {
                          new PCheckboxHLI<SettingsParams>("Check for and show notices on startup", &SettingsParams::GetAutoCheckForNotices, &SettingsParams::SetAutoCheckForNotices),
                          new PCheckboxHLI<SettingsParams>("Automatically stretch domain", &SettingsParams::GetAutoStretchEnabled, &SettingsParams::SetAutoStretchEnabled),
-                         new PCheckbox(SettingsParams::UseAllCoresTag, "Use all available cores for multithreaded tasks"),
+                         new PCheckbox(SettingsParams::UseAllCoresTag, "Use all (" + std::to_string(nthreads) + ") available cores for multithreaded tasks"),
                          new PSubGroup({(new PIntegerInputHLI<SettingsParams>("Limit threads to", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads))
                                             ->SetRange(1, 1024)
                                             ->EnableBasedOnParam(SettingsParams::UseAllCoresTag, false)}),

@@ -53,20 +53,19 @@ UnstructuredGridLayered::UnstructuredGridLayered(const std::vector<size_t> &vert
     VAssert(location == NODE);
 }
 
-vector<size_t> UnstructuredGridLayered::GetCoordDimensions(size_t dim) const
+DimsType UnstructuredGridLayered::GetCoordDimensions(size_t dim) const
 {
+    DimsType dims = {1, 1, 1};
+
     if (dim == 0) {
-        return (_ug2d.GetCoordDimensions(dim));
+        dims = _ug2d.GetCoordDimensions(dim);
     } else if (dim == 1) {
-        return (_ug2d.GetCoordDimensions(dim));
+        dims = _ug2d.GetCoordDimensions(dim);
     } else if (dim == 2) {
-        auto tmp = _zug.GetDimensions();
-        auto dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
-        dims.resize(_zug.GetNumDimensions());
-        return dims;
-    } else {
-        return (vector<size_t>(1, 1));
+        dims = _zug.GetDimensions();
     }
+
+    return (dims);
 }
 
 size_t UnstructuredGridLayered::GetGeometryDim() const { return (3); }
@@ -225,15 +224,45 @@ float UnstructuredGridLayered::GetValueLinear(const CoordType &coords) const
 
     // Interpolate value inside bottom face
     //
+    float mv = GetMissingValue();
+
     float  z0 = 0.0;
     size_t k0 = indices[1];
-    for (int i = 0; i < lambda.size(); i++) { z0 += AccessIJK(nodes2D[i], k0) * lambda[i]; }
+    for (size_t i = 0; i < lambda.size(); i++) {
+        float v = AccessIJK(nodes2D[i], k0, 0);
+        if (v == mv) {
+            if (lambda[i] != 0.0) {
+                z0 = mv;
+                break;
+            } else
+                v = 0.0;
+        }
+
+        z0 += v * lambda[i];
+    }
+
+    if (z0 == mv) return (mv);
+
+    size_t k1 = k0 + 1;
+    if (k1 >= GetDimensions()[1] || zwgt[1] == 0.0) return (z0);
 
     // Interpolate value inside top face
     //
     float z1 = 0.0;
-    float k1 = indices[1] + 1;
-    for (int i = 0; i < lambda.size(); i++) { z1 += AccessIJK(nodes2D[i], k1) * lambda[i]; }
+    for (int i = 0; i < lambda.size(); i++) {
+        float v = AccessIJK(nodes2D[i], k1, 0);
+        if (v == mv) {
+            if (lambda[i] != 0.0) {
+                z1 = mv;
+                break;
+            } else
+                v = 0.0;
+        }
+
+        z1 += v * lambda[i];
+    }
+
+    if (z1 == mv) return (mv);
 
     return (z0 * zwgt[0] + z1 * zwgt[1]);
 }

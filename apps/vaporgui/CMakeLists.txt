@@ -4,7 +4,6 @@ set (SRCS
 	RenderHolder.cpp
 	GLWidget.cpp
 	ErrorReporter.cpp
-	Histo.cpp
 	VizSelectCombo.cpp
 	AnnotationEventRouter.cpp
 	ViewpointTab.cpp
@@ -21,7 +20,6 @@ set (SRCS
 	BarbEventRouter.cpp
 	BarbEventRouter.h
 	BannerGUI.cpp
-	SettingsParams.cpp
 	main.cpp
 	MainForm.cpp
 	MainForm_isOpenGLContextActive.cpp
@@ -122,6 +120,10 @@ set (SRCS
     VDoubleLineEdit.cpp
     VDoubleSliderEdit.cpp
     VDoubleSliderEdit.h
+    VDoubleSliderEditMenu.cpp
+    VDoubleSliderEditMenu.h
+    VIntSliderEditMenu.cpp
+    VIntSliderEditMenu.h
     VIntSliderEdit.cpp
     VIntSliderEdit.h
     VNumericLineEdit.cpp
@@ -277,6 +279,8 @@ set (SRCS
     ParticleEventRouter.h
     PTimestepSliderEdit.cpp
     PTimestepSliderEdit.h
+    PMetadataClasses.cpp
+    PMetadataClasses.h
 
 	# Need to include all files that request .ui files
 	Statistics.h
@@ -293,7 +297,6 @@ set (SRCS
 	VizWinMgr.h
 	windowsUtils.h
 	ErrorReporter.h
-	Histo.h
 	EventRouter.h
 	GLWidget.h
 	VizWin.h
@@ -312,7 +315,6 @@ set (SRCS
 	RangeCombos.h
 	RenderEventRouter.h
 	RenderHolder.h
-	SettingsParams.h
 	StatisticsParams.h
 	TabManager.h
 	VizSelectCombo.h
@@ -346,7 +348,6 @@ set (CMAKE_AUTORCC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set (ASSIMP_LIB assimp)
-set (PYTHON_LIB python${PYTHONVERSION}m)
 set (TIFF_LIB tiff)
 
 if (APPLE)
@@ -361,7 +362,6 @@ if (APPLE)
 	set (INSTALL_BIN_DIR ".")
 elseif (WIN32)
     set (ASSIMP_LIB assimp-vc140-mt)
-    set (PYTHON_LIB python${PYTHONVERSION})
     set (TIFF_LIB libtiff)
 
 	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/share/images/vapor-win-icon.ico")
@@ -372,9 +372,9 @@ else ()
 endif()
 
 target_link_libraries (
-        vapor common vdc wasp render params jpeg ${GLEW} 
+        vapor common vdc wasp render params jpeg
         ${TIFF_LIB} geotiff ${ASSIMP_LIB} Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus Qt5::Network
-        ${PYTHON_LIB}
+        ${Python_LIBRARIES}
 )
 
 if (APPLE)
@@ -385,6 +385,7 @@ if (APPLE)
 	target_link_libraries (vapor ${CORESERVICES} ${FOUNDATION} ${COCOA})
 elseif (UNIX AND NOT APPLE)
 	target_link_libraries (vapor quadmath)
+	target_compile_options(vapor PRIVATE -Wno-conversion-null)
 endif ()
 
 OpenMPInstall (

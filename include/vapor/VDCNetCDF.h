@@ -180,10 +180,8 @@ protected:
     int closeVariable(int fd);
 
     int readRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+    int readRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, double *region);
     int readRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, int *region);
-
-    int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
-    int readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region);
 
     virtual bool variableExists(size_t ts, string varname, int reflevel = 0, int lod = 0) const;
 
@@ -272,8 +270,6 @@ private:
 
     template<class T>
     int _copyVarHelper(DC &dc, int fdr, int fdw, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, T *buffer);
-
-    template<class T> int _readRegionBlockTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 
     template<class T> int _readRegionTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region);
 };

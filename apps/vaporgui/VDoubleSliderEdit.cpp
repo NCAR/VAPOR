@@ -7,7 +7,7 @@
 
 #include "VDoubleSliderEdit.h"
 #include "VDoubleLineEdit.h"
-#include "VDoubleRangeMenu.h"
+#include "VDoubleSliderEditMenu.h"
 #include "VSlider.h"
 
 VDoubleSliderEdit::VDoubleSliderEdit(double min, double max, double value, bool rangeChangable) : VSliderEditInterface(), _value(value), _rangeChangable(rangeChangable)
@@ -33,12 +33,17 @@ void VDoubleSliderEdit::AllowUserRange(bool allowed)
 
 void VDoubleSliderEdit::_makeContextMenu()
 {
-    _menu = new VDoubleRangeMenu(this, _lineEdit->GetSciNotation(), _lineEdit->GetNumDigits(), _slider->GetMinimum(), _slider->GetMaximum(), _rangeChangable);
+    _menu = new VDoubleSliderEditMenu(this);
     connect(_menu, &VNumericFormatMenu::DecimalDigitsChanged, this, &VDoubleSliderEdit::SetNumDigits);
     connect(_menu, &VNumericFormatMenu::SciNotationChanged, this, &VDoubleSliderEdit::SetSciNotation);
     connect(_menu, &VDoubleRangeMenu::MinChanged, this, &VDoubleSliderEdit::SetMinimum);
     connect(_menu, &VDoubleRangeMenu::MaxChanged, this, &VDoubleSliderEdit::SetMaximum);
+    connect(_menu, &VDoubleSliderEditMenu::DynamicUpdateChanged, this, &VDoubleSliderEdit::SetDynamicUpdate);
 }
+
+void VDoubleSliderEdit::AllowDynamicUpdate() const { _menu->AllowDynamicUpdate(); }
+
+void VDoubleSliderEdit::SetDynamicUpdate(bool enabled) { emit DynamicUpdateChanged(enabled); }
 
 bool VDoubleSliderEdit::GetSciNotation() const { return _lineEdit->GetSciNotation(); }
 
@@ -85,7 +90,11 @@ double VDoubleSliderEdit::GetMinimum() const
 void VDoubleSliderEdit::SetMinimum(double min)
 {
     // If the new value is unchanged, or illegal, reset the menu and return
-    if (min == _slider->GetMinimum() || min >= _slider->GetMaximum() || min > _value) {
+    if (min == _slider->GetMinimum() || min > _slider->GetMaximum()) {
+        if (min > _value) {
+            _value = min;
+            SetValue(_value);
+        }
         _menu->SetMinimum(_slider->GetMinimum());
         return;
     }
@@ -103,7 +112,11 @@ double VDoubleSliderEdit::GetMaximum() const { return _slider->GetMaximum(); }
 void VDoubleSliderEdit::SetMaximum(double max)
 {
     // If the new value is unchanged, or illegal, reset the menu and retur
-    if (max == _slider->GetMaximum() || max <= _slider->GetMinimum() || max < _value) {
+    if (max == _slider->GetMaximum() || max < _slider->GetMinimum()) {
+        if (max < _value) {
+            _value = max;
+            SetValue(_value);
+        }
         _menu->SetMaximum(_slider->GetMaximum());
         return;
     }

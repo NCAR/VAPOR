@@ -132,6 +132,17 @@ int ControlExec::ResizeViz(string winName, int width, int height)
     return 0;
 }
 
+void ControlExec::ClearRenderCache(const string &winName, const string &inst)
+{
+    getVisualizer(winName)->ClearRenderCache(inst);
+}
+
+void ControlExec::ClearAllRenderCaches()
+{
+    std::map<string, Visualizer *>::const_iterator itr;
+    for (itr = _visualizers.begin(); itr != _visualizers.end(); ++itr) { itr->second->ClearRenderCache(); }
+}
+
 GLManager::Vendor ControlExec::GetGPUVendor() const { return _cachedVendor; }
 
 int ControlExec::Paint(string winName, bool fast)
@@ -808,6 +819,62 @@ bool ControlExec::RenderLookup(string instName, string &winName, string &dataSet
     return (ok);
 }
 
+string ControlExec::MakeRendererNameUnique(string name) const
+{
+    string newname = name;
+
+    ParamsMgr *pm = GetParamsMgr();
+
+    vector<string> allInstNames;
+
+    // Get ALL of the renderer instance names defined
+    //
+    vector<string> vizNames = pm->GetVisualizerNames();
+    for (int i = 0; i < vizNames.size(); i++) {
+        vector<string> classNames = GetRenderClassNames(vizNames[i]);
+
+        for (int j = 0; j < classNames.size(); j++) {
+            vector<string> rendererNames = GetRenderInstances(vizNames[i], classNames[j]);
+
+            allInstNames.insert(allInstNames.begin(), rendererNames.begin(), rendererNames.end());
+        }
+    }
+
+    while (1) {
+        bool match = false;
+        for (int i = 0; i < allInstNames.size(); i++) {
+            string usedName = allInstNames[i];
+
+            if (newname != usedName) continue;
+
+            match = true;
+
+            // found a match.  Modify newname
+            // If newname ends with a number, increase the number.
+            // Otherwise just append _1
+            //
+            size_t lastnonint = newname.find_last_not_of("0123456789");
+            if (lastnonint < newname.length() - 1) {
+                // remove terminating int
+                string endchars = newname.substr(lastnonint + 1);
+                // Convert to int:
+                int termInt = atoi(endchars.c_str());
+                // int termInt = std::stoi(endchars);
+                termInt++;
+                // convert termInt to a string
+                std::stringstream ss;
+                ss << termInt;
+                endchars = ss.str();
+                newname.replace(lastnonint + 1, string::npos, endchars);
+            } else {
+                newname = newname + "_1";
+            }
+        }
+        if (!match) break;
+    }
+    return newname;
+}
+
 int ControlExec::DrawText(string winName, string text, int x, int y, int size, float color[3], int type)
 {
     Visualizer *v = getVisualizer(winName);
@@ -882,8 +949,7 @@ int ControlExec::AddFunction(string scriptType, string dataSetName, string scrip
     // the variable's name will not. Hence, if we don't clear the data
     // the renderer may continue using old data
     //
-    std::map<string, Visualizer *>::const_iterator itr;
-    for (itr = _visualizers.begin(); itr != _visualizers.end(); ++itr) { itr->second->ClearRenderCache(); }
+    ClearAllRenderCaches();
 
     return (_calcEngineMgr->AddFunction(scriptType, dataSetName, scriptName, script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag));
 }

@@ -732,58 +732,10 @@ template<class T> int VDCNetCDF::_readRegionTemplate(int fd, const vector<size_t
 
 int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
+int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, double *region) { return (_readRegionTemplate(fd, min, max, region)); }
+
 int VDCNetCDF::readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionTemplate(fd, min, max, region)); }
 
-template<class T> int VDCNetCDF::_readRegionBlockTemplate(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
-{
-    VDCFileObject *o = (VDCFileObject *)_fileTable.GetEntry(fd);
-    if (!o) {
-        SetErrMsg("Invalid file descriptor : %d", fd);
-        return (-1);
-    }
-
-    WASP * wasp = o->GetWaspData();
-    string varname = o->GetVarname();
-    size_t file_ts = o->GetFileTS();
-    WASP * wasp_mask = o->GetWaspMask();
-
-    bool time_varying = VDC::IsTimeVarying(varname);
-
-    vector<size_t> start;
-    vector<size_t> count;
-    vdc_2_ncdfcoords(file_ts, file_ts, time_varying, min, max, start, count);
-
-    int rc = wasp->GetVaraBlock(start, count, region);
-    if (rc < 0) return (rc);
-
-    // if no mask we're done
-    //
-    if (!wasp_mask) return (0);
-
-    size_t file_ts_mask = o->GetFileTSMask();
-    double mv = o->GetMissingValue();
-
-    // If there is a mask associated with this variable we need to
-    // restore the missing value
-    //
-    string mask_varname = o->GetVarnameMask();
-    time_varying = VDC::IsTimeVarying(mask_varname);
-    vdc_2_ncdfcoords(file_ts_mask, file_ts_mask, time_varying, min, max, start, count);
-
-    size_t         size = vproduct(count);
-    unsigned char *mask = (unsigned char *)_mask_buffer.Alloc(size);
-    rc = wasp_mask->GetVaraBlock(start, count, mask);
-    if (rc < 0) return (rc);
-
-    for (size_t i = 0; i < size; i++) {
-        if (!mask[i]) { region[i] = mv; }
-    }
-    return (0);
-}
-
-int VDCNetCDF::readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (_readRegionBlockTemplate(fd, min, max, region)); }
-
-int VDCNetCDF::readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, int *region) { return (_readRegionBlockTemplate(fd, min, max, region)); }
 
 template<class T> int VDCNetCDF::_putVarTemplate(string varname, int lod, const T *data)
 {

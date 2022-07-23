@@ -10,13 +10,6 @@
 #define WIREFRAMERENDERER_H
 
 #include <vapor/glutil.h>    // Must be included first!!!
-
-#ifdef Darwin
-    #include <OpenGL/gl.h>
-#else
-    #include <GL/gl.h>
-#endif
-
 #include <utility>
 #include <vapor/DataMgr.h>
 #include <vapor/utils.h>

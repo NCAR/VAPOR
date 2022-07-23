@@ -153,12 +153,66 @@ public:
         return (_dc->GetDimensionNames());
     }
 
+    //! \copydoc DC::GetAtt(string, string, vector<double>&)
+    //
+    bool GetAtt (string varname, string attname, vector< double > &values) const
+    {
+        VAssert(_dc);
+        return (_dc->GetAtt(varname, attname, values));
+    }
+
+    //! \copydoc DC::GetAtt(string, string, vector<long>&)
+    //
+    bool GetAtt (string varname, string attname, vector<long> &values) const
+    {
+        VAssert(_dc);
+        return (_dc->GetAtt(varname, attname, values));
+    }
+
+    //! \copydoc DC::GetAtt(string, string, string&)
+    //
+    bool GetAtt (string varname, string attname, string &values) const
+    {
+        VAssert(_dc);
+        return (_dc->GetAtt(varname, attname, values));
+    }
+
+    //! \copydoc DC::GetAttNames(string)
+    //
+    std::vector<string> GetAttNames(string varname) const
+    {
+        VAssert(_dc);
+        return (_dc->GetAttNames(varname));
+    }
+
+    //! \copydoc DC::GetAttType(string, string)
+    //
+    DC::XType GetAttType(string varname, string attname) const
+    {
+        VAssert(_dc);
+        return (_dc->GetAttType(varname, attname));
+    }
+
     //! \copydoc DC::GetDimension()
     //
     bool GetDimension(string dimname, DC::Dimension &dimension, long ts) const
     {
         VAssert(_dc);
         return (_dc->GetDimension(dimname, dimension, ts));
+    }
+    
+    //! Returns the length of a dimension at a given timestep
+    //!
+    //! \retval length A negative int is returned on failure
+    //!
+    long GetDimensionLength(string name, long ts) const
+    {
+        VAssert(_dc);
+        DC::Dimension dimension;
+        bool ok = GetDimension(name, dimension, ts);
+        if (ok)
+            return dimension.GetLength();
+        return -1;
     }
 
     //! \copydoc DC::GetMeshNames()
@@ -253,6 +307,7 @@ public:
     //!
     //
     virtual bool GetVarCoordVars(string varname, bool spatial, std::vector<string> &coord_vars) const;
+    vector<string> GetVarCoordVars(string varname, bool spatial) const;
 
     //! Return a data variable's definition
     //!
@@ -302,8 +357,8 @@ public:
 
     //! Return a boolean indicating whether a variable is time varying
     //!
-    //! This method returns \b true if the variable named by \p varname is defined
-    //! and it has a time axis dimension. If either of these conditions
+    //! This method returns \b true if the variable named by \p varname
+    //! is defined and it has a time axis dimension. If either of these conditions
     //! is not true the method returns false.
     //!
     //! \param[in] varname A string specifying the name of the variable.
@@ -599,7 +654,7 @@ public:
         std::vector<CoordType> _maxs;
     };
 
-private:
+protected:
     //
     // Cache for various metadata attributes
     //
@@ -796,8 +851,6 @@ private:
 
     void _assignHorizontalCoords(vector<string> &coord_vars) const;
 
-    void _assignTimeCoord(string &coord_var) const;
-
     bool _getVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const;
 
     bool _getDataVarDimensions(string varname, vector<DC::Dimension> &dimensions, long ts) const;
@@ -826,13 +879,12 @@ private:
 
     int _openVariableRead(size_t ts, string varname, int level, int lod);
 
-    template<class T> int _readRegionBlock(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region);
     template<class T> int _readRegion(int fd, const DimsType &min, const DimsType &max, size_t ndims, T *region);
     int                   _closeVariable(int fd);
 
-    int _getVar(string varname, int level, int lod, float *data);
+    template<class T> int _getVar(string varname, int level, int lod, T *data);
 
-    int _getVar(size_t ts, string varname, int level, int lod, float *data);
+    template<class T> int _getVar(size_t ts, string varname, int level, int lod, T *data);
 
     void _getLonExtents(std::vector<float> &lons, DimsType dims, float &min, float &max) const;
 

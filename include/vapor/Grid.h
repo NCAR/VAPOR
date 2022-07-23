@@ -124,7 +124,7 @@ public:
     //! a vector of length one with its single component equal to
     //! one is returned.
     //!
-    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const = 0;
+    virtual DimsType GetCoordDimensions(size_t dim) const = 0;
 
     virtual std::string GetType() const = 0;
 
@@ -442,6 +442,11 @@ public:
     //! \sa GetInterpolationOrder()
     //!
     virtual void SetInterpolationOrder(int order);
+
+    //! Compute the dimensions of a rectangular region bounded
+    //! by \p min and \p max coordinates
+    //
+    static DimsType Dims(const DimsType &min, const DimsType &max);
 
     //! Return the user coordinates of a grid point
     //!
@@ -791,6 +796,7 @@ public:
 
         return ((left <= pt[0]) && (right >= pt[0]) && (top <= pt[1]) && (bottom >= pt[1]));
     }
+
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
 
@@ -1262,6 +1268,10 @@ protected:
             }
         }
     }
+
+    float BilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt) const;
+
+    float TrilinearInterpolate(size_t i, size_t j, size_t k, const double xwgt, const double ywgt, const double zwgt) const;
 
 private:
     DimsType             _dims;                   // dimensions of grid arrays

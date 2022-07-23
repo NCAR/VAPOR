@@ -38,7 +38,7 @@
 #include <chrono>
 #include <vapor/ControlExecutive.h>
 #include <vapor/GUIStateParams.h>
-#include "SettingsParams.h"
+#include <vapor/SettingsParams.h>
 #include <vapor/AnimationParams.h>
 #include "AnimationController.h"
 //#include "MiscParams.h"
@@ -56,6 +56,7 @@ class QLabel;
 class QSpinBox;
 class ProgressStatusBar;
 class QTimer;
+class QDialog;
 
 class VizWindow;
 class VizWinMgr;
@@ -68,6 +69,7 @@ class PythonVariables;
 class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
+class PMetadataSection;
 
 namespace VAPoR {
 class XmlNode;
@@ -148,6 +150,7 @@ private:
     QAction *_plotAction;
     QAction *_statsAction;
     QAction *_pythonAction;
+    QAction *_metadataAction;
 
     // Capture menu
     //
@@ -190,6 +193,8 @@ private:
     Statistics *        _stats;
     Plot *              _plot;
     PythonVariables *   _pythonVariables;
+    PMetadataSection*   _metadata;
+    QDialog*            _metadataDialog;
     AppSettingsMenu *   _appSettingsMenu;
     BannerGUI *         _banner;
     VizSelectCombo *    _windowSelector;
@@ -355,6 +360,7 @@ private slots:
     void launchStats();
     void launchPlotUtility();
     void launchPythonVariables();
+    void launchMetadata();
 
     // animation toolbar:
     void _setTimeStep();

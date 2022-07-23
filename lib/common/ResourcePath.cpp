@@ -3,6 +3,7 @@
 #include <vapor/CMakeConfig.h>
 #include <vapor/FileUtils.h>
 #include <vapor/CFuncs.h>
+#include <cassert>
 
 #define INCLUDE_DEPRECATED_GET_APP_PATH
 #include "vapor/GetAppPath.h"
@@ -65,17 +66,26 @@ string GetInstalledResourceRoot()
     return path;
 }
 
+#define TRY_PATH(p) {                                 \
+    string path = Wasp::FileUtils::POSIXPathToCurrentOS(p); \
+    if (Wasp::FileUtils::Exists(path)) return path;         \
+}
+
+std::string (*resourceFinderCB)(const std::string &) = nullptr;
+
+string GetResourcePathFromCallback(const std::string &name)
+{
+    if (resourceFinderCB)
+        return resourceFinderCB(name);
+    return "";
+}
+
 std::string Wasp::GetResourcePath(const std::string &name)
 {
-    string path;
-
-#define TRY_PATH(p)                            \
-    path = FileUtils::POSIXPathToCurrentOS(p); \
-    if (FileUtils::Exists(path)) return path;
-
 #if FORCE_USE_DEV_LIBS
     TRY_PATH(FileUtils::JoinPaths({SOURCE_DIR, name}));
 #else
+    TRY_PATH(GetResourcePathFromCallback(name));
     TRY_PATH(FileUtils::JoinPaths({GetInstalledResourceRoot(), name}));
     TRY_PATH(FileUtils::JoinPaths({SOURCE_DIR, name}));
     TRY_PATH(FileUtils::JoinPaths({THIRD_PARTY_DIR, name}));
@@ -116,4 +126,10 @@ std::string Wasp::GetPythonDir()
 
     if (!FileUtils::Exists(FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH}))) path = string(PYTHON_DIR);
     return path;
+}
+
+void Wasp::RegisterResourceFinder(std::string (*cb)(const std::string &))
+{
+    assert(resourceFinderCB == nullptr);
+    resourceFinderCB = cb;
 }

@@ -23,8 +23,8 @@ public:
     using Box::Box;
     FlowParams *parent = nullptr;
 
-    void        Initialize(string tag);
-    void        SetExtents(const vector<double> &minExt, const vector<double> &maxExt) override;
+    void Initialize(string tag);
+    void SetExtents(const vector<double> &minExt, const vector<double> &maxExt) override;
 };
 
 class PARAMS_API FlowParams : public RenderParams {
@@ -32,6 +32,9 @@ class PARAMS_API FlowParams : public RenderParams {
     FakeRakeBox *_fakeRakeBox = nullptr;
     FakeRakeBox *_fakeIntegrationBox = nullptr;
     bool         _initialized = false;
+
+    void   _setRakeCenter(int dim, double center);
+    double _getRakeCenter(int dim);
 
 public:
     enum RenderType { RenderTypeStream, RenderTypeSamples, RenderTypeDensity };
@@ -141,18 +144,52 @@ public:
             return GetColorMapVariableName();
     }
 
+    //! Get the rake's center position on the X axis
+    //! \retval X rake center
+    double GetXRakeCenter();
+
+    //! Set the rake's center position on the X axis
+    //! \param[in] Rake center position on X axis
+    void SetXRakeCenter(double center);
+
+    //! Get the rake's center position on the Y axis
+    //! \retval Y rake center
+    double GetYRakeCenter();
+
+    //! Set the rake's center position on the Y axis
+    //! \param[in] Rake center position on Y axis
+    void SetYRakeCenter(double center);
+
+    //! Get the rake's center position on the Z axis
+    //! \retval Z rake center
+    double GetZRakeCenter();
+
+    //! Set the rake's center position on the Z axis
+    //! \param[in] Rake center position on Z axis
+    void SetZRakeCenter(double center);
+
+    //! The rendering type that represents the flow paths.
+    //! See RenderType enum class.
     static const std::string RenderTypeTag;
     static const std::string RenderRadiusBaseTag;
+    //! Scales the radius of the flow tube rendering
     static const std::string RenderRadiusScalarTag;
+    //! Toggles between rendering 2d glyphs and 3d geometry of the render type
     static const std::string RenderGeom3DTag;
     static const std::string RenderLightAtCameraTag;
+    //! Draws the direction of the flow stream
     static const std::string RenderShowStreamDirTag;
-
+    
+    //! When rendering samples, determines whether samples are rendered as circles or arrows
     static const std::string RenderGlyphTypeTag;
+    //! When rendering samples, draw every N samples
     static const std::string RenderGlyphStrideTag;
+    //! When rendering samples, only draw the leading sample in a path
     static const std::string RenderGlyphOnlyLeadingTag;
 
+    //! Falloff parameter for density rendering
     static const std::string RenderDensityFalloffTag;
+    //! ToneMapping parameter for density rendering
     static const std::string RenderDensityToneMappingTag;
 
     static const std::string RenderFadeTailTag;

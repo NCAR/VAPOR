@@ -21,6 +21,16 @@ using namespace std;
 
 namespace {
 
+DC::XType netcdf_to_dc_xtype(int t)
+{
+    switch (t) {
+    case NC_DOUBLE: return (DC::XType::DOUBLE);
+    case NC_INT64: return (DC::XType::INT64);
+    case NC_CHAR: return (DC::XType::TEXT);
+    default: return (DC::XType::INVALID);
+    }
+}
+
 #ifdef UNUSED_FUNCTION
 // Product of elements in a vector
 //
@@ -44,26 +54,23 @@ DCCF::DCCF()
     _dataVarsMap.clear();
     _auxVarsMap.clear();
     _meshMap.clear();
-    _derivedVars.clear();
 }
 
 DCCF::~DCCF()
 {
     if (_ncdfc) delete _ncdfc;
-
-    for (int i = 0; i < _derivedVars.size(); i++) {
-        if (_derivedVars[i]) delete _derivedVars[i];
-    }
-    _derivedVars.clear();
 }
 
 int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
+    return initialize(paths, options, new NetCDFCFCollection());
+}
+
+int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options, NetCDFCFCollection *ncdfc)
+{
     if (_ncdfc) delete _ncdfc;
-    _ncdfc = nullptr;
-
-    NetCDFCFCollection *ncdfc = new NetCDFCFCollection();
-
+    _paths = paths;
+    
     // Initialize the NetCDFCFCollection class.
     //
     int rc = ncdfc->Initialize(paths);
@@ -80,9 +87,24 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
         return (-1);
     }
 
+    _ncdfc = ncdfc;
+
+    return BuildCache();
+}
+
+int DCCF::Reinitialize()
+{
+    return Initialize(_paths, {});
+}
+
+int DCCF::BuildCache()
+{
+    auto ncdfc = _ncdfc;
+    int rc;
+    
     //
     //  Get the dimensions of the grid.
-    //	Initializes members: _dimsMap
+    //    Initializes members: _dimsMap
     //
     rc = initDimensions(ncdfc, _dimsMap);
     if (rc < 0) {
@@ -114,10 +136,8 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
     //
     rc = initDataVars(ncdfc, _dataVarsMap);
     if (rc < 0) return (-1);
-
-    _ncdfc = ncdfc;
-
-    return (0);
+    
+    return 0;
 }
 
 bool DCCF::getDimension(string dimname, DC::Dimension &dimension) const
@@ -240,6 +260,11 @@ std::vector<string> DCCF::getAuxVarNames() const
 
 template<class T> bool DCCF::_getAttTemplate(string varname, string attname, T &values) const
 {
+    if (varname.empty()) {
+        _ncdfc->GetAtt("", attname, values);
+        return (true);
+    }
+
     DC::BaseVar var;
     bool        status = getBaseVarInfo(varname, var);
     if (!status) return (status);
@@ -276,6 +301,8 @@ bool DCCF::getAtt(string varname, string attname, string &values) const
 
 std::vector<string> DCCF::getAttNames(string varname) const
 {
+    if (varname.empty()) return (_ncdfc->GetAttNames(""));
+
     DC::BaseVar var;
     bool        status = getBaseVarInfo(varname, var);
     if (!status) return (vector<string>());
@@ -291,6 +318,8 @@ std::vector<string> DCCF::getAttNames(string varname) const
 
 DC::XType DCCF::getAttType(string varname, string attname) const
 {
+    if (varname.empty()) { return (netcdf_to_dc_xtype(_ncdfc->GetAttType("", attname))); }
+
     DC::BaseVar var;
     bool        status = getBaseVarInfo(varname, var);
     if (!status) return (DC::INVALID);
@@ -603,6 +632,7 @@ int DCCF::getVarCoordinates(NetCDFCFCollection *ncdfc, string varname, vector<st
 //
 int DCCF::initMesh(NetCDFCFCollection *ncdfc, std::map<string, DC::Mesh> &meshMap)
 {
+    meshMap.clear();
     //
     // Get names of variables  in the CF data set that have 0 to 3
     // spatial dimensions

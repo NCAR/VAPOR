@@ -65,21 +65,19 @@ RegularGrid::RegularGrid(const vector<size_t> &dimsv, const vector<size_t> &bsv,
     _regularGrid(minu, maxu);
 }
 
-vector<size_t> RegularGrid::GetCoordDimensions(size_t dim) const
+DimsType RegularGrid::GetCoordDimensions(size_t dim) const
 {
+    DimsType dims = {1, 1, 1};
+
     if (dim == 0) {
-        return (vector<size_t>(1, GetDimensions()[0]));
+        dims[0] = GetDimensions()[0];
     } else if (dim == 1) {
-        return (vector<size_t>(1, GetDimensions()[1]));
+        dims[0] = GetDimensions()[1];
     } else if (dim == 2) {
-        if (GetNumDimensions() == 3) {
-            return (vector<size_t>(1, GetDimensions()[2]));
-        } else {
-            return (vector<size_t>(1, 1));
-        }
-    } else {
-        return (vector<size_t>(1, 1));
+        dims[0] = GetDimensions()[2];
     }
+
+    return (dims);
 }
 
 float RegularGrid::GetValueNearestNeighbor(const CoordType &coords) const
@@ -132,7 +130,8 @@ float RegularGrid::GetValueLinear(const CoordType &coords) const
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-    if (!InsideGrid(cCoords)) return (GetMissingValue());
+    float mv = GetMissingValue();
+    if (!InsideGrid(cCoords)) return (mv);
 
     size_t i = 0;
     size_t j = 0;
@@ -147,66 +146,15 @@ float RegularGrid::GetValueLinear(const CoordType &coords) const
     VAssert(j < dims[1]);
     VAssert(k < dims[2]);
 
-    double iwgt = 0.0;
-    double jwgt = 0.0;
-    double kwgt = 0.0;
+    double xwgt = 0.0;
+    double ywgt = 0.0;
+    double zwgt = 0.0;
 
-    if (_delta[0] != 0.0) { iwgt = ((cCoords[0] - _minu[0]) - (i * _delta[0])) / _delta[0]; }
-    if (_delta[1] != 0.0) { jwgt = ((cCoords[1] - _minu[1]) - (j * _delta[1])) / _delta[1]; }
-    if (_delta[2] != 0.0) { kwgt = ((cCoords[2] - _minu[2]) - (k * _delta[2])) / _delta[2]; }
+    if (_delta[0] != 0.0) { xwgt = 1.0 - (((cCoords[0] - _minu[0]) - (i * _delta[0])) / _delta[0]); }
+    if (_delta[1] != 0.0) { ywgt = 1.0 - (((cCoords[1] - _minu[1]) - (j * _delta[1])) / _delta[1]); }
+    if (_delta[2] != 0.0) { zwgt = 1.0 - (((cCoords[2] - _minu[2]) - (k * _delta[2])) / _delta[2]); }
 
-    float  missingValue = GetMissingValue();
-    double p0, p1, p2, p3, p4, p5, p6, p7;
-
-    p0 = AccessIJK(i, j, k);
-    if (p0 == missingValue) return (missingValue);
-
-    if (iwgt != 0.0) {
-        p1 = AccessIJK(i + 1, j, k);
-        if (p1 == missingValue) return (missingValue);
-    } else
-        p1 = 0.0;
-
-    if (jwgt != 0.0) {
-        p2 = AccessIJK(i, j + 1, k);
-        if (p2 == missingValue) return (missingValue);
-    } else
-        p2 = 0.0;
-
-    if (iwgt != 0.0 && jwgt != 0.0) {
-        p3 = AccessIJK(i + 1, j + 1, k);
-        if (p3 == missingValue) return (missingValue);
-    } else
-        p3 = 0.0;
-
-    if (kwgt != 0.0) {
-        p4 = AccessIJK(i, j, k + 1);
-        if (p4 == missingValue) return (missingValue);
-    } else
-        p4 = 0.0;
-
-    if (kwgt != 0.0 && iwgt != 0.0) {
-        p5 = AccessIJK(i + 1, j, k + 1);
-        if (p5 == missingValue) return (missingValue);
-    } else
-        p5 = 0.0;
-
-    if (kwgt != 0.0 && jwgt != 0.0) {
-        p6 = AccessIJK(i, j + 1, k + 1);
-        if (p6 == missingValue) return (missingValue);
-    } else
-        p6 = 0.0;
-
-    if (kwgt != 0.0 && iwgt != 0.0 && jwgt != 0.0) {
-        p7 = AccessIJK(i + 1, j + 1, k + 1);
-        if (p7 == missingValue) return (missingValue);
-    } else
-        p7 = 0.0;
-
-    double c0 = p0 + iwgt * (p1 - p0) + jwgt * ((p2 + iwgt * (p3 - p2)) - (p0 + iwgt * (p1 - p0)));
-    double c1 = p4 + iwgt * (p5 - p4) + jwgt * ((p6 + iwgt * (p7 - p6)) - (p4 + iwgt * (p5 - p4)));
-
-    return (c0 + kwgt * (c1 - c0));
+    return (TrilinearInterpolate(i, j, k, xwgt, ywgt, zwgt));
 }
 
 void RegularGrid::GetUserExtentsHelper(CoordType &minu, CoordType &maxu) const

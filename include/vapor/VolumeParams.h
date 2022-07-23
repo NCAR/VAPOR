@@ -86,6 +86,7 @@ private:
 public:
     static const std::string _algorithmTag;
 
+    //! If this is enabled, the volume opacity will be controlled by the main variable while the colormapping will be determined by the colormap variable
     static const std::string UseColormapVariableTag;
     static const std::string SamplingRateMultiplierTag;
     static const std::string VolumeDensityTag;

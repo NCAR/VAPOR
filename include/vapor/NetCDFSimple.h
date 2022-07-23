@@ -136,7 +136,7 @@ public:
     //!
     //! \retval status A negative int is returned on failure
     //!
-    int Initialize(string path);
+    virtual int Initialize(string path);
 
     //! Open the named variable for reading
     //!
@@ -154,7 +154,7 @@ public:
     //!
     //! \sa Read(), GetVariables()
     //!
-    int OpenRead(const NetCDFSimple::Variable &variable);
+    virtual int OpenRead(const NetCDFSimple::Variable &variable);
 
     //! Read an array of values from a variable
     //!
@@ -174,6 +174,7 @@ public:
     //! \sa OpenRead()
     //! \sa NetCDF documentation for nc_get_vara
     //!
+    int Read(const size_t start[], const size_t count[], double *data, int fd = 0) const;
     int Read(const size_t start[], const size_t count[], float *data, int fd = 0) const;
     int Read(const size_t start[], const size_t count[], int *data, int fd = 0) const;
     int Read(const size_t start[], const size_t count[], char *data, int fd = 0) const;
@@ -183,7 +184,7 @@ public:
     //! \param[in] fd A currently opened file descriptor returned by OpenRead().
     //! \retval status Returns a non-negative value on success
     //
-    int Close(int fd = 0);
+    virtual int Close(int fd = 0);
 
     //! Return a vector of the Variables contained in the file
     //!
@@ -326,7 +327,7 @@ public:
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const NetCDFSimple &nc);
 
-private:
+protected:
     int                                                 _ncid;
     std::map<int, int>                                  _ovr_table;    // open variable map: fd -> varid
     string                                              _path;

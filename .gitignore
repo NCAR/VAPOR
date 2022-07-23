@@ -22,6 +22,8 @@ plugins/visit/WASP/cmake_install.cmake
 plugins/visit/vdf.xml.bak
 plugins/visit/VDC/CMake*
 share/fonts/Pacifico.ttf
+__pycache__
+.idea
 
 tags
 

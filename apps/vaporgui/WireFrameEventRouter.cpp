@@ -2,6 +2,7 @@
 #include "vapor/WireFrameParams.h"
 #include "PWidgets.h"
 #include "PConstantColorWidget.h"
+#include "PMetadataClasses.h"
 
 using namespace VAPoR;
 
@@ -17,7 +18,8 @@ WireFrameEventRouter::WireFrameEventRouter(QWidget *parent, ControlExec *ce) : R
             new PScalarVariableSelector,
             new PHeightVariableSelector
         }),
-        new PFidelitySection
+        new PFidelitySection,
+        new POpenVariableMetadataWidget
     }));
     
     AddAppearanceSubtab(new PGroup({

@@ -27,7 +27,6 @@
 #include <qrect.h>
 #include <qmessagebox.h>
 #include <qlineedit.h>
-#include "GL/glew.h"
 #include <vapor/AnnotationParams.h>
 #include <vapor/DataStatus.h>
 #include <vapor/DataMgrUtils.h>

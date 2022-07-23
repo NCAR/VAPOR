@@ -5,7 +5,7 @@
 
 #include "VIntSliderEdit.h"
 #include "VIntLineEdit.h"
-#include "VIntRangeMenu.h"
+#include "VIntSliderEditMenu.h"
 #include "VSlider.h"
 
 VIntSliderEdit::VIntSliderEdit(int min, int max, int value, bool rangeChangable) : VSliderEditInterface(), _value(value), _rangeChangable(rangeChangable)
@@ -31,12 +31,17 @@ void VIntSliderEdit::AllowUserRange(bool allowed)
 
 void VIntSliderEdit::_makeContextMenu()
 {
-    _menu = new VIntRangeMenu(this, _lineEdit->GetSciNotation(), _lineEdit->GetNumDigits(), _slider->GetMinimum(), _slider->GetMaximum(), _rangeChangable);
+    _menu = new VIntSliderEditMenu(this);
     connect(_menu, &VNumericFormatMenu::DecimalDigitsChanged, this, &VIntSliderEdit::SetNumDigits);
     connect(_menu, &VNumericFormatMenu::SciNotationChanged, this, &VIntSliderEdit::SetSciNotation);
     connect(_menu, &VIntRangeMenu::MinChanged, this, &VIntSliderEdit::SetMinimum);
     connect(_menu, &VIntRangeMenu::MaxChanged, this, &VIntSliderEdit::SetMaximum);
+    connect(_menu, &VIntSliderEditMenu::DynamicUpdateChanged, this, &VIntSliderEdit::SetDynamicUpdate);
 }
+
+void VIntSliderEdit::AllowDynamicUpdate() const { _menu->AllowDynamicUpdate(); }
+
+void VIntSliderEdit::SetDynamicUpdate(bool enabled) { emit DynamicUpdateChanged(enabled); }
 
 bool VIntSliderEdit::GetSciNotation() const { return _lineEdit->GetSciNotation(); }
 
@@ -83,7 +88,11 @@ int VIntSliderEdit::GetMinimum() const
 void VIntSliderEdit::SetMinimum(int min)
 {
     // If the new value is unchanged, or illegal, reset the menu and retur
-    if (min == _slider->GetMinimum() || min >= _slider->GetMaximum() || min > _value) {
+    if (min == _slider->GetMinimum() || min > _slider->GetMaximum()) {
+        if (min > _value) {
+            _value = min;
+            SetValue(_value);
+        }
         _menu->SetMinimum(_slider->GetMinimum());
         return;
     }
@@ -101,7 +110,11 @@ int VIntSliderEdit::GetMaximum() const { return _slider->GetMaximum(); }
 void VIntSliderEdit::SetMaximum(int max)
 {
     // If the new value is unchanged, or illegal, reset the menu and return
-    if (max == _slider->GetMaximum() || max <= _slider->GetMinimum() || max < _value) {
+    if (max == _slider->GetMaximum() || max < _slider->GetMinimum()) {
+        if (max < _value) {
+            _value = max;
+            SetValue(_value);
+        }
         _menu->SetMaximum(_slider->GetMaximum());
         return;
     }

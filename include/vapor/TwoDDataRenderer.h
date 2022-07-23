@@ -19,16 +19,7 @@
 #ifndef TWODDATARENDERER_H
 #define TWODDATARENDERER_H
 
-#include <GL/glew.h>
-
-#ifdef Darwin
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
-#else
-    #include <GL/gl.h>
-    #include <GL/glu.h>
-#endif
-
+#include <vapor/glutil.h>
 #include <vapor/TwoDRenderer.h>
 #include <vapor/DataMgr.h>
 #include <vapor/GeoImage.h>

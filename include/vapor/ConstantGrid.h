@@ -50,7 +50,7 @@ private:
     // They do nothing and return meaningless values.
     // Do not use!
     //
-    std::vector<size_t>        GetCoordDimensions(size_t) const override;
+    DimsType                   GetCoordDimensions(size_t) const override;
     size_t                     GetGeometryDim() const override;
     const DimsType &           GetNodeDimensions() const override;
     const size_t               GetNumNodeDimensions() const override;

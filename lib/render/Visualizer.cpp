@@ -274,15 +274,12 @@ int Visualizer::InitializeGL(GLManager *glManager)
     _glManager = glManager;
     _vizFeatures->InitializeGL(glManager);
 
-    // glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    VAssert(GLManager::CheckError());
-    if (GLEW_OK != err) {
-        MyBase::SetErrMsg("Error: Unable to initialize GLEW");
-        return -1;
+    if (GetVendor() == MESA) {
+        SetErrMsg(
+            "Your device appears to either not have hardware graphics support, or not have graphics drivers configured correctly for your device.\n"
+            "Rendering performance may be significantly diminished, or in the case of some renderers, may not function at all."
+            );
     }
-
-    if (GetVendor() == MESA) { SetErrMsg("GL Vendor String is MESA.\nGraphics drivers may need to be reinstalled"); }
 
     _framebuffer.EnableDepthBuffer();
     _framebuffer.Generate();
@@ -382,6 +379,13 @@ bool Visualizer::HasRenderer(string renderType, string renderName) const { retur
 void Visualizer::ClearRenderCache()
 {
     for (int i = 0; i < _renderers.size(); i++) { _renderers[i]->ClearCache(); }
+}
+
+void Visualizer::ClearRenderCache(const string &inst)
+{
+    for (int i = 0; i < _renderers.size(); i++)
+        if (_renderers[i]->GetInstanceName() == inst)
+            _renderers[i]->ClearCache();
 }
 
 Renderer *Visualizer::_getRenderer(string type, string instance) const
