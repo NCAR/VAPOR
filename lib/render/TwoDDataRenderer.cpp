@@ -274,7 +274,7 @@ int TwoDDataRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norma
 
     VAssert(g);
 
-    double defaultZ = GetDefaultZ(dataMgr, ts);
+    double defaultZ = 0;
 
     if (dynamic_cast<StructuredGrid *>(g) && !ForceUnstructured) {
         rc = _getMeshStructured(dataMgr, dynamic_cast<StructuredGrid *>(g), defaultZ);
