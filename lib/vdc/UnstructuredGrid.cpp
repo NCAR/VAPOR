@@ -102,8 +102,9 @@ bool UnstructuredGrid::GetCellNodes(const DimsType &cindices, vector<DimsType> &
     if (GetNumCellDimensions() == 1) {
         nodes.resize(_maxVertexPerFace);    // ensure sufficient memory
         for (int i = 0; i < _maxVertexPerFace; i++, ptr++) {
-            if (*ptr == GetMissingID() || *ptr + offset < 0) break;
+            if (*ptr == GetMissingID()) break;
             if (*ptr == GetBoundaryID()) continue;
+            if (*ptr + offset < 0) break;
 
             nodes[n][0] = *ptr + offset;
             nodes[n][1] = 0;
@@ -116,8 +117,9 @@ bool UnstructuredGrid::GetCellNodes(const DimsType &cindices, vector<DimsType> &
         // Bottom layer
         //
         for (int i = 0; i < _maxVertexPerFace; i++, ptr++) {
-            if (*ptr == GetMissingID() || *ptr + offset < 0) break;
+            if (*ptr == GetMissingID()) break;
             if (*ptr == GetBoundaryID()) continue;
+            if (*ptr + offset < 0) break;
 
             nodes[n][0] = *ptr + offset;
             nodes[n][1] = cCindices[1];

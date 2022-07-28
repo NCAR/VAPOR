@@ -36,7 +36,7 @@ const string maxEdgesDimName = "maxEdges";
 const string maxEdges2DimName = "maxEdges2";
 const string vertexDegreeDimName = "vertexDegree";
 
-const vector<string> requiredDimNames = {timeDimName, nCellsDimName, nVerticesDimName, vertexDegreeDimName};
+const vector<string> requiredDimNames = {timeDimName, nCellsDimName, nVerticesDimName, nEdgesDimName, vertexDegreeDimName};
 
 const vector<string> optionalVertDimNames = {nVertLevelsDimName};
 
@@ -60,7 +60,9 @@ const string xEdgeVarName = "xEdge";    // Cartesian coord - not used
 const string yEdgeVarName = "yEdge";    // Cartesian coord - not used
 const string zEdgeVarName = "zEdge";    // Cartesian coord - not used
 
-const vector<string> requiredHorizCoordVarNames = {latCellVarName, lonCellVarName, latVertexVarName, lonVertexVarName};
+const vector<string> requiredHorizCoordVarNames = {latCellVarName, lonCellVarName, latVertexVarName, lonVertexVarName, latEdgeVarName, lonEdgeVarName};
+
+const vector<string> lonCoordVarNames = {lonCellVarName, lonVertexVarName, lonEdgeVarName};
 
 // Vertical coordinate variables
 //
@@ -90,7 +92,7 @@ const string uTangentialVarName = "v";
 
 const vector<string> connectivityVarNames = {cellsOnVertexVarName, verticesOnCellVarName, verticesOnEdge, edgesOnCellVarName};
 
-const vector<string> requiredAuxVarNames = {cellsOnVertexVarName, verticesOnCellVarName};
+const vector<string> requiredAuxVarNames = {cellsOnVertexVarName, verticesOnCellVarName, verticesOnEdge, edgesOnCellVarName, nEdgesOnCellVarName};
 
 // Meshes: dual mesh (triangle) and primal (hexagonal cell)
 //
@@ -177,6 +179,8 @@ string get_mesh_name(vector<string> dimnames)
 bool is_connectivity_var(string varname) { return (find(connectivityVarNames.begin(), connectivityVarNames.end(), varname) != connectivityVarNames.end()); }
 
 bool is_lat_or_lon(string varname) { return (find(requiredHorizCoordVarNames.begin(), requiredHorizCoordVarNames.end(), varname) != requiredHorizCoordVarNames.end()); }
+
+bool is_lon(string varname) { return (find(lonCoordVarNames.begin(), lonCoordVarNames.end(), varname) != lonCoordVarNames.end()); }
 
 void rad2degrees(float *buf, size_t n)
 {
@@ -596,7 +600,10 @@ int DCMPAS::_readVarToSmartBuf(size_t ts, string varname, Wasp::SmartBuf &smartB
     int rc = _ncdfc->Read(buf, fd);
     if (rc < 0) return (fd);
 
+
     if (is_lat_or_lon(varname)) { rad2degrees((float *)buf, n); }
+
+    if (is_lon(varname)) { GeoUtil::ShiftLon(buf, buf+n, 180.0); }
 
     return (_ncdfc->Close(fd));
 }
@@ -936,8 +943,6 @@ int DCMPAS::_InitCoordvars(NetCDFCollection *ncdfc)
         int    axis = 0;
         string name = cvars[i];
         dimnames = ncdfc->GetDimNames(name);
-
-        if (! dimnames.size()) continue;
         VAssert(dimnames.size() == 1);
 
         _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, time_dim_name);
@@ -957,8 +962,6 @@ int DCMPAS::_InitCoordvars(NetCDFCollection *ncdfc)
         int    axis = 1;
         string name = cvars[i];
         dimnames = ncdfc->GetDimNames(name);
-
-        if (! dimnames.size()) continue;
         VAssert(dimnames.size() == 1);
 
         _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, time_dim_name);
