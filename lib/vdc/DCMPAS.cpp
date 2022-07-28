@@ -36,7 +36,7 @@ const string maxEdgesDimName = "maxEdges";
 const string maxEdges2DimName = "maxEdges2";
 const string vertexDegreeDimName = "vertexDegree";
 
-const vector<string> requiredDimNames = {timeDimName, nCellsDimName, nVerticesDimName, nEdgesDimName, vertexDegreeDimName};
+const vector<string> requiredDimNames = {timeDimName, nCellsDimName, nVerticesDimName, vertexDegreeDimName};
 
 const vector<string> optionalVertDimNames = {nVertLevelsDimName};
 
@@ -60,7 +60,7 @@ const string xEdgeVarName = "xEdge";    // Cartesian coord - not used
 const string yEdgeVarName = "yEdge";    // Cartesian coord - not used
 const string zEdgeVarName = "zEdge";    // Cartesian coord - not used
 
-const vector<string> requiredHorizCoordVarNames = {latCellVarName, lonCellVarName, latVertexVarName, lonVertexVarName, latEdgeVarName, lonEdgeVarName};
+const vector<string> requiredHorizCoordVarNames = {latCellVarName, lonCellVarName, latVertexVarName, lonVertexVarName};
 
 // Vertical coordinate variables
 //
@@ -90,7 +90,7 @@ const string uTangentialVarName = "v";
 
 const vector<string> connectivityVarNames = {cellsOnVertexVarName, verticesOnCellVarName, verticesOnEdge, edgesOnCellVarName};
 
-const vector<string> requiredAuxVarNames = {cellsOnVertexVarName, verticesOnCellVarName, verticesOnEdge, edgesOnCellVarName, nEdgesOnCellVarName};
+const vector<string> requiredAuxVarNames = {cellsOnVertexVarName, verticesOnCellVarName};
 
 // Meshes: dual mesh (triangle) and primal (hexagonal cell)
 //
@@ -936,6 +936,8 @@ int DCMPAS::_InitCoordvars(NetCDFCollection *ncdfc)
         int    axis = 0;
         string name = cvars[i];
         dimnames = ncdfc->GetDimNames(name);
+
+        if (! dimnames.size()) continue;
         VAssert(dimnames.size() == 1);
 
         _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, time_dim_name);
@@ -955,6 +957,8 @@ int DCMPAS::_InitCoordvars(NetCDFCollection *ncdfc)
         int    axis = 1;
         string name = cvars[i];
         dimnames = ncdfc->GetDimNames(name);
+
+        if (! dimnames.size()) continue;
         VAssert(dimnames.size() == 1);
 
         _coordVarsMap[name] = CoordVar(name, units, DC::FLOAT, periodic, axis, false, dimnames, time_dim_name);
