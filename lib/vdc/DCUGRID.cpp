@@ -320,7 +320,7 @@ int DCUGRID::_initFaceNodeConnectivityMap(NetCDFCFCollection *ncdfc)
             SetErrMsg("Unable to read longitude coordinate variable %s", lonVarName.c_str());
             return (rc);
         }
-#ifdef	DEAD
+#ifdef DEAD
         GeoUtil::ShiftLon(lonVar.begin(), lonVar.end());
 #endif
 

@@ -579,7 +579,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelperCylindrical(DC::FileTable::F
     if (rc < 0) { return (rc); }
 
     if (_lonFlag) {
-#ifdef	DEAD
+#ifdef DEAD
         if (_proj4API.IsCylindrical()) {
             GeoUtil::UnwrapLongitude(region, region + nElements);
             GeoUtil::ShiftLon(region, region + nElements);
@@ -637,7 +637,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper1D(DC::FileTable::FileObject
     make2D(lonBufPtr, latBufPtr, roidims);
 
 
-#ifdef	DEAD
+#ifdef DEAD
     if (_proj4API.IsCylindrical()) {
         size_t nx = max[0] - min[0] + 1;
         size_t ny = max[1] - min[1] + 1;
@@ -680,7 +680,7 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper2D(DC::FileTable::FileObject
     int rc = _getVar(_dc, ts, _lonName, -1, lod, min, max, lonBufPtr);
     if (rc < 0) { return (rc); }
 
-#ifdef	DEAD
+#ifdef DEAD
     if (_proj4API.IsCylindrical()) {
         size_t nx = max[0] - min[0] + 1;
         size_t ny = max[1] - min[1] + 1;

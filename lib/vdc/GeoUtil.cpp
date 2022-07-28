@@ -24,11 +24,11 @@ template<class T> void _minmax(const T *a, int n, int stride, T &min, T &max)
 template<class ForwardIt> void shiftLonTemplate(ForwardIt first, ForwardIt last, double bound)
 {
     for (auto itr = first; itr != last; ++itr) {
-        while (*itr > bound) *itr -= 360.0; 
+        while (*itr > bound) *itr -= 360.0;
     }
 
     for (auto itr = first; itr != last; ++itr) {
-        while (*itr < (-1 * bound)) *itr += 360.0; 
+        while (*itr < (-1 * bound)) *itr += 360.0;
     }
 }
 

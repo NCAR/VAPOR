@@ -3117,7 +3117,7 @@ void DataMgr::_getLonExtents(vector<float> &lons, DimsType dims, float &min, flo
 
     if (!lons.size()) return;
 
-#ifdef	DEAD
+#ifdef DEAD
     size_t nx = dims[0];
     size_t ny = dims[1];
     for (size_t j = 0; j < ny; j++) {

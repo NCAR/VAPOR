@@ -603,7 +603,7 @@ int DCMPAS::_readVarToSmartBuf(size_t ts, string varname, Wasp::SmartBuf &smartB
 
     if (is_lat_or_lon(varname)) { rad2degrees((float *)buf, n); }
 
-    if (is_lon(varname)) { GeoUtil::ShiftLon(buf, buf+n, 180.0); }
+    if (is_lon(varname)) { GeoUtil::ShiftLon(buf, buf + n, 180.0); }
 
     return (_ncdfc->Close(fd));
 }
