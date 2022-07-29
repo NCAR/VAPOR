@@ -141,7 +141,7 @@ RegularGrid *GridHelper::_make_grid_regular(const DimsType &dims, const vector<f
 {
     CoordType minu = {0.0, 0.0, 0.0};
     CoordType maxu = {0.0, 0.0, 0.0};
-    for (int i = 0; i < blkvec.size()-1 && blkvec[i+1]; i++) {
+    for (int i = 0; i < blkvec.size() - 1 && blkvec[i + 1]; i++) {
         VAssert(dims[i] > 0);
         float *coords = blkvec[i + 1];
         minu[i] = (coords[0]);
