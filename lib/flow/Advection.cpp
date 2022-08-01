@@ -678,7 +678,7 @@ float Advection::_applyPeriodic(float val, float min, float max) const
 
 void Advection::_printNonZero(int rtn, const char *file, const char *func, int line) const
 {
-#ifndef NDEBUG
+#ifdef VPRINT
     if (rtn != 0) {    // only print non-zero values
         printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line);
     }
