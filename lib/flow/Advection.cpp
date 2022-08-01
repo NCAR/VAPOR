@@ -555,9 +555,6 @@ int Advection::_advectRK4(Field *velocity, const Particle &p0, double dt, Partic
     p1.location = p0.location + dt32 / 6.0f * (k1 + 2.0f * (k2 + k3) + k4);
     p1.time = p0.time + dt;
 
-    if (!std::isnan(p0.location.x) && std::isnan(p1.location.x))
-      std::printf("Wow!\n");
-
     return 0;
 }
 
