@@ -59,7 +59,8 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM_BIAS)->Then({
                 (new PIntegerSliderEdit(FP::_randomNumOfSeedsTag, "Seed count"))->SetRange(1, 500),
-                (new PIntegerSliderEdit(FP::_rakeBiasStrength, "Bias weight"))->SetRange(-10000, 10000),
+                (new PIntegerSliderEdit(FP::_rakeBiasStrength, "Bias weight"))->SetRange(-10000, 10000)
+                     ->AllowUserRange(true),
                 new PVariableSelector(FP::_rakeBiasVariable, "Bias Variable")
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
