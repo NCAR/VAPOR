@@ -400,7 +400,7 @@ public:
     vector<double> GetSlicePlaneRotation() const;
 
     //! Return the renderer's 3 axis origin for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval vector<double> - Slice's origin on X, Y, and Z axes
+    //! \retval vector<double> - Slice's origin on X, Y, and Z axes, specified in the data's coordinate system
     //! Valid values - A point within the data domain
     vector<double> GetSlicePlaneOrigin() const;
 
