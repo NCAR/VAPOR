@@ -337,6 +337,21 @@ jobs:
             apt install -y python3-pip
             pip3 install --upgrade pip
             pip3 install scikit-build command
+
+      - run:
+          name: update cmake
+          command: |
+            apt remove --purge --auto-remove cmake
+            apt update && \
+            apt install -y software-properties-common lsb-release && \
+            apt clean all
+            wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+            sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+            apt install kitware-archive-keyring
+            rm /etc/apt/trusted.gpg.d/kitware.gpg
+            apt update
+            apt install cmake
+
       - checkout
 
       - run:
