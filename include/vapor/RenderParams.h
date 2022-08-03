@@ -400,12 +400,12 @@ public:
     vector<double> GetSlicePlaneRotation() const;
 
     //! Return the renderer's 3 axis origin for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval vector<double> - Slice's origin on X, Y, and Z axes
+    //! \retval vector<double> - Slice's origin on X, Y, and Z axes, specified in the data's coordinate system
     //! Valid values - A point within the data domain
     vector<double> GetSlicePlaneOrigin() const;
 
     //! Return the renderer's 3 axis normal for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval vector<double> - Slice's rotation on X, Y, and Z axes
+    //! \retval vector<double> - Slice's rotation on X, Y, and Z axes, specified in the data's coordinate system
     //! Valid values - -1.0 to 1.0 for each axis component
     vector<double> GetSlicePlaneNormal() const;
 
@@ -420,7 +420,7 @@ public:
     double GetYSlicePlaneOrigin() const;
 
     //! Return the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval double - Slice's origin on the Z axis
+    //! \retval double - Slice's origin on the Z axis, specified in the data's coordinate system
     //! Valid values - A point within the data domain's Z axis coordinates
     double GetZSlicePlaneOrigin() const;
 
