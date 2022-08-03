@@ -405,7 +405,7 @@ public:
     vector<double> GetSlicePlaneOrigin() const;
 
     //! Return the renderer's 3 axis normal for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval vector<double> - Slice's rotation on X, Y, and Z axes
+    //! \retval vector<double> - Slice's rotation on X, Y, and Z axes, specified in the data's coordinate system
     //! Valid values - -1.0 to 1.0 for each axis component
     vector<double> GetSlicePlaneNormal() const;
 
