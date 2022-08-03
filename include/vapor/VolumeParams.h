@@ -25,12 +25,12 @@ public:
 
     static string GetClassType() { return ("VolumeParams"); }
 
-    //! Get the current raytracing algorithm
-    //! \retval string - Current raytracing algorithm (Regular, Curvilinear, or Ospray) 
+    //! Get the current raycasting algorithm
+    //! \retval string - Current raycasting algorithm (Regular, Curvilinear, or Ospray) 
     std::string GetAlgorithm() const;
 
-    //! Set the current raytracing algorithm
-    //! \param[in] string - Raytracing algorithm (Regular, Curvilinear, or Ospray)
+    //! Set the current raycasting algorithm
+    //! \param[in] string - Raycasting algorithm (Regular, Curvilinear, or Ospray)
     void        SetAlgorithm(std::string algorithm);
 
     void        SetAlgorithmByUser(std::string algorithm);
@@ -38,11 +38,11 @@ public:
     void        SetAlgorithmWasManuallySetByUser(bool v);
     static std::vector<float> GetSamplingRateMultiples();
 
-    //! Get the sampling rate multiplier used with the current raytracing algorithm
+    //! Get the sampling rate multiplier used with the current raycasting algorithm
     //! \retval long - Sampling rate multiplier
     long                      GetSamplingMultiplier() const;
     
-    //! Set the sampling rate multiplier used with the current raytracing algorithm
+    //! Set the sampling rate multiplier used with the current raycasting algorithm
     //! \param[in] long - Sampling rate multiplier
     void                      SetSamplingMultiplier(long d);
 

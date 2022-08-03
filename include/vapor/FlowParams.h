@@ -123,7 +123,7 @@ public:
     //! \param[in] string - A file path containing a defined list of seed points to advect from
     void SetSeedInputFilename(const std::string &);
 
-    //! If GetNeedFlowlineOutput() returns true, this will return the file path to the text file that data will be written to.
+    //! Returns the file path to the text file that data will be written to.
     //! \retval string - The file path of the data file that contains sample values along streamlines/pathlines.
     std::string GetFlowlineOutputFilename() const;
     

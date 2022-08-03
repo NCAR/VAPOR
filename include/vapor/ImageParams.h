@@ -22,7 +22,7 @@ public:
     //
     virtual size_t GetRenderDim() const override { return (2); }
 
-    //! Set image file path
+    //! Set file path for the image to be read and displayed.
     //! \param[in] string - Path to image file
     void SetImagePath(std::string file)
     {
@@ -40,7 +40,7 @@ public:
     std::string GetImagePath() const;
 
     //! Inquire whether the currently selected image is georeferenced
-    //! Valid values: 0 = not georeferenced, 1 = georeferenced
+    //! Valid values: 0 = do not use georeference information, 1 = use georeference information
     //! \retval bool - State indicating whether current image is georeferenced
     bool GetIsGeoRef() const { return (GetValueLong(_isGeoRefTag, (long)true)); }
 

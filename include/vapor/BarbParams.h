@@ -53,12 +53,12 @@ public:
         SetValueLong(_zBarbsCountTag, "", grid[2]);
     }
 
-    //! Determine line thickness in voxels
-    //! \retval double line thickness
+    //! Query line thickness as a multiplier that's applied to the default value.
+    //! \retval double line thickness.
     double GetLineThickness() const { return GetValueDouble(_thicknessScaleTag, 1.f); }
 
-    //! Set line thickness in voxels
-    //! \param[in] double - Line thickness in voxels.
+    //! Set line thickness as a multiplier that's applied to the default value.
+    //! \param[in] double - Line thickness.
     void SetLineThickness(double val) { SetValueDouble(_thicknessScaleTag, "Barb thickness", val); }
 
     // Get static string identifier for this params class
