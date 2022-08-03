@@ -343,7 +343,7 @@ jobs:
           command: |
             apt remove -y --purge --auto-remove cmake
             apt install -y libssl-dev
-            apt install build-essential git
+            apt install -y build-essential git
             git clone https://github.com/Kitware/CMake/
             cd CMake
             ./bootstrap && make && sudo make install
