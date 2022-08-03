@@ -201,7 +201,7 @@ public:
     int  GetSeedInjInterval() const;
     
     //! Sets the interval w.r.t. the time steps that new pathlines are injected into the scene.
-    //! For example, 1 means that seeds are injected at every time step, and 2 means that seeds are injected at every other time step.
+    //! For example, 1 means that seeds are injected at every time step, and 2 means that seeds are injected at every other time step. Note  "time step" refers to the data set time step, not the integration time step
     //! \param[in] int - The seed injection interval.
     void SetSeedInjInterval(int);
 
