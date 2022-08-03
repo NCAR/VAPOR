@@ -59,7 +59,7 @@ jobs:
 
   build_osx_installer:
     macos:
-      xcode: "13.2.0"
+      xcode: "13.4.1"
     steps:
       - run:
           name: Make VAPOR-Deps
@@ -346,7 +346,7 @@ jobs:
             apt install -y build-essential git
             git clone https://github.com/Kitware/CMake/
             cd CMake
-            ./bootstrap && make && sudo make install
+            ./bootstrap && make && make install
 
       - checkout
 
@@ -585,7 +585,7 @@ jobs:
 
   release_weekly_installers:
     macos:
-      xcode: "12.4.0"
+      xcode: "13.4.1"
     steps:
       - checkout
       #- run:
