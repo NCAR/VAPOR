@@ -420,7 +420,7 @@ public:
     double GetYSlicePlaneOrigin() const;
 
     //! Return the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
-    //! \retval double - Slice's origin on the Z axis
+    //! \retval double - Slice's origin on the Z axis, specified in the data's coordinate system
     //! Valid values - A point within the data domain's Z axis coordinates
     double GetZSlicePlaneOrigin() const;
 
