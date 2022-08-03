@@ -56,35 +56,39 @@ public:
     //! Sets the type of flow rendering algorithm being used.
     //! Steady flow (streamlines) renders time-invariant trajectories that follow a vector field at a single timestep.
     //! Unsteady flow (pathlines) render time-variant trajectories that advect through the timeseries of a loaded dataset.
-    //! \param[in] bool - Steady/streamlines = 1, Unsteady/pathlines = 0
+    //! \param[in] bool - Steady/streamlines = true, Unsteady/pathlines = false
     void SetIsSteady(bool steady);
     
     //! Gets the type of flow rendering algorithm being used.
     //! Steady flow (streamlines) renders time-invariant trajectories that follow a vector field at a single timestep.
     //! Unsteady flow (pathlines) render time-variant trajectories that advect through the timeseries of a loaded dataset.
-    //! \retval bool - Steady/streamlines = 1, Unsteady/pathlines = 0
+    //! \retval bool - Steady/streamlines = true, Unsteady/pathlines = false
     bool GetIsSteady() const;
 
     //! Get the multiplier being applied to the flow advection algorithm.
     //! If there happens to be a mismatch between the units of your data's domain and the units of a variable such as wind speed,
     //! you can scale the wind field with this parameter.  IE - If your data's domain is written in kilometers but your wind
-    //! vectors are in meters, you can apply a velocity multiplyer of 1000 to correct the mismatch.
+    //! vectors are in meters, you can apply a velocity multiplyer of 0.001 to correct the mismatch.
     //! \retval double - Velocity field multiplier for flow rendering
     double GetVelocityMultiplier() const;
     
     //! Set the multiplier being applied to the flow advection algorithm.
     //! If there happens to be a mismatch between the units of your data's domain and the units of a variable such as wind speed,
     //! you can scale the wind field with this parameter.  IE - If your data's domain is written in kilometers but your wind
-    //! vectors are in meters, you can apply a velocity multiplyer of 1000 to correct the mismatch.
+    //! vectors are in meters, you can apply a velocity multiplyer of 0.001 to correct the mismatch.
     //! \param[in] double - Velocity field multiplier for flow rendering
     void   SetVelocityMultiplier(double);
 
-    //! Get the number of steps to advect a steady flow line (aka a streamline)
-    //! \retval long - The number of steps a steady flow line is advected
+    //! Get the target number of steps to advect a steady flow line (aka a streamline).
+    //! \retval long - The number of steps a steady flow line targets to advect.
     long GetSteadyNumOfSteps() const;
     
-    //! Set the number of steps to advect a steady flow line (aka a streamline)
-    //! \param[in] long - The number of steps a steady flow line is advected
+    //! Set the target number of steps to advect a steady flow line (aka a streamline).
+    //! Note 1: Advection can terminate before hitting the specified target number of steps. Common reasons are 1) it travels 
+    //!         out of the volume, and 2) it enters a "sink" where velocity is zero and no longer travels.
+    //! Note 2: The advection step size is adjusted internally based on the current curvature, so even with the same steps
+    //!         being advected, the lengths of advected trajectories can still differ.
+    //! \param[in] long - The number of steps a steady flow line targets to advect.
     void SetSteadyNumOfSteps(long);
 
     //! Get the mode for generating seeds (points of origin) for the flow renderer.
@@ -95,12 +99,12 @@ public:
     //! \param[in] int - The current seed generation mode for the flow renderer. 0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds
     void SetSeedGenMode(int);
 
-    //! Enable or disable the writing of flow renderer data values o a text file.
-    //! \param[in] bool - Enable (1/true) or disable (0/false) the writing of trajectory data values to a text file.
+    //! Enable or disable the writing of flow renderer data values to a text file.
+    //! \param[in] bool - Enable (true) or disable (false) the writing of trajectory data values to a text file.
     void SetNeedFlowlineOutput(bool);
     
     //! Inquire whether the writing of flow renderer data values are being written to a text file.
-    //! \retval bool - Enable (1/true) or disable (0/false) the writing of trajectory data values to a text file.
+    //! \retval bool - Enable (true) or disable (false) the writing of trajectory data values to a text file.
     bool GetNeedFlowlineOutput() const;
 
     //! Get the current flow renderer's advection direction.
@@ -120,12 +124,12 @@ public:
     void SetSeedInputFilename(const std::string &);
 
     //! If GetNeedFlowlineOutput() returns true, this will return the file path to the text file that data will be written to.
-    //! \retval string - The file path of the data file that contains sample data along streamlines/pathlines.
+    //! \retval string - The file path of the data file that contains sample values along streamlines/pathlines.
     std::string GetFlowlineOutputFilename() const;
     
-    //! Sets the file path to the text file that data will be written to.
+    //! Sets the file path to the text file that flowline output will be written to.
     //! \param[in] string - The file path of the data file that contains sample data along streamlines/pathlines.
-    void        SetFlowlineOutputFilename(const std::string &);
+    void SetFlowlineOutputFilename(const std::string &);
 
     //! If more than one variable is being sampled along flowlines and is being written to an output file, this returns those variables.
     //! \retval std::vector<std::string> - A vector containing the variables being written to the specified output file name.
@@ -133,14 +137,14 @@ public:
 
     //! Inquires whether the current flow advection scheme is periodic.  IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.
     //! Note: this result vector could be of size 2 or 3.
-    //! \retval std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (0 = non-periodic, 1 = periodic)
+    //! \retval std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (false = non-periodic, true = periodic)
 
     std::vector<bool> GetPeriodic() const;
     //! Sets whether the current flow advection scheme is periodic.  IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.
-    //! \param[in] std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (0 = non-periodic, 1 = periodic)
+    //! \param[in] std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (false = non-periodic, true = periodic)
 
     //! Gets whether the current flow advection scheme is periodic.  IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.
-    //! \retval std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (0 = non-periodic, 1 = periodic)
+    //! \retval std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (false = non-periodic, true = periodic)
     void              SetPeriodic(const std::vector<bool> &);
 
     /*
@@ -156,35 +160,35 @@ public:
     Box *GetIntegrationBox();
     void SetIntegrationVolume(const std::vector<float> &);
 
-    //! Returns the number of seed points on the X, Y, and Z axes if the seeding distribution is Gridded, as determined by GetSeedGenMode() (0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds)
+    //! Returns the number of seed points on the X, Y, and Z axes if the seeding distribution is Gridded, as determined by GetSeedGenMode() 
     //! \retval std::vector<long> - Number of seeds distributed on the X, Y, and Z axes.
     std::vector<long> GetGridNumOfSeeds() const;
     
-    //! Sets the number of seed points on the X, Y, and Z axes if the seeding distribution is Gridded, as determined by GetSeedGenMode() (0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds)
+    //! Sets the number of seed points on the X, Y, and Z axes if the seeding distribution is Gridded, as determined by GetSeedGenMode()
     //! \retval std::vector<long> - Number of seeds distributed on the X, Y, and Z axes.
     void SetGridNumOfSeeds(const std::vector<long> &);
 
-    //! Returns the number of seed points randomly generated if the seeding distribution is randomly generated, as determined by GetSeedGenMode() (0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds)
+    //! Returns the number of seed points randomly generated if the seeding distribution is randomly generated, as determined by GetSeedGenMode()
     //! \retval long - Number of seeds randomly distributed within the seeding rake region.
     long GetRandomNumOfSeeds() const;
     
-    //! Setsthe number of seed points randomly generated if the seeding distribution is randomly generated, as determined by GetSeedGenMode() (0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds)
+    //! Sets the number of seed points randomly generated if the seeding distribution is randomly generated, as determined by GetSeedGenMode()
     //! \param[in] long - Number of seeds randomly distributed within the seeding rake region.
     void SetRandomNumOfSeeds(long);
 
-    //! Returns the bias variable that randomly seeded flow-lines are distributed towards.
+    //! Returns the bias variable that randomly seeded flow-lines are distributed towards if the seed generation mode is "Random w/ Bias."
     //! \retval string - The variable that seeds are biased distributed for.
     std::string GetRakeBiasVariable() const;
     
-    //! Sets the bias variable that randomly seeded flow-lines are distributed towards.
+    //! Sets the bias variable that randomly seeded flow-lines are distributed towards if the seed generation mode is "Random w/ Bias."
     //! \retval string - The variable that seeds are biased distributed for.
     void SetRakeBiasVariable(const std::string &);
 
-    //! When randomly seeding flowlines with bias towards a along a chosen variable's distribution, this returns the bias strength.  Negative bias will place seeds at locations where the bias value has low values.  Positive bias will place seeds where the bias variable has high values.
+    //! When randomly seeding flowlines with bias towards along a chosen variable's distribution, this returns the bias strength.  Negative bias will place seeds at locations where the bias value has low values.  Positive bias will place seeds where the bias variable has high values.
     //! \retval int - The bias of the seed distribution.
     long GetRakeBiasStrength() const;
 
-    //! When randomly seeding flowlines with bias towards a along a chosen variable's distribution, this sets the bias strength.  Negative bias will place seeds at locations where the bias value has low values.  Positive bias will place seeds where the bias variable has high values.
+    //! When randomly seeding flowlines with bias towards along a chosen variable's distribution, this sets the bias strength.  Negative bias will place seeds at locations where the bias value has low values.  Positive bias will place seeds where the bias variable has high values.
     //! \param[in] long - The bias of the seed distribution.
     void SetRakeBiasStrength(long);
 
@@ -196,7 +200,8 @@ public:
     //! \retval int - The seed injection interval.
     int  GetSeedInjInterval() const;
     
-    //! Sets the interval that new pathlines are injected into the scene.
+    //! Sets the interval w.r.t. the time steps that new pathlines are injected into the scene.
+    //! For example, 1 means that seeds are injected at every time step, and 2 means that seeds are injected at every other time step.
     //! \param[in] int - The seed injection interval.
     void SetSeedInjInterval(int);
 
