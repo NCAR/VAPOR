@@ -45,7 +45,7 @@ public:
     bool GetIsGeoRef() const { return (GetValueLong(_isGeoRefTag, (long)true)); }
 
     //! If the raster image contained in the path returned by GetImagePath() has georeference information (e.g. the file is a GeoTIFF) this boolean determines whether or not the georeference information is honored
-    //! Valid values: 0 = not georeferenced, 1 = georeferenced
+    //! Valid values: 0 = do not use georeference information, 1 = use georeference information
     //! \param[in] bool - State indicating whether current image is georeferenced
     void SetIsGeoRef(bool val) { SetValueLong(_isGeoRefTag, "Geo-reference the image", (long)val); }
 
