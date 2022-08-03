@@ -43,6 +43,9 @@ public:
         return dims;
     }
 
+    //! Specify the size of a discrete grid
+    //! E.g. the grid on which barbs are placed.
+    //! \param[in] int array of size 3 - Specifies the barb distribution on the X, Y, and Z axes.
     void SetGrid(const int grid[3])
     {
         SetValueLong(_xBarbsCountTag, "", grid[0]);
@@ -54,6 +57,8 @@ public:
     //! \retval double line thickness
     double GetLineThickness() const { return GetValueDouble(_thicknessScaleTag, 1.f); }
 
+    //! Set line thickness in voxels
+    //! \param[in] double - Line thickness in voxels.
     void SetLineThickness(double val) { SetValueDouble(_thicknessScaleTag, "Barb thickness", val); }
 
     // Get static string identifier for this params class

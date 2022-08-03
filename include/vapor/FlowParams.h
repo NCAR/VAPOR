@@ -53,35 +53,94 @@ public:
 
     static std::string GetClassType() { return ("FlowParams"); }
 
-    // True  == Steady; False == Unteady
+    //! Sets the type of flow rendering algorithm being used.
+    //! Steady flow (streamlines) renders time-invariant trajectories that follow a vector field at a single timestep.
+    //! Unsteady flow (pathlines) render time-variant trajectories that advect through the timeseries of a loaded dataset.
+    //! \param[in] bool - Steady/streamlines = 1, Unsteady/pathlines = 0
     void SetIsSteady(bool steady);
+    
+    //! Gets the type of flow rendering algorithm being used.
+    //! Steady flow (streamlines) renders time-invariant trajectories that follow a vector field at a single timestep.
+    //! Unsteady flow (pathlines) render time-variant trajectories that advect through the timeseries of a loaded dataset.
+    //! \retval bool - Steady/streamlines = 1, Unsteady/pathlines = 0
     bool GetIsSteady() const;
 
+    //! Get the multiplier being applied to the flow advection algorithm.
+    //! If there happens to be a mismatch between the units of your data's domain and the units of a variable such as wind speed,
+    //! you can scale the wind field with this parameter.  IE - If your data's domain is written in kilometers but your wind
+    //! vectors are in meters, you can apply a velocity multiplyer of 1000 to correct the mismatch.
+    //! \retval double - Velocity field multiplier for flow rendering
     double GetVelocityMultiplier() const;
+    
+    //! Set the multiplier being applied to the flow advection algorithm.
+    //! If there happens to be a mismatch between the units of your data's domain and the units of a variable such as wind speed,
+    //! you can scale the wind field with this parameter.  IE - If your data's domain is written in kilometers but your wind
+    //! vectors are in meters, you can apply a velocity multiplyer of 1000 to correct the mismatch.
+    //! \param[in] double - Velocity field multiplier for flow rendering
     void   SetVelocityMultiplier(double);
 
+    //! Get the number of steps to advect a steady flow line (aka a streamline)
+    //! \retval long - The number of steps a steady flow line is advected
     long GetSteadyNumOfSteps() const;
+    
+    //! Set the number of steps to advect a steady flow line (aka a streamline)
+    //! \param[in] long - The number of steps a steady flow line is advected
     void SetSteadyNumOfSteps(long);
 
+    //! Get the mode for generating seeds (points of origin) for the flow renderer.
+    //! \retval int - The current seed generation mode for the flow renderer. 0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds
     int  GetSeedGenMode() const;
+    
+    //! Set the mode for generating seeds (points of origin) for the flow renderer.
+    //! \param[in] int - The current seed generation mode for the flow renderer. 0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds
     void SetSeedGenMode(int);
 
+    //! Enable or disable the writing of flow renderer data values o a text file.
+    //! \param[in] bool - Enable (1/true) or disable (0/false) the writing of trajectory data values to a text file.
     void SetNeedFlowlineOutput(bool);
+    
+    //! Inquire whether the writing of flow renderer data values are being written to a text file.
+    //! \retval bool - Enable (1/true) or disable (0/false) the writing of trajectory data values to a text file.
     bool GetNeedFlowlineOutput() const;
 
+    //! Get the current flow renderer's advection direction.
+    //! \retval int - The advection direction for the current flow renderer.  (0 = forward, 1 = backward, 2 = bi-directional)
     int  GetFlowDirection() const;
+    
+    //! Set the current flow renderer's advection direction.
+    //! \param[in] int - The advection direction for the current flow renderer.  (0 = forward, 1 = backward, 2 = bi-directional)
     void SetFlowDirection(int);
 
+    //! Get the file name/path to a file containing a list of seed points to advect from.  See https://vapor.readthedocs.io/en/readthedocs/usage/flowRenderer.html#seed-distribution-settings
+    //! \retval string - A file path containing a defined list of seed points to advect from
     std::string GetSeedInputFilename() const;
-    void        SetSeedInputFilename(const std::string &);
+    
+    //! Set the file name/path to a file containing a list of seed points to advect from.  See https://vapor.readthedocs.io/en/readthedocs/usage/flowRenderer.html#seed-distribution-settings
+    //! \param[in] string - A file path containing a defined list of seed points to advect from
+    void SetSeedInputFilename(const std::string &);
 
+    //! If GetNeedFlowlineOutput() returns true, this will return the file path to the text file that data will be written to.
+    //! \retval string - The file path of the data file that contains sample data along streamlines/pathlines.
     std::string GetFlowlineOutputFilename() const;
+    
+    //! Sets the file path to the text file that data will be written to.
+    //! \param[in] string - The file path of the data file that contains sample data along streamlines/pathlines.
     void        SetFlowlineOutputFilename(const std::string &);
 
+    //! If more than one variable is being sampled along flowlines and is being written to an output file, this returns those variables.
+    //! \retval std::vector<std::string> - A vector containing the variables being written to the specified output file name.
     std::vector<std::string> GetFlowOutputMoreVariables() const;
 
-    // Note: this result vector could be of size 2 or 3.
+    //! Inquires whether the current flow advection scheme is periodic.  IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.
+    //! Note: this result vector could be of size 2 or 3.
+    //! \retval std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (0 = non-periodic, 1 = periodic)
+
     std::vector<bool> GetPeriodic() const;
+    //! Sets whether the current flow advection scheme is periodic.  IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.
+    //! \param[in] std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (0 = non-periodic, 1 = periodic)
+
+    //! Gets whether the current flow advection scheme is periodic.  IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.
+    //! \retval std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (0 = non-periodic, 1 = periodic)
     void              SetPeriodic(const std::vector<bool> &);
 
     /*
@@ -97,32 +156,48 @@ public:
     Box *GetIntegrationBox();
     void SetIntegrationVolume(const std::vector<float> &);
 
-    /*
-     *This result vector could be of size 2 or 3.
-     */
+    //! Returns the number of seed points on the X, Y, and Z axes if the seeding distribution is Gridded, as determined by GetSeedGenMode() (0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds)
+    //! \retval std::vector<long> - Number of seeds distributed on the X, Y, and Z axes.
     std::vector<long> GetGridNumOfSeeds() const;
-    void              SetGridNumOfSeeds(const std::vector<long> &);
+    
+    //! Sets the number of seed points on the X, Y, and Z axes if the seeding distribution is Gridded, as determined by GetSeedGenMode() (0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds)
+    //! \retval std::vector<long> - Number of seeds distributed on the X, Y, and Z axes.
+    void SetGridNumOfSeeds(const std::vector<long> &);
 
-    /*
-     * 3 or 2 values to represent the number of seeds inside of a rake
-     * in the gridded seed generation mode.
-     */
+    //! Returns the number of seed points randomly generated if the seeding distribution is randomly generated, as determined by GetSeedGenMode() (0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds)
+    //! \retval long - Number of seeds randomly distributed within the seeding rake region.
     long GetRandomNumOfSeeds() const;
+    
+    //! Setsthe number of seed points randomly generated if the seeding distribution is randomly generated, as determined by GetSeedGenMode() (0 = Gridded, 1 = Random, 2 = Random with bias, 3 = List of seeds)
+    //! \param[in] long - Number of seeds randomly distributed within the seeding rake region.
     void SetRandomNumOfSeeds(long);
 
-    /*
-     * The number of seeds in the random seed generation mode.
-     */
+    //! Returns the bias variable that randomly seeded flow-lines are distributed towards.
+    //! \retval string - The variable that seeds are biased distributed for.
     std::string GetRakeBiasVariable() const;
-    void        SetRakeBiasVariable(const std::string &);
+    
+    //! Sets the bias variable that randomly seeded flow-lines are distributed towards.
+    //! \retval string - The variable that seeds are biased distributed for.
+    void SetRakeBiasVariable(const std::string &);
 
+    //! When randomly seeding flowlines with bias towards a along a chosen variable's distribution, this returns the bias strength.  Negative bias will place seeds at locations where the bias value has low values.  Positive bias will place seeds where the bias variable has high values.
+    //! \retval int - The bias of the seed distribution.
     long GetRakeBiasStrength() const;
+
+    //! When randomly seeding flowlines with bias towards a along a chosen variable's distribution, this sets the bias strength.  Negative bias will place seeds at locations where the bias value has low values.  Positive bias will place seeds where the bias variable has high values.
+    //! \param[in] long - The bias of the seed distribution.
     void SetRakeBiasStrength(long);
+
 
     int  GetPastNumOfTimeSteps() const;
     void SetPastNumOfTimeSteps(int);
 
+    //! Returns the interval that new pathlines are injected into the scene.
+    //! \retval int - The seed injection interval.
     int  GetSeedInjInterval() const;
+    
+    //! Sets the interval that new pathlines are injected into the scene.
+    //! \param[in] int - The seed injection interval.
     void SetSeedInjInterval(int);
 
     //! \copydoc RenderParams::GetRenderDim()
@@ -171,35 +246,101 @@ public:
     //! The rendering type that represents the flow paths.
     //! See RenderType enum class.
     static const std::string RenderTypeTag;
+
     static const std::string RenderRadiusBaseTag;
-    //! Scales the radius of the flow tube rendering
+
+    //! Scales the radius of the flow tube rendering.
+    //! Applies data of type: double.
+    //! Typical values: 0.1 to 5.0.
+    //! Valid values: DBL_MIN to DBL_MAX.
     static const std::string RenderRadiusScalarTag;
-    //! Toggles between rendering 2d glyphs and 3d geometry of the render type
+
+    //! Toggles between rendering 2d glyphs and 3d geometry of the render type.
+    //! Applies data of type: bool.
+    //! Valid values: 0 = off, 1 = on.
     static const std::string RenderGeom3DTag;
+
     static const std::string RenderLightAtCameraTag;
-    //! Draws the direction of the flow stream
+
+    //! Draws the direction of the flow stream.
+    //! Applies data of type: bool.
+    //! Valid values: 0 = off, 1 = on.
     static const std::string RenderShowStreamDirTag;
     
-    //! When rendering samples, determines whether samples are rendered as circles or arrows
+    //! When rendering samples, determines whether samples are rendered as circles or arrows.
+    //! Applies data of type: long.
+    //! Valid values: 0 = FloatParams::GlyphTypeSphere, 1 = FloatParams::GlyphTypeArrow.
     static const std::string RenderGlyphTypeTag;
-    //! When rendering samples, draw every N samples
+
+    //! When rendering samples, draw every N samples.
+    //! Applies data of type: int.
+    //! Typical values: 1 to 20.
+    //! Valid values: INT_MIN to INT_MAX.
     static const std::string RenderGlyphStrideTag;
-    //! When rendering samples, only draw the leading sample in a path
+
+    //! When rendering samples, only draw the leading sample in a path.
+    //! Applies data of type: bool.
+    //! Valid values: 0 = off, 1 = on.
     static const std::string RenderGlyphOnlyLeadingTag;
 
-    //! Falloff parameter for density rendering
+    //! Falloff parameter for density rendering.
+    //! Applies data of type: double.
+    //! Typical values: 0.5 to 10.0.
+    //! Valid values: DBL_MIN to DBL_MAX.
     static const std::string RenderDensityFalloffTag;
-    //! ToneMapping parameter for density rendering
+
+    //! ToneMapping parameter for density rendering.
+    //! Applies data of type: double.
+    //! Typical values: 0.0 to 1.0.
+    //! Valid values: DBL_MIN to DBL_MAX.
     static const std::string RenderDensityToneMappingTag;
 
+    //! Applies transparency to the tails of pathlines and streamlines.
+    //! Applies data of type: bool.
+    //! Valid values: 0 = off, 1 = on.
     static const std::string RenderFadeTailTag;
+
+    //! Specifies the starting integration step for fading a flow line's tail.
+    //! Applies data of type: int.
+    //! Typical values: 1 to 100.
+    //! Valid values: INT_MIN to INT_MAX.
     static const std::string RenderFadeTailStartTag;
+
+
+    //! Specifies the stopping integration step for fading a flow line's tail.
+    //! Applies data of type: int.
+    //! Typical values: 1 to 100.
+    //! Valid values: INT_MIN to INT_MAX.
     static const std::string RenderFadeTailStopTag;
+
+    //! Specifies the length of a faded flow line when animating steady flow.
+    //! Applies data of type: int.
+    //! Typical values: 1 to 100.
+    //! Valid values: INT_MIN to INT_MAX.
     static const std::string RenderFadeTailLengthTag;
 
+    //! Specifies the Phong Ambient lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model).
+    //! Applies data of type: double.
+    //! Typical values: 0.0 to 1.0.
+    //! Valid values: DBL_MIN to DBL_MAX.
     static const std::string PhongAmbientTag;
+
+    //! Specifies the Phong Diffuse lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model).
+    //! Applies data of type: double.
+    //! Typical values: 0.0 to 1.0.
+    //! Valid values: DBL_MIN to DBL_MAX.
     static const std::string PhongDiffuseTag;
+
+    //! Specifies the Phong Specular lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model).
+    //! Applies data of type: double.
+    //! Typical values: 0.0 to 1.0.
+    //! Valid values: DBL_MIN to DBL_MAX.
     static const std::string PhongSpecularTag;
+
+    //! Specifies the Phong Shininess lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model).
+    //! Applies data of type: double.
+    //! Typical values: 0.0 to 1.0.
+    //! Valid values: DBL_MIN to DBL_MAX.
     static const std::string PhongShininessTag;
 
     static const std::string _isSteadyTag;

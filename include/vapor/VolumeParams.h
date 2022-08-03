@@ -25,14 +25,25 @@ public:
 
     static string GetClassType() { return ("VolumeParams"); }
 
+    //! Get the current raytracing algorithm
+    //! \retval string - Current raytracing algorithm (Regular, Curvilinear, or Ospray) 
     std::string GetAlgorithm() const;
+
+    //! Set the current raytracing algorithm
+    //! \param[in] string - Raytracing algorithm (Regular, Curvilinear, or Ospray)
     void        SetAlgorithm(std::string algorithm);
+
     void        SetAlgorithmByUser(std::string algorithm);
     bool        GetAlgorithmWasManuallySetByUser() const;
     void        SetAlgorithmWasManuallySetByUser(bool v);
-
     static std::vector<float> GetSamplingRateMultiples();
+
+    //! Get the sampling rate multiplier used with the current raytracing algorithm
+    //! \retval long - Sampling rate multiplier
     long                      GetSamplingMultiplier() const;
+    
+    //! Set the sampling rate multiplier used with the current raytracing algorithm
+    //! \param[in] long - Sampling rate multiplier
     void                      SetSamplingMultiplier(long d);
 
     using RenderParams::GetIsoValues;
@@ -40,15 +51,44 @@ public:
     vector<double> GetIsoValues(const string &variable) override;
     void           SetIsoValues(const string &variable, const vector<double> &values) override;
 
+    //! Enable or disable lighting from the position of the camera
+    //! \param[in] bool - Enable lighting (1/true) or disable lighting (0/false)
     void  SetLightingEnabled(bool v);
+    
+    //! Get the state for whether lighting is enabled or disabled
+    //! \retval bool - State for enabled lighting (1/true) or disabled lighting (0/false)
     bool  GetLightingEnabled() const;
+    
+    //! Set the Phong Ambient lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model)
+    //! \param[in] float - Phong ambient lighting coefficient
     void  SetPhongAmbient(float v);
+    
+    //! Get the Phong Ambient lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model)
+    //! \param[in] float - Phong ambient lighting coefficient
     float GetPhongAmbient() const;
+
+    //! Set the Phong Diffuse lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model)
+    //! \param[in] float - Phong diffuse lighting coefficient
     void  SetPhongDiffuse(float v);
+    
+    //! Get the Phong Diffuse lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model)
+    //! \param[in] float - Phong diffuse lighting coefficient
     float GetPhongDiffuse() const;
+
+    //! Set the Phong Specular lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model)
+    //! \param[in] float - Phong specular lighting coefficient
     void  SetPhongSpecular(float v);
+    
+    //! Get the Phong Specular lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model)
+    //! \param[in] float - Phong specular lighting coefficient
     float GetPhongSpecular() const;
+    
+    //! Set the Phong Shininess lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model)
+    //! \param[in] float - Phong shininess lighting coefficient
     void  SetPhongShininess(float v);
+    
+    //! Get the Phong Diffuse lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model)
+    //! \param[in] float - Phong shininess lighting coefficient
     float GetPhongShininess() const;
 
     //! \copydoc RenderParams::GetRenderDim()
@@ -89,6 +129,10 @@ public:
     //! If this is enabled, the volume opacity will be controlled by the main variable while the colormapping will be determined by the colormap variable
     static const std::string UseColormapVariableTag;
     static const std::string SamplingRateMultiplierTag;
+
+    //! The VolumeDensityTag applies an opacity factor to the entirety of the volume rendering
+    //! in addition to the opacity applied in the Transfer Function.
+    //! Values range between 0.0 (completely transparent) and 1.0 (completely opaque).
     static const std::string VolumeDensityTag;
 
     static const std::string LightingEnabledTag;

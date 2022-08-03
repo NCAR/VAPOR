@@ -11,6 +11,7 @@ public:
     //! 3D models can be in formats supported by the ASSIMP library.
     //! A description of the Vapor vms scene format can be found at
     //! https://vapor.readthedocs.io/en/readthedocs/usage/modelRenderer.html
+    //! Applies to data of type: string
     static const std::string FileTag;
 
     ModelParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave);
