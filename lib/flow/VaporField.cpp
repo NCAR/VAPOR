@@ -237,10 +237,15 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
             missingV[i] = grid->GetMissingValue();
         }
         auto  hasMissing = glm::equal(velocity, missingV);
+        // If missing values are represented using NaN, you cannot compare equality with them!
+        for (int i = 0; i < 3; i++) {
+          if (std::isnan(missingV[i]) && std::isnan(velocity[i]))
+            hasMissing[i] = true;
+        }
         float mult = _params_locked ? _c_vel_mult : _params->GetVelocityMultiplier();
         if (glm::any(hasMissing)) {
             return MISSING_VAL;
-        }    //
+        }
         else {
             velocity *= mult;
             return SUCCESS;

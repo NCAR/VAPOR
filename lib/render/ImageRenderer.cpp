@@ -159,7 +159,7 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
     // If we are terrain mapping the image or if both the image and the
     // data are geo-referenced
     //
-    double defaultZ = GetDefaultZ(dataMgr, myParams->GetCurrentTimestep());
+    double defaultZ = 0;
     if (!myParams->GetHeightVariableName().empty() || (myParams->GetIsGeoRef() && !dataMgr->GetMapProjection().empty())) {
         // Get the width and height of the image texture. These
         // will be used to set the width and height of the mesh.
