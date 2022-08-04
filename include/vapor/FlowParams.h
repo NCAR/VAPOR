@@ -288,13 +288,15 @@ public:
     //! Valid values: 0 = off, 1 = on.
     static const std::string RenderGlyphOnlyLeadingTag;
 
-    //! Falloff parameter for density rendering.
+    //! Falloff parameter for the flow density rendering mode as specified in
+    //! https://www.researchgate.net/publication/261329939_Trajectory_Density_Projection_for_Vector_Field_Visualization
     //! Applies data of type: double.
     //! Typical values: 0.5 to 10.0.
     //! Valid values: DBL_MIN to DBL_MAX.
     static const std::string RenderDensityFalloffTag;
 
-    //! ToneMapping parameter for density rendering.
+    //! ToneMapping parameter for the flow density rendering mode as specified in
+    //! https://www.researchgate.net/publication/261329939_Trajectory_Density_Projection_for_Vector_Field_Visualization
     //! Applies data of type: double.
     //! Typical values: 0.0 to 1.0.
     //! Valid values: DBL_MIN to DBL_MAX.
