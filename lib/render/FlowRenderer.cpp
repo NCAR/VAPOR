@@ -882,7 +882,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
 
     // Check the bias variable and bias strength
     const auto rakeBiasVariable = params->GetRakeBiasVariable();
-    const auto rakeBiasStrength = params->GetRakeBiasStrength() * 100;
+    const auto rakeBiasStrength = params->GetRakeBiasStrength();
     if (_cache_rakeBiasStrength != rakeBiasStrength || _cache_rakeBiasVariable.compare(rakeBiasVariable) != 0) {
         _cache_rakeBiasVariable = rakeBiasVariable;
         _cache_rakeBiasStrength = rakeBiasStrength;
