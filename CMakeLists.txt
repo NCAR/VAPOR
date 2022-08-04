@@ -4,7 +4,7 @@
 # 
 # libnetcdf-dev,  libudunits2-dev,  libproj-dev
 
-cmake_minimum_required (VERSION 3.14)
+cmake_minimum_required (VERSION 3.17)
 project (VAPOR3)
 
 include (buildutils/UtilityFunctions.cmake)
