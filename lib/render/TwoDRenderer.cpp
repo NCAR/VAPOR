@@ -82,6 +82,9 @@ int TwoDRenderer::_initializeGL()
 
 int TwoDRenderer::_paintGL(bool)
 {
+    float zOffset = GetDefaultZ(_dataMgr, GetActiveParams()->GetCurrentTimestep());
+    _glManager->matrixManager->Translate(0, 0, zOffset);
+    
     // Get the 2D texture
     //
     _texture = GetTexture(_dataMgr, _texWidth, _texHeight, _texInternalFormat, _texFormat, _texType, _texelSize, _gridAligned);
