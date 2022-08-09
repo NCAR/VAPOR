@@ -68,7 +68,7 @@ class Session(link.Session):
     def GetCamera(self):
         return Camera(self.ce)
 
-    def RenderToImage(self) -> PIL.Image:
+    def RenderToImage(self, fast=False) -> PIL.Image:
         from PIL import Image
         from array import array
         width, height = self._renderManager.GetResolution()
@@ -76,7 +76,7 @@ class Session(link.Session):
         buf = array('B', [0] * nBytes)
         address, length = buf.buffer_info()
         assert length == nBytes
-        self.Render(f":RAM:{address:x}")
+        self.Render(f":RAM:{address:x}", fast)
         return Image.frombytes("RGB", (width, height), buf.tobytes())
 
     def Show(self):

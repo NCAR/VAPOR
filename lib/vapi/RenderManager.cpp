@@ -191,7 +191,7 @@ void RenderManager::setUpModelViewMatrix()
 
 
 
-int RenderManager::Render(String imagePath)
+int RenderManager::Render(String imagePath, bool fast)
 {
     //    GL_ERR_BREAK();
     if (!_glManager) {
@@ -218,7 +218,7 @@ int RenderManager::Render(String imagePath)
     _glManager->matrixManager->PushMatrix();
     setUpModelViewMatrix();
 
-    int rc = _controlExec->EnableImageCapture(imagePath, GetWinName());
+    int rc = _controlExec->EnableImageCapture(imagePath, GetWinName(), fast);
     if (rc < 0) { LogWarning("Paint Failed"); }
 
     _glManager->matrixManager->MatrixModeProjection();

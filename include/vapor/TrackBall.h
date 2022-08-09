@@ -81,7 +81,7 @@ public:
     bool ReconstructCamera(double position[3], double upVec[3], double viewDir[3]) const;
 
     // Note:  button is 1,2,3 for left, middle, right
-    void MouseOnTrackball(int eventType, int thisButton, int xcrd, int ycrd, unsigned width, unsigned height);
+    void MouseOnTrackball(int eventType, int thisButton, int xcrd, int ycrd, int width, int height);
 
     // Initialize the trackball, provide viewer position, direction, upvector,
     // and the center of rotation (all in trackball coordinate space)
@@ -109,7 +109,7 @@ public:
 
     double GetOrthoSize() const;
 
-    const double *GetModelViewMatrix() { return (_modelViewMatrix); }
+    const double *GetModelViewMatrix() const { return (_modelViewMatrix); }
 
 private:
     void setCenter(const std::vector<double> &newCenter)

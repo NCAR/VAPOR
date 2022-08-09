@@ -51,6 +51,8 @@ unset CMAKE_PREFIX_PATH
 # When conda messes up the build environment it not only points the python install target to the wrong root,
 # it also sometimes points it to the wrong version of python.
 SP_DIR="`python -c 'import site; print(site.getsitepackages()[0].replace(\"'$BUILD_PREFIX'\", \"'$PREFIX'\"))'`"
+# It also will sometimes decide not to make this dir
+mkdir -p "$SP_DIR"
 
 # Our third party libs have a non-standard copy of the GTE library so it is packaged and extracted here.
 unzip -d include buildutils/GTE.zip
@@ -63,6 +65,17 @@ if false ; then
 	echo "============================================================"
 	echo "Python = `python --version`"
 fi
+
+pip install --target="$SP_DIR" apps/pythonapi/jupyter-vapor-widget
+
+mkdir -p $PREFIX/share/jupyter/nbextensions/
+mkdir -p $PREFIX/etc/jupyter/nbconfig/notebook.d/
+cp -r $SP_DIR/share/jupyter/nbextensions/jupyter-vapor-widget $PREFIX/share/jupyter/nbextensions/
+cp -r $SP_DIR/etc/jupyter/nbconfig/notebook.d/jupyter-vapor-widget.json $PREFIX/etc/jupyter/nbconfig/notebook.d/
+
+mkdir $SP_DIR/vapor
+touch $SP_DIR/vapor/__init__.py
+
 
 if [ ! -d "build" ]; then
     mkdir build
@@ -85,4 +98,14 @@ cmake .. \
 make -j$(($CPU_COUNT+1))
 make doc
 make install
+
+if false ; then
+    echo "########################################################################################"
+    echo "#################################     SP DIR 2     #####################################"
+    echo "########################################################################################"
+    ls $SP_DIR | grep -iF vapor
+    echo "########################################################################################"
+    echo "########################################################################################"
+    echo "########################################################################################"
+fi
 

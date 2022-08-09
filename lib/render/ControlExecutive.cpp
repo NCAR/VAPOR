@@ -549,7 +549,7 @@ void ControlExec::CloseData(string dataSetName)
     UndoRedoClear();
 }
 
-int ControlExec::EnableImageCapture(string filename, string winName)
+int ControlExec::EnableImageCapture(string filename, string winName, bool fast)
 {
     Visualizer *v = getVisualizer(winName);
     if (!v) {
@@ -565,7 +565,7 @@ int ControlExec::EnableImageCapture(string filename, string winName)
     //
     bool enabled = _paramsMgr->GetSaveStateEnabled();
     _paramsMgr->SetSaveStateEnabled(false);
-    int rc = v->paintEvent(false);    // paint with image capture enabled
+    int rc = v->paintEvent(fast);    // paint with image capture enabled
     _paramsMgr->SetSaveStateEnabled(enabled);
     if (rc != 0) {
         SetErrMsg("Visualizer (%s) failed to paint and thus not capturing image.", winName.c_str());

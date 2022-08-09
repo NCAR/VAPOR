@@ -149,14 +149,14 @@ void Session::Reset()
     _controlExec->UndoRedoClear();
 }
 
-int Session::Render(String imagePath)
+int Session::Render(String imagePath, bool fast)
 {
     if (!_controlExec->GetParamsMgr()->GetDataMgrNames().size()) {
         LogWarning("Nothing to render");
         return -1;
     }
 
-    return _renderManager->Render(imagePath);
+    return _renderManager->Render(imagePath, fast);
 }
 
 void Session::SetTimestep(int ts) { NavigationUtils::SetTimestep(_controlExec, ts); }

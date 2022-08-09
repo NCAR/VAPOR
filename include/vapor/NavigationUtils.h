@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vapor/ControlExecutive.h>
+#include <vapor/TrackBall.h>
 
 using VAPoR::ControlExec;
 class GUIStateParams;
@@ -28,6 +29,9 @@ public:
     static void SetAllCameras(ControlExec *ce, const vector<double> &position, const vector<double> &direction, const vector<double> &up);
     static void SetAllCameras(ControlExec *ce, const double matrix[16], const double origin[3]);
     static void SetAllCameras(ControlExec *ce, const vector<double> &matrix, const vector<double> &origin);
+    
+    static void SetAllCameras(ControlExec *ce, const Trackball &trackball);
+    static void ConfigureTrackball(ControlExec *ce, Trackball &trackball);
 
     static void LookAt(ControlExec *ce, const vector<double> &position, const vector<double> &target, const vector<double> &up);
     

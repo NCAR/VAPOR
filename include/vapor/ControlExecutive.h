@@ -501,7 +501,7 @@ public:
     //! Only one image will be captured.
     //! \param[in] filename is either .jpg, .tif, or .tiff file name to capture
     //! \param[in] viz Valid visualizer handle
-    int EnableImageCapture(string filename, string winName);
+    int EnableImageCapture(string filename, string winName, bool fast=false);
 
     //! Start or stop capturing a sequence of rendered images
     //! When this method is called, the next time Paint() is called for

@@ -1,0 +1,14 @@
+*.egg-info/
+.ipynb_checkpoints/
+dist/
+build/
+*.py[cod]
+node_modules/
+
+# Compiled javascript
+jupyter_vapor_widget/nbextension/
+jupyter_vapor_widget/labextension/
+
+# OS X
+.DS_Store
+./jupyter_vapor_widget.egg-info
