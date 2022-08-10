@@ -54,39 +54,37 @@ public:
     static std::string GetClassType() { return ("FlowParams"); }
 
     //! Sets the type of flow rendering algorithm being used.
-    //! Steady flow (streamlines) renders time-invariant trajectories that follow a vector field at a single timestep.
+    //! \details Steady flow (streamlines) renders time-invariant trajectories that follow a vector field at a single timestep.\n
     //! Unsteady flow (pathlines) render time-variant trajectories that advect through the timeseries of a loaded dataset.
     //! \param[in] bool - Steady/streamlines = true, Unsteady/pathlines = false
     void SetIsSteady(bool steady);
     
     //! Gets the type of flow rendering algorithm being used.
-    //! Steady flow (streamlines) renders time-invariant trajectories that follow a vector field at a single timestep.
-    //! Unsteady flow (pathlines) render time-variant trajectories that advect through the timeseries of a loaded dataset.
+    //! \copydetails FlowParams::SetIsSteady(bool)
     //! \retval bool - Steady/streamlines = true, Unsteady/pathlines = false
     bool GetIsSteady() const;
 
     //! Get the multiplier being applied to the flow advection algorithm.
-    //! If there happens to be a mismatch between the units of your data's domain and the units of a variable such as wind speed,
-    //! you can scale the wind field with this parameter.  IE - If your data's domain is written in kilometers but your wind
+    //! \details If there happens to be a mismatch between the units of your data's domain and the units of a variable such as wind speed,\n
+    //! you can scale the wind field with this parameter.  IE - If your data's domain is written in kilometers but your wind\n
     //! vectors are in meters, you can apply a velocity multiplyer of 0.001 to correct the mismatch.
     //! \retval double - Velocity field multiplier for flow rendering
     double GetVelocityMultiplier() const;
     
     //! Set the multiplier being applied to the flow advection algorithm.
-    //! If there happens to be a mismatch between the units of your data's domain and the units of a variable such as wind speed,
-    //! you can scale the wind field with this parameter.  IE - If your data's domain is written in kilometers but your wind
-    //! vectors are in meters, you can apply a velocity multiplyer of 0.001 to correct the mismatch.
+    //! \copydetails FlowParams::GetVelocityMultiplier()
     //! \param[in] double - Velocity field multiplier for flow rendering
     void   SetVelocityMultiplier(double);
 
     //! Get the target number of steps to advect a steady flow line (aka a streamline).
+    //! \copydetails FlowParams::SetSteadyNumOfSteps()
     //! \retval long - The number of steps a steady flow line targets to advect.
     long GetSteadyNumOfSteps() const;
     
     //! Set the target number of steps to advect a steady flow line (aka a streamline).
-    //! Note 1: Advection can terminate before hitting the specified target number of steps. Common reasons are 1) it travels 
-    //!         out of the volume, and 2) it enters a "sink" where velocity is zero and no longer travels.
-    //! Note 2: The advection step size is adjusted internally based on the current curvature, so even with the same steps
+    //! \details Note 1: Advection can terminate before hitting the specified target number of steps. Common reasons are 1) it travels \n
+    //!         out of the volume, and 2) it enters a "sink" where velocity is zero and no longer travels.\n
+    //! Note 2: The advection step size is adjusted internally based on the current curvature, so even with the same steps\n
     //!         being advected, the lengths of advected trajectories can still differ.
     //! \param[in] long - The number of steps a steady flow line targets to advect.
     void SetSteadyNumOfSteps(long);
@@ -115,11 +113,13 @@ public:
     //! \param[in] int - The advection direction for the current flow renderer.  (0 = forward, 1 = backward, 2 = bi-directional)
     void SetFlowDirection(int);
 
-    //! Get the file name/path to a file containing a list of seed points to advect from.  See https://vapor.readthedocs.io/en/readthedocs/usage/flowRenderer.html#seed-distribution-settings
+    //! Get the file name/path to a file containing a list of seed points to advect from.
+    //! \details See https://vapor.readthedocs.io/en/readthedocs/usage/flowRenderer.html#seed-distribution-settings
     //! \retval string - A file path containing a defined list of seed points to advect from
     std::string GetSeedInputFilename() const;
     
-    //! Set the file name/path to a file containing a list of seed points to advect from.  See https://vapor.readthedocs.io/en/readthedocs/usage/flowRenderer.html#seed-distribution-settings
+    //! Set the file name/path to a file containing a list of seed points to advect from.
+    //! \copydetails FlowParams::GetSeedInputFilename()
     //! \param[in] string - A file path containing a defined list of seed points to advect from
     void SetSeedInputFilename(const std::string &);
 
@@ -135,17 +135,16 @@ public:
     //! \retval std::vector<std::string> - A vector containing the variables being written to the specified output file name.
     std::vector<std::string> GetFlowOutputMoreVariables() const;
 
-    //! Inquires whether the current flow advection scheme is periodic.  IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.
+    //! Inquires whether the current flow advection scheme is periodic.
+    //! \details IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.\n
     //! Note: this result vector could be of size 2 or 3.
     //! \retval std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (false = non-periodic, true = periodic)
-
     std::vector<bool> GetPeriodic() const;
-    //! Sets whether the current flow advection scheme is periodic.  IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.
-    //! \param[in] std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (false = non-periodic, true = periodic)
 
-    //! Gets whether the current flow advection scheme is periodic.  IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.
-    //! \retval std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (false = non-periodic, true = periodic)
-    void              SetPeriodic(const std::vector<bool> &);
+    //! Gets whether the current flow advection scheme is periodic.
+    //! \copydetails FlowParams::GetPeriodic()
+    //! \param[in] std::vector<bool> - A vector consisting of booleans that indicate periodicity on the X, Y, and Z axes.  (false = non-periodic, true = periodic)
+    void SetPeriodic(const std::vector<bool> &);
 
     /*
      * 6 values to represent a rake in this particular order:
@@ -184,11 +183,13 @@ public:
     //! \retval string - The variable that seeds are biased distributed for.
     void SetRakeBiasVariable(const std::string &);
 
-    //! When randomly seeding flowlines with bias towards along a chosen variable's distribution, this returns the bias strength.  Negative bias will place seeds at locations where the bias value has low values.  Positive bias will place seeds where the bias variable has high values.
+    //! When randomly seeding flowlines with bias towards along a chosen variable's distribution, this returns the bias strength.  
+    //! \details Negative bias will place seeds at locations where the bias value has low values.  Positive bias will place seeds where the bias variable has high values.
     //! \retval int - The bias of the seed distribution.
     long GetRakeBiasStrength() const;
 
-    //! When randomly seeding flowlines with bias towards along a chosen variable's distribution, this sets the bias strength.  Negative bias will place seeds at locations where the bias value has low values.  Positive bias will place seeds where the bias variable has high values.
+    //! When randomly seeding flowlines with bias towards along a chosen variable's distribution, this sets the bias strength.
+    //! \copydetails
     //! \param[in] long - The bias of the seed distribution.
     void SetRakeBiasStrength(long);
 
