@@ -500,6 +500,7 @@ public:
     //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
     //! this tag identifies the parameter for the origin's
     //! location on the X axis.
+    //! \details RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: double
     //! Valid values: A point within the data domain's X axis coordinates
     static const string XSlicePlaneOriginTag;
@@ -507,6 +508,7 @@ public:
     //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
     //! this tag identifies the parameter for the origin's
     //! location on the Y axis.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: double
     //! Valid values: A point within the data domain's Y axis coordinates
     static const string YSlicePlaneOriginTag;
@@ -514,6 +516,7 @@ public:
     //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
     //! this tag identifies the parameter for the origin's
     //! location on the Z axis.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: double
     //! Valid values: A point within the data domain's Z axis coordinates
     static const string ZSlicePlaneOriginTag;
@@ -521,6 +524,7 @@ public:
     //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
     //! this tag identifies the parameter for the rotation
     //! about the X axis.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: double
     //! Valid values: -90.0 to 90.0
     static const string XSlicePlaneRotationTag;
@@ -528,6 +532,7 @@ public:
     //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
     //! this tag identifies the parameter for the rotation
     //! about the Y axis.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: double
     //! Valid values: -90.0 to 90.0
     static const string YSlicePlaneRotationTag;
@@ -535,25 +540,29 @@ public:
     //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
     //! this tag identifies the parameter for the rotation
     //! about the Z axis.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: double
     //! Valid values: -90.0 to 90.0
     static const string ZSlicePlaneRotationTag;
 
-    //! If a renderer samples data points along a vector (IE - Slice and Contour),
+    //! If a renderer samples data points through a plane (IE - Slice and Contour),
     //! this tag identifies the parameter for how many samples
     //! to take along that vector.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: long
     //! Valid values: 0 to LONG_MAX
     static const string SampleRateTag;
 
     //! If a renderer can be offset from a point of origin  (IE - Slice and Contour),
     //! this tag identifies the parameter for offsetting the renderer from that point.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: double
     //! Valid values: DBL_MIN to DBL_MAX
     static const string SliceOffsetTag;
 
     //! If a renderer can be oriented orthogonally to a normal vector (IE - Slice and Contour),
     //! this tag identifies the normal's X component.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: double
     //! Typical values: -1.0 to 1.0
     //! Valid values: DBL_MIN to DBL_MAX
@@ -561,6 +570,7 @@ public:
 
     //! If a renderer can be oriented orthogonally to a normal vector (IE - Slice and Contour),
     //! this tag identifies the normal's Y component.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: double
     //! Typical values: -1.0 to 1.0
     //! Valid values: DBL_MIN to DBL_MAX
@@ -568,6 +578,7 @@ public:
 
     //! If a renderer can be oriented orthogonally to a normal vector (IE - Slice and Contour),
     //! this tag identifies the normal's Z component.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: double
     //! Typical values: -1.0 to 1.0
     //! Valid values: DBL_MIN to DBL_MAX
@@ -576,6 +587,7 @@ public:
     //! If a renderer can be oriented according to 1) a set of rotationis on the XYZ axes, or
     //! 2) according to the orthoganality of a specified normal (IE - Slice and Contour), 
     //! this tag determines which method is being used to orient the the renderer.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag
     //! Applies to data of type: long
     //! Valid values: 0 = SlicePlaneOrientationMode::Rotation, 1 = SlicePlaneOrientationMode::Normal
     static const string SlicePlaneOrientationModeTag;
