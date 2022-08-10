@@ -153,7 +153,7 @@ void WireFrameRenderer::_drawCell(const GLuint *cellNodeIndices, int n, bool lay
 void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *heightGrid, vector<GLuint> &nodeMap, bool *GPUOutOfMemory) const
 {
     double mv = grid->GetMissingValue();
-    float  defaultZ = GetDefaultZ(_dataMgr, _cacheParams.ts);
+    float  defaultZ = 0;
     auto   tmp = grid->GetDimensions();
     auto   dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
     size_t numNodes = Wasp::VProduct(dims);
@@ -362,6 +362,11 @@ int WireFrameRenderer::_paintGL(bool fast)
         }
     }
     _lutTexture.TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, lut);
+    
+    if (rp->GetRenderDim() == 2) {
+        float zOffset = GetDefaultZ(_dataMgr, GetActiveParams()->GetCurrentTimestep());
+        _glManager->matrixManager->Translate(0, 0, zOffset);
+    }
 
     SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("Wireframe");
     if (!shader.IsValid()) return -1;
