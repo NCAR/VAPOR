@@ -501,11 +501,11 @@ if (UNIX AND NOT APPLE)
 				)
 		endif ()
 
-		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/share/plugins/*.so")
+		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
 		message(STATUS "HDF5_PLUGINS ${HDF5_PLUGINS}")
 			install (
 				FILES ${HDF5_PLUGINS}
-				DESTINATION "${INSTALL_LIB_DIR}/share/plugins"
+				DESTINATION "${INSTALL_SHARE_DIR}/plugins"
 				COMPONENT Dependencies
 				)
 
