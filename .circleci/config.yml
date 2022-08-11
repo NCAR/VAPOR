@@ -378,6 +378,7 @@ jobs:
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
             /root/miniconda/bin/conda build .
+          no_output_timeout: 30m
  
   build_ubuntu18:
     docker:
