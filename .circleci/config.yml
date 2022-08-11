@@ -361,6 +361,7 @@ jobs:
       - run:
           name: install miniconda
           command: |
+            apt install -y wget
             wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
             bash ~/miniconda.sh -b -p ~/miniconda 
             rm ~/miniconda.sh
@@ -372,8 +373,10 @@ jobs:
       - run:
           name: conda build .
           command: |
+            rm -rf /root/project/build
             cd /root/project/conda
-            conda install conda-build
+            conda install -y conda-build
+            conda config --add channels conda-forge
             conda build .
  
   build_ubuntu18:
