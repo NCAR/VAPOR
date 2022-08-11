@@ -334,6 +334,48 @@ jobs:
             https://api.github.com/repos/NCAR/VAPOR/issues/${CIRCLE_PULL_REQUEST##*/} \
             -d "$json"
 
+  build_python_api:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - run:
+          name: install python
+          command: |
+            apt-get update
+            apt-get install -y python3
+            apt install -y python3-pip
+            pip3 install --upgrade pip
+            pip3 install scikit-build command
+
+      - run:
+          name: update cmake
+          command: |
+            apt remove -y --purge --auto-remove cmake
+            apt install -y libssl-dev
+            apt install -y build-essential git
+            git clone https://github.com/Kitware/CMake/
+            cd CMake
+            ./bootstrap && make && make install
+
+      - run:
+          name: install miniconda
+          command: |
+            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+            bash ~/miniconda.sh -b -p ~/miniconda 
+            rm ~/miniconda.sh
+            export PATH=~/miniconda/bin:$PATH
+            source ~/.bashrc
+
+      - checkout
+
+      - run:
+          name: conda build .
+          command: |
+            cd /root/project/conda
+            conda install conda-build
+            conda build .
+ 
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -637,9 +679,10 @@ workflows:
   version: 2
   build:
     jobs:
-      - clang-tidy
-      - build_ubuntu18
-      - build_centos7
+      - build_python_api
+      #- clang-tidy
+      #- build_ubuntu18
+      #- build_centos7
       #- foo
       #- test_clang_format
       #- build_win10_installer
