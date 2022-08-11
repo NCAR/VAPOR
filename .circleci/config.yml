@@ -375,9 +375,9 @@ jobs:
           command: |
             rm -rf /root/project/build
             cd /root/project/conda
-            conda install -y conda-build
-            conda config --add channels conda-forge
-            conda build .
+            /root/miniconda/bin/conda install -y conda-build
+            /root/miniconda/bin/conda config --add channels conda-forge
+            /root/miniconda/bin/conda build .
  
   build_ubuntu18:
     docker:
