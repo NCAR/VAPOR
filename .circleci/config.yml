@@ -637,7 +637,7 @@ workflows:
   version: 2
   build:
     jobs:
-      - clang-tidy
+      #- clang-tidy
       - build_ubuntu18
       - build_centos7
       #- foo
