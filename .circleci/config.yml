@@ -87,9 +87,10 @@ jobs:
             chmod -R 777 /usr/local/VAPOR-Deps
 
       - run:
-          name: Get cmake
+          name: Get cmake and llvm
           command: |
             brew install cmake
+            brew install llvm
 
       - run:
           name: Get MacPorts
