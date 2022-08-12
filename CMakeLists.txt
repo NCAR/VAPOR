@@ -445,6 +445,9 @@ if (UNIX AND NOT APPLE)
         if (BUILD_PYTHON)
             set (PARSE_BINARY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libvapi.so")
         endif()
+        message( STATUS "${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
+            ${PARSE_BINARY} ${EXTRA_LIBS_SEARCH} >
+            ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt")
 		add_custom_target (
 			linuxpreinstall
 			COMMAND ${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
@@ -501,11 +504,11 @@ if (UNIX AND NOT APPLE)
 				)
 		endif ()
 
-		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_LIB_DIR}/share/plugins/*.so")
+		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
 		message(STATUS "HDF5_PLUGINS ${HDF5_PLUGINS}")
 			install (
 				FILES ${HDF5_PLUGINS}
-				DESTINATION "${INSTALL_LIB_DIR}/share/plugins"
+				DESTINATION "${INSTALL_SHARE_DIR}/plugins"
 				COMPONENT Dependencies
 				)
 
