@@ -274,7 +274,12 @@ int Visualizer::InitializeGL(GLManager *glManager)
     _glManager = glManager;
     _vizFeatures->InitializeGL(glManager);
 
-    if (GetVendor() == MESA) { SetErrMsg("GL Vendor String is MESA.\nGraphics drivers may need to be reinstalled"); }
+    if (GetVendor() == MESA) {
+        SetErrMsg(
+            "Your device appears to either not have hardware graphics support, or not have graphics drivers configured correctly for your device.\n"
+            "Rendering performance may be significantly diminished, or in the case of some renderers, may not function at all."
+            );
+    }
 
     _framebuffer.EnableDepthBuffer();
     _framebuffer.Generate();
