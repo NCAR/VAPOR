@@ -143,6 +143,7 @@ find_library(UDUNITS2 udunits2)
 find_library(FREETYPE freetype)
 find_library(GEOTIFF geotiff)
 find_library(JPEG jpeg)
+find_library(HDF5_LIB hdf5)
 
 # find_package(Python)
 #   Output

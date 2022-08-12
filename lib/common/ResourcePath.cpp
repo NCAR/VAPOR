@@ -133,14 +133,14 @@ std::string Wasp::GetPythonDir()
 }
 
 void Wasp::SetHDF5PluginPath() {
-    string plugins = Wasp::GetResourcePath("share/plugins");
+    string plugins = Wasp::GetSharePath("plugins");
 
 #ifndef WIN32
     H5PLreplace(plugins.c_str(), 0);
 #else
     plugins = "HDF5_PLUGIN_PATH=" + plugins;
     int rc=_putenv(plugins.c_str());
-    if (rc != 0) MyBase::SetDiagMsg("Unable to set environtment variable %s", plugins.c_str());
+    if (rc != 0) MyBase::SetErrMsg("Unable to set environtment variable %s", plugins.c_str());
 #endif
 }
 

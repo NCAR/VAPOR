@@ -200,8 +200,7 @@ int NetCDFSimple::Read(const size_t start[], const size_t count[], float *data, 
 
     int rc = nc_get_vara_float(_ncid, varid, start, count, data);
     if (rc != 0) {
-        std::string error = nc_strerror(rc);
-        SetErrMsg("nc_get_vara_float(%d, %d) : %s", _ncid, varid, error.c_str());
+        SetErrMsg("nc_get_vara_float(%d, %d) : %s", _ncid, varid, nc_strerror(rc));
         return (-1);
     }
     return (0);

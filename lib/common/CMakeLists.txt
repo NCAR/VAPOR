@@ -43,8 +43,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Base16StringStream.h
 )
 
-find_library(HDF5_LIB hdf5)
-add_library (common SHARED ${SRC} ${HEADERS} ${HDF5_LIB})
+add_library (common SHARED ${SRC} ${HEADERS})
 
 if (APPLE)
 	find_library (COREFOUNDATION CoreFoundation)
@@ -68,8 +67,6 @@ target_include_directories (common
 	PUBLIC "${THIRD_PARTY_INC_DIR}"
 	PUBLIC "${THIRD_PARTY_INC_DIR}/freetype2"
 	)
-
-#target_link_libraries(${HDF5_LIB})
 
 install (
 	TARGETS common
