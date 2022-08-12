@@ -3117,14 +3117,6 @@ void DataMgr::_getLonExtents(vector<float> &lons, DimsType dims, float &min, flo
 
     if (!lons.size()) return;
 
-#ifdef DEAD
-    size_t nx = dims[0];
-    size_t ny = dims[1];
-    for (size_t j = 0; j < ny; j++) {
-        GeoUtil::UnwrapLongitude(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
-        GeoUtil::ShiftLon(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
-    }
-#endif
     auto minmaxitr = std::minmax_element(lons.begin(), lons.end());
     min = *(minmaxitr.first);
     max = *(minmaxitr.second);
