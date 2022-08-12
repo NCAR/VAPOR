@@ -445,6 +445,9 @@ if (UNIX AND NOT APPLE)
         if (BUILD_PYTHON)
             set (PARSE_BINARY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libvapi.so")
         endif()
+        message( STATUS "${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
+            ${PARSE_BINARY} ${EXTRA_LIBS_SEARCH} >
+            ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt")
 		add_custom_target (
 			linuxpreinstall
 			COMMAND ${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
