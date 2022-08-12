@@ -111,6 +111,7 @@ jobs:
       - run:
           name: Get clang13
           command: |
+            sudo /opt/local/bin/port selfupdate
             (sudo yes || true) | sudo /opt/local/bin/port install clang-13
             sudo /opt/local/bin/port select --set clang mp-clang-13
             /opt/local/bin/clang++ -v > clangVersion.txt
