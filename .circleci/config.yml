@@ -654,12 +654,12 @@ workflows:
   version: 2
   build:
     jobs:
-      - clang-tidy
-      - build_ubuntu18
-      - build_centos7
+      #- clang-tidy
+      #- build_ubuntu18
+      #- build_centos7
       #- test_clang_format
       #- build_win10_installer
-      #- build_osx_installer
+      - build_osx_installer
       #- build_ubuntu18_installer
       #- build_centos7_installer
       #- release_weekly_installers:
