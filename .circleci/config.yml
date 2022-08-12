@@ -104,12 +104,12 @@ jobs:
       - run:
           name: Get libomp
           command: |
-            sudo /opt/local/bin/port selfupdate
-            (sudo yes || true) | sudo /opt/local/bin/port install libomp
+            #sudo /opt/local/bin/port selfupdate
+            #(sudo yes || true) | sudo /opt/local/bin/port install libomp
           no_output_timeout: 30m
 
       - run:
-          name: Get clang12
+          name: Get clang13
           command: |
             (sudo yes || true) | sudo /opt/local/bin/port install clang-13
             sudo /opt/local/bin/port select --set clang mp-clang-13
