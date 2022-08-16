@@ -377,7 +377,7 @@ jobs:
             cd /root/project/conda
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
-            nohup /root/miniconda/bin/conda build .
+            nohup /root/miniconda/bin/conda build . &
           no_output_timeout: 60m
  
   build_ubuntu18:
