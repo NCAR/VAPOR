@@ -126,12 +126,15 @@ class CPPYYDoxygenWrapperMeta(type):
 """.strip()
 
     @classmethod
-    def __GetFunctionDocumentation(cls, pCls, func) -> str:
+    def __GetFunctionDocumentation(cls, pCls:type, func) -> str:
         name = getattr(func, "__doxygen_name__",func.__name__)
         # if hasattr(func, "__doxygen_name__"):
 
         nodes = cls.__GetMemberNodes(pCls.__cpp_name__, name)
         if not nodes:
+            # DOxygen does not inherit documentation so base classes need to be recursively queried
+            if pCls.__base__ and cls.__GetClassRoot(pCls.__base__.__cpp_name__):
+                return cls.__GetFunctionDocumentation(pCls.__base__, func)
             return func.__doc__
         return "\n\n".join([cls.__GetDocumentationForMemberNode(node) for node in nodes])
 
