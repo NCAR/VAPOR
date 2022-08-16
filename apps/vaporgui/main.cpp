@@ -31,6 +31,7 @@
 #include <vapor/OptionParser.h>
 #include <vapor/FileUtils.h>
 #include <vapor/OSPRay.h>
+#include <vapor/SetHDF5PluginPath.h>
 #ifdef WIN32
     #include "Windows.h"
 #endif
@@ -175,7 +176,7 @@ int           main(int argc, char **argv)
 #endif
 #endif
 
-    Wasp::SetHDF5PluginPath();
+    VAPoR::SetHDF5PluginPath();
 
     app = &a;
 

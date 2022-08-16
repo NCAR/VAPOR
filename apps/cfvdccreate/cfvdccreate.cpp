@@ -9,7 +9,7 @@
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCCF.h>
 #include <vapor/FileUtils.h>
-#include <vapor/ResourcePath.h>
+#include <vapor/SetHDF5PluginPath.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -145,7 +145,7 @@ void defineMapProjection(const DCCF &dc, VDCNetCDF &vdc) { vdc.SetMapProjection(
 
 int main(int argc, char **argv)
 {
-    Wasp::SetHDF5PluginPath();
+    VAPoR::SetHDF5PluginPath();
 
     OptionParser op;
 
