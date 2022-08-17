@@ -381,8 +381,9 @@ jobs:
           command: |
             yum -y install doxygen
             rm -rf /root/project/build/*
+            rm -f /root/project/site.local
             cd /root/project/build
-            cmake -DBUILD_DOC=ON -DBUILD_PYTHON=ON ..
+            cmake -DBUILD_PYTHON=ON -DBUILD_GUI=OFF -DBUILD_DOC=ON ..
             make doc
             rm -f CMakeCache.txt
             cd /root/project/conda
