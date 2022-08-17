@@ -92,6 +92,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/OpenMPSupport.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCUGRID.h
 	${PROJECT_SOURCE_DIR}/include/vapor/UnstructuredGridCoordless.h
+	${PROJECT_SOURCE_DIR}/include/vapor/SetHDF5PluginPath.h
 )
 
 add_library (vdc SHARED ${SRC} ${HEADERS})

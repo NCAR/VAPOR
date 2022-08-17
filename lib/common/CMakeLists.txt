@@ -55,7 +55,7 @@ if (CONDA_BUILD AND UNIX AND NOT APPLE)
 endif()
 
 if (NOT WIN32)
-	target_link_libraries (common pthread)
+	target_link_libraries (common pthread ${HDF5_LIB})
 	add_definitions (-DENABLE_THREADS)
 endif()
 

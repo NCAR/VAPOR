@@ -31,9 +31,11 @@
 #include <vapor/OptionParser.h>
 #include <vapor/FileUtils.h>
 #include <vapor/OSPRay.h>
+#include <vapor/SetHDF5PluginPath.h>
 #ifdef WIN32
     #include "Windows.h"
 #endif
+
 using namespace std;
 using namespace VAPoR;
 using namespace Wasp;
@@ -151,7 +153,6 @@ int           main(int argc, char **argv)
 // For Mac and Linux, set the PYTHONHOME in this app
 #if PRE_PYTHON_API_REFACTOR
 #ifndef WIN32
-
     const char *s = getenv("PYTHONHOME");
     string      phome = s ? s : "";
     if (!phome.empty()) {
@@ -172,9 +173,10 @@ int           main(int argc, char **argv)
         setenv("PYTHONHOME", phome.c_str(), 1);
     }
     MyBase::SetDiagMsg("PYTHONHOME = %s", phome.c_str());
+#endif
+#endif
 
-#endif
-#endif
+    VAPoR::SetHDF5PluginPath();
 
     app = &a;
 
