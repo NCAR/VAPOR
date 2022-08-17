@@ -334,6 +334,52 @@ jobs:
             https://api.github.com/repos/NCAR/VAPOR/issues/${CIRCLE_PULL_REQUEST##*/} \
             -d "$json"
 
+  build_python_api2:
+    docker:
+      - image: sgpearse/vapor3-centos7:latest
+
+    steps:
+      - run:
+          name: install python
+          command: |
+            yum update
+            yum install -y python3
+            yum install -y python3-pip
+            pip3 install --upgrade pip
+            pip3 install scikit-build command
+
+      - run:
+          name: update cmake
+          command: |
+            #apt remove -y --purge --auto-remove cmake
+            #apt install -y libssl-dev
+            #apt install -y build-essential git
+            #git clone https://github.com/Kitware/CMake/
+            #cd CMake
+            #./bootstrap && make && make install
+
+      - run:
+          name: install miniconda
+          command: |
+            yum install -y wget
+            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+            bash ~/miniconda.sh -b -p ~/miniconda 
+            rm ~/miniconda.sh
+            export PATH=~/miniconda/bin:$PATH
+            source ~/.bashrc
+
+      - checkout
+
+      - run:
+          name: conda build .
+          command: |
+            rm -rf /root/project/build
+            cd /root/project/conda
+            /root/miniconda/bin/conda install -y conda-build
+            /root/miniconda/bin/conda config --add channels conda-forge
+            nohup /root/miniconda/bin/conda build . &
+          no_output_timeout: 60m
+ 
   build_python_api:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -684,6 +730,7 @@ workflows:
   build:
     jobs:
       - build_python_api
+      - build_python_api2
       #- clang-tidy
       #- build_ubuntu18
       #- build_centos7
