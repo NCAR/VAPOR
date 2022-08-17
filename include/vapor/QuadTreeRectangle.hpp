@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <cassert>
+#include <limits>
 #include <cmath>
 #include <iostream>
 #include <cstdint>
@@ -67,7 +68,10 @@ public:
 
         // Horizontal aspect ratio
         //
-        float hAspectRatio() const { return (std::fabs((_right - _left) / (_bottom - _top))); }
+        float hAspectRatio() const {
+            if (_bottom == _top) return (std::numeric_limits<float>::quiet_NaN());
+            return (std::fabs((_right - _left) / (_bottom - _top)));
+        }
 
         friend std::ostream &operator<<(std::ostream &os, const rectangle_t &rec)
         {
