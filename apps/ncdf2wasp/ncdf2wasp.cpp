@@ -8,6 +8,7 @@
 #include <vapor/OptionParser.h>
 #include <vapor/WASP.h>
 #include <vapor/FileUtils.h>
+#include <vapor/SetHDF5PluginPath.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -394,6 +395,8 @@ void Process(string ncdffile, string waspfile)
 
 int main(int argc, char **argv)
 {
+    VAPoR::SetHDF5PluginPath();
+
     OptionParser op;
 
     MyBase::SetErrMsgFilePtr(stderr);
