@@ -345,8 +345,8 @@ jobs:
             yum -y update
             yum install -y python3 || true
             yum install -y python3-pip || true
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
+            pip3 install --upgrade pip || true
+            pip3 install scikit-build command || true
 
       - run:
           name: update cmake
