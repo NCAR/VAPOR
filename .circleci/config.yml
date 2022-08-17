@@ -342,7 +342,7 @@ jobs:
       - run:
           name: install python
           command: |
-            yum -y update
+            yum -y update || true
             yum install -y python3 || true
             yum install -y python3-pip || true
             pip3 install --upgrade pip || true
