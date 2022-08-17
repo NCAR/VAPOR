@@ -356,8 +356,6 @@ jobs:
             yum install -y python3-pip
             pip3 install --upgrade pip
             pip3 install scikit-build command
-            rm /usr/bin/python
-            ln -s /usr/bin/python3 /usr/bin/python
 
       - run:
           name: update cmake
@@ -385,6 +383,8 @@ jobs:
             rm -rf /root/project/build/*
             rm -f /root/project/site.local
             cd /root/project/build
+            rm /usr/bin/python
+            ln -s /usr/bin/python3 /usr/bin/python
             cmake -DBUILD_PYTHON=ON -DBUILD_GUI=OFF -DBUILD_DOC=ON ..
             make doc
             rm -f CMakeCache.txt
