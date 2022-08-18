@@ -411,15 +411,6 @@ int NetCDFSimple::_GetAtts(int ncid, int varid, vector<pair<string, vector<doubl
         return (-1);
     }
 
-    double *dblbuf = NULL;
-    size_t  dblbufsz = 0;
-
-    long * longbuf = NULL;
-    size_t longbufsz = 0;
-
-    char * textbuf = NULL;
-    size_t textbufsz = 0;
-
     for (int i = 0; i < natts; i++) {
         char namebuf[NC_MAX_NAME + 1];
         rc = nc_inq_attname(ncid, varid, i, namebuf);
@@ -437,61 +428,50 @@ int NetCDFSimple::_GetAtts(int ncid, int varid, vector<pair<string, vector<doubl
         }
 
         else if (IsNCTypeInt(xtype)) {
-            if (longbufsz < len) {
-                if (longbuf) delete[] longbuf;
-                longbuf = new long[len];
-                longbufsz = len;
-            }
-            rc = nc_get_att_long(ncid, varid, namebuf, longbuf);
+
+            // N.B. Use long long for windows platforms, which may
+            // represent longs as 32 bits. 
+            // See https://github.com/NCAR/VAPOR/issues/3139
+            //
+            vector <long long> longbuf(len);
+
+            rc = nc_get_att_longlong(ncid, varid, namebuf, longbuf.data());
             if (rc != 0) {
                 SetErrMsg("nc_get_att_long(%d, %d, %s) : %s", ncid, varid, namebuf, nc_strerror(rc));
                 return (-1);
             }
 
+
             vector<long> vals;
             for (int i = 0; i < len; i++) { vals.push_back(longbuf[i]); }
             int_atts.push_back(make_pair(namebuf, vals));
         } else if (IsNCTypeFloat(xtype)) {
-            if (dblbufsz < len) {
-                if (dblbuf) delete[] dblbuf;
-                dblbuf = new double[len];
-                dblbufsz = len;
-            }
-            rc = nc_get_att_double(ncid, varid, namebuf, dblbuf);
+            vector <double> dblbuf(len);
+
+            rc = nc_get_att_double(ncid, varid, namebuf, dblbuf.data());
             if (rc != 0) {
                 SetErrMsg("nc_get_att_double(%d, %d, %s) : %s", ncid, varid, namebuf, nc_strerror(rc));
                 return (-1);
             }
 
-            vector<double> vals;
-            for (int i = 0; i < len; i++) { vals.push_back(dblbuf[i]); }
-            flt_atts.push_back(make_pair(namebuf, vals));
+            flt_atts.push_back(make_pair(namebuf, dblbuf));
 
         } else if (IsNCTypeText(xtype)) {
-            if (textbufsz < len + 1) {
-                if (textbuf) delete[] textbuf;
-                textbuf = new char[len + 1];
-                textbufsz = len + 1;
-            }
+            vector <char> textbuf(len+1, '\0');
 
-            rc = nc_get_att_text(ncid, varid, namebuf, textbuf);
+            rc = nc_get_att_text(ncid, varid, namebuf, textbuf.data());
             if (rc != 0) {
                 SetErrMsg("nc_get_att_text(%d, %d, %s) : %s", ncid, varid, namebuf, nc_strerror(rc));
                 return (-1);
             }
-            textbuf[len] = '\0';    // need to null terminate - sigh :-(
 
-            string val = textbuf;
-            str_atts.push_back(make_pair(namebuf, val));
+            str_atts.push_back(make_pair(namebuf, textbuf.data()));
 
         } else {
             SetErrMsg("Unhandled attribute type : %d", xtype);
             return (-1);
         }
     }
-    if (longbuf) delete[] longbuf;
-    if (dblbuf) delete[] dblbuf;
-    if (textbuf) delete[] textbuf;
 
     return (0);
 }

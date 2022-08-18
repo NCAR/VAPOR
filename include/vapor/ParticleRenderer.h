@@ -20,14 +20,8 @@
 #ifndef ParticleRENDERER_H
 #define ParticleRENDERER_H
 
-//<<<<<<< HEAD
-//#include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <vapor/glutil.h>
-
-//=======
-//#include <vapor/glutil.h>
-//>>>>>>> main
 #include "vapor/VAssert.h"
 
 #include <vapor/Renderer.h>

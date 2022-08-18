@@ -22,9 +22,8 @@ public:
     //
     virtual size_t GetRenderDim() const override { return (2); }
 
-    //
-    // Get and set image file path
-    //
+    //! Set file path for the image to be read and displayed.
+    //! \param[in] string - Path to image file
     void SetImagePath(std::string file)
     {
         BeginGroup("Set image path");
@@ -36,19 +35,28 @@ public:
         EndGroup();
     }
 
+    //! Set image file path
+    //! \retval string - Path to image file
     std::string GetImagePath() const;
 
-    //
-    // Get and set ifGeoRef
-    //
+    //! Inquire whether the currently selected image is georeferenced
+    //! Valid values: 0 = do not use georeference information, 1 = use georeference information
+    //! \retval bool - State indicating whether current image is georeferenced
     bool GetIsGeoRef() const { return (GetValueLong(_isGeoRefTag, (long)true)); }
 
+    //! If the raster image contained in the path returned by GetImagePath() has georeference information (e.g. the file is a GeoTIFF) this boolean determines whether or not the georeference information is honored
+    //! Valid values: 0 = do not use georeference information, 1 = use georeference information
+    //! \param[in] bool - State indicating whether current image is georeferenced
     void SetIsGeoRef(bool val) { SetValueLong(_isGeoRefTag, "Geo-reference the image", (long)val); }
 
-    //
-    // Get and set ignoreTransparency
-    //
+    //! Get whether transparency is being ignored regarding the currently selected image
+    //! Valid values: 0 = transparency is being honored, 1 = transparency is being ignored
+    //! \retval bool - State whether transparency is being ignored
     bool GetIgnoreTransparency() const { return (0 != GetValueLong(_ignoreTransparencyTag, (long)false)); }
+
+    //! Set whether transparency is being ignored regarding the currently selected image
+    //! Valid values: 0 = transparency is being honored, 1 = transparency is being ignored
+    //! \param[in] bool - State whether transparency is being ignored
     void SetIgnoreTransparency(bool val) { SetValueLong(_ignoreTransparencyTag, "if transparence is ignored", (long)val); }
 
     //

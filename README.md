@@ -1,10 +1,6 @@
 [![CircleCI](https://circleci.com/gh/NCAR/VAPOR.svg?style=svg)](https://circleci.com/gh/NCAR/VAPOR) 
 [![DOI](https://img.shields.io/badge/DOI-10.506565%2Fd6j38qhc-brightgreen?style=for-the-badge)](https://doi.org/10.5065/d6j38qhc)
 
-## User Survey:
-
-We need our users to fill out a [5 minute survey](https://docs.google.com/forms/d/e/1FAIpQLSeZWvuAXaRiWyFrQ16zO25bfy8AANp8C8HpVXeMk83uQPdTLA/viewform?usp=sf_link) so we can determine new features for Vapor 3.6.  This is your opportunity to get what YOU need into Vapor.  The deadline for providing feedback is June 18.
-
 ## Vapor:
 
 **VAPOR** is the **V**isualization and **A**nalysis **P**latform for **O**cean, Atmosphere, and Solar **R**esearchers.  VAPOR provides an interactive 3D visualization environment that can also produce animations and still frame images.  VAPOR runs on most UNIX and Windows systems equipped with modern 3D graphics cards.

@@ -2,12 +2,13 @@ set(LIB osgl)
 
 include(CMakeCopy.cmake)
 
-set(BUILD_MESA OFF)
+set(BUILD_MESA_DEFAULT OFF)
 if (BUILD_PYTHON AND (UNIX AND NOT APPLE))
-    set(BUILD_MESA ON)
+    set(BUILD_MESA_DEFAULT ON)
 endif()
+option (BUILD_MESA "Build with OSMesa" ${BUILD_MESA_DEFAULT})
 
-set(SOFTWARE_ONLY OFF)
+option (SOFTWARE_ONLY "Disable EGL" OFF)
 if (NOT SOFTWARE_ONLY)
     if (UNIX AND NOT APPLE)
         set(BUILD_EGL ON)
