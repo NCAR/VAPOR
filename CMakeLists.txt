@@ -47,6 +47,7 @@ if (APPLE)
 	add_definitions (-DDarwin)
 elseif (WIN32)
 	add_definitions (-DWIN32 -DNOMINMAX)
+	add_definitions (-DGLAD_API_CALL_EXPORT)
 endif()
 
 # compiler warning flags

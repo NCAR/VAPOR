@@ -28,7 +28,7 @@
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
 
-class Histo {
+class RENDER_API Histo {
 public:
     Histo(int numberBins, float mnData, float mxData, string var, int ts);
     Histo(int numberBins);

@@ -25,6 +25,12 @@
         #define FLOW_API __declspec(dllimport)
     #endif
 
+    #ifdef OSGL_EXPORTS
+        #define OSGL_API __declspec(dllexport)
+    #else
+        #define OSGL_API __declspec(dllimport)
+    #endif
+
     #ifdef PARAMS_EXPORTS
         #define PARAMS_API __declspec(dllexport)
     #else

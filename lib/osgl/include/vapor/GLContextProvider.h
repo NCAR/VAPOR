@@ -7,7 +7,7 @@
 //! \brief Interface for creating an OpenGL context.
 //! \author Stas Jaroszynski
 
-class GLContextProvider {
+class OSGL_API GLContextProvider {
 public:
     //! Creates an OpenGL context. The returned pointer is optional for managing
     //! multiple contexts.

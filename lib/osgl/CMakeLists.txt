@@ -87,6 +87,10 @@ endif()
 target_include_directories (${LIB} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories (${LIB} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
 
+if (WIN32)
+    add_definitions (-DOSGL_EXPORTS)
+    add_definitions (-DGLAD_API_CALL_EXPORT_BUILD)
+endif()
 
 install (
     TARGETS ${LIB}
@@ -117,3 +121,4 @@ if (NOT WIN32)
 endif()
     install(TARGETS ${TEST_TARGET} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Libraries)
 endforeach()
+

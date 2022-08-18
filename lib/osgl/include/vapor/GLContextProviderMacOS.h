@@ -7,7 +7,7 @@
 //! \brief Creates an OpenGL context using macOS's libraries.
 //! \author Stas Jaroszynski
 
-class GLContextProviderMacOS {
+class OSGL_API GLContextProviderMacOS {
     class GLContextMacOS : public GLContext {
         void *_ctx = nullptr;
 

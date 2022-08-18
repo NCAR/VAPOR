@@ -24,13 +24,6 @@
 //#include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <vapor/glutil.h>
-#ifdef Darwin
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
-#else
-    #include <GL/gl.h>
-    #include <GL/glu.h>
-#endif
 
 //=======
 //#include <vapor/glutil.h>
