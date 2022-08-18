@@ -104,16 +104,15 @@ jobs:
       - run:
           name: Get libomp
           command: |
-            #sudo /opt/local/bin/port selfupdate
-            #(sudo yes || true) | sudo /opt/local/bin/port install libomp
+            sudo /opt/local/bin/port selfupdate
+            (sudo yes || true) | sudo /opt/local/bin/port install libomp
           no_output_timeout: 30m
 
       - run:
-          name: Get clang13
+          name: Get clang12
           command: |
-            sudo /opt/local/bin/port selfupdate
-            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
-            sudo /opt/local/bin/port select --set clang mp-clang-13
+            (sudo yes || true) | sudo /opt/local/bin/port install clang-12
+            sudo /opt/local/bin/port select --set clang mp-clang-12
             /opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 30m
 
@@ -131,7 +130,7 @@ jobs:
             cd build
             git checkout $CIRCLE_BRANCH
             export PATH=/opt/local/bin:$PATH
-            sudo port select --set clang mp-clang-13
+            sudo port select --set clang mp-clang-12
             cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DUSE_OMP=ON ..
             make -j2
             make installer -j2
@@ -384,12 +383,13 @@ jobs:
             rm -rf /root/project/build/*
             rm -f /root/project/site.local
             cd /root/project/build
-            rm /usr/bin/python
-            ln -s /usr/bin/python3 /usr/bin/python
-            cmake -DBUILD_PYTHON=ON -DBUILD_GUI=OFF -DBUILD_DOC=ON ..
-            make doc
-            rm -f CMakeCache.txt
+            #rm /usr/bin/python
+            #ln -s /usr/bin/python3 /usr/bin/python
+            #cmake -DBUILD_PYTHON=ON -DBUILD_GUI=OFF -DBUILD_DOC=ON ..
+            #make doc
+            #rm -f CMakeCache.txt
             cd /root/project/conda
+            export PYTHONPATH=/root/miniconda/lib/python3.9
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
             /root/miniconda/bin/conda build .
@@ -456,15 +456,6 @@ jobs:
             pip3 install scikit-build command
 
       - run:
-          name: update 3rd party libraries
-          command: |
-            rm -rf /usr/local/VAPOR-Deps/2019-Aug
-            pip3 install gdown --upgrade
-            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
-            filename="/root/project/2019-Aug-Ubuntu.tar.xz"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
-
-      - run: 
           name: update cmake
           command: |
             apt remove -y --purge --auto-remove cmake
