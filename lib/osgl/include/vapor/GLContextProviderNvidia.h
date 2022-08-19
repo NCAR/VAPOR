@@ -7,7 +7,7 @@
 //! \brief Implements nvidia's API for headless OpenGL Context creation.
 //! \author Stas Jaroszynski
 
-class GLContextProviderNvidia : private GLContextProviderEGL {
+class OSGL_API GLContextProviderNvidia : private GLContextProviderEGL {
 public:
     static GLContext *CreateContext();
 };
