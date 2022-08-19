@@ -383,7 +383,7 @@ jobs:
           no_output_timeout: 20m
  
       - store_artifacts:
-          path: /root/miniconda/conda-bld/linux_64
+          path: /root/miniconda/conda-bld/linux-64
 
   python_api_ubuntu:
     docker:
@@ -434,7 +434,7 @@ jobs:
           no_output_timeout: 30m
  
       - store_artifacts:
-          path: /root/miniconda/conda-bld/linux_64
+          path: /root/miniconda/conda-bld/linux-64
 
   build_ubuntu18:
     docker:
