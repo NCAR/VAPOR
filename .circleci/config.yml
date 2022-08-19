@@ -338,6 +338,8 @@ jobs:
     docker:
       - image: sgpearse/vapor3-centos7:latest
 
+    resource_class: large
+
     steps:
       - run:
           name: update 3rd party libraries
