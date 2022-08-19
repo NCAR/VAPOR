@@ -12,7 +12,7 @@ The examples below will show you how to make NetCDF data CF-Compliant, so that i
 
 Make sure to pick the example that matches the grid type of your data.  For information on Vapor's supported grid types (cartesian, rectilinear, and curvilinear), you can `read more here <https://en.wikipedia.org/wiki/Regular_grid>`_. 
 
-A demonstration can be viewed below, and the sample data used in these examples can be downloaded :download:`here <https://github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc>`.
+A demonstration can be viewed below, and the sample data used in these examples can be downloaded `here <https://github.com/NCAR/VAPOR-Data/blob/main/netCDF/simple.nc>`.
 
 .. note::
 
