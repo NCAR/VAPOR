@@ -94,7 +94,6 @@ public:
     //! The default is the empty string, which indicates no variable.
     //! \param[in] string varName. If "0" \p varName will be quietly
     //! set to the empty string, "".
-    //
     virtual void SetVariableName(string varName);
 
     //! Get the primary variable name, e.g. used in color mapping or rendering.
@@ -113,7 +112,7 @@ public:
     //!
     //! The default is a vector of length containing the empty string.
     //!
-    //! \retval string variable name
+    //! \retval vector<string> variable name
     vector<string> GetAuxVariableNames() const;
 
     //! Determine if auxiliary variable name is used
@@ -164,7 +163,6 @@ public:
     //! Get the field variable names, e.g. used in flow integration.
     //! \retval vector<string> variable names. A vector of length 3
     //! containing variable names. The default is 3 empty variable names.
-    //
     vector<string> GetFieldVariableNames() const;
 
     //! Get the X field variable name, e.g. used in flow integration.
@@ -397,33 +395,48 @@ public:
     virtual bool GetOrientable() const;
 
     //! Return the renderer's 3 axis rotation for creating ArbitrarilyOrientedRegularGrids.
+    //! \retval vector<double> - Slice's rotation on X, Y, and Z axes
+    //! Valid values - -90.0 to 90.0 for each axis component
     vector<double> GetSlicePlaneRotation() const;
 
     //! Return the renderer's 3 axis origin for creating ArbitrarilyOrientedRegularGrids.
+    //! \retval vector<double> - Slice's origin on X, Y, and Z axes, specified in the data's coordinate system
+    //! Valid values - A point within the data domain
     vector<double> GetSlicePlaneOrigin() const;
 
     //! Return the renderer's 3 axis normal for creating ArbitrarilyOrientedRegularGrids.
+    //! \retval vector<double> - Slice's rotation on X, Y, and Z axes, specified in the data's coordinate system
+    //! Valid values - -1.0 to 1.0 for each axis component
     vector<double> GetSlicePlaneNormal() const;
 
     //! Return the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \retval double - Slice's origin on the X axis
+    //! Valid values - A point within the data domain's X axis coordinates
     double GetXSlicePlaneOrigin() const;
 
     //! Return the renderer's origin value on the Y axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \retval double - Slice's origin on the Y axis
+    //! Valid values - A point within the data domain's Y axis coordinates
     double GetYSlicePlaneOrigin() const;
 
     //! Return the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
+    //! \retval double - Slice's origin on the Z axis, specified in the data's coordinate system
+    //! Valid values - A point within the data domain's Z axis coordinates
     double GetZSlicePlaneOrigin() const;
 
     //! Set the renderer's origin value on the X axis for creating ArbitrarilyOrientedRegularGrids.
-    //! \param[in] Value to use for the plane origin on the X axis.
+    //! \param[in] double - Value to use for the plane origin on the X axis.
+    //! Valid values - A point within the data domain's X axis coordinates
     void SetXSlicePlaneOrigin(double xOrigin);
 
     //! Set the renderer's origin value on the Y axis for creating ArbitrarilyOrientedRegularGrids.
-    //! \param[in] Value to use for the plane origin on the Y axis.
+    //! \param[in] double - Value to use for the plane origin on the Y axis.
+    //! Valid values - A point within the data domain's Y axis coordinates
     void SetYSlicePlaneOrigin(double yOrigin);
 
     //! Set the renderer's origin value on the Z axis for creating ArbitrarilyOrientedRegularGrids.
-    //! \param[in] Value to use for the plane origin on the Z axis.
+    //! \param[in] double - Value to use for the plane origin on the Z axis.
+    //! Valid values - A point within the data domain's Z axis coordinates
     void SetZSlicePlaneOrigin(double zOrigin);
 
     //! Set the values for a quad that encloses an arbitrary user-defined plane
@@ -484,46 +497,101 @@ public:
     static const string CustomHistogramRangeTag;
     static const string LightingEnabledTag;
 
-    //! If a renderer supports rotation about a point of origin,
-    //! this string identifies the parameter for the origin's
+    //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
+    //! this tag identifies the parameter for the origin's
     //! location on the X axis.
+    //! \details This tag only applies when 3D data are sliced for contouring or pseudo-coloring slices
+    //! Applies to data of type: double
+    //! Valid values: A point within the data domain's X axis coordinates
     static const string XSlicePlaneOriginTag;
 
-    //! If a renderer supports rotation about a point of origin,
-    //! this string identifies the parameter for the origin's
+    //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
+    //! this tag identifies the parameter for the origin's
     //! location on the Y axis.
-
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: double
+    //! Valid values: A point within the data domain's Y axis coordinates
     static const string YSlicePlaneOriginTag;
-    //! If a renderer supports rotation about a point of origin,
-    //! this string identifies the parameter for the origin's
+
+    //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
+    //! this tag identifies the parameter for the origin's
     //! location on the Z axis.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: double
+    //! Valid values: A point within the data domain's Z axis coordinates
     static const string ZSlicePlaneOriginTag;
 
-    //! If a renderer supports rotation about a point of origin,
-    //! this string identifies the parameter for the rotation
+    //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
+    //! this tag identifies the parameter for the rotation
     //! about the X axis.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: double
+    //! Valid values: -90.0 to 90.0
     static const string XSlicePlaneRotationTag;
 
-    //! If a renderer supports rotation about a point of origin,
-    //! this string identifies the parameter for the rotation
+    //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
+    //! this tag identifies the parameter for the rotation
     //! about the Y axis.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: double
+    //! Valid values: -90.0 to 90.0
     static const string YSlicePlaneRotationTag;
 
-    //! If a renderer supports rotation about a point of origin,
-    //! this string identifies the parameter for the rotation
+    //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
+    //! this tag identifies the parameter for the rotation
     //! about the Z axis.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: double
+    //! Valid values: -90.0 to 90.0
     static const string ZSlicePlaneRotationTag;
 
-    //! If a renderer samples data points along a vector,
-    //! this string identifies the parameter for how many samples
+    //! If a renderer samples data points through a plane (IE - Slice and Contour),
+    //! this tag identifies the parameter for how many samples
     //! to take along that vector.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: long
+    //! Valid values: 0 to LONG_MAX
     static const string SampleRateTag;
 
+    //! If a renderer can be offset from a point of origin  (IE - Slice and Contour),
+    //! this tag identifies the parameter for offsetting the renderer from that point.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: double
+    //! Valid values: DBL_MIN to DBL_MAX
     static const string SliceOffsetTag;
+
+    //! If a renderer can be oriented orthogonally to a normal vector (IE - Slice and Contour),
+    //! this tag identifies the normal's X component.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: double
+    //! Typical values: -1.0 to 1.0
+    //! Valid values: DBL_MIN to DBL_MAX
     static const string SlicePlaneNormalXTag;
+
+    //! If a renderer can be oriented orthogonally to a normal vector (IE - Slice and Contour),
+    //! this tag identifies the normal's Y component.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: double
+    //! Typical values: -1.0 to 1.0
+    //! Valid values: DBL_MIN to DBL_MAX
     static const string SlicePlaneNormalYTag;
+
+    //! If a renderer can be oriented orthogonally to a normal vector (IE - Slice and Contour),
+    //! this tag identifies the normal's Z component.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: double
+    //! Typical values: -1.0 to 1.0
+    //! Valid values: DBL_MIN to DBL_MAX
     static const string SlicePlaneNormalZTag;
+
+    //! If a renderer can be oriented according to 1) a set of rotationis on the XYZ axes, or
+    //! 2) according to the orthoganality of a specified normal (IE - Slice and Contour), 
+    //! this tag determines which method is being used to orient the the renderer.
+    //! \copydetails RenderParams::XSlicePlaneOriginTag()
+    //! Applies to data of type: long
+    //! Valid values: 0 = SlicePlaneOrientationMode::Rotation, 1 = SlicePlaneOrientationMode::Normal
     static const string SlicePlaneOrientationModeTag;
+
     enum class SlicePlaneOrientationMode {
         Rotation = 0,
         Normal = 1,

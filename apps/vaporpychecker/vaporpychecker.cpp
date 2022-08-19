@@ -71,20 +71,21 @@ int main(int argc, char **argv)
         return (1);
     }
 
-    cout << "System search path: ";
+
+    cout << endl << "System search path: ";
     std::string printSysPath = "try:\n"
                                "	import sys\n"
                                "except: \n"
                                "	print >> sys.stderr, \'Failed to import sys\'\n"
                                "	raise\n"
                                "print(sys.path)\n";
-
     rc = PyRun_SimpleString(printSysPath.c_str());
     if (rc < 0) {
         MyBase::SetErrMsg("PyRun_SimpleString() : %s", MyPython::Instance()->PyErr().c_str());
         return (1);
     }
-    cout << endl;
+    cout << MyPython::Instance()->PyOut() << endl;
+
 
     cout << "Location of site module: ";
     std::string printSiteModulePath = "try:\n"
@@ -92,28 +93,30 @@ int main(int argc, char **argv)
                                       "except: \n"
                                       "	print >> sys.stderr, \'Failed to import site\'\n"
                                       "	raise\n"
+                                      "import os\n"
                                       "print(os.path.dirname(site.__file__))\n";
-
     rc = PyRun_SimpleString(printSiteModulePath.c_str());
     if (rc < 0) {
         MyBase::SetErrMsg("PyRun_SimpleString() : %s", MyPython::Instance()->PyErr().c_str());
         return (1);
     }
+    cout << MyPython::Instance()->PyOut() << endl;
 
-    cout << endl;
+
     cout << "Location of matplotlib module: ";
     std::string printMatplotlibModulePath = "try:\n"
                                             "	import matplotlib\n"
                                             "except: \n"
                                             "	print >> sys.stderr, \'Failed to import matplotlib\'\n"
                                             "	raise\n"
+                                            "import os\n"
                                             "print(os.path.dirname(matplotlib.__file__))\n";
-
     rc = PyRun_SimpleString(printMatplotlibModulePath.c_str());
     if (rc < 0) {
         MyBase::SetErrMsg("PyRun_SimpleString() : %s", MyPython::Instance()->PyErr().c_str());
         return (1);
     }
+    cout << MyPython::Instance()->PyOut() << endl;
 
     return (0);
 }

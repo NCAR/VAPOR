@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <cassert>
+#include <limits>
 #include <cmath>
 #include <iostream>
 #include <cstdint>
@@ -67,7 +68,10 @@ public:
 
         // Horizontal aspect ratio
         //
-        float hAspectRatio() const { return (std::fabs((_right - _left) / (_bottom - _top))); }
+        float hAspectRatio() const {
+            if (_bottom == _top) return (std::numeric_limits<float>::quiet_NaN());
+            return (std::fabs((_right - _left) / (_bottom - _top)));
+        }
 
         friend std::ostream &operator<<(std::ostream &os, const rectangle_t &rec)
         {
@@ -162,7 +166,7 @@ public:
         if (!_nodes[_rootidx].intersects(rectangle)) return (false);
 
         float ar = rectangle.hAspectRatio();
-        if (!(std::isfinite(ar))) return (false);
+        if (!(std::isfinite(ar)) || ar == 0.0) return (false);
 
         if (ar <= maxAspectRatio && ar >= (1.0 / maxAspectRatio)) {
             return (node_t::insert(_nodes, _rootidx, rectangle, payload, _maxDepth));

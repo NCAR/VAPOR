@@ -4,6 +4,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef WIN32
+#include <algorithm>
+#endif
+
 bool Log::InfoLevelEnabled = true;
 
 void Log::printc(const char *format, ...)
