@@ -334,7 +334,7 @@ jobs:
             https://api.github.com/repos/NCAR/VAPOR/issues/${CIRCLE_PULL_REQUEST##*/} \
             -d "$json"
 
-  build_python_api_centos:
+  python_api_centos:
     docker:
       - image: sgpearse/vapor3-centos7:latest
 
@@ -385,7 +385,7 @@ jobs:
       - store_artifacts:
           path: /root/miniconda/conda-bld/linux_64
 
-  build_python_api_ubuntu:
+  python_api_ubuntu:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
 
@@ -739,17 +739,17 @@ workflows:
   version: 2
   build:
     jobs:
-      - build_python_api_centos
       #- clang-tidy
       - build_ubuntu18
       - build_centos7
+      - python_api_centos
       #- foo
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer
       #- build_ubuntu18_installer
       #- build_centos7_installer
-      #- build_python_api_ubuntu
+      #- python_api_ubuntu
       #- release_weekly_installers:
       #    requires:
       #      - build_ubuntu18_installer
