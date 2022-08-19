@@ -338,7 +338,7 @@ jobs:
     docker:
       - image: sgpearse/vapor3-centos7:latest
 
-    resource_class: medium
+    resource_class: large
 
     steps:
       - run:
@@ -389,7 +389,7 @@ jobs:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
 
-    resource_class: medium
+    resource_class: large
 
     steps:
       - run:
