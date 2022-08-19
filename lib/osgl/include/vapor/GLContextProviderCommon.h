@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vapor/common.h>
 #include <cassert>
 #include <string>
 #include <vector>

@@ -237,10 +237,15 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
             missingV[i] = grid->GetMissingValue();
         }
         auto  hasMissing = glm::equal(velocity, missingV);
+        // If missing values are represented using NaN, you cannot compare equality with them!
+        for (int i = 0; i < 3; i++) {
+          if (std::isnan(missingV[i]) && std::isnan(velocity[i]))
+            hasMissing[i] = true;
+        }
         float mult = _params_locked ? _c_vel_mult : _params->GetVelocityMultiplier();
         if (glm::any(hasMissing)) {
             return MISSING_VAL;
-        }    //
+        }
         else {
             velocity *= mult;
             return SUCCESS;
@@ -458,12 +463,15 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
     //   a particle needs 1000 steps (in case of unstructured grids) or
     //   twice the domain dimension (in case of structured grids)
     //   to travel the entire space.
+    // Also, no matter what fidelity level we are at with the VDC data set,
+    //   we always use the domain dimensions of the full resolution.
     double desiredNum = 1000.0;    // pre-defined value for unstructured grids
-
     const auto *grid = _getAGrid(currentTS, VelocityNames[0]);
     const auto *structuredGrid = dynamic_cast<const VAPoR::StructuredGrid *>(grid);
     if (structuredGrid) {
-        auto   dims = structuredGrid->GetDimensions();
+        auto dims = std::vector<size_t>();
+        // -1 indicates that querying the native resolution.
+        _datamgr->GetDimLensAtLevel(VelocityNames[0], -1, dims, currentTS);
         double numCellsDiagnal = std::sqrt(double(dims[0] * dims[0] + dims[1] * dims[1] + dims[2] * dims[2]));
         desiredNum = 2.0 * numCellsDiagnal;
     }

@@ -2,7 +2,7 @@
 
 #include <vapor/GLContextProviderCommon.h>
 
-class Log {
+class OSGL_API Log {
     template<typename... Args> static void print(String fmt, Args... args)
     {
         fmt += "\n";

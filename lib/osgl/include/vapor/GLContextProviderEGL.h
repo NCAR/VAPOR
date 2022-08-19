@@ -6,7 +6,7 @@
 //! \brief Creates an OpenGL context using the EGL library.
 //! \author Stas Jaroszynski
 
-class GLContextProviderEGL {
+class OSGL_API GLContextProviderEGL {
     class GLContextEGL : public GLContext {
         void *_display = nullptr;
         void *_surface = nullptr;

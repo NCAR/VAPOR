@@ -39,6 +39,8 @@ void Progress::SetHandlers(Start_t start, Update_t update, Finish_t finish)
 }
 
 #ifndef NDEBUG
+#ifndef WIN32
     #include <unistd.h>
 void Progress::Sleep(double s) { usleep(s * 1e6L); }
+#endif
 #endif

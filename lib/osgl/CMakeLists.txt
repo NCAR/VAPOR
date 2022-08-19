@@ -74,9 +74,9 @@ endif ()
 # target_link_libraries (${LIB} rt)
 # endif()
 
-
-target_compile_options(${LIB} PRIVATE -Wno-deprecated-declarations)
-# target_compile_options(${LIB} PRIVATE -Wno-conversion-null)
+if (NOT WIN32)
+    target_compile_options(${LIB} PRIVATE -Wno-deprecated-declarations)
+endif()
 # target_compile_options(${LIB} PRIVATE -Wno-unknown-warning-option)
 
 # file(COPY ${HDRS} DESTINATION ${CMAKE_BINARY_DIR}/include/vapor)
@@ -88,6 +88,10 @@ target_compile_options(${LIB} PRIVATE -Wno-deprecated-declarations)
 target_include_directories (${LIB} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories (${LIB} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
 
+if (WIN32)
+    add_definitions (-DOSGL_EXPORTS)
+    add_definitions (-DGLAD_API_CALL_EXPORT_BUILD)
+endif()
 
 install (
     TARGETS ${LIB}
@@ -113,6 +117,9 @@ foreach (TEST ${TESTS})
     set(TEST_TARGET "${LIB}_${TEST_NAME}")
     add_executable(${TEST_TARGET} "${TEST}")
     target_link_libraries(${TEST_TARGET} ${LIB})
+if (NOT WIN32)
     target_compile_options(${TEST_TARGET} PRIVATE -Wno-deprecated-declarations)
+endif()
     install(TARGETS ${TEST_TARGET} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Libraries)
 endforeach()
+

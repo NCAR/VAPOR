@@ -37,7 +37,7 @@
 //! There is only a global SettingsParams, that
 //! is used throughout the application
 //!
-class SettingsParams : public VAPoR::ParamsBase {
+class PARAMS_API SettingsParams : public VAPoR::ParamsBase {
 public:
     SettingsParams(VAPoR::ParamsBase::StateSave *ssave, bool loadFromFile = true);
     SettingsParams(VAPoR::ParamsBase::StateSave *ssave, VAPoR::XmlNode *node);

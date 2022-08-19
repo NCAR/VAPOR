@@ -6,7 +6,7 @@
 //! \brief Uses OSMesa for headless OpenGL Context creation.
 //! \author Stas Jaroszynski
 
-class GLContextProviderMesa {
+class OSGL_API GLContextProviderMesa {
     class GLContextMesa : public GLContext {
         void *_ctx = nullptr;
         char  _dummyBuffer[4 * 4 * 3];

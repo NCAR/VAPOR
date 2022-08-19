@@ -4,7 +4,7 @@
 # 
 # libnetcdf-dev,  libudunits2-dev,  libproj-dev
 
-cmake_minimum_required (VERSION 3.14)
+cmake_minimum_required (VERSION 3.17)
 project (VAPOR3)
 
 include (buildutils/UtilityFunctions.cmake)
@@ -47,6 +47,7 @@ if (APPLE)
 	add_definitions (-DDarwin)
 elseif (WIN32)
 	add_definitions (-DWIN32 -DNOMINMAX)
+	add_definitions (-DGLAD_API_CALL_EXPORT)
 endif()
 
 # compiler warning flags
@@ -130,6 +131,8 @@ else()
 endif()
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
+include_directories ("${PROJECT_SOURCE_DIR}/lib/osgl/include")
+include_directories ("${PROJECT_SOURCE_DIR}/lib/osgl/glad/include")
 
 if (WIN32)
 	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
@@ -143,6 +146,7 @@ find_library(UDUNITS2 udunits2)
 find_library(FREETYPE freetype)
 find_library(GEOTIFF geotiff)
 find_library(JPEG jpeg)
+find_library(HDF5_LIB hdf5)
 
 # find_package(Python)
 #   Output
@@ -159,18 +163,19 @@ function(FIND_BUNDLED_PYTHON)
     # does not conform to its requirements so this manually configures the results
     message("Using bundled python")
     set(Python_VERSION "${PYTHONVERSION}")
-    set(Python_SITELIB "${PYTHONPATH}/site-packages")
     set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
     unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
     find_library(
         Python_LIBRARIES
-        NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-        PATHS "${THIRD_PARTY_LIB_DIR}"
+	NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
+	PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
         NO_DEFAULT_PATH
     )
     if (WIN32)
+        set(Python_SITELIB "${PYTHONPATH}/Lib/site-packages")
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")
     else()
+        set(Python_SITELIB "${PYTHONPATH}/site-packages")
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m")
     endif()
 
@@ -342,6 +347,11 @@ if (WIN32)
 			${QTDIR}/plugins/platforms/qwindows.dll
 			DESTINATION platforms
 		)
+		install (
+			DIRECTORY ${THIRD_PARTY_DIR}/share/plugins
+			DESTINATION ${INSTALL_LIB_DIR}/share
+			COMPONENT Dependencies
+		)
 	endif (GENERATE_FULL_INSTALLER)
 
 	set (CPACK_NSIS_MODIFY_PATH OFF)
@@ -415,6 +425,12 @@ if (APPLE)
                 COMPONENT Dependencies
                 )
         endif ()
+        file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
+		install (
+			FILES ${HDF5_PLUGINS}
+			DESTINATION "${INSTALL_SHARE_DIR}/plugins"
+			COMPONENT Dependencies
+			)
 
     endif ()
 endif (APPLE)
@@ -434,6 +450,9 @@ if (UNIX AND NOT APPLE)
         if (BUILD_PYTHON)
             set (PARSE_BINARY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libvapi.so")
         endif()
+        message( STATUS "${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
+            ${PARSE_BINARY} ${EXTRA_LIBS_SEARCH} >
+            ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt")
 		add_custom_target (
 			linuxpreinstall
 			COMMAND ${CMAKE_SOURCE_DIR}/buildutils/gen_linux_shared_libs.pl
@@ -490,6 +509,13 @@ if (UNIX AND NOT APPLE)
 				)
 		endif ()
 
+		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
+		message(STATUS "HDF5_PLUGINS ${HDF5_PLUGINS}")
+			install (
+				FILES ${HDF5_PLUGINS}
+				DESTINATION "${INSTALL_SHARE_DIR}/plugins"
+				COMPONENT Dependencies
+				)
 
 	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 endif (UNIX AND NOT APPLE)

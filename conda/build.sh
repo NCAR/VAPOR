@@ -59,7 +59,9 @@ if false ; then
 	echo "Python = `python --version`"
 fi
 
-mkdir build
+if [ ! -d "build" ]; then
+    mkdir build
+fi
 cd build
 
 cmake .. \
