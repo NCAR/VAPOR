@@ -73,6 +73,7 @@
     #define VDF_API
     #define WASP_API
     #define FLOW_API
+    #define OSGL_API
     #define PARAMS_API
     #define RENDER_API
     #define GRIBAPI_API
