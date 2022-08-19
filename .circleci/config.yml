@@ -401,6 +401,8 @@ jobs:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
 
+    resource_class: medium
+
     steps:
       - run:
           name: install python
@@ -441,8 +443,11 @@ jobs:
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
             nohup /root/miniconda/bin/conda build . &
-          no_output_timeout: 60m
+          no_output_timeout: 30m
  
+      - store_artifacts:
+          path: /root/miniconda/conda_bld/linux_64/*.tar.bz2
+
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
