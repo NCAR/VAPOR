@@ -30,4 +30,6 @@ The Contour Renderer has specialized controls in its Appearance tab, under the h
 
     *Contour Minimum* sets the value of the lowest valued contour in the series
 
+    *N Samples* This renderer operates by sampling data values along the X and Y axis of a plane.  The *N Samples* parameter will increase the sampling rate used both axes for generating the contours among the plane.
+
 .. include:: commonControls/heightVariable.rst

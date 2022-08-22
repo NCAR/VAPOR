@@ -22,4 +22,4 @@ This renderer contains all of Vapor's standard renderer controls: the :ref:`Vari
 Specialized Controls
 --------------------
 
-The Slice Renderer contains a *Quality* adjustment parameter in the Appearance tab.  This renderer operates by sampling data values along a plane.  The *Quality* parameter will increase the sampling rate used in generating the Slice.
+The Slice Renderer contains a *N Samples* adjustment parameter in the Appearance tab.  This renderer operates by sampling data values along the X and Y axis of a plane.  The *N Samples* parameter will increase the sampling rate used both axes for generating the Slice.
