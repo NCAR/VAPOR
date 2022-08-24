@@ -336,7 +336,7 @@ jobs:
 
   python_api_centos:
     docker:
-      - image: centos7
+      - image: centos:7
 
     resource_class: large
 
@@ -368,7 +368,7 @@ jobs:
 
   python_api_ubuntu:
     docker:
-      - image: conda/miniconda3
+      - image: conda/miniconda3 # Debian based docker image
 
     resource_class: large
 
@@ -729,15 +729,13 @@ workflows:
       - build_ubuntu18
       - build_centos7
       - python_api_ubuntu
-      - python_api_centos
+      #- python_api_centos
       #- python_api_osx
-      #- foo
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer
       #- build_ubuntu18_installer
       #- build_centos7_installer
-      #- python_api_ubuntu
       #- release_weekly_installers:
       #    requires:
       #      - build_ubuntu18_installer
