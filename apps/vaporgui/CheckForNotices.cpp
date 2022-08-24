@@ -34,7 +34,7 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
         QObject::connect(manager, &QNetworkAccessManager::finished, manager, [&](QNetworkReply *reply) {
             if (reply->error()) {
 #ifndef NDEBUG
-                cout << reply->errorString().toStdString() << endl;
+                printf("%s\n", reply->errorString().toStdString().c_str());
 #endif
                 return;
             }
