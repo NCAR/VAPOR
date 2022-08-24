@@ -5,14 +5,12 @@ package:
 source:
   path: ..
 
-#build:
-#  script: |
-#    pwd
-#    echo unused
-
 build:
   skip_compile_pyc:
     - "*.py"
+  script_env:
+  - DEBUG_BUILD=true
+  - MAP_IMAGES_PATH
 
 requirements:
   build:

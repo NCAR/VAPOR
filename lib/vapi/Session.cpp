@@ -134,8 +134,11 @@ void Session::Reset()
 {
     CloseAllDatasets();
     _controlExec->LoadState();
+    _controlExec->SetCacheSize(getSettingsParams()->GetCacheMB());
+
     _controlExec->NewVisualizer("viz_1");
     getGUIStateParams()->SetActiveVizName("viz_1");
+
     
     if (_renderManager) delete _renderManager;
     _renderManager = new RenderManager(_controlExec);
