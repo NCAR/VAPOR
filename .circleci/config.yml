@@ -379,14 +379,15 @@ jobs:
           name: conda build .
           command: |
             cd /root/project/conda
-            /root/miniconda/bin/conda install -y conda-build
-            /root/miniconda/bin/conda config --add channels conda-forge
-            /root/miniconda/bin/conda build .
+            conda install -y conda-build
+            conda config --add channels conda-forge
+            conda build .
             mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
-            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
+            mkdir /usr/local/conda-bld/linux-64/tarBallDir
+            mv /usr/local/conda-bld/linux-64/tarBallDir/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
  
       - store_artifacts:
-          path: /root/miniconda/conda-bld/linux-64/tarBallDir
+          path: /usr/local/conda-bld/linux-64/tarBallDir
 
   python_api_osx:
     macos:
@@ -407,6 +408,7 @@ jobs:
           name: conda build .
           command: |
             cd /Users/distiller/project/conda
+            #export PYTHONPATH=/root/miniconda/lib/python3.9
             /Users/distiller/miniconda/bin/conda install -y conda-build anaconda conda-verify
             /Users/distiller/miniconda/bin/conda config --add channels conda-forge
             /Users/distiller/miniconda/bin/conda build .
