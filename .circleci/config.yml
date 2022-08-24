@@ -373,18 +373,19 @@ jobs:
     resource_class: large
 
     steps:
-      - run:
-          name: install python
-          command: |
-            apt-get update
-            apt-get install -y python3
-            apt install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
+    #  - run:
+    #      name: install python
+    #      command: |
+    #        apt-get update
+    #        apt-get install -y python3
+    #        apt install -y python3-pip
+    #        pip3 install --upgrade pip
+    #        pip3 install scikit-build command
 
       - run:
           name: install miniconda
           command: |
+            apt-get update
             apt install -y wget
             wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
             bash ~/miniconda.sh -b -p ~/miniconda 
@@ -397,7 +398,7 @@ jobs:
       - run:
           name: conda build .
           command: |
-            rm -rf /root/project/build
+            ls /root/project
             cd /root/project/conda
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
