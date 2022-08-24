@@ -336,7 +336,7 @@ jobs:
 
   python_api_centos:
     docker:
-      - image: sgpearse/vapor3-centos7:latest
+      - image: centos7
 
     resource_class: large
 
