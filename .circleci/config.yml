@@ -383,7 +383,7 @@ jobs:
             conda config --add channels conda-forge
             conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
-            mv /usr/local/conda-bld/linux-64/tarBallDir/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
+            mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
  
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
