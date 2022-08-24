@@ -729,7 +729,7 @@ workflows:
       - build_ubuntu18
       - build_centos7
       - python_api_ubuntu
-      #- python_api_centos
+      - python_api_centos
       #- python_api_osx
       #- foo
       #- test_clang_format
