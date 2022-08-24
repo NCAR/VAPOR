@@ -99,11 +99,11 @@ MPAS/ThomasSchwitalla:
     Image:
 
 MPAS/RosimarRiosBerrios:
-  skip: true
+  # skip: true
   runConcurrently: false
   files:
-    - Source/MPAS/RosimarRiosBerrios.0/x5.tropical_3km_10N.init.nc
-    - Source/MPAS/RosimarRiosBerrios.0/history.2000-05-31_06.00.00.nc
+    - Source/MPAS/RosimarRiosBerrios/x5.tropical_3km_10N.init.nc
+    - Source/MPAS/RosimarRiosBerrios/diag.2000-05-31_06.00.00.nc
   type: mpas
   renderers:
     - TwoDData
