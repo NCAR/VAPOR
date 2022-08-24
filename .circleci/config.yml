@@ -341,23 +341,23 @@ jobs:
     resource_class: large
 
     steps:
-      - run:
-          name: update 3rd party libraries
-          command: |
-            rm -rf /usr/local/VAPOR-Deps/2019-Aug
-            pip3 install gdown --upgrade
-            gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
-            filename="/root/project/2019-Aug-CentOS.tar.xz"
-            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
+      #- run:
+      #    name: update 3rd party libraries
+      #    command: |
+      #      rm -rf /usr/local/VAPOR-Deps/2019-Aug
+      #      pip3 install gdown --upgrade
+      #      gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
+      #      filename="/root/project/2019-Aug-CentOS.tar.xz"
+      #      bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
 
-      - run:
-          name: install python
-          command: |
-            yum -y update || true
-            yum install -y python3
-            yum install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
+      #- run:
+      #    name: install python
+      #    command: |
+      #      yum -y update || true
+      #      yum install -y python3
+      #      yum install -y python3-pip
+      #      pip3 install --upgrade pip
+      #      pip3 install scikit-build command
 
       - run:
           name: install miniconda
@@ -371,23 +371,27 @@ jobs:
       - run:
           name: conda build .
           command: |
-            yum -y install doxygen
+            #yum -y install doxygen
             rm -rf /root/project/build/*
             rm -f /root/project/site.local
             cd /root/project/build
             cd /root/project/conda
-            export PYTHONPATH=/root/miniconda/lib/python3.9
+            #export PYTHONPATH=/root/miniconda/lib/python3.9
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
             /root/miniconda/bin/conda build .
+            mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
+            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
+            #mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 tarBallDir
           no_output_timeout: 20m
  
       - store_artifacts:
-          path: /root/miniconda/conda-bld/linux-64
+          path: /root/miniconda/conda-bld/linux-64/tarBallDir
 
   python_api_ubuntu:
     docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
+      #- image: sgpearse/vapor3-ubuntu18:latest
+      - image: conda/miniconda3
 
     resource_class: large
 
@@ -401,15 +405,15 @@ jobs:
             pip3 install --upgrade pip
             pip3 install scikit-build command
 
-      - run:
-          name: update cmake
-          command: |
-            apt remove -y --purge --auto-remove cmake
-            apt install -y libssl-dev
-            apt install -y build-essential git
-            git clone https://github.com/Kitware/CMake/
-            cd CMake
-            ./bootstrap && make && make install
+      #- run:
+      #    name: update cmake
+      #    command: |
+      #      apt remove -y --purge --auto-remove cmake
+      #      apt install -y libssl-dev
+      #      apt install -y build-essential git
+      #      git clone https://github.com/Kitware/CMake/
+      #      cd CMake
+      #      ./bootstrap && make && make install
 
       - run:
           name: install miniconda
@@ -430,11 +434,93 @@ jobs:
             cd /root/project/conda
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
-            nohup /root/miniconda/bin/conda build . &
+            /root/miniconda/bin/conda build .
+            mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
+            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
           no_output_timeout: 30m
  
       - store_artifacts:
-          path: /root/miniconda/conda-bld/linux-64
+          path: /root/miniconda/conda-bld/linux-64/tarBallDir
+
+  python_api_osx:
+    macos:
+      xcode: "13.4.1"
+
+    resource_class: large
+
+    steps:
+
+      - checkout
+
+      #- run:
+      #    name: Get cmake
+      #    command: |
+      #      brew install cmake
+
+      #- run:
+      #    name: Get MacPorts
+      #    command: |
+      #      curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
+      #      tar xf MacPorts-2.7.1.tar.bz2
+      #      cd MacPorts-2.7.1/
+      #      ./configure
+      #      make -j2
+      #      sudo make install -j2
+
+      - run:
+          name: Get libomp
+          command: |
+            #sudo /opt/local/bin/port selfupdate
+            #(sudo yes || true) | sudo /opt/local/bin/port install libomp
+          no_output_timeout: 30m
+
+      #- run:
+      #    name: Get clang13
+      #    command: |
+      #      sudo /opt/local/bin/port selfupdate
+      #      (sudo yes || true) | sudo /opt/local/bin/port install clang-13
+      #      sudo /opt/local/bin/port select --set clang mp-clang-13
+      #      /opt/local/bin/clang++ -v > clangVersion.txt
+      #    no_output_timeout: 30m
+
+      #- run:
+      #    name: install python
+      #    command: |
+      #      brew install python3
+      #      pip3 install --upgrade pip
+      #      pip3 install scikit-build command
+
+      - run:
+          name: install miniconda
+          command: |
+            brew install wget
+            wget https://repo.continuum.io/miniconda/Miniconda3-py39_4.9.2-MacOSX-x86_64.sh -O ~/miniconda.sh
+            bash ~/miniconda.sh -b -p ~/miniconda
+
+      - run:
+          name: conda build .
+          command: |
+      #      sudo /opt/local/bin/port select --set clang mp-clang-13
+      #      brew install doxygen
+            #rm -rf /root/project/build/*
+            #rm -f /root/project/site.local
+            #cd /root/project/build
+            cd /Users/distiller/project/conda
+            export PYTHONPATH=/root/miniconda/lib/python3.9
+            /Users/distiller/miniconda/bin/conda install -y conda-build anaconda conda-verify
+            /Users/distiller/miniconda/bin/conda config --add channels conda-forge
+            /Users/distiller/miniconda/bin/conda build .
+            mkdir -p /tmp/workspace/installers
+            mv /Users/distiller/miniconda/conda-bld/osx-64/*.tar.bz2 /tmp/workspace/installers
+          no_output_timeout: 30m
+
+      - store_artifacts:
+          path: /tmp/workspace/installers
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - installers
 
   build_ubuntu18:
     docker:
@@ -740,9 +826,11 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      - build_ubuntu18
-      - build_centos7
+      #- build_ubuntu18
+      #- build_centos7
       - python_api_centos
+      - python_api_ubuntu
+      - python_api_osx
       #- foo
       #- test_clang_format
       #- build_win10_installer
