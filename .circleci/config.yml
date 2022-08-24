@@ -373,32 +373,11 @@ jobs:
     resource_class: large
 
     steps:
-    #  - run:
-    #      name: install python
-    #      command: |
-    #        apt-get update
-    #        apt-get install -y python3
-    #        apt install -y python3-pip
-    #        pip3 install --upgrade pip
-    #        pip3 install scikit-build command
-
-      - run:
-          name: install miniconda
-          command: |
-            apt-get update
-            apt install -y wget
-            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
-            bash ~/miniconda.sh -b -p ~/miniconda 
-            rm ~/miniconda.sh
-            export PATH=~/miniconda/bin:$PATH
-            source ~/.bashrc
-
       - checkout
 
       - run:
           name: conda build .
           command: |
-            ls /root/project
             cd /root/project/conda
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
@@ -417,44 +396,6 @@ jobs:
 
       - checkout
 
-      #- run:
-      #    name: Get cmake
-      #    command: |
-      #      brew install cmake
-
-      #- run:
-      #    name: Get MacPorts
-      #    command: |
-      #      curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
-      #      tar xf MacPorts-2.7.1.tar.bz2
-      #      cd MacPorts-2.7.1/
-      #      ./configure
-      #      make -j2
-      #      sudo make install -j2
-
-      - run:
-          name: Get libomp
-          command: |
-            #sudo /opt/local/bin/port selfupdate
-            #(sudo yes || true) | sudo /opt/local/bin/port install libomp
-          no_output_timeout: 30m
-
-      #- run:
-      #    name: Get clang13
-      #    command: |
-      #      sudo /opt/local/bin/port selfupdate
-      #      (sudo yes || true) | sudo /opt/local/bin/port install clang-13
-      #      sudo /opt/local/bin/port select --set clang mp-clang-13
-      #      /opt/local/bin/clang++ -v > clangVersion.txt
-      #    no_output_timeout: 30m
-
-      #- run:
-      #    name: install python
-      #    command: |
-      #      brew install python3
-      #      pip3 install --upgrade pip
-      #      pip3 install scikit-build command
-
       - run:
           name: install miniconda
           command: |
@@ -465,13 +406,7 @@ jobs:
       - run:
           name: conda build .
           command: |
-            #sudo /opt/local/bin/port select --set clang mp-clang-13
-            #brew install doxygen
-            #rm -rf /root/project/build/*
-            #rm -f /root/project/site.local
-            #cd /root/project/build
             cd /Users/distiller/project/conda
-            export PYTHONPATH=/root/miniconda/lib/python3.9
             /Users/distiller/miniconda/bin/conda install -y conda-build anaconda conda-verify
             /Users/distiller/miniconda/bin/conda config --add channels conda-forge
             /Users/distiller/miniconda/bin/conda build .
