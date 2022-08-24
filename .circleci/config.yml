@@ -353,9 +353,6 @@ jobs:
       - run:
           name: conda build .
           command: |
-            rm -rf /root/project/build/*
-            rm -f /root/project/site.local
-            cd /root/project/build
             cd /root/project/conda
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
@@ -393,7 +390,6 @@ jobs:
       xcode: "13.4.1"
 
     steps:
-
       - checkout
 
       - run:
