@@ -341,24 +341,6 @@ jobs:
     resource_class: large
 
     steps:
-      #- run:
-      #    name: update 3rd party libraries
-      #    command: |
-      #      rm -rf /usr/local/VAPOR-Deps/2019-Aug
-      #      pip3 install gdown --upgrade
-      #      gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
-      #      filename="/root/project/2019-Aug-CentOS.tar.xz"
-      #      bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
-
-      #- run:
-      #    name: install python
-      #    command: |
-      #      yum -y update || true
-      #      yum install -y python3
-      #      yum install -y python3-pip
-      #      pip3 install --upgrade pip
-      #      pip3 install scikit-build command
-
       - run:
           name: install miniconda
           command: |
@@ -371,26 +353,21 @@ jobs:
       - run:
           name: conda build .
           command: |
-            #yum -y install doxygen
             rm -rf /root/project/build/*
             rm -f /root/project/site.local
             cd /root/project/build
             cd /root/project/conda
-            #export PYTHONPATH=/root/miniconda/lib/python3.9
             /root/miniconda/bin/conda install -y conda-build
             /root/miniconda/bin/conda config --add channels conda-forge
             /root/miniconda/bin/conda build .
             mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
             mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
-            #mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 tarBallDir
-          no_output_timeout: 20m
  
       - store_artifacts:
           path: /root/miniconda/conda-bld/linux-64/tarBallDir
 
   python_api_ubuntu:
     docker:
-      #- image: sgpearse/vapor3-ubuntu18:latest
       - image: conda/miniconda3
 
     resource_class: large
@@ -404,16 +381,6 @@ jobs:
             apt install -y python3-pip
             pip3 install --upgrade pip
             pip3 install scikit-build command
-
-      #- run:
-      #    name: update cmake
-      #    command: |
-      #      apt remove -y --purge --auto-remove cmake
-      #      apt install -y libssl-dev
-      #      apt install -y build-essential git
-      #      git clone https://github.com/Kitware/CMake/
-      #      cd CMake
-      #      ./bootstrap && make && make install
 
       - run:
           name: install miniconda
@@ -437,7 +404,6 @@ jobs:
             /root/miniconda/bin/conda build .
             mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
             mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
-          no_output_timeout: 30m
  
       - store_artifacts:
           path: /root/miniconda/conda-bld/linux-64/tarBallDir
@@ -445,8 +411,6 @@ jobs:
   python_api_osx:
     macos:
       xcode: "13.4.1"
-
-    resource_class: large
 
     steps:
 
@@ -500,8 +464,8 @@ jobs:
       - run:
           name: conda build .
           command: |
-      #      sudo /opt/local/bin/port select --set clang mp-clang-13
-      #      brew install doxygen
+            #sudo /opt/local/bin/port select --set clang mp-clang-13
+            #brew install doxygen
             #rm -rf /root/project/build/*
             #rm -f /root/project/site.local
             #cd /root/project/build
