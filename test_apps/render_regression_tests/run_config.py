@@ -147,7 +147,7 @@ def GenerateTests(config, tests):
                 fullName = f"{name}-{ren}"
                 if len(varCombos) > 1:
                     fullName += '-'.join(['', *chain.from_iterable(combo)])
-                fName = fullName + ".jpg"
+                fName = fullName + ".png"
                 fName = fName.replace('/', '-')
 
                 yield {
