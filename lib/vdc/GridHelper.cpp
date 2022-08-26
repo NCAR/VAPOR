@@ -606,6 +606,11 @@ void GridHelper::_makeGridHelper(const DC::DataVar &var, const DimsType &roi_dim
         mv = var.GetMissingValue();
     }
 
+    // Don't allow NaNs as missing values. We replace any
+    // missing values in the data with infinity
+    //
+    if (std::isnan(mv)) mv = std::numeric_limits<float>::infinity();
+
     g->SetPeriodic(periodic);
     if (has_missing) {
         g->SetHasMissingValues(true);
