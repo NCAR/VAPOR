@@ -83,6 +83,9 @@ int Session::OpenDataset(String format, const vector<String> &files, String name
 
 String Session::OpenDataset(String format, vector<String> files)
 {
+    if (files.empty())
+        return "";
+
     String name = ControlExec::MakeStringConformant(FileUtils::Basename(files[0]));
     
     if (OpenDataset(format, files, name) < 0)
