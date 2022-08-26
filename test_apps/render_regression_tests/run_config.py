@@ -15,7 +15,7 @@ def ParseAruments() -> (dict, dict):
     parser.add_argument('-n', '--dryRun', action='store_true')
     parser.add_argument('-j', '--jobs', type=int, default=1)
     parser.add_argument('-o', '--outDir')
-    parser.add_argument('-t', '--testName')
+    parser.add_argument('-t', '--testName', help="Run specific test from config.yaml. By default will run all tests.")
     args = parser.parse_args()
 
     with open(args.configPath, "r") as f:
