@@ -9,7 +9,7 @@ build:
   skip_compile_pyc:
     - "*.py"
   script_env:
-  - DEBUG_BUILD=true
+  - DEBUG_BUILD
   - MAP_IMAGES_PATH
 
 requirements:
