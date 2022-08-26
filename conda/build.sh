@@ -48,7 +48,7 @@ unset CMAKE_PREFIX_PATH
 SP_DIR="`python -c 'import site; print(site.getsitepackages()[0].replace(\"'$BUILD_PREFIX'\", \"'$PREFIX'\"))'`"
 
 # Our third party libs have a non-standard copy of the GTE library so it is packaged and extracted here.
-unzip -f -d include buildutils/GTE.zip
+unzip -d include buildutils/GTE.zip
 
 if false ; then
 	echo "============================================================"
