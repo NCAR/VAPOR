@@ -20,11 +20,11 @@ namespace VAPoR {
 class VDF_API GeoUtil : public Wasp::MyBase {
 public:
     //! Shift a container of longitude values so that all
-    //! values are in the range [-180.0..180.0)
+    //! values are in the range [-bound .. bound]
     //
-    static void ShiftLon(vector<float>::iterator first, vector<float>::iterator last);
-    static void ShiftLon(vector<double>::iterator first, vector<double>::iterator last);
-    static void ShiftLon(float *first, float *last);
+    static void ShiftLon(vector<float>::iterator first, vector<float>::iterator last, double bound = 360.0);
+    static void ShiftLon(vector<double>::iterator first, vector<double>::iterator last, double bound = 360.0);
+    static void ShiftLon(float *first, float *last, double bound = 360.0);
 
     //! Unwrap any wrapped longitued values
     //!

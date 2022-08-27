@@ -579,10 +579,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelperCylindrical(DC::FileTable::F
     if (rc < 0) { return (rc); }
 
     if (_lonFlag) {
-        if (_proj4API.IsCylindrical()) {
-            GeoUtil::UnwrapLongitude(region, region + nElements);
-            GeoUtil::ShiftLon(region, region + nElements);
-        }
         rc = _proj4API.Transform(region, buf.data(), nElements);
     } else {
         rc = _proj4API.Transform(buf.data(), region, nElements);
@@ -634,16 +630,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper1D(DC::FileTable::FileObject
     //
     make2D(lonBufPtr, latBufPtr, roidims);
 
-
-    if (_proj4API.IsCylindrical()) {
-        size_t nx = max[0] - min[0] + 1;
-        size_t ny = max[1] - min[1] + 1;
-        for (size_t j = 0; j < ny; j++) {
-            GeoUtil::UnwrapLongitude(lonBufPtr + (j * nx), lonBufPtr + (j * nx) + nx);
-            GeoUtil::ShiftLon(lonBufPtr + (j * nx), lonBufPtr + (j * nx) + nx);
-        }
-    }
-
     rc = _proj4API.Transform(lonBufPtr, latBufPtr, vproduct(roidims));
 
     return (rc);
@@ -675,15 +661,6 @@ int DerivedCoordVar_PCSFromLatLon::_readRegionHelper2D(DC::FileTable::FileObject
 
     int rc = _getVar(_dc, ts, _lonName, -1, lod, min, max, lonBufPtr);
     if (rc < 0) { return (rc); }
-
-    if (_proj4API.IsCylindrical()) {
-        size_t nx = max[0] - min[0] + 1;
-        size_t ny = max[1] - min[1] + 1;
-        for (size_t j = 0; j < ny; j++) {
-            GeoUtil::UnwrapLongitude(lonBufPtr + (j * nx), lonBufPtr + (j * nx) + nx);
-            GeoUtil::ShiftLon(lonBufPtr + (j * nx), lonBufPtr + (j * nx) + nx);
-        }
-    }
 
     rc = _getVar(_dc, ts, _latName, -1, lod, min, max, latBufPtr);
     if (rc < 0) { return (rc); }
