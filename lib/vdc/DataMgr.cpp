@@ -1873,7 +1873,7 @@ int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, i
     map_blk_to_vox(file_bs, bmin, bmax, file_min, file_max);
     T *file_block = new T[vproduct(box_dims(file_min, file_max))];
 
-    size_t ndims = number_of_dimensions(file_dims);
+    size_t ndims = GetNumDimensions(varname);
 
     for (size_t i = 0; i < nreads; i++) {
         map_blk_to_vox(file_bs, file_dims, bmin, bmax, file_min, file_max);
