@@ -335,36 +335,7 @@ jobs:
             https://api.github.com/repos/NCAR/VAPOR/issues/${CIRCLE_PULL_REQUEST##*/} \
             -d "$json"
 
-  python_api_centos:
-    docker:
-      - image: centos:7
-
-    resource_class: large
-
-    steps:
-      - run:
-          name: install miniconda
-          command: |
-            yum install -y wget
-            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
-            bash ~/miniconda.sh -b -p ~/miniconda 
-
-      - checkout
-
-      - run:
-          name: conda build .
-          command: |
-            cd /root/project/conda
-            /root/miniconda/bin/conda install -y conda-build
-            /root/miniconda/bin/conda config --add channels conda-forge
-            /root/miniconda/bin/conda build .
-            mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
-            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
- 
-      - store_artifacts:
-          path: /root/miniconda/conda-bld/linux-64/tarBallDir
-
-  python_api_ubuntu:
+  build_python_api_ubuntuDebug:
     docker:
       - image: conda/miniconda3 # Debian based docker image
 
@@ -386,7 +357,76 @@ jobs:
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
 
-  python_api_osx:
+  build_python_api_ubuntu:
+    docker:
+      - image: conda/miniconda3 # Debian based docker image
+
+    resource_class: large
+
+    steps:
+      - checkout
+
+      - run:
+          name: acquire map image archive
+          command: |
+            cd /root
+            apt update
+            apt install -y git
+            git clone https://github.com/NCAR/VAPOR-Data.git
+
+      - run:
+          name: build conda installer
+          command: |
+            conda config --add channels conda-forge
+            conda install -y conda-build
+            cd /root/project/conda
+            DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
+            mkdir /usr/local/conda-bld/linux-64/tarBallDir
+            mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
+
+      - store_artifacts:
+          path: /usr/local/conda-bld/linux-64/tarBallDir
+
+  build_python_api_centos:
+    docker:
+      - image: centos:7
+
+    resource_class: large
+
+    steps:
+      - run:
+          name: install miniconda
+          command: |
+            yum install -y wget
+            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+            bash ~/miniconda.sh -b -p ~/miniconda 
+
+      - checkout
+
+      - run:
+          name: acquire map image archive
+          command: |
+            cd /root
+            yum update -y
+            yum install -y git
+            git clone https://github.com/NCAR/VAPOR-Data.git
+
+      - run:
+          name: conda build .
+          command: |
+            cd /root/project/conda
+            export PATH=/root/miniconda/bin:$PATH
+            conda config --add channels conda-forge
+            conda install -y conda-build
+            conda build .
+            DEBUG_BUILD=false MAP_IMAGES_PATH="/root/images" conda build .
+            mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
+            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
+ 
+      - store_artifacts:
+          path: /root/miniconda/conda-bld/linux-64/tarBallDir
+
+  build_python_api_osx:
     macos:
       xcode: "13.4.1"
 
@@ -401,12 +441,18 @@ jobs:
             bash ~/miniconda.sh -b -p ~/miniconda
 
       - run:
+          name: acquire map image archive
+          command: |
+            cd /Users/distiller
+            git clone https://github.com/NCAR/VAPOR-Data.git
+
+      - run:
           name: conda build .
           command: |
             cd /Users/distiller/project/conda
             /Users/distiller/miniconda/bin/conda install -y conda-build anaconda conda-verify
             /Users/distiller/miniconda/bin/conda config --add channels conda-forge
-            /Users/distiller/miniconda/bin/conda build .
+            DEBUG_BUILD=false MAP_IMAGES_PATH="/Users/distiller/images" /Users/distiller/miniconda/bin/conda build .
             mkdir -p /tmp/workspace/installers
             mv /Users/distiller/miniconda/conda-bld/osx-64/*.tar.bz2 /tmp/workspace/installers
           no_output_timeout: 30m
@@ -725,9 +771,10 @@ workflows:
       #- clang-tidy
       - build_ubuntu18
       - build_centos7
-      - python_api_ubuntu
-      #- python_api_centos
-      #- python_api_osx
+      - build_python_api_ubuntuDebug
+      #- build_python_api_ubuntu
+      #- build_python_api_centos
+      #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer
