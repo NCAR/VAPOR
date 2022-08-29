@@ -1,0 +1,369 @@
+--- # CONFIG
+outDir: ./out
+# dataRootDir: /Volumes/ExtremeSSD/data
+dataRootDir: /glade/p/cisl/vast/vapor/data
+resolution: [1000, 720]
+
+rendererSets:
+  default:
+    - TwoDData
+    - Image
+    - Volume
+    - IsoSurface
+    - Flow
+  2D:
+    - TwoDData
+    - Image
+    - Flow2D
+  3D:
+    - Image
+    - Volume
+    - IsoSurface
+    - Flow3D
+
+--- # Tests
+
+CAM/AdamPhillips/v5_rel04_BC5_ne120_t12_pop62:
+  files: Source/CAM/AdamPhillips/v5_rel04_BC5_ne120_t12_pop62/*.nc
+  type: cf
+
+CAM/AMIP_0.25degree:
+  files: Source/CAM/AMIP_0.25degree/cam5_1_amip_run2.cam2.h1.1979-01-0[1-3]-00000.nc
+  type: cf
+
+CAM/FiniteVolume/cam_fv:
+  # GPU out of memory for 3D
+  files: Source/CAM/FiniteVolume/cam_fv/*.nc
+  type: cf
+
+CAM/Gaussian:
+  files: Source/CAM/Gaussian/*.nc
+  type: cf
+  renderers:
+    - TwoDData
+    - Image
+
+MOM4/00010101:
+  files: Source/MOM4/00010101/*.nc
+  type: cf
+
+MOM4/19990101:
+  files: Source/MOM4/19990101/*.nc
+  type: cf
+
+MOM4/iom1/ocean_month:
+  files: Source/MOM4/iom1/ocean_month/*.nc
+  type: cf
+
+MOM4/JinHeeYuk/ocean_eta:
+  files: Source/MOM4/JinHeeYuk/ocean_eta/*.nc
+  type: cf
+  renderers:
+    - TwoDData
+    - Image
+
+MOM4/JinHeeYuk/ocean_salt:
+  files: Source/MOM4/JinHeeYuk/ocean_salt/*.nc
+  type: cf
+  renderers: 3D
+
+MOM4/om3/ocean_residency_snap:
+  files: Source/MOM4/om3/ocean_residency_snap/*.nc
+  type: cf
+
+MPAS/MPAS-O:
+  files: Source/MPAS/MPAS-O/*.nc
+  type: mpas
+  renderers: 2D
+
+MPAS/FalkoJudt/30km:
+  files:
+    - Source/MPAS/FalkoJudt/30km/x1.static.nc
+    - Source/MPAS/FalkoJudt/30km/diag.2016-08-01_10.30.00.nc
+  type: mpas
+  renderers: 2D
+
+MPAS/MPAS_V4.0:
+  files: Source/MPAS/MPAS_V4.0/x1.40962.output.2012-05-25_06.00.00.nc
+  type: mpas
+  renderers: 2D
+
+MPAS/ThomasSchwitalla:
+  runConcurrently: false
+  files:
+    - Source/MPAS/ThomasSchwitalla/x1.65536002.grid.nc
+    - Source/MPAS/ThomasSchwitalla/ter_3km.nc
+  type: mpas
+  renderers:
+    TwoDData: t2m
+    Image:
+
+MPAS/RosimarRiosBerrios:
+  # skip: true
+  runConcurrently: false
+  files:
+    - Source/MPAS/RosimarRiosBerrios/x5.tropical_3km_10N.init.nc
+    - Source/MPAS/RosimarRiosBerrios/history.2000-05-31_06.00.00.nc
+  type: mpas
+  renderers:
+    - TwoDData
+    - Image
+
+POP/KISTI:
+  files: Source/POP/KISTI/*.nc
+  type: cf
+  renderers: 2D
+
+ROMS/his:
+  files: Source/ROMS/his/*.nc
+  type: cf
+  renderers:
+    default:
+    IsoSurface: temp
+
+ROMS/jsmall:
+  files: Source/ROMS/jsmall/*.nc
+  type: cf
+
+ROMS/Kauffman:
+  files: Source/ROMS/Kauffman/*.nc
+  type: cf
+
+ROMS/KISTI/dm1:
+  files: Source/ROMS/KISTI/dm1/*.nc
+  type: cf
+  renderers:
+    default:
+    TwoDData: zeta
+
+ROMS/KISTI/Regular2:
+  files: Source/ROMS/KISTI/Regular2/*.nc
+  type: cf
+
+ROMS/KISTI/Rotated:
+  files: Source/ROMS/KISTI/Rotated/*.nc
+  type: cf
+  renderers:
+    default:
+    TwoDData: zeta
+
+WRF/2D:
+  files: Source/WRF/2D/wrf.nc
+  type: wrf
+  renderers:
+    2D:
+    TwoDData:
+      variable: U10
+
+WRF/antarctic/antarctic_01:
+  files: Source/WRF/antarctic/antarctic_01/wrfout_d01_2009-04-01_00:00:00
+  type: wrf
+
+WRF/antarctic/antarctic_02:
+  files: Source/WRF/antarctic/antarctic_02/wrfout_d02_2009-04-01_00:00:00
+  type: wrf
+
+WRF/antarctic/antarctic_03:
+  files: Source/WRF/antarctic/antarctic_03/wrfout_d03_2009-04-01_00:00:00
+  type: wrf
+  renderers:
+    default:
+    Volume: V
+
+WRF/antarctic/antarctic_04:
+  files: Source/WRF/antarctic/antarctic_04/wrfout_d04_2009-04-01_00:00:00
+  type: wrf
+  renderers:
+    default:
+    Volume: U
+    TwoDData: T2
+
+WRF/antarctic/antarctic_05:
+  files: Source/WRF/antarctic/antarctic_05/wrfout_d05_2009-04-01_00:00:00
+  type: wrf
+
+WRF/antarctic/antarctic_06:
+  files: Source/WRF/antarctic/antarctic_06/wrfout_d06_2009-04-01_00:00:00
+  type: wrf
+
+WRF/april:
+  files: Source/WRF/april/wrfout_d01_2007-04-0[4-5]_00:00:00
+  type: wrf
+
+WRF/DUKU:
+  files: Source/WRF/DUKU/wrfout_d02_2007-04-01_00:00:00.nc
+  type: wrf
+
+WRF/headwaters:
+  files: Source/WRF/headwaters/wrfout_d01_2053-03-21_00:00:00
+  type: wrf
+
+WRF/HurricaneBill:
+  files:
+    - Source/WRF/HurricaneBill/wrfout_d01_2009-08-18_12:00:00
+    - Source/WRF/HurricaneBill/wrfout_d01_2009-08-18_15:00:00
+  type: wrf
+  renderers:
+    default:
+    IsoSurface:
+      IsoValues: [60.87427]
+
+WRF/idealized/kalundquist:
+  files: Source/WRF/idealized/kalundquist/wrfout_d01_2013-01-01_09_30_00
+  type: wrf
+  renderers:
+    default:
+    TwoDData:
+      variable: SWUPT
+
+WRF/idealized:
+  files: Source/WRF/idealized/wrfout_d01_0001-01-01_00:00:40
+  type: wrf
+  renderers:
+    default:
+    TwoDData:
+      variable: U10
+    Volume:
+      variable: V
+    IsoSurface:
+      variable: V
+
+WRF/Katrina:
+  files: Source/WRF/Katrina/wrfout_d02_2005-08-29_01
+  type: wrf
+
+WRF/planetwrf:
+  files: Source/WRF/planetwrf/wrfout_d01601
+  type: wrf
+
+WRF/rotlatlon/Alan1/d01:
+  files:
+    - Source/WRF/rotlatlon/Alan1/d01/wrfout_d01_2008-06-01_00
+    - Source/WRF/rotlatlon/Alan1/d01/wrfout_d01_2008-06-01_06
+    - Source/WRF/rotlatlon/Alan1/d01/wrfout_d01_2008-06-01_12
+  type: wrf
+  renderers:
+    default:
+    TwoDData: Q2
+    Volume: P
+    IsoSurface:
+      variable: P
+      IsoValues: [ 783 ]
+
+WRF/rotlatlon/Alan1/d02:
+  files:
+    - Source/WRF/rotlatlon/Alan1/d02/wrfout_d02_2008-06-01_00
+    - Source/WRF/rotlatlon/Alan1/d02/wrfout_d02_2008-06-01_06
+    - Source/WRF/rotlatlon/Alan1/d02/wrfout_d02_2008-06-01_12
+  type: wrf
+  renderers:
+    default:
+    TwoDData: Q2
+    Volume: P
+    IsoSurface:
+      variable: P
+
+WRF/rotlatlon/Alan2/d01:
+  files:
+    - Source/WRF/rotlatlon/Alan2/d01/wrfout_d01_2008-06-01_00
+    - Source/WRF/rotlatlon/Alan2/d01/wrfout_d01_2008-06-01_06
+    - Source/WRF/rotlatlon/Alan2/d01/wrfout_d01_2008-06-01_12
+  type: wrf
+  renderers:
+    default:
+    TwoDData: Q2
+    Volume: P
+    IsoSurface:
+      variable: P
+
+WRF/rotlatlon/Alan2/d02:
+  files:
+    - Source/WRF/rotlatlon/Alan2/d02/wrfout_d02_2008-06-01_00
+    - Source/WRF/rotlatlon/Alan2/d02/wrfout_d02_2008-06-01_06
+    - Source/WRF/rotlatlon/Alan2/d02/wrfout_d02_2008-06-01_12
+  type: wrf
+  renderers:
+    default:
+    TwoDData: Q2
+    Volume: P
+    IsoSurface:
+      variable: P
+
+WRF/yochen:
+  files: Source/WRF/yochen/wrfout_d05_2005-07-10_00:1[0-1]:00
+  type: wrf
+  renderers:
+    default:
+    TwoDData: T2
+    Volume: V
+
+WRF/HRRR:
+  files: Source/WRF/HRRR/wrfout_d01_2020-08-28_20_00_00
+  type: wrf
+  renderers:
+    Flow2D:
+    TwoDData:
+      variable: HFX
+    Volume:
+    IsoSurface:
+      IsoValues: [0.01773]
+
+BOV/256i.bov:
+  files: Source/BOV/256i.bov
+  type: bov
+  renderers: 3D
+
+BOV/256f.bov:
+  files: Source/BOV/256f.bov
+  type: bov
+  renderers: 3D
+
+BOV/256d.bov:
+  files: Source/BOV/256d.bov
+  type: bov
+  renderers: 3D
+
+BOV/multiTimeMultiVar:
+  files: Source/BOV/multiTimeMultiVar/*.bov
+  type: bov
+  renderers: 3D
+
+BOV/relativePath1.bov:
+  files: Source/BOV/relativePath1.bov
+  type: bov
+  renderers: 3D
+
+BOV/relativePath2.bov:
+  files: Source/BOV/relativePath2.bov
+  type: bov
+  renderers: 3D
+
+BOV/relativePath3.bov:
+  files: Source/BOV/relativePath3.bov
+  type: bov
+  renderers: 3D
+
+BOV/relativePath4.bov:
+  files: Source/BOV/relativePath4.bov
+  type: bov
+  renderers: 3D
+
+UGRID/NOAA-geoflow/large:
+  files: Source/UGRID/NOAA-geoflow/large/*.nc
+  type: ugrid
+  renderers:
+    - Image
+    - Flow3D
+
+UGRID/NOAA-geoflow/small:
+  files: Source/UGRID/NOAA-geoflow/small/*.nc
+  type: ugrid
+  renderers:
+    - Image
+    - Flow3D
+
+UGRID/NOAA-geoflow/2D:
+  files: Source/UGRID/NOAA-geoflow/2D/*.nc
+  type: ugrid
+  renderers: 2D
+

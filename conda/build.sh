@@ -1,6 +1,9 @@
 #!/bin/sh
 
-DEBUG_BUILD=true
+# Inputs
+[[ -z "$DEBUG_BUILD" ]] && DEBUG_BUILD=true
+# MAP_IMAGES_PATH
+
 CMAKE_EXTRA=""
 
 # The env can be either PREFIX or BUILD_PREFIX depending on the build requirements.
@@ -18,6 +21,8 @@ if $DEBUG_BUILD; then
     
     CMAKE_EXTRA="$CMAKE_EXTRA -DCMAKE_BUILD_TYPE=Debug"
     CMAKE_EXTRA="$CMAKE_EXTRA -DINSTALLER_OMIT_MAPS=ON"
+else
+    CMAKE_EXTRA="$CMAKE_EXTRA -DCMAKE_BUILD_TYPE=Release"
 fi
 
 # Ignore extra warnings

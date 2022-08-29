@@ -37,4 +37,6 @@ else ()
 	set (NUMPY_INCLUDE_DIR "${PYTHONPATH}/site-packages/numpy/core/include")
 endif ()
 
+set (MAP_IMAGES_PATH "${THIRD_PARTY_DIR}/share/images")
+
 include (../vapor-site/site.cmake OPTIONAL)
