@@ -20,7 +20,7 @@ if (BUILD_VDC AND ${GENERATE_FULL_INSTALLER})
 		examples
 	)
     if (NOT INSTALLER_OMIT_MAPS)
-	    set (SHARE_DIRS ${SHARE_DIRS} ${THIRD_PARTY_DIR}/share/images)
+	    set (SHARE_DIRS ${SHARE_DIRS} "${MAP_IMAGES_PATH}")
     endif()
 	install (
 		DIRECTORY ${SHARE_DIRS}
