@@ -419,7 +419,7 @@ jobs:
             conda config --add channels conda-forge
             conda install -y conda-build
             conda build .
-            DEBUG_BUILD=false MAP_IMAGES_PATH="/root/images" conda build .
+            DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
             mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
             mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
  
@@ -452,7 +452,7 @@ jobs:
             cd /Users/distiller/project/conda
             /Users/distiller/miniconda/bin/conda install -y conda-build anaconda conda-verify
             /Users/distiller/miniconda/bin/conda config --add channels conda-forge
-            DEBUG_BUILD=false MAP_IMAGES_PATH="/Users/distiller/images" /Users/distiller/miniconda/bin/conda build .
+            DEBUG_BUILD=false MAP_IMAGES_PATH="/Users/distiller/VAPOR-Data/images" /Users/distiller/miniconda/bin/conda build .
             mkdir -p /tmp/workspace/installers
             mv /Users/distiller/miniconda/conda-bld/osx-64/*.tar.bz2 /tmp/workspace/installers
           no_output_timeout: 30m
@@ -772,7 +772,7 @@ workflows:
       - build_ubuntu18
       - build_centos7
       - build_python_api_ubuntuDebug
-      #- build_python_api_ubuntu
+      - build_python_api_ubuntu
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
