@@ -776,10 +776,10 @@ workflows:
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
-      - build_win10_installer
-      - build_osx_installer
-      - build_ubuntu18_installer
-      - build_centos7_installer
+      #- build_win10_installer
+      #- build_osx_installer
+      #- build_ubuntu18_installer
+      #- build_centos7_installer
       #- release_weekly_installers:
       #    requires:
       #      - build_ubuntu18_installer
