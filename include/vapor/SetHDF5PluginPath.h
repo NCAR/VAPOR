@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vapor/MyBase.h"
 #include "vapor/ResourcePath.h"
 
 #ifndef WIN32
