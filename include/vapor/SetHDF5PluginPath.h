@@ -16,7 +16,7 @@ void SetHDF5PluginPath() {
     #else
         plugins = "HDF5_PLUGIN_PATH=" + plugins;
         int rc=_putenv(plugins.c_str());
-        if (rc != 0) MyBase::SetErrMsg("Unable to set environtment variable %s", plugins.c_str());
+        if (rc != 0) Wasp::MyBase::SetErrMsg("Unable to set environtment variable %s", plugins.c_str());
     #endif
 }
 };    // namespace VAPoR
