@@ -7,7 +7,7 @@
 #endif
 
 namespace VAPoR {
-VDF_API void SetHDF5PluginPath() {
+void SetHDF5PluginPath() {
     string plugins = Wasp::GetSharePath("plugins");
 
     #ifndef WIN32
