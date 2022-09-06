@@ -89,7 +89,7 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
                 break;
             }
 
-            if (rv == 0) {    // Advection successful!
+            if (rv == SUCCESS) {
                 // The new particle *may* be the same as the old particle in case
                 // there's a sink, meaning the velocity is zero.
                 // In that case, we mark p1 as "special" and terminate the current stream.
@@ -179,7 +179,7 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
     velocity->UnlockParams();
 
     if (happened)
-        return ADVECT_HAPPENED;
+        return SUCCESS;
     else
         return NO_ADVECT_HAPPENED;
 }

@@ -160,7 +160,7 @@ int FlowRenderer::_outputFlowLines()
 int FlowRenderer::_paintGL(bool fast)
 {
     FlowParams *params = dynamic_cast<FlowParams *>(GetActiveParams());
-    int         rv;    // return value
+    int         rv = 0;    // return value
 
     if (params->GetNeedFlowlineOutput()) {
         rv = _outputFlowLines();
@@ -1285,7 +1285,7 @@ int FlowRenderer::_updateAdvectionPeriodicity(flow::Advection *advc)
 void FlowRenderer::_printNonZero(int rtn, const char *file, const char *func, int line) const
 {
 #ifdef VPRINT
-    if (rtn != 0) {    // only print non-zero values
+    if (rtn != 0) {
         printf("Rtn == %d: %s:(%s):%d\n", rtn, file, func, line);
     }
 #endif
