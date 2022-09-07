@@ -258,10 +258,8 @@ int VDCNetCDF::GetPath(string varname, size_t ts, string &path, size_t &file_ts,
     path += varname;
 
     if (time_varying) {
-        size_t nelements = 1;
         size_t ngridpoints = 1;
         for (int i = 0; i < dimensions.size() - 1; i++) {
-            nelements *= dimensions[i].GetLength();
             ngridpoints *= dimensions[i].GetLength();
         }
 
@@ -1780,11 +1778,8 @@ bool VDCNetCDF::_var_in_master(const VDC::BaseVar &var) const
     if (time_varying && dims.size() > 3) return (false);
 
     size_t nelements = 1;
-    size_t ngridpoints = 1;
     for (int i = 0; i < dims.size(); i++) {
         nelements *= dims[i].GetLength();
-
-        if (!(i == dims.size() - 1 && time_varying)) { ngridpoints *= dims[i].GetLength(); }
     }
     if (nelements < _master_threshold && !var.IsCompressed()) { return (true); }
 
