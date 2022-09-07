@@ -170,13 +170,14 @@ int FlowRenderer::_paintGL(bool fast)
     }
 
     rv = _updateFlowCacheAndStates(params);
+    _printNonZero(rv, __FILE__, __func__, __LINE__);
     if (rv != 0) {
-        _printNonZero(rv, __FILE__, __func__, __LINE__);
         MyBase::SetErrMsg("Parameters not ready!");
         return flow::PARAMS_ERROR;
     }
 
-    if (_velocityStatus != FlowStatus::UPTODATE || _colorStatus != FlowStatus::UPTODATE) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    if (_velocityStatus != FlowStatus::UPTODATE || _colorStatus != FlowStatus::UPTODATE)
+        _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
 
     _velocityField.UpdateParams(params);
     _velocityField.ScalarName.clear();
@@ -197,11 +198,12 @@ int FlowRenderer::_paintGL(bool fast)
     if (_velocityStatus == FlowStatus::SIMPLE_OUTOFDATE) {
         // First step is to re-calculate deltaT
         rv = _velocityField.CalcDeltaTFromCurrentTimeStep(_cache_deltaT);
+
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         if (rv == flow::FIELD_ALL_ZERO) {
             MyBase::SetErrMsg("The velocity field seems to contain only zero values!");
             return flow::PARAMS_ERROR;
         } else if (rv != 0) {
-            _printNonZero(rv, __FILE__, __func__, __LINE__);
             MyBase::SetErrMsg("Update deltaT failed!");
             return rv;
         }
@@ -217,8 +219,8 @@ int FlowRenderer::_paintGL(bool fast)
         else if (_cache_seedGenMode == FlowSeedMode::LIST)
             rv = _genSeedsFromList(seeds);
 
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         if (rv != 0) {
-            _printNonZero(rv, __FILE__, __func__, __LINE__);
             MyBase::SetErrMsg("Generating seeds failed!");
             return flow::NO_SEED_PARTICLE_YET;
         }
@@ -228,8 +230,8 @@ int FlowRenderer::_paintGL(bool fast)
         //   It should immediately be followed by a function to set its periodicity
         _advection.UseSeedParticles(seeds);
         rv = _updateAdvectionPeriodicity(&_advection);
+        _printNonZero(rv, __FILE__, __func__, __LINE__);
         if (rv != 0) {
-            _printNonZero(rv, __FILE__, __func__, __LINE__);
             MyBase::SetErrMsg("Update Advection Periodicity failed!");
             return flow::GRID_ERROR;
         }
@@ -237,8 +239,8 @@ int FlowRenderer::_paintGL(bool fast)
         {
             _2ndAdvection->UseSeedParticles(seeds);
             rv = _updateAdvectionPeriodicity(_2ndAdvection.get());
+            _printNonZero(rv, __FILE__, __func__, __LINE__);
             if (rv != 0) {
-                _printNonZero(rv, __FILE__, __func__, __LINE__);
                 MyBase::SetErrMsg("Update Advection Periodicity failed!");
                 return flow::GRID_ERROR;
             }

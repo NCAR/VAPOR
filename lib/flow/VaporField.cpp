@@ -472,7 +472,14 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
         auto dims = std::vector<size_t>();
         // -1 indicates that querying the native resolution.
         _datamgr->GetDimLensAtLevel(VelocityNames[0], -1, dims, currentTS);
-        double numCellsDiagnal = std::sqrt(double(dims[0] * dims[0] + dims[1] * dims[1] + dims[2] * dims[2]));
+        // `dims` could have 2 or 3 elements, depending on the dimension of the variable.
+        assert(dims.size() == 2 || dims.size() == 3);
+        double numCellsDiagnal = 0.0;
+        if (dims.size() == 3)
+          numCellsDiagnal = std::sqrt(double(dims[0] * dims[0] + dims[1] * dims[1] + dims[2] * dims[2]));
+        else
+          numCellsDiagnal = std::sqrt(double(dims[0] * dims[0] + dims[1] * dims[1]));
+
         desiredNum = 2.0 * numCellsDiagnal;
     }
 
@@ -483,10 +490,14 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
     //   if deltaT will send a particle out of the domain in just one step in any direction,
     //   then we halve deltaT until the particle can go one step inside of the volume.
     float smallestD = std::numeric_limits<float>::max();
-    if (!VelocityNames[0].empty()) smallestD = std::min(smallestD, std::abs(minxyz.x - maxxyz.x));
-    if (!VelocityNames[1].empty()) smallestD = std::min(smallestD, std::abs(minxyz.y - maxxyz.y));
-    if (!VelocityNames[2].empty()) smallestD = std::min(smallestD, std::abs(minxyz.z - maxxyz.z));
-    while (maxmag * delT > double(smallestD)) {    //
+    if (!VelocityNames[0].empty())
+      smallestD = std::min(smallestD, std::abs(minxyz.x - maxxyz.x));
+    if (!VelocityNames[1].empty())
+      smallestD = std::min(smallestD, std::abs(minxyz.y - maxxyz.y));
+    if (!VelocityNames[2].empty()) {
+      smallestD = std::min(smallestD, std::abs(minxyz.z - maxxyz.z));
+    }
+    while (maxmag * delT > double(smallestD)) {
         delT /= 2.0;
     }
 
