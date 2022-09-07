@@ -234,8 +234,8 @@ warnings.filterwarnings("ignore",
 from sphinx_gallery.sorting import ExampleTitleSortKey
 
 sphinx_gallery_conf = {
-    'examples_dirs': ['data/netCDF', 'usage/imageRenderer'],  # path to your example scripts
-    'gallery_dirs': ['data/netCDF/examples', 'usage/imageRenderer'],  # path to where to save gallery generated output
+    'examples_dirs': ['data/netCDF', 'usage/imageRenderer', 'usage/pythonAPI'],  # path to your example scripts
+    'gallery_dirs': ['data/netCDF/examples', 'usage/imageRenderer', 'usage/pythonAPI'],  # path to where to save gallery generated output
     'within_subsection_order': ExampleTitleSortKey,
     'matplotlib_animations': True,
 }
