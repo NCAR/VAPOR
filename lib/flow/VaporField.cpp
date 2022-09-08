@@ -494,9 +494,8 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
       smallestD = std::min(smallestD, std::abs(minxyz.x - maxxyz.x));
     if (!VelocityNames[1].empty())
       smallestD = std::min(smallestD, std::abs(minxyz.y - maxxyz.y));
-    if (!VelocityNames[2].empty()) {
+    if (!VelocityNames[2].empty())
       smallestD = std::min(smallestD, std::abs(minxyz.z - maxxyz.z));
-    }
     while (maxmag * delT > double(smallestD)) {
         delT /= 2.0;
     }
