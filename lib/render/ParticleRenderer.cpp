@@ -110,10 +110,8 @@ int ParticleRenderer::_paintGL(bool)
 
     bool renderGlyphs = GetActiveParams()->GetValueLong(ParticleParams::Render3DTag, true);
     if (renderGlyphs) {
-        if (regenerateParticles) {
-            _generateParticleData(grid, vecGrids);
-            _generateTextureData();
-        }
+        if (regenerateParticles)
+            _generateTextureData(grid, vecGrids);
         _renderParticlesHelper();
     }
     else {
@@ -223,56 +221,6 @@ void ParticleRenderer::_resetColormapCache() {
     std::vector<double> minMax = tf->getMinMaxMapValue();
     _cacheParams.tf_lut    = tf_lut;
     _cacheParams.tf_minMax = minMax;
-}
-
-void ParticleRenderer::_generateTextureData()
-{
-    vector<_vertex> vertices;
-    vector<int>    sizes;
-    vector<_vertex> sv;
-
-    int nStreams = _particles.size();
-    for (int s = 0; s < nStreams; s+=2) {
-        _vertex p = _particles[s];
-        sv.clear();
-        int sn = 2;
-
-        for (int i = 0; i < sn + 1; i++) {
-            if (i == sn) {
-                int svn = sv.size();
-
-                if (svn < 2) {
-                    sv.clear();
-                    continue;
-                }
-
-                glm::vec3 prep(-normalize(sv[1].point - sv[0].point) + sv[0].point);
-                glm::vec3 post(normalize(sv[svn - 1].point - sv[svn - 2].point) + sv[svn - 1].point);
-
-                size_t vn = vertices.size();
-                vertices.resize(vn + svn + 2);
-                vertices[vn] = {prep, sv[0].value};
-                vertices[vertices.size() - 1] = {post, sv[svn - 1].value};
-
-                memcpy(vertices.data() + vn + 1, sv.data(), sizeof(_vertex) * svn);
-
-                sizes.push_back(svn + 2);
-                sv.clear();
-            } else {
-                sv.push_back({p.point, p.value});
-            }
-        }
-    }
-
-    assert(glIsVertexArray(_VAO) == GL_TRUE);
-    assert(glIsBuffer(_VBO) == GL_TRUE);
-
-    glBindVertexArray(_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(_vertex) * _particles.size(), _particles.data(), GL_STREAM_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    _streamSizes = sizes;
 }
 
 int ParticleRenderer::_renderParticlesHelper()
@@ -406,8 +354,9 @@ int ParticleRenderer::_getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const
     return 0;
 }
 
-void ParticleRenderer::_generateParticleData(const Grid* grid, const std::vector<Grid*>& vecGrids) {
+void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<Grid*>& vecGrids) {
     _particles.clear();
+    _streamSizes.clear();
 
     bool      showDir = _cacheParams.direction;
     size_t    stride = max(1L, (long)_cacheParams.stride);
@@ -426,21 +375,41 @@ void ParticleRenderer::_generateParticleData(const Grid* grid, const std::vector
             continue;
         }
 
+        _streamSizes.push_back(4);
+
         const float value = grid->GetValueAtIndex(*node);
         grid->GetUserCoordinates(*node, coordsBuf);
-        const glm::vec3 p(coordsBuf[0], coordsBuf[1], coordsBuf[2]);
-
-        _particles.push_back({glm::vec3(p[0], p[1], p[2]), value});
+        const glm::vec3 p1(coordsBuf[0], coordsBuf[1], coordsBuf[2]);
 
         if (showDir) {
             const glm::vec3 n(*(dirs[0]), *(dirs[1]), *(dirs[2]));
-            const glm::vec3 p2 = p + n * dirScale;
+            const glm::vec3 p2 = p1 + n * dirScale;
+            glm::vec3 prep(-normalize(p1 - p2) + p2);
+            glm::vec3 post( normalize(p1 - p2) + p1);
+
+            _particles.push_back({prep, value});
             _particles.push_back({glm::vec3(p2[0], p2[1], p2[2]), value});
+            _particles.push_back({glm::vec3(p1[0], p1[1], p1[2]), value});
+            _particles.push_back({post, value});
 
             for (auto &it : dirs) ++it;
         }
-        else _particles.push_back({glm::vec3(p[0], p[1], p[2]), value});
+        else {
+            glm::vec3 prep(-normalize(p1 - p1) + p1);
+            _particles.push_back({prep, value});
+            _particles.push_back({glm::vec3(p1[0], p1[1], p1[2]), value});
+            _particles.push_back({glm::vec3(p1[0], p1[1], p1[2]), value});
+            _particles.push_back({prep, value});
+        }
     }
+    
+    assert(glIsVertexArray(_VAO) == GL_TRUE);
+    assert(glIsBuffer(_VBO) == GL_TRUE);
+
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(_vertex) * _particles.size(), _particles.data(), GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void ParticleRenderer::_renderParticlesLegacy(const Grid* grid, const std::vector<Grid*>& vecGrids) const {
