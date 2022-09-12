@@ -152,6 +152,14 @@ int FlowParams::Initialize()
     return (0);
 }
 
+void FlowParams::SetDefaultVariables(int dim, bool secondaryColormapVariable) {
+    RenderParams::SetDefaultVariables(dim, secondaryColormapVariable);
+
+    vector<string> varnames(1,"");
+    varnames = _dataMgr->GetDataVarNames(dim);
+    SetRakeBiasVariable(varnames[0]);
+}
+
 void FlowParams::SetIsSteady(bool steady) { SetValueLong(_isSteadyTag, "are we using steady advection", long(steady)); }
 
 bool FlowParams::GetIsSteady() const

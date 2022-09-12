@@ -28,7 +28,6 @@
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
 #include <vapor/DataMgrUtils.h>
-#include <vapor/FlowParams.h>
 
 using namespace VAPoR;
 
@@ -106,7 +105,7 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
     // Now set the rest of the variable name fields. It's not important
     // that these exist or not
     //
-    vector<string> varnames(1,"");
+    vector<string> varnames;
     varnames = _dataMgr->GetDataVarNames(dim);
 
     vector<string> fieldVarNames(3, "");
@@ -123,10 +122,6 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
     if (secondaryColormapVariable) colorVar = _findVarStartingWithLetter(varnames, 't');
 
     if (!colorVar.empty()) SetColorMapVariableName(colorVar);
-
-    /*FlowParams* p = dynamic_cast<FlowParams*>(this);
-    if (p != nullptr)
-        p->SetRakeBiasVariable(varnames[0]);*/
 }
 
 void RenderParams::_init()
