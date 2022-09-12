@@ -155,7 +155,7 @@ int FlowParams::Initialize()
 void FlowParams::SetDefaultVariables(int dim, bool secondaryColormapVariable) {
     RenderParams::SetDefaultVariables(dim, secondaryColormapVariable);
 
-    varnames = _dataMgr->GetDataVarNames(dim);
+    std::vector<std::string> varnames = _dataMgr->GetDataVarNames(dim);
     if (varnames.size())
         SetRakeBiasVariable(varnames[0]);
 }
