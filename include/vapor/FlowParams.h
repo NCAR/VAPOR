@@ -53,6 +53,9 @@ public:
 
     static std::string GetClassType() { return ("FlowParams"); }
 
+    //! \copydoc RenderParams::SetDefaultVariables()
+    void SetDefaultVariables(int dim = 3, bool secondaryColormapVariable = false) override;
+
     //! Sets the type of flow rendering algorithm being used.
     //! \details Steady flow (streamlines) renders time-invariant trajectories that follow a vector field at a single timestep.\n
     //! Unsteady flow (pathlines) render time-variant trajectories that advect through the timeseries of a loaded dataset.
