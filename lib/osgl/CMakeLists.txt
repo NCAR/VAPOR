@@ -110,16 +110,14 @@ install (
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 	COMPONENT Libraries
     )
-
-file (GLOB TESTS ./test_*.cpp)
-foreach (TEST ${TESTS})
-    get_filename_component(TEST_NAME "${TEST}" NAME_WE)
-    set(TEST_TARGET "${LIB}_${TEST_NAME}")
-    add_executable(${TEST_TARGET} "${TEST}")
-    target_link_libraries(${TEST_TARGET} ${LIB})
 if (NOT WIN32)
-    target_compile_options(${TEST_TARGET} PRIVATE -Wno-deprecated-declarations)
+    file (GLOB TESTS ./test_*.cpp)
+    foreach (TEST ${TESTS})
+        get_filename_component(TEST_NAME "${TEST}" NAME_WE)
+        set(TEST_TARGET "${LIB}_${TEST_NAME}")
+        add_executable(${TEST_TARGET} "${TEST}")
+        target_link_libraries(${TEST_TARGET} ${LIB})
+        target_compile_options(${TEST_TARGET} PRIVATE -Wno-deprecated-declarations)
+        install(TARGETS ${TEST_TARGET} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Libraries)
+    endforeach()
 endif()
-    install(TARGETS ${TEST_TARGET} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Libraries)
-endforeach()
-

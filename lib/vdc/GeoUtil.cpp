@@ -19,28 +19,16 @@ template<class T> void _minmax(const T *a, int n, int stride, T &min, T &max)
 }
 //
 // Shift 1D array of longitudes, if needed, such that values
-// are in the range [-360.0..360.0)
+// are in the specified range, typically [-360.0..360.0] or [-180.0..180.0]
 //
-template<class ForwardIt> void shiftLonTemplate(ForwardIt first, ForwardIt last)
+template<class ForwardIt> void shiftLonTemplate(ForwardIt first, ForwardIt last, double bound)
 {
-    auto min = *(std::min_element(first, last));
-    auto max = *(std::max_element(first, last));
-
-    if (max > 360.0) {
-        double delta = 0.0;
-        while (max > 360.0) {
-            max -= 360.0;
-            delta += 360.0;
-        }
-        for (auto itr = first; itr != last; ++itr) { *itr -= delta; }
+    for (auto itr = first; itr != last; ++itr) {
+        while (*itr > bound) *itr -= 360.0;
     }
-    if (min < -360.0) {
-        double delta = 0.0;
-        while (min < -360.0) {
-            min += 360.0;
-            delta -= 360.0;
-        }
-        for (auto itr = first; itr != last; ++itr) { *itr -= delta; }
+
+    for (auto itr = first; itr != last; ++itr) {
+        while (*itr < (-1 * bound)) *itr += 360.0;
     }
 }
 
@@ -74,9 +62,9 @@ template<class T> void _ExtractBoundaryTemplate(const T *a, int nx, int ny, T *b
 
 };    // namespace
 
-void GeoUtil::ShiftLon(vector<float>::iterator first, vector<float>::iterator last) { shiftLonTemplate(first, last); }
-void GeoUtil::ShiftLon(vector<double>::iterator first, vector<double>::iterator last) { shiftLonTemplate(first, last); }
-void GeoUtil::ShiftLon(float *first, float *last) { shiftLonTemplate(first, last); }
+void GeoUtil::ShiftLon(vector<float>::iterator first, vector<float>::iterator last, double bound) { shiftLonTemplate(first, last, bound); }
+void GeoUtil::ShiftLon(vector<double>::iterator first, vector<double>::iterator last, double bound) { shiftLonTemplate(first, last, bound); }
+void GeoUtil::ShiftLon(float *first, float *last, double bound) { shiftLonTemplate(first, last, bound); }
 
 void GeoUtil::UnwrapLongitude(vector<float>::iterator first, vector<float>::iterator last) { unwrapLongitudeTemplate(first, last); }
 void GeoUtil::UnwrapLongitude(vector<double>::iterator first, vector<double>::iterator last) { unwrapLongitudeTemplate(first, last); }

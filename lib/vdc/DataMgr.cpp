@@ -1873,7 +1873,7 @@ int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, i
     map_blk_to_vox(file_bs, bmin, bmax, file_min, file_max);
     T *file_block = new T[vproduct(box_dims(file_min, file_max))];
 
-    size_t ndims = number_of_dimensions(file_dims);
+    size_t ndims = GetNumDimensions(varname);
 
     for (size_t i = 0; i < nreads; i++) {
         map_blk_to_vox(file_bs, file_dims, bmin, bmax, file_min, file_max);
@@ -3117,12 +3117,6 @@ void DataMgr::_getLonExtents(vector<float> &lons, DimsType dims, float &min, flo
 
     if (!lons.size()) return;
 
-    size_t nx = dims[0];
-    size_t ny = dims[1];
-    for (size_t j = 0; j < ny; j++) {
-        GeoUtil::UnwrapLongitude(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
-        GeoUtil::ShiftLon(lons.begin() + (j * nx), lons.begin() + (j * nx) + nx);
-    }
     auto minmaxitr = std::minmax_element(lons.begin(), lons.end());
     min = *(minmaxitr.first);
     max = *(minmaxitr.second);

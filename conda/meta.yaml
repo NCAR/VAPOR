@@ -1,18 +1,16 @@
 package:
   name: vapor
-  version: "3.6.0"
+  version: "3.6.1"
 
 source:
   path: ..
 
-#build:
-#  script: |
-#    pwd
-#    echo unused
-
 build:
   skip_compile_pyc:
     - "*.py"
+  script_env:
+  - DEBUG_BUILD
+  - MAP_IMAGES_PATH
 
 requirements:
   build:

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vapor/MyBase.h"
 #include "vapor/ResourcePath.h"
 
 #ifndef WIN32
@@ -7,7 +8,7 @@
 #endif
 
 namespace VAPoR {
-VDF_API void SetHDF5PluginPath() {
+void SetHDF5PluginPath() {
     string plugins = Wasp::GetSharePath("plugins");
 
     #ifndef WIN32
@@ -15,7 +16,7 @@ VDF_API void SetHDF5PluginPath() {
     #else
         plugins = "HDF5_PLUGIN_PATH=" + plugins;
         int rc=_putenv(plugins.c_str());
-        if (rc != 0) MyBase::SetErrMsg("Unable to set environtment variable %s", plugins.c_str());
+        if (rc != 0) Wasp::MyBase::SetErrMsg("Unable to set environtment variable %s", plugins.c_str());
     #endif
 }
 };    // namespace VAPoR

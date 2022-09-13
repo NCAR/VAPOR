@@ -141,7 +141,7 @@ RegularGrid *GridHelper::_make_grid_regular(const DimsType &dims, const vector<f
 {
     CoordType minu = {0.0, 0.0, 0.0};
     CoordType maxu = {0.0, 0.0, 0.0};
-    for (int i = 0; i < Grid::GetNumDimensions(dims); i++) {
+    for (int i = 0; i < blkvec.size() - 1 && blkvec[i + 1]; i++) {
         VAssert(dims[i] > 0);
         float *coords = blkvec[i + 1];
         minu[i] = (coords[0]);
@@ -182,17 +182,17 @@ StretchedGrid *GridHelper::_make_grid_stretched(const DimsType &dims, const vect
     }
 
     vector<double> xcoords;
-    if (Grid::GetNumDimensions(dims) > 0) {
+    if (blkvec.size() > 1 && blkvec[1]) {
         for (int i = 0; i < dims[0]; i++) xcoords.push_back(blkvec[1][i]);
     }
 
     vector<double> ycoords;
-    if (Grid::GetNumDimensions(dims) > 1) {
+    if (blkvec.size() > 2 && blkvec[2]) {
         for (int i = 0; i < dims[1]; i++) ycoords.push_back(blkvec[2][i]);
     }
 
     vector<double> zcoords;
-    if (Grid::GetNumDimensions(dims) > 2) {
+    if (blkvec.size() > 3 && blkvec[3]) {
         for (int i = 0; i < dims[2]; i++) zcoords.push_back(blkvec[3][i]);
     }
 

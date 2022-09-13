@@ -224,8 +224,8 @@ private:
     vector<Renderer *> _renderersToDestroy;
 
     Framebuffer  _framebuffer;
-    unsigned int _screenQuadVAO = NULL;
-    unsigned int _screenQuadVBO = NULL;
+    unsigned int _screenQuadVAO = 0;
+    unsigned int _screenQuadVBO = 0;
 };
 
 };    // namespace VAPoR
