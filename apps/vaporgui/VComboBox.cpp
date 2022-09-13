@@ -1,4 +1,5 @@
 #include "VComboBox.h"
+#include <vapor/STLUtils.h>
 #include <QStandardItemModel>
 #include <cassert>
 
@@ -24,6 +25,7 @@ VComboBox::VComboBox(const std::vector<std::string> &values) : VHBoxWidget()
 //
 void VComboBox::SetOptions(const std::vector<std::string> &values)
 {
+    _options = values;
     _combo->blockSignals(true);
     _combo->clear();
     for (auto i : values) { _combo->addItem(QString::fromStdString(i)); }
@@ -41,6 +43,10 @@ void VComboBox::SetIndex(int index)
 
 void VComboBox::SetValue(const std::string &value)
 {
+    if (!STLUtils::Contains(_options, value)) {
+        _options.push_back(value);
+        SetOptions(_options);
+    }
     QString qValue = QString::fromStdString(value);
     int     index = _combo->findText(qValue);
     if (index >= 0) SetIndex(index);

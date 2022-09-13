@@ -26,6 +26,7 @@ public:
 
 private:
     QComboBox *_combo;
+    std::vector<std::string> _options;
 
 public slots:
     void emitComboChanged(const QString &value);
