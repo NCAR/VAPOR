@@ -840,8 +840,8 @@ void NetCDFCFCollection::_GetMissingValueMap(map<string, double> &missingValueMa
 
         for (int i = 0; i < vars.size(); i++) {
             double mv;
-            if (_GetMissingValue(vars[i], "missing_value", mv)) { missingValueMap[vars[i]] = mv; }
             if (_GetMissingValue(vars[i], "_FillValue", mv)) { missingValueMap[vars[i]] = mv; }
+            if (_GetMissingValue(vars[i], "missing_value", mv)) { missingValueMap[vars[i]] = mv; }
         }
     }
 }
