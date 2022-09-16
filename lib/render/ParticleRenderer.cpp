@@ -408,7 +408,7 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
 
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(_vertex) * _particles.size(), _particles.data(), GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _particles.size(), _particles.data(), GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
