@@ -4,7 +4,9 @@
 #include "VLineItem.h"
 #include "V3DInput.h"
 #include "VGroup.h"
-
+#include "PFileSelector.h"
+#include "PButton.h"
+#include "PGroup.h"
 
 // =====================================
 //           PTrackballWidget
@@ -12,6 +14,17 @@
 
 
 using namespace VAPoR;
+
+PCameraFileGroup::PCameraFileGroup(ControlExec *ce) : PGroup(), _ce(ce) {
+    Add(new PFileOpenSelector(ViewpointParams::CameraDataFileTag, "Camera data file"));
+    Add(new PButton("Apply camera position from file", [this](VAPoR::ParamsBase* p) { NavigationUtils::GetActiveViewpointParams(this->_ce)->SetCameraFromFile();}));
+    Add(new PButton("Save camera position to file", [this](VAPoR::ParamsBase* p) { NavigationUtils::GetActiveViewpointParams(this->_ce)->SaveCameraToFile();}));
+}
+
+void PCameraFileGroup::updateGUI() const {
+    auto params = NavigationUtils::GetActiveViewpointParams(_ce);
+    for (PWidget *child : _children) child->Update(params);
+}
 
 PTrackballWidget::PTrackballWidget(ControlExec *ce) : PWidget("", _group = new VGroup()), _ce(ce)
 {

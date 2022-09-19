@@ -41,6 +41,8 @@ using namespace Wasp;
 const string ViewpointParams::UseCustomFramebufferTag = "UseCustomFramebuffer";
 const string ViewpointParams::CustomFramebufferWidthTag = "CustomFramebufferWidth";
 const string ViewpointParams::CustomFramebufferHeightTag = "CustomFramebufferHeight";
+const string ViewpointParams::OpenCameraFileTag = "OpenCameraFile";
+const string ViewpointParams::SaveCameraFileTag = "SaveCameraFile";
 
 const string ViewpointParams::_viewPointsTag = "Viewpoints";
 const string ViewpointParams::_transformsTag = "Transforms";
@@ -311,6 +313,61 @@ vector<double> ViewpointParams::GetStretchFactors() const
         if (val[i] < 0) val[i] *= -1.0;
     }
     return (val);
+}
+
+int ViewpointParams::SetCameraFromFile() {
+    XmlParser xmlparser;
+
+    XmlNode *node = new XmlNode();
+
+    std::string path = GetValueString(ViewpointParams::CameraDataFileTag,"");
+    int rc = xmlparser.LoadFromFile(node, path);
+    if (rc < 0) {
+        MyBase::SetErrMsg("Failed to read file %s : %M", path.c_str());
+        return (-1);
+    }
+
+    // Create a new MapperFunction from the XmlNode tree
+    //
+    //XmlNode *        parent = this->GetNode()->GetParent();
+    Viewpoint* v     = new Viewpoint(_ssave, node);
+
+    // Assign (copy) new TF to this object
+    //
+    //*this = *vp;
+    //this->GetNode()->SetParent(parent);
+
+    SetCurrentViewpoint(v);
+
+    // Delete the new tree
+    //
+    delete v;
+
+    _ssave->Save(_node, "Load camera from file");
+
+    return (0);
+}
+
+int ViewpointParams::SaveCameraToFile() {
+    std::string path = GetValueString(ViewpointParams::CameraDataFileTag,"");
+    ofstream out(path);
+    if (!out) {
+        MyBase::SetErrMsg("Failed to open file %s : %M", path.c_str());
+        return (-1);
+    }
+
+    Viewpoint *    vp = getCurrentViewpoint();
+    XmlNode *node = vp->GetNode();
+
+    out << *node;
+
+    if (out.bad()) {
+        MyBase::SetErrMsg("Failed to write file %s : %M", path.c_str());
+        return (-1);
+    }
+    out.close();
+
+    return (0);
 }
 
 #ifdef VAPOR3_0_0_ALPHA
