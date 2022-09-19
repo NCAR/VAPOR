@@ -16,9 +16,9 @@
 using namespace VAPoR;
 
 PCameraFileGroup::PCameraFileGroup(ControlExec *ce) : PGroup(), _ce(ce) {
-    Add((new PFileSaveSelector(ViewpointParams::LoadCameraDataFileTag, "Target file to load camera settings"))->SetFileTypeFilter("Vapor camera XML file (*.vc3)"));
+    Add((new PFileOpenSelector(ViewpointParams::LoadCameraDataFileTag, "Target file to load camera settings"))->SetFileTypeFilter("Vapor camera XML file (*.vc3)"));
     Add(new PButton("Apply camera settings from file", [this](VAPoR::ParamsBase* p) { NavigationUtils::GetActiveViewpointParams(this->_ce)->SetCameraFromFile();}));
-    Add((new PFileOpenSelector(ViewpointParams::SaveCameraDataFileTag, "Target file to save camera settings"))->SetFileTypeFilter("Vapor camera XML file (*.vc3)"));
+    Add((new PFileSaveSelector(ViewpointParams::SaveCameraDataFileTag, "Target file to save camera settings"))->SetFileTypeFilter("Vapor camera XML file (*.vc3)"));
     Add(new PButton("Save camera settings to file", [this](VAPoR::ParamsBase* p) { NavigationUtils::GetActiveViewpointParams(this->_ce)->SaveCameraToFile();}));
 }
 
