@@ -278,7 +278,8 @@ public:
     static const string UseCustomFramebufferTag;
     static const string CustomFramebufferWidthTag;
     static const string CustomFramebufferHeightTag;
-    static const string CameraDataFileTag;
+    static const string LoadCameraDataFileTag;
+    static const string SaveCameraDataFileTag;
 
 private:
     ParamsContainer *m_VPs = nullptr;
