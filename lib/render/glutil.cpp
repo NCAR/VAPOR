@@ -100,7 +100,7 @@ int oglGetFreeMemory()
 {
 #define TEXTURE_FREE_MEMORY_ATI 0x87FC
 #define GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX 0x9049
-    int buf[4];
+    GLint buf[4];
     vector<int> _;
 
     memset(buf, 0, sizeof(buf));
