@@ -41,8 +41,7 @@ using namespace Wasp;
 const string ViewpointParams::UseCustomFramebufferTag = "UseCustomFramebuffer";
 const string ViewpointParams::CustomFramebufferWidthTag = "CustomFramebufferWidth";
 const string ViewpointParams::CustomFramebufferHeightTag = "CustomFramebufferHeight";
-const string ViewpointParams::OpenCameraFileTag = "OpenCameraFile";
-const string ViewpointParams::SaveCameraFileTag = "SaveCameraFile";
+const string ViewpointParams::CameraDataFileTag = "CameraDataFile";
 
 const string ViewpointParams::_viewPointsTag = "Viewpoints";
 const string ViewpointParams::_transformsTag = "Transforms";
@@ -327,20 +326,9 @@ int ViewpointParams::SetCameraFromFile() {
         return (-1);
     }
 
-    // Create a new MapperFunction from the XmlNode tree
-    //
-    //XmlNode *        parent = this->GetNode()->GetParent();
     Viewpoint* v     = new Viewpoint(_ssave, node);
-
-    // Assign (copy) new TF to this object
-    //
-    //*this = *vp;
-    //this->GetNode()->SetParent(parent);
-
     SetCurrentViewpoint(v);
 
-    // Delete the new tree
-    //
     delete v;
 
     _ssave->Save(_node, "Load camera from file");

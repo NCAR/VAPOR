@@ -232,67 +232,13 @@ public:
     //
     vector<string> GetTransformNames() const { return (_transforms->GetNames()); }
 
-    int SetCameraFromFile(); /*{
-        //Viewpoint *    vp = getCurrentViewpoint();
-
-        XmlParser xmlparser;
-
-        XmlNode *node = new XmlNode();
-
-        std::string path = GetValueString("OpenCameraFile","");
-        int rc = xmlparser.LoadFromFile(node, path);
-        if (rc < 0) {
-            MyBase::SetErrMsg("Failed to read file %s : %M", path.c_str());
-            return (-1);
-        }
-
-        // Create a new MapperFunction from the XmlNode tree
-        //
-        //XmlNode *        parent = this->GetNode()->GetParent();
-        Viewpoint* v     = new Viewpoint(_ssave, node);
-
-        // Assign (copy) new TF to this object
-        //
-        //this = *vp;
-        //this->GetNode()->SetParent(parent);
-
-        SetCurrentViewpoint(v);
-
-        // Delete the new tree
-        //
-        delete v;
-
-        _ssave->Save(_node, "Load camera from file");
-
-        return (0);
-    }*/
+    //! Set the current camera position, direction, up vector, and origin from a given xml file
+    //! \retval integer indicating success (0) or failure (-1)
+    int SetCameraFromFile();
     
-    int SaveCameraToFile();/* {
-        std::string path = GetValueString("SaveCameraFile","");
-        ofstream out(path);
-        std::cout << "path " << path << std::endl;
-        if (!out) {
-            MyBase::SetErrMsg("Failed to open file %s : %M", path.c_str());
-            return (-1);
-        }
-
-        std::cout << "A" << std::endl;
-
-        Viewpoint *    vp = getCurrentViewpoint();
-        XmlNode *node = vp->GetNode();
-
-        out << *node;
-
-        if (out.bad()) {
-            MyBase::SetErrMsg("Failed to write file %s : %M", path.c_str());
-            return (-1);
-        }
-        out.close();
-
-        std::cout << "B" << std::endl;
-
-        return (0);
-    }*/
+    //! Save the current camera position, direction, up vector, and origin to an xml file
+    //! \retval integer indicating success (0) or failure (-1)
+    int SaveCameraToFile();
 
 #ifdef VAPOR3_0_0_ALPHA
     //! Determine the current diameter of the visible scene.
@@ -332,8 +278,7 @@ public:
     static const string UseCustomFramebufferTag;
     static const string CustomFramebufferWidthTag;
     static const string CustomFramebufferHeightTag;
-    static const string OpenCameraFileTag;
-    static const string SaveCameraFileTag;
+    static const string CameraDataFileTag;
 
 private:
     ParamsContainer *m_VPs = nullptr;
