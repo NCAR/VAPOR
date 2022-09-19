@@ -131,7 +131,7 @@ int Renderer::paintGL(bool fast)
     vector<int> status;
     bool        ok = oglStatusOK(status);
     if (!ok) {
-        SetErrMsg("OpenGL error : %s", oglGetErrMsg(status).c_str());
+        SetErrMsg("%s", oglGetErrMsg(status).c_str());
         return (-1);
     }
     return (0);

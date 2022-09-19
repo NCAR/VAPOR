@@ -412,6 +412,26 @@ void VolumeCellTraversal::SetUniforms(const ShaderProgram *s) const
 
 float VolumeCellTraversal::GuestimateFastModeSpeedupFactor() const { return 2; }
 
+int VolumeCellTraversal::CheckHardwareSupport(const Grid *grid) const
+{
+    int ret = VolumeRegular::CheckHardwareSupport(grid);
+    if (ret < 0)
+        return ret;
+
+    long freeKB = oglGetFreeMemory();
+    if (freeKB >= 0) {
+        auto dims = grid->GetDimensions();
+        long estimatedMinimumB = dims[0]*dims[1]*dims[2] * sizeof(float) * 4;
+        long estimatedMinimumKB = estimatedMinimumB/1024;
+        if (freeKB < estimatedMinimumKB) {
+            Wasp::MyBase::SetErrMsg("Not enough GPU RAM free (%liMB free, need at least %liMB)\n", freeKB/1024, estimatedMinimumKB/1024);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
 bool VolumeCellTraversal::_needsHighPrecisionTriangleRoutine(const Grid *grid)
 {
     vector<double> extentsMin, extentsMax;
