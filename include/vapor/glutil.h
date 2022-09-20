@@ -100,6 +100,10 @@ RENDER_API void doubleToString(const double val, std::string &result, int digits
 //
 RENDER_API std::string oglGetErrMsg(std::vector<int> status);
 
+//! Returns free RAM in kilobytes
+//! Returns -1 if not supported
+RENDER_API int oglGetFreeMemory();
+
 //! Test readyness of OpenGL frame buffer, GL_FRAMEBUFFER
 //!
 RENDER_API bool FrameBufferReady();

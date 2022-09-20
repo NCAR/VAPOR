@@ -1,6 +1,7 @@
 #include <vapor/Texture.h>
 #include <vapor/glutil.h>
-#include "vapor/VAssert.h"
+#include <vapor/MyBase.h>
+#include <vapor/VAssert.h>
 
 using namespace VAPoR;
 
@@ -52,6 +53,23 @@ int Texture::TexImage(int internalFormat, int width, int height, int depth, unsi
     VAssert(Initialized());
     VAssert(_nDims >= 2 || height == 0);
     VAssert(_nDims >= 3 || depth == 0);
+
+    if (_nDims == 3) {
+        GLint max3DTexDim;
+        glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &max3DTexDim);
+        if (width > max3DTexDim || height > max3DTexDim || depth > max3DTexDim) {
+            Wasp::MyBase::SetErrMsg("Texture size (%lix%lix%li) not supported by GPU (max supported size per dim is %i)\n", width, height, depth, max3DTexDim);
+            return -1;
+        }
+    } else {
+        GLint max2DTexDim;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max2DTexDim);
+        if (width > max2DTexDim || height > max2DTexDim) {
+            Wasp::MyBase::SetErrMsg("Texture size (%lix%li) not supported by GPU (max supported size per dim is %i)\n", width, height, max2DTexDim);
+            return -1;
+        }
+    }
+
     _width = width;
     _height = height;
     _depth = depth;

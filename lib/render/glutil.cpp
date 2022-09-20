@@ -69,11 +69,55 @@ bool oglStatusOK(vector<int> &status)
     return (true);
 }
 
+static const char *_glErrorStr(int err)
+{
+    switch (err) {
+#define ERR_TO_STR(E) case E: return #E
+        ERR_TO_STR(GL_NO_ERROR);
+        ERR_TO_STR(GL_INVALID_ENUM);
+        ERR_TO_STR(GL_INVALID_VALUE);
+        ERR_TO_STR(GL_INVALID_OPERATION);
+        ERR_TO_STR(GL_INVALID_FRAMEBUFFER_OPERATION);
+        ERR_TO_STR(GL_OUT_OF_MEMORY);
+//        ERR_TO_STR(GL_STACK_UNDERFLOW);
+//        ERR_TO_STR(GL_STACK_OVERFLOW);
+    default: return "GL_UNKNOWN_ERROR";
+    }
+}
+
 string oglGetErrMsg(vector<int> status)
 {
     string msg;
-    for (int i = 0; i < status.size(); i++) msg += "Error #" + std::to_string(status[i]) + "\n";
+    for (auto e : status) {
+        msg += "OpenGL Error: ";
+        msg += _glErrorStr(e);
+        msg += " (#" + std::to_string(e) + ")\n";
+    }
     return msg;
+}
+
+int oglGetFreeMemory()
+{
+#define TEXTURE_FREE_MEMORY_ATI 0x87FC
+#define GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX 0x9049
+    GLint buf[4];
+    vector<int> _;
+
+    memset(buf, 0, sizeof(buf));
+    glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, buf);
+    if (buf[0] > 0)
+        return buf[0];
+
+    oglStatusOK(_);
+
+    memset(buf, 0, sizeof(buf));
+    glGetIntegerv(GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, buf);
+    if (buf[0] > 0)
+        return buf[0];
+
+    oglStatusOK(_);
+
+    return -1;
 }
 
 int __CheckGLError(const char *file, int line, const char *msg)
