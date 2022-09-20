@@ -29,6 +29,7 @@ jobs:
             pwd
             ls
             python .circleci/downloadWin3rdParty.py
+          no_output_timeout: 20m
       - run:
           name: dos2unix
           command: |
@@ -789,7 +790,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "25 18 * * 2" #Mountain Standard Time +7
+             cron: "40 18 * * 2" #Mountain Standard Time +7
              filters:
                branches:
                  only: main
