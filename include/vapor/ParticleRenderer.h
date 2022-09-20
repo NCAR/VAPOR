@@ -67,12 +67,12 @@ private:
         std::vector<std::string> fieldVars;
     } _cacheParams;
 
-    struct _vertex {
+    struct Vertex {
         glm::vec3  point;
         float      value;
     };
 
-    std::vector<_vertex> _particles;
+    std::vector<Vertex> _particles;
 
     std::vector<int> _streamSizes;
 
@@ -94,8 +94,7 @@ private:
     void _resetColormapCache();
     int  _generateParticlesLegacy(Grid*& grid, std::vector<Grid*>& vecGrids);
     int  _getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const;
-    void _generateTextureData();
-    void _generateParticleData(const Grid* grid, const std::vector<Grid*>& vecGrids);
+    void _generateTextureData(const Grid* grid, const std::vector<Grid*>& vecGrids);
     void _renderParticlesLegacy(const Grid* grid, const std::vector<Grid*>& vecGrids) const;
     int  _renderParticlesHelper();
     void _prepareColormap();

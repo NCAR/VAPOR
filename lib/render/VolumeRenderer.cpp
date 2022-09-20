@@ -358,8 +358,11 @@ int VolumeRenderer::_loadData()
         }
     }
 
-    int ret = _algorithm->LoadData(grid);
-    _lastRenderTime = 10000;
+    int ret = _algorithm->CheckHardwareSupport(grid);
+    if (ret == 0) {
+        ret = _algorithm->LoadData(grid);
+        _lastRenderTime = 10000;
+    }
     delete grid;
     return ret;
 }

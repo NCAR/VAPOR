@@ -3052,7 +3052,7 @@ template<class T> int DataMgr::_readRegion(int fd, const DimsType &min, const Di
         rc = _dc->ReadRegion(fd, minv, maxv, region);
     }
 
-    _sanitizeFloats(region, vproduct(box_dims(min, max)));
+   _sanitizeFloats(region, vproduct(box_dims(min, max)));
     return (rc);
 }
 

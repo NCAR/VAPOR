@@ -46,6 +46,7 @@ public:
     //! tasks so they won't crash
     virtual bool  RequiresChunkedRendering() = 0;
     virtual float GuestimateFastModeSpeedupFactor() const { return 1; }
+    virtual int CheckHardwareSupport(const Grid *grid) const { return 0; }
 
     static VolumeAlgorithm *NewAlgorithm(const std::string &name, GLManager *gl, VolumeRenderer *renderer);
 

@@ -77,10 +77,10 @@ int VolumeRegular::_loadDataDirect(const Grid *grid, Texture3D *dataTexture, Tex
     }
     Progress::Finish();
 
-    dataTexture->TexImage(GL_R32F, dims[0], dims[1], dims[2], GL_RED, GL_FLOAT, data);
+    int ret = dataTexture->TexImage(GL_R32F, dims[0], dims[1], dims[2], GL_RED, GL_FLOAT, data);
 
     *hasMissingData = grid->HasMissingData();
-    if (*hasMissingData) {
+    if (ret == 0 && *hasMissingData) {
         const float    missingValue = grid->GetMissingValue();
         unsigned char *missingMask = new unsigned char[nVerts];
         memset(missingMask, 0, nVerts);
@@ -89,14 +89,14 @@ int VolumeRegular::_loadDataDirect(const Grid *grid, Texture3D *dataTexture, Tex
             if (data[i] == missingValue) missingMask[i] = 255;
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        missingTexture->TexImage(GL_R8, dims[0], dims[1], dims[2], GL_RED, GL_UNSIGNED_BYTE, missingMask);
+        ret = missingTexture->TexImage(GL_R8, dims[0], dims[1], dims[2], GL_RED, GL_UNSIGNED_BYTE, missingMask);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
         delete[] missingMask;
     }
 
     delete[] data;
-    return 0;
+    return ret;
 }
 
 ShaderProgram *VolumeRegular::GetShader() const { return _glManager->shaderManager->GetShader(_addDefinitionsToShader("VolumeDVR")); }
@@ -118,6 +118,33 @@ void VolumeRegular::SetUniforms(const ShaderProgram *s) const
 }
 
 float VolumeRegular::GuestimateFastModeSpeedupFactor() const { return 5; }
+
+int VolumeRegular::CheckHardwareSupport(const Grid *grid) const
+{
+    int maxTexDim;
+    glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &maxTexDim);
+
+    auto dims = grid->GetDimensions();
+    for (auto d : dims) {
+        if (d > maxTexDim) {
+            Wasp::MyBase::SetErrMsg("Grid size (%lix%lix%li) not supported by GPU (max supported size per dim is %i)\n", dims[0], dims[1], dims[2], maxTexDim);
+            return -1;
+        }
+    }
+
+    long freeKB = oglGetFreeMemory();
+    if (freeKB >= 0) {
+        long estimatedMinimumB = dims[0]*dims[1]*dims[2] * sizeof(float);
+        long estimatedMinimumKB = estimatedMinimumB/1024;
+        if (freeKB < estimatedMinimumKB) {
+            Wasp::MyBase::SetErrMsg("Not enough GPU RAM free (%liMB free, need at least %liMB)\n", freeKB/1024, estimatedMinimumKB/1024);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
 
 std::string VolumeRegular::_addDefinitionsToShader(std::string shaderName) const
 {

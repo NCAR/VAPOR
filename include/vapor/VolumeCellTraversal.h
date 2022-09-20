@@ -42,6 +42,7 @@ public:
     virtual ShaderProgram *GetShader() const;
     virtual void           SetUniforms(const ShaderProgram *shader) const;
     virtual float          GuestimateFastModeSpeedupFactor() const;
+    virtual int CheckHardwareSupport(const Grid *grid) const;
 
 private:
     Texture3D      _coordTexture;

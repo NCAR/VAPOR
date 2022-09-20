@@ -188,9 +188,7 @@ int NetCDFCFCollection::Initialize(const vector<string> &files)
     _timeCoordVars = make_unique(_timeCoordVars);
 
     string mvattname;
-    _GetMissingValueMap(_missingValueMap, mvattname);
-
-    if (!mvattname.empty()) { NetCDFCFCollection::SetMissingValueAttName(mvattname); }
+    _GetMissingValueMap(_missingValueMap);
 
     return (0);
 }
@@ -826,55 +824,24 @@ bool NetCDFCFCollection::_GetMissingValue(string varname, string attname, double
     return (false);
 }
 
-void NetCDFCFCollection::_GetMissingValueMap(map<string, double> &missingValueMap, string &mv_attname) const
+void NetCDFCFCollection::_GetMissingValueMap(map<string, double> &missingValueMap) const
 {
     missingValueMap.clear();
-    mv_attname.clear();
-
-    // First see if data set use "missing_value" attribute to identify
-    // missing data values
-    //
-    for (int d = 1; d < 5 && mv_attname.empty(); d++) {
-        string         attname = "missing_value";
-        vector<string> vars = NetCDFCFCollection::GetDataVariableNames(d, false);
-        for (int i = 0; i < vars.size(); i++) {
-            double mv;
-            if (_GetMissingValue(vars[i], attname, mv)) {
-                mv_attname = attname;
-                break;
-            }
-        }
-    }
-
-    // Second if "missing_value" not used see if data set use
-    // "_FillValue" attribute to identify
-    // missing data values. Some (e.g. CAM) data sets have both attributes.
-    // If so, assuming "missing_value" is true missing data marker
-    //
-    for (int d = 1; d < 5 && mv_attname.empty(); d++) {
-        string         attname = "_FillValue";
-        vector<string> vars = NetCDFCFCollection::GetDataVariableNames(d, false);
-        for (int i = 0; i < vars.size(); i++) {
-            double mv;
-            if (_GetMissingValue(vars[i], attname, mv)) {
-                mv_attname = attname;
-                break;
-            }
-        }
-    }
-
-    if (mv_attname.empty()) return;
 
     //
     // Generate a map from all data variables with missing value
-    // attributes to missing value values.
+    // attributes to missing value values. The CF conventions allow
+    // for two different attributes to specify missing values, "missing_value",
+    // and "_FillValue". The latter is for historical reasaons. Here we look
+    // for either, but give priority to "missing_value"
     //
     for (int d = 1; d < 5; d++) {
         vector<string> vars = NetCDFCFCollection::GetDataVariableNames(d, false);
 
         for (int i = 0; i < vars.size(); i++) {
             double mv;
-            if (_GetMissingValue(vars[i], mv_attname, mv)) { missingValueMap[vars[i]] = mv; }
+            if (_GetMissingValue(vars[i], "_FillValue", mv)) { missingValueMap[vars[i]] = mv; }
+            if (_GetMissingValue(vars[i], "missing_value", mv)) { missingValueMap[vars[i]] = mv; }
         }
     }
 }
