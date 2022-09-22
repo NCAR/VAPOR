@@ -4,6 +4,7 @@
 #include <vapor/MyPython.h>
 #include <vapor/CFuncs.h>
 #include <vapor/FileUtils.h>
+#include <vapor/ResourcePath.h>
 
 using namespace Wasp;
 
