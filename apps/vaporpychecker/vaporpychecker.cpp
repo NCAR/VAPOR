@@ -45,6 +45,9 @@ int main(int argc, char **argv)
 {
     OptionParser op;
 
+    std::string phome = GetPythonDir();
+    setenv("PYTHONHOME", phome.c_str(), 1);
+
     MyBase::SetErrMsgFilePtr(stderr);
     //
     // Parse command line arguments
