@@ -279,8 +279,6 @@ int ParticleRenderer::_renderParticlesHelper()
     glBindTexture(GL_TEXTURE_1D, _colorMapTexId);
     shader->SetUniform("LUT", 0);
 
-    //EnableClipToBox(shader, 0.01);
-
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
     glEnable(GL_BLEND);
