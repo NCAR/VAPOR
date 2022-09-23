@@ -4,6 +4,7 @@
 #include <vapor/MyPython.h>
 #include <vapor/CFuncs.h>
 #include <vapor/FileUtils.h>
+#include <vapor/ResourcePath.h>
 
 using namespace Wasp;
 
@@ -44,6 +45,9 @@ string pyErr()
 int main(int argc, char **argv)
 {
     OptionParser op;
+
+    std::string phome = GetPythonDir();
+    setenv("PYTHONHOME", phome.c_str(), 1);
 
     MyBase::SetErrMsgFilePtr(stderr);
     //
