@@ -23,30 +23,24 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
             (new PIntegerInput(ParticleParams::StrideTag, "Stride"))->SetRange(1, 1000)
         }),
     }));
-    
+
     AddAppearanceSubtab(new PGroup({
         new PTFEditor,
-        new PCheckbox(ParticleParams::Render3DTag,"Enable 3D geometry"),
-        (new PShowIf(ParticleParams::Render3DTag))->Equals(true)->Then({
             new PSection("Particles", {
-                (new PDoubleSliderEdit(ParticleParams::RenderRadiusScalarTag, "Radius"))->SetRange(0.5, 25)->AllowUserRange(true)->EnableDynamicUpdate(),
+                new PCheckbox(ParticleParams::Render3DTag,"Enable 3D geometry"),
+                (new PDoubleSliderEdit(ParticleParams::RenderRadiusScalarTag, "Radius"))->SetRange(0.5, 25)->AllowUserRange(true)->EnableDynamicUpdate()->EnableBasedOnParam(ParticleParams::Render3DTag),
                 new PCheckbox(ParticleParams::ShowDirectionTag, "Show direction"),
-                (new PShowIf(ParticleParams::ShowDirectionTag))->Equals(true)->Then({
-                    (new PDoubleSliderEdit(ParticleParams::DirectionScaleTag, "Length scale"))->SetRange(0.0001, 10)->AllowUserRange(true)->EnableDynamicUpdate(),
-                    (new PXFieldVariableSelector)->ShowParticleVars(),
-                    (new PYFieldVariableSelector)->ShowParticleVars(),
-                    (new PZFieldVariableSelector)->ShowParticleVars(),
-                }),
-            }),
-            new PCheckbox(ParticleParams::LightingEnabledTag,"Enable Lighting"),
-            (new PShowIf(ParticleParams::LightingEnabledTag))->Equals(true)->Then({
+                    (new PDoubleSliderEdit(ParticleParams::DirectionScaleTag, "Length scale"))->SetRange(0.0001, 10)->AllowUserRange(true)->EnableDynamicUpdate()->EnableBasedOnParam(ParticleParams::ShowDirectionTag),
+                    (new PXFieldVariableSelector)->ShowParticleVars()->EnableBasedOnParam(ParticleParams::ShowDirectionTag),
+                    (new PYFieldVariableSelector)->ShowParticleVars()->EnableBasedOnParam(ParticleParams::ShowDirectionTag),
+                    (new PZFieldVariableSelector)->ShowParticleVars()->EnableBasedOnParam(ParticleParams::ShowDirectionTag),
                 new PSection("Lighting", {
-                    (new PDoubleSliderEdit(ParticleParams::PhongAmbientTag,   "Ambient"  ))->EnableDynamicUpdate(),
-                    (new PDoubleSliderEdit(ParticleParams::PhongDiffuseTag,   "Diffuse"  ))->EnableDynamicUpdate(),
-                    (new PDoubleSliderEdit(ParticleParams::PhongSpecularTag,  "Specular" ))->EnableDynamicUpdate(),
-                    (new PDoubleSliderEdit(ParticleParams::PhongShininessTag, "Shininess"))->EnableDynamicUpdate()
+                    (new PCheckbox(ParticleParams::LightingEnabledTag,"Enable Lighting"))->EnableBasedOnParam(ParticleParams::Render3DTag),
+                    (new PDoubleSliderEdit(ParticleParams::PhongAmbientTag,   "Ambient"  ))->EnableDynamicUpdate()->EnableBasedOnParam(ParticleParams::Render3DTag),
+                    (new PDoubleSliderEdit(ParticleParams::PhongDiffuseTag,   "Diffuse"  ))->EnableDynamicUpdate()->EnableBasedOnParam(ParticleParams::Render3DTag),
+                    (new PDoubleSliderEdit(ParticleParams::PhongSpecularTag,  "Specular" ))->EnableDynamicUpdate()->EnableBasedOnParam(ParticleParams::Render3DTag),
+                    (new PDoubleSliderEdit(ParticleParams::PhongShininessTag, "Shininess"))->EnableDynamicUpdate()->EnableBasedOnParam(ParticleParams::Render3DTag)
                 })
-            }),
         }),
     }));
     
