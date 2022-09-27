@@ -317,38 +317,39 @@ int ParticleRenderer::_getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const
     vector<string> mainVarCoords;
     _dataMgr->GetVarCoordVars(_cacheParams.varName, true, mainVarCoords);
 
-    for (auto var : vecNames) {
-        vector<string> varCoords;
-        _dataMgr->GetVarCoordVars(var, true, varCoords);
+    if (_cacheParams.direction) {
+        for (auto var : vecNames) {
+            vector<string> varCoords;
+            _dataMgr->GetVarCoordVars(var, true, varCoords);
 
-        if (mainVarCoords != varCoords) {
-            if (grid) {
-                _dataMgr->UnlockGrid(grid);
-                delete grid;
+            if (mainVarCoords != varCoords) {
+                if (grid) {
+                    _dataMgr->UnlockGrid(grid);
+                    delete grid;
+                }
+                for (auto g : vecGrids) {
+                    _dataMgr->UnlockGrid(g);
+                    delete g;
+                }
+                SetErrMsg("Variable \"%s\" on different grid from main variable", var.c_str());
+                return -1;
             }
-            for (auto g : vecGrids) {
-                _dataMgr->UnlockGrid(g);
-                delete g;
+
+            Grid *ng = _dataMgr->GetVariable(_cacheParams.ts, var, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
+            if (!ng) {
+                if (grid) {
+                    _dataMgr->UnlockGrid(grid);
+                    delete grid;
+                }
+                for (auto g : vecGrids) {
+                    _dataMgr->UnlockGrid(g);
+                    delete g;
+                }
+                SetErrMsg("Cannot read var \"%s\"", var.c_str());
+                return -1;
             }
-            SetErrMsg("Variable \"%s\" on different grid from main variable", var.c_str());
-            return -1;
+            vecGrids.push_back(ng);
         }
-
-        Grid *ng = _dataMgr->GetVariable(_cacheParams.ts, var, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
-        if (!ng) {
-            if (grid) {
-                _dataMgr->UnlockGrid(grid);
-                delete grid;
-            }
-            for (auto g : vecGrids) {
-                _dataMgr->UnlockGrid(g);
-                delete g;
-            }
-            SetErrMsg("Cannot read var \"%s\"", var.c_str());
-            return -1;
-        }
-
-        vecGrids.push_back(ng);
     }
 
     return 0;
