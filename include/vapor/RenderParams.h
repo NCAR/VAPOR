@@ -479,6 +479,7 @@ private:
     static const string _currentTimestepTag;
 
     string _findVarStartingWithLetter(std::vector<string> searchVars, char letter);
+    string _findVarEndingWithLetter(std::vector<string> searchVars, char letter);
 
 public:
     static const string _variableNameTag;

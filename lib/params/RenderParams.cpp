@@ -108,12 +108,20 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
     vector<string> varnames;
     varnames = _dataMgr->GetDataVarNames(dim);
 
+    // Try to find U, V, and W vector variables
     vector<string> fieldVarNames(3, "");
     fieldVarNames[0] = _findVarStartingWithLetter(varnames, 'u');
     fieldVarNames[1] = _findVarStartingWithLetter(varnames, 'v');
     if (dim == 3) {
         fieldVarNames[2] = _findVarStartingWithLetter(varnames, 'w');
         SetHeightVariableName("");
+    }
+
+    // If we can't find U or V, look for variables that correspond with the X, Y, and Z dimensions such as bx, by, and bz
+    if (fieldVarNames[0] == "" || fieldVarNames[1] == "") {
+        fieldVarNames[0] = _findVarEndingWithLetter(varnames, 'x');
+        fieldVarNames[1] = _findVarEndingWithLetter(varnames, 'y');
+        if (dim == 3) fieldVarNames[2] = _findVarEndingWithLetter(varnames, 'z');
     }
 
     SetFieldVariableNames(fieldVarNames);
@@ -656,6 +664,16 @@ string RenderParams::_findVarStartingWithLetter(vector<string> searchVars, char 
     }
     return "";
 }
+
+string RenderParams::_findVarEndingWithLetter(vector<string> searchVars, char letter)
+{
+    for (auto &element : searchVars) {
+        int last = element.size()-1;
+        if (element[last] == letter || element[last] == toupper(letter)) { return element; }
+    }
+    return "";
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 // RenParamsFactory Class
