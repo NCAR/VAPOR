@@ -384,8 +384,11 @@ jobs:
             DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
+            cd /usr/local/conda-bld/linux-64/tarBallDir
+            fileName=${ls}
+            newFileName=${fileName//vapor/vaporUbuntu}
             mkdir -p /tmp/workspace/installers
-            cp /usr/local/conda-bld/linux-64/tarBallDir/*.tar.bz2 /tmp/workspace/installers
+            cp /usr/local/conda-bld/linux-64/tarBallDir/*.tar.bz2 /tmp/workspace/installers/
 
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
@@ -463,6 +466,9 @@ jobs:
             DEBUG_BUILD=false MAP_IMAGES_PATH="/Users/distiller/VAPOR-Data/images" /Users/distiller/miniconda/bin/conda build .
             mkdir -p /tmp/workspace/installers
             mv /Users/distiller/miniconda/conda-bld/osx-64/*.tar.bz2 /tmp/workspace/installers
+            cd /tmp/workspace/installers
+            fileName=${ls}
+            newFileName=${fileName//vapor/vaporUbuntu}
           no_output_timeout: 30m
 
       - store_artifacts:
@@ -797,7 +803,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "27 20 * * 3" #Mountain Standard Time +6
+             cron: "30 22 * * 3" #Mountain Standard Time +6
              filters:
                branches:
                  only: main
