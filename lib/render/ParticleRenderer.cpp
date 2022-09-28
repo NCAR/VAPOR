@@ -381,7 +381,59 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
 
         if (showDir) {
             const glm::vec3 n(*(dirs[0]), *(dirs[1]), *(dirs[2]));
-            const glm::vec3 p2 = p1 + n * dirScale;
+            glm::vec3 p2 = p1 + n * dirScale;
+            //_clipToBox(p1, p2);
+
+            /*if      (p1[0] > _cacheParams.boxMax[0]) { _streamSizes.pop_back(); continue; }
+            else if (p1[1] > _cacheParams.boxMax[1]) { _streamSizes.pop_back(); continue; }
+            else if (p1[2] > _cacheParams.boxMax[2]) { _streamSizes.pop_back(); continue; }
+            else if (p1[0] < _cacheParams.boxMin[0]) { _streamSizes.pop_back(); continue; }
+            else if (p1[1] < _cacheParams.boxMin[1]) { _streamSizes.pop_back(); continue; }
+            else if (p1[2] < _cacheParams.boxMin[2]) { _streamSizes.pop_back(); continue; }
+
+            if (p1[2] < _cacheParams.boxMin[2]) { 
+                float distance = sqrt(pow(_cacheParams.boxMax[0]-p1[0],2)) / sqrt( pow(p2[0]-p1[0],2) );
+                p2[0] = _cacheParams.boxMax[0];
+                p2[1] = p1[1] + (p2[1]-p1[1])*distance;
+                p2[2] = p1[2] + (p2[2]-p1[2])*distance;
+                std::cout << "A" << std::endl;
+            }
+            else if (p2[0] < _cacheParams.boxMin[0]) {
+                float distance = sqrt(pow(_cacheParams.boxMax[0]-p1[0],2)) / sqrt( pow(p2[0]-p1[0],2) );
+                p2[0] = _cacheParams.boxMin[0];
+                p2[1] = p1[1] + (p2[1]-p1[1])*distance;
+                p2[2] = p1[2] + (p2[2]-p1[2])*distance;
+                std::cout << "B" << std::endl;
+            }
+            if (p2[1] > _cacheParams.boxMax[1]) {
+                float distance = sqrt(pow(_cacheParams.boxMax[1]-p1[1],2)) / sqrt( pow(p2[1]-p1[1],2) );
+                p2[0] = p1[0] + (p2[0]-p1[0])*distance;
+                p2[1] = _cacheParams.boxMax[1];
+                p2[2] = p1[2] + (p2[2]-p1[2])*distance;
+                std::cout << "C" << std::endl;
+            }
+            else if (p2[1] < _cacheParams.boxMin[1]) {
+                float distance = sqrt(pow(_cacheParams.boxMin[1]-p1[1],2)) / sqrt( pow(p2[1]-p1[1],2) );
+                p2[0] = p1[0] + (p2[0]-p1[0])*distance;
+                p2[1] = _cacheParams.boxMin[1];
+                p2[2] = p1[2] + (p2[2]-p1[2])*distance;
+                std::cout << "D" << std::endl;
+            }
+            if (p2[2] > _cacheParams.boxMax[2]) {
+                float distance = sqrt(pow(_cacheParams.boxMax[2]-p1[2],2)) / sqrt( pow(p2[2]-p1[2],2) );
+                p2[0] = p1[0] + (p2[0]-p1[0])*distance;
+                p2[1] = p1[1] + (p2[1]-p1[1])*distance;
+                p2[2] = _cacheParams.boxMax[2];
+                std::cout << "E" << std::endl;
+            }
+            else if (p2[2] < _cacheParams.boxMin[2]) {
+                float distance = sqrt(pow(_cacheParams.boxMin[2]-p1[2],2)) / sqrt( pow(p2[2]-p1[2],2) );
+                p2[0] = p1[0] + (p2[0]-p1[0])*distance;
+                p2[1] = p1[1] + (p2[1]-p1[1])*distance;
+                p2[2] = _cacheParams.boxMin[2];
+                std::cout << "F" << std::endl;
+            }*/
+
             glm::vec3 prep(-normalize(p1 - p2) + p2);
             glm::vec3 post( normalize(p1 - p2) + p1);
 
