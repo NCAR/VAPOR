@@ -803,7 +803,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "30 22 * * 3" #Mountain Standard Time +6
+             cron: "05 00 * * 4" #Mountain Standard Time +6
              filters:
                branches:
                  only: main
@@ -812,13 +812,13 @@ workflows:
         - build_centos7_installer
         - build_osx_installer
         - build_win10_installer
-        - build_python_api_ubuntu
-        - build_python_api_osx
+        #- build_python_api_ubuntu
+        #- build_python_api_osx
         - release_weekly_installers:
             requires:
               - build_ubuntu18_installer
               - build_centos7_installer
               - build_osx_installer
               - build_win10_installer
-              - build_python_api_ubuntu
-              - build_python_api_osx
+              #- build_python_api_ubuntu
+              #- build_python_api_osx
