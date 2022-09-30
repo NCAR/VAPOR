@@ -1,0 +1,48 @@
+.. _3.7.0:
+
+Current Release: 3.7.0
+----------------------
+
+September 30, 2022
+
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`__
+
+3.7.0 is now live!
+
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/mCuZ8oH4G8U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+|
+
+Vapor can now be scripted with its Python API. Now you can configure a session in Vapor’s GUI with your preferred renderers, then use Python to generate still frames or movies in ways that are difficult if not impossible to do without a script.
+
+3.7 also introduces new enhanced rendering for visualization of Lagrangian particle tracking, the display of dataset metadata, and 93 other enhancements and bug fixes.
+
+Turn on Vapor’s notice board (under Preferences) to get updates on upcoming video tutorials on these new features, and upcoming in-person tutorials.
+
+Thanks!
+-The Vapor Team
+
+Primary Enhancements
+    - Python Scripting API
+    - Enhanced Particle Rendering
+    - Dataset metadata monitoring
+    
+Secondary Enhancements
+    - Support for ZFP compressed NetCDF
+    - Improved CPU core diagnostics
+    - Allowance for time units in vdccreate
+
+New improvements include:
+    - Slice Renderers can now be arbitrarily oriented
+    - The Contour Renderer now supports 3D variables, and can also be arbitrarily oriented
+    - New Flow integration tools for data analysis along pathlines and streamlines
+
+As well as many other reported issues from our users.
+
+As always, please `engage us on our forum <https://vapor.discourse.group/>`_.
+
+Thank you!
+
+-The Vapor Team

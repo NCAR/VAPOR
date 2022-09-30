@@ -6,7 +6,7 @@ Downloads
 
 See below for our current release, as well as links to sample data and installation instructions.
 
-.. include:: ../announcements/3.6.0.rst
+.. include:: ../announcements/3.7.0.rst
 
 .. include:: sampleData.rst
 
