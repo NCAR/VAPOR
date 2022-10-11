@@ -428,7 +428,7 @@ bool ParticleRenderer::_clipOriginToBox( const glm::vec3 &p1) {
 
 void ParticleRenderer::_clipEndpointToBox( const glm::vec3 &p1, glm::vec3 &p2) const {
     // Trim the endpoints of the particles to the box's extents
-    if (p2[0] > _cacheParams.boxMin[0]) { 
+    if (p2[0] > _cacheParams.boxMax[0]) { 
         float distance = sqrt(pow(_cacheParams.boxMax[0]-p1[0],2)) / sqrt( pow(p2[0]-p1[0],2) );
         p2[0] = _cacheParams.boxMax[0];
         p2[1] = p1[1] + (p2[1]-p1[1])*distance;
