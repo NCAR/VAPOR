@@ -7,7 +7,10 @@ pendent on demonstrable evidence of the software's value to the scientific commu
 For journal articles, proceedings, etc.,
 we request:
 
-**Visualization & Analysis Systems Technologies. (2022) Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers (VAPOR version 3.6.1) [Software].  Boulder, CO: UCAR/NCAR - Computational and Information System Lab.  doi:10.5065/d6j38qhc**
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.7139693.svg
+   :target: https://doi.org/10.5281/zenodo.7139693
+
+**Visualization & Analysis Systems Technologies. (2022) Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers (VAPOR version 3.7.1) [Software].  Boulder, CO: UCAR/NCAR - Computational and Information System Lab.  doi:10.5281/zenodo.7139693**
 
 For presentations, posters, etc.,
 we suggest:
