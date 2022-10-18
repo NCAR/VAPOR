@@ -1081,12 +1081,8 @@ public:
 
     private:
         InsideBox _pred;
-#ifdef VAPOR3_0_0
-        ConstCoordItr _coordItr;
-#else
         const Grid *_g;
         bool        _cellInsideBox(const size_t cindices[]) const;
-#endif
     };
 
     //! Return constant grid cell coordinate iterator
