@@ -642,6 +642,7 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(ForwardIterator<T> &
     _blocksize = rhs._blocksize;
     _coordItr = std::move(rhs._coordItr);
     _index = rhs._index;
+    _lastIndex = rhs._lastIndex;
     _xb = rhs._xb;
     _itr = rhs._itr;
     rhs._itr = nullptr;
@@ -656,6 +657,7 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator()
     _bs3d = {1, 1, 1};
     _blocksize = 1;
     _index = {0, 0, 0};
+    _lastIndex = {0, 0, 0};
     _xb = 0;
     _itr = nullptr;
 }
