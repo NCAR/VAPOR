@@ -41,8 +41,6 @@ using namespace Wasp;
 const string ViewpointParams::UseCustomFramebufferTag = "UseCustomFramebuffer";
 const string ViewpointParams::CustomFramebufferWidthTag = "CustomFramebufferWidth";
 const string ViewpointParams::CustomFramebufferHeightTag = "CustomFramebufferHeight";
-const string ViewpointParams::LoadCameraDataFileTag = "LoadCameraDataFile";
-const string ViewpointParams::SaveCameraDataFileTag = "SaveCameraDataFile";
 
 const string ViewpointParams::_viewPointsTag = "Viewpoints";
 const string ViewpointParams::_transformsTag = "Transforms";
@@ -315,12 +313,11 @@ vector<double> ViewpointParams::GetStretchFactors() const
     return (val);
 }
 
-int ViewpointParams::SetCameraFromFile() {
+int ViewpointParams::SetCameraFromFile(const std::string &path) {
     XmlParser xmlparser;
 
     XmlNode *node = new XmlNode();
 
-    std::string path = GetValueString(ViewpointParams::LoadCameraDataFileTag,"");
     int rc = xmlparser.LoadFromFile(node, path);
     if (rc < 0) {
         MyBase::SetErrMsg("Failed to read file %s : %M", path.c_str());
@@ -337,8 +334,7 @@ int ViewpointParams::SetCameraFromFile() {
     return (0);
 }
 
-int ViewpointParams::SaveCameraToFile() {
-    std::string path = GetValueString(ViewpointParams::SaveCameraDataFileTag,"");
+int ViewpointParams::SaveCameraToFile(const std::string &path) {
     ofstream out(path);
     if (!out) {
         MyBase::SetErrMsg("Failed to open file %s : %M", path.c_str());

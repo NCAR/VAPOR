@@ -234,11 +234,11 @@ public:
 
     //! Set the current camera position, direction, up vector, and origin from a given xml file
     //! \retval integer indicating success (0) or failure (-1)
-    int SetCameraFromFile();
+    int SetCameraFromFile(const std::string &path);
     
     //! Save the current camera position, direction, up vector, and origin to an xml file
     //! \retval integer indicating success (0) or failure (-1)
-    int SaveCameraToFile();
+    int SaveCameraToFile(const std::string &path);
 
 #ifdef VAPOR3_0_0_ALPHA
     //! Determine the current diameter of the visible scene.
@@ -278,8 +278,6 @@ public:
     static const string UseCustomFramebufferTag;
     static const string CustomFramebufferWidthTag;
     static const string CustomFramebufferHeightTag;
-    static const string LoadCameraDataFileTag;
-    static const string SaveCameraDataFileTag;
 
 private:
     ParamsContainer *m_VPs = nullptr;

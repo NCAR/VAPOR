@@ -5,8 +5,7 @@
 #include "V3DInput.h"
 #include "VGroup.h"
 #include "PFileSelector.h"
-#include "PButton.h"
-#include "PGroup.h"
+#include "PFileButton.h"
 
 // =====================================
 //           PTrackballWidget
@@ -16,10 +15,8 @@
 using namespace VAPoR;
 
 PCameraFileGroup::PCameraFileGroup(ControlExec *ce) : PGroup(), _ce(ce) {
-    Add((new PFileOpenSelector(ViewpointParams::LoadCameraDataFileTag, "Target file to load camera settings"))->SetFileTypeFilter("Vapor camera XML file (*.vc3)"));
-    Add(new PButton("Apply camera settings from file", [this](VAPoR::ParamsBase* p) { NavigationUtils::GetActiveViewpointParams(this->_ce)->SetCameraFromFile();}));
-    Add((new PFileSaveSelector(ViewpointParams::SaveCameraDataFileTag, "Target file to save camera settings"))->SetFileTypeFilter("Vapor camera XML file (*.vc3)"));
-    Add(new PButton("Save camera settings to file", [this](VAPoR::ParamsBase* p) { NavigationUtils::GetActiveViewpointParams(this->_ce)->SaveCameraToFile();}));
+    Add((new PFileWriter("Save camera settings to file", [this](std::string path) { NavigationUtils::GetActiveViewpointParams(this->_ce)->SaveCameraToFile(path); }))->SetFileTypeFilter("Vapor Camera File (*.vc3)"));
+    Add((new PFileReader("Load camera settings from file", [this](std::string path) { NavigationUtils::GetActiveViewpointParams(this->_ce)->SetCameraFromFile(path); }))->SetFileTypeFilter("Vapor Camera File (*.vc3)"));
 }
 
 void PCameraFileGroup::updateGUI() const {
