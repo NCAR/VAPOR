@@ -5,9 +5,6 @@
 
 class VPushButton;
 
-typedef std::function<void(VAPoR::ParamsBase *)> Callback;
-typedef std::function<void(std::string)> Callback2;
-
 //! \class PButton
 //! \brief PWidget wrapper for VPushButton.
 //! \author Stas Jaroszynski
@@ -16,7 +13,9 @@ typedef std::function<void(std::string)> Callback2;
 //! Please don't capture in the callback.
 
 class PButton : public PWidget {
+    typedef std::function<void(VAPoR::ParamsBase *)> Callback;
     VPushButton *                                    _button;
+    const Callback                                   _cb;
     bool                                             _disableUndo = false;
 
 public:
@@ -25,9 +24,9 @@ public:
     PButton *DisableUndo();
 
 protected:
-    const Callback                                   _cb;
-    const Callback2                                   _cb2;
     void updateGUI() const override {}
     bool requireParamsMgr() const override { return _disableUndo; }
-    virtual void clicked();
+
+private:
+    void clicked();
 };

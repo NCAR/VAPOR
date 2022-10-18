@@ -4,7 +4,6 @@
 #include "VLineItem.h"
 #include "V3DInput.h"
 #include "VGroup.h"
-#include "PFileSelector.h"
 #include "PFileButton.h"
 
 // =====================================
