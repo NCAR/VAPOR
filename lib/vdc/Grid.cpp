@@ -621,6 +621,8 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
 
     if (!begin || !_blks.size()) {
         _index = _lastIndex;
+        _itr = nullptr;
+        _coordItr = rg->ConstCoordEnd();
         return;
     }
 
