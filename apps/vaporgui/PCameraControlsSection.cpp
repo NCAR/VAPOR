@@ -1,17 +1,10 @@
-#include <QFileDialog>
-
 #include <vapor/ViewpointParams.h>
-#include <vapor/FileUtils.h>
-
 #include "ErrorReporter.h"
 #include "PCameraControlsSection.h"
 #include "PFileButton.h"
-#include "PLineItem.h"
 #include "VLineItem.h"
 #include "V3DInput.h"
 #include "VGroup.h"
-#include "VPushButton.h"
-#include "PButton.h"
 
 // =====================================
 //           PTrackballWidget

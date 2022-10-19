@@ -12,7 +12,6 @@
 
 class VGroup;
 class V3DInput;
-class VPushButton;
 
 class PTrackballWidget : public PWidget {
     ControlExec *_ce;
@@ -56,7 +55,6 @@ protected:
 class PCameraFileGroup : public PGroup {
     ControlExec* _ce;
     VGroup *     _group;
-    VPushButton* _loadFileButton;
 
 public:
     PCameraFileGroup(ControlExec* ce);
