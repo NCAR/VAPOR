@@ -99,6 +99,8 @@ private:
     int  _renderParticlesHelper();
     void _prepareColormap();
     glm::vec3 _getScales();
+    bool _clipOriginToBox( const glm::vec3 &p1);
+    void _clipEndpointToBox( const glm::vec3 &p1, glm::vec3 &p2 ) const;
 };
 
 };    // namespace VAPoR

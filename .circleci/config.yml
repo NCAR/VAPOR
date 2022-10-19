@@ -384,9 +384,19 @@ jobs:
             DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
+            cd /usr/local/conda-bld/linux-64/tarBallDir
+            fileName=${ls}
+            newFileName=${fileName//vapor/vaporUbuntu}
+            mkdir -p /tmp/workspace/installers
+            cp /usr/local/conda-bld/linux-64/tarBallDir/*.tar.bz2 /tmp/workspace/installers/
 
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - installers
 
   build_python_api_centos:
     docker:
@@ -456,6 +466,9 @@ jobs:
             DEBUG_BUILD=false MAP_IMAGES_PATH="/Users/distiller/VAPOR-Data/images" /Users/distiller/miniconda/bin/conda build .
             mkdir -p /tmp/workspace/installers
             mv /Users/distiller/miniconda/conda-bld/osx-64/*.tar.bz2 /tmp/workspace/installers
+            cd /tmp/workspace/installers
+            fileName=${ls}
+            newFileName=${fileName//vapor/vaporUbuntu}
           no_output_timeout: 30m
 
       - store_artifacts:
@@ -790,7 +803,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "40 18 * * 2" #Mountain Standard Time +7
+             cron: "05 00 * * 4" #Mountain Standard Time +6
              filters:
                branches:
                  only: main
@@ -799,9 +812,13 @@ workflows:
         - build_centos7_installer
         - build_osx_installer
         - build_win10_installer
+        #- build_python_api_ubuntu
+        #- build_python_api_osx
         - release_weekly_installers:
             requires:
               - build_ubuntu18_installer
               - build_centos7_installer
               - build_osx_installer
               - build_win10_installer
+              #- build_python_api_ubuntu
+              #- build_python_api_osx

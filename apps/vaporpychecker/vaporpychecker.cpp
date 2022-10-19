@@ -46,8 +46,10 @@ int main(int argc, char **argv)
 {
     OptionParser op;
 
+#ifndef WIN32
     std::string phome = GetPythonDir();
     setenv("PYTHONHOME", phome.c_str(), 1);
+#endif
 
     MyBase::SetErrMsgFilePtr(stderr);
     //

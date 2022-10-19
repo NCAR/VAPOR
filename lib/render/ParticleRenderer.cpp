@@ -279,8 +279,6 @@ int ParticleRenderer::_renderParticlesHelper()
     glBindTexture(GL_TEXTURE_1D, _colorMapTexId);
     shader->SetUniform("LUT", 0);
 
-    EnableClipToBox(shader, 0.01);
-
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
     glEnable(GL_BLEND);
@@ -317,38 +315,39 @@ int ParticleRenderer::_getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const
     vector<string> mainVarCoords;
     _dataMgr->GetVarCoordVars(_cacheParams.varName, true, mainVarCoords);
 
-    for (auto var : vecNames) {
-        vector<string> varCoords;
-        _dataMgr->GetVarCoordVars(var, true, varCoords);
+    if (_cacheParams.direction) {
+        for (auto var : vecNames) {
+            vector<string> varCoords;
+            _dataMgr->GetVarCoordVars(var, true, varCoords);
 
-        if (mainVarCoords != varCoords) {
-            if (grid) {
-                _dataMgr->UnlockGrid(grid);
-                delete grid;
+            if (mainVarCoords != varCoords) {
+                if (grid) {
+                    _dataMgr->UnlockGrid(grid);
+                    delete grid;
+                }
+                for (auto g : vecGrids) {
+                    _dataMgr->UnlockGrid(g);
+                    delete g;
+                }
+                SetErrMsg("Variable \"%s\" on different grid from main variable", var.c_str());
+                return -1;
             }
-            for (auto g : vecGrids) {
-                _dataMgr->UnlockGrid(g);
-                delete g;
+
+            Grid *ng = _dataMgr->GetVariable(_cacheParams.ts, var, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
+            if (!ng) {
+                if (grid) {
+                    _dataMgr->UnlockGrid(grid);
+                    delete grid;
+                }
+                for (auto g : vecGrids) {
+                    _dataMgr->UnlockGrid(g);
+                    delete g;
+                }
+                SetErrMsg("Cannot read var \"%s\"", var.c_str());
+                return -1;
             }
-            SetErrMsg("Variable \"%s\" on different grid from main variable", var.c_str());
-            return -1;
+            vecGrids.push_back(ng);
         }
-
-        Grid *ng = _dataMgr->GetVariable(_cacheParams.ts, var, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true);
-        if (!ng) {
-            if (grid) {
-                _dataMgr->UnlockGrid(grid);
-                delete grid;
-            }
-            for (auto g : vecGrids) {
-                _dataMgr->UnlockGrid(g);
-                delete g;
-            }
-            SetErrMsg("Cannot read var \"%s\"", var.c_str());
-            return -1;
-        }
-
-        vecGrids.push_back(ng);
     }
 
     return 0;
@@ -383,7 +382,11 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
 
         if (showDir) {
             const glm::vec3 n(*(dirs[0]), *(dirs[1]), *(dirs[2]));
-            const glm::vec3 p2 = p1 + n * dirScale;
+            glm::vec3 p2 = p1 + n * dirScale;
+
+            if (!_clipOriginToBox(p1)) continue;  // continue if particle origin falls outside of box
+            _clipEndpointToBox(p1, p2);
+
             glm::vec3 prep(-normalize(p1 - p2) + p2);
             glm::vec3 post( normalize(p1 - p2) + p1);
 
@@ -395,6 +398,7 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
             for (auto &it : dirs) ++it;
         }
         else {
+            if (!_clipOriginToBox(p1)) continue;  // continue if particle origin falls outside of box
             glm::vec3 prep(-normalize(p1 - p1) + p1);
             _particles.push_back({prep, value});
             _particles.push_back({glm::vec3(p1[0], p1[1], p1[2]), value});
@@ -410,6 +414,56 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _particles.size(), _particles.data(), GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+bool ParticleRenderer::_clipOriginToBox( const glm::vec3 &p1) {
+    if      (p1[0] > _cacheParams.boxMax[0]) { _streamSizes.pop_back(); return false; }
+    else if (p1[1] > _cacheParams.boxMax[1]) { _streamSizes.pop_back(); return false; }
+    else if (p1[2] > _cacheParams.boxMax[2]) { _streamSizes.pop_back(); return false; }
+    else if (p1[0] < _cacheParams.boxMin[0]) { _streamSizes.pop_back(); return false; }
+    else if (p1[1] < _cacheParams.boxMin[1]) { _streamSizes.pop_back(); return false; }
+    else if (p1[2] < _cacheParams.boxMin[2]) { _streamSizes.pop_back(); return false; }
+    return true;
+}
+
+void ParticleRenderer::_clipEndpointToBox( const glm::vec3 &p1, glm::vec3 &p2) const {
+    // Trim the endpoints of the particles to the box's extents
+    if (p2[0] > _cacheParams.boxMax[0]) { 
+        float distance = sqrt(pow(_cacheParams.boxMax[0]-p1[0],2)) / sqrt( pow(p2[0]-p1[0],2) );
+        p2[0] = _cacheParams.boxMax[0];
+        p2[1] = p1[1] + (p2[1]-p1[1])*distance;
+        p2[2] = p1[2] + (p2[2]-p1[2])*distance;
+    }
+    else if (p2[0] < _cacheParams.boxMin[0]) {
+        float distance = sqrt(pow(_cacheParams.boxMax[0]-p1[0],2)) / sqrt( pow(p2[0]-p1[0],2) );
+        p2[0] = _cacheParams.boxMin[0];
+        p2[1] = p1[1] + (p2[1]-p1[1])*distance;
+        p2[2] = p1[2] + (p2[2]-p1[2])*distance;
+    }
+    if (p2[1] > _cacheParams.boxMax[1]) {
+        float distance = sqrt(pow(_cacheParams.boxMax[1]-p1[1],2)) / sqrt( pow(p2[1]-p1[1],2) );
+        p2[0] = p1[0] + (p2[0]-p1[0])*distance;
+        p2[1] = _cacheParams.boxMax[1];
+        p2[2] = p1[2] + (p2[2]-p1[2])*distance;
+    }
+    else if (p2[1] < _cacheParams.boxMin[1]) {
+        float distance = sqrt(pow(_cacheParams.boxMin[1]-p1[1],2)) / sqrt( pow(p2[1]-p1[1],2) );
+        p2[0] = p1[0] + (p2[0]-p1[0])*distance;
+        p2[1] = _cacheParams.boxMin[1];
+        p2[2] = p1[2] + (p2[2]-p1[2])*distance;
+    }
+    if (p2[2] > _cacheParams.boxMax[2]) {
+        float distance = sqrt(pow(_cacheParams.boxMax[2]-p1[2],2)) / sqrt( pow(p2[2]-p1[2],2) );
+        p2[0] = p1[0] + (p2[0]-p1[0])*distance;
+        p2[1] = p1[1] + (p2[1]-p1[1])*distance;
+        p2[2] = _cacheParams.boxMax[2];
+    }
+    else if (p2[2] < _cacheParams.boxMin[2]) {
+        float distance = sqrt(pow(_cacheParams.boxMin[2]-p1[2],2)) / sqrt( pow(p2[2]-p1[2],2) );
+        p2[0] = p1[0] + (p2[0]-p1[0])*distance;
+        p2[1] = p1[1] + (p2[1]-p1[1])*distance;
+        p2[2] = _cacheParams.boxMin[2];
+    }
 }
 
 void ParticleRenderer::_renderParticlesLegacy(const Grid* grid, const std::vector<Grid*>& vecGrids) const {
