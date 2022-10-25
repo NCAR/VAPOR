@@ -299,12 +299,6 @@ float Grid::GetValue(const CoordType &coords) const
     CoordType cCoords;
     ClampCoord(coords, cCoords);
 
-#ifdef VAPOR3_0_0_ALPHA
-    // At this point xyz should be within the grid bounds
-    //
-    if (!InsideGrid(cCoords)) return (_missingValue);
-#endif
-
     if (_interpolationOrder == 0) {
         return (GetValueNearestNeighbor(cCoords));
     } else {
@@ -569,48 +563,20 @@ void Grid::ConstCellIteratorSG::next(const long &offset)
 
 bool Grid::ConstCellIteratorBoxSG::_cellInsideBox(const size_t cindices[]) const
 {
-#ifdef VAPOR3_0_0
-    size_t  maxNodes = _g->GetMaxVertexPerCell();
-    size_t  nodeDim = _g->GetNodeDimensions().size();
-    size_t *nodes = (size_t *)alloca(sizeof(size_t) * maxNodes * nodeDim);
-    size_t  coordDim = _g->GetGeometryDim();
-    double *coord = (double *)alloca(sizeof(double) * coordDim);
-
-    int  numNodes;
-    bool status = _g->GetCellNodes(cindices, nodes, numNodes);
-    if (!status) return (false);
-
-    for (int i = 0; i < numNodes; i++) {
-        _g->GetUserCoordinates(&nodes[i * nodeDim], coord);
-        if (!_pred(coord)) return (false);
-    }
-#endif
-
     return (true);
 }
 
 Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(const Grid *g, const CoordType &minu, const CoordType &maxu) : ConstCellIteratorSG(g, true), _pred(minu, maxu)
 {
-#ifdef VAPOR3_0_0
-    // Advance to first node inside box
-    //
-    _coordItr = g->ConstCoordBegin();
-
-    if (!_pred(*_coordItr)) { next(); }
-#else
     _g = g;
 
     // Advance to first node inside box
     //
     if (!_cellInsideBox(_index.data())) { next(); }
-#endif
 }
 
 Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(const ConstCellIteratorBoxSG &rhs) : ConstCellIteratorSG()
 {
-#ifdef VAPOR3_0_0
-    _coordItr = rhs._coordItr;
-#endif
     _pred = rhs._pred;
 }
 
@@ -618,35 +584,18 @@ Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG() : ConstCellIteratorSG() {
 
 void Grid::ConstCellIteratorBoxSG::next()
 {
-#ifdef VAPOR3_0_0
-    do {
-        ConstCellIteratorSG::next();
-        ++_coordItr;
-    } while (!_pred(*_coordItr) && _index != _lastIndex);
-#else
     do {
         ConstCellIteratorSG::next();
     } while (!_cellInsideBox(_index.data()) && _index != _lastIndex);
-#endif
 }
 
 void Grid::ConstCellIteratorBoxSG::next(const long &offset)
 {
-#ifdef VAPOR3_0_0
-    _coordItr += offset;
-    while (!_pred(*_coordItr) && _index != _lastIndex) {
-        ConstCellIteratorSG::next();
-        ++_coordItr;
-    }
-
-#else
-
     long count = offset;
     while (!_cellInsideBox(_index.data()) && _index != _lastIndex && count > 0) {
         ConstCellIteratorSG::next();
         count--;
     }
-#endif
 }
 
 //
@@ -672,6 +621,8 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
 
     if (!begin || !_blks.size()) {
         _index = _lastIndex;
+        _itr = nullptr;
+        _coordItr = rg->ConstCoordEnd();
         return;
     }
 
@@ -691,6 +642,7 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(ForwardIterator<T> &
     _blocksize = rhs._blocksize;
     _coordItr = std::move(rhs._coordItr);
     _index = rhs._index;
+    _lastIndex = rhs._lastIndex;
     _xb = rhs._xb;
     _itr = rhs._itr;
     rhs._itr = nullptr;
@@ -705,6 +657,7 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator()
     _bs3d = {1, 1, 1};
     _blocksize = 1;
     _index = {0, 0, 0};
+    _lastIndex = {0, 0, 0};
     _xb = 0;
     _itr = nullptr;
 }
