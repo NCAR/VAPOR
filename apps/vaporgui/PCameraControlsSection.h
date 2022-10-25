@@ -7,6 +7,7 @@
 
 
 #include "PWidget.h"
+#include "PGroup.h"
 #include <vapor/NavigationUtils.h>
 
 class VGroup;
@@ -51,6 +52,18 @@ protected:
 };
 
 
+class PCameraFileGroup : public PGroup {
+    ControlExec* _ce;
+    VGroup *     _group;
+
+public:
+    PCameraFileGroup(ControlExec* ce);
+    void SetAllCameras(std::string& path);
+
+protected:
+    void updateGUI() const override;
+};
+
 // =====================================
 //        PCameraControlsSection
 // =====================================
@@ -65,6 +78,7 @@ public:
     PSection("Camera Controls", {
         new PTrackballWidget(ce),
         new PCameraProjectionWidget(ce),
+        new PCameraFileGroup(ce)
     }) {}
     // clang-format on
 };

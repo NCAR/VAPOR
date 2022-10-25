@@ -25,6 +25,7 @@
 #include <vapor/Transform.h>
 
 #include <memory>
+#include <fstream>
 
 namespace VAPoR {
 
@@ -230,6 +231,14 @@ public:
     //! Return the list of transform names added with AddDatasetTransform()
     //
     vector<string> GetTransformNames() const { return (_transforms->GetNames()); }
+
+    //! Set the current camera position, direction, up vector, and origin from a given xml file
+    //! \retval integer indicating success (0) or failure (-1)
+    int SetCameraFromFile(const std::string &path);
+    
+    //! Save the current camera position, direction, up vector, and origin to an xml file
+    //! \retval integer indicating success (0) or failure (-1)
+    int SaveCameraToFile(const std::string &path);
 
 #ifdef VAPOR3_0_0_ALPHA
     //! Determine the current diameter of the visible scene.

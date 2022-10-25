@@ -1,10 +1,10 @@
-#include "PCameraControlsSection.h"
 #include <vapor/ViewpointParams.h>
 #include "ErrorReporter.h"
+#include "PCameraControlsSection.h"
+#include "PFileButton.h"
 #include "VLineItem.h"
 #include "V3DInput.h"
 #include "VGroup.h"
-
 
 // =====================================
 //           PTrackballWidget
@@ -12,6 +12,54 @@
 
 
 using namespace VAPoR;
+using namespace Wasp;
+
+PCameraFileGroup::PCameraFileGroup(ControlExec *ce) : PGroup(), _ce(ce) {
+    Add((new PFileWriter("Save camera settings to file", [this](std::string path) { NavigationUtils::GetActiveViewpointParams(this->_ce)->SaveCameraToFile(path); }))->SetFileTypeFilter("Vapor Camera File (*.vc3)"));
+    Add((new PFileReader("Load camera settings from file", [this](std::string path) { PCameraFileGroup::SetAllCameras(path); }))->SetFileTypeFilter("Vapor Camera File (*.vc3)"));
+}
+
+void PCameraFileGroup::updateGUI() const {
+    auto params = NavigationUtils::GetActiveViewpointParams(_ce);
+    for (PWidget *child : _children) child->Update(params);
+}
+
+void PCameraFileGroup::SetAllCameras(std::string &fileName) {
+    XmlParser xmlparser;
+    XmlNode *node = new XmlNode();
+
+    int rc = xmlparser.LoadFromFile(node, fileName);
+    if (rc < 0) {
+        MSG_ERR("Failed to read file " + fileName);
+        return;
+    }
+
+    // Ensure ModelViewMatrix and RotationCenter tags exist
+    const std::string mvmTag = "ModelViewMatrix";
+    const std::string rcTag  = "RotationCenter";
+    if (!node->HasElementDouble(mvmTag)) {
+        MSG_ERR("Invalid camera file" + fileName + ".  Missing XML node: " + mvmTag);
+        return;
+    }
+    if (!node->HasElementDouble(rcTag)) {
+        MSG_ERR("Invalid camera file" + fileName + ".  Missing XML node: " + rcTag);
+        return;
+    }
+
+    // Check for valid matrix and origin values
+    std::vector<double> matrix = node->GetElementDouble(mvmTag);
+    std::vector<double> origin = node->GetElementDouble(rcTag);
+    if (matrix.size() != 16) {
+        MSG_ERR("Invalid camera file" + fileName + ".  Tag " + mvmTag + " must have 16 elements.");
+        return;
+    }
+    if (origin.size() != 3) {
+        MSG_ERR("Invalid camera file" + fileName + ".  Tag " + rcTag + " must have 3 elements.");
+        return;
+    }
+
+    NavigationUtils::SetAllCameras(_ce, matrix, origin);
+}
 
 PTrackballWidget::PTrackballWidget(ControlExec *ce) : PWidget("", _group = new VGroup()), _ce(ce)
 {

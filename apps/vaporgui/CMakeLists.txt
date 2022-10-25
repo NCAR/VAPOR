@@ -180,6 +180,8 @@ set (SRCS
 	PStringDropdownHLI.h
 	PColorSelector.cpp
 	PColorSelector.h
+	PFileButton.cpp
+	PFileButton.h
 	PFileSelector.cpp
 	PFileSelector.h
 	PFileSelectorHLI.h

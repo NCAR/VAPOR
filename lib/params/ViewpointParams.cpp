@@ -313,6 +313,48 @@ vector<double> ViewpointParams::GetStretchFactors() const
     return (val);
 }
 
+int ViewpointParams::SetCameraFromFile(const std::string &path) {
+    XmlParser xmlparser;
+
+    XmlNode *node = new XmlNode();
+
+    int rc = xmlparser.LoadFromFile(node, path);
+    if (rc < 0) {
+        MyBase::SetErrMsg("Failed to read file %s : %M", path.c_str());
+        return (-1);
+    }
+
+    Viewpoint* v     = new Viewpoint(_ssave, node);
+    SetCurrentViewpoint(v);
+
+    delete v;
+
+    _ssave->Save(_node, "Load camera from file");
+
+    return (0);
+}
+
+int ViewpointParams::SaveCameraToFile(const std::string &path) {
+    ofstream out(path);
+    if (!out) {
+        MyBase::SetErrMsg("Failed to open file %s : %M", path.c_str());
+        return (-1);
+    }
+
+    Viewpoint *    vp = getCurrentViewpoint();
+    XmlNode *node = vp->GetNode();
+
+    out << *node;
+
+    if (out.bad()) {
+        MyBase::SetErrMsg("Failed to write file %s : %M", path.c_str());
+        return (-1);
+    }
+    out.close();
+
+    return (0);
+}
+
 #ifdef VAPOR3_0_0_ALPHA
 void ViewpointParams::SetStretchFactors(vector<double> val)
 {
