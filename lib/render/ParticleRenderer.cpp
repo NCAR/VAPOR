@@ -108,14 +108,14 @@ int ParticleRenderer::_paintGL(bool)
         return rc;
     }
 
-    bool renderGlyphs = GetActiveParams()->GetValueLong(ParticleParams::Render3DTag, true);
-    if (renderGlyphs) {
+    bool renderLegacy = GetActiveParams()->GetValueLong(ParticleParams::RenderLegacyTag, false);
+    if (renderLegacy) {
+        _renderParticlesLegacy(grid, vecGrids);
+    }
+    else {
         if (regenerateParticles)
             _generateTextureData(grid, vecGrids);
         _renderParticlesHelper();
-    }
-    else {
-        _renderParticlesLegacy(grid, vecGrids);
     }
 
     _dataMgr->UnlockGrid(grid);

@@ -15,7 +15,7 @@ const std::string ParticleParams::StrideTag = "StrideTag";
 const std::string ParticleParams::RenderRadiusScalarTag = "RenderRadiusScalarTag";
 const std::string ParticleParams::LightingEnabledTag = "LightingEnabledTag";
 const std::string ParticleParams::RenderRadiusBaseTag = "RenderRadiusBaseTag";
-const std::string ParticleParams::Render3DTag = "Render3DTag";
+const std::string ParticleParams::RenderLegacyTag = "RenderLegacyTag";
 const std::string ParticleParams::PhongAmbientTag = "PhongAmbientTag";
 const std::string ParticleParams::PhongDiffuseTag = "PhongDiffuseTag";
 const std::string ParticleParams::PhongSpecularTag = "PhongSpecularTag";
@@ -48,7 +48,7 @@ void ParticleParams::_init()
     SetValueLong(StrideTag, "", 1);
     SetValueDouble(RenderRadiusScalarTag, "", 8.);
     SetValueDouble(RenderRadiusBaseTag, "", -1);
-    SetValueLong(Render3DTag, "", true);
+    SetValueLong(RenderLegacyTag, "", false);
     SetValueLong(LightingEnabledTag, "", true);
     SetValueDouble(PhongAmbientTag, "", .4);
     SetValueDouble(PhongDiffuseTag, "", .8);
