@@ -1,5 +1,4 @@
-var widgets = require('@jupyter-widgets/base');
-var _ = require('lodash');
+import { DOMWidgetModel, DOMWidgetView } from '@jupyter-widgets/base';
 
 // NOTE
 //
@@ -9,6 +8,7 @@ var _ = require('lodash');
 // fails to update dev install of js code and dist needs to be manually
 // copied to jupyter extension dir
 
+// See example.py for the kernel counterpart to this file.
 
 // Custom Model. Custom widgets models must at least provide default values
 // for model attributes, including
@@ -19,32 +19,30 @@ var _ = require('lodash');
 //
 //  - `_model_name`
 //  - `_model_module`
-//  - `_model_module_version` //
+//  - `_model_module_version`
+//
 //  when different from the base class.
 
 // When serialiazing the entire widget state for embedding, only values that
-// differ from the defaults will be specified.
-var VaporVisualizerModel = widgets.DOMWidgetModel.extend({
-    defaults: _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
+// differ from the defaults will be serialized.
+
+export class VaporVisualizerModel extends DOMWidgetModel {
+    defaults() {
+      return {
+        ...super.defaults(),
         _model_name : 'VaporVisualizerModel',
         _view_name : 'VaporVisualizerView',
         _model_module : 'jupyter-vapor-widget',
         _view_module : 'jupyter-vapor-widget',
         _model_module_version : '1.0',
         _view_module_version : '1.0',
-        value : 'Hello World!',
-    })
-});
+        value : 'Hello World!'
+      };
+    }
+  }
 
-
-// iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVQImWNISUkBAAJcAS0OBgnuAAAAAElFTkSuQmCC
-
-
-// Custom View. Renders the widget model.
-var VaporVisualizerView = widgets.DOMWidgetView.extend({
-    // Defines how the widget gets rendered into the DOM
-    render: function() {
-
+export class VaporVisualizerView extends DOMWidgetView {
+    render() {
         this.$img = $('<img>', {src:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVQImWNISUkBAAJcAS0OBgnuAAAAAElFTkSuQmCC'})
         let $img = this.$img;
         $img.attr('draggable', false);
@@ -72,8 +70,7 @@ var VaporVisualizerView = widgets.DOMWidgetView.extend({
         $img.click(function(e){e.preventDefault();});
         $img.bind('contextmenu', function(e){return false;});
 
-
-        $el = $(this.el)
+        let $el = $(this.el);
         $el.append($img);
 
         // this.$valueDisplay = $('<div>');
@@ -84,40 +81,35 @@ var VaporVisualizerView = widgets.DOMWidgetView.extend({
         // $el.append($('<h3>Log</h3>'));
         // $el.append(this.$log);
 
-
-
-        // Observe changes in the value traitlet in Python, and define
-        // a custom callback.
-        // this.model.on('change:value', this.value_changed, this);
         this.model.on('change:imageData', this.image_changed, this);
-
         this.model.on('change:value', this.updateValueDisplay, this);
 
         this.image_changed();
         this.updateValueDisplay();
-    },
+    }
 
-    logClear: function() {
+    logClear() {
         // this.$log.empty();
-    },
-    log: function(s) {
+    }
+
+    log(s) {
         // this.$log.append($('<p>').text(s));
-    },
+    }
 
-    updateValueDisplay: function() {
+    updateValueDisplay() {
         // this.$valueDisplay.html(this.model.get('value'))
-    },
+    }
 
-    image_changed: function() {
+    image_changed() {
         // this.logClear();
-
         // this.log("image_change");
         // this.el.textContent = this.model.get('value');
+
         let $img = this.$img;
         let model = this.model;
 
-        width = model.get('resolution')[0]
-        height = model.get('resolution')[1]
+        let width = model.get('resolution')[0];
+        let height = model.get('resolution')[1];
 
         $img.attr("width", width);
         $img.attr("height", height);
@@ -129,9 +121,9 @@ var VaporVisualizerView = widgets.DOMWidgetView.extend({
         }
 
         $(this.p).html("JQ test: " + this.model.get('value') + " w: " + width + "<br> h: " + height);
-    },
+    }
 
-    mousedown: function(e) {
+    mousedown(e) {
         e.preventDefault();
 
         var key = e.which;
@@ -142,14 +134,16 @@ var VaporVisualizerView = widgets.DOMWidgetView.extend({
         this.model.set('mouseButton', key);
         this.model.set('mouseDown', true);
         this.model.save_changes();
-    },
-    mouseup: function(e) {
+    }
+
+    mouseup(e) {
         e.preventDefault();
         this.$img.css('border', 'none');
         this.model.set('mouseDown', false);
         this.model.save_changes();
-    },
-    mousemove: function(e) {
+    }
+
+    mousemove(e) {
         this.logClear();
         // this.$img.css('border', '2px solid orange');
         var offset = this.$img.offset();
@@ -165,11 +159,5 @@ var VaporVisualizerView = widgets.DOMWidgetView.extend({
         this.log("POS " + nx + ", " + ny);
         this.model.set('mousePos', [nx, ny]);
         this.model.save_changes();
-    },
-});
-
-
-module.exports = {
-    VaporVisualizerModel: VaporVisualizerModel,
-    VaporVisualizerView: VaporVisualizerView
-};
+    }
+}

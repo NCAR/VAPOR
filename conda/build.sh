@@ -66,16 +66,6 @@ if false ; then
 	echo "Python = `python --version`"
 fi
 
-pip install --target="$SP_DIR" apps/pythonapi/jupyter-vapor-widget
-
-mkdir -p $PREFIX/share/jupyter/nbextensions/
-mkdir -p $PREFIX/etc/jupyter/nbconfig/notebook.d/
-cp -r $SP_DIR/share/jupyter/nbextensions/jupyter-vapor-widget $PREFIX/share/jupyter/nbextensions/
-cp -r $SP_DIR/etc/jupyter/nbconfig/notebook.d/jupyter-vapor-widget.json $PREFIX/etc/jupyter/nbconfig/notebook.d/
-
-mkdir $SP_DIR/vapor
-touch $SP_DIR/vapor/__init__.py
-
 
 if [ ! -d "build" ]; then
     mkdir build
@@ -99,13 +89,13 @@ make -j$(($CPU_COUNT+1))
 make doc
 make install
 
-if false ; then
-    echo "########################################################################################"
-    echo "#################################     SP DIR 2     #####################################"
-    echo "########################################################################################"
-    ls $SP_DIR | grep -iF vapor
-    echo "########################################################################################"
-    echo "########################################################################################"
-    echo "########################################################################################"
-fi
+# ===========================================
+
+cd ../apps/pythonapi/jupyter-vapor-widget
+echo $PYTHON -m pip install --no-deps --ignore-installed --target="$SP_DIR" .
+$PYTHON -m pip install --no-deps --ignore-installed --target="$SP_DIR" .
+
+cd ../../..
+echo $PYTHON conda/jupyter_installer_fix.py --widgetDir=./apps/pythonapi/jupyter-vapor-widget --outRootDir="$PREFIX"
+$PYTHON conda/jupyter_installer_fix.py --widgetDir=./apps/pythonapi/jupyter-vapor-widget --outRootDir="$PREFIX"
 

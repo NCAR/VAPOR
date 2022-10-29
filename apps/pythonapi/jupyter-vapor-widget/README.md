@@ -1,10 +1,8 @@
-jupyter-vapor-widget
-===============================
+# jupyter-vapor-widget
 
-A Custom Jupyter Widget Library
+Jupyter Visualizer Widgets for Vapor API
 
-Installation
-------------
+## Installation
 
 To install use pip:
 

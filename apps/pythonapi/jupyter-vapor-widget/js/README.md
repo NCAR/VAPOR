@@ -1,4 +1,4 @@
-A Custom Jupyter Widget Library
+Jupyter Visualizer Widgets for Vapor API
 
 Package Install
 ---------------

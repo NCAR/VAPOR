@@ -1,3 +1,0 @@
-nodejs=16.13.1
-yarn=1.22.18
-# running `cd js && yarn run build` for development requires jupyterlab

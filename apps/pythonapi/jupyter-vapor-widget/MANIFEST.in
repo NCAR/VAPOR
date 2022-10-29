@@ -9,6 +9,7 @@ include jupyter-vapor-widget.json
 
 include LICENSE
 include setup.py
+include setup.cfg
 include pyproject.toml
 include install.json
 
