@@ -343,6 +343,8 @@ These steps generate a .tar.bz2 bundle that you can locally install with conda, 
 
     conda build .
 
+Note: If you get a build error referencing CMakeLists.txt at this point, delete everything in your VAPOR/build directory and try re-running the above command.
+
 5) Alternatively, add cmake build flags to your conda build such as the following:
 
 .. code-block:: python
