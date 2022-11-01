@@ -24,3 +24,4 @@ Below, you can find descriptions of each Renderer and tutorials on how to use th
    barbRenderer
    wireFrameRenderer
    modelRenderer
+   particleRenderer

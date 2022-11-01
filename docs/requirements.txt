@@ -1,6 +1,7 @@
 Sphinx==4.2.0
 xarray==0.18.2
 numpy==1.19.2
+Jinja2<3.1 # https://github.com/readthedocs/readthedocs.org/issues/9038
 netCDF4
 matplotlib
 sphinx_gallery
