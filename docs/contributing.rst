@@ -345,7 +345,7 @@ These steps generate a .tar.bz2 bundle that you can locally install with conda, 
 
 Note: If you get a build error referencing CMakeLists.txt at this point, delete everything in your VAPOR/build directory and try re-running the above command.
 
-5) Alternatively, add cmake build flags to your conda build such as the following:
+Alternatively, add cmake build flags to your conda build such as the following:
 
 .. code-block:: python
 
@@ -375,9 +375,9 @@ Once you've built a .tar.bz2 conda image for your customized version of Vapor, f
 
 .. code-block:: python
 
-    mv ~/tmp/miniconda/envs/xarray/conda-bld/linux-64/vapor-3.6.0-ha5a8b8e_0.tar.bz2 ~/channel/linux-64
-    or
     mv ~/tmp/miniconda/envs/xarray/conda-bld/osx-64/vapor-3.6.0-ha5a8b8e_0.tar.bz2 ~/channel/osx-64
+    or
+    mv ~/tmp/miniconda/envs/xarray/conda-bld/linux-64/vapor-3.6.0-ha5a8b8e_0.tar.bz2 ~/channel/linux-64
 
 3) Index your new channel, so conda knows about it:
 
