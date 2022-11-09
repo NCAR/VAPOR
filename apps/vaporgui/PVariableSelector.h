@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PStringDropdown.h"
+#include "PGroup.h"
 
 //! \class PVariableSelector
 //! \author Stas Jaroszynski
@@ -76,9 +77,12 @@ class PColorMapVariableSelector : public PVariableSelector {
 public:
     PColorMapVariableSelector();
 };
-class PHeightVariableSelector : public PVariableSelector2D {
+class PHeightVariableSelector : public PGroup {
+    bool isShown() const override;
+    int _onlyShowForDim = -1;
 public:
     PHeightVariableSelector();
+    PHeightVariableSelector* OnlyShowForDim(int dim);
 };
 class PXFieldVariableSelector : public PVariableSelector {
 public:

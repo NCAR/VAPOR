@@ -159,7 +159,12 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
     // If we are terrain mapping the image or if both the image and the
     // data are geo-referenced
     //
-    double defaultZ = 0;
+    double defaultZ;
+    if (myParams->GetValueLong(RenderParams::AddHeightToBottomTag, false))
+        defaultZ = 0;
+    else
+        defaultZ = GetDefaultZ(dataMgr, myParams->GetCurrentTimestep());
+    
     if (!myParams->GetHeightVariableName().empty() || (myParams->GetIsGeoRef() && !dataMgr->GetMapProjection().empty())) {
         // Get the width and height of the image texture. These
         // will be used to set the width and height of the mesh.
@@ -268,8 +273,9 @@ bool ImageRenderer::_gridStateDirty() const
     myParams->GetBox()->GetExtents(minExt, maxExt);
     vector<double> boxExtents(minExt);
     boxExtents.insert(boxExtents.end(), maxExt.begin(), maxExt.end());
+    bool addHeightToBottom= myParams->GetValueLong(RenderParams::AddHeightToBottomTag, false);
 
-    return (refLevel != _cacheRefLevel || lod != _cacheLod || hgtVar != _cacheHgtVar || ts != _cacheTimestep || boxExtents != _cacheBoxExtents);
+    return (refLevel != _cacheRefLevel || lod != _cacheLod || hgtVar != _cacheHgtVar || ts != _cacheTimestep || boxExtents != _cacheBoxExtents || addHeightToBottom != _cacheAddHeightToBottom);
 }
 
 void ImageRenderer::_gridStateClear()
@@ -279,6 +285,7 @@ void ImageRenderer::_gridStateClear()
     _cacheHgtVar.clear();
     _cacheTimestep = -1;
     _cacheBoxExtents.clear();
+    _cacheAddHeightToBottom = false;
 }
 
 void ImageRenderer::_gridStateSet()
@@ -292,6 +299,7 @@ void ImageRenderer::_gridStateSet()
     myParams->GetBox()->GetExtents(minExt, maxExt);
     _cacheBoxExtents = minExt;
     _cacheBoxExtents.insert(_cacheBoxExtents.end(), maxExt.begin(), maxExt.end());
+    _cacheAddHeightToBottom = myParams->GetValueLong(RenderParams::AddHeightToBottomTag, false);
 }
 
 bool ImageRenderer::_imageStateDirty(const vector<double> &times) const
@@ -554,8 +562,8 @@ int ImageRenderer::_getMeshDisplacedGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei
             //
             float deltaZ = (float)defaultZ;
             if (hgtGrid) {
-                deltaZ = hgtGrid->GetValue(x, y, 0.0);
                 if (deltaZ == mv) deltaZ = defaultZ;
+                else deltaZ = hgtGrid->GetValue(x, y, 0.0) - defaultZ;
             }
             z = deltaZ;
 
@@ -602,15 +610,14 @@ int ImageRenderer::_getMeshDisplacedNoGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsiz
             //
             float deltaZ = (float)defaultZ;
             if (hgtGrid) {
-                deltaZ = hgtGrid->GetValue(x, y, 0.0);
                 if (deltaZ == mv) deltaZ = defaultZ;
+                else deltaZ = hgtGrid->GetValue(x, y, 0.0) - defaultZ;
             }
             z = deltaZ;
 
             verts[j * width * 3 + i * 3 + 2] = z;
         }
     }
-
     return (0);
 }
 

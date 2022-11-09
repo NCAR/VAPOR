@@ -69,6 +69,7 @@ void WireFrameRenderer::_saveCacheParams()
     _cacheParams.ts = p->GetCurrentTimestep();
     _cacheParams.level = p->GetRefinementLevel();
     _cacheParams.lod = p->GetCompressionLevel();
+    _cacheParams.addHeightToBottom = p->GetValueLong(RenderParams::AddHeightToBottomTag, false);
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 }
 
@@ -80,6 +81,7 @@ bool WireFrameRenderer::_isCacheDirty() const
     if (_cacheParams.ts != p->GetCurrentTimestep()) return true;
     if (_cacheParams.level != p->GetRefinementLevel()) return true;
     if (_cacheParams.lod != p->GetCompressionLevel()) return true;
+    if (_cacheParams.addHeightToBottom != p->GetValueLong(RenderParams::AddHeightToBottomTag, false)) return true;
 
     vector<double> min, max;
     p->GetBox()->GetExtents(min, max);
@@ -152,8 +154,11 @@ void WireFrameRenderer::_drawCell(const GLuint *cellNodeIndices, int n, bool lay
 //
 void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *heightGrid, vector<GLuint> &nodeMap, bool *GPUOutOfMemory) const
 {
+    WireFrameParams* wfp = (WireFrameParams *)GetActiveParams();
+    double defaultZ = GetDefaultZ(_dataMgr, wfp->GetCurrentTimestep());;
+    if (wfp->GetValueLong(RenderParams::AddHeightToBottomTag, false)) 
+        defaultZ = 0;
     double mv = grid->GetMissingValue();
-    float  defaultZ = 0;
     auto   tmp = grid->GetDimensions();
     auto   dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
     size_t numNodes = Wasp::VProduct(dims);
@@ -185,11 +190,13 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
         if (grid->GetGeometryDim() > 2) {
             coord[2] = (*coordItr)[2];
         } else {
+            double z;
             if (heightGrid) {
-                coord[2] = heightGrid->GetValueAtIndex(*nodeItr);
+                z = heightGrid->GetValueAtIndex(*nodeItr) - defaultZ;
             } else {
-                coord[2] = defaultZ;
+                z = defaultZ;
             }
+            coord[2] = z;
         }
 
         float dataValue = grid->GetValueAtIndex(*nodeItr);

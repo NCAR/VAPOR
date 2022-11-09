@@ -52,8 +52,8 @@ private:
     class _grid_state_c {
     public:
         _grid_state_c() = default;
-        _grid_state_c(size_t numRefLevels, int refLevel, int lod, string hgtVar, string meshName, size_t ts, vector<double> minExts, vector<double> maxExts)
-        : _numRefLevels(numRefLevels), _refLevel(refLevel), _lod(lod), _hgtVar(hgtVar), _meshName(meshName), _ts(ts), _minExts(minExts), _maxExts(maxExts)
+        _grid_state_c(size_t numRefLevels, int refLevel, int lod, string hgtVar, string meshName, size_t ts, vector<double> minExts, vector<double> maxExts, bool addHeightToBottom)
+        : _numRefLevels(numRefLevels), _refLevel(refLevel), _lod(lod), _hgtVar(hgtVar), _meshName(meshName), _ts(ts), _minExts(minExts), _maxExts(maxExts), _addHeightToBottom(addHeightToBottom)
         {
         }
 
@@ -65,12 +65,13 @@ private:
             _ts = 0;
             _minExts.clear();
             _maxExts.clear();
+            _addHeightToBottom = false;
         }
 
         bool operator==(const _grid_state_c &rhs) const
         {
             return (_numRefLevels == rhs._numRefLevels && _refLevel == rhs._refLevel && _lod == rhs._lod && _hgtVar == rhs._hgtVar && _meshName == rhs._meshName && _ts == rhs._ts
-                    && _minExts == rhs._minExts && _maxExts == rhs._maxExts);
+                    && _minExts == rhs._minExts && _maxExts == rhs._maxExts && _addHeightToBottom == rhs._addHeightToBottom);
         }
         bool operator!=(const _grid_state_c &rhs) const { return (!(*this == rhs)); }
 
@@ -83,6 +84,7 @@ private:
         size_t         _ts;
         vector<double> _minExts;
         vector<double> _maxExts;
+        bool           _addHeightToBottom;
     };
 
     class _tex_state_c {

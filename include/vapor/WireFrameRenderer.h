@@ -59,6 +59,7 @@ private:
         int                 level;
         int                 lod;
         std::vector<double> boxMin, boxMax;
+        bool                addHeightToBottom;
 
     } _cacheParams;
 

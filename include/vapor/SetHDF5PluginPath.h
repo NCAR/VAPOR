@@ -12,7 +12,8 @@ void SetHDF5PluginPath() {
     string plugins = Wasp::GetSharePath("plugins");
 
     #ifndef WIN32
-        H5PLreplace(plugins.c_str(), 0);
+        std::cout << "retVal: " << H5PLreplace(plugins.c_str(), 0) << std::endl;
+        std::cout << plugins << std::endl;
     #else
         plugins = "HDF5_PLUGIN_PATH=" + plugins;
         int rc=_putenv(plugins.c_str());

@@ -497,6 +497,7 @@ public:
     static const string CustomHistogramDataTag;
     static const string CustomHistogramRangeTag;
     static const string LightingEnabledTag;
+    static const string AddHeightToBottomTag;
 
     //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
     //! this tag identifies the parameter for the origin's

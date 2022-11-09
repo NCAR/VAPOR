@@ -153,6 +153,7 @@ private:
         float          colorSamples[10][3];
         float          alphaSamples[10];
         bool           needToRecalc;
+        bool           addHeightToBottom;
     } _cacheParams;
 
     bool _isCacheDirty() const;

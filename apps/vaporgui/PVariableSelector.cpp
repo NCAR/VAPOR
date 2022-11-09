@@ -1,4 +1,5 @@
 #include "PVariableSelector.h"
+#include "PCheckbox.h"
 #include <vapor/RenderParams.h>
 #include <assert.h>
 
@@ -49,11 +50,22 @@ void PVariableSelector::dropdownTextChanged(std::string text)
 
 PScalarVariableSelector::PScalarVariableSelector() : PVariableSelector(RenderParams::_variableNameTag, "Variable Name") {}
 PColorMapVariableSelector::PColorMapVariableSelector() : PVariableSelector(RenderParams::_colorMapVariableNameTag, "Color mapped variable") {}
-PHeightVariableSelector::PHeightVariableSelector() : PVariableSelector2D(RenderParams::_heightVariableNameTag, "Height variable")
-{
-    AddNullOption();
-    OnlyShowForDim(2);
-}
 PXFieldVariableSelector::PXFieldVariableSelector() : PVariableSelector(RenderParams::_xFieldVariableNameTag, "X Field") { AddNullOption(); }
 PYFieldVariableSelector::PYFieldVariableSelector() : PVariableSelector(RenderParams::_yFieldVariableNameTag, "Y Field") { AddNullOption(); }
 PZFieldVariableSelector::PZFieldVariableSelector() : PVariableSelector(RenderParams::_zFieldVariableNameTag, "Z Field") { AddNullOption(); }
+
+PHeightVariableSelector::PHeightVariableSelector() : PGroup() {
+    Add((new PVariableSelector2D(RenderParams::_heightVariableNameTag, "Height variable"))->AddNullOption());
+    Add(new PCheckbox(RenderParams::AddHeightToBottomTag, "Add height values to bottom of domain"));
+    OnlyShowForDim(2);
+}
+
+PHeightVariableSelector* PHeightVariableSelector::OnlyShowForDim(int dim) {
+    _onlyShowForDim = dim;
+    return this;
+}
+
+bool PHeightVariableSelector::isShown() const {
+    if (_onlyShowForDim > 0) return getParams<RenderParams>()->GetRenderDim() == _onlyShowForDim;
+    return true;
+}
