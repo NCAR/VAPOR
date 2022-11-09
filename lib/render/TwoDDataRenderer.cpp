@@ -313,7 +313,7 @@ bool TwoDDataRenderer::_gridStateDirty() const
     rParams->GetBox()->GetExtents(minExts, maxExts);
 
     _grid_state_c current_state(_dataMgr->GetNumRefLevels(rParams->GetVariableName()), rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), rParams->GetHeightVariableName(),
-                                dvar.GetMeshName(), rParams->GetCurrentTimestep(), minExts, maxExts, rParams->GetValueLong(RenderParams::AddHeightToBottomTag, false));
+                                dvar.GetMeshName(), rParams->GetCurrentTimestep(), minExts, maxExts);
 
     return (_grid_state != current_state);
 }
@@ -332,7 +332,7 @@ void TwoDDataRenderer::_gridStateSet()
     string meshName;
 
     _grid_state = _grid_state_c(_dataMgr->GetNumRefLevels(rParams->GetVariableName()), rParams->GetRefinementLevel(), rParams->GetCompressionLevel(), rParams->GetHeightVariableName(),
-                                dvar.GetMeshName(), rParams->GetCurrentTimestep(), minExts, maxExts, rParams->GetValueLong(RenderParams::AddHeightToBottomTag, false));
+                                dvar.GetMeshName(), rParams->GetCurrentTimestep(), minExts, maxExts);
 }
 
 bool TwoDDataRenderer::_texStateDirty(DataMgr *dataMgr) const

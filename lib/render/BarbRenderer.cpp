@@ -110,7 +110,6 @@ void BarbRenderer::_saveCacheParams()
     _cacheParams.grid = p->GetGrid();
     _cacheParams.needToRecalc = p->GetNeedToRecalculateScales();
     _cacheParams.useSingleColor = p->UseSingleColor();
-    _cacheParams.addHeightToBottom = p->GetValueLong(RenderParams::AddHeightToBottomTag, false);
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 }
 
@@ -127,7 +126,6 @@ bool BarbRenderer::_isCacheDirty() const
     if (_cacheParams.grid != p->GetGrid()) return true;
     if (_cacheParams.needToRecalc != p->GetNeedToRecalculateScales()) return true;
     if (_cacheParams.useSingleColor != p->UseSingleColor()) return true;
-    if (_cacheParams.addHeightToBottom != p->GetValueLong(RenderParams::AddHeightToBottomTag, false)) return true;
 
     vector<double> min, max, contourValues;
     p->GetBox()->GetExtents(min, max);

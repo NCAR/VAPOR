@@ -269,9 +269,8 @@ bool ImageRenderer::_gridStateDirty() const
     myParams->GetBox()->GetExtents(minExt, maxExt);
     vector<double> boxExtents(minExt);
     boxExtents.insert(boxExtents.end(), maxExt.begin(), maxExt.end());
-    bool addHeightToBottom= myParams->GetValueLong(RenderParams::AddHeightToBottomTag, false);
 
-    return (refLevel != _cacheRefLevel || lod != _cacheLod || hgtVar != _cacheHgtVar || ts != _cacheTimestep || boxExtents != _cacheBoxExtents || addHeightToBottom != _cacheAddHeightToBottom);
+    return (refLevel != _cacheRefLevel || lod != _cacheLod || hgtVar != _cacheHgtVar || ts != _cacheTimestep || boxExtents != _cacheBoxExtents);
 }
 
 void ImageRenderer::_gridStateClear()
@@ -281,7 +280,6 @@ void ImageRenderer::_gridStateClear()
     _cacheHgtVar.clear();
     _cacheTimestep = -1;
     _cacheBoxExtents.clear();
-    _cacheAddHeightToBottom = false;
 }
 
 void ImageRenderer::_gridStateSet()
@@ -295,7 +293,6 @@ void ImageRenderer::_gridStateSet()
     myParams->GetBox()->GetExtents(minExt, maxExt);
     _cacheBoxExtents = minExt;
     _cacheBoxExtents.insert(_cacheBoxExtents.end(), maxExt.begin(), maxExt.end());
-    _cacheAddHeightToBottom = myParams->GetValueLong(RenderParams::AddHeightToBottomTag, false);
 }
 
 bool ImageRenderer::_imageStateDirty(const vector<double> &times) const

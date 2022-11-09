@@ -69,7 +69,6 @@ void WireFrameRenderer::_saveCacheParams()
     _cacheParams.ts = p->GetCurrentTimestep();
     _cacheParams.level = p->GetRefinementLevel();
     _cacheParams.lod = p->GetCompressionLevel();
-    _cacheParams.addHeightToBottom = p->GetValueLong(RenderParams::AddHeightToBottomTag, false);
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 }
 
@@ -81,7 +80,6 @@ bool WireFrameRenderer::_isCacheDirty() const
     if (_cacheParams.ts != p->GetCurrentTimestep()) return true;
     if (_cacheParams.level != p->GetRefinementLevel()) return true;
     if (_cacheParams.lod != p->GetCompressionLevel()) return true;
-    if (_cacheParams.addHeightToBottom != p->GetValueLong(RenderParams::AddHeightToBottomTag, false)) return true;
 
     vector<double> min, max;
     p->GetBox()->GetExtents(min, max);

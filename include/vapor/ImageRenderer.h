@@ -44,7 +44,6 @@ private:
     string         _cacheHgtVar;
     int            _cacheGeoreferenced;
     vector<double> _cacheBoxExtentsTex;
-    bool           _cacheAddHeightToBottom;
     SmartBuf       _sb_verts;
     SmartBuf       _sb_normals;
     SmartBuf       _sb_indices;
