@@ -59,6 +59,7 @@ private:
         int                 level;
         int                 lod;
         std::vector<double> boxMin, boxMax;
+
     } _cacheParams;
 
     // Helper class to keep track of which cell edges have been drawn so
