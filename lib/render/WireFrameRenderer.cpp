@@ -156,8 +156,6 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
 {
     WireFrameParams* wfp = (WireFrameParams *)GetActiveParams();
     double defaultZ = GetDefaultZ(_dataMgr, wfp->GetCurrentTimestep());;
-    if (wfp->GetValueLong(RenderParams::AddHeightToBottomTag, false)) 
-        defaultZ = 0;
     double mv = grid->GetMissingValue();
     auto   tmp = grid->GetDimensions();
     auto   dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};

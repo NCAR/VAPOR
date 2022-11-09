@@ -604,8 +604,7 @@ float BarbRenderer::_getHeightOffset(Grid *heightVar, float xCoord, float yCoord
         offset = 0.f;
     }
     BarbParams* p = (BarbParams *)GetActiveParams();
-    if (!p->GetValueLong(RenderParams::AddHeightToBottomTag, false))
-        offset -= GetDefaultZ(_dataMgr, p->GetCurrentTimestep());
+    offset -= GetDefaultZ(_dataMgr, p->GetCurrentTimestep());
     return offset;
 }
 
