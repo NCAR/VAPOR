@@ -242,46 +242,6 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
     return rc;
 }
 
-bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time, bool withCoordBounds)
-{
-    bool rc = true;
-    count = 0;
-    expectedCount = 1;
-    disagreements = 0;
-    double t0 = Wasp::GetTime();
-
-    Grid::ConstNodeIterator itr;
-    Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
-
-    if (withCoordBounds) {
-        CoordType minu, maxu;
-        g->GetUserExtents(minu, maxu);
-        itr = g->ConstNodeBegin(minu, maxu);
-    } else {
-        itr = g->ConstNodeBegin();
-    }
-
-    auto dims = g->GetDimensions();
-    for (auto dim : dims) expectedCount *= dim;
-
-    for (; itr != enditr; ++itr) {
-        DimsType ijk3 = {0, 0, 0};
-        Wasp::VectorizeCoords(count, dims.data(), ijk3.data(), dims.size());
-
-        double itrData = g->GetValueAtIndex(*itr);
-        double gridData = g->GetValueAtIndex(ijk3);
-
-        if (!Wasp::NearlyEqual(itrData, gridData)) { disagreements++; }
-
-        count++;
-    }
-
-    time = Wasp::GetTime() - t0;
-
-    if (expectedCount != count || disagreements > 0) { rc = false; }
-    return rc;
-}
-
 bool TestIterator(Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time)
 {
     bool rc = true;
@@ -384,44 +344,6 @@ void GetRange_36(VAPoR::Grid* g, float range[2])
     }
 }
 
-bool RunTest(Grid *grid, bool silenceTime)
-{
-    bool   rc = true;
-    double rms;
-    size_t numMissingValues;
-    size_t disagreements;
-    double t0 = Wasp::GetTime();
-
-    rc = CompareIndexToCoords(grid, rms, numMissingValues, disagreements);
-
-    if (grid->GetInterpolationOrder() == 0) {
-        cout << "  Interpolation order: nearestNeighbor " << endl;
-    } else {
-        cout << "  Interpolation order: linear          " << endl;
-    }
-
-    double time = Wasp::GetTime() - t0;
-
-    PrintStats(rms, numMissingValues, disagreements, time, silenceTime);
-
-    // Test the correctness of OpenMP implementation of Grid::GetRange()
-    float range_36[2] = {0.0, 1.1};
-    float range_omp[2] = {2.2, 3.3};
-    GetRange_36(grid, range_36);
-    grid->GetRange(range_omp);
-    bool omp_good = (range_36[0] == range_omp[0] && range_36[1] == range_omp[1]);
- 
-    rc = rc && omp_good;
-
-    if (rc == false) {
-        cout << "    *** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
-    } else {
-        cout << endl;
-    }
-
-    return rc;
-}
-
 bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal, bool silenceTime)
 {
     auto   dims = grid->GetDimensions();
@@ -519,6 +441,84 @@ bool RunTests(Grid *grid, const std::vector<std::string> &tests, float minVal, f
     if (TestConstNodeIterator(grid, count, expectedCount, disagreements, time, true) == false) { rc = false; }
 
     PrintGridIteratorResults(type, "ConstNodeIterator with bounds", count, expectedCount, disagreements, time, silenceTime);
+
+    return rc;
+}
+
+bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time, bool withCoordBounds)
+{
+    bool rc = true;
+    count = 0;
+    expectedCount = 1;
+    disagreements = 0;
+    double t0 = Wasp::GetTime();
+
+    Grid::ConstNodeIterator itr;
+    Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
+
+    if (withCoordBounds) {
+        CoordType minu, maxu;
+        g->GetUserExtents(minu, maxu);
+        itr = g->ConstNodeBegin(minu, maxu);
+    } else {
+        itr = g->ConstNodeBegin();
+    }
+
+    auto dims = g->GetDimensions();
+    for (auto dim : dims) expectedCount *= dim;
+
+    for (; itr != enditr; ++itr) {
+        DimsType ijk3 = {0, 0, 0};
+        Wasp::VectorizeCoords(count, dims.data(), ijk3.data(), dims.size());
+
+        double itrData = g->GetValueAtIndex(*itr);
+        double gridData = g->GetValueAtIndex(ijk3);
+
+        if (!Wasp::NearlyEqual(itrData, gridData)) { disagreements++; }
+
+        count++;
+    }
+
+    time = Wasp::GetTime() - t0;
+
+    if (expectedCount != count || disagreements > 0) { rc = false; }
+    return rc;
+}
+
+bool RunTest(Grid *grid, bool silenceTime)
+{
+    bool   rc = true;
+    double rms;
+    size_t numMissingValues;
+    size_t disagreements;
+    double t0 = Wasp::GetTime();
+
+    rc = CompareIndexToCoords(grid, rms, numMissingValues, disagreements);
+
+    if (grid->GetInterpolationOrder() == 0) {
+        cout << "  Interpolation order: nearestNeighbor " << endl;
+    } else {
+        cout << "  Interpolation order: linear          " << endl;
+    }
+
+    double time = Wasp::GetTime() - t0;
+
+    PrintStats(rms, numMissingValues, disagreements, time, silenceTime);
+
+    // Test the correctness of OpenMP implementation of Grid::GetRange()
+    float range_36[2] = {0.0, 1.1};
+    float range_omp[2] = {2.2, 3.3};
+    GetRange_36(grid, range_36);
+    grid->GetRange(range_omp);
+    bool omp_good = (range_36[0] == range_omp[0] && range_36[1] == range_omp[1]);
+ 
+    rc = rc && omp_good;
+
+    if (rc == false) {
+        cout << "    *** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
+    } else {
+        cout << endl;
+    }
 
     return rc;
 }

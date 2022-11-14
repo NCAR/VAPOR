@@ -6,9 +6,9 @@
 #include <vapor/StretchedGrid.h>
 #include <vapor/UnstructuredGrid2D.h>
 
-std::vector<float *> AllocateBlocks(const std::vector<size_t> &bs, const std::vector<size_t> &dims);
+void DeleteHeap();
 
-bool RandomizeMissingValue();
+std::vector<float *> AllocateBlocks(const std::vector<size_t> &bs, const std::vector<size_t> &dims);
 
 void MakeTriangle(VAPoR::Grid *grid, float minVal, float maxVal, bool addRandomMissingValues=true);
 
@@ -24,31 +24,28 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
                           size_t &     disagreements        // Counter for when AccessIJK() and GetValue() disagree
 );
 
-bool isNotEqual(double x, double y);
-
-// Returns the expected node count for Grid::ConstNodeIterator
-bool TestConstNodeIterator(const VAPoR::Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time);
-
 // Returns the expected node count for Grid::Iterator
 bool TestIterator(VAPoR::Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time);
 
 // Returns the expected node count for Grid::ConstCoordIterator
 bool TestConstCoordItr(const VAPoR::Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time);
 
-void PrintGridIteratorResults(std::string &gridType, std::string itrType, size_t count, size_t expectedCount, size_t disagreements, double time, bool silenceTime);
+// Returns the expected node count for Grid::ConstNodeIterator
+bool TestConstNodeIterator(const VAPoR::Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time, bool withCoordBounds);
 
 void PrintStats(double rms, size_t numMissingValues, size_t disagreements, double time, bool silenceTime);
 
-bool RunTest(VAPoR::Grid *grid, bool silenceTime);
-
 bool RunTests(VAPoR::Grid *grid, const std::vector<std::string> &tests, float minVal, float maxVal, bool silenceTime);
 
-VAPoR::StretchedGrid *MakeStretchedGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu);
+bool RunTest(VAPoR::Grid *grid, bool silenceTime);
 
-VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu);
+void PrintGridIteratorResults(std::string &gridType, std::string itrType, size_t count, size_t expectedCount, size_t disagreements, double time, bool silenceTime);
 
 VAPoR::CurvilinearGrid *MakeCurvilinearTerrainGrid(const std::vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu, const std::vector<size_t> &dims);
 
 VAPoR::LayeredGrid *MakeLayeredGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu);
 
-void DeleteHeap();
+VAPoR::StretchedGrid *MakeStretchedGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu);
+
+VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu);
+
