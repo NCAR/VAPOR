@@ -356,7 +356,14 @@ If the build is successful a conda package file will be created. The path to the
 
 .. code-block:: python
 
-    ~/tmp/miniconda/envs/xarray/conda-bld/osx-64/vapor-3.6.0-ha5a8b8e_0.tar.bz2
+    $CONDA_PREFIX/conda-bld/osx-64/vapor-3.6.0-ha5a8b8e_0.tar.bz2
+
+.. note::
+
+    $CONDA_PREFIX is an environment variable that points to your conda installation path.
+
+  Parts of this document are derived from the `xarray Contributing
+  Guide <http://xarray.pydata.org/en/stable/contributing.html>`_.
 
 Installing the conda image
 **************************
