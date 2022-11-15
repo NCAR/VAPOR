@@ -3,6 +3,25 @@
 #include "gridTools.h"
 #include "dataMgrTools.h"
 
+int TestDataMgr(const std::string &fileType, size_t memsize, size_t nthreads, const std::vector<std::string> &files, const std::vector<std::string> &options, bool silenceTime)
+{
+    VAPoR::DataMgr dataMgr(fileType, memsize, nthreads);
+    int            rc = dataMgr.Initialize(files, options);
+    if (rc < 0) {
+        cerr << "Failed to intialize WRF DataMGR" << endl;
+        return -1;
+    }
+
+    PrintDimensions(dataMgr);
+    PrintMeshes(dataMgr);
+    PrintVariables(dataMgr);
+    TestVariables(dataMgr, silenceTime);
+    PrintCoordVariables(dataMgr);
+    PrintTimeCoordinates(dataMgr);
+
+    return 0;
+}
+
 void PrintDimensions(const VAPoR::DataMgr &dataMgr)
 {
     vector<string> dimnames;
@@ -138,23 +157,4 @@ void TestVariables(VAPoR::DataMgr &dataMgr, bool silenceTime)
             PrintStats(rms, numMissingValues, disagreements, 0.0, silenceTime);
         }
     }
-}
-
-int TestDataMgr(const std::string &fileType, size_t memsize, size_t nthreads, const std::vector<std::string> &files, const std::vector<std::string> &options, bool silenceTime)
-{
-    VAPoR::DataMgr dataMgr(fileType, memsize, nthreads);
-    int            rc = dataMgr.Initialize(files, options);
-    if (rc < 0) {
-        cerr << "Failed to intialize WRF DataMGR" << endl;
-        return -1;
-    }
-
-    PrintDimensions(dataMgr);
-    PrintMeshes(dataMgr);
-    PrintVariables(dataMgr);
-    TestVariables(dataMgr, silenceTime);
-    PrintCoordVariables(dataMgr);
-    PrintTimeCoordinates(dataMgr);
-
-    return 0;
 }
