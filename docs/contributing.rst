@@ -413,6 +413,8 @@ Note: It may be necessary to re-run *conda config --add channels conda-forge* at
     python
     import vapor
 
+Example python scripts and jupyter notebooks can be found in $CONDA_PREFIX/lib/python3.<version>/site-packages/vapor
+
 .. _contributing.documentation:
 
 Contributing to Vapor's Documentation
