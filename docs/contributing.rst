@@ -362,9 +362,6 @@ If the build is successful a conda package file will be created. The path to the
 
     $CONDA_PREFIX is an environment variable that points to your conda installation path.
 
-  Parts of this document are derived from the `xarray Contributing
-  Guide <http://xarray.pydata.org/en/stable/contributing.html>`_.
-
 Installing the conda image
 **************************
 
