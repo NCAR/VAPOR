@@ -308,6 +308,113 @@ After review, further changes may be requested.  If everything looks good, the P
 `Vapor Coding Conventions <https://github.com/NCAR/VAPOR/wiki/Vapor-Coding-Convention>`_
 ________________________________________________________________________________________
 
+
+Building Vapor's Python API from source 
+_______________________________________
+
+To build Vapor's Python API from source, you will need to install either Anaconda or Miniconda onto your system.  `Download here <https://www.anaconda.com/products/distribution>`_.  Once installed, :ref:`fork Vapor's github repository <contributing.environment>` then build and install the .tar.bz2 package by following the steps below.
+
+Building the conda image
+************************
+
+These steps generate a .tar.bz2 bundle that you can locally install with conda, instead of fetching a package from a remote repository like conda-forge.
+
+1) After cloning Vapor, installing Anaconda/Miniconda, and modifying source code if needed, cd into the /conda directory:
+
+.. code-block:: python
+
+    cd ~/VAPOR/conda
+
+2) Install the conda-build package on your current Anaconda/Miniconda installation:
+
+.. code-block:: python
+
+    conda install conda-build
+
+3) Install the conda-forge channel, which Anaconda/Miniconda will use to gather libraries for your build:
+
+.. code-block:: python
+
+    conda config --add channels conda-forge
+
+4) Execute the conda build command on your current code base:
+
+.. code-block:: python
+
+    conda build .
+
+Note: If you get a build error referencing CMakeLists.txt at this point, delete everything in your VAPOR/build directory and try re-running the above command.
+
+Alternatively, add cmake build flags to your conda build such as the following:
+
+.. code-block:: python
+
+    DEBUG_BUILD=false MAP_IMAGES_PATH="<path_to_images>" conda build .
+
+
+If the build is successful a conda package file will be created. The path to the file will be created at the end of the “conda build” step, and will look something like:
+
+.. code-block:: python
+
+    $CONDA_PREFIX/conda-bld/osx-64/vapor-3.6.0-ha5a8b8e_0.tar.bz2
+
+.. note::
+
+    $CONDA_PREFIX is an environment variable that points to your conda installation path.
+
+Installing the conda image
+**************************
+
+Once you've built a .tar.bz2 conda image for your customized version of Vapor, follow these steps to install it:
+
+1) Create a local conda channel on your computer that will host your new .tar.bz file for installation.  Note - If you're on OSX, name your directory osx-64, or if you're on linux, name it linux-64.
+
+.. code-block:: python
+
+    mkdir -p ~/channel/osx-64
+    or
+    mkdir -p ~/channel/linux-64
+
+2) Move your created .tar.bz2 package from its initial directory into your channel
+
+.. code-block:: python
+
+    mv ~/tmp/miniconda/envs/xarray/conda-bld/osx-64/vapor-3.6.0-ha5a8b8e_0.tar.bz2 ~/channel/osx-64
+    or
+    mv ~/tmp/miniconda/envs/xarray/conda-bld/linux-64/vapor-3.6.0-ha5a8b8e_0.tar.bz2 ~/channel/linux-64
+
+3) Index your new channel, so conda knows about it:
+
+.. code-block:: python
+
+    conda index ~/channel
+
+4) Create a new conda environment to install Vapor onto, or select a pre-existing environment:
+
+.. code-block:: python
+
+    conda create --name vapor
+    conda activate vapor
+    or
+    conda activate myEnvironment
+
+5) Finally install the custon .tar.bz2 package:
+
+.. code-block:: python
+
+    conda install -c file://<pathToYourChannel> vapor
+
+Note: It may be necessary to re-run *conda config --add channels conda-forge* at this step.
+
+6) Verify that your new installation works:
+
+.. code-block:: python
+
+    python
+    import vapor
+
+Example python scripts and jupyter notebooks can be found in $CONDA_PREFIX/lib/python3.<version>/site-packages/vapor
+
 .. _contributing.documentation:
 
 Contributing to Vapor's Documentation

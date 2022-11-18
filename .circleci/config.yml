@@ -1,0 +1,14 @@
+workflows:
+  version: 2
+
+jobs:
+  dummy:
+    docker:
+      - image: ubuntu:20.04
+
+  build:
+    jobs:
+      - dummy:
+          branches:
+            ignore:
+              - readTheDocs
