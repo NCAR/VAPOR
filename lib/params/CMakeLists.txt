@@ -83,7 +83,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	target_link_libraries (params PUBLIC ${AGL})
 endif()
 
-target_link_libraries (params PUBLIC vdc expat)
+target_link_libraries (params PUBLIC vdc ${EXPAT})
 
 add_definitions (-DPARAMS_EXPORTS)
 

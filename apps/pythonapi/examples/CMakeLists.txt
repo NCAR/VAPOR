@@ -39,6 +39,9 @@ if (JUPYTEXT)
     notebook(camera_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/camera_example.ipynb)
     notebook(transfer_function_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/transfer_function_example.ipynb)
     notebook(workflow_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/workflow_example.ipynb)
+    notebook(animation_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/animation_example.ipynb)
+    notebook(visualizer_widget_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/visualizer_widget_example.ipynb)
+
 
     add_custom_target(
         example_notebooks
@@ -49,7 +52,6 @@ else()
     message(WARNING "jupytext not found")
     message(WARNING "Skipping generation of jupyter notebooks")
 endif()
-
 
 if (CONDA_BUILD)
     set(CONDA_SITE_PACKAGE_DIR "$ENV{SP_DIR}")

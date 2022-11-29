@@ -151,6 +151,15 @@ find_library(FREETYPE freetype)
 find_library(GEOTIFF geotiff)
 find_library(JPEG jpeg)
 find_library(HDF5_LIB hdf5)
+find_library(EXPAT expat)
+
+message("Library NETCDF   = ${NETCDF}")
+message("Library UDUNITS2 = ${UDUNITS2}")
+message("Library FREETYPE = ${FREETYPE}")
+message("Library GEOTIFF  = ${GEOTIFF}")
+message("Library JPEG     = ${JPEG}")
+message("Library HDF5_LIB = ${HDF5_LIB}")
+message("Library EXPAT = ${EXPAT}")
 
 # find_package(Python)
 #   Output

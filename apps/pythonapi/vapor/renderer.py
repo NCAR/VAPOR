@@ -54,6 +54,7 @@ class Renderer(ParamsWrapper, wrap=RenderParams):
     UseSingleColor
     
     GetTransform
+    ResetUserExtentsToDataExents
     
     SetRefinementLevel
     GetRefinementLevel

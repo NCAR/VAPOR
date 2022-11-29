@@ -3,7 +3,6 @@
 #include <vapor/ParamsMgr.h>
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
-#include <vapor/TrackBall.h>
 #include <vapor/AnimationParams.h>
 #include <vapor/GUIStateParams.h>
 #include <vapor/AnimationParams.h>
@@ -237,6 +236,34 @@ void NavigationUtils::SetAllCameras(ControlExec *ce, const vector<double> &m, co
 {
     assert(m.size() == 16);
     SetAllCameras(ce, m.data(), origin.data());
+}
+
+void NavigationUtils::SetAllCameras(ControlExec *ce, const Trackball &trackball)
+{
+    double center[3];
+    trackball.GetCenter(center);
+    const double *m = trackball.GetModelViewMatrix();
+    NavigationUtils::SetAllCameras(ce, m, center);
+}
+
+void NavigationUtils::ConfigureTrackball(ControlExec *ce, Trackball &trackball)
+{
+    vector<double> pos, dir, up, tgt;
+    GetCameraProperties(ce, &pos, &dir, &up, &tgt);
+    trackball.setFromFrame(pos, dir, up, tgt, true);
+    
+    if (ce->GetDataNames().size() == 0) return;
+
+    DataStatus *dataStatus = ce->GetDataStatus();
+    ParamsMgr  *paramsMgr  = ce->GetParamsMgr();
+    size_t ts = GetAnimationParams(ce)->GetCurrentTimestep();
+
+    VAPoR::CoordType minExts, maxExts;
+    dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
+
+    double scale[3];
+    scale[0] = scale[1] = scale[2] = max(maxExts[0] - minExts[0], (maxExts[1] - minExts[1]));
+    trackball.SetScale(scale);
 }
 
 void NavigationUtils::LookAt(ControlExec *ce, const vector<double> &position, const vector<double> &target, const vector<double> &up)

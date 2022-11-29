@@ -31,7 +31,7 @@ public:
     String NewRenderer(String type, String dataset="");
     void DeleteRenderer(String name);
 
-    int  Render(String imagePath);
+    int  Render(String imagePath, bool fast=false);
     void SetTimestep(int ts);
     
     static void SetWaspMyBaseErrMsgFilePtrToSTDERR();

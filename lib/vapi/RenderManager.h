@@ -13,7 +13,7 @@ class RenderManager {
 public:
     RenderManager(ControlExec *ce);
     ~RenderManager();
-    int Render(String imagePath);
+    int Render(String imagePath, bool fast=false);
     void SetResolution(int width, int height);
     vector<int> GetResolution() const;
     String GetWinName() const;

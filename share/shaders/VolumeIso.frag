@@ -73,6 +73,8 @@ void main(void)
         }
         
         fragColor = accum;
+    } else {
+        fragColor = vec4(0.f);
     }
         
     if (accum.a < ALPHA_DISCARD)

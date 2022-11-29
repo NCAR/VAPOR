@@ -22,6 +22,11 @@ requirements:
     - unzip=6.0
     - jupytext=1.13.8 # Generate notebooks
     - doxygen=1.9.1
+    # Jupyter Visualizer Widget
+    - nodejs
+    - yarn
+    - jupyter_packaging
+    - jupyterlab
     # Both
     # (Needs to be specified manually in both rather than just in host because otherwise conda will install multiple versions of some packages and break the install)
     # ==========================================
@@ -38,6 +43,7 @@ requirements:
     - proj=7.2.0
     - glm=0.9.9.4
     - mesalib=21.2.5
+    - expat=2.4
   run:
     # Run only
     - xarray=2022 #=2022.3.0
@@ -46,6 +52,8 @@ requirements:
     - jupyter=1 #=1.0.0
     - py-opencv=4 #=4.5.3
     - cppyy=2.2 #=2.2.0 If this is in build conda will load an old clang compiler which fails to compile macOS headers
+    # Jupyter Visualizer Widget
+    - widgetsnbextension # This seems to be already installed but its files are missing?
     # Both
     - python=3.9 # pin_compatible('python') selects python 3.10 which is not compatible
     - {{ pin_compatible('numpy') }}
@@ -60,3 +68,4 @@ requirements:
     - {{ pin_compatible('proj') }}
     - {{ pin_compatible('glm') }}
     - {{ pin_compatible('mesalib') }}
+    - {{ pin_compatible('expat') }}

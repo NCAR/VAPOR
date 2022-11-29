@@ -48,9 +48,17 @@ export CFLAGS="$CFLAGS $CPPFLAGS"
 unset CMAKE_ARGS
 unset CMAKE_PREFIX_PATH
 
+# Prevent linking outside libraries
+export CMAKE_LIBRARY_PATH="$PREFIX/lib:$BUILD_PREFIX/lib"
+export CMAKE_PREFIX_PATH="$PREFIX:$BUILD_PREFIX"
+# CMAKE_EXTRA="$CMAKE_EXTRA -DCMAKE_FIND_FRAMEWORK=NEVER"
+# CMAKE_EXTRA="$CMAKE_EXTRA -DCMAKE_FIND_APPBUNDLE=NEVER"
+
 # When conda messes up the build environment it not only points the python install target to the wrong root,
 # it also sometimes points it to the wrong version of python.
 SP_DIR="`python -c 'import site; print(site.getsitepackages()[0].replace(\"'$BUILD_PREFIX'\", \"'$PREFIX'\"))'`"
+# It also will sometimes decide not to make this dir
+mkdir -p "$SP_DIR"
 
 # Our third party libs have a non-standard copy of the GTE library so it is packaged and extracted here.
 unzip -d include buildutils/GTE.zip
@@ -63,6 +71,7 @@ if false ; then
 	echo "============================================================"
 	echo "Python = `python --version`"
 fi
+
 
 if [ ! -d "build" ]; then
     mkdir build
@@ -85,4 +94,14 @@ cmake .. \
 make -j$(($CPU_COUNT+1))
 make doc
 make install
+
+# ===========================================
+
+cd ../apps/pythonapi/jupyter-vapor-widget
+echo $PYTHON -m pip install --no-deps --ignore-installed --target="$SP_DIR" .
+$PYTHON -m pip install --no-deps --ignore-installed --target="$SP_DIR" .
+
+cd ../../..
+echo $PYTHON conda/jupyter_installer_fix.py --widgetDir=./apps/pythonapi/jupyter-vapor-widget --outRootDir="$PREFIX"
+$PYTHON conda/jupyter_installer_fix.py --widgetDir=./apps/pythonapi/jupyter-vapor-widget --outRootDir="$PREFIX"
 
