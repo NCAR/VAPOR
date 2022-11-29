@@ -51,6 +51,8 @@ unset CMAKE_PREFIX_PATH
 # Prevent linking outside libraries
 export CMAKE_LIBRARY_PATH="$PREFIX/lib:$BUILD_PREFIX/lib"
 export CMAKE_PREFIX_PATH="$PREFIX:$BUILD_PREFIX"
+# CMAKE_EXTRA="$CMAKE_EXTRA -DCMAKE_FIND_FRAMEWORK=NEVER"
+# CMAKE_EXTRA="$CMAKE_EXTRA -DCMAKE_FIND_APPBUNDLE=NEVER"
 
 # When conda messes up the build environment it not only points the python install target to the wrong root,
 # it also sometimes points it to the wrong version of python.
