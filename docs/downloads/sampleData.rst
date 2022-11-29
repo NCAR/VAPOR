@@ -10,6 +10,8 @@ The following datasets are provided for user experimentation.
 +-----------------------------+-----------+--------------------------------------+-------------------+-----------+
 | Tornado_                    | CM-1      | :ref:`NetCDF-CF <cfComplianceBrief>` | 371 x 441 x 201   | 1.11 GB   |
 +-----------------------------+-----------+--------------------------------------+-------------------+-----------+
+| OvershootingTop_            | CM-1      | :ref:`NetCDF-CF <cfComplianceBrief>` | 1000 x 900 x 168  | 1.52 GB   |
++-----------------------------+-----------+--------------------------------------+-------------------+-----------+
 | Kauffman_                   | ROMS      | :ref:`NetCDF-CF <cfComplianceBrief>` | 226 x 642 x 43    | 495 MB    |
 +-----------------------------+-----------+--------------------------------------+-------------------+-----------+
 | DUKU_                       | WRF-ARW   | :ref:`WRF-ARW <wrf>`                 | 181 x 166 x 35    | 734 MB    |
@@ -25,13 +27,15 @@ The following datasets are provided for user experimentation.
 | Particles_                  | Synthetic | :ref:`DCP <dcp>`                     | N/A               | 119 KB    |
 +-----------------------------+-----------+--------------------------------------+-------------------+-----------+
 
-.. _DUKU: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/dukuSample.tar.gz
+.. _DUKU: https://drive.google.com/file/d/1lZdxM5TzcqhjwlZ2K5WRK0T4bumbxb1R/view?usp=sharing
 
-.. _Kauffman: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/kauffmanSample.tar.gz
+.. _Kauffman: https://drive.google.com/file/d/1918eZ3UJzaGH8NbKjYjCNLpl8V3uyGww/view?usp=sharing
 
 .. _UGRIDsmall: https://drive.google.com/file/d/1kQASS78W9KyMLYvJv40Pvm60j0gCvq3s/view?usp=sharing
 
 .. _Tornado: https://drive.google.com/file/d/18T7Ss01YjufK3_ScdUlxz9ljAJ8nL_-b/view?usp=sharing
+
+.. _OvershootingTop: https://drive.google.com/file/d/1JB1AdIItI2-WtTCovvYdKCqTFLmFAhV0/view?usp=sharing
 
 .. _MultiTimeMultiVar: https://drive.google.com/file/d/1cp-oNVaLej6jzcDo2sOYec56svfX0sGc/view?usp=sharing
 
