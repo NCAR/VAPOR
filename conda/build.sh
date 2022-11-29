@@ -48,6 +48,10 @@ export CFLAGS="$CFLAGS $CPPFLAGS"
 unset CMAKE_ARGS
 unset CMAKE_PREFIX_PATH
 
+# Prevent linking outside libraries
+export CMAKE_LIBRARY_PATH="$PREFIX/lib:$BUILD_PREFIX/lib"
+export CMAKE_PREFIX_PATH="$PREFIX:$BUILD_PREFIX"
+
 # When conda messes up the build environment it not only points the python install target to the wrong root,
 # it also sometimes points it to the wrong version of python.
 SP_DIR="`python -c 'import site; print(site.getsitepackages()[0].replace(\"'$BUILD_PREFIX'\", \"'$PREFIX'\"))'`"
