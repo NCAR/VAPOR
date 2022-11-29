@@ -388,6 +388,7 @@ if (APPLE)
 elseif (UNIX AND NOT APPLE)
 	target_link_libraries (vapor quadmath)
 	target_compile_options(vapor PRIVATE -Wno-conversion-null)
+    target_link_options(vapor PRIVATE "LINKER:--no-as-needed")
 endif ()
 
 OpenMPInstall (
