@@ -500,6 +500,7 @@ jobs:
             conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
+          no_output_timeout: 45m
  
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
@@ -535,6 +536,7 @@ jobs:
             newFileName=${fileName//vapor/vaporUbuntu}
             mkdir -p /tmp/workspace/installers
             cp /usr/local/conda-bld/linux-64/tarBallDir/*.tar.bz2 /tmp/workspace/installers/
+          no_output_timeout: 45m
 
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
