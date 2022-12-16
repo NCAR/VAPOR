@@ -44,7 +44,7 @@ jobs:
             mkdir build
             cd build
             git checkout $CIRCLE_BRANCH
-            & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DDIST_INSTALLER:string=ON -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 16 2019' -A x64
+            & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DDIST_INSTALLER:string=ON -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_OSP=OFF -G 'Visual Studio 16 2019' -A x64
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\project\tmp\workspace\installers
             Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers
@@ -934,14 +934,14 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      - build_ubuntu18
-      - build_centos7
-      - build_python_api_ubuntuDebug
-      - build_python_api_ubuntu
+      #- build_ubuntu18
+      #- build_centos7
+      #- build_python_api_ubuntuDebug
+      #- build_python_api_ubuntu
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
-      #- build_win10_installer
+      - build_win10_installer
       #- build_osx_installer
       #- build_M1_installer
       #- build_ubuntu18_installer
