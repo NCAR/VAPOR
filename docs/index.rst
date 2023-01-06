@@ -2,10 +2,10 @@
 
 |
 
-VAPOR is the Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers. It provides an interactive 3D visualization environment that can produce animations and still frame images, and runs on Windows, OSX, Ubuntu, and CentOS.
+VAPOR is the Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers. A free 3D visualization environment for geophysical scientists.
 
 
-.. include:: ./announcements/3.7.0.rst
+.. include:: ./announcements/3.8.0.rst
 
 .. toctree::
    :caption: Contents:

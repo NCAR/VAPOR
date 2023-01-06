@@ -1,0 +1,47 @@
+.. _3.8.0:
+
+Current Release: 3.8.0
+----------------------
+
+`Download here <https://forms.gle/4QeC4B4hURpKMT4Q9>`__
+
+3.8.0 is now live!
+
+.. raw:: html
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/mCuZ8oH4G8U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+|
+
+Thank you to our users for reporting bugs, feature requests, and questions `to our forum <https://vapor.discourse.group/>`_.  We really appreciate it!
+
+**New Enhancements**
+
+3230 - Allow user to load and save camera viewpoint as a file
+
+3157 - Jupyter Widgets can now be embedded in Jupyter notebook sessions running Vapor's Python API, and Jupyter notebook visualizers are now interactive so the camera can be repositioned from within a running notebook.
+
+To install Vapor's Python API, install `Anaconda <https://anaconda.org/>`_ and do the following:
+
+.. code-block::
+
+        conda create -n vapor python=3.9
+        conda activate vapor
+        conda install -c conda-forge -c ncar-vapor vapor
+
+
+**Bug fixes**
+
+    3280 - VAPOR 3.7 crashes on Ubuntu 20.04 LTS
+    3257 - VAPOR crashes when run through Rosetta (x86 emulation) on arm64 based M1 Macbook. Missing library?
+    3250 - Particles jump with reduced Y extents
+    3246 - Particle renderer does not work without selecting velocity variables
+    3244 - Particles disappear when "Enable 3D Geometry" Disabled
+    3243 - Crash in UnstructuredGrid3D
+    3094 - Mess up smoke test headers won't break build
+
+As always, please keep `engaging us on our forum <https://vapor.discourse.group/>`_!
+
+Thank you!
+
+-The Vapor Team
