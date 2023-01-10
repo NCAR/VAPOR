@@ -27,7 +27,7 @@ author = 'John Clyne, Scott Pearse, Samuel Li, Stanislaw Jaroszynski'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '3.7.0'
+release = '3.8.0'
 
 
 #breathe_projects = { "myproject": "/Users/pearse/vapor2/targets/common/doc/library/xml" }
