@@ -1,0 +1,6 @@
+name: vaporHelp
+channels:
+  - conda-forge
+  - ncar-vapor
+dependencies:
+  - vapor

@@ -14,6 +14,7 @@ Below, you can find descriptions of each Renderer and tutorials on how to use th
 .. toctree::
    :maxdepth: 1
 
+   basicRendererControls
    contourRenderer
    twoDData
    imageRenderer/index

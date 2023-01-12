@@ -321,25 +321,25 @@ These steps generate a .tar.bz2 bundle that you can locally install with conda, 
 
 1) After cloning Vapor, installing Anaconda/Miniconda, and modifying source code if needed, cd into the /conda directory:
 
-.. code-block:: python
+.. code-block:: console
 
     cd ~/VAPOR/conda
 
 2) Install the conda-build package on your current Anaconda/Miniconda installation:
 
-.. code-block:: python
+.. code-block:: console
 
     conda install conda-build
 
 3) Install the conda-forge channel, which Anaconda/Miniconda will use to gather libraries for your build:
 
-.. code-block:: python
+.. code-block:: console
 
     conda config --add channels conda-forge
 
 4) Execute the conda build command on your current code base:
 
-.. code-block:: python
+.. code-block:: console
 
     conda build .
 
@@ -347,14 +347,14 @@ Note: If you get a build error referencing CMakeLists.txt at this point, delete 
 
 Alternatively, add cmake build flags to your conda build such as the following:
 
-.. code-block:: python
+.. code-block:: console
 
     DEBUG_BUILD=false MAP_IMAGES_PATH="<path_to_images>" conda build .
 
 
 If the build is successful a conda package file will be created. The path to the file will be created at the end of the “conda build” step, and will look something like:
 
-.. code-block:: python
+.. code-block:: console
 
     $CONDA_PREFIX/conda-bld/osx-64/vapor-3.6.0-ha5a8b8e_0.tar.bz2
 
@@ -369,7 +369,7 @@ Once you've built a .tar.bz2 conda image for your customized version of Vapor, f
 
 1) Create a local conda channel on your computer that will host your new .tar.bz file for installation.  Note - If you're on OSX, name your directory osx-64, or if you're on linux, name it linux-64.
 
-.. code-block:: python
+.. code-block:: console
 
     mkdir -p ~/channel/osx-64
     or
@@ -377,7 +377,7 @@ Once you've built a .tar.bz2 conda image for your customized version of Vapor, f
 
 2) Move your created .tar.bz2 package from its initial directory into your channel
 
-.. code-block:: python
+.. code-block:: console
 
     mv ~/tmp/miniconda/envs/xarray/conda-bld/osx-64/vapor-3.6.0-ha5a8b8e_0.tar.bz2 ~/channel/osx-64
     or
@@ -385,13 +385,13 @@ Once you've built a .tar.bz2 conda image for your customized version of Vapor, f
 
 3) Index your new channel, so conda knows about it:
 
-.. code-block:: python
+.. code-block:: console
 
     conda index ~/channel
 
 4) Create a new conda environment to install Vapor onto, or select a pre-existing environment:
 
-.. code-block:: python
+.. code-block:: console
 
     conda create --name vapor
     conda activate vapor
@@ -400,7 +400,7 @@ Once you've built a .tar.bz2 conda image for your customized version of Vapor, f
 
 5) Finally install the custon .tar.bz2 package:
 
-.. code-block:: python
+.. code-block:: console
 
     conda install -c file://<pathToYourChannel> vapor
 
@@ -408,7 +408,7 @@ Note: It may be necessary to re-run *conda config --add channels conda-forge* at
 
 6) Verify that your new installation works:
 
-.. code-block:: python
+.. code-block:: console
 
     python
     import vapor
@@ -426,7 +426,7 @@ To contribute to Vapor's documentation, follow the three steps below.  Python ve
 
 1) Install the following requirements.  There is more than one way to do this, and ``pip`` is one recommendation.
 
-.. code-block:: python
+.. code-block:: console
 
     python -m pip install sphinx
     python -m pip install sphinx_rtd_theme
@@ -437,7 +437,7 @@ To contribute to Vapor's documentation, follow the three steps below.  Python ve
 
 2) Checkout Vapor's ``readTheDocs`` branch, then enter the ``docs`` directory.
 
-.. code-block:: python
+.. code-block:: console
 
     cd ~/VAPOR
     git checkout readTheDocs
@@ -445,7 +445,7 @@ To contribute to Vapor's documentation, follow the three steps below.  Python ve
 
 3) Explore Vapor's documentation by reading and editing the .rst files in this directory, then build the documentation
 
-.. code-block:: python
+.. code-block:: console
 
     make html
 

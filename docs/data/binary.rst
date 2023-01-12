@@ -1,3 +1,5 @@
+:orphan:
+
 .. _binary:
 
 Raw Binary Data

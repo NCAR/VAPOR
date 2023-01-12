@@ -1,8 +1,8 @@
-.. _usage:
+.. _usingVaporsGUI:
 
-=============
-Using Vapor 3
-=============
+=================
+Using Vapor's GUI
+=================
 
 Vapor 3 is comprised of a set of tools called Renderers.  Each Renderer visualizes your data in different ways based on your specifications.
 
@@ -19,10 +19,8 @@ If any feature in Vapor is not sufficienty self describing in the application, t
 .. toctree::
     :maxdepth: 1 
 
-    usage/renderers.rst
-    usage/rendererControls.rst
-    usage/creatingNewVariablesWithPython.rst
-    usage/navigationSettings.rst
-    usage/globalSettings.rst
-    usage/ancillaryTools.rst
-
+    usingVaporsGUI/renderers.rst
+    usingVaporsGUI/rendererControls.rst
+    usingVaporsGUI/navigationSettings.rst
+    usingVaporsGUI/globalSettings.rst
+    usingVaporsGUI/otherTools/otherTools.rst

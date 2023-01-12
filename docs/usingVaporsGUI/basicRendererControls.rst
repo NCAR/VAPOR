@@ -1,7 +1,7 @@
-.. _controllingYourRenderers:
+.. _basicRendererControls:
 
 Basic Renderer Controls
------------------------
+_______________________
 
 Each of Vapor's renderers has a common set of controls that will create imagery of your variables according to color, opacity, and region of interest.
 
@@ -24,7 +24,7 @@ See the :ref:`Renderers <renderers>` section for more information on how each of
 .. _variablesTab:
 
 Variables Tab
-_____________
+-------------
 The Variables Tab allows the user to define what variables are used as input to a renderer.  The options presented to the user in this tab depend on the renderer currently being used.
 
 Users that have converted their data into :ref:`VDC <vdc>` will have a fidelity controller, which allows them to view compressed data to speed up their rendering time.  Making a visualization interactive lets you change parameters faster, so you can crank up the fidelity of your data for a final visualization after exploring first.
@@ -32,7 +32,7 @@ Users that have converted their data into :ref:`VDC <vdc>` will have a fidelity 
 .. _appearanceTab:
 
 Appearance Tab
-______________
+--------------
 The appearance tab controls the color, opacity, and any renderer-specific parameters of your renderer.  Color and opacity are controlled by the Transfer Function.  Renderer-specific parameters will be grouped together within the Appearance Tab.  See the :ref:`Renderers <renderers>` section for more info on renderer-specific parameters.
 
 The Transfer Function consists of a `Probability Density Function (PDF) <https://en.wikipedia.org/wiki/Probability_density_function>`_ of your currently selected variable.  Underneath the PDF is a color bar that shows the colors that get applied to the values located directly above it.
@@ -86,7 +86,7 @@ Opacity is controlled by the green line on top of the PDF.  The higher this gree
 .. _geometryTab:
 
 Geometry Tab
-____________
+------------
 
 The Geometry tab controls where your renderer is drawing, within the space of your simulation.  By excluding regions of data from being drawn, occluded features may be seen more clearly. Compute time will also be reduced, as well as the memory needed for a given renderer.
 
@@ -137,7 +137,7 @@ Users may also control the geometry of their renderer by using the `Region Mouse
 .. _annotationTab:
 
 Annotation Tab
-______________
+--------------
 
 Quantifying the colors to your viewers can be done by adding a colorbar in the Annotation tab.
 

@@ -1,3 +1,5 @@
+:orphan:
+
 .. _ncdfExamples:
 
 .. figure:: /_images/netcdfExamplesInPython.png

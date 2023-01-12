@@ -13,10 +13,12 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 
-
 import os
 import sys
 import sphinx_rtd_theme
+
+# Add vapor_utils to path and vapor_wrf modules for python engine documentation
+sys.path.insert(0, os.path.abspath('usingVaporsGUI/otherTools'))
 
 # -- Project information -----------------------------------------------------
 
@@ -71,7 +73,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -194,6 +196,10 @@ epub_title = project
 # -- Extension configuration -------------------------------------------------
 
 
+###
+### Configure Sphinx-gallery
+###
+
 # -- Download example data ---------------------------------------------------
 import requests
 from pathlib import Path
@@ -234,8 +240,29 @@ warnings.filterwarnings("ignore",
 from sphinx_gallery.sorting import ExampleTitleSortKey
 
 sphinx_gallery_conf = {
-    'examples_dirs': ['data/netCDF', 'usage/imageRenderer', 'usage/pythonAPI'],  # path to your example scripts
-    'gallery_dirs': ['data/netCDF/examples', 'usage/imageRenderer', 'usage/pythonAPI'],  # path to where to save gallery generated output
+    'examples_dirs': ['data/netCDF', 'usingVaporsGUI/imageRenderer'],  # path to your example scripts
+    'gallery_dirs': ['data/netCDF/examples', 'usingVaporsGUI/imageRenderer'],  # path to where to save gallery generated output
     'within_subsection_order': ExampleTitleSortKey,
     'matplotlib_animations': True,
 }
+
+###
+### Configure pythonHelp
+###
+
+import vapor
+
+string = "foo"
+print(string)
+out = sys.stdout
+fname = "help/" + string + ".txt"
+sys.stdout = open(fname, "w")
+
+print(":orphan:")
+print("\n")
+print(string)
+print("-" * len(string))
+print("\n")
+
+sys.stdout.close()
+sys.stdout = out

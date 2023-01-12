@@ -4,14 +4,12 @@
 Quick Start Guide
 =================
 
-First, install Vapor from our :ref:`downloads <downloads>` page.
-
-Sample data can be found :ref:`here <sampleData>`.
+First, install Vapor from our :ref:`downloads <downloads>` page.  Sample data can be found :ref:`here <sampleData>`.
 
 Launch Vapor
 ------------
 
-After following the :ref:`installation instructions <installationInstructions>` for your platform (:ref:`OSX <osxInstallation>`, :ref:`Linux <linuxInstallation>`, or :ref:`Windows <windowsInstallation>`), launch the application by doing the following:
+After following the :ref:`installation instructions <installationInstructions>`, launch the application by doing the following:
 
 :OSX:
 
@@ -80,6 +78,5 @@ Now that you have your first Renderer, you can do the following:
 3. Modify the orientation and region that your renderer is drawn to in the :ref:`Geometry Tab <geometryTab>`
 4. Add annotations and color bars in the :ref:`Annotations Tab <annotationTab>`
 
-At this point, we've created our first renderer.  To customize it, we need to get familiar with the four tabs listed above.  The :ref:`Variables Tab <variablesTab>` and :ref:`Appearance Tab <appearanceTab>` are the most important to get started with.  We also encourage you to watch active demonstrations in our :ref:`Video <videos>` archive.
-
-If you have any questions, bug reports, or feature requests, see our :ref:`Help <getHelp>` section.  Thank you. 
+At this point, we've created our first renderer.  To customize it, we need to get familiar with the four tabs listed above.  The :ref:`Variables Tab <variablesTab>` and :ref:`Appearance Tab <appearanceTab>` are the most important to get started with.  We also encourage you to watch active demonstrations in our `YouTube channel <https://www.youtube.com/channel/UCpf-d1GDO1sotzjJ2t_QkDw>`_.
+If you have any questions, bug reports, or feature requests, see our `forum <https://vapor.discourse.group/>`_ section.  Thank you. 

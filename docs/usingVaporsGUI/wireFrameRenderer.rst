@@ -17,6 +17,6 @@ The Wire Frame Renderer displays a wireframe of the mesh for the selected variab
 Basic Controls
 --------------
 
-This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appear    anceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.
+This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appearanceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.
 
 .. include:: commonControls/heightVariable.rst

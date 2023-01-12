@@ -1,3 +1,5 @@
+:orphan:
+
 .. _weekly:
 
 Weekly Build

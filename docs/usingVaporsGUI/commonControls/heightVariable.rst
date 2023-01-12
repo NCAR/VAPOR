@@ -5,5 +5,5 @@ Height Variable
 .. table:: An Image and Wireframe renderer making use of a height variable, offsetting their 2D planes
 
     +-------------------------------------------+-----------------------------------------------+
-    | .. image :: ../../_images/imageHeight.png | .. image :: ../../_images/wireframeHeight.png |
+    | .. image :: /_images/imageHeight.png      |    .. image :: /_images/wireframeHeight.png   |
     +-------------------------------------------+-----------------------------------------------+

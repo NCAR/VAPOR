@@ -1,4 +1,0 @@
-.. _pythonAPI:
-
-Python API
-==========

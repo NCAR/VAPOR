@@ -1,3 +1,5 @@
+:orphan:
+
 Example BOV header file
 -----------------------
    
