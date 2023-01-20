@@ -1,12 +1,10 @@
 .. _3.8.0:
 
-**Vapor 3.8.0**
-
-January 10, 2023
+January 10, 2023 - Vapor 3.8.0
 
 `Download here <https://forms.gle/xLGwLgYSiABbHe8t8>`__
 
-3.8.0 is now live!
+Thank you to our users for reporting bugs, feature requests, and questions `to our forum <https://vapor.discourse.group/>`_.  We really appreciate it!
 
 .. raw:: html
 
@@ -14,13 +12,14 @@ January 10, 2023
 
 |
 
-Thank you to our users for reporting bugs, feature requests, and questions `to our forum <https://vapor.discourse.group/>`_.  We really appreciate it!
-
 **New Enhancements**
 
-3157 - Jupyter Widgets can now be embedded in Jupyter notebook sessions running Vapor's Python API, and Jupyter notebook visualizers are now interactive so the camera can be repositioned from within a running notebook.
+* 3157 - Jupyter Widgets can now be embedded in Jupyter notebook sessions running Vapor's Python API, and Jupyter notebook visualizers are now interactive so the camera can be repositioned from within a running notebook.
 
-To install Vapor's Python API, install `Anaconda <https://anaconda.org/>`_ and do the following:
+  To install Vapor's Python API:
+
+  * Install `Anaconda <https://anaconda.org/>`_ 
+  * Run the following commands:
 
 .. code-block::
 
@@ -28,23 +27,17 @@ To install Vapor's Python API, install `Anaconda <https://anaconda.org/>`_ and d
         conda activate vapor
         conda install -c conda-forge -c ncar-vapor vapor
 
-3230 - Allow user to load and save camera viewpoint as a file
+* 3230 - Allow user to load and save camera viewpoint as a file
 
 **Bug fixes**
 
-    3280 - VAPOR 3.7 crashes on Ubuntu 20.04 LTS
-
-    3257 - VAPOR crashes when run through Rosetta (x86 emulation) on arm64 based M1 Macbook. Missing library?
-
-    3250 - Particles jump with reduced Y extents
-
-    3246 - Particle renderer does not work without selecting velocity variables
-
-    3244 - Particles disappear when "Enable 3D Geometry" Disabled
-
-    3243 - Crash in UnstructuredGrid3D
-
-    3094 - Mess up smoke test headers won't break build
+* 3280 - VAPOR 3.7 crashes on Ubuntu 20.04 LTS
+* 3257 - VAPOR crashes when run through Rosetta (x86 emulation) on arm64 based M1 Macbook. Missing library?
+* 3250 - Particles jump with reduced Y extents
+* 3246 - Particle renderer does not work without selecting velocity variables
+* 3244 - Particles disappear when "Enable 3D Geometry" Disabled
+* 3243 - Crash in UnstructuredGrid3D
+* 3094 - Mess up smoke test headers won't break build
 
 As always, please keep `engaging us on our forum <https://vapor.discourse.group/>`_!
 

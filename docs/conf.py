@@ -6,6 +6,94 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
+def fetchPythonAPIExamples():
+    # Fetch python API examples
+    subprocess.call("git checkout origin/main -- ../apps/pythonapi/examples", shell=True)
+    subprocess.call("mv ../apps/pythonapi/examples pythonAPIReference", shell=True)
+
+    # Get all .py files in /examples
+    files = os.listdir("pythonAPIReference/examples")
+    files = [ fi for fi in files if fi.endswith(".py") ]
+
+    # Generate python api examples in pythonAPIReference/examples.rst
+    exampleFile = open("pythonAPIReference/examples.rst", "w+")
+    exampleFile.writelines(["Examples\n________\n\n"])
+    exampleFile.writelines(["Once you've installed VAPOR's Python API, you can find the examples below in the following directory:\n\n"])
+    exampleFile.writelines([".. code-block:: console\n\n"])
+    exampleFile.writelines(["    $CONDA_PREFIX/lib/python3.9/site-packages/vapor/examples\n\n"])
+    exampleFile.writelines([".. toctree::\n\n"])
+    for fi in files:
+        rstFileName = "examples/" + fi[0:-3] + ".rst"
+        exampleFile.writelines(["   " + rstFileName + "\n"])
+        rstFile = open("pythonAPIReference/" + rstFileName, "w+")
+        rstFile.writelines([fi + "\n"])
+        rstFile.writelines(["-" * len(fi) + "\n\n"])
+        rstFile.writelines([".. literalinclude:: " + fi + "\n"])
+        rstFile.close()
+    exampleFile.close()
+
+#def generatePythonAPIClassReference():
+#    import vapor
+#    classReferenceFileName = "pythonAPIReference/classReference.rst"
+#    classReferenceFile = open(classReferenceFileName, "w")
+#    classReferenceFile.writelines([".. _classReference:\n\n"])
+#    classReferenceFile.writelines(["Class Reference\n"])
+#    classReferenceFile.writelines(["_______________\n\n"])
+#    classReferenceFile.writelines([".. toctree::\n"])
+#    classReferenceFile.writelines(["   :maxdepth: 1\n\n"])
+#
+#    classReferenceFiles = "pythonAPIReference/classReferenceFiles"
+#    if (os.path.isdir(classReferenceFiles)):
+#        import shutil
+#        shutil.rmtree(classReferenceFiles)
+#    os.mkdir(classReferenceFiles)
+#
+#    package=vapor
+#    for importer, modName, ispkg in pkgutil.walk_packages(path=package.__path__,
+#                                                          prefix=package.__name__+'.',
+#                                                          onerror=lambda x: None):
+#        mod = __import__(modName, fromlist=["vapor"])
+#        classReferenceFile.writelines(["   classReferenceFiles//" + modName + ".rst\n"])
+#
+#        modDir = classReferenceFiles + "//" + modName + "//"
+#        os.mkdir(modDir)
+#
+#        modFileName = modDir[0:-2] + ".rst"
+#        modFile = open(modFileName, "w")
+#        modFile.writelines([".. _" + modName + ":\n\n"])
+#        modFile.writelines([modName + "\n"])
+#        modFile.writelines([str("-" * len(modName)) + "\n\n"])
+#        modFile.writelines([".. toctree::\n"])
+#        modFile.writelines(["   :maxdepth: 1\n\n"])
+#
+#        classes = dict([(name, cls) for name, cls in mod.__dict__.items() if isinstance(cls, type)])
+#
+#        for myClass in classes:
+#            className = modName + "." + myClass
+#            out = sys.stdout
+#            classFileName = modDir + className + ".rst"
+#
+#            # Add this class's .rst file to moduleFile toctree
+#            modFile.writelines(["   " + modName + "//" + className + ".rst\n"])
+#
+#            # write file through stdout, since help() outputs through stdout
+#            sys.stdout = open(classFileName, "w")
+#            #print(":orphan:")
+#            print(".. _" + className + ":")
+#            print("\n")
+#            print(className)
+#            print("-" * len(className))
+#            print("\n")
+#            help(className)
+#            sys.stdout.close()
+#            sys.stdout = out
+
+import os
+import sys
+import sphinx_rtd_theme
+import subprocess
+import pkgutil
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -13,18 +101,14 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 
-import os
-import sys
-import sphinx_rtd_theme
-
 # Add vapor_utils to path and vapor_wrf modules for python engine documentation
-sys.path.insert(0, os.path.abspath('usingVaporsGUI/otherTools'))
+sys.path.insert(0, os.path.abspath('vaporApplicationReference/otherTools'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Vapor'
-copyright = '2019 University Corporation for Atmospheric Research'
-author = 'John Clyne, Scott Pearse, Samuel Li, Stanislaw Jaroszynski'
+project = ' '
+copyright = '2023 University Corporation for Atmospheric Research'
+author = ''
 
 # The short X.Y version
 version = ''
@@ -35,16 +119,6 @@ release = '3.8.0'
 #breathe_projects = { "myproject": "/Users/pearse/vapor2/targets/common/doc/library/xml" }
 #breathe_default_project = "myproject"
 
-# -- General configuration ---------------------------------------------------
-
-# If your documentation needs a minimal Sphinx version, state it here.
-#
-# needs_sphinx = '1.0'
-
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
-#extensions = [ 'sphinx.ext.pngmath', 'sphinx.ext.todo', 'breathe' ]
 extensions = [
     'sphinx.ext.imgmath', 
     'sphinx.ext.todo', 
@@ -68,11 +142,6 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
-# The language for content autogenerated by Sphinx. Refer to documentation
-# for a list of supported languages.
-#
-# This is also used if you do content translation via gettext catalogs.
-# Usually you set "language" from the command line for these cases.
 language = 'en'
 
 # List of patterns, relative to source directory, that match files and
@@ -84,66 +153,35 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = None
 
 
-# -- Options for HTML output -------------------------------------------------
-
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = "sphinx_rtd_theme"
-html_logo = "_images/vaporLogoWhite2.png"
+html_logo = "_images/vaporLogoBlack.png"
 html_favicon = "_images/vaporVLogo.png"
 
-html_theme_options = {
-    'navigation_depth': 4,
-}
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#
-# html_theme_options = {}
+html_theme = "sphinx_book_theme"
+html_theme_options = dict(
+    # analytics_id=''  this is configured in rtfd.io
+    # canonical_url="",
+    repository_url="https://github.com/NCAR/VAPOR",
+    repository_branch="main",
+    path_to_docs="doc",
+    use_edit_page_button=True,
+    use_repository_button=True,
+    use_issues_button=True,
+    home_page_in_toc=False,
+    extra_navbar="",
+    navbar_footer_text="",
+    extra_footer=""
+)
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# The default sidebars (for documents that don't match any pattern) are
-# defined by theme itself.  Builtin themes are using these templates by
-# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
-# 'searchbox.html']``.
-#
-# html_sidebars = {}
-
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Vapordoc'
-
-
-# -- Options for LaTeX output ------------------------------------------------
-
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
-
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
-
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
-
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
-}
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
@@ -180,27 +218,11 @@ texinfo_documents = [
 # Bibliographic Dublin Core info.
 epub_title = project
 
-# The unique identifier of the text. This can be a ISBN number
-# or the project homepage.
-#
-# epub_identifier = ''
-
-# A unique identification for the text.
-#
-# epub_uid = ''
-
-# A list of files that should not be packed into the epub file.
-#epub_exclude_files = ['search.html']
-
-
-# -- Extension configuration -------------------------------------------------
-
-
 ###
 ### Configure Sphinx-gallery
 ###
 
-# -- Download example data ---------------------------------------------------
+# Download example data 
 import requests
 from pathlib import Path
 home = str(Path.home())
@@ -219,7 +241,7 @@ try:
 except ImportError:
     pass
 
-# -- suppress warnings -------------------------------------------------------
+# suppress warnings
 import warnings
 
 # filter Matplotlib 'agg' warnings
@@ -240,29 +262,33 @@ warnings.filterwarnings("ignore",
 from sphinx_gallery.sorting import ExampleTitleSortKey
 
 sphinx_gallery_conf = {
-    'examples_dirs': ['data/netCDF', 'usingVaporsGUI/imageRenderer'],  # path to your example scripts
-    'gallery_dirs': ['data/netCDF/examples', 'usingVaporsGUI/imageRenderer'],  # path to where to save gallery generated output
+    'examples_dirs': ['dataFormatRequirements/netCDF', 'vaporApplicationReference/imageRenderer'],  # path to your example scripts
+    'gallery_dirs': ['dataFormatRequirements/netCDF/examples', 'vaporApplicationReference/imageRenderer'],  # path to where to save gallery generated output
+    #'examples_dirs': ['data/netCDF', 'vaporApplicationReference/imageRenderer', 'pythonAPIReference/examples'],  # path to your example scripts
+    #'gallery_dirs': ['data/netCDF/examples', 'vaporApplicationReference/imageRenderer', 'pythonAPIReference/examples'],  # path to where to save gallery generated output
     'within_subsection_order': ExampleTitleSortKey,
     'matplotlib_animations': True,
 }
 
-###
-### Configure pythonHelp
-###
+#fetchPythonAPIExamples()
+#generatePythonAPIClassReference()
 
-import vapor
+'''print("*******************")
+print("*******************")
+print("*******************")
+print("*******************")
+print("*******************")
+subprocess.call("pwd", shell=True)
+subprocess.call("which python", shell=True)
+subprocess.call("python --version", shell=True)
+subprocess.call("echo prefix: ${CONDA_PREFIX}", shell=True)
+subprocess.call("ls ${CONDA_PREFIX}/include", shell=True)
+subprocess.call("ls /include", shell=True)'''
 
-string = "foo"
-print(string)
-out = sys.stdout
-fname = "help/" + string + ".txt"
-sys.stdout = open(fname, "w")
+'''test = r'CONDA_PREFIX=/home/docs/checkouts/readthedocs.org/user_builds/vapor/conda/pythonhelp python -c "exec(\"import vapor\")"'
+print(test)
+subprocess.call(test, shell=True)'''
 
-print(":orphan:")
-print("\n")
-print(string)
-print("-" * len(string))
-print("\n")
-
-sys.stdout.close()
-sys.stdout = out
+'''#subprocess.call("python -c \"exec\("import vapor\n\"\)\"", shell=True)
+subprocess.call("/home/docs/checkouts/readthedocs.org/user_builds/vapor/conda/pythonhelp/bin/python makePythonClassReference.py", shell=True)
+subprocess.call("/home/docs/checkouts/readthedocs.org/user_builds/vapor/conda/pythonhelp/bin/python docs/makePythonClassReference.py", shell=True)'''

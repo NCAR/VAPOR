@@ -1,20 +1,22 @@
-.. image:: _images/vaporLogoBlack.png
+.. image:: /_images/vaporLogoBlack.png
 
 |
 
 VAPOR is the Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers. A free 3D visualization environment for geophysical scientists.
 
+===============
+Current Release
+===============
 
 .. include:: announcements/3.8.0.rst
 
 .. toctree::
-   :caption: Contents:
+   :maxdepth: 2
 
    downloads
-   quickStartGuide
-   data/gettingDataIntoVapor
-   usingVaporsGUI
-   usingVaporsPythonAPI
+   dataFormatRequirements
+   vaporApplicationReference
+   pythonAPIReference
    YouTube Channel <https://www.youtube.com/channel/UCpf-d1GDO1sotzjJ2t_QkDw>
    Get Help on Our Forum <https://vapor.discourse.group>
    contributing

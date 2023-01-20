@@ -1,0 +1,11 @@
+name: readTheDocs
+channels:
+  - conda-forge
+  - ncar-vapor
+dependencies:
+  - sphinx = 4.2.0
+  - sphinx-gallery
+  - sphinx-book-theme >= 0.0.38
+  - python = 3.9
+  - vapor
+prefix: /Users/pearse/miniconda3/envs/readTheDocs

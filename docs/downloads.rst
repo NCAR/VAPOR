@@ -10,6 +10,6 @@ Downloads
     :maxdepth: 1
 
     announcements/current.rst
-    downloads/sampleData.rst
     downloads/installationInstructions.rst
-
+    downloads/sampleData.rst
+    downloads/thirdPartyLibraries.rst
