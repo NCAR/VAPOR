@@ -7,10 +7,16 @@ pendent on demonstrable evidence of the software's value to the scientific commu
 For journal articles, proceedings, etc.,
 we request:
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.7139693.svg
-   :target: https://doi.org/10.5281/zenodo.7139693
+* Li S, Jaroszynski S, Pearse S, Orf L, Clyne J. VAPOR: A Visualization Package Tailored to Analyze Simulation Data in Earth System Science. Atmosphere. 2019; 10(9):488. https://doi.org/10.3390/atmos10090488
 
-**Visualization & Analysis Systems Technologies. (2022) Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers (VAPOR version 3.7.1) [Software].  Boulder, CO: UCAR/NCAR - Computational and Information System Lab.  doi:10.5281/zenodo.7139693**
+* Visualization & Analysis Systems Technologies. (2023) Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers (VAPOR version 3.8.0) [Software]. Boulder, CO: UCAR/NCAR - Computational and Information System Lab. doi:10.5281/zenodo.7551613
+
+Link to zenodo DOI:
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.7551613.svg
+   :target: https://doi.org/10.5281/zenodo.7551613
+
+|
 
 For presentations, posters, etc.,
 we suggest:

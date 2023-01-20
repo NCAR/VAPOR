@@ -1,9 +1,10 @@
-.. _licenseAndCitation:
+.. _citationAndLicense:
 
 ====================
-License and Citation
+Citation and License
 ====================
 
+.. include:: citation.rst
 
 .. _license:
 
@@ -86,4 +87,3 @@ Vapor 3 makes use of the third party software listed below.  In addition to the 
 | GetGitRevisionDescription.cmake | :ref:`Boost V1 <boostLicense>`        |
 +---------------------------------+---------------------------------------+
 
-.. include:: citation.rst

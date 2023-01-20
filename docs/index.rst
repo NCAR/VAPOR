@@ -21,6 +21,7 @@ Current Release
    Get Help on Our Forum <https://vapor.discourse.group>
    contributing
    licenseAndCitation
+   citationAndLicense
 
 .. image:: _images/vaporBanner.png
 
