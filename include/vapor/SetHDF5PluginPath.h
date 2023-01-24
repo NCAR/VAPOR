@@ -5,7 +5,7 @@
 
 namespace VAPoR {
 void SetHDF5PluginPath() {
-    int rc;
+    int rc=0;
     std::string plugins = "HDF5_PLUGIN_PATH=" + Wasp::GetSharePath("plugins");
     #ifdef WIN32
         rc=_putenv(plugins.c_str());
