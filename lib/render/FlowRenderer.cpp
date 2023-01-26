@@ -198,6 +198,7 @@ int FlowRenderer::_paintGL(bool fast)
     if (_velocityStatus == FlowStatus::SIMPLE_OUTOFDATE) {
         // First step is to re-calculate deltaT
         rv = _velocityField.CalcDeltaTFromCurrentTimeStep(_cache_deltaT);
+        _cache_deltaT /= 400.0;
 
         _printNonZero(rv, __FILE__, __func__, __LINE__);
         if (rv == flow::FIELD_ALL_ZERO) {
