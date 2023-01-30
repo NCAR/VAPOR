@@ -274,7 +274,7 @@ int TwoDDataRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norma
 
     VAssert(g);
 
-    double defaultZ = 0;
+    double defaultZ = GetDefaultZ(dataMgr, rParams->GetCurrentTimestep());
 
     if (dynamic_cast<StructuredGrid *>(g) && !ForceUnstructured) {
         rc = _getMeshStructured(dataMgr, dynamic_cast<StructuredGrid *>(g), defaultZ);
@@ -504,7 +504,7 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
 
         verts[voffset + 0] = coords[0];
         verts[voffset + 1] = coords[1];
-        verts[voffset + 2] = deltaZ + defaultZ;
+        verts[voffset + 2] = deltaZ - defaultZ;
 
         // Compute the surface normal using central differences
         //
@@ -592,9 +592,8 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(DataMgr *dataMgr, const Struct
             double deltaZ = hgtGrid->GetValue(x, y, 0.0);
             if (deltaZ == mv) deltaZ = 0.0;
 
-            double z = deltaZ + defaultZ;
+            double z = deltaZ - defaultZ;
 
-            //
             verts[j * width * 3 + i * 3] = x;
             verts[j * width * 3 + i * 3 + 1] = y;
             verts[j * width * 3 + i * 3 + 2] = z;
