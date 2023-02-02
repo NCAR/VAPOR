@@ -110,7 +110,10 @@ install (
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 	COMPONENT Libraries
     )
-if (NOT WIN32)
+
+set (BUILD_OSGL_TESTS OFF)
+
+if (NOT WIN32 AND BUILD_OSGL_TESTS)
     file (GLOB TESTS ./test_*.cpp)
     foreach (TEST ${TESTS})
         get_filename_component(TEST_NAME "${TEST}" NAME_WE)

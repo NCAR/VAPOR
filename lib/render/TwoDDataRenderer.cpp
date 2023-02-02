@@ -635,8 +635,8 @@ int TwoDDataRenderer::_getMeshStructuredPlane(DataMgr *dataMgr, const Structured
 int TwoDDataRenderer::_getOrientation(DataMgr *dataMgr, string varname)
 {
     vector<string> coordvars;
-    bool           ok = dataMgr->GetVarCoordVars(varname, true, coordvars);
-    VAssert(ok);
+    bool ok = dataMgr->GetVarCoordVars(varname, true, coordvars);
+    if (!ok) return -1;
     VAssert(coordvars.size() == 2);
 
     vector<int> axes;    // order list of coordinate axes

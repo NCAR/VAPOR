@@ -16,6 +16,6 @@ void Wasp::_VAssertFailed(const char *expr, const char *path, const unsigned int
 #ifdef NDEBUG
     exit(1);
 #else
-    raise(SIGTERM);
+    raise(SIGINT);
 #endif
 }
