@@ -103,12 +103,15 @@ int oglGetFreeMemory()
     GLint buf[4];
     vector<int> _;
 
+#if AMD_MEM_QUERY_ENABLED
+    // On some systems returns incorrect values
     memset(buf, 0, sizeof(buf));
     glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, buf);
     if (buf[0] > 0)
         return buf[0];
 
     oglStatusOK(_);
+#endif
 
     memset(buf, 0, sizeof(buf));
     glGetIntegerv(GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, buf);
