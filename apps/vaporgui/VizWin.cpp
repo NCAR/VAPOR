@@ -100,6 +100,11 @@ VizWin::~VizWin()
 
 void VizWin::closeEvent(QCloseEvent *e)
 {
+    if (_controlExec->GetNumVisualizers() == 1) {
+        e->ignore();
+        return;
+    }
+
     // Remove the visualizer. This must be done inside of VizWin so that
     // the OpenGL context can be made current because removing a visualizer
     // triggers OpenGL calls in the renderer destructors
