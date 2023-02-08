@@ -500,6 +500,10 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
         delT /= 2.0;
     }
 
+    // Finally, apply a multiplier to the estimated deltaT. See Github issue 3318:
+    // https://github.com/NCAR/VAPOR/issues/3318
+    delT *= _params->GetFirstStepSizeMultiplier();
+
     return 0;
 }
 

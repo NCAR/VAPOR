@@ -43,6 +43,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
                 _pathlineInjectionSlider = new PIntegerSliderEdit(FP::_seedInjInterval, "Injection Interval"),
             }),
             new PDoubleInput(FP::_velocityMultiplierTag, "Vector Field Multiplier"),
+            new PDoubleInput(FP::_firstStepSizeMultiplierTag, "First Step Size Multiplier"),
             new PCheckbox(FP::_xPeriodicTag, "X axis periodicity"),
             new PCheckbox(FP::_yPeriodicTag, "Y axis periodicity"),
             new PCheckbox(FP::_zPeriodicTag, "Z axis periodicity"),
