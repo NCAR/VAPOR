@@ -1006,6 +1006,18 @@ bool RenderParams::InitBoxFromVariable(size_t ts, string varName)
 
     vector<double> origin(minExt.size());
     for (int i = 0; i < minExt.size(); i++) { origin[i] = minExt[i] + (maxExt[i] - minExt[i]) * 0.5; }
+
+    if (planar) {
+        bool ok = DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, 3, varName, ts);
+        if (ok) {
+            CoordType minExt, maxExt;
+            int rc = _dataMgr->GetVariableExtents(ts, varName, 0, 0, minExt, maxExt);
+            if (rc == 0) {
+                origin[2] = minExt[2] + (maxExt[2] - minExt[2]) * 0.5;
+            }
+        }
+    }
+
     _transform->SetOrigin(origin);
 
     SetValueDouble(XSlicePlaneOriginTag, "", origin[0]);
