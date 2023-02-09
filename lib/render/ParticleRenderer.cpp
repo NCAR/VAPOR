@@ -435,7 +435,7 @@ void ParticleRenderer::_clipEndpointToBox( const glm::vec3 &p1, glm::vec3 &p2) c
         p2[2] = p1[2] + (p2[2]-p1[2])*distance;
     }
     else if (p2[0] < _cacheParams.boxMin[0]) {
-        float distance = sqrt(pow(_cacheParams.boxMax[0]-p1[0],2)) / sqrt( pow(p2[0]-p1[0],2) );
+        float distance = sqrt(pow(_cacheParams.boxMin[0]-p1[0],2)) / sqrt( pow(p2[0]-p1[0],2) );
         p2[0] = _cacheParams.boxMin[0];
         p2[1] = p1[1] + (p2[1]-p1[1])*distance;
         p2[2] = p1[2] + (p2[2]-p1[2])*distance;
