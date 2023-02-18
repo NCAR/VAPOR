@@ -54,7 +54,6 @@ protected:
 
 class PCameraFileGroup : public PGroup {
     ControlExec* _ce;
-    VGroup *     _group;
 
 public:
     PCameraFileGroup(ControlExec* ce);
