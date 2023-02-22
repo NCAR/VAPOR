@@ -91,7 +91,7 @@ void CheckForGHNotices(std::function<void(const std::vector<Notice> &)> callback
 #ifdef TESTING_API
     req.setUrl(QUrl("http://localhost:8000/list.json"));
 #else
-    req.setUrl(QUrl("https://api.github.com/repos/NCAR/VAPOR-SupportPage/contents/notices"));
+    req.setUrl(QUrl("https://api.github.com/repos/NCAR/VAPOR-LandingPage/contents/notices"));
 #endif
     manager->get(req);
 }
