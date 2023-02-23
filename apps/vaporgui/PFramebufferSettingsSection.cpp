@@ -14,7 +14,7 @@ PFramebufferSettingsSection::PFramebufferSettingsSection(VAPoR::ControlExec *ce)
     new PSection("Framebuffer Settings", {
         new PCheckbox(VP::UseCustomFramebufferTag, "Use Custom Output Size"),
         (new PIntegerInput(VP::CustomFramebufferWidthTag,  "Output Width (px)"))->SetRange(1, 16384)->EnableBasedOnParam(VP::UseCustomFramebufferTag),
-        (new PIntegerInput(VP::CustomFramebufferHeightTag, "Output Width (px)"))->SetRange(1, 16384)->EnableBasedOnParam(VP::UseCustomFramebufferTag),
+        (new PIntegerInput(VP::CustomFramebufferHeightTag, "Output Height (px)"))->SetRange(1, 16384)->EnableBasedOnParam(VP::UseCustomFramebufferTag),
     }
 )), _ce(ce) {}
 // clang-format on
