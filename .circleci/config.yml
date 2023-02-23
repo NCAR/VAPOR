@@ -874,9 +874,9 @@ jobs:
           command: |
             mkdir -p /root/project/build
             cd /root/project/build
-            #git checkout main
-            #git reset --hard origin/main
-            #git pull
+            git checkout main
+            git reset --hard origin/main
+            git pull
             cmake -DCMAKE_BUILD_TYPE:String=Release cmake -DPYTHONVERSION=3.9 -DQTDIR=/usr/local/VAPOR-Deps/2019-Aug/Qt/5.15.2/gcc_64 -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
             make -j2
             make installer -j2
