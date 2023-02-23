@@ -499,6 +499,26 @@ if (UNIX AND NOT APPLE)
 		    	COMPONENT Dependencies
 		    	)
 
+                    # Determine if we are building on Ubuntu 22.  If so, include xinerama
+		    #
+                    file(READ "/etc/issue" ETC_ISSUE)
+                    string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
+                    if(DIST STREQUAL "Ubuntu")
+                        find_program(LSB_RELEASE_EXEC lsb_release)
+                        execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
+                            OUTPUT_VARIABLE LSB_RELEASE
+                            OUTPUT_STRIP_TRAILING_WHITESPACE
+                        )
+			if(${LSB_RELEASE} MATCHES "^22.")
+		            file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
+		            install (
+		        	FILES ${XCB_FILES}
+		        	DESTINATION ${INSTALL_LIB_DIR}
+		        	COMPONENT Dependencies
+		        	)
+                        endif ()
+                    endif ()
+
 		    install (
 		    	FILES ${QTDIR}/plugins/platforms/libqxcb.so
 		    	DESTINATION ${INSTALL_LIB_DIR}/platforms
@@ -523,7 +543,6 @@ if (UNIX AND NOT APPLE)
 		endif ()
 
 		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
-		message(STATUS "HDF5_PLUGINS ${HDF5_PLUGINS}")
 			install (
 				FILES ${HDF5_PLUGINS}
 				DESTINATION "${INSTALL_SHARE_DIR}/plugins"
