@@ -52,6 +52,8 @@ class Renderer(ParamsWrapper, wrap=RenderParams):
     
     SetUseSingleColor
     UseSingleColor
+    GetConstantOpacity
+    SetConstantOpacity
     
     GetTransform
     ResetUserExtentsToDataExents
