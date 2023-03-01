@@ -486,7 +486,7 @@ jobs:
     docker:
       - image: conda/miniconda3 # Debian based docker image
 
-    resource_class: large
+    resource_class: xlarge
 
     steps:
       - checkout
