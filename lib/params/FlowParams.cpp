@@ -26,6 +26,7 @@ const std::string FlowParams::PhongShininessTag = "PhongShininessTag";
 
 const std::string FlowParams::_isSteadyTag = "IsSteadyTag";
 const std::string FlowParams::_velocityMultiplierTag = "VelocityMultiplierTag";
+const std::string FlowParams::_firstStepSizeMultiplierTag = "FirstStepSizeMultiplierTag";
 const std::string FlowParams::_steadyNumOfStepsTag = "SteadyNumOfStepsTag";
 const std::string FlowParams::_seedGenModeTag = "SeedGenModeTag";
 const std::string FlowParams::_seedInputFilenameTag = "SeedInputFilenameTag";
@@ -138,6 +139,7 @@ int FlowParams::Initialize()
     SetFlowDirection((int)FlowDir::FORWARD);
     SetSteadyNumOfSteps(100);
     SetVelocityMultiplier(1.0);
+    SetFirstStepSizeMultiplier(1.0);
     SetPeriodic(vector<bool>(3, false));
     SetGridNumOfSeeds({5, 5, 1});
     SetRandomNumOfSeeds(50);
@@ -178,7 +180,11 @@ bool FlowParams::GetNeedFlowlineOutput() const
 
 double FlowParams::GetVelocityMultiplier() const { return GetValueDouble(_velocityMultiplierTag, 1.0); }
 
+double FlowParams::GetFirstStepSizeMultiplier() const { return GetValueDouble(_firstStepSizeMultiplierTag, 1.0); }
+
 void FlowParams::SetVelocityMultiplier(double coeff) { SetValueDouble(_velocityMultiplierTag, "Field Scale Factor", coeff); }
+
+void FlowParams::SetFirstStepSizeMultiplier(double coeff) { SetValueDouble(_firstStepSizeMultiplierTag, "first step size multiplier", coeff); }
 
 long FlowParams::GetSteadyNumOfSteps() const { return GetValueLong(_steadyNumOfStepsTag, 100); }
 
