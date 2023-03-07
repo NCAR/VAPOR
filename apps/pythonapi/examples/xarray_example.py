@@ -60,3 +60,54 @@ ren.SetVariableName("variable_name")
 
 ses.GetCamera().ViewAll()
 ses.Show()
+
+# %%
+
+ses.DeleteRenderer(ren)
+
+
+# %% [md]
+#
+# Below we generate an XArray variable that consists of a curvilinear 3D grid.
+#
+# %%
+
+def gen3d(w,h,d,f):
+    """Generate a 3D grid of size (w,h,d) by evaluating f(x,y,z) for every x,y,z coordinate"""
+    az = []
+    for z in range(0,d):
+        ay = []
+        for y in range(0,h):
+            ax = []
+            for x in range(0,w):
+                ax += [f(x,y,z)]
+            ay += [ax]
+        az += [ay]
+    return az
+
+
+w = h = d = 8
+curveVar = xr.DataArray(
+    gen3d(w,h,d,lambda x,y,z: z*w*h + y*w + x),
+    dims=("x", "y", "z"),
+    coords={
+        "x_coord": xr.DataArray(gen2d(w,h,lambda x,y: x), dims=("x", "y")),
+        "y_coord": xr.DataArray(gen2d(w,h,lambda x,y: y), dims=("x", "y")),
+        "z_coord": xr.DataArray(gen3d(w,h,d,lambda x,y,z: z), dims=("x", "y", "z")),
+    })
+
+data.AddXArrayData("variable_3d", curveVar)
+
+# %%
+
+# Create a renderer for the data
+
+ren = data.NewRenderer(renderer.WireFrameRenderer)
+ren.SetVariableName("variable_3d")
+
+# %%
+
+# Show the rendering
+
+ses.GetCamera().ViewAll()
+ses.Show()

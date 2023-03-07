@@ -70,7 +70,12 @@ class PythonDataset(Dataset, wrap=link.VAPoR.PythonDataMgr):
         if not link.VAPoR.XmlNode.IsValidXMLElement(name):
             raise Exception(f"The variable name '{name}' must be a valid XML tag, i.e. [a-Z0-9_-]+")
 
+
     def AddNumpyData(self, name:str, arr:np.ndarray):
+        """
+        Vapor expects data to be in order='C' with X as the fastest varying dimension.
+        You can swap your axes with np.swapaxes(data, 0, -1).
+        """
         self.__checkNameValid(name)
         # assert arr.dtype == np.float32
         if arr.__array_interface__['strides']:
@@ -79,7 +84,13 @@ class PythonDataset(Dataset, wrap=link.VAPoR.PythonDataMgr):
         # TODO: Only clear necessary renderers
         self.ses.ce.ClearAllRenderCaches()
 
+
     def AddXArrayData(self, varName:str, arr:xr.DataArray):
+        """
+        Vapor supports grids commonly used in earth science data.
+        Vapor expects data to be in order='C' with X as the fastest varying dimension.
+        You can swap your axes with np.swapaxes(data, 0, -1).
+        """
         self.__checkNameValid(varName)
         # assert arr.dtype == np.float32
         dc = self._wrappedInstance.GetDC()
