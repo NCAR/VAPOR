@@ -90,6 +90,7 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
             }
 
             if (rv == SUCCESS) {
+                // Bookmark_1
                 // The new particle *may* be the same as the old particle in case
                 // there's a sink, meaning the velocity is zero.
                 // In that case, we mark p1 as "special" and terminate the current stream.
@@ -104,6 +105,7 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
                     numberOfSteps++;
                 }
             } else if (rv == MISSING_VAL) {
+                // Bookmark_2
                 // This is the annoying part: there are multiple possiblities.
                 // 1) past0 is really located at a missing value location;
                 // 2) past0 is inside the volume, but really close to the boundary,
@@ -198,6 +200,9 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
         if (p0.time < startT)      // Skip this stream if it didn't advance to startT
             continue;
 
+        if (p0.IsSpecial())
+            continue;
+
         size_t thisStep = 0;
 
         while (p0.time < targetT) {
@@ -229,7 +234,6 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
                 } else {
                     break;    // break the while loop
                 }
-
             } // Finish the out-of-volume condition
 
             double dt = deltaT;
@@ -258,19 +262,68 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
                 _printNonZero(rv, __FILE__, __func__, __LINE__);
                 break;
             }
-            if (rv != 0) {    // Advection wasn't successful for some reason...
-                break;
-            } else {    // Advection successful, keep the new particle.
-                happened = true;
-                s.push_back(p1);
-                p0 = p1;
-            }
+
+            if (rv == SUCCESS) {
+                // Check out Bookmark_1
+                if (p1.location == p0.location) {
+                    p1.SetSpecial(true);
+                    s.push_back(p1);
+                    _separatorCount[streamIdx]++;
+                    break;
+                } else {
+                    happened = true;
+                    s.push_back(p1);
+                    p0 = p1;
+                }
+            } else if (rv == MISSING_VAL) {
+                // Check out Bookmark_2
+                glm::vec3 vel;
+                bool isMissing = (velocity->GetVelocity(p0.time, p0.location, vel) == MISSING_VAL);
+                bool isInside = velocity->InsideVolumeVelocity(p0.time, p0.location);
+
+                if (isInside && isMissing) {
+                    p1.SetSpecial(true);
+                    s.push_back(p1);
+                    _separatorCount[streamIdx]++;
+                    break;
+                } else if (isInside && (!isMissing)) {
+                    rv = _advectEuler(velocity, p0, dt, p1);
+                    assert(rv == 0);
+                    s.push_back(p1);
+                    p0 = p1;
+                } else {
+                    auto loc = p0.location;
+                    for (int i = 0; i < 3; i++) {
+                        if (_isPeriodic[i])
+                            loc[i] = _applyPeriodic(loc[i], _periodicBounds[i][0], _periodicBounds[i][1]);
+                    }
+
+                    if (velocity->InsideVolumeVelocity(p0.time, loc)) {
+                        p1.SetSpecial(true);
+                        auto it = s.end();
+                        --it;
+                        s.insert(it, p1);
+                        it = s.end();
+                        --it;
+                        it->location = loc;
+                        _separatorCount[streamIdx]++;
+                    } else {
+                        p1.SetSpecial(true);
+                        s.push_back(p1);
+                        _separatorCount[streamIdx]++;
+                        break;
+                    }
+                }
+            } // finish handling missing value
 
             // Another termination criterion: when advecting at least 10,000 steps and
             // more than 10X more than the previous max num of steps.
             //
             if (++thisStep == maxSteps) {
                 thisStep = maxSteps / 10;
+                p1.SetSpecial(true);
+                s.push_back(p1);
+                _separatorCount[streamIdx]++;
                 break;
             }
         }    // Finish advecting one particle
