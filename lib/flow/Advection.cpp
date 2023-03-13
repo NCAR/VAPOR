@@ -200,12 +200,13 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
         if (p0.time < startT)      // Skip this stream if it didn't advance to startT
             continue;
 
-        if (p0.IsSpecial())
+        if (p0.IsSpecial())       // Also skip this tream if it was marked special.
             continue;
 
         size_t thisStep = 0;
 
         while (p0.time < targetT) {
+
             // Check if the particle is inside of the volume.
             // Wrap it along periodic dimensions if applicable.
             if (!velocity->InsideVolumeVelocity(p0.time, p0.location)) {
@@ -219,8 +220,13 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
                         locChanged = true;
                     }
                 }
-                if (!locChanged)    // no dimension is periodic
+                if (!locChanged) {  // no dimension is periodic, append a separator
+                    Particle separator;
+                    separator.SetSpecial(true);
+                    s.push_back(separator);
+                    _separatorCount[streamIdx]++;
                     break;          // break the while loop
+                }
 
                 // See if the new location is inside of the volume
                 if (velocity->InsideVolumeVelocity(itr->time, loc)) {
@@ -231,7 +237,11 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
                     separator.SetSpecial(true);
                     s.insert(itr, separator);
                     _separatorCount[streamIdx]++;
-                } else {
+                } else {  // Still outside, so we terminate the stream!
+                    Particle separator;
+                    separator.SetSpecial(true);
+                    s.push_back(separator);
+                    _separatorCount[streamIdx]++;
                     break;    // break the while loop
                 }
             } // Finish the out-of-volume condition
