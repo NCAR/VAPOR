@@ -350,8 +350,13 @@ void VizWinMgr::Shutdown()
     vector<string> vizNames = _getVisualizerNames();
 
     for (int i = 0; i < vizNames.size(); i++) { _killViz(vizNames[i]); }
-    VAssert(_vizMdiWin.empty());
-    VAssert(_vizWindow.empty());
+
+    // For whatever reason, if _killViz() was not able to kill a viz, we remove
+    // it from the following two containers anyway.
+    // This is a (dirty) fix for issue #3329, while it doesn't have obvious side effects.
+    //
+    _vizMdiWin.clear();
+    _vizWindow.clear();
 
     _initialized = false;
 }
