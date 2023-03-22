@@ -39,11 +39,12 @@ requirements:
     - geotiff=1.6.0
     - udunits2=2.2.26
     - netcdf4=1.5.8
-    - libtiff=4.3.0
+    - libtiff=4.3|4.4
     - proj=7.2.0
     - glm=0.9.9.4
     - mesalib=21.2.5
     - expat=2.4
+    - libcxx=14.0
   run:
     # Run only
     - xarray=2022 #=2022.3.0
@@ -64,8 +65,9 @@ requirements:
     - {{ pin_compatible('geotiff') }}
     - {{ pin_compatible('udunits2') }}
     - {{ pin_compatible('netcdf4') }}
-    - {{ pin_compatible('libtiff') }}
+    - libtiff=4.3|4.4 # pin_compatible pins an incompatible version
     - {{ pin_compatible('proj') }}
     - {{ pin_compatible('glm') }}
     - {{ pin_compatible('mesalib') }}
     - {{ pin_compatible('expat') }}
+    - {{ pin_compatible('libcxx') }}
