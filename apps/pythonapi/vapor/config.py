@@ -28,10 +28,16 @@ modulePaths = [Path(__file__).parent]
 
 condaPaths = [os.getenv('CONDA_PREFIX', "/")]
 
+def PathExists(path):
+    try:
+        return path.exists()
+    except PermissionError:
+        return False
+
 roots = sourcePaths + installPaths + modulePaths + condaPaths
 allRoots = roots.copy()
 roots = map(Path, roots)
-roots = filter(Path.exists, roots)
+roots = filter(PathExists, roots)
 roots = [*roots]
 
 # print("Resource Roots:\n\t" + "\n\t".join(map(str, roots)))
