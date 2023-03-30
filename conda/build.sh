@@ -95,13 +95,3 @@ make -j$(($CPU_COUNT+1))
 make doc
 make install
 
-# ===========================================
-
-cd ../apps/pythonapi/jupyter-vapor-widget
-echo $PYTHON -m pip install --no-deps --ignore-installed --target="$SP_DIR" .
-$PYTHON -m pip install --no-deps --ignore-installed --target="$SP_DIR" .
-
-cd ../../..
-echo $PYTHON conda/jupyter_installer_fix.py --widgetDir=./apps/pythonapi/jupyter-vapor-widget --outRootDir="$PREFIX"
-$PYTHON conda/jupyter_installer_fix.py --widgetDir=./apps/pythonapi/jupyter-vapor-widget --outRootDir="$PREFIX"
-
