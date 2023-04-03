@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7551613.svg)](https://doi.org/10.5281/zenodo.7551613)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7779648.svg)](https://doi.org/10.5281/zenodo.7779648)
 [![CircleCI](https://circleci.com/gh/NCAR/VAPOR.svg?style=svg)](https://circleci.com/gh/NCAR/VAPOR) 
 
 ## Vapor:
