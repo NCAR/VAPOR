@@ -24,6 +24,16 @@ class Link:
         # print("- include", path)
         return cppyy.include(path)
 
+    @staticmethod
+    def FixModuleOwnership(Class):
+        """
+        Classes that directly inherit from CPPYY C++ classes have an incorrect __module__ attr
+        """
+        import inspect
+        callerModule = inspect.getmodule(inspect.stack()[1][0])
+        Class.__module__ = callerModule.__name__
+        return Class
+
     def __getattr__(self, name):
         return getattr(cppyy.gbl, name)
 
