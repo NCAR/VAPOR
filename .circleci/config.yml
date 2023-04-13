@@ -497,6 +497,7 @@ jobs:
             cd /root/project/conda
             conda install -y conda-build
             conda config --add channels conda-forge
+            conda config --add channels ncar-vapor
             conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
