@@ -30,6 +30,10 @@ class Dataset(SmartWrapper, wrap=link.VAPoR.DataMgr):
     GetVarCoordVars
     GetNumTimeSteps
     IsTimeVarying
+
+    GetMeshNames
+    GetMesh
+    GetDimLens
     """)
 
     def __init__(self, dataMgr:link.VAPoR.DataMgr, id:str, ses):
@@ -91,12 +95,18 @@ class PythonDataset(Dataset, wrap=link.VAPoR.PythonDataMgr):
         Vapor expects data to be in order='C' with X as the fastest varying dimension.
         You can swap your axes with np.swapaxes(data, 0, -1).
         """
+        
         self.__checkNameValid(varName)
         # assert arr.dtype == np.float32
         dc = self._wrappedInstance.GetDC()
         dimNames = []
         dimNameMap = {}
-        for name,length in arr.sizes.items():
+        xDims = list(arr.sizes.items())
+        # DC::Mesh requires dimensions to be specified in reverse order
+        # i.e. if data is slowest to fastest, DC::Mesh expects them in fastest to slowest
+        xDims.reverse()
+
+        for name,length in xDims:
             genName = f"__{varName}_dim_{name}"
             dim = DC.Dimension(genName, length)
             dc.AddDimension(dim)
@@ -112,8 +122,10 @@ class PythonDataset(Dataset, wrap=link.VAPoR.PythonDataMgr):
             uniformHint = False
             timeDim = ""
             mappedDims = [dimNameMap[d] for d in xCoord.dims]
+            mappedDims.reverse() # DC.CoordVar expects these in fastest to slowest
             coord = DC.CoordVar(genName, "m", DC.FLOAT, periodic, axis, uniformHint, mappedDims, timeDim)
-            dc.AddCoordVar(coord, np.float32(xCoord.data))
+            xCoordData = xCoord.data.astype(np.float32, copy=False)
+            dc.AddCoordVar(coord, np.float32(xCoordData))
             coordNames += [genName]
 
         meshGenName = f"__{varName}_mesh_{DC.Mesh.MakeMeshName(dimNames)}"
