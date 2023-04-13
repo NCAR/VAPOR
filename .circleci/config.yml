@@ -527,6 +527,8 @@ jobs:
       - run:
           name: build conda installer
           command: |
+            conda update -n base -c defaults conda
+            conda config --add channels ncar-vapor
             conda config --add channels conda-forge
             conda install -y conda-build
             cd /root/project/conda
