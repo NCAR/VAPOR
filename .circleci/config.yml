@@ -495,8 +495,10 @@ jobs:
           name: conda build .
           command: |
             cd /root/project/conda
+            conda update -n base -c defaults conda
             conda install -y conda-build
             conda config --add channels conda-forge
+            conda config --add channels ncar-vapor
             conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
@@ -525,6 +527,8 @@ jobs:
       - run:
           name: build conda installer
           command: |
+            conda update -n base -c defaults conda
+            conda config --add channels ncar-vapor
             conda config --add channels conda-forge
             conda install -y conda-build
             cd /root/project/conda
