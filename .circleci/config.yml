@@ -1203,9 +1203,11 @@ jobs:
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz
 
+orbs:
+  win: circleci/windows@5.0
+
   build_win10_libs:
-    docker:
-      - image: server-2019
+    executor: win/server-2019
     steps:
       - checkout
       - run:
