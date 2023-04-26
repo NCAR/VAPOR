@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  win: circleci/windows@2.2.0
+  win: circleci/windows@5.0
 
 references:
   workspace_root: &workspace_root
@@ -1202,9 +1202,6 @@ jobs:
 
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz
-
-orbs:
-  win: circleci/windows@5.0
 
   build_win10_libs:
     executor: win/server-2019
