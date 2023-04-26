@@ -92,7 +92,53 @@ windowsPrerequisites() {
     apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'
     apt install -y cmake --allow-unauthenticated
 
-    apt install mingw-64
+    sudo apt update; 
+    sudo apt --yes --install 
+        build-dep \
+        libxcb-xinerama0-dev \
+        build-essential \
+        perl python \
+        '^libxcb.*-dev' \
+        libx11-xcb-dev \
+        libglu1-mesa-dev \
+        libxrender-dev \
+        libxi-dev \
+        libxkbcommon-dev \
+        libxkbcommon-x11-dev \
+        flex \
+        bison \
+        gperf \
+        libicu-dev \
+        libxslt-dev \
+        ruby libssl-dev \
+        libxcursor-dev \
+        libxcomposite-dev \
+        libxdamage-dev \
+        libxrandr-dev \
+        libdbus-1-dev \
+        libfontconfig1-dev \
+        libcap-dev \
+        libxtst-dev \
+        libpulse-dev \
+        libudev-dev \
+        libpci-dev \
+        libnss3-dev \
+        libasound2-dev \
+        libxss-dev \
+        libegl1-mesa-dev \
+        gperf \
+        bison \
+        libasound2-dev \
+        libgstreamer0.10-dev \
+        libgstreamer-plugins-base0.10-dev \
+        libclang-6.0-dev \
+        llvm-6.0
+    #apt install mingw-64
+    sudo apt install --yes g++-mingw-w64
+    sudo update-alternatives --config x86_64-w64-mingw32-g++
+    sudo update-alternatives --config x86_64-w64-mingw32-gcc
+
+
 
     #choco install visualstudio2019-workload-vctools python cmake -y
     #setx /M PATH "%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"

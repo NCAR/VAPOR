@@ -1076,16 +1076,16 @@ jobs:
       - image: ubuntu:20.04
 
     steps:
-      - checkout
-
       - run:
           name: acquire prerequisites
           command: |
             DEBIAN_FRONTEND=noninteractive
+            pwd
+            ls
             #apt update
             #apt install -y curl
             #apt install -y xz-utils
-            #apt install -y git
+            apt install -y git
             #apt install -y g++
             #apt install -y freeglut3-dev
             #apt install -y libexpat1-dev
@@ -1094,6 +1094,8 @@ jobs:
             #apt install -y valgrind
             #apt install -y clang-tidy
             #apt install -y lsb-release
+
+      - checkout
 
       - run:
           name: update cmake
@@ -1201,23 +1203,26 @@ jobs:
           path: /usr/local/VAPOR-Deps/2023-CentOS7.tar.xz
 
   build_win10_libs:
-    executor: win/default
+    docker:
+      - image: server-2019
     steps:
       - checkout
       - run:
           name: get source files
           command: |
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            tar xvf ${filename} -C /usr/local/VAPOR-Deps
+            #choco install visualstudio2019-workload-vctools -y
             msbuild -version
+            #gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+            #tar xvf ${filename} -C /usr/local/VAPOR-Deps
       - run:
           name: build libraries
           command: |
-            chmod 777 /root/project/scripts/build3rdParty.sh
-            /root/project/scripts/build3rdParty.sh -o Windows
+            ls
+            #chmod 777 /root/project/scripts/build3rdParty.sh
+            #/root/project/scripts/build3rdParty.sh -o Windows
 
       - store_artifacts:
-          path: C:\Users\circleci\project\tmp\workspace\installers
+          path: C:\
 
 workflows:
   version: 2
@@ -1238,10 +1243,10 @@ workflows:
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      - build_ubuntu20_libs
-      - build_centos7_libs
-      - build_osx_libs
-      #- build_windows_libs
+      #- build_ubuntu20_libs
+      #- build_centos7_libs
+      #- build_osx_libs
+      - build_win10_libs
       #- release_weekly_installers:
       #    requires:
       #      - build_ubuntu18_installer
