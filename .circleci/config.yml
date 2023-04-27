@@ -1208,7 +1208,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: get source files
+          name: prerequisites
           command: |
             #choco install visualstudio2019-workload-vctools -y
             msbuild -version
@@ -1218,11 +1218,15 @@ jobs:
             choco install nsis -y
             choco install 7zip.install -y
             python -m pip install gdown
+
+          name: get source files
+          command: |
             gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
             7z x 2023-src.tar.xz
             7z x 2023-src.tar
             mv 2023-Mar-src C:\
             tar -xvf 2023-src.tar.xz -C /usr/local/VAPOR-Deps
+          no_output_timeout: 20m
       - run:
           name: build libraries
           command: |
