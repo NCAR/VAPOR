@@ -58,7 +58,7 @@ jobs:
           paths:
             - installers
 
-  setup_osx:
+  setup_:
     macos:
       xcode: "13.4.1"
     steps:
@@ -115,18 +115,18 @@ jobs:
           no_output_timeout: 30m
 
       - save_cache:
-          key: osx-{{ .Environment.CIRCLE_SHA1 }}
+          key: -{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - /usr/local/VAPOR-Deps
             - /opt/local/bin
 
-  build_osx_installer:
+  build__installer:
     macos:
       xcode: "13.4.1"
     steps:
       #- restore_cache:
       #    keys:
-      #      - osx-{{ .Environment.CIRCLE_SHA1 }}
+      #      - -{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Make VAPOR-Deps
           command: |
@@ -213,10 +213,10 @@ jobs:
     macos:
       xcode: "13.4.1"
     steps:
-      # Saving and restoring cache takes forever, so we must repeat build_osx_steps verbatim
+      # Saving and restoring cache takes forever, so we must repeat build__steps verbatim
       #- restore_cache:
       #    keys:
-      #      - osx-{{ .Environment.CIRCLE_SHA1 }}
+      #      - -{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Make VAPOR-Deps
           command: |
@@ -585,7 +585,7 @@ jobs:
       - store_artifacts:
           path: /root/miniconda/conda-bld/linux-64/tarBallDir
 
-  build_python_api_osx:
+  build_python_api_:
     macos:
       xcode: "13.4.1"
 
@@ -613,7 +613,7 @@ jobs:
             /Users/distiller/miniconda/bin/conda config --add channels conda-forge
             DEBUG_BUILD=false MAP_IMAGES_PATH="/Users/distiller/VAPOR-Data/images" /Users/distiller/miniconda/bin/conda build .
             mkdir -p /tmp/workspace/installers
-            mv /Users/distiller/miniconda/conda-bld/osx-64/*.tar.bz2 /tmp/workspace/installers
+            mv /Users/distiller/miniconda/conda-bld/-64/*.tar.bz2 /tmp/workspace/installers
             cd /tmp/workspace/installers
             fileName=${ls}
             newFileName=${fileName//vapor/vaporUbuntu}
@@ -1058,14 +1058,14 @@ jobs:
             centosSha=$os$sha$endl
             #os="OSX:       "
             #sha=`shasum -a 256 VAPOR3*Darwin*`
-            #osxSha=$os$sha$endl
+            #Sha=$os$sha$endl
             #os="M1:       "
             #sha=`shasum -a 256 VAPOR3*M1*`
-            #osxSha=$os$sha$endl
+            #Sha=$os$sha$endl
             #os="Windows:   "
             #sha=`shasum -a 256 VAPOR3*win64*`
             #winSha=$os$sha$endl
-            shaMessage="$title$ubuntuSha$centosSha$osxSha$m1Sha$winSha"
+            shaMessage="$title$ubuntuSha$centosSha$Sha$m1Sha$winSha"
             date=`date +"%d_%m_%y"`
             echo $shaMessage > "/tmp/workspace/installers/sha256.txt"
             echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
@@ -1138,7 +1138,7 @@ jobs:
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Ubuntu20.tar.xz
 
-  build_osx_libs:
+  build_appleIntel_libs:
     macos:
       xcode: "13.4.1"
 
@@ -1162,6 +1162,39 @@ jobs:
           command: |
             chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
             /Users/distiller/project/scripts/build3rdParty.sh -o OSX
+
+      - run:
+          name: compress files
+          command: |
+            tar cfJ /usr/local/VAPOR-Deps/2023-OSX.tar.xz /usr/local/VAPOR-Deps/current
+
+      - store_artifacts:
+          path: /usr/local/VAPOR-Deps/2023-OSX.tar.xz
+
+  build_appleM1_libs:
+    macos:
+      xcode: "13.4.1"
+
+    steps:
+      - checkout
+
+      - run:
+          name: get source files
+          command: |
+            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
+            sudo mkdir -p /usr/local/VAPOR-Deps
+            sudo chmod -R 777 /usr/local/VAPOR-Deps
+            pip3 install gdown
+            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+            filename="/Users/distiller/project/2023-src.tar.xz"
+            sudo tar xvf $filename -C /usr/local/VAPOR-Deps
+            sudo chmod -R 777 /usr/local/VAPOR-Deps
+
+      - run:
+          name: build libraries
+          command: |
+            chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
+            /Users/distiller/project/scripts/build3rdParty.sh -o M1
 
       - run:
           name: compress files
@@ -1247,24 +1280,25 @@ workflows:
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
       #- build_python_api_centos
-      #- build_python_api_osx
+      #- build_python_api_
       #- test_clang_format
       #- build_win10_installer
-      #- build_osx_installer
+      #- build__installer
       #- build_M1_installer
       #- build_ubuntu18_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      #- build_ubuntu20_libs
+      - build_ubuntu20_libs
       #- build_centos7_libs
-      #- build_osx_libs
-      - build_win10_libs
+      - build_appleIntel_libs
+      - build_appleM1_libs
+      #- build_win10_libs
       #- release_weekly_installers:
       #    requires:
       #      - build_ubuntu18_installer
       #      - build_centos7_installer
-      #      - build_osx_installer
+      #      - build__installer
       #      - build_win10_installer
   weekly:
       triggers:
@@ -1277,18 +1311,18 @@ workflows:
         - build_ubuntu22_installer
         - build_ubuntu18_installer
         - build_centos7_installer
-        - build_osx_installer
+        - build__installer
         - build_M1_installer
         - build_win10_installer
         #- build_python_api_ubuntu
-        #- build_python_api_osx
+        #- build_python_api_
         - release_weekly_installers:
             requires:
               - build_ubuntu22_installer
               - build_ubuntu18_installer
               - build_centos7_installer
-              - build_osx_installer
+              - build__installer
               - build_M1_installer
               - build_win10_installer
               #- build_python_api_ubuntu
-              #- build_python_api_osx
+              #- build_python_api_
