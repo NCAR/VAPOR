@@ -532,14 +532,21 @@ if (UNIX AND NOT APPLE)
 		    	FILES ${QTDIR}/plugins/platforms/libqxcb.so
 		    	DESTINATION ${INSTALL_LIB_DIR}/platforms
 		    	COMPONENT Dependencies
-		    	)
+		    )
+
+            file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinput.*)
+            install (
+                FILES ${XCB_FILES}
+                DESTINATION ${INSTALL_LIB_DIR}
+                COMPONENT Dependencies
+            )
 
 		    file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
 		    install (
 		    	FILES ${XCBQPA_FILES}
 		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
-		    	)
+		    )
         endif ()
 
 		if (BUILD_OSP)

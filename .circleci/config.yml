@@ -1166,7 +1166,7 @@ jobs:
       - run:
           name: compress files
           command: |
-            tar cfJ /usr/local/VAPOR-Deps/2023-OSX.tar.xz /usr/local/VAPOR-Deps/current
+            tar cfJ /usr/local/VAPOR-Deps/2023-OSX.tar.xz current
 
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-OSX.tar.xz

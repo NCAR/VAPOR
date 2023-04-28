@@ -11,12 +11,15 @@
 set -e
 
 #OS="CentOS"
-baseDir='/usr/local/VAPOR-Deps/2023-Mar-src'
-installDir='/usr/local/VAPOR-Deps/current'
+baseDir='/usr/local/VAPOR-Deps'
+srcDir="$baseDir/2023-Mar-src"
+installDir="$baseDir/current"
+archiveName="$2023-Mar"
+
 while getopts o:b:i flag
 do
     case "${flag}" in
-        b) baseDir=${OPTARG};;
+        b) srcDir=${OPTARG};;
         i) installDir=${OPTARG};;
         o) OS=${OPTARG};;
     esac
@@ -140,23 +143,23 @@ centosPrerequisites() {
 }
 
 libpng() {
-    cd $baseDir
+    cd $srcDir
     local library='libpng-1.6.39'
-    tar xvf $baseDir/$library.tar.xz 
-    mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
+    tar xvf $srcDir/$library.tar.xz 
+    mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
     make -j4 && make install
 }
 
 assimp() {
-    cd $baseDir
+    cd $srcDir
     if [ "$OS" == "CentOS" ]; then
         local library='assimp-5.1.6'
     else
         local library='assimp-5.2.5' #requires c++17
     fi
-    tar xvf $baseDir/$library.tar.gz
-    mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
+    tar xvf $srcDir/$library.tar.gz
+    mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     cmake \
     -DCMAKE_INSTALL_PREFIX=$installDir \
     -DCMAKE_BUILD_TYPE=Release \
@@ -167,10 +170,10 @@ assimp() {
 }
 
 zlib() {
-    cd $baseDir
+    cd $srcDir
     local library='zlib-1.2.13'
-    tar xvf $baseDir/$library.tar.gz
-    mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
+    tar xvf $srcDir/$library.tar.gz
+    mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
     make -j4 && make install
 }
@@ -178,10 +181,10 @@ zlib() {
 #Note: after configuration, need to make sure both zlib and szlib are enabled!!
 # How are we supposed do do that?  Configure does not indicate yes or no...
 szip() {
-    cd $baseDir
+    cd $srcDir
     local library='szip-2.1.1'
-    tar xvf $baseDir/$library.tar.gz
-    cd $baseDir/$library
+    tar xvf $srcDir/$library.tar.gz
+    cd $srcDir/$library
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
 }
@@ -190,7 +193,7 @@ szip() {
 #hdfVersion='1.13.3'
 hdfVersion='1.12.2'
 hdf5() {
-    cd $baseDir
+    cd $srcDir
     if [ "$OS" == "Ubuntu" ] || [ "$OS" == "CentOS" ]; then
         #tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64.tar.gz && cd hdf              # use this line for versions > 12.12.2
         tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf         # use this line for versions = 12.12.2
@@ -207,10 +210,10 @@ hdf5() {
 }
 
 netcdf() {
-    cd $baseDir
+    cd $srcDir
     local library='netcdf-c-4.9.1'
-    tar xvf $baseDir/$library.tar.gz
-    mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
+    tar xvf $srcDir/$library.tar.gz
+    mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
 
     cmake \
     -DCMAKE_INSTALL_PREFIX=$installDir \
@@ -223,18 +226,18 @@ netcdf() {
 }
 
 expat() {
-    cd $baseDir
+    cd $srcDir
     local library='expat-2.5.0'
-    tar xvf $baseDir/$library.tar.xz 
-    mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
+    tar xvf $srcDir/$library.tar.xz 
+    mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
     make -j4 && make install
 }
 
 udunits() {
-    cd $baseDir
+    cd $srcDir
     local library='udunits-2.2.28'
-    tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
+    tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
     LDFLAGS=-L$installDir/lib/ \
     CPPFLAGS=-I$installDir/include/ \
     CC=$CC CXX=$CXX \
@@ -244,28 +247,28 @@ udunits() {
 }
 
 freetype() {
-    cd $baseDir
+    cd $srcDir
     local library='freetype-2.13.0'
-    tar xvf $baseDir/$library.tar.xz
-    cd $baseDir/$library
+    tar xvf $srcDir/$library.tar.xz
+    cd $srcDir/$library
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
 }
 
 #CC=clang CXX=clang++ ./configure --prefix=/usr/local/VAPOR-Deps/2019-Aug
 jpeg() {
-    cd $baseDir
-    tar xvf $baseDir/jpegsrc.v9e.tar.gz
-    cd $baseDir/jpeg-9e
+    cd $srcDir
+    tar xvf $srcDir/jpegsrc.v9e.tar.gz
+    cd $srcDir/jpeg-9e
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
 }
 
 tiff() {
-    cd $baseDir
+    cd $srcDir
     local library='libtiff-v4.5.0'
-    tar xvf $baseDir/$library.tar.gz
-    cd $baseDir/$library
+    tar xvf $srcDir/$library.tar.gz
+    cd $srcDir/$library
     if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
         glibtoolize --force
     else
@@ -285,22 +288,22 @@ tiff() {
 }
 
 sqlite() {
-    cd $baseDir
+    cd $srcDir
     local library='sqlite-autoconf-3410000'
-    tar xvf $baseDir/$library.tar.gz
-    cd $baseDir/$library
+    tar xvf $srcDir/$library.tar.gz
+    cd $srcDir/$library
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
 }
 
 proj() {
-    cd $baseDir
+    cd $srcDir
     #local library='proj-9.1.0' # does not work
     #local library='proj-6.3.1' # works
     local library='proj-7.2.1' # ?
-    tar xvf $baseDir/$library.tar.gz
+    tar xvf $srcDir/$library.tar.gz
     tar xvf proj-datumgrid-1.8.tar.gz -C $library/data
-    mkdir -p $baseDir/$library/build && cd $baseDir/$library/build
+    mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     
     if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
         local sqliteLib="-DSQLITE3_LIBRARY=$installDir/lib/libsqlite3.dylib"
@@ -322,9 +325,9 @@ proj() {
 }
 
 geotiff() {
-    cd $baseDir
+    cd $srcDir
     local library='libgeotiff-1.7.1'
-    tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
+    tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
 
     LDFLAGS=-L$installDir/lib/ \
     CPPFLAGS=-I$installDir/include/ \
@@ -339,32 +342,32 @@ geotiff() {
 }
 
 xinerama() {
-    cd $baseDir
+    cd $srcDir
     local library='xcb-proto-1.15.2'
-    tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
+    tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
     ./configure --prefix=$installDir
     make -j4 && make install
 
-    cd $baseDir
+    cd $srcDir
     library='libxcb-1.15'
     export PYTHONPATH=$installDir/local/lib/python3.10/dist-packages
-    tar xvf $baseDir/$library.tar.xz && cd $baseDir/$library
+    tar xvf $srcDir/$library.tar.xz && cd $srcDir/$library
     PYTHON=python3 PKG_CONFIG_PATH=$installDir/share/pkgconfig ./configure --without-doxygen --docdir='${datadir}'/doc/libxcb-1.15 --prefix=$installDir
     make -j4 && make install
 }
 
 openssl() {
-    cd $baseDir
+    cd $srcDir
     local library='openssl-1.1.1t'
-    tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
+    tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
     ./config shared --prefix=$installDir --openssldir=$installDir
     make -j4 && make install
 }
 
 pythonVapor() {
-    cd $baseDir
+    cd $srcDir
     local library='cpython-3.9.16'
-    tar xvf $baseDir/$library.tar.gz && cd $baseDir/$library
+    tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
     if [ "$OS" = "OSX" ] || [ "$OS" = "M1" ]; then
         export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"; \
         CC=$CC \
@@ -412,22 +415,22 @@ pythonVapor() {
 }
 
 ospray() {
-    cd $baseDir
+    cd $srcDir
     if [ "$OS" != "OSX" ]; then
         local library='ospray-2.11.0.x86_64.linux'
-        tar xvf $baseDir/ospray/$library.tar.gz && cd $baseDir/$library
+        tar xvf $srcDir/ospray/$library.tar.gz && cd $srcDir/$library
     else
         local library='ospray-2.11.0.x86_64.macosx'
-        unzip $baseDir/ospray/$library && cd $baseDir/$library
+        unzip $srcDir/ospray/$library && cd $srcDir/$library
     fi
     mkdir -p $installDir/Ospray
     cp -r * $installDir/Ospray
 }
 
 glm() {
-    cd $baseDir
+    cd $srcDir
     local library='glm-0.9.9.8'
-    unzip $baseDir/$library.zip && cp -r $baseDir/glm/glm $installDir/include
+    unzip $srcDir/$library.zip && cp -r $srcDir/glm/glm $installDir/include
     #unzip $library.zip && mkdir -p glm/build
     #cd glm/build
     #cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
@@ -435,32 +438,32 @@ glm() {
 }
 
 gte() {
-    cd $baseDir
+    cd $srcDir
     tar xvf GTE.tar.xz
     mv GTE $installDir/include
 }
 
 images() {
-    cd $baseDir
+    cd $srcDir
     tar xvf images.tar.xz
     mv images $installDir/share
 }
 
 qt() {
-    cd $baseDir
+    cd $srcDir
     if [ "$OS" == "CentOS" ]; then
         local library='qt-everywhere-src-5.13.2'
-        tar xf $baseDir/$library.tar.xz
-        mkdir -p $baseDir/$library/build
-        cd $baseDir/$library/build
+        tar xf $srcDir/$library.tar.xz
+        mkdir -p $srcDir/$library/build
+        cd $srcDir/$library/build
     else 
-        tar xf $baseDir/qt-everywhere-opensource-src-5.15.8.tar.xz
-        mkdir -p $baseDir/qt-everywhere-src-5.15.8/build
-        cd $baseDir/qt-everywhere-src-5.15.8/build
+        tar xf $srcDir/qt-everywhere-opensource-src-5.15.8.tar.xz
+        mkdir -p $srcDir/qt-everywhere-src-5.15.8/build
+        cd $srcDir/qt-everywhere-src-5.15.8/build
     fi
 
-    #mkdir -p $baseDir/$library/build
-    #cd $baseDir/$library/build
+    #mkdir -p $srcDir/$library/build
+    #cd $srcDir/$library/build
 
     CPPFLAGS=-I$installDir/include \
     LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
@@ -478,6 +481,10 @@ qt() {
     make install > qtInstall.txt
 }
 
+renameAndCompress() {
+    mv $installDir $baseDir/$archiveName
+    tar cfJ $installDir $baseDir/$archiveName-$OS.tar.xz
+}
 
 if [ "$OS" == "OSX" ]; then
     osxPrerequisites
@@ -513,3 +520,4 @@ glm
 gte
 images
 qt
+renameAndCompress
