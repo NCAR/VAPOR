@@ -1079,12 +1079,12 @@ jobs:
       - run:
           name: acquire prerequisites
           command: |
-            touch foo.txt
-            tar cfJ foo.tar.xz foo.txt
             DEBIAN_FRONTEND=noninteractive
             apt update
             #apt install -y curl
-            #apt install -y xz-utils
+            apt install -y xz-utils
+            touch foo.txt
+            tar cfJ foo.tar.xz foo.txt
             apt install -y git
             git config --global --add safe.directory /tmp/_circleci_local_build_repo
             #apt install -y g++
