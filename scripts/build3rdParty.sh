@@ -61,8 +61,6 @@ ubuntuPrerequisites() {
     apt install -y \
         build-essential \
         libgl1-mesa-dev \
-        libglu1-mesa-dev \
-        libglut-dev \
         qt5-default \
         m4 \
         libcurl4-openssl-dev \
@@ -78,6 +76,7 @@ ubuntuPrerequisites() {
     apt-get install -y \
         '^libxcb.*-dev' \
         libx11-xcb-dev \
+        libglut-dev \
         libglu1-mesa-dev \
         libxrender-dev \
         libxi-dev \
