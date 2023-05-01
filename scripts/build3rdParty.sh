@@ -76,7 +76,7 @@ ubuntuPrerequisites() {
     apt-get install -y \
         '^libxcb.*-dev' \
         libx11-xcb-dev \
-        libglut-dev \
+        freeglut3-dev \
         libglu1-mesa-dev \
         libxrender-dev \
         libxi-dev \
