@@ -477,7 +477,7 @@ qt() {
     -v \
     -prefix $installDir \
     -opensource \
-    -opengl dynamic \
+    -opengl desktop \
     -confirm-license \
     -release \
     -nomake examples \
