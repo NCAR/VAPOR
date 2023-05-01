@@ -14,7 +14,7 @@ set -e
 baseDir='/usr/local/VAPOR-Deps'
 srcDir="$baseDir/2023-Mar-src"
 installDir="$baseDir/current"
-archiveName="$2023-Mar"
+archiveName="2023-Mar"
 
 while getopts o:b:i flag
 do
@@ -488,10 +488,10 @@ qt() {
     make install > qtInstall.txt
 }
 
-baseDir='/usr/local/VAPOR-Deps'
-srcDir="$baseDir/2023-Mar-src"
-installDir="$baseDir/current"
-archiveName="$2023-Mar"
+#baseDir='/usr/local/VAPOR-Deps'
+#srcDir="$baseDir/2023-Mar-src"
+#installDir="$baseDir/current"
+#archiveName="2023-Mar"
 renameAndCompress() {
     bundle="$baseDir/$archiveName-$OS"
     mv $installDir $bundle
