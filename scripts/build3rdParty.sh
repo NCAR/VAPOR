@@ -493,6 +493,7 @@ qt() {
 #installDir="$baseDir/current"
 #archiveName="2023-Mar"
 renameAndCompress() {
+    pwd
     bundle="$baseDir/$archiveName-$OS"
     mv $installDir $bundle
     tar cfJ $bundle.tar.xz $bundle
