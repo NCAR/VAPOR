@@ -1134,7 +1134,7 @@ jobs:
           name: compress files
           command: |
             #tar cfJ /usr/local/VAPOR-Deps/2023-Ubuntu20.tar.xz /usr/local/VAPOR-Deps/current
-            tar cfJ 2023-Ubuntu20.tar.xz /usr/local/VAPOR-Deps/current
+            #tar cfJ 2023-Ubuntu20.tar.xz /usr/local/VAPOR-Deps/current
             mv 2023-Ubuntu20.tar.xz /usr/local/VAPOR-Deps
 
       - store_artifacts:
