@@ -1130,15 +1130,8 @@ jobs:
             chmod 777 /root/project/scripts/build3rdParty.sh
             /root/project/scripts/build3rdParty.sh -o Ubuntu
 
-      - run:
-          name: compress files
-          command: |
-            #tar cfJ /usr/local/VAPOR-Deps/2023-Ubuntu20.tar.xz /usr/local/VAPOR-Deps/current
-            #tar cfJ 2023-Ubuntu20.tar.xz /usr/local/VAPOR-Deps/current
-            mv 2023-Ubuntu20.tar.xz /usr/local/VAPOR-Deps
-
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Ubuntu20.tar.xz
+          path: /usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
 
   build_osx_libs:
     macos:
