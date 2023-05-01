@@ -496,7 +496,7 @@ renameAndCompress() {
     bundle="$baseDir/$archiveName-$OS"
     mv $installDir $bundle
     tar cfJ $bundle.tar.xz $bundle
-    mv $bundle.tar.xz /usr/local/VAPOR-Deps
+    #mv $bundle.tar.xz /usr/local/VAPOR-Deps
 }
 
 if [ "$OS" == "OSX" ]; then
