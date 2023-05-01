@@ -68,6 +68,7 @@ ubuntuPrerequisites() {
         autoconf \
         libtool \
         libxcb-xinerama0 \
+        libxcb-xinerama0-dev \
         pkg-config \
         unzip \
         libssl-dev
@@ -487,9 +488,14 @@ qt() {
     make install > qtInstall.txt
 }
 
+baseDir='/usr/local/VAPOR-Deps'
+srcDir="$baseDir/2023-Mar-src"
+installDir="$baseDir/current"
+archiveName="$2023-Mar"
 renameAndCompress() {
-    mv $installDir $baseDir/$archiveName
-    tar cfJ $installDir $baseDir/$archiveName-$OS.tar.xz
+    bundle="$baseDir/$archiveName-$OS"
+    mv $installDir $bundle
+    tar cfJ $bundle.tar.xz $bundle
 }
 
 if [ "$OS" == "OSX" ]; then
@@ -502,7 +508,7 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-#openssl
+openssl
 #pythonVapor
 #zlib
 #libpng
@@ -525,5 +531,5 @@ fi
 #glm
 #gte
 #images
-qt
+#qt
 renameAndCompress
