@@ -511,27 +511,27 @@ elif [ "$OS" == "Windows" ]; then
 fi
 
 openssl
-#pythonVapor
-#zlib
-#libpng
-#assimp
-#szip
-#hdf5
-#netcdf
-#expat
-#udunits
-#freetype
-#jpeg
-#tiff
-#sqlite
-#proj
-#geotiff
-#if [ "$OS" == "Ubuntu" ] ; then
-#   xinerama
-#fi         
-#ospray
-#glm
-#gte
-#images
-#qt
+pythonVapor
+zlib
+libpng
+assimp
+szip
+hdf5
+netcdf
+expat
+udunits
+freetype
+jpeg
+tiff
+sqlite
+proj
+geotiff
+if [ "$OS" == "Ubuntu" ] ; then
+   xinerama
+fi         
+ospray
+glm
+gte
+images
+qt
 renameAndCompress
