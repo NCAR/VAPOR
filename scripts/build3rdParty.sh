@@ -82,7 +82,27 @@ ubuntuPrerequisites() {
         libxrender-dev \
         libxi-dev \
         libxkbcommon-dev \
-        libxkbcommon-x11-dev
+        libxkbcommon-x11-dev \
+        libgl1-mesa-dev \
+        libx11-dev 
+
+#sudo apt-get install 
+#build-essential 
+#libfontconfig1-dev 
+#libdbus-1-dev 
+#libfreetype6-dev 
+#libicu-dev 
+#libinput-dev 
+#libxkbcommon-dev 
+#libsqlite3-dev 
+#libssl-dev 
+#libpng-dev 
+#libjpeg-dev 
+#libglib2.0-dev 
+#libx11-dev 
+#libxi-dev 
+#libgl1-mesa-dev
+
 }
 
 windowsPrerequisites() {
