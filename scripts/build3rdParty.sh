@@ -61,7 +61,7 @@ ubuntuPrerequisites() {
     apt install -y \
         build-essential \
         libgl1-mesa-dev \
-        qt5-default \
+        qtbase5-dev \
         m4 \
         libcurl4-openssl-dev \
         libxau-dev \
