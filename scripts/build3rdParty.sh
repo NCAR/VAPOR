@@ -479,7 +479,7 @@ qt() {
         -release
         -nomake examples
     )
-    if [ "$OS" == "Ubuntu" ] || [ "$OS" = "CentOS" ]; then; then
+    if [ "$OS" == "Ubuntu" ] || [ "$OS" = "CentOS" ]; then
         args+=(-feature-freetype)
         args+=(-fontconfig)
         args+=(-qt-freetype)
