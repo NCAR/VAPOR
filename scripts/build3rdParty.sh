@@ -471,23 +471,28 @@ qt() {
     #mkdir -p $srcDir/$library/build
     #cd $srcDir/$library/build
 
+    args=(
+        -v
+        -prefix $installDir
+        -opensource
+        -confirm-license
+        -release
+        -nomake examples
+    )
+    if [ "$OS" == "Ubuntu" ]; then
+        args+=(-feature-freetype)
+        args+=(-fontconfig)
+    fi
+    args+=("-nomake tests > qtConfig.txt")
+
+    echo "${args[@]}"
+
     CPPFLAGS=-I$installDir/include \
     LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
     CC=$CC \
     CXX=$CXX \
     ../configure \
-    -v \
-    -prefix $installDir \
-    -opensource \
-    -confirm-license \
-    -release \
-    -nomake examples \
-    -feature-freetype \
-    -fontconfig \
-    -nomake tests > qtConfig.txt
-    
-    make -j4 > qtMake.txt
-    make install > qtInstall.txt
+    "${args[@]}"
 }
 
 #baseDir='/usr/local/VAPOR-Deps'
