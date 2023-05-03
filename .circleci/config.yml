@@ -1250,8 +1250,8 @@ workflows:
       #- build_centos7_installer
       - build_ubuntu20_libs
       - build_centos7_libs
-      #- build_osx_libs
-      #- build_M1_libs
+      - build_osx_libs
+      - build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:

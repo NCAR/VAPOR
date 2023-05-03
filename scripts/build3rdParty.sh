@@ -478,22 +478,23 @@ qt() {
         -confirm-license
         -release
         -nomake examples
+        -nomake tests
     )
     if [ "$OS" == "Ubuntu" ] || [ "$OS" = "CentOS" ]; then
         args+=(-feature-freetype)
         args+=(-fontconfig)
         args+=(-qt-freetype)
     fi
-    args+=("-nomake tests > qtConfig.txt")
+    #args+=(> qtConfig.txt)
 
-    echo "${args[@]}"
+    #echo "${args[@]}"
 
     CPPFLAGS=-I$installDir/include \
     LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
     CC=$CC \
     CXX=$CXX \
     ../configure \
-    "${args[@]}"
+    "${args[@]}" > qtConfig.txt
 }
 
 #baseDir='/usr/local/VAPOR-Deps'
@@ -518,28 +519,28 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-openssl
-pythonVapor
-zlib
-libpng
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-if [ "$OS" == "Ubuntu" ] ; then
-   xinerama
-fi         
-ospray
-glm
-gte
-images
+#openssl
+#pythonVapor
+#zlib
+#libpng
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#jpeg
+#tiff
+#sqlite
+#proj
+#geotiff
+#if [ "$OS" == "Ubuntu" ] ; then
+#   xinerama
+#fi         
+#ospray
+#glm
+#gte
+#images
 qt
 renameAndCompress
