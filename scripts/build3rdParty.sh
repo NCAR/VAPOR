@@ -479,9 +479,10 @@ qt() {
         -release
         -nomake examples
     )
-    if [ "$OS" == "Ubuntu" ]; then
+    if [ "$OS" == "Ubuntu" ] || [ "$OS" = "CentOS" ]; then; then
         args+=(-feature-freetype)
         args+=(-fontconfig)
+        args+=(-qt-freetype)
     fi
     args+=("-nomake tests > qtConfig.txt")
 
