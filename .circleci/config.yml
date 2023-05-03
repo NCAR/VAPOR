@@ -1075,6 +1075,8 @@ jobs:
     docker:
       - image: ubuntu:20.04
 
+    resource_class: large
+
     steps:
       - run:
           name: acquire prerequisites
@@ -1127,6 +1129,8 @@ jobs:
   build_osx_libs:
     macos:
       xcode: "13.4.1"
+
+    resource_class: macos.x86.medium.gen2
 
     steps:
       - checkout
@@ -1186,6 +1190,8 @@ jobs:
   build_centos7_libs:
     docker:
       - image: centos:7
+
+    resource_class: large
 
     steps:
       - checkout
