@@ -482,7 +482,7 @@ qt() {
     )
     if [ "$OS" == "Ubuntu" ] || [ "$OS" = "CentOS" ]; then
         args+=(-feature-freetype)
-        args+=(-fontconfig)
+        #args+=(-fontconfig)
         args+=(-qt-freetype)
     fi
     #args+=(> qtConfig.txt)
@@ -495,6 +495,9 @@ qt() {
     CXX=$CXX \
     ../configure \
     "${args[@]}" > qtConfig.txt
+
+    make -j4 > qtMake.txt
+    make install > qtInstall.txt
 }
 
 #baseDir='/usr/local/VAPOR-Deps'
