@@ -62,6 +62,7 @@ ubuntuPrerequisites() {
         build-essential \
         libgl1-mesa-dev \
         qtbase5-dev \
+        libicu-dev \
         m4 \
         libcurl4-openssl-dev \
         libxau-dev \
@@ -481,6 +482,8 @@ qt() {
     -confirm-license \
     -release \
     -nomake examples \
+    -feature-freetype \
+    -fontconfig \
     -nomake tests > qtConfig.txt
     
     make -j4 > qtMake.txt
