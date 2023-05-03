@@ -508,7 +508,7 @@ renameAndCompress() {
     #mv $bundle.tar.xz /usr/local/VAPOR-Deps
 }
 
-if [ "$OS" == "OSX" ]; then
+if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
     osxPrerequisites
 elif [ "$OS" == "Ubuntu" ]; then
     ubuntuPrerequisites
