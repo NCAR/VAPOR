@@ -506,9 +506,11 @@ qt() {
 #archiveName="2023-Mar"
 renameAndCompress() {
     pwd
-    bundle="$baseDir/$archiveName-$OS"
-    mv $installDir $bundle
-    tar cfJ $bundle.tar.xz $bundle
+    cd $baseDir
+    mv $installDir $archiveName
+    tar cfJ $archiveName-$OS.tar.xz $archiveName
+    #bundle="$baseDir/$archiveName-$OS"
+    #tar cfJ $bundle.tar.xz $bundle
     #mv $bundle.tar.xz /usr/local/VAPOR-Deps
 }
 
