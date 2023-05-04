@@ -1214,7 +1214,7 @@ jobs:
             /root/project/scripts/build3rdParty.sh -o CentOS
 
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Mar-CentOS7.tar.xz
+          path: /usr/local/VAPOR-Deps/2023-Mar-CentOS.tar.xz
 
   build_win10_libs:
     executor: win/default
