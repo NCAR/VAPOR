@@ -139,6 +139,12 @@ else()
     #list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.14.0/lib)
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
     #list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.13.3/lib)
+
+    if (APPLE)
+        #list (APPEND CMAKE_LIBRARY_PATH /opt/local/lib/libomp)
+        #include(/opt/local/lib/libomp/libomp.dylib)
+        set(CMAKE_MODULE_PATH /opt/local/lib/libomp)
+    endif()
 endif()
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
