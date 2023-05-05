@@ -257,9 +257,9 @@ jobs:
           name: Get clang13
           command: |
             sudo /opt/local/bin/port selfupdate
-            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
-            sudo /opt/local/bin/port select --set clang mp-clang-13
-            /opt/local/bin/clang++ -v > clangVersion.txt
+            #(sudo yes || true) | sudo /opt/local/bin/port install clang-13
+            #sudo /opt/local/bin/port select --set clang mp-clang-13
+            #/opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 30m
       - run:
           name: make VAPOR
@@ -1007,16 +1007,16 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      - build_ubuntu18
-      - build_centos7
-      - build_python_api_ubuntuDebug
-      - build_python_api_ubuntu
+      #- build_ubuntu18
+      #- build_centos7
+      #- build_python_api_ubuntuDebug
+      #- build_python_api_ubuntu
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer
-      #- build_M1_installer
+      - build_M1_installer
       #- build_ubuntu18_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
