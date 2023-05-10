@@ -423,13 +423,13 @@ pythonVapor() {
 ospray() {
     cd $srcDir
     if [ "$OS" == "M1" ]; then
-        git clone https://github.com/ospray/ospray.git
-        cd ospray && git checkout v2.11.0
+        git clone https://github.com/ospray/ospray.git ospraySrc
+        cd ospraySrc && git checkout v2.11.0
         mkdir build && cd build
         cmake \
             -DBUILD_JOBS=8 \
             -DBUILD_TBB_FROM_SOURCE=ON \
-            $srcDir/ospray/scripts/superbuild/
+            $srcDir/ospraySrc/scripts/superbuild/
         cmake --build .
         mv install/ospray/* $installDir/Ospray
     elif [ "$OS" == "OSX" ]; then
