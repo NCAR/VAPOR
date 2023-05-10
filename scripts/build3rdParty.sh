@@ -422,12 +422,22 @@ pythonVapor() {
 
 ospray() {
     cd $srcDir
-    if [ "$OS" != "OSX" ]; then
-        local library='ospray-2.11.0.x86_64.linux'
-        tar xvf $srcDir/ospray/$library.tar.gz && cd $srcDir/$library
-    else
+    if [ "$OS" == "M1" ]; then
+        git clone https://github.com/ospray/ospray.git
+        cd ospray && git checkout v2.11.0
+        mkdir build && cd build
+        cmake \
+            -DBUILD_JOBS=8 \
+            -DBUILD_TBB_FROM_SOURCE=ON \
+            $srcDir/ospray/scripts/superbuild/
+        cmake --build .
+        mv install/ospray/* $installDir/Ospray
+    elif [ "$OS" == "OSX" ]; then
         local library='ospray-2.11.0.x86_64.macosx'
         unzip $srcDir/ospray/$library && cd $srcDir/$library
+    else
+        local library='ospray-2.11.0.x86_64.linux'
+        tar xvf $srcDir/ospray/$library.tar.gz && cd $srcDir/$library
     fi
     mkdir -p $installDir/Ospray
     cp -r * $installDir/Ospray
@@ -524,28 +534,31 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-openssl
-pythonVapor
-zlib
-libpng
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-if [ "$OS" == "Ubuntu" ] ; then
-   xinerama
-fi         
+#openssl
+#pythonVapor
+#zlib
+#libpng
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#jpeg
+#tiff
+#sqlite
+#proj
+#geotiff
+#if [ "$OS" == "Ubuntu" ] ; then
+#   xinerama
+#fi         
 ospray
-glm
-gte
-images
-qt
-renameAndCompress
+#glm
+#gte
+#images
+#qt
+#if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
+#   /Users/distiller/project/buildutils/OSX_PostBuild.py
+#fi         
+#renameAndCompress

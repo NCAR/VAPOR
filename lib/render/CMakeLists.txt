@@ -155,7 +155,10 @@ endif ()
 
 
 if(BUILD_OSP)
+            message (STATUS "OSPRAYDIR ${OSPRAYDIR}")
+            message (STATUS "OSPRAYDIR ${INSTALL_OSP_LIBS}")
 	find_library (OSPRAY ospray HINTS ${OSPRAYDIR}/lib REQUIRED)
+        message (STATUS "renderer CMakeLists ${OSPRAYDIR}/lib ${OSPRAYDIR}/lib")
 	target_link_libraries (render PUBLIC ${OSPRAY})
 	target_include_directories (render PUBLIC ${OSPRAYDIR}/include)
 	target_compile_definitions (render PUBLIC BUILD_OSPRAY)

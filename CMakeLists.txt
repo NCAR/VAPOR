@@ -417,6 +417,8 @@ if (APPLE)
 
         if (BUILD_OSP)
             file (GLOB INSTALL_OSP_LIBS ${OSPRAYDIR}/lib/*.dylib) 
+            message (STATUS "OSPRAYDIR ${OSPRAYDIR}")
+            message (STATUS "OSPRAYDIR ${INSTALL_OSP_LIBS}")
 		    install (
 		    	FILES ${INSTALL_OSP_LIBS}
 		    	DESTINATION ${INSTALL_LIB_DIR}
@@ -457,6 +459,12 @@ if (APPLE)
 		install (
 			FILES ${HDF5_PLUGINS}
 			DESTINATION "${INSTALL_SHARE_DIR}/plugins"
+			COMPONENT Dependencies
+			)
+		file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/*.dylib) 
+		install (
+			FILES ${HDF5_LIBS}
+			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
 

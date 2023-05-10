@@ -17,10 +17,8 @@ import sys
 import stat
 import subprocess
 
-
-executable_dir   = "/Users/pearse/VAPOR/build/bin"
-vaporLibrary_dir = "/Users/pearse/VAPOR/build/lib"
-thirdParty_dir   = "/usr/local/VAPOR-Deps/2019-Aug/lib"
+thirdParty_dir   = "/usr/local/VAPOR-Deps/current"
+lib_dir  = thirdParty_dir + "/lib"
 
 changeDependencyCommand = "/usr/bin/install_name_tool -change "
 changeLibraryIDCommand  = "/usr/bin/install_name_tool -id "
