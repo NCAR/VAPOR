@@ -105,6 +105,7 @@ elseif( NOT WIN32 )
   target_compile_options( vdc PUBLIC "-Wno-unknown-pragmas" )
 endif()
 
+message( STATUS "PROJ ${PROJ}")
 target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ})
 
 add_definitions (-DVDF_EXPORTS)

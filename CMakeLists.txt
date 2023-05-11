@@ -403,7 +403,7 @@ if (APPLE)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
-        file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH} ${QTDIR}/lib/*.framework)
+        file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
@@ -432,13 +432,13 @@ if (APPLE)
 		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
 		    	)
-            file (GLOB COCOA_LIBS ${QTDIR}/plugins/platforms/libqcocoa.dylib)
+            file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)
 	        install (
                 FILES ${COCOA_LIBS}
                 DESTINATION ${INSTALL_BIN_DIR}/platforms
                 COMPONENT Dependencies
                 )
-            file (GLOB STYLE_LIBS ${QTDIR}/plugins/styles/libqmacstyle.dylib)
+            file (GLOB STYLE_LIBS ${THIRD_PARTY_DIR}/plugins/styles/libqmacstyle.dylib)
 	        install (
                 FILES ${STYLE_LIBS}
                 DESTINATION ${INSTALL_BIN_DIR}/styles
@@ -517,7 +517,7 @@ if (UNIX AND NOT APPLE)
 		    	)
 
 		    install (
-		    	DIRECTORY ${QTDIR}/plugins/xcbglintegrations
+		    	DIRECTORY ${THIRD_PARTY_DIR}/plugins/xcbglintegrations
 		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
 		    	)
@@ -543,7 +543,7 @@ if (UNIX AND NOT APPLE)
                     endif ()
 
 		    install (
-		    	FILES ${QTDIR}/plugins/platforms/libqxcb.so
+		    	FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
 		    	DESTINATION ${INSTALL_LIB_DIR}/platforms
 		    	COMPONENT Dependencies
 		    )
@@ -555,7 +555,7 @@ if (UNIX AND NOT APPLE)
                 COMPONENT Dependencies
             )
 
-		    file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
+		    file (GLOB XCBQPA_FILES ${THIRD_PARTY_DIR}/lib/libQt5XcbQpa.*)
 		    install (
 		    	FILES ${XCBQPA_FILES}
 		    	DESTINATION ${INSTALL_LIB_DIR}

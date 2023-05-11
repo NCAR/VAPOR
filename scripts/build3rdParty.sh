@@ -151,6 +151,7 @@ centosPrerequisites() {
 libpng() {
     cd $srcDir
     local library='libpng-1.6.39'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz 
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
@@ -164,6 +165,7 @@ assimp() {
     else
         local library='assimp-5.2.5' #requires c++17
     fi
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     cmake \
@@ -178,6 +180,7 @@ assimp() {
 zlib() {
     cd $srcDir
     local library='zlib-1.2.13'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
@@ -189,6 +192,7 @@ zlib() {
 szip() {
     cd $srcDir
     local library='szip-2.1.1'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     cd $srcDir/$library
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
@@ -218,6 +222,7 @@ hdf5() {
 netcdf() {
     cd $srcDir
     local library='netcdf-c-4.9.1'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
 
@@ -234,6 +239,7 @@ netcdf() {
 expat() {
     cd $srcDir
     local library='expat-2.5.0'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz 
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
@@ -243,6 +249,7 @@ expat() {
 udunits() {
     cd $srcDir
     local library='udunits-2.2.28'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
     LDFLAGS=-L$installDir/lib/ \
     CPPFLAGS=-I$installDir/include/ \
@@ -255,6 +262,7 @@ udunits() {
 freetype() {
     cd $srcDir
     local library='freetype-2.13.0'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz
     cd $srcDir/$library
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
@@ -264,6 +272,7 @@ freetype() {
 #CC=clang CXX=clang++ ./configure --prefix=/usr/local/VAPOR-Deps/2019-Aug
 jpeg() {
     cd $srcDir
+    rm -rf $srcDir/jpeg-9e || true
     tar xvf $srcDir/jpegsrc.v9e.tar.gz
     cd $srcDir/jpeg-9e
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
@@ -273,6 +282,18 @@ jpeg() {
 tiff() {
     cd $srcDir
     local library='libtiff-v4.5.0'
+    rm -rf $library || true
+    tar xvf $srcDir/$library.tar.gz
+    mkdir $srcDir/$library/build && cd $_
+
+    cmake -DCMAKE_INSTALL_PREFIX=$installDir .. 
+    make -j4 && make install
+}
+
+oldTiff() {
+    cd $srcDir
+    local library='libtiff-v4.5.0'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     cd $srcDir/$library
     if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
@@ -296,6 +317,7 @@ tiff() {
 sqlite() {
     cd $srcDir
     local library='sqlite-autoconf-3410000'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     cd $srcDir/$library
     CC=$CC CXX=$CXX ./configure --prefix=$installDir
@@ -307,6 +329,7 @@ proj() {
     #local library='proj-9.1.0' # does not work
     #local library='proj-6.3.1' # works
     local library='proj-7.2.1' # ?
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     tar xvf proj-datumgrid-1.8.tar.gz -C $library/data
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
@@ -317,15 +340,61 @@ proj() {
         local sqliteLib="-DSQLITE3_LIBRARY=$installDir/lib/libsqlite3.so"
     fi
 
-    cmake \
-    -DCMAKE_PREFIX_PATH=$installDir \
-    -DEXE_SQLITE3=$installDir/bin/sqlite3 \
-    -DSQLITE3_INCLUDE_DIR=$installDir/include \
-    $sqliteLib \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    -DCMAKE_INSTALL_PREFIX=$installDir \
-    -DPROJ_COMPILER_NAME=$CXX \
-    ..
+    args=(
+        -DCMAKE_PREFIX_PATH=$installDir
+        -DEXE_SQLITE3=$installDir/bin/sqlite3
+        -DSQLITE3_INCLUDE_DIR=$installDir/include
+        $sqliteLib \
+        -DCMAKE_INSTALL_LIBDIR=lib
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DPROJ_COMPILER_NAME=$CXX
+    )
+    if [ "$OS" == "M1" ]; then
+        args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+    fi
+    cmake "${args[@]}" ..
+
+    #cmake \
+    #-DCMAKE_PREFIX_PATH=$installDir \
+    #-DEXE_SQLITE3=$installDir/bin/sqlite3 \
+    #-DSQLITE3_INCLUDE_DIR=$installDir/include \
+    #$sqliteLib \
+    #-DCMAKE_INSTALL_LIBDIR=lib \
+    #-DCMAKE_INSTALL_PREFIX=$installDir \
+    #-DCMAKE_OSX_ARCHITECTURES=arm64 \
+    #-DPROJ_COMPILER_NAME=$CXX \
+    #..
+
+    make -j4 && make install
+}
+
+geotiff2() {
+    cd $srcDir
+    local library='libgeotiff-1.7.1'
+    rm -rf $library || true
+    tar xvf $srcDir/$library.tar.gz && mkdir $srcDir/$library/build && cd $_
+
+    args=(
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DPROJ_DIR=$installDir
+#        -DTIFF_DIR=$installDir
+#        -DZLIB_DIR=$installDir
+        -DWITH_JPEG=ON
+        -DWITH_ZLIB=ON
+    )
+    if [ "$OS" == "M1" ]; then
+        args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+    fi
+    if [ "$OS" == "M1" ] || [ "$OS" == "OSX" ]; then
+        args+=(-DCMAKE_SKIP_RPATH=ON)
+        args+=(-DCMAKE_SKIP_INSTALL_RPATH=ON)
+    fi
+    #CPPFLAGS=-I$installDir/include \
+    #LDFLAGS="-L$installDir/lib -Wl" \
+    #CC=$CC \
+    #CXX=$CXX \
+    cmake "${args[@]}" ..
 
     make -j4 && make install
 }
@@ -333,16 +402,38 @@ proj() {
 geotiff() {
     cd $srcDir
     local library='libgeotiff-1.7.1'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
 
-    LDFLAGS=-L$installDir/lib/ \
-    CPPFLAGS=-I$installDir/include/ \
-    CC=$CC CXX=$CXX \
-    ./configure \
-    --prefix=$installDir \
-    --with-zlib=yes \
-    --with-jpeg=yes \
-    --with-proj=$installDir
+    args=(
+        --prefix=$installDir
+        --with-zlib=yes
+        --with-jpeg=yes
+        --with-proj=$installDir
+        --with-libtiff=$installDir
+    )
+    #if [ "$OS" == "M1" ]; then
+    #    args+=(--build=arm64)
+    #fi
+
+    #echo "${args[@]}"
+
+    CPPFLAGS=-I$installDir/include \
+    LDFLAGS=-L$installDir/lib \
+    CC=$CC \
+    CXX=$CXX \
+    ./configure "${args[@]}"
+
+
+    # the old way.  need to specify arm64.
+    #LDFLAGS=-L$installDir/lib/ \
+    #CPPFLAGS=-I$installDir/include/ \
+    #CC=$CC CXX=$CXX \
+    #./configure \
+    #--prefix=$installDir \
+    #--with-zlib=yes \
+    #--with-jpeg=yes \
+    #--with-proj=$installDir
 
     make -j4 && make install
 }
@@ -350,6 +441,7 @@ geotiff() {
 xinerama() {
     cd $srcDir
     local library='xcb-proto-1.15.2'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
     ./configure --prefix=$installDir
     make -j4 && make install
@@ -365,6 +457,7 @@ xinerama() {
 openssl() {
     cd $srcDir
     local library='openssl-1.1.1t'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
     ./config shared --prefix=$installDir --openssldir=$installDir
     make -j4 && make install
@@ -373,6 +466,7 @@ openssl() {
 pythonVapor() {
     cd $srcDir
     local library='cpython-3.9.16'
+    rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
     if [ "$OS" = "OSX" ] || [ "$OS" = "M1" ]; then
         export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"; \
@@ -423,24 +517,31 @@ pythonVapor() {
 ospray() {
     cd $srcDir
     if [ "$OS" == "M1" ]; then
-        git clone https://github.com/ospray/ospray.git ospraySrc
-        cd ospraySrc && git checkout v2.11.0
-        mkdir build && cd build
-        cmake \
-            -DBUILD_JOBS=8 \
-            -DBUILD_TBB_FROM_SOURCE=ON \
-            $srcDir/ospraySrc/scripts/superbuild/
-        cmake --build .
-        mv install/ospray/* $installDir/Ospray
+        cd $srcDir/ospray/osprayM1
+        # The following source build results with the following error on CircleCI:
+        #   Error executing ISPC executable
+        #   Bad CPU type in executable
+        #
+        #git clone https://github.com/ospray/ospray.git ospraySrc
+        #cd ospraySrc && git checkout v2.11.0
+        #mkdir build && cd build
+        #cmake \
+        #    -DBUILD_JOBS=8 \
+        #    -DBUILD_TBB_FROM_SOURCE=ON \
+        #    $srcDir/ospraySrc/scripts/superbuild/
+        #cmake --build .
+        #mv install/ospray/* $installDir/Ospray
     elif [ "$OS" == "OSX" ]; then
         local library='ospray-2.11.0.x86_64.macosx'
+        rm -rf ospray/$library || true
         unzip $srcDir/ospray/$library && cd $srcDir/$library
     else
         local library='ospray-2.11.0.x86_64.linux'
+        rm -rf ospray/$library || true
         tar xvf $srcDir/ospray/$library.tar.gz && cd $srcDir/$library
     fi
     mkdir -p $installDir/Ospray
-    cp -r * $installDir/Ospray
+    cp -rP * $installDir/Ospray
 }
 
 glm() {
@@ -534,31 +635,32 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-#openssl
-#pythonVapor
-#zlib
-#libpng
-#assimp
-#szip
-#hdf5
-#netcdf
-#expat
-#udunits
-#freetype
-#jpeg
-#tiff
-#sqlite
-#proj
-#geotiff
-#if [ "$OS" == "Ubuntu" ] ; then
-#   xinerama
-#fi         
+openssl
+pythonVapor
+zlib
+libpng
+assimp
+szip
+hdf5
+netcdf
+expat
+udunits
+freetype
+jpeg
+tiff
+sqlite
+proj
+geotiff
+geotiff2
+if [ "$OS" == "Ubuntu" ] ; then
+   xinerama
+fi         
 ospray
-#glm
-#gte
-#images
-#qt
-#if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
-#   /Users/distiller/project/buildutils/OSX_PostBuild.py
-#fi         
-#renameAndCompress
+glm
+gte
+images
+qt
+if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
+   /Users/distiller/project/buildutils/OSX_PostBuild.py
+fi         
+renameAndCompress
