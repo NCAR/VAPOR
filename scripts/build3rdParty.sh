@@ -284,7 +284,7 @@ tiff() {
     local library='libtiff-v4.5.0'
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
-    mkdir $srcDir/$library/build && cd $_
+    cd $srcDir/$library/build
 
     cmake -DCMAKE_INSTALL_PREFIX=$installDir .. 
     make -j4 && make install
@@ -651,7 +651,7 @@ tiff
 sqlite
 proj
 geotiff
-geotiff2
+#geotiff2
 if [ "$OS" == "Ubuntu" ] ; then
    xinerama
 fi         
