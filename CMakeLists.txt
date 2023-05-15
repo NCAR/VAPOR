@@ -525,12 +525,6 @@ if (UNIX AND NOT APPLE)
                     DESTINATION ${INSTALL_LIB_DIR}
                     COMPONENT Dependencies
                 )
-                install (
-                    FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
-                    DESTINATION ${INSTALL_LIB_DIR}/platforms
-                    COMPONENT Dependencies
-                )
-
                 find_program(LSB_RELEASE_EXEC lsb_release)
                 execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
                     OUTPUT_VARIABLE LSB_RELEASE
@@ -545,6 +539,12 @@ if (UNIX AND NOT APPLE)
                         )
                 endif ()
             endif ()
+
+            install (
+                FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
+                DESTINATION ${INSTALL_LIB_DIR}/platforms
+                COMPONENT Dependencies
+            )
 
             file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinput.*)
             install (
