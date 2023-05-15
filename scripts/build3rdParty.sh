@@ -40,6 +40,7 @@ osxPrerequisites() {
     brew install libtool
     brew install automake
     brew install xz zlib openssl
+    brew install python@3.9
     brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
 }
 
@@ -381,6 +382,7 @@ proj() {
     make -j4 && make install
 }
 
+#CPPFLAGS=-I$/usr/local/VAPOR-Deps/current/include LDFLAGS=-L/usr/local/VAPOR-Deps/current/lib CC=gcc CXX=g++ ./configure -prefix=/usr/local/VAPOR-Deps/current --with-zlib=yes --with-jpeg=yes --with-proj=/usr/local/VAPOR-Deps/current --with-libtiff=/usr/local/VAPOR-Deps/current/lib64
 geotiff2() {
     cd $srcDir
     local library='libgeotiff-1.7.1'
