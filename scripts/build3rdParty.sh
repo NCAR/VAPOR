@@ -154,7 +154,11 @@ libpng() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz 
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
-    cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
+    cmake \
+    -DCMAKE_INSTALL_PREFIX=$installDir \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    ..
     make -j4 && make install
 }
 
@@ -171,6 +175,7 @@ assimp() {
     cmake \
     -DCMAKE_INSTALL_PREFIX=$installDir \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_LIBDIR=lib \
     -DCMAKE_CXX_FLAGS="-O3 -Wno-error=deprecated-declarations" \
     -DASSIMP_BUILD_TESTS=OFF \
     ..
@@ -229,6 +234,7 @@ netcdf() {
     cmake \
     -DCMAKE_INSTALL_PREFIX=$installDir \
     -DCMAKE_PREFIX_PATH="$installDir/HDF_Group/HDF5/$hdfVersion" \
+    -DCMAKE_INSTALL_LIBDIR=lib \
     -DENABLE_BYTERANGE=False \
     -DENABLE_DAP=False \
     -DCMAKE_BUILD_TYPE=Release ..
@@ -242,7 +248,11 @@ expat() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz 
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
-    cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
+    cmake \
+    -DCMAKE_INSTALL_PREFIX=$installDir \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    ..
     make -j4 && make install
 }
 
@@ -286,7 +296,10 @@ tiff() {
     tar xvf $srcDir/$library.tar.gz
     cd $srcDir/$library/build
 
-    cmake -DCMAKE_INSTALL_PREFIX=$installDir .. 
+    cmake \
+    -DCMAKE_INSTALL_PREFIX=$installDir \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    .. 
     make -j4 && make install
 }
 
@@ -661,6 +674,6 @@ gte
 images
 qt
 if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
-   /Users/distiller/project/buildutils/OSX_PostBuild.py
+   python /Users/distiller/project/buildutils/OSX_PostBuild.py
 fi         
 renameAndCompress
