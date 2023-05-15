@@ -676,6 +676,6 @@ gte
 images
 qt
 if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
-   python /Users/distiller/project/buildutils/OSX_PostBuild.py
+   $installDir/bin/python3.9.vapor /Users/distiller/project/buildutils/OSX_PostBuild.py
 fi         
 renameAndCompress
