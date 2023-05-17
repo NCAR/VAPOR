@@ -127,7 +127,7 @@ centosPrerequisites() {
         libcurl-devel \
         which \
         mesa-libGL-devel \
-        mesa-libGLU-devel
+        mesa-libGLU-devel \
         libxcb \
         libxcb-devel \
         xcb-util \
