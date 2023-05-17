@@ -128,7 +128,12 @@ centosPrerequisites() {
         which \
         mesa-libGL-devel \
         mesa-libGLU-devel
-	yum update -y
+        libxcb \
+        libxcb-devel \
+        xcb-util \
+        xcb-util-devel \
+        mesa-libGL-devel \
+        libxkbcommon-devel
 
     #shopt -s expand_aliases
     #alias cmake='cmake3'
@@ -610,7 +615,6 @@ qt() {
         args+=(-feature-freetype)
         #args+=(-fontconfig)
         args+=(-qt-freetype)
-        args+=(-xcb)
     fi
     #args+=(> qtConfig.txt)
 
