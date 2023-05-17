@@ -610,6 +610,7 @@ qt() {
         args+=(-feature-freetype)
         #args+=(-fontconfig)
         args+=(-qt-freetype)
+        args+=(-xcb)
     fi
     #args+=(> qtConfig.txt)
 
