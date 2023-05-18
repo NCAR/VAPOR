@@ -15,6 +15,7 @@ baseDir='/usr/local/VAPOR-Deps'
 srcDir="$baseDir/2023-Mar-src"
 installDir="$baseDir/current"
 archiveName="2023-Mar"
+osxMinVersion="10.9"
 
 while getopts o:b:i flag
 do
@@ -128,6 +129,7 @@ centosPrerequisites() {
         which \
         mesa-libGL-devel \
         mesa-libGLU-devel \
+        libXtst-devel \
         libxcb \
         libxcb-devel \
         xcb-util \
@@ -160,11 +162,17 @@ libpng() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz 
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
-    cmake \
-    -DCMAKE_INSTALL_PREFIX=$installDir \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    ..
+
+    args=(
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_INSTALL_LIBDIR=lib
+    )
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+    fi
+
+    cmake "${args[@]}" ..
     make -j4 && make install
 }
 
@@ -178,13 +186,19 @@ assimp() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
-    cmake \
-    -DCMAKE_INSTALL_PREFIX=$installDir \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    -DCMAKE_CXX_FLAGS="-O3 -Wno-error=deprecated-declarations" \
-    -DASSIMP_BUILD_TESTS=OFF \
-    ..
+
+    args=(
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_INSTALL_LIBDIR=lib
+        -DCMAKE_CXX_FLAGS="-O3 -Wno-error=deprecated-declarations"
+        -DASSIMP_BUILD_TESTS=OFF
+    )
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+    fi
+
+    cmake "${args[@]}" ..
     make -j4 && make install
 }
 
@@ -194,7 +208,16 @@ zlib() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
-    cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
+
+    args=(
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DCMAKE_BUILD_TYPE=Release 
+    )
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+    fi
+
+    cmake "${args[@]}" ..
     make -j4 && make install
 }
 
@@ -206,7 +229,15 @@ szip() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     cd $srcDir/$library
-    CC=$CC CXX=$CXX ./configure --prefix=$installDir
+    args=(
+        --prefix=$installDir
+    )
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(--with-macosx-version-min=$osxMinVersion)
+    fi
+    ../configure "${args[@]}"
+
+    #CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
 }
 
@@ -237,14 +268,19 @@ netcdf() {
     tar xvf $srcDir/$library.tar.gz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
 
-    cmake \
-    -DCMAKE_INSTALL_PREFIX=$installDir \
-    -DCMAKE_PREFIX_PATH="$installDir/HDF_Group/HDF5/$hdfVersion" \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    -DENABLE_BYTERANGE=False \
-    -DENABLE_DAP=False \
-    -DCMAKE_BUILD_TYPE=Release ..
+    args=(
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DCMAKE_PREFIX_PATH="$installDir/HDF_Group/HDF5/$hdfVersion"
+        -DCMAKE_INSTALL_LIBDIR=lib
+        -DENABLE_BYTERANGE=False
+        -DENABLE_DAP=False
+        -DCMAKE_BUILD_TYPE=Release
+    )
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+    fi
 
+    cmake "${args[@]}" ..
     make && make install
 }
 
@@ -254,11 +290,17 @@ expat() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz 
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
-    cmake \
-    -DCMAKE_INSTALL_PREFIX=$installDir \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    ..
+
+    args=(
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_INSTALL_LIBDIR=lib
+    )
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+    fi
+
+    cmake "${args[@]}"
     make -j4 && make install
 }
 
@@ -267,11 +309,17 @@ udunits() {
     local library='udunits-2.2.28'
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
+
+    args=(
+        --prefix=$installDir
+    )
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(--with-macosx-version-min=$osxMinVersion)
+    fi
     LDFLAGS=-L$installDir/lib/ \
     CPPFLAGS=-I$installDir/include/ \
     CC=$CC CXX=$CXX \
-    ./configure \
-    --prefix=$installDir
+    ../configure "${args[@]}"
     make -j4 && make install
 }
 
@@ -281,7 +329,14 @@ freetype() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz
     cd $srcDir/$library
-    CC=$CC CXX=$CXX ./configure --prefix=$installDir
+    args=(
+        --prefix=$installDir
+    )
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(--with-macosx-version-min=$osxMinVersion)
+    fi
+    CC=$CC CXX=$CXX \
+    ../configure "${args[@]}"
     make -j4 && make install
 }
 
@@ -291,7 +346,15 @@ jpeg() {
     rm -rf $srcDir/jpeg-9e || true
     tar xvf $srcDir/jpegsrc.v9e.tar.gz
     cd $srcDir/jpeg-9e
-    CC=$CC CXX=$CXX ./configure --prefix=$installDir
+
+    args=(
+        --prefix=$installDir
+    )
+    CC=$CC CXX=$CXX \
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(--with-macosx-version-min=$osxMinVersion)
+    fi
+    ./configure "${args[@]}"
     make -j4 && make install
 }
 
@@ -302,10 +365,15 @@ tiff() {
     tar xvf $srcDir/$library.tar.gz
     cd $srcDir/$library/build
 
-    cmake \
-    -DCMAKE_INSTALL_PREFIX=$installDir \
-    -DCMAKE_INSTALL_LIBDIR=lib \
-    .. 
+    args=(
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DCMAKE_INSTALL_LIBDIR=lib
+    )
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+    fi
+
+    cmake "${args[@]}" ..
     make -j4 && make install
 }
 
@@ -324,12 +392,17 @@ oldTiff() {
     autoheader
     automake --force-missing --add-missing
     autoconf
+    args=(
+        --prefix=$installDir
+        --disable-dap
+    )
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(--with-macosx-version-min=$osxMinVersion)
+    fi
     LDFLAGS=-L$installDir/lib \
     CPPFLAGS=-I$installDir/include \
     CC=$CC CXX=$CXX \
-    ./configure \
-    --prefix=$installDir \
-    --disable-dap
+    ./configure "${args[@]}"
     make -j4 && make install
 }
 
@@ -339,7 +412,15 @@ sqlite() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     cd $srcDir/$library
-    CC=$CC CXX=$CXX ./configure --prefix=$installDir
+    
+    args=(
+        --prefix=$installDir
+    }
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(--with-macosx-version-min=$osxMinVersion)
+    fi
+    CC=$CC CXX=$CXX \
+    ./configure "${args[@]}"
     make -j4 && make install
 }
 
@@ -370,6 +451,10 @@ proj() {
     )
     if [ "$OS" == "M1" ]; then
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+    fi
+    if [ "$OS" == "OSX" ]; then
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
     cmake "${args[@]}" ..
 
@@ -409,6 +494,7 @@ geotiff2() {
     if [ "$OS" == "M1" ] || [ "$OS" == "OSX" ]; then
         args+=(-DCMAKE_SKIP_RPATH=ON)
         args+=(-DCMAKE_SKIP_INSTALL_RPATH=ON)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
     #CPPFLAGS=-I$installDir/include \
     #LDFLAGS="-L$installDir/lib -Wl" \
@@ -432,11 +518,10 @@ geotiff() {
         --with-proj=$installDir
         --with-libtiff=$installDir
     )
-    #if [ "$OS" == "M1" ]; then
+    if [ "$OS" == "M1" ] || [ "$OS" == "OSX" ]; then
     #    args+=(--build=arm64)
-    #fi
-
-    #echo "${args[@]}"
+        args+=(--with-macosx-version-min=$osxMinVersion)
+    fi
 
     CPPFLAGS=-I$installDir/include \
     LDFLAGS=-L$installDir/lib \
@@ -479,8 +564,56 @@ openssl() {
     local library='openssl-1.1.1t'
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
-    ./config shared --prefix=$installDir --openssldir=$installDir
+
+    args=(
+        --prefix=$installDir
+        --openssldir=$installDir
+    )
+    if [ "$OS" = "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(--with-macosx-version-min=$osxMinVersion)
+    fi
+
+    ./config shared "${args[@]}"
     make -j4 && make install
+}
+
+pythonVapor2() {
+
+    cd $srcDir
+    local library='cpython-3.9.16'
+    rm -rf $library || true
+    tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
+
+    args=(
+        --prefix=$installDir
+        --enable-shared
+        --with-ensurepip=install
+        --with-suffix=.vapor
+        --enable-optimizations
+    )
+    if [ "$OS" = "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(--with-openssl=$(brew --prefix openssl@1.1))
+        args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
+        args+=(--with-tcltk-includes="$(pkg-config --cflags tcl tk)")
+        args+=(--with-macosx-version-min=$osxMinVersion)
+        CC=$CC \
+        CXX=$CXX \
+        LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
+        CPPFLAGS="-I$installDir/include -I$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
+        ./configure "${args[@]}"
+    else
+        args+=(--with-openssl=$installDir)
+        CC=$CC \
+        CXX=$CXX \
+        CPPFLAGS=-I$installDir/include \
+        LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
+        ./configure "${args[@]}"
+    fi
+
+    make -j4 && make install
+
+    $installDir/bin/python3.9.vapor -m pip install --upgrade pip
+    $installDir/bin/pip3 install --upgrade --target $installDir/lib/python3.9/site-packages numpy scipy matplotlib
 }
 
 pythonVapor() {
@@ -568,10 +701,6 @@ glm() {
     cd $srcDir
     local library='glm-0.9.9.8'
     unzip $srcDir/$library.zip && cp -r $srcDir/glm/glm $installDir/include
-    #unzip $library.zip && mkdir -p glm/build
-    #cd glm/build
-    #cmake -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release ..
-    #make -j4 && make install
 }
 
 gte() {
@@ -615,6 +744,10 @@ qt() {
         args+=(-feature-freetype)
         #args+=(-fontconfig)
         args+=(-qt-freetype)
+        args+=(-opengl desktop)
+    fi
+    if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
+        args+=(--with-macosx-version-min=$osxMinVersion)
     fi
     #args+=(> qtConfig.txt)
 
@@ -656,7 +789,8 @@ elif [ "$OS" == "Windows" ]; then
 fi
 
 openssl
-pythonVapor
+#pythonVapor
+pythonVapor2
 zlib
 libpng
 assimp
@@ -681,6 +815,6 @@ gte
 images
 qt
 if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
-   $installDir/bin/python3.9.vapor /Users/distiller/project/buildutils/OSX_PostBuild.py
+   python3 /Users/distiller/project/buildutils/OSX_PostBuild.py
 fi         
 renameAndCompress

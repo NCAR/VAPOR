@@ -31,6 +31,8 @@ def modifyPath( filename, changeFileID):
     output = subprocess.check_output("otool -L " + filename, shell=True)
     output = output.decode("utf-8")
 
+    print(output)
+
     for line in output.splitlines():  
 
         # remove indentations and colons
@@ -55,14 +57,19 @@ def modifyPath( filename, changeFileID):
         #
         library = line.split('/')[-1]
 
-        if ( location == thirdParty_dir ):
+        if ( location == lib_dir ):
             #if ( (changeFileID == True) and "dylib" in filename ):
             if ( changeFileID == True ):
+                print("goo")
                 print(          changeLibraryIDCommand + "@rpath/" + library + " " + filename )
                 subprocess.run( changeLibraryIDCommand + "@rpath/" + library + " " + filename, shell=True )
             if ( changeFileID == False):
+                print("goo2")
                 print(          changeDependencyCommand + line + " @rpath/" + library + " " + filename )
                 subprocess.run( changeDependencyCommand + line + " @rpath/" + library + " " + filename, shell=True )
+            print("goo3")
+        else:
+            print("bar")
 
 # traverse root directory, and list directories as dirs and files as files
 def fixLibsInDir( directory, changeFileID ):
