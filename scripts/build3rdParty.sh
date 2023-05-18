@@ -235,7 +235,7 @@ szip() {
     if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
         args+=(--with-macosx-version-min=$osxMinVersion)
     fi
-    ../configure "${args[@]}"
+    ./configure "${args[@]}"
 
     #CC=$CC CXX=$CXX ./configure --prefix=$installDir
     make -j4 && make install
@@ -569,9 +569,9 @@ openssl() {
         --prefix=$installDir
         --openssldir=$installDir
     )
-    if [ "$OS" = "OSX" ] || [ "$OS" = "M1" ]; then
-        args+=(--with-macosx-version-min=$osxMinVersion)
-    fi
+    #if [ "$OS" = "OSX" ] || [ "$OS" = "M1" ]; then
+    #    args+=(--with-macosx-version-min=$osxMinVersion)
+    #fi
 
     ./config shared "${args[@]}"
     make -j4 && make install
