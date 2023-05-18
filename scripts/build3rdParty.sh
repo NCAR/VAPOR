@@ -415,7 +415,7 @@ sqlite() {
     
     args=(
         --prefix=$installDir
-    }
+    )
     if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
         args+=(--with-macosx-version-min=$osxMinVersion)
     fi
