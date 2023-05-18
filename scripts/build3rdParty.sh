@@ -350,10 +350,10 @@ jpeg() {
     args=(
         --prefix=$installDir
     )
-    CC=$CC CXX=$CXX \
     if [ "$OS" == "OSX" ] || [ "$OS" = "M1" ]; then
         args+=(--with-macosx-version-min=$osxMinVersion)
     fi
+    CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
     make -j4 && make install
 }
