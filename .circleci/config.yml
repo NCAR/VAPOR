@@ -1114,7 +1114,7 @@ jobs:
 
   build_osx_libs:
     macos:
-      xcode: "13.4.1"
+      xcode: "11.7.0"
 
     resource_class: macos.x86.medium.gen2
 
@@ -1242,8 +1242,8 @@ workflows:
       #- build_centos7_installer
       - build_ubuntu20_libs
       - build_centos7_libs
-      #- build_osx_libs
-      #- build_M1_libs
+      - build_osx_libs
+      - build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
