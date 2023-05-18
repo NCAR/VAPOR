@@ -538,6 +538,8 @@ ospray() {
     cd $srcDir
     if [ "$OS" == "M1" ]; then
         cd $srcDir/ospray/osprayM1
+        mkdir -p $installDir/Ospray
+        cp -rP * $installDir/Ospray
         # The following source build results with the following error on CircleCI:
         #   Error executing ISPC executable
         #   Bad CPU type in executable
@@ -555,13 +557,17 @@ ospray() {
         local library='ospray-2.11.0.x86_64.macosx'
         rm -rf ospray/$library || true
         unzip $srcDir/ospray/$library && cd $srcDir/$library
+        mkdir -p $installDir/Ospray
+        cp -r * $installDir/Ospray
     else
         local library='ospray-2.11.0.x86_64.linux'
         rm -rf ospray/$library || true
         tar xvf $srcDir/ospray/$library.tar.gz && cd $srcDir/$library
+        mkdir -p $installDir/Ospray
+        cp -rP * $installDir/Ospray
     fi
-    mkdir -p $installDir/Ospray
-    cp -rP * $installDir/Ospray
+    #mkdir -p $installDir/Ospray
+    #cp -rP * $installDir/Ospray
 }
 
 glm() {
