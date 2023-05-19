@@ -618,6 +618,7 @@ qt() {
         -release
         -nomake examples
         -nomake tests
+        -opengl desktop
     )
     if [ "$OS" == "Ubuntu" ] || [ "$OS" = "CentOS" ]; then
         args+=(-feature-freetype)
