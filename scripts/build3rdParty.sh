@@ -184,7 +184,6 @@ assimp() {
     -DCMAKE_INSTALL_LIBDIR=lib \
     -DCMAKE_CXX_FLAGS="-O3 -Wno-error=deprecated-declarations" \
     -DASSIMP_BUILD_TESTS=OFF \
-    -D-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 \
     ..
     make -j4 && make install
 }
