@@ -168,8 +168,10 @@ libpng() {
     make -j4 && make install
 }
 
+    #-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 \
 assimp() {
     cd $srcDir
+    #if [ "$OS" == "CentOS" ]; then
     if [ "$OS" == "CentOS" ] || [ "$OS" == "OSX" ]; then
         local library='assimp-5.1.6'
     else
@@ -689,4 +691,4 @@ assimp
 #if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
 #   $installDir/bin/python3.9.vapor /Users/distiller/project/buildutils/OSX_PostBuild.py
 #fi         
-#renameAndCompress
+renameAndCompress
