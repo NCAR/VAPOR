@@ -663,32 +663,32 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-#openssl
-#pythonVapor
-#zlib
-#libpng
+openssl
+pythonVapor
+zlib
+libpng
 assimp
-#szip
-#hdf5
-#netcdf
-#expat
-#udunits
-#freetype
-#jpeg
-#tiff
-#sqlite
-#proj
-#geotiff
-##geotiff2
-#if [ "$OS" == "Ubuntu" ] ; then
-#   xinerama
-#fi         
-#ospray
-#glm
-#gte
-#images
-#qt
-#if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
-#   $installDir/bin/python3.9.vapor /Users/distiller/project/buildutils/OSX_PostBuild.py
-#fi         
+szip
+hdf5
+netcdf
+expat
+udunits
+freetype
+jpeg
+tiff
+sqlite
+proj
+geotiff
+#geotiff2
+if [ "$OS" == "Ubuntu" ] ; then
+   xinerama
+fi         
+ospray
+glm
+gte
+images
+qt
+if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
+   python3 /Users/distiller/project/buildutils/OSX_PostBuild.py
+fi         
 renameAndCompress
