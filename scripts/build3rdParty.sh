@@ -688,7 +688,7 @@ ospray
 glm
 gte
 images
-qt
+#qt
 if [ "$OS" == "OSX" ] || [ "$OS" == "M1" ]; then
    python3 /Users/distiller/project/buildutils/OSX_PostBuild.py
 fi         

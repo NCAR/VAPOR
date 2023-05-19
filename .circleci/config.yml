@@ -1138,7 +1138,7 @@ jobs:
 
       - run:
           name: build libraries
-          no_output_timeout: 30m
+          no_output_timeout: 120m
           command: |
             chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
             /Users/distiller/project/scripts/build3rdParty.sh -o OSX
@@ -1244,10 +1244,10 @@ workflows:
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      - build_ubuntu20_libs
+      #- build_ubuntu20_libs
       - build_centos7_libs
-      - build_osx_libs
-      - build_M1_libs
+      #- build_osx_libs
+      #- build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
