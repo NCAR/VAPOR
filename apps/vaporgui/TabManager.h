@@ -29,9 +29,9 @@
 #include <ViewpointTab.h>
 #include <vapor/GUIStateParams.h>
 #include <vapor/NavigationUtils.h>
-class RenderHolder;
+#include <QComboBox>
 class EventRouter;
-class RenderEventRouter;
+class RenderersPanel;
 
 //! \class TabManager
 //! \ingroup Public_GUI
@@ -75,21 +75,6 @@ class TabManager : public QTabWidget {
 
 public:
     TabManager(QWidget *, VAPoR::ControlExec *ce);
-
-    void SetActiveRenderer(string activeViz, string renderClass, string renderInst);
-
-    //! In order to display the parameters for the selected renderer,
-    //! QWidget::show() is invoked for the selected EventRouter, and
-    //! QWidget::hide() is invoked for all other renderer EventRouters.
-    //! This is performed in the RenderHolder class.
-    //! \param[in] tag is the tag associated with the renderer.
-    //
-    void ShowRenderWidget(string tag);
-
-    //! All the render EventRouter widgets are hidden until one
-    //! is selected, using this method.
-    //
-    void HideRenderWidgets();
 
     //! Update from current state
     //
@@ -166,17 +151,13 @@ private slots:
 
     void SetActiveViz(const QString &vizNameQ);
 
-    void _setActive(string activeViz, string renderClass, string renderInst);
-
-    void _newRenderer(string activeViz, string renderClass, string renderInst);
-
 private:
     static const string _renderersTabName;
     static const string _navigationTabName;
     static const string _settingsTabName;
 
     VAPoR::ControlExec *_controlExec;
-    RenderHolder *      _renderHolder;
+    RenderersPanel *_renderersPanel;
 
     // ordered list of all top level tabs
     //
@@ -214,8 +195,6 @@ private:
     virtual void keyPressEvent(QKeyEvent *e) { e->accept(); }
 
     EventRouter *_getEventRouter(string erType) const;
-
-    RenderEventRouter *_getRenderEventRouter(string winName, string renderType, string instName) const;
 
     // Find the position of the specified widget in subTab, or -1 if it isn't there.
     //
@@ -264,8 +243,6 @@ private:
     void _addSubTabWidget(QWidget *evWid, string Tag, string tagType);
 
     void _updateRouters();
-
-    void _initRenderHolder();
 };
 
 #endif    // TABMANAGER_H

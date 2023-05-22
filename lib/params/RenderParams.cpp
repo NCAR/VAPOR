@@ -67,6 +67,7 @@ const string RenderParams::SlicePlaneNormalYTag = "SlicePlaneNormalYTag";
 const string RenderParams::SlicePlaneNormalZTag = "SlicePlaneNormalZTag";
 const string RenderParams::SlicePlaneOrientationModeTag = "SlicePlaneOrientationModeTag";
 const string RenderParams::LightingEnabledTag = "LightingEnabled";
+const string RenderParams::UserNameTag = "UserNameTag";
 
 #define REQUIRED_SAMPLE_SIZE 1000000
 

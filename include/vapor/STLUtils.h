@@ -4,12 +4,19 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 namespace STLUtils {
 
 template<typename T> bool Contains(const std::vector<T> &toSearch, const T &object) { return std::find(toSearch.cbegin(), toSearch.cend(), object) != toSearch.cend(); }
 
 template<typename T> void AppendTo(std::vector<T> &a, const std::vector<T> &b) { a.insert(a.end(), b.begin(), b.end()); }
+
+template<typename T> vector<T> Filter(const std::vector<T> &v, std::function<bool(const T&)> f) {
+    vector<T> v2;
+    std::copy_if(v.begin(), v.end(), std::back_inserter(v2), f);
+    return v2;
+}
 
 COMMON_API bool Contains(const std::string &toSearch, const std::string &query);
 COMMON_API bool ContainsIgnoreCase(const std::string &toSearch, const std::string &query);

@@ -42,10 +42,14 @@ public:
     //! Get active renderer class and instance name for a visualizer
     //
     void GetActiveRenderer(string vizWin, string &renderType, string &renderInst) const;
+    string GetActiveRendererInst() const;
 
     //! Get active renderer class and instance name for a visualizer
     //
     void SetActiveRenderer(string vizWin, string renderType, string renderInst);
+
+    string GetActiveDataset() const ;
+    void SetActiveDataset(string name);
 
     //! method identifies the current session file
     //! \retval session file path

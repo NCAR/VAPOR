@@ -283,6 +283,23 @@ set (SRCS
     PTimestepSliderEdit.h
     PMetadataClasses.cpp
     PMetadataClasses.h
+    VVisibilityCheckbox.cpp
+    VVisibilityCheckbox.h
+    RendererList.cpp
+    RendererList.h
+    VRouter.cpp
+    VRouter.h
+    RenderersPanel.cpp
+    RenderersPanel.h
+    RendererInspector.cpp
+    RendererInspector.h
+    DatasetInspector.cpp
+    DatasetInspector.h
+    VScrollArea.cpp
+    VScrollArea.h
+    VScrollGroup.h
+    NewRendererDialogManager.cpp
+    NewRendererDialogManager.h
 
 	# Need to include all files that request .ui files
 	Statistics.h
@@ -326,14 +343,12 @@ set (SRCS
 )
 
 set (UIS 
-	LeftPanel.ui
 	NewRendererDialog.ui
 	TransformTableGUI.ui
 	statsWindow.ui
 	plotWindow.ui
     PythonVariablesGUI.ui
 	FidelityWidgetGUI.ui
-	errMsg.ui
 	
 	QSliderEdit.ui
 	QRange.ui
@@ -353,7 +368,11 @@ set (ASSIMP_LIB assimp)
 set (TIFF_LIB tiff)
 
 if (APPLE)
-	set (SRCS ${SRCS} core_profile_attributes.mm)
+	set (SRCS ${SRCS}
+        core_profile_attributes.mm
+        mac_darkmode.mm
+        mac_darkmode.h
+        )
 	set (MACOSX_BUNDLE_GUI_IDENTIFIER Vapor3)
 	set (MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}})
 	set (MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
