@@ -1116,8 +1116,8 @@ jobs:
     macos:
       #xcode: "13.4.1"   Does not support osx 12
       #xcode: "10.15.5"  Assimp does not compile https://app.circleci.com/pipelines/github/NCAR/VAPOR/6684/workflows/e00c9620-d6e0-4d4d-ad5a-6c4db4ff9acc/jobs/16250
-      #xcode: "12.5.1"
-      xcode: "11.7.0"
+      xcode: "12.5.1"
+      #xcode: "11.7.0"
 
     resource_class: macos.x86.medium.gen2
 
