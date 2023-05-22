@@ -496,6 +496,7 @@ pythonVapor() {
         CXX=$CXX \
         LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
         CPPFLAGS="-I$installDir/include -I$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
+        MACOSX_DEPLOYMENT_TARGET=10.15 \
         ./configure \
         --prefix=$installDir \
         --enable-shared \
