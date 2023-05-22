@@ -624,6 +624,8 @@ qt() {
         args+=(-feature-freetype)
         #args+=(-fontconfig)
         args+=(-qt-freetype)
+    elif [ "$OS" == "OSX" ]; then
+        args+=(QMAKE_MACOSX_DEPLOYMENT_TARGET=10.9)
     fi
     #args+=(> qtConfig.txt)
 
