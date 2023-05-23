@@ -324,7 +324,7 @@ udunits() {
     LDFLAGS=-L$installDir/lib/ \
     CPPFLAGS=-I$installDir/include/ \
     CC=$CC CXX=$CXX \
-    ../configure "${args[@]}"
+    ./configure "${args[@]}"
     make -j4 && make install
 }
 
@@ -341,7 +341,7 @@ freetype() {
     #    args+=(--with-macosx-version-min=$osxMinVersion)
     #fi
     CC=$CC CXX=$CXX \
-    ../configure "${args[@]}"
+    ./configure "${args[@]}"
     make -j4 && make install
 }
 
