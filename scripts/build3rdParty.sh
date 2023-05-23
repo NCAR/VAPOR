@@ -372,6 +372,8 @@ proj() {
     )
     if [ "$OS" == "M1" ]; then
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+    elif [ "$OS" == "OSX" ]; then
+        args+=(QMAKE_MACOSX_DEPLOYMENT_TARGET=10.15)
     fi
     cmake "${args[@]}" ..
 
