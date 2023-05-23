@@ -38,6 +38,7 @@ macOSx86Prerequisites() {
 }
 
 macOSPrerequisites() {
+    export MACOSX_DEPLOYMENT_TARGET=$macOSMinVersion
     CC='clang'
     CXX='clang++'
     brew install cmake
@@ -173,7 +174,7 @@ libpng() {
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_INSTALL_LIBDIR=lib
     )
-    if [ "$OS" == "macOSx86" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -199,7 +200,7 @@ assimp() {
         -DCMAKE_CXX_FLAGS="-O3 -Wno-error=deprecated-declarations"
         -DASSIMP_BUILD_TESTS=OFF
     )
-    if [ "$OS" == "macOSx86" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -218,7 +219,7 @@ zlib() {
         -DCMAKE_INSTALL_PREFIX=$installDir
         -DCMAKE_BUILD_TYPE=Release 
     )
-    if [ "$OS" == "macOSx86" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -281,7 +282,7 @@ netcdf() {
         -DENABLE_DAP=False
         -DCMAKE_BUILD_TYPE=Release
     )
-    if [ "$OS" == "macOSx86" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -301,7 +302,7 @@ expat() {
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_INSTALL_LIBDIR=lib
     )
-    if [ "$OS" == "macOSx86" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -374,7 +375,7 @@ tiff() {
         -DCMAKE_INSTALL_PREFIX=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
     )
-    if [ "$OS" == "macOSx86" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -456,7 +457,7 @@ proj() {
     )
     if [ "$OS" == "M1" ]; then
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
-        #args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
     if [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
@@ -494,11 +495,9 @@ geotiff2() {
         -DWITH_ZLIB=ON
     )
     if [ "$OS" == "M1" ]; then
-        args+=(-DCMAKE_SKIP_RPATH=ON)
-        args+=(-DCMAKE_SKIP_INSTALL_RPATH=ON)
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
     fi
-    if [ "$OS" == "macOSx86" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(-DCMAKE_SKIP_RPATH=ON)
         args+=(-DCMAKE_SKIP_INSTALL_RPATH=ON)
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
