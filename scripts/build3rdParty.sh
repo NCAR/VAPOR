@@ -32,6 +32,11 @@ if [ "$OS" = "CentOS" ]; then
     alias
 fi
 
+maxOSx86Prerequisites() {
+    export MACOSX_DEPLOYMENT_TARGET=$macOSMinVersion
+    macOSPrerequisites
+}
+
 macOSPrerequisites() {
     CC='clang'
     CXX='clang++'
@@ -43,7 +48,6 @@ macOSPrerequisites() {
     brew install xz zlib openssl
     brew install python@3.9
     brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
-    export MACOSX_DEPLOYMENT_TARGET=$macOSMinVersion
 }
 
 ubuntuPrerequisites() {
@@ -169,7 +173,7 @@ libpng() {
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_INSTALL_LIBDIR=lib
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -195,7 +199,7 @@ assimp() {
         -DCMAKE_CXX_FLAGS="-O3 -Wno-error=deprecated-declarations"
         -DASSIMP_BUILD_TESTS=OFF
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -214,7 +218,7 @@ zlib() {
         -DCMAKE_INSTALL_PREFIX=$installDir
         -DCMAKE_BUILD_TYPE=Release 
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -277,7 +281,7 @@ netcdf() {
         -DENABLE_DAP=False
         -DCMAKE_BUILD_TYPE=Release
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -297,11 +301,11 @@ expat() {
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_INSTALL_LIBDIR=lib
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
-    cmake "${args[@]}"
+    cmake "${args[@]}" ..
     make -j4 && make install
 }
 
@@ -370,7 +374,7 @@ tiff() {
         -DCMAKE_INSTALL_PREFIX=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
 
@@ -452,7 +456,7 @@ proj() {
     )
     if [ "$OS" == "M1" ]; then
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        #args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
     fi
     if [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
@@ -490,9 +494,11 @@ geotiff2() {
         -DWITH_ZLIB=ON
     )
     if [ "$OS" == "M1" ]; then
+        args+=(-DCMAKE_SKIP_RPATH=ON)
+        args+=(-DCMAKE_SKIP_INSTALL_RPATH=ON)
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
     fi
-    if [ "$OS" == "M1" ] || [ "$OS" == "macOSx86" ]; then
+    if [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_SKIP_RPATH=ON)
         args+=(-DCMAKE_SKIP_INSTALL_RPATH=ON)
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
@@ -779,7 +785,9 @@ renameAndCompress() {
     #mv $bundle.tar.xz /usr/local/VAPOR-Deps
 }
 
-if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
+if [ "$OS" == "macOSx86" ]; then
+    macOSx86Prerequisites
+elif [ "$OS" == "M1" ]; then
     macOSPrerequisites
 elif [ "$OS" == "Ubuntu" ]; then
     ubuntuPrerequisites
