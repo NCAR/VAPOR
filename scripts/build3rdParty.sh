@@ -32,7 +32,7 @@ if [ "$OS" = "CentOS" ]; then
     alias
 fi
 
-maxOSx86Prerequisites() {
+macOSx86Prerequisites() {
     export MACOSX_DEPLOYMENT_TARGET=$macOSMinVersion
     macOSPrerequisites
 }
