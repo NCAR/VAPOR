@@ -15,7 +15,7 @@ baseDir='/usr/local/VAPOR-Deps'
 srcDir="$baseDir/2023-Mar-src"
 installDir="$baseDir/current"
 archiveName="2023-Mar"
-macOSMinVersion="10.9"
+macOSMinVersion="10.15"
 
 while getopts o:b:i flag
 do
