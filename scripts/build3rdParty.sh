@@ -596,8 +596,10 @@ pythonVapor2() {
         --enable-shared
         --with-ensurepip=install
         --with-suffix=.vapor
-        --enable-optimizations
     )
+    if [ "$OS" != "CentOS" ]; then
+        args+=(--enable-optimizations)
+    fi
     if [ "$OS" = "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(--with-openssl=$(brew --prefix openssl@1.1))
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
