@@ -822,7 +822,7 @@ geotiff
 #gte
 #images
 #qt
-#if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
-#   python3 /Users/distiller/project/buildutils/OSX_PostBuild.py
-#fi         
-#renameAndCompress
+if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
+   python3 /Users/distiller/project/buildutils/OSX_PostBuild.py
+fi         
+renameAndCompress
