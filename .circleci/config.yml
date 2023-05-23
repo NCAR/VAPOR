@@ -1137,7 +1137,7 @@ jobs:
           name: build libraries
           command: |
             chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
-            /Users/distiller/project/scripts/build3rdParty.sh -o OSX
+            /Users/distiller/project/scripts/build3rdParty.sh -o macOSx86
 
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Mar-OSX.tar.xz
