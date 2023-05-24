@@ -42,7 +42,7 @@ macOSPrerequisites() {
     CC='clang'
     CXX='clang++'
     brew install cmake
-    brew install jpeg
+    #brew install jpeg
     brew install autoconf
     brew install atool
     brew install libtool
