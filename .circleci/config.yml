@@ -212,6 +212,8 @@ jobs:
   build_M1_installer:
     macos:
       xcode: "13.4.1"
+
+    resource_class: macos.m1.large.gen1
     steps:
       # Saving and restoring cache takes forever, so we must repeat build_osx_steps verbatim
       #- restore_cache:
@@ -1246,7 +1248,7 @@ workflows:
       #- build_ubuntu20_libs
       #- build_centos7_libs
       #- build_osx_libs
-      - build_M1_libs
+      #- build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
