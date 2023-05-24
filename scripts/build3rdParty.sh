@@ -354,12 +354,14 @@ jpeg() {
     tar xvf $srcDir/jpegsrc.v9e.tar.gz
     cd $srcDir/jpeg-9e
 
+    echo target $MACOSX_DEPLOYMENT_TARGET
+
     args=(
         --prefix=$installDir
     )
-    #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$macOSMinVersion)
-    #fi
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+        args+=(--host=arm-apple-darwin)
+    fi
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
     make -j4 && make install
@@ -374,8 +376,10 @@ tiff() {
     cd $srcDir/$library/build
 
     args=(
-        -DJPEG_INCLUDE_DIR=$installDir/include
-        -DJPEG_LIB_DIR=$installDir/lib
+        -DCMAKE_LIBRARY_PATH=$installDir/lib
+        -DCMAKE_INCLUDE_PATH=$installDir/include
+        #-DJPEG_INCLUDE_DIR=$installDir/include
+        #-DJPEG_LIBRARY_RELEASE=$installDir/lib/
         -DCMAKE_INSTALL_PREFIX=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
     )
@@ -459,6 +463,8 @@ proj() {
         -DCMAKE_INSTALL_LIBDIR=lib
         -DCMAKE_INSTALL_PREFIX=$installDir
         -DPROJ_COMPILER_NAME=$CXX
+        -DCMAKE_LIBRARY_PATH=$installDir/lib
+        -DCMAKE_INCLUDE_PATH=$installDir/include
     )
     if [ "$OS" == "M1" ]; then
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
@@ -600,8 +606,11 @@ pythonVapor2() {
         --enable-shared
         --with-ensurepip=install
         --with-suffix=.vapor
-        --enable-optimizations
     )
+    if [ "$OS" != "CentOS" ]; then
+        args+=(--enable-optimizations)
+    fi
+
     if [ "$OS" = "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(--with-openssl=$(brew --prefix openssl@1.1))
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
@@ -801,33 +810,34 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-#openssl
-##pythonVapor
-#pythonVapor2
-#zlib
-#libpng
-#assimp
-#szip
-#hdf5
-#netcdf
-#expat
-#udunits
-#freetype
+openssl
+#pythonVapor
+pythonVapor2
+zlib
+libpng
+assimp
+szip
+hdf5
+netcdf
+expat
+udunits
+freetype
 jpeg
 tiff
-#sqlite
-#proj
-#geotiff
+sqlite
+proj
+geotiff
 ##geotiff2
-#if [ "$OS" == "Ubuntu" ] ; then
-#   xinerama
-#fi         
-#ospray
-#glm
-#gte
-#images
-#qt
+if [ "$OS" == "Ubuntu" ] ; then
+   xinerama
+fi         
+ospray
+glm
+gte
+images
+qt
 if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
    python3 /Users/distiller/project/buildutils/OSX_PostBuild.py
+   #python3 /Users/vapor/VAPOR/buildutils/OSX_PostBuild.py
 fi         
 renameAndCompress

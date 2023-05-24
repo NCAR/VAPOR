@@ -68,8 +68,8 @@ def modifyPath( filename, changeFileID):
                 print(          changeDependencyCommand + line + " @rpath/" + library + " " + filename )
                 subprocess.run( changeDependencyCommand + line + " @rpath/" + library + " " + filename, shell=True )
             print("goo3")
-        else:
-            print("bar")
+        #else:
+        #    print("bar")
 
 # traverse root directory, and list directories as dirs and files as files
 def fixLibsInDir( directory, changeFileID ):
