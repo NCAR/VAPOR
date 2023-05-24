@@ -41,14 +41,14 @@ macOSPrerequisites() {
     export MACOSX_DEPLOYMENT_TARGET=$macOSMinVersion
     CC='clang'
     CXX='clang++'
-    brew install cmake
-    brew install autoconf
-    brew install atool
-    brew install libtool
-    brew install automake
-    brew install xz zlib openssl
-    brew install python@3.9
-    brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
+#    brew install cmake
+#    brew install autoconf
+#    brew install atool
+#    brew install libtool
+#    brew install automake
+#    brew install xz zlib openssl
+#    brew install python@3.9
+#    brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
 }
 
 ubuntuPrerequisites() {
@@ -175,7 +175,7 @@ libpng() {
         -DCMAKE_INSTALL_LIBDIR=lib
     )
     if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
 
     cmake "${args[@]}" ..
@@ -201,7 +201,7 @@ assimp() {
         -DASSIMP_BUILD_TESTS=OFF
     )
     if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
 
     cmake "${args[@]}" ..
@@ -220,7 +220,7 @@ zlib() {
         -DCMAKE_BUILD_TYPE=Release 
     )
     if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
 
     cmake "${args[@]}" ..
@@ -239,7 +239,7 @@ szip() {
         --prefix=$installDir
     )
     #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$osxMinVersion)
+    #    args+=(--with-macosx-version-min=$macOSMinVersion)
     #fi
     ./configure "${args[@]}"
 
@@ -283,7 +283,7 @@ netcdf() {
         -DCMAKE_BUILD_TYPE=Release
     )
     if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
 
     cmake "${args[@]}" ..
@@ -303,7 +303,7 @@ expat() {
         -DCMAKE_INSTALL_LIBDIR=lib
     )
     if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
 
     cmake "${args[@]}" ..
@@ -320,7 +320,7 @@ udunits() {
         --prefix=$installDir
     )
     #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$osxMinVersion)
+    #    args+=(--with-macosx-version-min=$macOSMinVersion)
     #fi
     LDFLAGS=-L$installDir/lib/ \
     CPPFLAGS=-I$installDir/include/ \
@@ -339,7 +339,7 @@ freetype() {
         --prefix=$installDir
     )
     #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$osxMinVersion)
+    #    args+=(--with-macosx-version-min=$macOSMinVersion)
     #fi
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
@@ -357,7 +357,7 @@ jpeg() {
         --prefix=$installDir
     )
     #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$osxMinVersion)
+    #    args+=(--with-macosx-version-min=$macOSMinVersion)
     #fi
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
@@ -375,12 +375,16 @@ tiff() {
         -DCMAKE_INSTALL_PREFIX=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
     )
+    echo "$OS"
+    echo $MACOSX_DEPLOYMENT_TARGET
     if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        echo "adding DCMAKE_OSX_DEPLOYMENT_TARGET"
+        args+=("-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion")
     fi
 
-    cmake "${args[@]}" ..
-    make -j4 && make install
+    echo "${args[@]}" ..
+    #cmake "${args[@]}" ..
+    #make -j4 && make install
 }
 
 oldTiff() {
@@ -403,7 +407,7 @@ oldTiff() {
         --disable-dap
     )
     #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        #args+=(--with-macosx-version-min=$osxMinVersion)
+        #args+=(--with-macosx-version-min=$macOSMinVersion)
     #fi
     LDFLAGS=-L$installDir/lib \
     CPPFLAGS=-I$installDir/include \
@@ -423,7 +427,7 @@ sqlite() {
         --prefix=$installDir
     )
     #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$osxMinVersion)
+    #    args+=(--with-macosx-version-min=$macOSMinVersion)
     #fi
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
@@ -457,10 +461,10 @@ proj() {
     )
     if [ "$OS" == "M1" ]; then
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
     if [ "$OS" == "macOSx86" ]; then
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
     cmake "${args[@]}" ..
 
@@ -500,7 +504,7 @@ geotiff2() {
     if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(-DCMAKE_SKIP_RPATH=ON)
         args+=(-DCMAKE_SKIP_INSTALL_RPATH=ON)
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$osxMinVersion)
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
     #CPPFLAGS=-I$installDir/include \
     #LDFLAGS="-L$installDir/lib -Wl" \
@@ -526,7 +530,7 @@ geotiff() {
     )
     #if [ "$OS" == "M1" ] || [ "$OS" == "macOSx86" ]; then
     #    args+=(--build=arm64)
-    #    args+=(--with-macosx-version-min=$osxMinVersion)
+    #    args+=(--with-macosx-version-min=$macOSMinVersion)
     #fi
 
     CPPFLAGS=-I$installDir/include \
@@ -576,7 +580,7 @@ openssl() {
         --openssldir=$installDir
     )
     #if [ "$OS" = "OSX" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$osxMinVersion)
+    #    args+=(--with-macosx-version-min=$macOSMinVersion)
     #fi
 
     ./config shared "${args[@]}"
@@ -601,7 +605,7 @@ pythonVapor2() {
         args+=(--with-openssl=$(brew --prefix openssl@1.1))
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
         args+=(--with-tcltk-includes="$(pkg-config --cflags tcl tk)")
-        #args+=(--with-macosx-version-min=$osxMinVersion)
+        #args+=(--with-macosx-version-min=$macOSMinVersion)
         CC=$CC \
         CXX=$CXX \
         LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
@@ -753,7 +757,7 @@ qt() {
         args+=(-opengl desktop)
     fi
     #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$osxMinVersion)
+    #    args+=(--with-macosx-version-min=$macOSMinVersion)
     #fi
     #args+=(> qtConfig.txt)
 
@@ -810,9 +814,9 @@ fi
 #freetype
 #jpeg
 tiff
-sqlite
-proj
-geotiff
+#sqlite
+#proj
+#geotiff
 ##geotiff2
 #if [ "$OS" == "Ubuntu" ] ; then
 #   xinerama
