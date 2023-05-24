@@ -17,6 +17,8 @@ installDir="$baseDir/current"
 archiveName="2023-Mar"
 macOSMinVersion="10.15"
 
+mkdir -p $installDir
+
 while getopts o:b:i flag
 do
     case "${flag}" in
