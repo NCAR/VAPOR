@@ -42,6 +42,7 @@ macOSPrerequisites() {
     CC='clang'
     CXX='clang++'
     brew install cmake
+    brew install jpeg
     brew install autoconf
     brew install atool
     brew install libtool
@@ -373,6 +374,8 @@ tiff() {
     cd $srcDir/$library/build
 
     args=(
+        -DJPEG_INCLUDE_DIR=$installDir/include
+        -DJPEG_LIB_DIR=$installDir/lib
         -DCMAKE_INSTALL_PREFIX=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
     )
@@ -810,7 +813,7 @@ fi
 #expat
 #udunits
 #freetype
-#jpeg
+jpeg
 tiff
 #sqlite
 #proj
