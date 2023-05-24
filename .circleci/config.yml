@@ -233,9 +233,11 @@ jobs:
             sudo mkdir -p /usr/local/VAPOR-Deps
             sudo chmod 777 /usr/local/VAPOR-Deps
             cd /usr/local/VAPOR-Deps
-            gdown https://drive.google.com/uc?id=1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg
+            #gdown https://drive.google.com/uc?id=1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg
+            gdown https://drive.google.com/uc?id=1FarGnK2dIjilboX-9AUVpI4OvmL7Q6xR
             cd /usr/local/VAPOR-Deps
-            tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
+            #tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
+            tar xf 2023-Mar-M1.tar.xz -C /usr/local/VAPOR-Deps
             chmod -R 777 /usr/local/VAPOR-Deps
 
       - run:
@@ -276,7 +278,8 @@ jobs:
                   -DDIST_INSTALLER:string=ON \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=ON \
+                  -DCMAKE_OSX_DEPLOYMENT_TARGET=11.4 \
+                  -DCMAKE
                   ..
             make -j2
             make installer -j2
@@ -1235,7 +1238,7 @@ workflows:
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer
-      #- build_M1_installer
+      - build_M1_installer
       #- build_ubuntu18_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
