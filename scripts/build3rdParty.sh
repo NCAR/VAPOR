@@ -15,7 +15,8 @@ baseDir='/usr/local/VAPOR-Deps'
 srcDir="$baseDir/2023-Mar-src"
 installDir="$baseDir/current"
 archiveName="2023-Mar"
-macOSMinVersion="10.15"
+#macOSMinVersion="10.15"
+macOSMinVersion="11.4.0"
 
 while getopts o:b:i flag
 do
@@ -33,7 +34,7 @@ if [ "$OS" = "CentOS" ]; then
 fi
 
 macOSx86Prerequisites() {
-    export MACOSX_DEPLOYMENT_TARGET=$macOSMinVersion
+    macOSMinVersion="10.15"
     macOSPrerequisites
 }
 
