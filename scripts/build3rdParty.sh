@@ -41,14 +41,14 @@ macOSPrerequisites() {
     export MACOSX_DEPLOYMENT_TARGET=$macOSMinVersion
     CC='clang'
     CXX='clang++'
-#    brew install cmake
-#    brew install autoconf
-#    brew install atool
-#    brew install libtool
-#    brew install automake
-#    brew install xz zlib openssl
-#    brew install python@3.9
-#    brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
+    brew install cmake
+    brew install autoconf
+    brew install atool
+    brew install libtool
+    brew install automake
+    brew install xz zlib openssl
+    brew install python@3.9
+    brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
 }
 
 ubuntuPrerequisites() {
