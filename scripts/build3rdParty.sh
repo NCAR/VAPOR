@@ -15,8 +15,6 @@ baseDir='/usr/local/VAPOR-Deps'
 srcDir="$baseDir/2023-Mar-src"
 installDir="$baseDir/current"
 archiveName="2023-Mar"
-#macOSMinVersion="10.15"
-macOSMinVersion="11.4.0"
 
 while getopts o:b:i flag
 do
@@ -26,6 +24,18 @@ do
         o) OS=${OPTARG};;
     esac
 done
+
+getMacOSMinVersion() {
+    if [ "$OS" == "macOSx86" ]; then
+        return "11.15.0"
+    elif [ "$OS" = "M1" ]; then
+        #return "11.4.0"
+        return "11.0.0"
+    fi
+}
+
+#macOSMinVersion="10.15"
+macOSMinVersion="$(getMacOSMinVersion)"
 
 if [ "$OS" = "CentOS" ]; then
     shopt -s expand_aliases
