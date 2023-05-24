@@ -25,13 +25,13 @@ do
     esac
 done
 
+#return "11.4.0"
 getMacOSMinVersion() {
     if [ "$OS" == "macOSx86" ]; then
-        return "11.15.0"
+        return "11.15"
     elif [ "$OS" = "M1" ]; then
-        return "11.0.0"
+        return "11.0"
     fi
-    #return "11.4.0"
 }
 
 #macOSMinVersion="10.15"

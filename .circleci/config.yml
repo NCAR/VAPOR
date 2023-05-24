@@ -279,7 +279,6 @@ jobs:
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
                   -DCMAKE_OSX_DEPLOYMENT_TARGET=11.4 \
-                  -DCMAKE
                   ..
             make -j2
             make installer -j2
