@@ -376,16 +376,13 @@ tiff() {
         -DCMAKE_INSTALL_PREFIX=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
     )
-    echo "$OS"
-    echo $MACOSX_DEPLOYMENT_TARGET
     if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        echo "adding DCMAKE_OSX_DEPLOYMENT_TARGET"
         args+=("-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion")
     fi
 
     echo "${args[@]}" ..
-    #cmake "${args[@]}" ..
-    #make -j4 && make install
+    cmake "${args[@]}" ..
+    make -j4 && make install
 }
 
 oldTiff() {
