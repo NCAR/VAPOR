@@ -17,8 +17,6 @@ installDir="$baseDir/current"
 archiveName="2023-Mar"
 macOSMinVersion="10.15"
 
-mkdir -p $installDir
-
 while getopts o:b:i flag
 do
     case "${flag}" in
@@ -367,6 +365,7 @@ jpeg() {
 }
 
 tiff() {
+    mkdir -p /usr/local/VAPOR-Deps/current
     cd $srcDir
     local library='libtiff-v4.5.0'
     rm -rf $library || true
