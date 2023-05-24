@@ -25,17 +25,17 @@ do
     esac
 done
 
-#return "11.4.0"
 getMacOSMinVersion() {
     if [ "$OS" == "macOSx86" ]; then
-        return "11.15"
+        echo "11.15.0"
     elif [ "$OS" = "M1" ]; then
-        return "11.0"
+        echo "11.0.0"
     fi
+    #return "11.4.0"
 }
 
 #macOSMinVersion="10.15"
-macOSMinVersion="$(getMacOSMinVersion)"
+macOSMinVersion=$(getMacOSMinVersion)
 
 if [ "$OS" = "CentOS" ]; then
     shopt -s expand_aliases
