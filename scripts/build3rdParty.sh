@@ -27,9 +27,9 @@ done
 
 getMacOSMinVersion() {
     if [ "$OS" == "macOSx86" ]; then
-        echo "11.15.0"
+        echo "10.15.0"
     elif [ "$OS" = "M1" ]; then
-        echo "11.0.0"
+        echo "12.0.0"
     fi
     #return "11.4.0"
 }
@@ -44,7 +44,7 @@ if [ "$OS" = "CentOS" ]; then
 fi
 
 macOSx86Prerequisites() {
-    macOSMinVersion="10.15"
+    #macOSMinVersion="10.15"
     macOSPrerequisites
 }
 
@@ -378,7 +378,8 @@ jpeg() {
     make -j4 && make install
 }
 
-tiff() {
+# Vapor refuses to link to this build of libtiff :\
+badTiff() {
     mkdir -p /usr/local/VAPOR-Deps/current
     cd $srcDir
     local library='libtiff-v4.5.0'
@@ -403,7 +404,7 @@ tiff() {
     make -j4 && make install
 }
 
-oldTiff() {
+tiff() {
     cd $srcDir
     local library='libtiff-v4.5.0'
     rm -rf $library || true
@@ -605,8 +606,7 @@ openssl() {
     make -j4 && make install
 }
 
-pythonVapor2() {
-
+pythonVapor() {
     cd $srcDir
     local library='cpython-3.9.16'
     rm -rf $library || true
@@ -639,57 +639,6 @@ pythonVapor2() {
         CPPFLAGS=-I$installDir/include \
         LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
         ./configure "${args[@]}"
-    fi
-
-    make -j4 && make install
-
-    $installDir/bin/python3.9.vapor -m pip install --upgrade pip
-    $installDir/bin/pip3 install --upgrade --target $installDir/lib/python3.9/site-packages numpy scipy matplotlib
-}
-
-pythonVapor() {
-    cd $srcDir
-    local library='cpython-3.9.16'
-    rm -rf $library || true
-    tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
-    if [ "$OS" = "macOSx86" ] || [ "$OS" = "M1" ]; then
-        export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"; \
-        CC=$CC \
-        CXX=$CXX \
-        LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
-        CPPFLAGS="-I$installDir/include -I$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
-        ./configure \
-        --prefix=$installDir \
-        --enable-shared \
-        --with-ensurepip=install \
-        --with-suffix=.vapor \
-        --enable-optimizations \
-        --with-openssl=$(brew --prefix openssl@1.1) \
-        --with-tcltk-libs="$(pkg-config --libs tcl tk)" \
-        --with-tcltk-includes="$(pkg-config --cflags tcl tk)"
-    elif [ "$OS" = "CentOS" ]; then
-        CPPFLAGS=-I$installDir/include \
-        LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
-        CC=$CC \
-        CXX=$CXX \
-        ./configure \
-        --prefix=$installDir \
-        --enable-shared \
-        --with-ensurepip=install \
-        --with-suffix=.vapor \
-        --with-openssl=$installDir
-    else
-        CPPFLAGS=-I$installDir/include \
-        LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
-        CC=$CC \
-        CXX=$CXX \
-        ./configure \
-        --prefix=$installDir \
-        --enable-shared \
-        --with-ensurepip=install \
-        --with-suffix=.vapor \
-        --enable-optimizations \
-        --with-openssl=$installDir
     fi
 
     make -j4 && make install
@@ -822,8 +771,7 @@ elif [ "$OS" == "Windows" ]; then
 fi
 
 openssl
-#pythonVapor
-pythonVapor2
+pythonVapor
 zlib
 libpng
 assimp
