@@ -57,7 +57,8 @@ def modifyPath( filename, changeFileID):
         #
         library = line.split('/')[-1]
 
-        if ( location == lib_dir ):
+        #if ( location == lib_dir ):
+        if ( location == thirdParty_dir ):
             #if ( (changeFileID == True) and "dylib" in filename ):
             if ( changeFileID == True ):
                 print("goo")
