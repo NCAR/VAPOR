@@ -31,7 +31,7 @@ def modifyPath( filename, changeFileID):
     output = subprocess.check_output("otool -L " + filename, shell=True)
     output = output.decode("utf-8")
 
-    print(output)
+    #print(output)
 
     for line in output.splitlines():  
 
@@ -53,12 +53,14 @@ def modifyPath( filename, changeFileID):
         location = line.split('/')[0:-1]
         location = '/'.join(location)
 
+        #print(location)
+
         # isolate the library name from the line
         #
         library = line.split('/')[-1]
 
-        #if ( location == lib_dir ):
-        if ( location == thirdParty_dir ):
+        #if ( location == thirdParty_dir ):
+        if ( location == lib_dir ):
             #if ( (changeFileID == True) and "dylib" in filename ):
             if ( changeFileID == True ):
                 print("goo")
@@ -82,4 +84,5 @@ def fixLibsInDir( directory, changeFileID ):
                 modifyPath( filename, changeFileID )
 
 # for changing rpath of our third-party libraries, such as libjpeg.dylib
-fixLibsInDir( thirdParty_dir, True )
+#fixLibsInDir( thirdParty_dir, True )
+fixLibsInDir( thirdParty_dir, False )

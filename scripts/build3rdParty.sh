@@ -744,6 +744,13 @@ qt() {
     make install > qtInstall.txt
 }
 
+add_rpath() {
+    for lib in $installDir/lib/*.dylib; do
+        fileName="$(basename $lib)"
+        install_name_tool -id @rpath/$fileName $lib
+    done
+}
+
 #baseDir='/usr/local/VAPOR-Deps'
 #srcDir="$baseDir/2023-Mar-src"
 #installDir="$baseDir/current"
@@ -770,33 +777,32 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-#openssl
-#pythonVapor
-#zlib
-#libpng
-#assimp
-#szip
-#hdf5
-#netcdf
-#expat
-#udunits
-#freetype
+openssl
+pythonVapor
+zlib
+libpng
+assimp
+szip
+hdf5
+netcdf
+expat
+udunits
+freetype
 jpeg
 tiff
 sqlite
 proj
 geotiff
-###geotiff2
-#if [ "$OS" == "Ubuntu" ] ; then
-#   xinerama
-#fi         
-#ospray
-#glm
-#gte
-#images
-#qt
-if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
-#   #python3 /Users/distiller/project/buildutils/OSX_PostBuild.py
-   python3 /Users/vapor/VAPOR/buildutils/OSX_PostBuild.py
+##geotiff2
+if [ "$OS" == "Ubuntu" ] ; then
+   xinerama
 fi         
-#renameAndCompress
+ospray
+glm
+gte
+images
+qt
+if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
+    add_rpath
+fi         
+renameAndCompress
