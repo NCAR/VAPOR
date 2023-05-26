@@ -767,8 +767,7 @@ add_rpath() {
                 install_name_tool -change "$dep" "$newPath" "$lib"
             fi
         done
-        #echo install_name_tool -change $installDir @rpath/$fileName $lib
-        #install_name_tool -change $installDir @rpath/$fileName $lib
+        codesign --force -s - $lib
     done
 }
 
@@ -798,32 +797,32 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-openssl
-pythonVapor
-zlib
-libpng
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-##geotiff2
-if [ "$OS" == "Ubuntu" ] ; then
-   xinerama
-fi         
-ospray
-glm
-gte
-images
-qt
-#if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
-#    add_rpath
+#openssl
+#pythonVapor
+#zlib
+#libpng
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#jpeg
+#tiff
+#sqlite
+#proj
+#geotiff
+###geotiff2
+#if [ "$OS" == "Ubuntu" ] ; then
+#   xinerama
 #fi         
-renameAndCompress
+#ospray
+#glm
+#gte
+#images
+#qt
+if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
+    add_rpath
+fi         
+#renameAndCompress
