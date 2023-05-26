@@ -627,6 +627,7 @@ pythonVapor() {
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
         args+=(--with-tcltk-includes="$(pkg-config --cflags tcl tk)")
         #args+=(--with-macosx-version-min=$macOSMinVersion)
+        export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"; \
         CC=$CC \
         CXX=$CXX \
         LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
