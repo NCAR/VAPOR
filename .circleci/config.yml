@@ -1242,7 +1242,7 @@ workflows:
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer
-      - build_M1_installer
+      #- build_M1_installer
       #- build_ubuntu18_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
@@ -1250,7 +1250,7 @@ workflows:
       #- build_ubuntu20_libs
       #- build_centos7_libs
       #- build_osx_libs
-      #- build_M1_libs
+      - build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
