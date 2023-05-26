@@ -786,17 +786,17 @@ renameAndCompress() {
     #mv $bundle.tar.xz /usr/local/VAPOR-Deps
 }
 
-#if [ "$OS" == "macOSx86" ]; then
-#    macOSx86Prerequisites
-#elif [ "$OS" == "M1" ]; then
-#    macOSPrerequisites
-#elif [ "$OS" == "Ubuntu" ]; then
-#    ubuntuPrerequisites
-#elif [ "$OS" == "CentOS" ]; then
-#    centosPrerequisites
-#elif [ "$OS" == "Windows" ]; then
-#    windowsPrerequisites
-#fi
+if [ "$OS" == "macOSx86" ]; then
+    macOSx86Prerequisites
+elif [ "$OS" == "M1" ]; then
+    macOSPrerequisites
+elif [ "$OS" == "Ubuntu" ]; then
+    ubuntuPrerequisites
+elif [ "$OS" == "CentOS" ]; then
+    centosPrerequisites
+elif [ "$OS" == "Windows" ]; then
+    windowsPrerequisites
+fi
 
 openssl
 pythonVapor
