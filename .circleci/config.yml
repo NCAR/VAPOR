@@ -282,10 +282,10 @@ jobs:
                   -DDIST_INSTALLER:string=ON \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
-                  -DCMAKE_OSX_DEPLOYMENT_TARGET=11.4 \
+                  -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
                   ..
-            make -j2
-            make installer -j2
+            make -j
+            make installer -j
             mkdir -p /tmp/workspace/installers
             mv *.dmg /tmp/workspace/installers
             for f in /tmp/workspace/installers/VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/DarwinM1}" ; done
@@ -1241,15 +1241,15 @@ workflows:
       #- test_clang_format
       #- build_win10_installer
       #- build_osx_installer
-      #- build_M1_installer
+      - build_M1_installer
       #- build_ubuntu18_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      - build_ubuntu20_libs
+      #- build_ubuntu20_libs
       #- build_centos7_libs
-      - build_osx_libs
-      - build_M1_libs
+      #- build_osx_libs
+      #- build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:

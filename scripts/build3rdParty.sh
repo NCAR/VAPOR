@@ -747,7 +747,28 @@ qt() {
 add_rpath() {
     for lib in $installDir/lib/*.dylib; do
         fileName="$(basename $lib)"
+        echo install_name_tool -id @rpath/$fileName $lib
         install_name_tool -id @rpath/$fileName $lib
+
+        # Get the list of dependencies
+        dependencies=$(otool -L "$lib" | awk '{print $1}' | grep -v ":")
+
+        echo a0
+        # Iterate over each dependency and replace the path with rpath
+        for dep in $dependencies; do
+            echo a
+            depName=$(basename "$dep")
+            echo b
+            newPath="@rpath/$depName"
+            echo c
+            if [ "$(dirname "$dep")" == "$installDir/lib" ]; then
+                echo d
+                echo install_name_tool -change "$dep" "$newPath" "$installDir/lib/$lib"
+                install_name_tool -change "$dep" "$newPath" "$lib"
+            fi
+        done
+        #echo install_name_tool -change $installDir @rpath/$fileName $lib
+        #install_name_tool -change $installDir @rpath/$fileName $lib
     done
 }
 
@@ -765,44 +786,44 @@ renameAndCompress() {
     #mv $bundle.tar.xz /usr/local/VAPOR-Deps
 }
 
-if [ "$OS" == "macOSx86" ]; then
-    macOSx86Prerequisites
-elif [ "$OS" == "M1" ]; then
-    macOSPrerequisites
-elif [ "$OS" == "Ubuntu" ]; then
-    ubuntuPrerequisites
-elif [ "$OS" == "CentOS" ]; then
-    centosPrerequisites
-elif [ "$OS" == "Windows" ]; then
-    windowsPrerequisites
-fi
+#if [ "$OS" == "macOSx86" ]; then
+#    macOSx86Prerequisites
+#elif [ "$OS" == "M1" ]; then
+#    macOSPrerequisites
+#elif [ "$OS" == "Ubuntu" ]; then
+#    ubuntuPrerequisites
+#elif [ "$OS" == "CentOS" ]; then
+#    centosPrerequisites
+#elif [ "$OS" == "Windows" ]; then
+#    windowsPrerequisites
+#fi
 
-openssl
-pythonVapor
-zlib
-libpng
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-##geotiff2
-if [ "$OS" == "Ubuntu" ] ; then
-   xinerama
-fi         
-ospray
-glm
-gte
-images
-qt
+#openssl
+#pythonVapor
+#zlib
+#libpng
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#jpeg
+#tiff
+#sqlite
+#proj
+#geotiff
+###geotiff2
+#if [ "$OS" == "Ubuntu" ] ; then
+#   xinerama
+#fi         
+#ospray
+#glm
+#gte
+#images
+#qt
 if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
     add_rpath
 fi         
-renameAndCompress
+#renameAndCompress
