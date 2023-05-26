@@ -274,7 +274,7 @@ jobs:
             cd build
             git checkout $CIRCLE_BRANCH
             export PATH=/opt/local/bin:$PATH
-            sudo port select --set clang mp-clang-13
+            #sudo port select --set clang mp-clang-13
             #-DCMAKE_BUILD_TYPE:String=Release \
             cmake -DBUILD_OSP=OFF \
                   -DCPACK_BINARY_DRAGNDROP=ON \
