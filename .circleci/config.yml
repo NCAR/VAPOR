@@ -251,20 +251,20 @@ jobs:
       - run:
           name: Get MacPorts
           command: |
-            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
-            tar xf MacPorts-2.7.1.tar.bz2
-            cd MacPorts-2.7.1/
-            ./configure
-            make -j2
-            sudo make install -j2
+            #curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
+            #tar xf MacPorts-2.7.1.tar.bz2
+            #cd MacPorts-2.7.1/
+            #./configure
+            #make -j2
+            #sudo make install -j2
 
       - run:
           name: Get clang13
           command: |
-            sudo /opt/local/bin/port selfupdate
-            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
-            sudo /opt/local/bin/port select --set clang mp-clang-13
-            /opt/local/bin/clang++ -v > clangVersion.txt
+            #sudo /opt/local/bin/port selfupdate
+            #(sudo yes || true) | sudo /opt/local/bin/port install clang-13
+            #sudo /opt/local/bin/port select --set clang mp-clang-13
+            #/opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 30m
       - run:
           name: make VAPOR
