@@ -3,14 +3,13 @@ package:
   version: "3.8.3"
 
 source:
-  path: ..
+  path: ../..
 
 build:
   skip_compile_pyc:
     - "*.py"
   script_env:
   - DEBUG_BUILD
-  - MAP_IMAGES_PATH
 
 requirements:
   build:
@@ -47,8 +46,10 @@ requirements:
     - ipython=8 #=8.3.0 
     - jupyter=1 #=1.0.0
     - py-opencv=4 #=4.5.3
+    - hdf5plugin=4
     - cppyy=2.2 #=2.2.0 If this is in build conda will load an old clang compiler which fails to compile macOS headers
     - jupyter-vapor-widget=1.0 # [not os.environ.get('DEBUG_BUILD', '1').lower() in ('true', '1', '')]
+    - vapor-maps=1.0 # [not os.environ.get('DEBUG_BUILD', '1').lower() in ('true', '1', '')]
     # Both
     - python=3.9 # pin_compatible('python') selects python 3.10 which is not compatible
     - {{ pin_compatible('numpy') }}

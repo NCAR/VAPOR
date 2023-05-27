@@ -1,0 +1,13 @@
+package:
+  name: vapor-maps-extra
+  version: "1.0.0"
+
+source:
+  - url: https://github.com/NCAR/VAPOR-Data/archive/refs/tags/1.0.tar.gz
+
+build:
+  noarch: generic
+  script: |
+    DEST="$PREFIX/share/images"
+    install -d "$DEST"
+    cp -r images/BigBlueMarble* images/*.tif "$DEST"

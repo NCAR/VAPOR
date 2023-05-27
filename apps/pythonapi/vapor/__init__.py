@@ -1,5 +1,6 @@
 from . import link
 import sys
+import hdf5plugin
 
 link.include('vapor/Version.h')
 vaporVersion = link.Wasp.Version()
