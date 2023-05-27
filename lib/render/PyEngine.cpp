@@ -226,6 +226,7 @@ using namespace Wasp;
 int PyEngine::Initialize()
 {
     int rc = MyPython::Instance()->Initialize();
+    std::cout << "RC " << rc << std::endl;
     if (rc < 0) return (rc);
 
     // Secret numpy incantation required to use NumPy's C API. Hope this
