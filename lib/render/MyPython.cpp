@@ -33,6 +33,7 @@
 
 using namespace Wasp;
 
+#define PYTHON_API_DEBUG
 #ifdef VAPOR3_0_0
 namespace {
 
@@ -81,6 +82,8 @@ int MyPython::Initialize()
         // on Linux and Mac
         m_pyHome = GetPythonDir();
     }
+
+    std::cout << "PYTHON HOME " << m_pyHome << std::endl;
 
     if (!m_pyHome.empty()) {
 #ifdef WIN32

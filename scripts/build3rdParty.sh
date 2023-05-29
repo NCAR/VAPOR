@@ -629,7 +629,7 @@ pythonVapor() {
         export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"; \
         CC=$CC \
         CXX=$CXX \
-        LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
+        LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/lib -I$(brew --prefix openssl)/lib" \
         CPPFLAGS="-I$installDir/include -I$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
         ./configure "${args[@]}"
     else
