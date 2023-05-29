@@ -143,9 +143,12 @@ jobs:
             sudo mkdir -p /usr/local/VAPOR-Deps
             sudo chmod 777 /usr/local/VAPOR-Deps
             cd /usr/local/VAPOR-Deps
-            gdown https://drive.google.com/uc?id=1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg
+            #gdown https://drive.google.com/uc?id=1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg
+            gdown https://drive.google.com/uc?id=1w0w1LtOpZy6yMJbvMIcrMSZ3PP9AHIxo
+            #https://drive.google.com/file/d/1w0w1LtOpZy6yMJbvMIcrMSZ3PP9AHIxo/view?usp=sharing
             cd /usr/local/VAPOR-Deps
-            tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
+            #tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
+            tar xf 2023-Mar-maxOSx86.tar.xz -C /usr/local/VAPOR-Deps
             chmod -R 777 /usr/local/VAPOR-Deps
 
       - run:
@@ -1243,7 +1246,7 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
-      #- build_osx_installer
+      - build_osx_installer
       #- build_M1_installer
       #- build_ubuntu18_installer
       #- build_ubuntu20_installer
@@ -1251,8 +1254,8 @@ workflows:
       #- build_centos7_installer
       #- build_ubuntu20_libs
       #- build_centos7_libs
-      - build_osx_libs
-      - build_M1_libs
+      #- build_osx_libs
+      #- build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:

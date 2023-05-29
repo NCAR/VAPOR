@@ -241,6 +241,8 @@ string MyPython::PyErr()
     //
     PyErr_Print();
 
+    if (catcher == NULL) std::cout << "catcher is null" << std::endl;
+
     if (!catcher) { return ("Failed to initialize Python error catcher!!!"); }
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");

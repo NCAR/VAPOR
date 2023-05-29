@@ -827,4 +827,4 @@ qt
 if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
     add_rpath
 fi         
-renameAndCompress
+#renameAndCompress
