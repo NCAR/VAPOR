@@ -148,7 +148,7 @@ jobs:
             #https://drive.google.com/file/d/1w0w1LtOpZy6yMJbvMIcrMSZ3PP9AHIxo/view?usp=sharing
             cd /usr/local/VAPOR-Deps
             #tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
-            tar xf 2023-Mar-maxOSx86.tar.xz -C /usr/local/VAPOR-Deps
+            tar xf 2023-Mar-macOSx86.tar.xz -C /usr/local/VAPOR-Deps
             chmod -R 777 /usr/local/VAPOR-Deps
 
       - run:
