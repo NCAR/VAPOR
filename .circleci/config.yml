@@ -1151,6 +1151,27 @@ jobs:
             chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
             /Users/distiller/project/scripts/build3rdParty.sh -o macOSx86
 
+      - run:
+          name: make VAPOR
+          command: |
+            cp site_files/site.NCAR site.local
+            mkdir build
+            cd build
+            git checkout $CIRCLE_BRANCH
+            export PATH=/opt/local/bin:$PATH
+            sudo port select --set clang mp-clang-13
+            cmake -DCPACK_BINARY_DRAGNDROP=ON \
+                  -DCMAKE_BUILD_TYPE:String=Release \
+                  -DDIST_INSTALLER:string=ON \
+                  -DCMAKE_CXX_COMPILER=clang++ \
+                  -DCMAKE_C_COMPILER=clang \
+                  -DUSE_OMP=ON \
+                  ..
+            make -j2
+            make installer -j2
+            mkdir -p /tmp/workspace/installers
+            mv *.dmg /usr/local/VAPOR-Deps
+
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Mar-macOSx86.tar.xz
 
@@ -1269,7 +1290,7 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
-      - build_osx_installer
+      #- build_osx_installer
       #- build_M1_installer
       #- build_ubuntu18_installer
       #- build_ubuntu20_installer
@@ -1277,8 +1298,8 @@ workflows:
       #- build_centos7_installer
       #- build_ubuntu20_libs
       #- build_centos7_libs
-      #- build_osx_libs
-      #- build_M1_libs
+      - build_osx_libs
+      - build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
