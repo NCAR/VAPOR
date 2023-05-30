@@ -232,6 +232,7 @@ int PyEngine::Initialize()
     // Secret numpy incantation required to use NumPy's C API. Hope this
     // crap works.
     //
+//#define DISABLE_EXTRA_PYTHON_MATH_IMPORTS=1
 #ifndef DISABLE_EXTRA_PYTHON_MATH_IMPORTS
     if (PyArray_API == NULL) { import_array1(-1) }
 #else
