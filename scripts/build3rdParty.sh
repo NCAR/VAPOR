@@ -757,16 +757,11 @@ add_rpath() {
         # Get the list of dependencies
         dependencies=$(otool -L "$lib" | awk '{print $1}' | grep -v ":")
 
-        echo a0
         # Iterate over each dependency and replace the path with rpath
         for dep in $dependencies; do
-            echo a
             depName=$(basename "$dep")
-            echo b
             newPath="@rpath/$depName"
-            echo c
             if [ "$(dirname "$dep")" == "$installDir/lib" ]; then
-                echo d
                 echo install_name_tool -change "$dep" "$newPath" "$installDir/lib/$lib"
                 install_name_tool -change "$dep" "$newPath" "$lib"
             fi
@@ -829,4 +824,4 @@ qt
 if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
     add_rpath
 fi         
-#renameAndCompress
+renameAndCompress
