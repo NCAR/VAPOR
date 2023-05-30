@@ -1120,9 +1120,12 @@ jobs:
           command: |
             chmod 777 /root/project/scripts/build3rdParty.sh
             /root/project/scripts/build3rdParty.sh -o Ubuntu
+            rm -rf /usr/local/VAPOR-Deps/2023-Mar-src
+            rm -rf /usr/local/VAPOR-Deps/2023-Mar
+            rm -rf /usr/local/VAPOR-Deps/current
 
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
+          path: /usr/local/VAPOR-Deps/
 
   build_osx_libs:
     macos:
@@ -1171,6 +1174,9 @@ jobs:
             make installer -j
             mkdir -p /tmp/workspace/installers
             mv *.dmg /usr/local/VAPOR-Deps
+            rm -rf /usr/local/VAPOR-Deps/2023-Mar-src
+            rm -rf /usr/local/VAPOR-Deps/2023-Mar
+            rm -rf /usr/local/VAPOR-Deps/current
 
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/
@@ -1223,6 +1229,9 @@ jobs:
             make installer -j
             mkdir -p /tmp/workspace/installers
             mv *.dmg /usr/local/VAPOR-Deps
+            rm -rf /usr/local/VAPOR-Deps/2023-Mar-src
+            rm -rf /usr/local/VAPOR-Deps/2023-Mar
+            rm -rf /usr/local/VAPOR-Deps/current
 
           no_output_timeout: 30m
       - store_artifacts:
@@ -1298,8 +1307,8 @@ workflows:
       #- build_centos7_installer
       - build_ubuntu20_libs
       #- build_centos7_libs
-      #- build_osx_libs
-      #- build_M1_libs
+      - build_osx_libs
+      - build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
