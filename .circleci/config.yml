@@ -1120,12 +1120,10 @@ jobs:
           command: |
             chmod 777 /root/project/scripts/build3rdParty.sh
             /root/project/scripts/build3rdParty.sh -o Ubuntu
-            rm -rf /usr/local/VAPOR-Deps/2023-Mar-src
-            rm -rf /usr/local/VAPOR-Deps/2023-Mar
-            rm -rf /usr/local/VAPOR-Deps/current
 
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/
+          path: |
+            /usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
 
   build_osx_libs:
     macos:
@@ -1173,13 +1171,11 @@ jobs:
             make -j
             make installer -j
             mkdir -p /tmp/workspace/installers
-            mv *.dmg /usr/local/VAPOR-Deps
-            rm -rf /usr/local/VAPOR-Deps/2023-Mar-src
-            rm -rf /usr/local/VAPOR-Deps/2023-Mar
-            rm -rf /usr/local/VAPOR-Deps/current
 
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/
+          path: |
+            /tmp/workspace/installers
+            /usr/local/VAPOR-Deps/2023-Mar-macOSx86.tar.xz
 
   build_M1_libs:
     macos:
@@ -1223,20 +1219,17 @@ jobs:
                   -DDIST_INSTALLER:string=ON \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=ON \
+                  -DUSE_OMP=OFF \
                   ..
             make -j
             make installer -j
             mkdir -p /tmp/workspace/installers
-            mv *.dmg /usr/local/VAPOR-Deps
-            rm -rf /usr/local/VAPOR-Deps/2023-Mar-src
-            rm -rf /usr/local/VAPOR-Deps/2023-Mar
-            rm -rf /usr/local/VAPOR-Deps/current
 
           no_output_timeout: 30m
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/
-
+          path: |
+            /tmp/workspace/installers
+            /usr/local/VAPOR-Deps/2023-Mar-M1.tar.xz
 
   build_centos7_libs:
     docker:
