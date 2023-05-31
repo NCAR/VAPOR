@@ -1141,24 +1141,10 @@ jobs:
       - store_artifacts:
           path: |
             /tmp/workspace/installers
-            usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
+            /usr/local/VAPOR-Deps/a.txt
 
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
-
-      - store_artifacts:
-          path: usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
-
-      - store_artifacts:
-          path: |
-            /tmp/workspace/installers
-            usr/local/VAPOR-Deps/a.txt
-
-      - store_artifacts:
-          path: /usr/local/VAPOR-Deps/b.txt
-
-      - store_artifacts:
-          path: usr/local/VAPOR-Deps/c.txt
 
   build_osx_libs:
     macos:
