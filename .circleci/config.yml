@@ -1124,6 +1124,9 @@ jobs:
       - run:
           name: Creating Dummy Artifacts
           command: |
+            echo "my artifact file" > /usr/local/VAPOR-Deps/a.txt;
+            echo "my artifact file" > /usr/local/VAPOR-Deps/b.txt;
+            echo "my artifact file" > /usr/local/VAPOR-Deps/c.txt;
             echo "my artifact file" > /tmp/artifact-1;
             mkdir /tmp/artifacts;
             echo "my artifact files in a dir" > /tmp/artifacts/artifact-2;
@@ -1145,6 +1148,17 @@ jobs:
 
       - store_artifacts:
           path: usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
+
+      - store_artifacts:
+          path: |
+            /tmp/workspace/installers
+            usr/local/VAPOR-Deps/a.txt
+
+      - store_artifacts:
+          path: /usr/local/VAPOR-Deps/b.txt
+
+      - store_artifacts:
+          path: usr/local/VAPOR-Deps/c.txt
 
   build_osx_libs:
     macos:

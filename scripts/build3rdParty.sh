@@ -798,7 +798,7 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-openssl
+#openssl
 #pythonVapor
 #zlib
 #libpng
@@ -826,4 +826,4 @@ openssl
 #if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
 #    add_rpath
 #fi         
-renameAndCompress
+#renameAndCompress
