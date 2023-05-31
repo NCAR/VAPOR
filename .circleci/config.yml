@@ -1176,6 +1176,7 @@ jobs:
       - run:
           name: make VAPOR
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Mar /usr/local/VAPOR-Deps/current
             brew install gettext
             cp site_files/site.NCAR site.local
             mkdir build
@@ -1232,6 +1233,7 @@ jobs:
       - run:
           name: make VAPOR
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Mar /usr/local/VAPOR-Deps/current
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
@@ -1324,10 +1326,10 @@ workflows:
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      #- build_ubuntu20_libs
+      - build_ubuntu20_libs
       #- build_centos7_libs
       - build_osx_libs
-      #- build_M1_libs
+      - build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
