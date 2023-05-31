@@ -58,10 +58,10 @@ macOSPrerequisites() {
     brew install libtool
     brew install automake
     brew install xz zlib openssl
-    brew install python@3.9
+    #brew install python@3.9
     brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
-    brew install gettext
-    brew link gettext --force
+    #brew install gettext
+    #brew link gettext --force
 }
 
 ubuntuPrerequisites() {
