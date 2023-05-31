@@ -623,6 +623,8 @@ pythonVapor() {
         args+=(--enable-optimizations)
     fi
 
+    #LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/lib -I$(brew --prefix openssl)/lib" \
+    #CPPFLAGS="-I$installDir/include -I$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
     if [ "$OS" = "macOSx86" ] || [ "$OS" = "M1" ]; then
         args+=(--with-openssl=$(brew --prefix openssl@1.1))
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
@@ -631,8 +633,8 @@ pythonVapor() {
         export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"; \
         CC=$CC \
         CXX=$CXX \
-        LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/lib -I$(brew --prefix openssl)/lib" \
-        CPPFLAGS="-I$installDir/include -I$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
+        LDFLAGS="-L$installDir/lib" \
+        CPPFLAGS="-I$installDir/include" \
         ./configure "${args[@]}"
     else
         args+=(--with-openssl=$installDir)
@@ -799,8 +801,8 @@ elif [ "$OS" == "Windows" ]; then
 fi
 
 openssl
+zlib
 pythonVapor
-#zlib
 #libpng
 #assimp
 #szip
