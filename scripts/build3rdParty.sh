@@ -65,6 +65,7 @@ macOSPrerequisites() {
     brew install pkg-config xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
     #brew install gettext
     #brew link gettext --force
+    brew uninstall --ignore-dependencies gettext
 }
 
 ubuntuPrerequisites() {
