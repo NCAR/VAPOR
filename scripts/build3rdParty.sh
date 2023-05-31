@@ -800,29 +800,29 @@ fi
 
 openssl
 pythonVapor
-zlib
-libpng
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-##geotiff2
-if [ "$OS" == "Ubuntu" ] ; then
-   xinerama
-fi         
-ospray
-glm
-gte
-images
-qt
+#zlib
+#libpng
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#jpeg
+#tiff
+#sqlite
+#proj
+#geotiff
+###geotiff2
+#if [ "$OS" == "Ubuntu" ] ; then
+#   xinerama
+#fi         
+#ospray
+#glm
+#gte
+#images
+#qt
 if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
     add_rpath
 fi         
