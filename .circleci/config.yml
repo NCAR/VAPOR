@@ -1176,6 +1176,7 @@ jobs:
       - run:
           name: make VAPOR
           command: |
+            brew install gettext
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
@@ -1187,7 +1188,7 @@ jobs:
                   -DDIST_INSTALLER:string=ON \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=ON \
+                  -DUSE_OMP=OFF \
                   ..
             make -j
             make installer -j
