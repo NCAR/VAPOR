@@ -60,6 +60,7 @@ macOSPrerequisites() {
     #brew install xz zlib openssl
     brew install xz
     #brew install python@3.9
+    brew uninstall python@3.9
     #brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
     brew install pkg-config xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
     #brew install gettext
