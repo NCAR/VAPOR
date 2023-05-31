@@ -1126,6 +1126,12 @@ jobs:
             /tmp/workspace/installers
             usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
 
+      - store_artifacts:
+          path: /usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
+
+      - store_artifacts:
+          path: usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
+
   build_osx_libs:
     macos:
       xcode: "13.4.1"
