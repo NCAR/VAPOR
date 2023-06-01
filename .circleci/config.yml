@@ -957,6 +957,9 @@ jobs:
       - run:
           name: make installer
           command: |
+            echo "deb http://security.ubuntu.com/ubuntu focal-security main" >> /etc/apt/sources.list
+            sudo apt-get update
+            sudo apt-get install libicu66
             mkdir -p /root/project/build
             cd /root/project/build
             git checkout main

@@ -5,6 +5,7 @@
 #include <vapor/CFuncs.h>
 #include <vapor/FileUtils.h>
 #include <vapor/ResourcePath.h>
+#include <numpy/arrayobject.h>
 
 using namespace Wasp;
 
@@ -123,6 +124,8 @@ int main(int argc, char **argv)
         return (1);
     }
     cout << MyPython::Instance()->PyOut() << endl;
+
+    if (PyArray_API == NULL) { import_array1(-1) }    
 
     return (0);
 }
