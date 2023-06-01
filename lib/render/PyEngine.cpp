@@ -235,13 +235,6 @@ int PyEngine::Initialize()
 //#define DISABLE_EXTRA_PYTHON_MATH_IMPORTS=1
 #ifndef DISABLE_EXTRA_PYTHON_MATH_IMPORTS
     if (PyArray_API == NULL) { import_array1(-1) }
-    //#define import_array1(ret) {if (_import_array() < 0) {PyErr_Print(); PyErr_SetString(PyExc_ImportError, "numpy.core.multiarray failed to import"); return ret; } }
-    if (_import_array() < 0) {
-        PyErr_Print(); 
-        PyErr_SetString(PyExc_ImportError, "numpy.core.multiarray failed to import"); 
-        //return ret; 
-        rc = ret;
-    }
 #else
     fprintf(stderr, "WARNING Vapor python array import disabled\n");
 #endif
