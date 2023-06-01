@@ -125,7 +125,12 @@ int main(int argc, char **argv)
     }
     cout << MyPython::Instance()->PyOut() << endl;
 
-    if (PyArray_API == NULL) { import_array1(-1) }    
+    std::cout << "testing PyArray_API==NULL" << std::endl;
+    if (PyArray_API == NULL) { 
+        std::cout << "running import_array1" << std::endl;
+        import_array1(-1) 
+        std::cout << "success" << std::endl;
+    }    
 
     return (0);
 }

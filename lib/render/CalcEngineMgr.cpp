@@ -155,12 +155,14 @@ void CalcEngineMgr::_sync()
     DatasetsParams *dParams = _paramsMgr->GetDatasetsParams();
     VAssert(dParams);
 
+    int rc=0;
     for (int i = 0; i < dataSetNames.size(); i++) {
         std::cout << "dataSetNames[i] " << dataSetNames[i] << std::endl;
         PyEngine *pyEngine = new PyEngine(_dataStatus->GetDataMgr(dataSetNames[i]));
         if (pyEngine==nullptr) std::cout << "pyengine is null" << std::endl;
         std::cout << pyEngine << std::endl;
-        int       rc = pyEngine->Initialize();
+        rc = pyEngine->Initialize();
+        std::cout << "RC3" << std::endl;
         VAssert(rc >= 0);
 
         _pyScripts[dataSetNames[i]] = pyEngine;
