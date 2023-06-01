@@ -656,7 +656,8 @@ pythonVapor() {
     # As of 5/27/2023, numpy==1.24.3 fails to initialize PyEngine's call to import_array1(-1)
     #$installDir/bin/pip3.9 install --upgrade --target $installDir/lib/python3.9/site-packages numpy==1.23.5 scipy matplotlib
     #$installDir/bin/pip3.9 install --upgrade --target $installDir/lib/python3.9/site-packages numpy scipy matplotlib
-    $installDir/bin/python3.9.vapor -m pip install numpy==1.17.0 scipy matplotlib
+    #$installDir/bin/python3.9.vapor -m pip install numpy==1.17.0 scipy matplotlib # numpy does not install
+    $installDir/bin/python3.9.vapor -m pip install numpy==1.19.4 scipy matplotlib
 }
 
 ospray() {
