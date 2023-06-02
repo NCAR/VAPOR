@@ -36,7 +36,7 @@ macOSMinVersion=$(getMacOSMinVersion)
 
 if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1"]; then
     shopt -s expand_aliases
-    alias make=make -j8
+    alias make='make -j8'
     alias
 else
     shopt -s expand_aliases
@@ -189,7 +189,7 @@ libpng() {
     fi
 
     cmake "${args[@]}" ..
-    make -j && make install
+    make && make install
 }
 
 assimp() {
@@ -215,7 +215,7 @@ assimp() {
     fi
 
     cmake "${args[@]}" ..
-    make -j && make install
+    make && make install
 }
 
 zlib() {
@@ -234,7 +234,7 @@ zlib() {
     fi
 
     cmake "${args[@]}" ..
-    make -j && make install
+    make && make install
 }
 
 #Note: After configuration, we need to make sure both zlib and szlib are enabled.
@@ -249,7 +249,7 @@ szip() {
     )
     ./configure "${args[@]}"
 
-    make -j && make install
+    make && make install
 }
 
 #hdfVersion='1.14.0'
@@ -312,7 +312,7 @@ expat() {
     fi
 
     cmake "${args[@]}" ..
-    make -j && make install
+    make && make install
 }
 
 udunits() {
@@ -328,7 +328,7 @@ udunits() {
     CPPFLAGS=-I$installDir/include/ \
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
-    make -j && make install
+    make && make install
 }
 
 freetype() {
@@ -342,7 +342,7 @@ freetype() {
     )
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
-    make -j && make install
+    make && make install
 }
 
 #CC=clang CXX=clang++ ./configure --prefix=/usr/local/VAPOR-Deps/2019-Aug
@@ -362,7 +362,7 @@ jpeg() {
     fi
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
-    make -j && make install
+    make && make install
 }
 
 tiff() {
@@ -388,7 +388,7 @@ tiff() {
     CPPFLAGS=-I$installDir/include \
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
-    make -j && make install
+    make && make install
 }
 
 sqlite() {
@@ -403,7 +403,7 @@ sqlite() {
     )
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
-    make -j && make install
+    make && make install
 }
 
 proj() {
@@ -442,7 +442,7 @@ proj() {
     fi
     cmake "${args[@]}" ..
 
-    make -j && make install
+    make && make install
 }
 
 #CPPFLAGS=-I$/usr/local/VAPOR-Deps/current/include LDFLAGS=-L/usr/local/VAPOR-Deps/current/lib CC=gcc CXX=g++ ./configure -prefix=/usr/local/VAPOR-Deps/current --with-zlib=yes --with-jpeg=yes --with-proj=/usr/local/VAPOR-Deps/current --with-libtiff=/usr/local/VAPOR-Deps/current/lib64
@@ -471,7 +471,7 @@ geotiff2() {
     fi
     cmake "${args[@]}" ..
 
-    make -j && make install
+    make && make install
 }
 
 geotiff() {
@@ -494,7 +494,7 @@ geotiff() {
     CXX=$CXX \
     ./configure "${args[@]}"
 
-    make -j && make install
+    make && make install
 }
 
 xinerama() {
@@ -503,14 +503,14 @@ xinerama() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
     ./configure --prefix=$installDir
-    make -j && make install
+    make && make install
 
     cd $srcDir
     library='libxcb-1.15'
     export PYTHONPATH=$installDir/local/lib/python3.10/dist-packages
     tar xvf $srcDir/$library.tar.xz && cd $srcDir/$library
     PYTHON=python3 PKG_CONFIG_PATH=$installDir/share/pkgconfig ./configure --without-doxygen --docdir='${datadir}'/doc/libxcb-1.15 --prefix=$installDir
-    make -j && make install
+    make && make install
 }
 
 openssl() {
@@ -525,7 +525,7 @@ openssl() {
     )
 
     ./config shared "${args[@]}"
-    make -j && make install
+    make && make install
 }
 
 pythonVapor() {
@@ -566,7 +566,7 @@ pythonVapor() {
         ./configure "${args[@]}"
     fi
 
-    make -j && make install
+    make && make install
 
     $installDir/bin/python3.9.vapor -m pip install --upgrade pip
 
@@ -651,7 +651,7 @@ qt() {
     ../configure \
     "${args[@]}" > qtConfig.txt
 
-    make -j8 > qtMake.txt
+    make > qtMake.txt
     make install > qtInstall.txt
 }
 
