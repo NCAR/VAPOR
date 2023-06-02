@@ -612,6 +612,11 @@ qt() {
         tar xf $srcDir/qt-everywhere-opensource-src-5.15.8.tar.xz
         mkdir -p $srcDir/qt-everywhere-src-5.15.8/build
         cd $srcDir/qt-everywhere-src-5.15.8/build
+
+        if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
+            brew install gettext
+            brew link gettext --force
+        fi
     fi
 
     args=(
@@ -625,7 +630,6 @@ qt() {
     )
     if [ "$OS" == "Ubuntu" ] || [ "$OS" = "CentOS" ]; then
         args+=(-feature-freetype)
-        #args+=(-fontconfig)
         args+=(-qt-freetype)
         args+=(-opengl desktop)
     fi
