@@ -1146,7 +1146,7 @@ jobs:
     docker:
       - image: ubuntu:20.04
 
-    resource_class: large
+    resource_class: 2xlarge
 
     steps:
       - run:
@@ -1179,6 +1179,7 @@ jobs:
           command: |
             chmod 777 /root/project/scripts/build3rdParty.sh
             /root/project/scripts/build3rdParty.sh -o Ubuntu
+          no_output_timeout: 60m
 
       - run:
           name: make installer
@@ -1192,7 +1193,7 @@ jobs:
                   -DDIST_INSTALLER:string=ON \
                   -DUSE_OMP=ON \
                   ..
-            make -j4
+            make -j8
             make installer
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu20}" ; done
             mkdir -p /tmp/workspace/installers
@@ -1425,8 +1426,8 @@ workflows:
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      #- build_ubuntu20_libs
-      #- build_centos7_libs
+      - build_ubuntu20_libs
+      - build_centos7_libs
       #- build_macOSx86_libs
       - build_M1_libs
       #- build_suse_libs
