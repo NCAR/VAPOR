@@ -1073,7 +1073,7 @@ jobs:
             ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
 
   build_suse_libs:
-    machine:
+    docker:
       - image: opensuse/leap:latest
 
     resource_class: large
@@ -1272,6 +1272,7 @@ jobs:
             make installer -j
             mkdir -p /tmp/workspace/installers
             mv VAPOR3*.dmg /tmp/workspace/installers
+          no_output_timeout: 20m
 
       - store_artifacts:
           path: |
