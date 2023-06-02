@@ -1146,7 +1146,7 @@ jobs:
     docker:
       - image: ubuntu:20.04
 
-    resource_class: 2xlarge
+    resource_class: large
 
     steps:
       - run:
@@ -1193,7 +1193,7 @@ jobs:
                   -DDIST_INSTALLER:string=ON \
                   -DUSE_OMP=ON \
                   ..
-            make -j8
+            make -j4
             make installer
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu20}" ; done
             mkdir -p /tmp/workspace/installers
