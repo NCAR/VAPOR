@@ -120,13 +120,10 @@ jobs:
             - /usr/local/VAPOR-Deps
             - /opt/local/bin
 
-  build_osx_installer:
+  build_macOSx86_installer:
     macos:
       xcode: "13.4.1"
     steps:
-      #- restore_cache:
-      #    keys:
-      #      - osx-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Make VAPOR-Deps
           command: |
@@ -143,11 +140,8 @@ jobs:
             sudo mkdir -p /usr/local/VAPOR-Deps
             sudo chmod 777 /usr/local/VAPOR-Deps
             cd /usr/local/VAPOR-Deps
-            #gdown https://drive.google.com/uc?id=1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg
             gdown https://drive.google.com/uc?id=1w0w1LtOpZy6yMJbvMIcrMSZ3PP9AHIxo
-            #https://drive.google.com/file/d/1w0w1LtOpZy6yMJbvMIcrMSZ3PP9AHIxo/view?usp=sharing
             cd /usr/local/VAPOR-Deps
-            #tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
             tar xf 2023-Mar-macOSx86.tar.xz -C /usr/local/VAPOR-Deps
             ln -s 2023-Mar current
             chmod -R 777 /usr/local/VAPOR-Deps
@@ -164,15 +158,8 @@ jobs:
             tar xf MacPorts-2.7.1.tar.bz2
             cd MacPorts-2.7.1/
             ./configure
-            make -j2
-            sudo make install -j2
-
-      - run:
-          name: Get libomp
-          command: |
-            #sudo /opt/local/bin/port selfupdate
-            #(sudo yes || true) | sudo /opt/local/bin/port install libomp
-          no_output_timeout: 30m
+            make -j
+            sudo make install -j
 
       - run:
           name: Get clang13
@@ -199,8 +186,8 @@ jobs:
                   -DCMAKE_C_COMPILER=clang \
                   -DUSE_OMP=ON \
                   ..
-            make -j2
-            make installer -j2
+            make -j
+            make installer -j
             mkdir -p /tmp/workspace/installers
             mv *.dmg /tmp/workspace/installers
           no_output_timeout: 30m
@@ -215,15 +202,10 @@ jobs:
 
   build_M1_installer:
     macos:
-      #xcode: "13.4.1"
       xcode: "14.2.0"
 
     resource_class: macos.m1.large.gen1
     steps:
-      # Saving and restoring cache takes forever, so we must repeat build_osx_steps verbatim
-      #- restore_cache:
-      #    keys:
-      #      - osx-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Make VAPOR-Deps
           command: |
@@ -256,21 +238,22 @@ jobs:
       - run:
           name: Get MacPorts
           command: |
-            #curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
-            #tar xf MacPorts-2.7.1.tar.bz2
-            #cd MacPorts-2.7.1/
-            #./configure
-            #make -j2
-            #sudo make install -j2
+            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
+            tar xf MacPorts-2.7.1.tar.bz2
+            cd MacPorts-2.7.1/
+            ./configure
+            make -j2
+            sudo make install -j2
 
       - run:
           name: Get clang13
           command: |
-            #sudo /opt/local/bin/port selfupdate
-            #(sudo yes || true) | sudo /opt/local/bin/port install clang-13
-            #sudo /opt/local/bin/port select --set clang mp-clang-13
-            #/opt/local/bin/clang++ -v > clangVersion.txt
+            sudo /opt/local/bin/port selfupdate
+            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
+            sudo /opt/local/bin/port select --set clang mp-clang-13
+            /opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 30m
+
       - run:
           name: make VAPOR
           command: |
@@ -279,15 +262,15 @@ jobs:
             cd build
             git checkout $CIRCLE_BRANCH
             export PATH=/opt/local/bin:$PATH
-            #sudo port select --set clang mp-clang-13
-            #-DCMAKE_BUILD_TYPE:String=Release \
+            sudo port select --set clang mp-clang-13
             cmake -DBUILD_OSP=OFF \
                   -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Debug \
+                  -DCMAKE_BUILD_TYPE:String=Release \
                   -DDIST_INSTALLER:string=ON \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
                   -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
+                  -DUSE_OMP=ON \
                   ..
             make -j
             make installer -j
@@ -893,9 +876,12 @@ jobs:
             git checkout main
             git reset --hard origin/main
             git pull
-            cmake -DCMAKE_BUILD_TYPE:String=Release cmake -DPYTHONVERSION=3.9 -DQTDIR=/usr/local/VAPOR-Deps/2019-Aug/Qt/5.15.2/gcc_64 -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
-            make -j2
-            make installer -j2
+            cmake -DCMAKE_BUILD_TYPE:String=Release \
+                  -DDIST_INSTALLER:string=ON \
+                  -DUSE_OMP=ON \
+                  ..
+            make -j
+            make installer
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu20}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
@@ -1125,31 +1111,31 @@ jobs:
             /root/project/scripts/build3rdParty.sh -o Ubuntu
 
       - run:
-          name: Creating Dummy Artifacts
+          name: make installer
           command: |
-            echo "my artifact file" > /usr/local/VAPOR-Deps/a.txt;
-            echo "my artifact file" > /usr/local/VAPOR-Deps/b.txt;
-            echo "my artifact file" > /usr/local/VAPOR-Deps/c.txt;
-            echo "my artifact file" > /tmp/artifact-1;
-            mkdir /tmp/artifacts;
-            echo "my artifact files in a dir" > /tmp/artifacts/artifact-2;
-
-      - store_artifacts:
-          path: /tmp/artifact-1
-          destination: artifact-file
-
-      - store_artifacts:
-          path: /tmp/artifacts
+            mkdir -p /root/project/build
+            cd /root/project/build
+            git checkout main
+            git reset --hard origin/main
+            git pull
+            cmake -DCMAKE_BUILD_TYPE:String=Release \
+                  -DDIST_INSTALLER:string=ON \
+                  -DUSE_OMP=ON \
+                  ..
+            make -j
+            make installer
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu20}" ; done
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
 
       - store_artifacts:
           path: |
             /tmp/workspace/installers
-            /usr/local/VAPOR-Deps/a.txt
 
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
 
-  build_osx_libs:
+  build_macOSx86_libs:
     macos:
       xcode: "13.4.1"
 
@@ -1177,6 +1163,25 @@ jobs:
             /Users/distiller/project/scripts/build3rdParty.sh -o macOSx86
 
       - run:
+          name: Get MacPorts
+          command: |
+            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
+            tar xf MacPorts-2.7.1.tar.bz2
+            cd MacPorts-2.7.1/
+            ./configure
+            make -j2
+            sudo make install -j2
+
+      - run:
+          name: Get clang13
+          command: |
+            sudo /opt/local/bin/port selfupdate
+            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
+            sudo /opt/local/bin/port select --set clang mp-clang-13
+            /opt/local/bin/clang++ -v > clangVersion.txt
+          no_output_timeout: 30m
+
+      - run:
           name: make VAPOR
           command: |
             ln -s /usr/local/VAPOR-Deps/2023-Mar /usr/local/VAPOR-Deps/current
@@ -1185,18 +1190,19 @@ jobs:
             mkdir build
             cd build
             git checkout $CIRCLE_BRANCH
-            #export PATH=/opt/local/bin:$PATH
-            #sudo port select --set clang mp-clang-13
+            export PATH=/opt/local/bin:$PATH
+            sudo port select --set clang mp-clang-13
             cmake -DCPACK_BINARY_DRAGNDROP=ON \
                   -DCMAKE_BUILD_TYPE:String=Release \
                   -DDIST_INSTALLER:string=ON \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=OFF \
+                  -DUSE_OMP=ON \
                   ..
             make -j
             make installer -j
             mkdir -p /tmp/workspace/installers
+            mv VAPOR3*.dmg /tmp/workspace/installers
 
       - store_artifacts:
           path: |
@@ -1207,7 +1213,6 @@ jobs:
 
   build_M1_libs:
     macos:
-      #xcode: "13.4.1"
       xcode: "14.2.0"
 
     resource_class: macos.m1.large.gen1
@@ -1232,6 +1237,25 @@ jobs:
           command: |
             chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
             /Users/distiller/project/scripts/build3rdParty.sh -o M1
+
+      - run:
+          name: Get MacPorts
+          command: |
+            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
+            tar xf MacPorts-2.7.1.tar.bz2
+            cd MacPorts-2.7.1/
+            ./configure
+            make -j2
+            sudo make install -j2
+
+      - run:
+          name: Get clang13
+          command: |
+            sudo /opt/local/bin/port selfupdate
+            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
+            sudo /opt/local/bin/port select --set clang mp-clang-13
+            /opt/local/bin/clang++ -v > clangVersion.txt
+          no_output_timeout: 30m
 
       - run:
           name: make VAPOR
@@ -1315,7 +1339,6 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      #- build_ubuntu18
       #- build_centos7
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
@@ -1323,22 +1346,20 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
-      #- build_osx_installer
+      #- build_macOSx86_installer
       #- build_M1_installer
-      #- build_ubuntu18_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
       - build_ubuntu20_libs
       #- build_centos7_libs
-      - build_osx_libs
+      - build_macOSx86_libs
       - build_M1_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
-      #      - build_ubuntu18_installer
       #      - build_centos7_installer
-      #      - build_osx_installer
+      #      - build_macOSx86_installer
       #      - build_win10_installer
   weekly:
       triggers:
@@ -1348,20 +1369,18 @@ workflows:
                branches:
                  only: main
       jobs:
-        - build_ubuntu22_installer
-        - build_ubuntu18_installer
+        - build_ubuntu20_installer
         - build_centos7_installer
-        - build_osx_installer
+        - build_macOSx86_installer
         - build_M1_installer
         - build_win10_installer
         #- build_python_api_ubuntu
         #- build_python_api_osx
         - release_weekly_installers:
             requires:
-              - build_ubuntu22_installer
-              - build_ubuntu18_installer
+              - build_ubuntu20_installer
               - build_centos7_installer
-              - build_osx_installer
+              - build_macOSx86_installer
               - build_M1_installer
               - build_win10_installer
               #- build_python_api_ubuntu

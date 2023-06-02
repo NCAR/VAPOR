@@ -31,10 +31,7 @@ getMacOSMinVersion() {
     elif [ "$OS" = "M1" ]; then
         echo "12.0.0"
     fi
-    #return "11.4.0"
 }
-
-#macOSMinVersion="10.15"
 macOSMinVersion=$(getMacOSMinVersion)
 
 if [ "$OS" = "CentOS" ]; then
@@ -44,7 +41,7 @@ if [ "$OS" = "CentOS" ]; then
 fi
 
 macOSx86Prerequisites() {
-    #macOSMinVersion="10.15"
+    brew uninstall python@3.9
     macOSPrerequisites
 }
 
@@ -60,7 +57,6 @@ macOSPrerequisites() {
     #brew install xz zlib openssl
     brew install xz
     #brew install python@3.9
-    brew uninstall python@3.9
     #brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
     brew install pkg-config xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
     #brew install gettext
@@ -160,23 +156,10 @@ centosPrerequisites() {
         mesa-libGL-devel \
         libxkbcommon-devel
 
-    #shopt -s expand_aliases
-    #alias cmake='cmake3'
-    #shopt -s expand_aliases
-    #echo alias cmake=\'cmake3\' >> ~/.bashrc
-    #. ~/.bashrc
-    #source ~/.bashrc
-
     cmake --version
     cmake3 --version
 
     yum groupinstall -y "Development Tools"
-
-	#curl -LO https://github.com/Kitware/CMake/releases/download/v3.26.0/cmake-3.26.0-linux-x86_64.tar.gz
-	#tar -xvf cmake-3.26.0.tar.gz
-	#mv cmake-3.26.0 /usr/local/cmake
-	#echo 'export PATH="/usr/local/cmake/bin:$PATH"' >> ~/.bashrc
-	#source ~/.bashrc
 }
 
 libpng() {
@@ -196,7 +179,7 @@ libpng() {
     fi
 
     cmake "${args[@]}" ..
-    make -j4 && make install
+    make -j && make install
 }
 
 assimp() {
@@ -204,7 +187,7 @@ assimp() {
     if [ "$OS" == "CentOS" ]; then
         local library='assimp-5.1.6'
     else
-        local library='assimp-5.2.5' #requires c++17
+        local library='assimp-5.2.5' #requires c++17 compiler
     fi
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
@@ -222,7 +205,7 @@ assimp() {
     fi
 
     cmake "${args[@]}" ..
-    make -j4 && make install
+    make -j && make install
 }
 
 zlib() {
@@ -241,11 +224,10 @@ zlib() {
     fi
 
     cmake "${args[@]}" ..
-    make -j4 && make install
+    make -j && make install
 }
 
-#Note: after configuration, need to make sure both zlib and szlib are enabled!!
-# How are we supposed do do that?  Configure does not indicate yes or no...
+#Note: After configuration, we need to make sure both zlib and szlib are enabled.
 szip() {
     cd $srcDir
     local library='szip-2.1.1'
@@ -255,13 +237,9 @@ szip() {
     args=(
         --prefix=$installDir
     )
-    #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$macOSMinVersion)
-    #fi
     ./configure "${args[@]}"
 
-    #CC=$CC CXX=$CXX ./configure --prefix=$installDir
-    make -j4 && make install
+    make -j && make install
 }
 
 #hdfVersion='1.14.0'
@@ -324,7 +302,7 @@ expat() {
     fi
 
     cmake "${args[@]}" ..
-    make -j4 && make install
+    make -j && make install
 }
 
 udunits() {
@@ -336,14 +314,11 @@ udunits() {
     args=(
         --prefix=$installDir
     )
-    #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$macOSMinVersion)
-    #fi
     LDFLAGS=-L$installDir/lib/ \
     CPPFLAGS=-I$installDir/include/ \
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
-    make -j4 && make install
+    make -j && make install
 }
 
 freetype() {
@@ -355,12 +330,9 @@ freetype() {
     args=(
         --prefix=$installDir
     )
-    #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$macOSMinVersion)
-    #fi
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
-    make -j4 && make install
+    make -j && make install
 }
 
 #CC=clang CXX=clang++ ./configure --prefix=/usr/local/VAPOR-Deps/2019-Aug
@@ -380,33 +352,7 @@ jpeg() {
     fi
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
-    make -j4 && make install
-}
-
-# Vapor refuses to link to this build of libtiff :\
-badTiff() {
-    mkdir -p /usr/local/VAPOR-Deps/current
-    cd $srcDir
-    local library='libtiff-v4.5.0'
-    rm -rf $library || true
-    tar xvf $srcDir/$library.tar.gz
-    cd $srcDir/$library/build
-
-    args=(
-        -DCMAKE_LIBRARY_PATH=$installDir/lib
-        -DCMAKE_INCLUDE_PATH=$installDir/include
-        #-DJPEG_INCLUDE_DIR=$installDir/include
-        #-DJPEG_LIBRARY_RELEASE=$installDir/lib/
-        -DCMAKE_INSTALL_PREFIX=$installDir
-        -DCMAKE_INSTALL_LIBDIR=lib
-    )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=("-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion")
-    fi
-
-    echo "${args[@]}" ..
-    cmake "${args[@]}" ..
-    make -j4 && make install
+    make -j && make install
 }
 
 tiff() {
@@ -428,14 +374,11 @@ tiff() {
         --prefix=$installDir
         --disable-dap
     )
-    #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        #args+=(--with-macosx-version-min=$macOSMinVersion)
-    #fi
     LDFLAGS=-L$installDir/lib \
     CPPFLAGS=-I$installDir/include \
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
-    make -j4 && make install
+    make -j && make install
 }
 
 sqlite() {
@@ -448,19 +391,16 @@ sqlite() {
     args=(
         --prefix=$installDir
     )
-    #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$macOSMinVersion)
-    #fi
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
-    make -j4 && make install
+    make -j && make install
 }
 
 proj() {
     cd $srcDir
     #local library='proj-9.1.0' # does not work
     #local library='proj-6.3.1' # works
-    local library='proj-7.2.1' # ?
+    local library='proj-7.2.1' # works
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     tar xvf proj-datumgrid-1.8.tar.gz -C $library/data
@@ -492,18 +432,7 @@ proj() {
     fi
     cmake "${args[@]}" ..
 
-    #cmake \
-    #-DCMAKE_PREFIX_PATH=$installDir \
-    #-DEXE_SQLITE3=$installDir/bin/sqlite3 \
-    #-DSQLITE3_INCLUDE_DIR=$installDir/include \
-    #$sqliteLib \
-    #-DCMAKE_INSTALL_LIBDIR=lib \
-    #-DCMAKE_INSTALL_PREFIX=$installDir \
-    #-DCMAKE_OSX_ARCHITECTURES=arm64 \
-    #-DPROJ_COMPILER_NAME=$CXX \
-    #..
-
-    make -j4 && make install
+    make -j && make install
 }
 
 #CPPFLAGS=-I$/usr/local/VAPOR-Deps/current/include LDFLAGS=-L/usr/local/VAPOR-Deps/current/lib CC=gcc CXX=g++ ./configure -prefix=/usr/local/VAPOR-Deps/current --with-zlib=yes --with-jpeg=yes --with-proj=/usr/local/VAPOR-Deps/current --with-libtiff=/usr/local/VAPOR-Deps/current/lib64
@@ -530,13 +459,9 @@ geotiff2() {
         args+=(-DCMAKE_SKIP_INSTALL_RPATH=ON)
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
-    #CPPFLAGS=-I$installDir/include \
-    #LDFLAGS="-L$installDir/lib -Wl" \
-    #CC=$CC \
-    #CXX=$CXX \
     cmake "${args[@]}" ..
 
-    make -j4 && make install
+    make -j && make install
 }
 
 geotiff() {
@@ -552,10 +477,6 @@ geotiff() {
         --with-proj=$installDir
         --with-libtiff=$installDir
     )
-    #if [ "$OS" == "M1" ] || [ "$OS" == "macOSx86" ]; then
-    #    args+=(--build=arm64)
-    #    args+=(--with-macosx-version-min=$macOSMinVersion)
-    #fi
 
     CPPFLAGS=-I$installDir/include \
     LDFLAGS=-L$installDir/lib \
@@ -563,18 +484,7 @@ geotiff() {
     CXX=$CXX \
     ./configure "${args[@]}"
 
-
-    # the old way.  need to specify arm64.
-    #LDFLAGS=-L$installDir/lib/ \
-    #CPPFLAGS=-I$installDir/include/ \
-    #CC=$CC CXX=$CXX \
-    #./configure \
-    #--prefix=$installDir \
-    #--with-zlib=yes \
-    #--with-jpeg=yes \
-    #--with-proj=$installDir
-
-    make -j4 && make install
+    make -j && make install
 }
 
 xinerama() {
@@ -583,14 +493,14 @@ xinerama() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
     ./configure --prefix=$installDir
-    make -j4 && make install
+    make -j && make install
 
     cd $srcDir
     library='libxcb-1.15'
     export PYTHONPATH=$installDir/local/lib/python3.10/dist-packages
     tar xvf $srcDir/$library.tar.xz && cd $srcDir/$library
     PYTHON=python3 PKG_CONFIG_PATH=$installDir/share/pkgconfig ./configure --without-doxygen --docdir='${datadir}'/doc/libxcb-1.15 --prefix=$installDir
-    make -j4 && make install
+    make -j && make install
 }
 
 openssl() {
@@ -603,12 +513,9 @@ openssl() {
         --prefix=$installDir
         --openssldir=$installDir
     )
-    #if [ "$OS" = "OSX" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$macOSMinVersion)
-    #fi
 
     ./config shared "${args[@]}"
-    make -j4 && make install
+    make -j && make install
 }
 
 pythonVapor() {
@@ -649,35 +556,20 @@ pythonVapor() {
         ./configure "${args[@]}"
     fi
 
-    make -j4 && make install
+    make -j && make install
 
     $installDir/bin/python3.9.vapor -m pip install --upgrade pip
 
-    # As of 5/27/2023, numpy==1.24.3 fails to initialize PyEngine's call to import_array1(-1)
-    #$installDir/bin/pip3.9 install --upgrade --target $installDir/lib/python3.9/site-packages numpy==1.23.5 scipy matplotlib
-    #$installDir/bin/pip3.9 install --upgrade --target $installDir/lib/python3.9/site-packages numpy scipy matplotlib
-    #$installDir/bin/python3.9.vapor -m pip install numpy==1.17.0 scipy matplotlib # numpy does not install
-    #$installDir/bin/python3.9.vapor -m pip install numpy==1.19.4 scipy matplotlib
+    # As of 5/27/2023, numpy's current version (1.24.3) fails to initialize PyEngine's call to import_array1(-1)
     $installDir/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
 }
 
 ospray() {
     cd $srcDir
     if [ "$OS" == "M1" ]; then
+        # 6/2/2023 - CircleCI was having difficulty targeting arm64 for Ospray's build.
+        #            Workaround: compile Ospray locally and add it to the source .tar.xz bundle
         cd $srcDir/ospray/osprayM1
-        # The following source build results with the following error on CircleCI:
-        #   Error executing ISPC executable
-        #   Bad CPU type in executable
-        #
-        #git clone https://github.com/ospray/ospray.git ospraySrc
-        #cd ospraySrc && git checkout v2.11.0
-        #mkdir build && cd build
-        #cmake \
-        #    -DBUILD_JOBS=8 \
-        #    -DBUILD_TBB_FROM_SOURCE=ON \
-        #    $srcDir/ospraySrc/scripts/superbuild/
-        #cmake --build .
-        #mv install/ospray/* $installDir/Ospray
     elif [ "$OS" == "macOSx86" ]; then
         local library='ospray-2.11.0.x86_64.macosx'
         rm -rf ospray/$library || true
@@ -722,9 +614,6 @@ qt() {
         cd $srcDir/qt-everywhere-src-5.15.8/build
     fi
 
-    #mkdir -p $srcDir/$library/build
-    #cd $srcDir/$library/build
-
     args=(
         -v
         -prefix $installDir
@@ -740,12 +629,6 @@ qt() {
         args+=(-qt-freetype)
         args+=(-opengl desktop)
     fi
-    #if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-    #    args+=(--with-macosx-version-min=$macOSMinVersion)
-    #fi
-    #args+=(> qtConfig.txt)
-
-    #echo "${args[@]}"
 
     CPPFLAGS=-I$installDir/include \
     LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
@@ -789,9 +672,6 @@ renameAndCompress() {
     cd $baseDir
     mv $installDir $archiveName
     tar cfJ $archiveName-$OS.tar.xz $archiveName
-    #bundle="$baseDir/$archiveName-$OS"
-    #tar cfJ $bundle.tar.xz $bundle
-    #mv $bundle.tar.xz /usr/local/VAPOR-Deps
 }
 
 if [ "$OS" == "macOSx86" ]; then
