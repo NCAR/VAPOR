@@ -1079,10 +1079,11 @@ jobs:
     resource_class: large
 
     steps:
-      - run:
-          name: acquire prerequisites
-          command: |
-            echo "test"
+      - checkout
+#      - run:
+#          name: acquire prerequisites
+#          command: |
+#            echo "test"
 
 #      - run:
 #          name: acquire prerequisites
@@ -1421,7 +1422,7 @@ workflows:
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      #- build_ubuntu20_libs
+      - build_ubuntu20_libs
       #- build_centos7_libs
       #- build_macOSx86_libs
       #- build_M1_libs

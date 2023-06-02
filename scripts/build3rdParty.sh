@@ -34,7 +34,17 @@ getMacOSMinVersion() {
 }
 macOSMinVersion=$(getMacOSMinVersion)
 
-if [ "$OS" = "CentOS" ]; then
+if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1"]; then
+    shopt -s expand_aliases
+    alias make=make -j8
+    alias
+else
+    shopt -s expand_aliases
+    alias make=make -j4
+    alias
+fi
+
+if [ "$OS" == "CentOS" ]; then
     shopt -s expand_aliases
     alias cmake=cmake3
     alias
