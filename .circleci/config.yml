@@ -851,7 +851,8 @@ jobs:
             pip3 install --upgrade pip
             pip3 install scikit-build command
             pip3 install gdown
-            gdown https://drive.google.com/uc?id=15-wSWR2H8swbpO7GvPueeaQrD56oLhxq
+            #gdown https://drive.google.com/uc?id=15-wSWR2H8swbpO7GvPueeaQrD56oLhxq
+            gdown https://drive.google.com/uc?id=12kHLQ8mP896lByMZutiawORsBrpNuZzv
             filename="/root/project/2019-Aug-Ubuntu22.tar.xz"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
           no_output_timeout: 45m
@@ -874,8 +875,8 @@ jobs:
           command: |
             mkdir -p /root/project/build
             cd /root/project/build
-            git checkout main
-            git reset --hard origin/main
+            #git checkout main
+            #git reset --hard origin/main
             git pull
             cmake -DCMAKE_BUILD_TYPE:String=Release \
                   -DDIST_INSTALLER:string=ON \
@@ -1419,13 +1420,13 @@ workflows:
       #- build_win10_installer
       #- build_macOSx86_installer
       #- build_M1_installer
-      #- build_ubuntu20_installer
+      - build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      - build_ubuntu20_libs
+      #- build_ubuntu20_libs
       #- build_centos7_libs
-      - build_macOSx86_libs
-      - build_M1_libs
+      #- build_macOSx86_libs
+      #- build_M1_libs
       #- build_suse_libs
       #- build_windows_libs
       #- release_weekly_installers:
