@@ -1198,9 +1198,8 @@ jobs:
             mv *.sh /tmp/workspace/installers
 
       - store_artifacts:
-          path: |
-            /tmp/workspace/installers
-
+          path: /tmp/workspace/installers
+      
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Mar-Ubuntu.tar.xz
 
@@ -1275,8 +1274,7 @@ jobs:
           no_output_timeout: 20m
 
       - store_artifacts:
-          path: |
-            /tmp/workspace/installers
+          path: /tmp/workspace/installers
       
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Mar-macOSx86.tar.xz
