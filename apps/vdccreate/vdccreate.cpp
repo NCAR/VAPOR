@@ -192,9 +192,9 @@ bool string_to_float(string s, float &f)
     f = 0.0;
     try {
         f = std::stof(s);
-    } catch (invalid_argument) {
+    } catch (invalid_argument const&) {
         return (false);
-    } catch (out_of_range) {
+    } catch (out_of_range const&) {
         return (false);
     }
     return (true);

@@ -119,11 +119,11 @@ int GeoImage::TiffGetImageDimensions(int dirnum, size_t &width, size_t &height) 
     bool ok = (bool)TIFFSetDirectory(_tif, dirnum);
     if (!ok) return (-1);
 
-    uint32 w;
+    uint32_t w;
     ok = (bool)TIFFGetField(_tif, TIFFTAG_IMAGEWIDTH, &w);
     if (!ok) return (-1);
 
-    uint32 h;
+    uint32_t h;
     ok = (bool)TIFFGetField(_tif, TIFFTAG_IMAGELENGTH, &h);
     if (!ok) return (-1);
 
@@ -139,7 +139,7 @@ int GeoImage::TiffReadImage(int dirnum, unsigned char *texture) const
 {
     VAssert(_tif != NULL);
 
-    uint32 *texuint32 = (uint32 *)texture;
+    uint32_t *texuint32_t = (uint32_t *)texture;
 
     bool ok = (bool)TIFFSetDirectory(_tif, dirnum);
     if (!ok) return (-1);
@@ -161,7 +161,7 @@ int GeoImage::TiffReadImage(int dirnum, unsigned char *texture) const
 
     if (nsamples == 2 && nbitspersample == 8) {
         tdata_t buf;
-        uint32  row;
+        uint32_t  row;
         short   config;
         short   photometric;
 
@@ -191,11 +191,11 @@ int GeoImage::TiffReadImage(int dirnum, unsigned char *texture) const
                     // If white is zero, reverse it:
                     if (!photometric) greyval = 255 - greyval;
                     unsigned char alphaval = charArray[2 * k + 1];
-                    texuint32[revrow * w + k] = alphaval << 24 | greyval << 16 | greyval << 8 | greyval;
+                    texuint32_t[revrow * w + k] = alphaval << 24 | greyval << 16 | greyval << 8 | greyval;
                 }
             }
         } else if (config == PLANARCONFIG_SEPARATE) {
-            uint16 s;
+            uint16_t s;
 
             // Note: following loop (adapted from tiff docs) has not
             // been tested.  Are there tiff
@@ -215,12 +215,12 @@ int GeoImage::TiffReadImage(int dirnum, unsigned char *texture) const
                             unsigned char greyval = charArray[k];
                             // If white is zero, reverse it:
                             if (!photometric) greyval = 255 - greyval;
-                            texuint32[revrow * w + k] = greyval << 16 | greyval << 8 | greyval;
+                            texuint32_t[revrow * w + k] = greyval << 16 | greyval << 8 | greyval;
                         }
                     } else {    // alpha
                         for (int k = 0; k < h; k++) {
                             unsigned char alphaval = charArray[k];
-                            texuint32[revrow * w + k] = alphaval << 24 | (texuint32[revrow * w + k] & 0xffffff);
+                            texuint32_t[revrow * w + k] = alphaval << 24 | (texuint32_t[revrow * w + k] & 0xffffff);
                         }
                     }
                 }
@@ -232,7 +232,7 @@ int GeoImage::TiffReadImage(int dirnum, unsigned char *texture) const
     } else {
         // Read pixels, whether or not we are georeferenced:
 
-        ok = TIFFReadRGBAImage(_tif, w, h, texuint32, 0);
+        ok = TIFFReadRGBAImage(_tif, w, h, texuint32_t, 0);
         if (!ok) {
             MyBase::SetErrMsg("Error reading tiff file:\n %s\n", _path.c_str());
             return -1;
