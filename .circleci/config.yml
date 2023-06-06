@@ -1478,7 +1478,7 @@ workflows:
       #- clang-tidy
       #- build_centos7
       #- build_python_api_ubuntuDebug
-      #- build_python_api_ubuntu
+      - build_python_api_ubuntu
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
