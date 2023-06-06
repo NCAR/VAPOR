@@ -1177,7 +1177,7 @@ jobs:
             pip3 install gdown
             gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
             filename="/root/project/2023-Jun-src.tar.xz"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+            tar --no-same-owner -xf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
           name: build libraries
@@ -1238,7 +1238,7 @@ jobs:
             pip3 install gdown
             gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
             filename="/root/project/2023-Jun-src.tar.xz"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+            tar --no-same-owner -xf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
           name: build libraries
