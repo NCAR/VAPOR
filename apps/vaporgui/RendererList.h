@@ -44,7 +44,7 @@ class RendererList : public VContainer {
     public:
         const std::string Id;
         DatasetItem(const std::string &name)
-        : QListWidgetItem(QString::fromStdString(name), nullptr, DatasetType), Id(name) {}
+        : QListWidgetItem(nullptr, DatasetType), Id(name) {}
     };
 
 public:

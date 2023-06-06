@@ -38,8 +38,29 @@ protected:
     }
 };
 
+class DisableDragFilter: public QObject {
+    QListWidget *_w;
+public:
+    DisableDragFilter(QListWidget *w) : _w(w) {}
+protected:
+    bool eventFilter(QObject* object, QEvent* event)
+    {
+        // This event filter is ignored by disabled items.
+//        if (event->type() == QEvent::MouseButtonPress) {
+//            auto pos = _w->mapFromGlobal(QCursor::pos());
+//            auto *item = _w->itemAt(pos);
+//            if (item && !(item->flags() & Qt::ItemIsEnabled))
+//                return true;
+//        }
+        if(event->type() == QEvent::MouseMove)
+            return true;
+        return QObject::eventFilter(object, event);
+    }
+};
+
 RendererList::RendererList(ControlExec *ce) : VContainer(_lw = new QListWidget), _ce(ce)
 {
+    installEventFilter(new DisableDragFilter(_lw));
     connect(_lw, &QListWidget::currentItemChanged, this, &RendererList::currentItemChanged);
     _lw->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(_lw, &QListWidget::customContextMenuRequested, this, &RendererList::showContextMenu);
@@ -105,11 +126,23 @@ void RendererList::Update()
     _lw->clear();
 
     auto datasets = paramsMgr->GetDataMgrNames();
-    for (auto dataset : datasets) {
+    for (int i = 0; i < datasets.size(); i++) {
+        auto dataset = datasets[i];
+        if (i != 0) {
+            QListWidgetItem *spacerItem = new QListWidgetItem();
+            // These flags only sortof work
+            spacerItem->setFlags(spacerItem->flags() & ~Qt::ItemIsEnabled & ~Qt::ItemIsSelectable & ~Qt::ItemIsDragEnabled);
+            _lw->addItem(spacerItem);
+        }
+
         QListWidgetItem *datasetItem = new DatasetItem(dataset);
+        datasetItem->setFlags(datasetItem->flags() & ~Qt::ItemIsDragEnabled);
+        QLabel *datasetLabel = new QLabel(QString::fromStdString(dataset));
+        datasetLabel->setStyleSheet("QLabel { font-weight: 500; }");
         if (!AllowInspectDataset)
-            datasetItem->setFlags(datasetItem->flags() & ~Qt::ItemIsSelectable);
+            datasetItem->setFlags(datasetItem->flags() & ~Qt::ItemIsEnabled);
         _lw->addItem(datasetItem);
+        _lw->setItemWidget(datasetItem, datasetLabel);
         if (AllowInspectDataset && dataset == activeDataset)
             _lw->setCurrentRow(_lw->count()-1);
 
@@ -136,6 +169,7 @@ void RendererList::Update()
             });
             
             QListWidgetItem *item = new RendererItem(rName, className, dataset);
+            item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);
             _lw->addItem(item);
             _lw->setItemWidget(item, line);
             
@@ -170,17 +204,11 @@ string RendererList::getClassName(string instName)
 
 void RendererList::currentItemChanged(QListWidgetItem *item, QListWidgetItem *previous)
 {
-    if (!AllowInspectDataset && item->type() == DatasetType) {
-        _lw->blockSignals(true);
-        _lw->setCurrentItem(previous);
-        _lw->blockSignals(false);
-        return;
-    }
-
     if (item->type() == RendererType) {
         RendererItem *rItem = dynamic_cast<RendererItem*>(item);
         inspectRenderer(rItem);
-    } else {
+    }
+    else if (item->type() == DatasetType) {
         DatasetItem *dItem = dynamic_cast<DatasetItem*>(item);
         inspectDataset(dItem);
     }
