@@ -803,9 +803,18 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
 
     // Check velocity multiplier
     // If the multiplier is changed, then the entire stream is out of date
-    const float mult = params->GetVelocityMultiplier();
-    if (_cache_velocityMltp != mult) {
-        _cache_velocityMltp = mult;
+    const auto velMult = params->GetVelocityMultiplier();
+    if (_cache_velocityMltp != velMult) {
+        _cache_velocityMltp = velMult;
+        _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+        _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+
+    // Check first step size multiplier
+    // If the multiplier is changed, then the entire stream is out of date
+    const auto firstMult = params->GetFirstStepSizeMultiplier();
+    if (_cache_firstStepSizeMltp != firstMult) {
+        _cache_firstStepSizeMltp = firstMult;
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }

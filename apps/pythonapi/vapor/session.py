@@ -10,6 +10,7 @@ import PIL.Image
 link.include('vapor/Session.h')
 link.include('vapor/RenderManager.h')
 
+@link.FixModuleOwnership
 class Session(link.Session):
     def __init__(self):
         super().__init__()

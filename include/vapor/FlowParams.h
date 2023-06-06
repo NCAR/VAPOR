@@ -73,11 +73,24 @@ public:
     //! vectors are in meters, you can apply a velocity multiplyer of 0.001 to correct the mismatch.
     //! \retval double - Velocity field multiplier for flow rendering
     double GetVelocityMultiplier() const;
+
+    //! Get the multiplier being applied to the first step size of flow integration.
+    //! \details VAPOR estimates a step size to be applied to the first step of flow integration,\n
+    //!          and then dynamically adjusts that value afterwards. However, VAPOR may fail to produce a proper estimate \n
+    //!          (mostly too big of an estimate) and result in obviously wrong flow lines. \n
+    //!          In such cases, users may manually apply a multiplier to the first step size.
+    //! \retval double - First step size multiplier for flow rendering.
+    double GetFirstStepSizeMultiplier() const;
     
     //! Set the multiplier being applied to the flow advection algorithm.
     //! \copydetails FlowParams::GetVelocityMultiplier()
     //! \param[in] double - Velocity field multiplier for flow rendering
-    void   SetVelocityMultiplier(double);
+    void SetVelocityMultiplier(double);
+    
+    //! Set the multiplier being applied to the first step size of flow advection.
+    //! \copydetails FlowParams::GetFirstStepSizeMultiplier()
+    //! \param[in] double - Velocity field multiplier for flow rendering
+    void SetFirstStepSizeMultiplier(double);
 
     //! Get the target number of steps to advect a steady flow line (aka a streamline).
     //! \copydetails FlowParams::SetSteadyNumOfSteps()
@@ -356,6 +369,7 @@ public:
 
     static const std::string _isSteadyTag;
     static const std::string _velocityMultiplierTag;
+    static const std::string _firstStepSizeMultiplierTag;
     static const std::string _steadyNumOfStepsTag;
     static const std::string _seedGenModeTag;
     static const std::string _seedInputFilenameTag;

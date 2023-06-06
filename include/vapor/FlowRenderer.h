@@ -57,7 +57,8 @@ private:
     int _cache_refinementLevel = 0;
     int _cache_compressionLevel = 0;
 
-    float              _cache_velocityMltp = 1.0f;
+    double             _cache_velocityMltp = 1.0;
+    double             _cache_firstStepSizeMltp = 1.0;
     bool               _cache_isSteady = false;
     long               _cache_steadyNumOfSteps = 0;
     size_t             _cache_currentTS = 0;

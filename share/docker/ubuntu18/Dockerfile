@@ -20,7 +20,9 @@ RUN apt-get update \
     && apt-get install -y libglib2.0-0 \
     && apt-get install -y libdbus-1-3 \
     && apt-get install -y valgrind \
-    && apt-get install -y clang-tidy 
+    && apt-get install -y clang-tidy \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Acquire 3rd party libraries
 #

@@ -96,7 +96,7 @@ class Animation:
 
     def SaveMP4(self, path:str, framerate=15):
         fourcc = cv2.VideoWriter_fourcc(*'avc1')
-        video = cv2.VideoWriter(path, fourcc, 15, self._frames[0].size)
+        video = cv2.VideoWriter(path, fourcc, framerate, self._frames[0].size)
         for i in self._frames:
             video.write(cv2.cvtColor(np.array(i), cv2.COLOR_RGB2BGR))
         video.release()

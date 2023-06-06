@@ -2,7 +2,6 @@
 
 # Inputs
 [[ -z "$DEBUG_BUILD" ]] && DEBUG_BUILD=true
-# MAP_IMAGES_PATH
 
 CMAKE_EXTRA=""
 
@@ -20,10 +19,10 @@ if $DEBUG_BUILD; then
     export CPPFLAGS="`echo $CPPFLAGS|sed 's/-D_FORTIFY_SOURCE=2//g'`"
     
     CMAKE_EXTRA="$CMAKE_EXTRA -DCMAKE_BUILD_TYPE=Debug"
-    CMAKE_EXTRA="$CMAKE_EXTRA -DINSTALLER_OMIT_MAPS=ON"
 else
     CMAKE_EXTRA="$CMAKE_EXTRA -DCMAKE_BUILD_TYPE=Release"
 fi
+CMAKE_EXTRA="$CMAKE_EXTRA -DINSTALLER_OMIT_MAPS=ON"
 
 # Ignore extra warnings
 export CPPFLAGS=" \
@@ -94,14 +93,4 @@ cmake .. \
 make -j$(($CPU_COUNT+1))
 make doc
 make install
-
-# ===========================================
-
-cd ../apps/pythonapi/jupyter-vapor-widget
-echo $PYTHON -m pip install --no-deps --ignore-installed --target="$SP_DIR" .
-$PYTHON -m pip install --no-deps --ignore-installed --target="$SP_DIR" .
-
-cd ../../..
-echo $PYTHON conda/jupyter_installer_fix.py --widgetDir=./apps/pythonapi/jupyter-vapor-widget --outRootDir="$PREFIX"
-$PYTHON conda/jupyter_installer_fix.py --widgetDir=./apps/pythonapi/jupyter-vapor-widget --outRootDir="$PREFIX"
 

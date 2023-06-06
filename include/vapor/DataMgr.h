@@ -227,6 +227,12 @@ public:
     //
     bool GetMesh(string meshname, DC::Mesh &mesh) const;
 
+    DC::Mesh GetMesh(string meshname) const {
+        DC::Mesh mesh;
+        GetMesh(meshname, mesh);
+        return mesh;
+    }
+
     //! Return a list of names for all of the defined data variables.
     //!
     //! This method returns a list of all data variables defined
@@ -510,6 +516,12 @@ public:
     //! equal to -1
     //!
     virtual int GetDimLens(string varname, std::vector<size_t> &dims, long ts) { return (GetDimLensAtLevel(varname, -1, dims, ts)); }
+
+    std::vector<size_t> GetDimLens(string varname) {
+        std::vector<size_t> dims;
+        GetDimLens(varname, dims, 0);
+        return dims;
+    }
 
     //! Unlock a floating-point region of memory
     //!
