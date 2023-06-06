@@ -12,9 +12,9 @@ set -e
 
 #OS="CentOS"
 baseDir='/usr/local/VAPOR-Deps'
-srcDir="$baseDir/2023-Mar-src"
+srcDir="$baseDir/2023-Jun-src"
 installDir="$baseDir/current"
-archiveName="2023-Mar"
+archiveName="2023-Jun"
 
 while getopts o:b:i flag
 do
@@ -680,9 +680,9 @@ add_rpath() {
 }
 
 #baseDir='/usr/local/VAPOR-Deps'
-#srcDir="$baseDir/2023-Mar-src"
+#srcDir="$baseDir/2023-Jun-src"
 #installDir="$baseDir/current"
-#archiveName="2023-Mar"
+#archiveName="2023-Jun"
 renameAndCompress() {
     pwd
     cd $baseDir
