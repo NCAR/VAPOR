@@ -635,7 +635,7 @@ jobs:
 
   build_ubuntu18:
     docker:
-      - image: ubuntu:20.04
+      - image: sgpearse/vapor3-ubuntu18:latest
 
     steps:
       - run:
@@ -654,7 +654,6 @@ jobs:
             apt install -y valgrind
             apt install -y clang-tidy
             apt install -y lsb-release
-            #- image: sgpearse/vapor3-ubuntu18:latest
 
       - run:
           name: install python
