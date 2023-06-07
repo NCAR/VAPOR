@@ -519,6 +519,8 @@ jobs:
       - run:
           name: acquire map image archive
           command: |
+            # The following resolves the error "E: The repository 'http://security.debian.org/debian-security stretch/updates Release' does not have a Release file."
+            echo "deb http://archive.debian.org/debian stretch main contrib non-free" > /etc/apt/sources.list
             cd /root
             apt update
             apt install -y git
