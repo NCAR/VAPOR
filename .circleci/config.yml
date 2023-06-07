@@ -1021,15 +1021,62 @@ jobs:
             echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
             ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
 
+  build_suse_libs:
+    docker:
+      - image: opensuse/leap:latest
+
+    resource_class: large
+
+    steps:
+      - checkout
+
+      - run:
+          name: install python
+          command: |
+            zypper update
+            zypper install -y python3
+            zypper install -y python3-pip
+            pip3 install --upgrade pip
+            pip3 install scikit-build command
+
+      - run:
+          name: update cmake
+          command: |
+            zypper install cmake
+            #apt remove -y --purge --auto-remove cmake
+            #apt install -y libssl-dev
+            #apt install -y build-essential git
+            #git clone https://github.com/Kitware/CMake/
+            #cd CMake
+            #./bootstrap && make && make install
+
+      - run:
+          name: update 3rd party libraries
+          command: |
+            rm -rf /usr/local/VAPOR-Deps/2019-Aug
+            pip3 install gdown --upgrade
+            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
+            filename="/root/project/2019-Aug-Ubuntu.tar.xz"
+            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+
+      - run:
+          name: make debug
+          command: |
+            cd /root/project/build
+            cmake -DBUILD_TEST_APPS=ON ..
+            make -j2 2>&1 | tee /tmp/debugOutput.txt
+            make clean
+      
 workflows:
   version: 2
   build:
     jobs:
       #- clang-tidy
-      - build_ubuntu18
-      - build_centos7
-      - build_python_api_ubuntuDebug
-      - build_python_api_ubuntu
+      - build_suse_libs
+      #- build_ubuntu18
+      #- build_centos7
+      #- build_python_api_ubuntuDebug
+      #- build_python_api_ubuntu
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
