@@ -295,7 +295,7 @@ void RendererList::deleteRenderer(std::string id)
 
     ParamsMgr *paramsMgr = _ce->GetParamsMgr();
     GUIStateParams *guiParams = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    paramsMgr->BeginSaveStateGroup("Remove Renderer");
+    paramsMgr->BeginSaveStateGroup(_ce->GetRemoveRendererUndoTag());
     _ce->RemoveRenderer(rWin, rDataset, rClass, id, false);
     guiParams->SetActiveRenderer(getCurrentViz(), "", "");
 
