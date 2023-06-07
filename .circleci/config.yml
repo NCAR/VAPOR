@@ -641,7 +641,7 @@ jobs:
       - run:
           name: acquire prerequisites
           command: |
-            ENV DEBIAN_FRONTEND=noninteractive
+            export DEBIAN_FRONTEND=noninteractive
             apt update
             apt install -y curl
             apt install -y xz-utils
