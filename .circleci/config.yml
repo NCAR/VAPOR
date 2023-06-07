@@ -637,6 +637,7 @@ jobs:
     docker:
       - image: ubuntu:20.04
 
+    steps:
       - run:
           name: acquire prerequisites
           command: |
@@ -655,7 +656,6 @@ jobs:
             apt install -y lsb-release
             #- image: sgpearse/vapor3-ubuntu18:latest
 
-    steps:
       - run:
           name: install python
           command: |
