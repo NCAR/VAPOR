@@ -635,7 +635,7 @@ jobs:
 
   build_ubuntu18:
     docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
+      - image: ubuntu:20.04
 
     steps:
       - run:
