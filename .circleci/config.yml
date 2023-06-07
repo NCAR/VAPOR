@@ -633,7 +633,7 @@ jobs:
           paths:
             - installers
 
-  build_ubuntu18:
+  build_ubuntu20:
     docker:
       - image: ubuntu:20.04
 
@@ -1034,15 +1034,15 @@ jobs:
           name: install python
           command: |
             zypper update
-            zypper install -y python3
-            zypper install -y python3-pip
+            zypper install python3 -y
+            zypper install python3-pip -y
             pip3 install --upgrade pip
             pip3 install scikit-build command
 
       - run:
           name: update cmake
           command: |
-            zypper install cmake
+            zypper install cmake -y
             #apt remove -y --purge --auto-remove cmake
             #apt install -y libssl-dev
             #apt install -y build-essential git
@@ -1073,7 +1073,7 @@ workflows:
     jobs:
       #- clang-tidy
       - build_suse_libs
-      #- build_ubuntu18
+      - build_ubuntu20
       #- build_centos7
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
