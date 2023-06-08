@@ -26,6 +26,7 @@
 #include <vapor/MouseModeParams.h>
 #include <vapor/GUIStateParams.h>
 #include <vapor/BookmarkParams.h>
+#include <vapor/STLUtils.h>
 
 using namespace VAPoR;
 
@@ -152,9 +153,38 @@ void GUIStateParams::SetActiveVizName(string vizWin) { SetValueString(m_activeVi
 //
 void GUIStateParams::GetActiveRenderer(string vizWin, string &renderType, string &renderInst) const { m_activeRenderer->GetActiveRenderer(vizWin, renderType, renderInst); }
 
+string GUIStateParams::GetActiveRendererInst() const
+{
+    string renderType, renderInst;
+    GetActiveRenderer(GetActiveVizName(), renderType, renderInst);
+    return renderInst;
+}
+
 //! Set active renderer class and instance name for a visualizer
 //
-void GUIStateParams::SetActiveRenderer(string vizWin, string renderType, string renderInst) { m_activeRenderer->SetActiveRenderer(vizWin, renderType, renderInst); }
+void GUIStateParams::SetActiveRenderer(string vizWin, string renderType, string renderInst) {
+    BeginGroup("Set active");
+    SetValueString("Active_Dataset", "", "");
+    m_activeRenderer->SetActiveRenderer(vizWin, renderType, renderInst);
+    EndGroup();
+}
+
+string GUIStateParams::GetActiveDataset() const
+{
+    string name = GetValueString("Active_Dataset", "");
+    if (!STLUtils::Contains(GetOpenDataSetNames(), name))
+        return "";
+    return name;
+}
+
+void GUIStateParams::SetActiveDataset(std::string name)
+{
+    assert(STLUtils::Contains(GetOpenDataSetNames(), name));
+    BeginGroup("Set active");
+    SetActiveRenderer(GetActiveVizName(), "", "");
+    SetValueString("Active_Dataset", "", name);
+    EndGroup();
+}
 
 string GUIStateParams::GetCurrentSessionFile() const { return (GetValueString(m_sessionFileTag, "")); }
 

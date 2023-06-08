@@ -8,16 +8,18 @@
 #include <vapor/MyBase.h>
 #include <QMessageBox>
 #include <vapor/GUIStateParams.h>
-#include "ui_LeftPanel.h"
 #include "ui_NewRendererDialog.h"
 #include "VaporTable.h"
+#include <vapor/ControlExecutive.h>
 
 QT_USE_NAMESPACE
 
+class RendererList;
 namespace VAPoR {
 class ControlExec;
 class ParamsMgr;
 class DataStatus;
+class RenderParams;
 }    // namespace VAPoR
 
 class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
@@ -74,91 +76,10 @@ public:
 //! QStackedWidget that displays the various parameters associated
 //! with the selected renderer.
 //!
-class RenderHolder : public QWidget, public Ui_LeftPanel {
-    Q_OBJECT
-
+class RenderHolder {
 public:
-    //! Constructor:
-    //!
-    //! \param[in] widgets vector of Widgets to be added
-    //! \param[in] widgetNames vector of widget names
-    //! \param[in] descriptions vector of Descriptions of the renderers to
-    //! be displayed
-    //! \param[in] iconPath Full path to a raster file containing a
-    //! large icon, or an empty string if none exists
-    //! \param[in] smallIconPath Full path to a raster file containing a
-    //! small icon (thumbnail), or an empty string if none exists
-    //
-    RenderHolder(QWidget *parent, VAPoR::ControlExec *ce, const std::vector<QWidget *> &widgets, const std::vector<string> &widgetNames, const std::vector<string> &descriptions,
-                 const std::vector<string> &iconPaths, const std::vector<string> &smallIconPaths, const std::vector<bool> &dim2DSupport, const std::vector<bool> &dim3DSupport,
-                 vector<bool> particleSupport);
-
-    virtual ~RenderHolder() {}
-
-    //! Make the tableWidget match the currently displayed RenderParams
-    //!
-    void Update();
-
-    //! Specify the name of the page to be displayed of the stackedWidget.
-    //! \param[in] name name of widget
-    //!
-    //! \sa RenderHolder()
-    //
-    void SetCurrentWidget(string name);
-
-#ifndef DOXYGEN_SKIP_THIS
-private:
-    RenderHolder() {}
-
-    GUIStateParams *_getStateParams() const
-    {
-        VAssert(_controlExec != NULL);
-        return ((GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    }
-
-    void _updateDupCombo();
-    void _makeRendererTableHeaders(vector<string> &table);
-    void _initializeNewRendererDialog(vector<string> datasetNames);
-
-    // Convert name to a unique name (among renderer names)
-    std::string uniqueName(std::string name);
-
-    void _showIntelDriverWarning(const string &rendererType);
-
-private slots:
-    void _showNewRendererDialog();
-    void _newRendererDialogAccepted();
-    void _deleteRenderer();
-    void _itemTextChange(QTableWidgetItem *);
-    void _copyInstanceTo(int);
-    void _activeRendererChanged(int row, int col);
-    void _tableValueChanged(int row, int col);
-
-signals:
-    void newRendererSignal(string vizName, string renderClass, string renderInst);
-    void activeChanged(string vizName, string renderClass, string renderInst);
-
-private:
-    VAPoR::ControlExec *_controlExec;
-    NewRendererDialog * _newRendererDialog;
-
-    VaporTable *        _vaporTable;
-    int                 _currentRow;
-    std::vector<string> _widgetNames;
-
-    int _getRow(string renderInst) const;
-
-    void _getRowInfo(int row, string &renderInst, string &renderClass, string &dataSetName) const;
-
-    void   _makeConnections();
-    void   _initializeSplitter();
-    string _getActiveRendererClass();
-    string _getActiveRendererInst();
-    // void highlightActiveRow(int row);
-    void                 _changeRendererName(int row, int col);
-    VAPoR::RenderParams *_getRenderParamsFromCell(int row, int col);
-
-#endif    // DOXYGEN_SKIP_THIS
+    static void _showIntelDriverWarning(VAPoR::ControlExec *_controlExec, const string &rendererType);
+    static void _newRendererDialogAccepted(VAPoR::ControlExec *_controlExec, NewRendererDialog *_newRendererDialog);
 };
 
 #endif    // RENDERHOLDER_H

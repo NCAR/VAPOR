@@ -15,7 +15,6 @@ ViewpointTab::ViewpointTab(ControlExec *ce) : EventRouter(ce, ViewpointParams::G
 {
     PProjectionStringSection *proj;
     _pg = new PGroup({
-        new PDatasetTransformWidget(_controlExec),
         new PCameraControlsSection(_controlExec),
         new PFramebufferSettingsSection(_controlExec),
         proj = new PProjectionStringSection(_controlExec),

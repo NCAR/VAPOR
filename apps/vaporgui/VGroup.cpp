@@ -2,8 +2,10 @@
 #include <QVBoxLayout>
 
 VGroup::VGroup(List children)
+: VGroup(new QVBoxLayout, children) {}
+
+VGroup::VGroup(QBoxLayout *layout, List children)
 {
-    QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin(0);
     layout->setSpacing(4);
     setLayout(layout);
@@ -21,3 +23,6 @@ VSubGroup::VSubGroup(List children)
     layout()->setContentsMargins(12, 0, 0, 0);
     AddM(children);
 }
+
+VHGroup::VHGroup()
+: VGroup(new QHBoxLayout, {}) {}

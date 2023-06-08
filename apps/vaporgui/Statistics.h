@@ -29,7 +29,6 @@
     #include <vapor/Grid.h>
     #include <vapor/ControlExecutive.h>
     #include "ui_statsWindow.h"
-    #include "ui_errMsg.h"
     #include <RangeCombos.h>
     #include <StatisticsParams.h>
     #include "PWidgets.h"
@@ -38,13 +37,6 @@ namespace VAPoR {
 class ParamsMgr;
 class DataMgr;
 }    // namespace VAPoR
-
-class sErrMsg : public QDialog, public Ui_ErrMsg {
-    Q_OBJECT
-
-public:
-    sErrMsg() { setupUi(this); }
-};
 
 class Statistics : public QDialog, public Ui_StatsWindow {
     Q_OBJECT
@@ -121,7 +113,6 @@ private slots:
 
 private:
     ValidStats             _validStats;
-    sErrMsg *              _errMsg;
     VAPoR::ControlExec *   _controlExec;
     std::vector<PWidget *> _pw;
 

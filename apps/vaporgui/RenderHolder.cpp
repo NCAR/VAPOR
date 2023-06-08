@@ -195,61 +195,7 @@ void NewRendererDialog::_uncheckAllButtons()
     }
 }
 
-RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce, const vector<QWidget *> &widgets, const vector<string> &widgetNames, const vector<string> &descriptions, const vector<string> &iconPaths,
-                           const vector<string> &smallIconPaths, const vector<bool> &dim2DSupport, const vector<bool> &dim3DSupport, vector<bool> particleSupport)
-: QWidget(parent), Ui_LeftPanel()
-{
-    VAssert(widgets.size() == widgetNames.size());
-    VAssert(widgets.size() == iconPaths.size());
-    VAssert(widgets.size() == smallIconPaths.size());
-
-    setupUi(this);
-
-    _controlExec = ce;
-    //_newRendererDialog = new NewRendererDialog(this, ce);
-    _newRendererDialog = new NewRendererDialog(this, widgetNames, descriptions, iconPaths, smallIconPaths, dim2DSupport, dim3DSupport, particleSupport);
-    // Remove [X] button from title bar to fix bug #2184
-    _newRendererDialog->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-
-    _vaporTable = new VaporTable(tableWidget, false, true);
-    _vaporTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE), (VaporTable::HighlightFlags)(VaporTable::ROWS));
-    _vaporTable->ShowToolTips(true);
-    _vaporTable->StretchToColumn(2);
-    _vaporTable->HideColumn(1);
-    _currentRow = 0;
-    tableWidget->setWordWrap(false);
-
-    _widgetNames = widgetNames;
-    for (int i = 0; i < widgets.size(); i++) { stackedWidget->addWidget(widgets[i]); }
-    stackedWidget->setCurrentIndex(0);
-
-    _makeConnections();
-    _initializeSplitter();
-}
-
-void RenderHolder::_makeConnections()
-{
-    connect(_vaporTable, SIGNAL(cellClicked(int, int)), this, SLOT(_activeRendererChanged(int, int)));
-    connect(_vaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(_tableValueChanged(int, int)));
-    connect(newButton, SIGNAL(clicked()), this, SLOT(_showNewRendererDialog()));
-    connect(deleteButton, SIGNAL(clicked()), this, SLOT(_deleteRenderer()));
-    connect(dupCombo, SIGNAL(activated(int)), this, SLOT(_copyInstanceTo(int)));
-    connect(_newRendererDialog, &NewRendererDialog::accepted, this, &RenderHolder::_newRendererDialogAccepted);
-}
-
-void RenderHolder::_initializeSplitter()
-{
-    QList<int> proportions;
-    int        topHeight = deleteButton->height() + newButton->height() + newButton->height();
-    int        bottomHeight = height() - topHeight;
-    proportions.append(topHeight);
-    proportions.append(bottomHeight);
-    mainSplitter->setSizes(proportions);
-}
-
-void RenderHolder::_initializeNewRendererDialog(vector<string> datasetNames) { _newRendererDialog->InitializeDataSources(_controlExec->GetDataStatus()); }
-
-void RenderHolder::_showIntelDriverWarning(const string &rendererType)
+void RenderHolder::_showIntelDriverWarning(ControlExec *_controlExec, const string &rendererType)
 {
     if (_controlExec->GetGPUVendor() != GLManager::Vendor::Intel) return;
     if (rendererType != VolumeRenderer::GetClassType() && rendererType != VolumeIsoRenderer::GetClassType()) return;
@@ -281,26 +227,18 @@ void RenderHolder::_showIntelDriverWarning(const string &rendererType)
     if (dontShowAgain->checkState() == Qt::Checked) sp->SetDontShowIntelDriverWarning(true);
 }
 
-void RenderHolder::_showNewRendererDialog()
-{
-    vector<string> dataSetNames = _controlExec->GetDataStatus()->GetDataMgrNames();
-
-    _initializeNewRendererDialog(dataSetNames);
-    _newRendererDialog->open();
-}
-
-void RenderHolder::_newRendererDialogAccepted()
+void RenderHolder::_newRendererDialogAccepted(ControlExec *_controlExec, NewRendererDialog *_newRendererDialog)
 {
     ParamsMgr *    paramsMgr = _controlExec->GetParamsMgr();
     vector<string> dataSetNames = _controlExec->GetDataStatus()->GetDataMgrNames();
 
     string rendererType = _newRendererDialog->GetSelectedRenderer();
-    _showIntelDriverWarning(rendererType);
+    _showIntelDriverWarning(_controlExec, rendererType);
 
     int    selection = _newRendererDialog->dataMgrCombo->currentIndex();
     string dataSetName = dataSetNames[selection];
 
-    GUIStateParams *p = _getStateParams();
+    GUIStateParams *p = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
     string          activeViz = p->GetActiveVizName();
 
     // figure out the name
@@ -312,7 +250,7 @@ void RenderHolder::_newRendererDialogAccepted()
     //
     if (rendererName.find_first_not_of(' ') == string::npos) { rendererName = rendererType; }
 
-    rendererName = uniqueName(rendererName);
+    rendererName = _controlExec->MakeRendererNameUnique(rendererName);
     qname = QString(rendererName.c_str());
 
     paramsMgr->BeginSaveStateGroup(_controlExec->GetActivateRendererUndoTag());
@@ -328,332 +266,8 @@ void RenderHolder::_newRendererDialogAccepted()
     //
     p->SetActiveRenderer(activeViz, rendererType, rendererName);
 
-    Update();
+//    Update();
 
-    emit newRendererSignal(activeViz, rendererType, rendererName);
+//    emit newRendererSignal(activeViz, rendererType, rendererName);
     paramsMgr->EndSaveStateGroup();
-}
-
-void RenderHolder::_deleteRenderer()
-{
-    // Check if there is anything to delete:
-    //
-    if (tableWidget->rowCount() == 0) { return; }
-
-    GUIStateParams *p = _getStateParams();
-    string          activeViz = p->GetActiveVizName();
-
-    // Get the currently selected renderer.
-    //
-    string rendererName, rendererType, dataSetName;
-
-    rendererName = _getActiveRendererInst();
-    int row = _getRow(rendererName);
-    _getRowInfo(row, rendererName, rendererType, dataSetName);
-
-    _controlExec->RemoveRenderer(activeViz, dataSetName, rendererType, rendererName, false);
-
-    // Update will rebuild the TableWidget with the updated state
-    //
-    p->SetActiveRenderer(activeViz, "", "");
-    Update();
-
-    // Make the renderer in the first row the active renderer
-    //
-    _getRowInfo(0, rendererName, rendererType, dataSetName);
-    if (rendererName != "" || rendererType != "" || dataSetName != "") {
-        _activeRendererChanged(0, 0);
-        emit activeChanged(activeViz, rendererType, rendererName);
-    }
-
-    _vaporTable->SetActiveRow(0);
-}
-
-void RenderHolder::_activeRendererChanged(int row, int col)
-{
-    _currentRow = row;
-    GUIStateParams *p = _getStateParams();
-    string          activeViz = p->GetActiveVizName();
-    string          rendererName = _vaporTable->GetValue(row, 0);
-    string          rendererType = _vaporTable->GetValue(row, 1);
-    p->SetActiveRenderer(activeViz, rendererType, rendererName);
-    if (col != 3) _vaporTable->SetActiveRow(row);
-    emit activeChanged(activeViz, rendererType, rendererName);
-}
-
-VAPoR::RenderParams *RenderHolder::_getRenderParamsFromCell(int row, int col)
-{
-    GUIStateParams *p = _getStateParams();
-    string          activeViz = p->GetActiveVizName();
-    string          activeRenderClass, activeRenderInst;
-    p->GetActiveRenderer(activeViz, activeRenderClass, activeRenderInst);
-
-    string rendererName = _vaporTable->GetValue(row, 0);
-    string rendererType = _vaporTable->GetValue(row, 1);
-    string dataSetName = _vaporTable->GetValue(row, 2);
-
-    RenderParams *rParams = _controlExec->GetRenderParams(activeViz, dataSetName, activeRenderClass, activeRenderInst);
-    return rParams;
-}
-
-void RenderHolder::_changeRendererName(int row, int col)
-{
-    string text = _vaporTable->GetValue(row, col);
-    string uniqueText = uniqueName(text);
-}
-
-void RenderHolder::_tableValueChanged(int row, int col)
-{
-    if (col == 0) {
-        _changeRendererName(row, col);
-        return;
-    }
-
-    GUIStateParams *p = _getStateParams();
-    string          activeViz = p->GetActiveVizName();
-    string          rendererName = _vaporTable->GetValue(row, 0);
-    string          rendererType = _vaporTable->GetValue(row, 1);
-    string          dataSetName = _vaporTable->GetValue(row, 2);
-    int             state = _vaporTable->GetValue(row, 3);
-
-    int rc = _controlExec->ActivateRender(activeViz, dataSetName, rendererType, rendererName, state);
-    if (rc < 0) {
-        MSG_ERR("Can't activate renderer");
-        return;
-    }
-
-    _activeRendererChanged(row, col);
-}
-
-void RenderHolder::_itemTextChange(QTableWidgetItem *item)
-{
-#ifdef VAPOR3_0_0_ALPHA
-    int row = item->row();
-    int col = item->column();
-    if (col != 0) return;
-    int viznum = _controlExec->GetActiveVizIndex();
-
-    // avoid responding to item creation:
-    if (InstanceParams::GetNumInstances(viznum) <= row) return;
-
-    string        text = item->text().toStdString();
-    RenderParams *rP = InstanceParams::GetRenderParamsInstance(viznum, row);
-    if (stdtext == rP->GetRendererName()) return;
-    string uniqueText = uniqueName(text);
-
-    if (uniqueText != text) item->setText(QString(uniqueText.c_str()));
-
-    rP->SetRendererName(uniqueText);
-#endif
-}
-
-void RenderHolder::_copyInstanceTo(int item)
-{
-    if (item == 0) return;    // User has selected descriptor item "Duplicate in:"
-
-    GUIStateParams *guiStateParams = _getStateParams();
-
-    string vizName = dupCombo->itemText(item).toStdString();
-    string activeViz = guiStateParams->GetActiveVizName();
-
-    string activeRenderClass, activeRenderInst;
-    guiStateParams->GetActiveRenderer(activeViz, activeRenderClass, activeRenderInst);
-
-    string dataSetName, dummy1, dummy2;
-    bool   status = _controlExec->RenderLookup(activeRenderInst, dummy1, dataSetName, dummy2);
-    VAssert(status);
-
-    RenderParams *rParams = _controlExec->GetRenderParams(activeViz, dataSetName, activeRenderClass, activeRenderInst);
-    VAssert(rParams);
-
-    string rendererName = uniqueName(activeRenderInst);
-
-    int rc = _controlExec->ActivateRender(vizName, dataSetName, rParams, rendererName, false);
-    if (rc < 0) {
-        MSG_ERR("Can't create renderer");
-        return;
-    }
-
-    // Save current instance to state
-    //
-    guiStateParams->SetActiveRenderer(activeViz, activeRenderClass, rendererName);
-
-    Update();
-
-    emit newRendererSignal(activeViz, activeRenderClass, rendererName);
-}
-
-std::string RenderHolder::uniqueName(std::string name)
-{
-    return _controlExec->MakeRendererNameUnique(name);
-}
-
-string RenderHolder::_getActiveRendererClass()
-{
-    GUIStateParams *p = _getStateParams();
-    string          activeViz = p->GetActiveVizName();
-
-    string activeRenderClass, activeRenderInst;
-    p->GetActiveRenderer(activeViz, activeRenderClass, activeRenderInst);
-
-    return activeRenderClass;
-}
-
-string RenderHolder::_getActiveRendererInst()
-{
-    GUIStateParams *p = _getStateParams();
-    string          activeViz = p->GetActiveVizName();
-
-    string activeRenderClass, activeRenderInst;
-    p->GetActiveRenderer(activeViz, activeRenderClass, activeRenderInst);
-
-    return activeRenderInst;
-}
-
-void RenderHolder::_updateDupCombo()
-{
-    ParamsMgr *    pm = _controlExec->GetParamsMgr();
-    vector<string> vizNames = pm->GetVisualizerNames();
-
-    dupCombo->clear();
-    dupCombo->addItem(QString::fromStdString(DuplicateInStr));
-
-    string activeRenderClass = _getActiveRendererClass();
-    string activeRenderInst = _getActiveRendererInst();
-    if (activeRenderClass.empty() || activeRenderInst.empty()) return;
-
-    for (int i = 0; i < vizNames.size(); i++) { dupCombo->addItem(QString::fromStdString(vizNames[i])); }
-
-    dupCombo->setCurrentIndex(0);
-}
-
-void RenderHolder::_makeRendererTableHeaders(vector<string> &tableValues)
-{
-    tableValues.push_back("Name");
-    tableValues.push_back("Type");
-    tableValues.push_back("Data Set");
-    tableValues.push_back("Enabled");
-}
-
-void RenderHolder::Update()
-{
-    std::vector<std::string> values;
-
-    // Get active params from GUI state
-    //
-    GUIStateParams *p = _getStateParams();
-    string          activeViz = p->GetActiveVizName();
-    if (activeViz.empty()) return;
-
-    string activeRenderClass, activeRenderInst;
-    p->GetActiveRenderer(activeViz, activeRenderClass, activeRenderInst);
-
-    // Get ALL of the renderer instance names defined for this visualizer
-    //
-    map<string, vector<string>> rendererNamesMap;
-    vector<string>              classNames = _controlExec->GetRenderClassNames(activeViz);
-    int                         numRows = 0;
-    for (int i = 0; i < classNames.size(); i++) {
-        vector<string> rendererNames = _controlExec->GetRenderInstances(activeViz, classNames[i]);
-        rendererNamesMap[classNames[i]] = rendererNames;
-        numRows += rendererNames.size();
-    }
-
-    vector<string> tableValues, rowHeader, colHeader;
-    _makeRendererTableHeaders(colHeader);
-
-    map<string, vector<string>>::iterator itr;
-    for (itr = rendererNamesMap.begin(); itr != rendererNamesMap.end(); ++itr) {
-        vector<string> rendererNames = itr->second;
-
-        string className = itr->first;
-
-        for (int i = 0; i < rendererNames.size(); i++) {
-            string rendererName = rendererNames[i];
-
-            string dataSetName, dummy1, dummy2;
-            bool   status = _controlExec->RenderLookup(rendererName, dummy1, dataSetName, dummy2);
-            VAssert(status);
-
-            RenderParams *rParams = _controlExec->GetRenderParams(activeViz, dataSetName, className, rendererName);
-            VAssert(rParams);
-
-            string enabled = rParams->IsEnabled() ? "1" : "0";
-            tableValues.push_back(rendererName);
-            tableValues.push_back(className);
-            tableValues.push_back(dataSetName);
-            tableValues.push_back(enabled);
-        }
-    }
-
-    _vaporTable->Update(numRows, 4, tableValues, rowHeader, colHeader);
-    int row = _getRow(activeRenderInst);
-    if (row >= 0)
-        _vaporTable->SetActiveRow(row);
-    else
-        p->SetActiveRenderer(activeViz, "", "");
-
-    _updateDupCombo();
-
-    // If there are no rows, there are no renderers, so we now set
-    // the current active renderer to be "empty"
-    //
-    if (numRows == 0) {
-        p->SetActiveRenderer(activeViz, "", "");
-        SetCurrentWidget("");
-        stackedWidget->hide();
-        deleteButton->setEnabled(false);
-        dupCombo->setEnabled(false);
-    } else {
-        deleteButton->setEnabled(true);
-        dupCombo->setEnabled(true);
-    }
-}
-
-void RenderHolder::SetCurrentWidget(string name)
-{
-    int indx = -1;
-    for (int i = 0; i < _widgetNames.size(); i++) {
-        if (name == _widgetNames[i]) {
-            indx = i;
-            break;
-        }
-    }
-    if (indx < 0) return;
-
-    stackedWidget->setCurrentIndex(indx);
-    stackedWidget->show();
-}
-
-int RenderHolder::_getRow(string renderInst) const
-{
-    int row = -1;
-    int rowCount = _vaporTable->RowCount();
-    for (int i = 0; i < rowCount; i++) {
-        string tableValue = _vaporTable->GetStringValue(i, 0);
-        if (renderInst != tableValue) continue;
-
-        row = i;
-    }
-
-    return row;
-}
-
-void RenderHolder::_getRowInfo(int row, string &rendererName, string &rendererType, string &dataSetName) const
-{
-    rendererName.clear();
-    rendererType.clear();
-
-    if (tableWidget->rowCount() == 0) {
-        rendererName = "";
-        rendererType = "";
-        dataSetName = "";
-        return;
-    }
-
-    if (row == -1) row = _vaporTable->RowCount() - 1;
-
-    rendererName = _vaporTable->GetStringValue(row, 0);
-    rendererType = _vaporTable->GetStringValue(row, 1);
-    dataSetName = _vaporTable->GetStringValue(row, 2);
 }

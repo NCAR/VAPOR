@@ -46,7 +46,6 @@ using namespace std;
 //
 Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
 {
-    _errMsg = NULL;
     _controlExec = NULL;
 
     setupUi(this);
@@ -70,10 +69,6 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
 
 Statistics::~Statistics()
 {
-    if (_errMsg) {
-        delete _errMsg;
-        _errMsg = NULL;
-    }
 }
 
 bool Statistics::Update()
