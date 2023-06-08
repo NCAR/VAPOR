@@ -81,9 +81,9 @@ else ()
 endif()
 
 if (CMAKE_GENERATOR STREQUAL "Xcode")
-    set (DEFAULT_BUILD_UTILITIES OFF)
+	set (DEFAULT_BUILD_UTILITIES OFF)
 else ()
-    set (DEFAULT_BUILD_UTILITIES ON)
+	set (DEFAULT_BUILD_UTILITIES ON)
 endif ()
 
 option (BUILD_VDC "Build VDC library and utilities" ON)
@@ -301,18 +301,18 @@ elseif (APPLE)
 	endif ()
 
     if (BUILD_PYTHON)
-        set (CMAKE_INSTALL_RPATH "@loader_path")
-    else ()
-        set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
+	    set (CMAKE_INSTALL_RPATH "@loader_path")
+	else ()
+	    set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
     endif ()
 
     if (DIST_INSTALLER AND USE_OMP)
-        message (WARNING "The build mode is set to distributable installer with OpenMP enabled and will not run from source")
-        set (INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-        set (CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-        set (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-        set (CMAKE_SKIP_BUILD_RPATH FALSE)
-    endif()
+		message (WARNING "The build mode is set to distributable installer with OpenMP enabled and will not run from source")
+		set (INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+		set (CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+		set (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+		set (CMAKE_SKIP_BUILD_RPATH FALSE)
+	endif()
 else ()
 	if (DIST_INSTALLER)
 		set (INSTALL_BIN_DIR lib)
@@ -441,19 +441,19 @@ if (APPLE)
         endif ()
 
         if (NOT BUILD_PYTHON)
-            install (
-                DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
-                DESTINATION ${INSTALL_LIB_DIR}
-                COMPONENT Dependencies
-                )
-            file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)
-            install (
+		    install (
+		    	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
+		    	DESTINATION ${INSTALL_LIB_DIR}
+		    	COMPONENT Dependencies
+		    	)
+            file (GLOB COCOA_LIBS ${QTDIR}/plugins/platforms/libqcocoa.dylib)
+	        install (
                 FILES ${COCOA_LIBS}
                 DESTINATION ${INSTALL_BIN_DIR}/platforms
                 COMPONENT Dependencies
                 )
-            file (GLOB STYLE_LIBS ${THIRD_PARTY_DIR}/plugins/styles/libqmacstyle.dylib)
-            install (
+            file (GLOB STYLE_LIBS ${QTDIR}/plugins/styles/libqmacstyle.dylib)
+	        install (
                 FILES ${STYLE_LIBS}
                 DESTINATION ${INSTALL_BIN_DIR}/styles
                 COMPONENT Dependencies
@@ -567,33 +567,31 @@ if (UNIX AND NOT APPLE)
                 COMPONENT Dependencies
             )
 
-            file (GLOB XCBQPA_FILES ${THIRD_PARTY_DIR}/lib/libQt5XcbQpa.*)
-            install (
-                FILES ${XCBQPA_FILES}
-                DESTINATION ${INSTALL_LIB_DIR}
-                COMPONENT Dependencies
-            )
+		    file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
+		    install (
+		    	FILES ${XCBQPA_FILES}
+		    	DESTINATION ${INSTALL_LIB_DIR}
+		    	COMPONENT Dependencies
+		    	)
         endif ()
 
-        if (BUILD_OSP)
-            file (GLOB INSTALL_OSPRAY_LIBS ${OSPRAYDIR}/lib/*.so*)
-            install (
-                FILES ${INSTALL_OSPRAY_LIBS}
-                DESTINATION ${INSTALL_LIB_DIR}
-                COMPONENT Dependencies
-                )
-        endif ()
+		if (BUILD_OSP)
+			file (GLOB INSTALL_OSPRAY_LIBS ${OSPRAYDIR}/lib/*.so*)
+			install (
+				FILES ${INSTALL_OSPRAY_LIBS}
+				DESTINATION ${INSTALL_LIB_DIR}
+				COMPONENT Dependencies
+				)
+		endif ()
 
-        #file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.14.0/lib/plugin/*.so")
         file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
-        #file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.13.3/lib/plugin/*.so")
             install (
                 FILES ${HDF5_PLUGINS}
                 DESTINATION "${INSTALL_SHARE_DIR}/plugins"
                 COMPONENT Dependencies
                 )
 
-    endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
+	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 endif (UNIX AND NOT APPLE)
 
 if (DIST_INSTALLER)

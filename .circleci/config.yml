@@ -1482,17 +1482,17 @@ workflows:
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
-      #- build_win10_installer
+      - build_win10_installer
       #- build_macOSx86_installer
       #- build_M1_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      #- build_ubuntu20_libs
-      #- build_ubuntu22_libs
+      - build_ubuntu20_libs
+      - build_ubuntu22_libs
       #- build_centos7_libs
-      #- build_macOSx86_libs
-      #- build_M1_libs
+      - build_macOSx86_libs
+      - build_M1_libs
       #- build_suse_libs
       #- build_windows_libs
       #- release_weekly_installers:
