@@ -97,7 +97,7 @@ VMetadataTree::VMetadataTree()
   _ts(-1),
   _topLevelBranches({})
 {
-    _vgroup->AddM({_tree});
+    _group->AddM({_tree});
     _tree->setHeaderHidden(true);
     _tree->header()->setStretchLastSection(false);
     _tree->setColumnCount(2);

@@ -36,6 +36,7 @@ CMakeCache.txt
 bin
 /build
 /build-release
+/cmake-build-*
 /xcode
 /apps/vaporgui/ui/
 /buildutils/LinuxInstallLibs.txt

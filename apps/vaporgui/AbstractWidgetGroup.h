@@ -34,6 +34,7 @@ public:
 //! \author Stas Jaroszynski
 
 template<class This, class Widget, class That> class WidgetGroupWrapper : public AbstractWidgetGroup<This, Widget> {
+protected:
     That *_group;
 
 public:
