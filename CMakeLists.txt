@@ -585,11 +585,11 @@ if (UNIX AND NOT APPLE)
 		endif ()
 
         file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
-            install (
-                FILES ${HDF5_PLUGINS}
-                DESTINATION "${INSTALL_SHARE_DIR}/plugins"
-                COMPONENT Dependencies
-                )
+			install (
+				FILES ${HDF5_PLUGINS}
+				DESTINATION "${INSTALL_SHARE_DIR}/plugins"
+				COMPONENT Dependencies
+				)
 
 	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 endif (UNIX AND NOT APPLE)
