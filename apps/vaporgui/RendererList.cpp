@@ -125,7 +125,7 @@ void RendererList::Update()
     int scrollY = _lw->verticalScrollBar()->value();
     _lw->clear();
 
-    auto datasets = paramsMgr->GetDataMgrNames();
+    auto datasets = guiParams->GetOpenDataSetNames();
     for (int i = 0; i < datasets.size(); i++) {
         auto dataset = datasets[i];
         if (i != 0) {
