@@ -16,9 +16,9 @@ set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
-    # Set the possible values of build type for cmake-gui
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "DEBUG" "RELEASE" "RELWITHDEBINFO")
+	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
+	# Set the possible values of build type for cmake-gui
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "DEBUG" "RELEASE" "RELWITHDEBINFO")
 endif()
 
 if(APPLE)
@@ -430,11 +430,11 @@ if (APPLE)
             file (GLOB INSTALL_OSP_LIBS ${OSPRAYDIR}/lib/*.dylib) 
             message (STATUS "OSPRAYDIR ${OSPRAYDIR}")
             message (STATUS "OSPRAYDIR ${INSTALL_OSP_LIBS}")
-            install (
-                FILES ${INSTALL_OSP_LIBS}
-                DESTINATION ${INSTALL_LIB_DIR}
-                COMPONENT Dependencies
-                )
+		    install (
+		    	FILES ${INSTALL_OSP_LIBS}
+		    	DESTINATION ${INSTALL_LIB_DIR}
+		    	COMPONENT Dependencies
+		    	)
         endif ()
 
         if (NOT BUILD_PYTHON)
@@ -467,11 +467,11 @@ if (APPLE)
         endif ()
         file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
         message (STATUS "plugins ${HDF5_PLUGINS}")
-        install (
-            FILES ${HDF5_PLUGINS}
-            DESTINATION "${INSTALL_SHARE_DIR}/plugins"
-            COMPONENT Dependencies
-            )
+		install (
+			FILES ${HDF5_PLUGINS}
+			DESTINATION "${INSTALL_SHARE_DIR}/plugins"
+			COMPONENT Dependencies
+			)
         file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/*.dylib) 
         install (
             FILES ${HDF5_LIBS}
@@ -521,11 +521,11 @@ if (UNIX AND NOT APPLE)
 			)
 
         if (NOT BUILD_PYTHON)
-            install (
-                DIRECTORY ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}
-                DESTINATION ${INSTALL_LIB_DIR}
-                COMPONENT Dependencies
-                )
+		    install (
+		    	DIRECTORY ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}
+		    	DESTINATION ${INSTALL_LIB_DIR}
+		    	COMPONENT Dependencies
+		    	)
 
                     # Include necessary libraries for Ubuntu
                     file(READ "/etc/issue" ETC_ISSUE)
@@ -536,26 +536,26 @@ if (UNIX AND NOT APPLE)
                     DESTINATION ${INSTALL_LIB_DIR}
                     COMPONENT Dependencies
                 )
-                find_program(LSB_RELEASE_EXEC lsb_release)
-                execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
-                    OUTPUT_VARIABLE LSB_RELEASE
-                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                        find_program(LSB_RELEASE_EXEC lsb_release)
+                        execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
+                            OUTPUT_VARIABLE LSB_RELEASE
+                            OUTPUT_STRIP_TRAILING_WHITESPACE
                 )
                 if(${LSB_RELEASE} MATCHES "^2[02].")
-                        file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
-                        install (
-                            FILES ${XCB_FILES}
-                            DESTINATION ${INSTALL_LIB_DIR}
-                            COMPONENT Dependencies
-                        )
-                endif ()
-            endif ()
+		            file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
+		            install (
+		        	FILES ${XCB_FILES}
+		        	DESTINATION ${INSTALL_LIB_DIR}
+		        	COMPONENT Dependencies
+		        	)
+                        endif ()
+                    endif ()
 
-            install (
+		    install (
                 FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
-                DESTINATION ${INSTALL_LIB_DIR}/platforms
-                COMPONENT Dependencies
-            )
+		    	DESTINATION ${INSTALL_LIB_DIR}/platforms
+		    	COMPONENT Dependencies
+		    	)
 
             file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinput.*)
             install (
