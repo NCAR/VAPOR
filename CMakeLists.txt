@@ -30,7 +30,6 @@ if(APPLE)
     if(IS_ARM64)
         message("Building on macOS M1 architecture (arm64)")
         # Set a flag or perform actions specific to M1 architecture
-        set(M1_ARCHITECTURE TRUE CACHE BOOL "Building on macOS M1 architecture")
         set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum OS X deployment version" FORCE)
 
     else()
