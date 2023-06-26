@@ -123,6 +123,15 @@ ses.Show()
 
 # %% [md]
 #
+# ## Saving figures
+#
+# %%
+ses.Render("figure.png")
+ses.Render("figure.jpg")
+ses.Render("figure.tif")
+
+# %% [md]
+#
 # ## Export the session for use in the Vapor GUI application
 #
 # Sessions created in Python can be saved as a .vs3 file.

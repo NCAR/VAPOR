@@ -41,6 +41,7 @@ if (JUPYTEXT)
     notebook(workflow_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/workflow_example.ipynb)
     notebook(animation_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/animation_example.ipynb)
     notebook(visualizer_widget_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/visualizer_widget_example.ipynb)
+    notebook(rotate_video.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/rotate_video.ipynb)
 
 
     add_custom_target(
