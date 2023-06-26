@@ -39,7 +39,7 @@ RenderParams *RenderEventRouter::GetActiveParams() const
 
     string winName, dataSetName, paramsType;
     bool   status = paramsMgr->RenderParamsLookup(_instName, winName, dataSetName, paramsType);
-    VAssert(status);
+    if (!status) return nullptr;
 
     string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(paramsType);
 
