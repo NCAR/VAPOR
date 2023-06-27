@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <glm/fwd.hpp>
+#include <vapor/Texture.h>
 
 #ifdef GL_QUADS
     #define LGL_QUADS GL_QUADS
@@ -45,6 +46,7 @@ class RENDER_API LegacyGL {
     bool                    _initialized, _insideBeginEndBlock;
     bool                    _lightingEnabled, _textureEnabled;
     float                   _lightDir[3];
+    Texture2D               _emptyTexture;
 
 public:
     LegacyGL(GLManager *glManager);

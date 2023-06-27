@@ -45,6 +45,10 @@ void LegacyGL::Initialize()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    _emptyTexture.Generate();
+    float zero = 0;
+    _emptyTexture.TexImage(GL_RGB, 1, 1, 0, GL_RGBA, GL_FLOAT, &zero);
+
     _initialized = true;
     GL_ERR_BREAK();
 }
@@ -80,6 +84,8 @@ void LegacyGL::End()
     _shader->SetUniform("textureEnabled", _textureEnabled);
     _shader->SetUniform("lightDir", glm::make_vec3(_lightDir));
 
+    if (!_textureEnabled) _emptyTexture.Bind();
+
     VAssert(glIsVertexArray(_VAO) == GL_TRUE);
     VAssert(glIsBuffer(_VBO) == GL_TRUE);
 
@@ -87,6 +93,7 @@ void LegacyGL::End()
 
     glBindVertexArray(0);
     _shader->UnBind();
+    if (!_textureEnabled) _emptyTexture.UnBind();
 
     _emulateQuads = false;
     _insideBeginEndBlock = false;
