@@ -2553,7 +2553,7 @@ void MainForm::endAnimCapture()
 
 string MainForm::_getDataSetName(string file, DatasetExistsAction existsAction)
 {
-    vector<string> names = _controlExec->GetDataNames();
+    vector<string> names = _paramsMgr->GetDataMgrNames();
     if (names.empty() || existsAction == AddNew) {
         return (makename(file));
     } else if (existsAction == ReplaceFirst) {
