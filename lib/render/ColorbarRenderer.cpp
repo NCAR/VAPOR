@@ -124,8 +124,8 @@ void ColorbarRenderer::Render(GLManager *glm, RenderParams *rp)
     vec2 viewSize = glm->GetViewportSize();
     size *= viewSize;
 
-    vec3   foregroundColor(0, 0, 0);
-    vec3   backgroundColor(1, 1, 1);
+    vec3   foregroundColor = [](vector<double> v){ return vec3(v[0], v[1], v[2]); }(cp->GetForegroundColor());
+    vec4   backgroundColor = [](vector<double> v){ return vec4(v[0], v[1], v[2],  v[3]); }(cp->GetBackgroundColor());
     string fontName = "arimo";
     float  border = roundf(glm::length(viewSize) * 0.001 * (1 + scale * 2));
     float  padding = roundf(glm::length(viewSize) * 0.007 * (1 + scale * 2));
@@ -212,12 +212,17 @@ void ColorbarRenderer::Render(GLManager *glm, RenderParams *rp)
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     lgl->Color(foregroundColor);
-    DrawRect(lgl, pos, size);
+    if (backgroundColor.w > 0.99)
+        DrawRect(lgl, pos, size);
     lgl->Color(backgroundColor);
     DrawRect(lgl, pos + vec2(border), size - vec2(border * 2));
-
     titledColorbar.Render(glm, colorbarPos);
+
+    glDisable(GL_BLEND);
 
     glm->PixelCoordinateSystemPop();
 }

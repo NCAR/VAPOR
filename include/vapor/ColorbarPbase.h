@@ -119,6 +119,9 @@ public:
     //! \param[in] color = (r,g,b)
     void SetBackgroundColor(vector<double> color);
 
+    vector<double> GetForegroundColor() const;
+    void SetForegroundColor(vector<double> color);
+
     //! Copy the settings (except enablement, title, and position) to another ColobarPbase.
     //! \param[in] target ColorbarPbase that is target of the copy.
     void copyTo(ColorbarPbase *target);
@@ -129,6 +132,7 @@ public:
 
 public:
     static const string _colorbarBackColorTag;
+    static const string _colorbarFrontColorTag;
     static const string _colorbarSizeXTag;
     static const string _colorbarSizeYTag;
     static const string _colorbarPositionXTag;

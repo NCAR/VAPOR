@@ -15,6 +15,7 @@ class PColorSelector : public PLineItem {
 
 public:
     PColorSelector(const std::string &tag, const std::string &label = "");
+    PColorSelector *ShowAlpha();
 
 protected:
     void updateGUI() const override;

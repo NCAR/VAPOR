@@ -1,6 +1,7 @@
 #include "PAnnotationColorbarWidget.h"
 #include "PWidgets.h"
 #include "PCornerSelector.h"
+#include "PColorSelector.h"
 #include <vapor/ColorbarPbase.h>
 #include <vapor/RenderParams.h>
 
@@ -22,6 +23,8 @@ PAnnotationColorbarWidget::PAnnotationColorbarWidget() : PWidget("", _pSection =
         new PStringInput(CBP::_colorbarTitleTag, "Title"),
         new PCheckbox(CBP::UseScientificNotationTag, "Scientific Notation"),
         (new PIntegerInput(CBP::_colorbarNumDigitsTag, "Significant Figures"))->SetRange(1, 7),
+        new PColorSelector(CBP::_colorbarFrontColorTag, "Foreground Color"),
+        (new PColorSelector(CBP::_colorbarBackColorTag, "Background Color"))->ShowAlpha(),
 #ifdef MANUAL_FONT_CONTROL
         new PCheckbox("manual_font", "Manual Font Size"),
         (new PShowIf("manual_font"))->Equals(true)->Then(new PSubGroup({
