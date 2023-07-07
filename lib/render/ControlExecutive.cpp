@@ -11,11 +11,13 @@
 #include <cfloat>
 
 #include <vapor/STLUtils.h>
+#include <vapor/FileUtils.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/ControlExecutive.h>
 #include <vapor/CalcEngineMgr.h>
 #include <vapor/Visualizer.h>
 #include <vapor/DataStatus.h>
+#include <vapor/GUIStateParams.h>
 
 #include <vapor/VolumeRenderer.h>
 #include <vapor/VolumeIsoRenderer.h>
@@ -378,6 +380,21 @@ int ControlExec::LoadState(string stateFile)
     if (rc < 0) {
         _paramsMgr->EndSaveStateGroup();
         return (-1);
+    }
+
+    GUIStateParams *gsp = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    auto sesDir = FileUtils::Dirname(stateFile);
+
+    for (auto dataset : gsp->GetOpenDataSetNames()) {
+        auto paths = gsp->GetOpenDataSetPaths(dataset);
+        if (std::all_of(paths.begin(), paths.end(), [](string p){return FileUtils::Exists(p);}))
+            continue;
+
+        for (int i = 0; i < paths.size(); i++) {
+            if (!FileUtils::IsPathAbsolute(paths[i]))
+                paths[i] = FileUtils::JoinPaths({sesDir, paths[i]});
+        }
+        gsp->InsertOpenDateSet(dataset, gsp->GetOpenDataSetFormat(dataset), paths);
     }
 
     vizNames = _paramsMgr->GetVisualizerNames();
@@ -758,23 +775,63 @@ void ControlExec::UndoRedoClear() { _paramsMgr->UndoRedoClear(); }
 int ControlExec::SaveSession(string filename)
 {
     ofstream fileout;
-    string   s;
+    const XmlNode *node = nullptr;
+    int ret = 0;
+
+    GUIStateParams *gsp = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    bool saveStateEnabled = _paramsMgr->GetSaveStateEnabled();
+    _paramsMgr->SetSaveStateEnabled(false);
+
+    bool useRel = true;
+    auto sesDir = FileUtils::Realpath(FileUtils::Dirname(filename));
+    auto datasets = gsp->GetOpenDataSetNames();
+    vector<vector<string>> originalPaths(datasets.size());
+    vector<vector<string>> newPaths(datasets.size());
+    vector<string> formats(datasets.size());
+
+    for (int i = 0; i < datasets.size() && useRel; i++) {
+        originalPaths[i] = gsp->GetOpenDataSetPaths(datasets[i]);
+        newPaths[i].resize(originalPaths[i].size());
+        formats[i] = gsp->GetOpenDataSetFormat(datasets[i]);
+
+        for (int j = 0; j < originalPaths[i].size() && useRel; j++) {
+            newPaths[i][j] = FileUtils::Realpath(originalPaths[i][j]);
+
+            if (FileUtils::IsSubpath(sesDir, newPaths[i][j]))
+                newPaths[i][j] = FileUtils::JoinPaths({".", newPaths[i][j].substr(1+sesDir.size())});
+            else
+                useRel = false;
+        }
+    }
+
+    if (useRel)
+        for (int i = 0; i < datasets.size(); i++)
+            gsp->InsertOpenDateSet(datasets[i], formats[i], newPaths[i]);
 
     fileout.open(filename.c_str());
     if (!fileout) {
         SetErrMsg("Unable to open output session file : %M");
-        return (-1);
+        goto return_error;
     }
 
-    const XmlNode *node = _paramsMgr->GetXMLRoot();
+    node = _paramsMgr->GetXMLRoot();
     XmlNode::streamOut(fileout, *node);
     if (fileout.bad()) {
         SetErrMsg("Unable to write output session file : %M");
-        return (-1);
+        goto return_error;
     }
 
-    fileout.close();
-    return (0);
+    cleanup:
+    if (useRel)
+        for (int i = 0; i < datasets.size(); i++)
+            gsp->InsertOpenDateSet(datasets[i], formats[i], originalPaths[i]);
+
+    _paramsMgr->SetSaveStateEnabled(saveStateEnabled);
+    return ret;
+
+    return_error:
+    ret = -1;
+    goto cleanup;
 }
 
 RenderParams *ControlExec::GetRenderParams(string winName, string dataSetName, string renderType, string instName) const

@@ -18,9 +18,13 @@ template<typename T> vector<T> Filter(const std::vector<T> &v, std::function<boo
     return v2;
 }
 
+template<typename T> bool BeginsWith(const T &str, const T &match) {
+    return str.size() >= match.size() && equal(match.begin(), match.end(), str.begin());
+}
+COMMON_API bool BeginsWith(const std::string &str, const std::string &match);
+
 COMMON_API bool Contains(const std::string &toSearch, const std::string &query);
 COMMON_API bool ContainsIgnoreCase(const std::string &toSearch, const std::string &query);
-COMMON_API bool BeginsWith(const std::string &str, const std::string &match);
 COMMON_API bool EndsWith(const std::string &str, const std::string &match);
 COMMON_API std::string ToLower(std::string str);
 COMMON_API std::vector<std::string> Split(std::string str, const std::string &delimeter);
