@@ -138,6 +138,12 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
                 })),
             }),
         }),
+        (new PShowIf(FP::RenderGeom3DTag))->Then(new PSection("Lighting", {
+            (new PDoubleSliderEdit(FP::PhongAmbientTag,   "Ambient"  ))->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(FP::PhongDiffuseTag,   "Diffuse"  ))->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(FP::PhongSpecularTag,  "Specular" ))->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(FP::PhongShininessTag, "Shininess"))->EnableDynamicUpdate(),
+        })),
 #ifndef NDEBUG
         (new PSection("Debug", {
             new PCheckbox("old_render", "Old Render Code (Regressing Testing)")
