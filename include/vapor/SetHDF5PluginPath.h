@@ -1,10 +1,17 @@
 #pragma once
 
+#include <stdlib.h>
 #include "vapor/MyBase.h"
 #include "vapor/ResourcePath.h"
 
 namespace VAPoR {
 void SetHDF5PluginPath() {
+    char *existing = getenv("HDF5_PLUGIN_PATH");
+    if (existing) {
+        printf("Using custom HDF5_PLUGIN_PATH: '%s'\n", existing);
+        return;
+    }
+
     int rc=0;
     std::string plugins = "HDF5_PLUGIN_PATH=" + Wasp::GetSharePath("plugins");
     #ifdef WIN32
