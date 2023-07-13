@@ -23,7 +23,7 @@ PAnnotationColorbarWidget::PAnnotationColorbarWidget() : PWidget("", _pSection =
         new PStringInput(CBP::_colorbarTitleTag, "Title"),
         new PCheckbox(CBP::UseScientificNotationTag, "Scientific Notation"),
         (new PIntegerInput(CBP::_colorbarNumDigitsTag, "Significant Figures"))->SetRange(1, 7),
-        new PColorSelector(CBP::_colorbarFrontColorTag, "Foreground Color"),
+        new PColorSelector(CBP::_colorbarFrontColorTag, "Font Color"),
         (new PColorSelector(CBP::_colorbarBackColorTag, "Background Color"))->ShowAlpha(),
 #ifdef MANUAL_FONT_CONTROL
         new PCheckbox("manual_font", "Manual Font Size"),

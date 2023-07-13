@@ -216,8 +216,10 @@ void ColorbarRenderer::Render(GLManager *glm, RenderParams *rp)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     lgl->Color(foregroundColor);
+#if DRAW_COLORBAR_BORDER
     if (backgroundColor.w > 0.99)
         DrawRect(lgl, pos, size);
+#endif
     lgl->Color(backgroundColor);
     DrawRect(lgl, pos + vec2(border), size - vec2(border * 2));
     titledColorbar.Render(glm, colorbarPos);
