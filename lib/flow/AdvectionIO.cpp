@@ -1,12 +1,12 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <iterator>    // std::distance
-#include <cctype>
 #include "vapor/AdvectionIO.h"
-#include "vapor/UDUnitsClass.h"
+#include <algorithm>
+#include <cctype>
+#include <fstream>
+#include <iostream>
+#include <iterator>    // std::distance
+#include <sstream>
 #include "vapor/Proj4API.h"
+#include "vapor/UDUnitsClass.h"
 
 auto flow::OutputFlowlinesNumSteps(const Advection *adv, const char *filename, size_t numSteps, const std::string &proj4string, bool append) -> int
 {
@@ -24,27 +24,24 @@ auto flow::OutputFlowlinesNumSteps(const Advection *adv, const char *filename, s
 
     // Requesting the file handle
     std::FILE *f = nullptr;
-    if (append) {
+    if (append)
         f = std::fopen(filename, "a");
-    } else {
+    else
         f = std::fopen(filename, "w");
-    }
     if (f == nullptr) return FILE_ERROR;
 
     auto propertyNames = adv->GetPropertyVarNames();
 
     // Write the header
     if (!append) {
-        std::fprintf(f, "%s", "# ID,  X-position,  Y-position,  Z-position,  Formatted-time, Raw-time");
+        std::fprintf(f, "%s", "# ID,  X-position,  Y-position,  Z-position");
 
         for (auto &n : propertyNames) std::fprintf(f, ",  %s", n.c_str());
         std::fprintf(f, "\n");
     }
 
-    // Let's declare variables that will be used repeatedly for
-    //   time and geo coordinate conversion
-    int   year, month, day, hour, minute, second;
-    float cX, cY;    // converted X, Y coordinates
+    // Let's declare variables that will be used repeatedly for geo coordinate conversion
+    float cX = 0.f, cY = 0.f;    // converted X, Y coordinates
 
     // Write the trajectories
     for (size_t s_idx = 0; s_idx < adv->GetNumberOfStreams(); s_idx++) {
@@ -53,15 +50,12 @@ auto flow::OutputFlowlinesNumSteps(const Advection *adv, const char *filename, s
         size_t step = 0;
         for (const auto &p : stream) {
             if (!p.IsSpecial()) {
-                // Let's convert the time!
-                udunits.DecodeTime(p.time, &year, &month, &day, &hour, &minute, &second);
-
                 // Let's also convert geo coordinates if needed.
                 cX = p.location.x;
                 cY = p.location.y;
-                if (needGeoConversion) { proj4API.Transform(&cX, &cY, 1); }
+                if (needGeoConversion) proj4API.Transform(&cX, &cY, 1);
 
-                std::fprintf(f, "%lu, %f, %f, %f, %.4d-%.2d-%.2d_%.2d:%.2d:%.2d, %f", s_idx, cX, cY, p.location.z, year, month, day, hour, minute, second, p.time);
+                std::fprintf(f, "%lu, %f, %f, %f", s_idx, cX, cY, p.location.z);
 
                 auto props = p.GetPropertyList();
                 // A quick sanity check
@@ -97,11 +91,10 @@ auto flow::OutputFlowlinesMaxTime(const Advection *adv, const char *filename, do
 
     // Requesting the file handle
     std::FILE *f = nullptr;
-    if (append) {
+    if (append)
         f = std::fopen(filename, "a");
-    } else {
+    else
         f = std::fopen(filename, "w");
-    }
     if (f == nullptr) return FILE_ERROR;
 
     auto propertyNames = adv->GetPropertyVarNames();
@@ -114,10 +107,9 @@ auto flow::OutputFlowlinesMaxTime(const Advection *adv, const char *filename, do
         std::fprintf(f, "\n");
     }
 
-    // Let's declare variables that will be used repeatedly for
-    //   time and geo coordinate conversion
-    int   year, month, day, hour, minute, second;
-    float cX, cY;    // converted X, Y coordinates
+    // Let's declare variables that will be used repeatedly for time and geo coordinate conversion
+    int   year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;
+    float cX = 0.f, cY = 0.f;    // converted X, Y coordinates
 
     // Write the trajectories
     for (size_t s_idx = 0; s_idx < adv->GetNumberOfStreams(); s_idx++) {
@@ -127,13 +119,13 @@ auto flow::OutputFlowlinesMaxTime(const Advection *adv, const char *filename, do
             if (p.time > maxTime) break;
 
             if (!p.IsSpecial()) {
-                // Let's convert the time!
+                // First, convert time.
                 udunits.DecodeTime(p.time, &year, &month, &day, &hour, &minute, &second);
 
-                // Let's also convert geo coordinates if needed.
+                // Also convert geo coordinates if needed.
                 cX = p.location.x;
                 cY = p.location.y;
-                if (needGeoConversion) { proj4API.Transform(&cX, &cY, 1); }
+                if (needGeoConversion) proj4API.Transform(&cX, &cY, 1);
 
                 std::fprintf(f, "%lu, %f, %f, %f, %.4d-%.2d-%.2d_%.2d:%.2d:%.2d, %f", s_idx, cX, cY, p.location.z, year, month, day, hour, minute, second, p.time);
 
