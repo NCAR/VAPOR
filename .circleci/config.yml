@@ -1480,7 +1480,7 @@ workflows:
     jobs:
       #- clang-tidy
       - build_centos7
-      - build_centos7_installer
+      #- build_centos7_installer
       - build_ubuntu18
       - build_python_api_ubuntuDebug
       - build_python_api_ubuntu
