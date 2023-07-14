@@ -515,8 +515,8 @@ jobs:
           name: acquire map image archive
           command: |
             cd /root
-            # https://serverfault.com/questions/1074688/security-debian-org-does-not-have-a-release-file-on-with-debian-docker-images
-            echo "deb http://security.debian.org/debian-security bullseye-security main contrib non-free" > /etc/apt/sources.list
+            # The following resolves the error "E: The repository 'http://security.debian.org/debian-security stretch/updates Release' does not have a Release file."
+            echo "deb http://archive.debian.org/debian stretch main contrib non-free" > /etc/apt/sources.list
 
             apt update
             apt install -y git
