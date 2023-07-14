@@ -534,6 +534,12 @@ if (UNIX AND NOT APPLE)
                     string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
             if(DIST STREQUAL "Ubuntu")
                 install (
+                    FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
+                    DESTINATION ${INSTALL_LIB_DIR}/platforms
+                    COMPONENT Dependencies
+                    )
+
+                install (
                     DIRECTORY ${THIRD_PARTY_DIR}/plugins/xcbglintegrations
                     DESTINATION ${INSTALL_LIB_DIR}
                     COMPONENT Dependencies
@@ -552,12 +558,6 @@ if (UNIX AND NOT APPLE)
 		        	)
                         endif ()
                     endif ()
-
-		    install (
-                FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
-		    	DESTINATION ${INSTALL_LIB_DIR}/platforms
-		    	COMPONENT Dependencies
-		    	)
 
             file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinput.*)
             install (
