@@ -360,7 +360,7 @@ jobs:
           command: |
             cd /root/project/build
             git checkout $CIRCLE_BRANCH
-            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
+            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m -DPYTHONVERSION=3.6 ..
             make -j2
             make installer -j2
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7}" ; done
@@ -767,7 +767,7 @@ jobs:
             name: make debug
             command: |
               cd /root/project/build
-              cmake3 -DBUILD_TEST_APPS=ON ..
+              cmake3 -DBUILD_TEST_APPS=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
               make -j2 2>&1 | tee /tmp/debugOutput.txt
               make clean
         
@@ -778,7 +778,7 @@ jobs:
             name: make debug with omp
             command: |
               cd /root/project/build
-              cmake3 -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+              cmake3 -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
               make -j2 2>&1 | tee /tmp/debugOutputWithOMP.txt
               make clean
         - store_artifacts:
@@ -788,7 +788,7 @@ jobs:
             name: make release
             command: |
               cd /root/project/build
-              cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
+              cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
               make -j2 2>&1 | tee /tmp/releaseOutput.txt
               make clean
         - store_artifacts:
@@ -798,7 +798,7 @@ jobs:
             name: make release with omp
             command: |
               cd /root/project/build
-              cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+              cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
               make -j2 2>&1 | tee /tmp/releaseOutputWithOMP.txt
         - store_artifacts:
             path: /tmp/releaseOutputWithOMP.txt
@@ -1477,6 +1477,7 @@ workflows:
     jobs:
       #- clang-tidy
       - build_centos7
+      - build_centos7_installer
       - build_ubuntu18
       - build_python_api_ubuntuDebug
       - build_python_api_ubuntu
