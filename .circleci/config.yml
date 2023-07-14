@@ -360,7 +360,7 @@ jobs:
           command: |
             cd /root/project/build
             git checkout $CIRCLE_BRANCH
-            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
+            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m -DPYTHONVERSION=3.6 ..
             make -j2
             make installer -j2
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7}" ; done
@@ -515,6 +515,9 @@ jobs:
           name: acquire map image archive
           command: |
             cd /root
+            # The following resolves the error "E: The repository 'http://security.debian.org/debian-security stretch/updates Release' does not have a Release file."
+            echo "deb http://archive.debian.org/debian stretch main contrib non-free" > /etc/apt/sources.list
+
             apt update
             apt install -y git
             git clone https://github.com/NCAR/VAPOR-Data.git
@@ -665,7 +668,7 @@ jobs:
           name: make debug
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON ..
+            cmake -DBUILD_TEST_APPS=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
             make -j2 2>&1 | tee /tmp/debugOutput.txt
             make clean
       
@@ -676,7 +679,7 @@ jobs:
           name: make debug with omp
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
             make -j2 2>&1 | tee /tmp/debugOutputWithOMP.txt
             make clean
       
@@ -687,7 +690,7 @@ jobs:
           name: make release
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
+            cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
             make -j2 2>&1 | tee /tmp/releaseOutput.txt
             make clean
       
@@ -698,7 +701,7 @@ jobs:
           name: make release with omp
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
             make -j2 2>&1 | tee /tmp/releaseOutputWithOMP.txt
       - store_artifacts:
           path: /tmp/releaseOutputWithOMP.txt
@@ -767,7 +770,7 @@ jobs:
             name: make debug
             command: |
               cd /root/project/build
-              cmake3 -DBUILD_TEST_APPS=ON ..
+              cmake3 -DBUILD_TEST_APPS=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
               make -j2 2>&1 | tee /tmp/debugOutput.txt
               make clean
         
@@ -778,7 +781,7 @@ jobs:
             name: make debug with omp
             command: |
               cd /root/project/build
-              cmake3 -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+              cmake3 -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
               make -j2 2>&1 | tee /tmp/debugOutputWithOMP.txt
               make clean
         - store_artifacts:
@@ -788,7 +791,7 @@ jobs:
             name: make release
             command: |
               cd /root/project/build
-              cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
+              cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
               make -j2 2>&1 | tee /tmp/releaseOutput.txt
               make clean
         - store_artifacts:
@@ -798,7 +801,7 @@ jobs:
             name: make release with omp
             command: |
               cd /root/project/build
-              cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON ..
+              cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
               make -j2 2>&1 | tee /tmp/releaseOutputWithOMP.txt
         - store_artifacts:
             path: /tmp/releaseOutputWithOMP.txt
@@ -1476,23 +1479,25 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      #- build_centos7
+      - build_centos7
+      - build_centos7_installer
+      - build_ubuntu18
       - build_python_api_ubuntuDebug
-      #- build_python_api_ubuntu
+      - build_python_api_ubuntu
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
-      - build_win10_installer
+      #- build_win10_installer
       #- build_macOSx86_installer
       #- build_M1_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      - build_ubuntu20_libs
-      - build_ubuntu22_libs
+      #- build_ubuntu20_libs
+      #- build_ubuntu22_libs
       #- build_centos7_libs
-      - build_macOSx86_libs
-      - build_M1_libs
+      #- build_macOSx86_libs
+      #- build_M1_libs
       #- build_suse_libs
       #- build_windows_libs
       #- release_weekly_installers:

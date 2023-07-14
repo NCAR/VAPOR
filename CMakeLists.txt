@@ -214,7 +214,9 @@ function(FIND_BUNDLED_PYTHON)
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")
     else()
         set(Python_SITELIB "${PYTHONPATH}/site-packages")
-        set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
+        if (NOT DEFINED Python_INCLUDE_DIRS)
+            set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
+        endif()
     endif()
 
     set(Python_VERSION "${Python_VERSION}" PARENT_SCOPE)
@@ -532,6 +534,12 @@ if (UNIX AND NOT APPLE)
                     string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
             if(DIST STREQUAL "Ubuntu")
                 install (
+                    FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
+                    DESTINATION ${INSTALL_LIB_DIR}/platforms
+                    COMPONENT Dependencies
+                    )
+
+                install (
                     DIRECTORY ${THIRD_PARTY_DIR}/plugins/xcbglintegrations
                     DESTINATION ${INSTALL_LIB_DIR}
                     COMPONENT Dependencies
@@ -550,12 +558,6 @@ if (UNIX AND NOT APPLE)
 		        	)
                         endif ()
                     endif ()
-
-		    install (
-                FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
-		    	DESTINATION ${INSTALL_LIB_DIR}/platforms
-		    	COMPONENT Dependencies
-		    	)
 
             file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinput.*)
             install (

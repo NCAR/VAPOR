@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctype.h>
+#include <stdint.h>
 #include "vapor/VAssert.h"
 
 #define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H 1
