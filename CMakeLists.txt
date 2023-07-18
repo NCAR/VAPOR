@@ -20,7 +20,24 @@ if(NOT CMAKE_BUILD_TYPE)
 	# Set the possible values of build type for cmake-gui
 	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "DEBUG" "RELEASE" "RELWITHDEBINFO")
 endif()
-set (CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
+
+if(APPLE)
+    # Check if the target architecture is arm64
+    include(CheckCXXSourceRuns)
+    set(CMAKE_REQUIRED_FLAGS "-arch arm64")
+    set(CHECK_ARM64_SOURCE_CODE "int main() { return 0; }")
+    check_cxx_source_runs("${CHECK_ARM64_SOURCE_CODE}" IS_ARM64)
+    if(IS_ARM64)
+        message("Building on macOS M1 architecture (arm64)")
+        # Set a flag or perform actions specific to M1 architecture
+        set(M1_ARCHITECTURE TRUE CACHE BOOL "Building on macOS M1 architecture")
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum OS X deployment version" FORCE)
+
+    else()
+        message("Building on macOS x86 architecture")
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version" FORCE)
+    endif()
+endif()
 
 set (VERSION_MAJOR 3)
 set (VERSION_MINOR 8)
@@ -127,11 +144,19 @@ if (CONDA_BUILD)
         set (MAP_IMAGES_PATH $ENV{MAP_IMAGES_PATH})
     endif()
 else()
+    message("THIRD_PARTY_DIR = ${THIRD_PARTY_DIR}")
     include_directories (SYSTEM ${THIRD_PARTY_INC_DIR})
     include_directories (SYSTEM ${THIRD_PARTY_INC_DIR}/freetype2)
     link_directories (${THIRD_PARTY_LIB_DIR})
     link_directories (${PYTHONPATH})
+
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
+    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR})
+    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
+
+    if (APPLE)
+        set(CMAKE_MODULE_PATH /opt/local/lib/libomp)
+    endif()
 endif()
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
@@ -189,7 +214,9 @@ function(FIND_BUNDLED_PYTHON)
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")
     else()
         set(Python_SITELIB "${PYTHONPATH}/site-packages")
-    	set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m")
+        if (NOT DEFINED Python_INCLUDE_DIRS)
+            set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
+        endif()
     endif()
 
     set(Python_VERSION "${Python_VERSION}" PARENT_SCOPE)
@@ -389,7 +416,7 @@ if (APPLE)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
-        file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH} ${QTDIR}/lib/*.framework)
+        file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
@@ -403,6 +430,8 @@ if (APPLE)
 
         if (BUILD_OSP)
             file (GLOB INSTALL_OSP_LIBS ${OSPRAYDIR}/lib/*.dylib) 
+            message (STATUS "OSPRAYDIR ${OSPRAYDIR}")
+            message (STATUS "OSPRAYDIR ${INSTALL_OSP_LIBS}")
 		    install (
 		    	FILES ${INSTALL_OSP_LIBS}
 		    	DESTINATION ${INSTALL_LIB_DIR}
@@ -439,11 +468,18 @@ if (APPLE)
                 )
         endif ()
         file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
+        message (STATUS "plugins ${HDF5_PLUGINS}")
 		install (
 			FILES ${HDF5_PLUGINS}
 			DESTINATION "${INSTALL_SHARE_DIR}/plugins"
 			COMPONENT Dependencies
 			)
+        file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/*.dylib) 
+        install (
+            FILES ${HDF5_LIBS}
+            DESTINATION ${INSTALL_LIB_DIR}
+            COMPONENT Dependencies
+            )
 
     endif ()
 endif (APPLE)
@@ -493,23 +529,27 @@ if (UNIX AND NOT APPLE)
 		    	COMPONENT Dependencies
 		    	)
 
-		    install (
-		    	DIRECTORY ${QTDIR}/plugins/xcbglintegrations
-		    	DESTINATION ${INSTALL_LIB_DIR}
-		    	COMPONENT Dependencies
-		    	)
-
-                    # Determine if we are building on Ubuntu 22.  If so, include xinerama
-		    #
+                    # Include necessary libraries for Ubuntu
                     file(READ "/etc/issue" ETC_ISSUE)
                     string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
-                    if(DIST STREQUAL "Ubuntu")
+            if(DIST STREQUAL "Ubuntu")
+                install (
+                    FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
+                    DESTINATION ${INSTALL_LIB_DIR}/platforms
+                    COMPONENT Dependencies
+                    )
+
+                install (
+                    DIRECTORY ${THIRD_PARTY_DIR}/plugins/xcbglintegrations
+                    DESTINATION ${INSTALL_LIB_DIR}
+                    COMPONENT Dependencies
+                )
                         find_program(LSB_RELEASE_EXEC lsb_release)
                         execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
                             OUTPUT_VARIABLE LSB_RELEASE
                             OUTPUT_STRIP_TRAILING_WHITESPACE
-                        )
-			if(${LSB_RELEASE} MATCHES "^22.")
+                )
+                if(${LSB_RELEASE} MATCHES "^2[02].")
 		            file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
 		            install (
 		        	FILES ${XCB_FILES}
@@ -519,11 +559,12 @@ if (UNIX AND NOT APPLE)
                         endif ()
                     endif ()
 
-		    install (
-		    	FILES ${QTDIR}/plugins/platforms/libqxcb.so
-		    	DESTINATION ${INSTALL_LIB_DIR}/platforms
-		    	COMPONENT Dependencies
-		    	)
+            file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinput.*)
+            install (
+                FILES ${XCB_FILES}
+                DESTINATION ${INSTALL_LIB_DIR}
+                COMPONENT Dependencies
+            )
 
 		    file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
 		    install (
@@ -542,7 +583,7 @@ if (UNIX AND NOT APPLE)
 				)
 		endif ()
 
-		file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
+        file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
 			install (
 				FILES ${HDF5_PLUGINS}
 				DESTINATION "${INSTALL_SHARE_DIR}/plugins"

@@ -436,10 +436,10 @@ int ModelRenderer::Scene::handleFloatAttribute(XmlNode *node, const std::string 
     size_t charsRead;
     try {
         *f = std::stof(valueString, &charsRead);
-    } catch (invalid_argument) {
+    } catch (invalid_argument const&) {
         MyBase::SetErrMsg("Invalid float attribute %s=\"%s\"", name.c_str(), valueString.c_str());
         return -1;
-    } catch (out_of_range) {
+    } catch (out_of_range const&) {
         MyBase::SetErrMsg("Float attribute out of range %s=\"%s\"", name.c_str(), valueString.c_str());
         return -1;
     }
@@ -457,10 +457,10 @@ int ModelRenderer::Scene::parseIntString(const std::string &str, int *i) const
     size_t charsRead;
     try {
         *i = std::stof(str, &charsRead);
-    } catch (invalid_argument) {
+    } catch (invalid_argument const&) {
         MyBase::SetErrMsg("Invalid integer \"%s\"", str.c_str());
         return -1;
-    } catch (out_of_range) {
+    } catch (out_of_range const&) {
         MyBase::SetErrMsg("Integer out of range \"%s\"", str.c_str());
         return -1;
     }
