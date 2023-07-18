@@ -15,6 +15,8 @@ class QColorWidget : public QLineEdit {
     QColor _color;
 
 public:
+    bool ShowAlpha = false;
+
     QColorWidget();
     QSize minimumSizeHint() const;
 

@@ -35,7 +35,11 @@ QColor QColorWidget::getColor() const { return _color; }
 
 void QColorWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    QColor newColor = QColorDialog::getColor(_color);
+    QColorDialog::ColorDialogOptions options = QColorDialog::ColorDialogOptions();
+    if (ShowAlpha)
+        options |= QColorDialog::ShowAlphaChannel;
+
+    QColor newColor = QColorDialog::getColor(_color, nullptr, "", options);
     QApplication::restoreOverrideCursor();
 
     if (newColor.isValid() && newColor != _color) {

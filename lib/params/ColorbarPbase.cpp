@@ -24,6 +24,7 @@
 
 using namespace VAPoR;
 const string ColorbarPbase::_colorbarBackColorTag = "ColorbarBackgroundColor";
+const string ColorbarPbase::_colorbarFrontColorTag = "ColorbarForegroundColor";
 const string ColorbarPbase::_colorbarSizeXTag = "ColorbarSize_X";
 const string ColorbarPbase::_colorbarSizeYTag = "ColorbarSize_Y";
 const string ColorbarPbase::_colorbarPositionXTag = "ColorbarPosition_X";
@@ -53,6 +54,7 @@ ColorbarPbase::ColorbarPbase(ParamsBase::StateSave *ssave) : ParamsBase(ssave, C
     SetNumDigits(4);
     SetNumTicks(6);
     SetBackgroundColor(vector<double>(3, 1.));
+    SetForegroundColor(vector<double>(3, 0.));
     SetEnabled(false);
     SetValueLong(UseScientificNotationTag, "", false);
 }
@@ -181,7 +183,7 @@ void ColorbarPbase::SetNumDigits(long val)
 //! \retval rgb color
 vector<double> ColorbarPbase::GetBackgroundColor() const
 {
-    vector<double> defaultv(3, 1.0);
+    vector<double> defaultv(4, 1.0);
     vector<double> color = GetValueDoubleVec(_colorbarBackColorTag, defaultv);
     for (int i = 0; i < color.size(); i++) {
         if (color[i] < 0.0) color[i] = 0.0;
@@ -194,7 +196,7 @@ vector<double> ColorbarPbase::GetBackgroundColor() const
 //! \param[in] color = (r,g,b)
 void ColorbarPbase::SetBackgroundColor(vector<double> color)
 {
-    VAssert(color.size() == 3);
+    VAssert(color.size() == 3 || color.size() == 4);
     for (int i = 0; i < color.size(); i++) {
         if (color[i] < 0.0) color[i] = 0.0;
         if (color[i] > 1.0) color[i] = 1.0;
@@ -202,9 +204,31 @@ void ColorbarPbase::SetBackgroundColor(vector<double> color)
     SetValueDoubleVec(_colorbarBackColorTag, "set colorbar background color", color);
 }
 
+vector<double> ColorbarPbase::GetForegroundColor() const
+{
+    vector<double> defaultv(3, 0.0);
+    vector<double> color = GetValueDoubleVec(_colorbarFrontColorTag, defaultv);
+    for (int i = 0; i < color.size(); i++) {
+        if (color[i] < 0.0) color[i] = 0.0;
+        if (color[i] > 1.0) color[i] = 1.0;
+    }
+    return (color);
+}
+
+void ColorbarPbase::SetForegroundColor(vector<double> color)
+{
+    color.resize(3, 0);
+    for (int i = 0; i < color.size(); i++) {
+        if (color[i] < 0.0) color[i] = 0.0;
+        if (color[i] > 1.0) color[i] = 1.0;
+    }
+    SetValueDoubleVec(_colorbarFrontColorTag, "set colorbar background color", color);
+}
+
 void ColorbarPbase::copyTo(ColorbarPbase *target)
 {
     target->SetBackgroundColor(GetBackgroundColor());
+    target->SetForegroundColor(GetForegroundColor());
     target->SetSize(GetSize());
     target->SetFontSize(GetFontSize());
     target->SetNumDigits(GetNumDigits());
