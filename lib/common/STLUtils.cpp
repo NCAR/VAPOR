@@ -7,9 +7,9 @@ bool STLUtils::Contains(const std::string &toSearch, const std::string &query) {
 
 bool STLUtils::ContainsIgnoreCase(const std::string &toSearch, const std::string &query) { return Contains(ToLower(toSearch), ToLower(query)); }
 
-bool STLUtils::BeginsWith(const std::string &str, const std::string &match) { return str.size() >= match.size() && equal(match.begin(), match.end(), str.begin()); }
-
 bool STLUtils::EndsWith(const std::string &str, const std::string &match) { return str.size() >= match.size() && equal(match.begin(), match.end(), str.end() - match.size()); }
+
+bool STLUtils::BeginsWith(const std::string &str, const std::string &match) { return STLUtils::BeginsWith<string>(str, match); }
 
 std::string STLUtils::ToLower(std::string str)
 {

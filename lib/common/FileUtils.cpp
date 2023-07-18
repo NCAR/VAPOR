@@ -1,4 +1,5 @@
 #include "vapor/FileUtils.h"
+#include "vapor/STLUtils.h"
 #include <string.h>
 #include <algorithm>
 #include <sys/stat.h>
@@ -92,6 +93,21 @@ std::string FileUtils::Dirname(const std::string &path)
 #endif
 }
 
+std::string FileUtils::Realpath(const std::string &path)
+{
+#ifdef WIN32
+    char real[_MAX_PATH];
+    if(_fullpath(real, path, _MAX_PATH))
+        return string(real);
+    return path;
+#else
+    char real[PATH_MAX];
+    if (realpath(path.c_str(), real))
+        return string(real);
+    return path;
+#endif
+}
+
 std::string FileUtils::Extension(const std::string &path)
 {
     string basename = Basename(path);
@@ -154,6 +170,10 @@ bool FileUtils::IsRegularFile(const std::string &path) { return FileUtils::GetFi
 
 bool FileUtils::IsDirectory(const std::string &path) { return FileUtils::GetFileType(path) == FileType::Directory; }
 
+bool FileUtils::IsSubpath(const std::string &dir, const std::string &path){
+    return STLUtils::BeginsWith(FileUtils::SplitPath(path), FileUtils::SplitPath(dir));
+}
+
 FileType FileUtils::GetFileType(const std::string &path)
 {
     struct STAT64 s;
@@ -209,7 +229,7 @@ std::vector<std::string> FileUtils::ListFiles(const std::string &path)
 #endif
 }
 
-std::string FileUtils::JoinPaths(std::initializer_list<std::string> paths)
+std::string FileUtils::JoinPaths(const std::initializer_list<std::string> &paths)
 {
     string path;
     for (auto it = paths.begin(); it != paths.end(); ++it) {
@@ -219,6 +239,12 @@ std::string FileUtils::JoinPaths(std::initializer_list<std::string> paths)
         }
     }
     return path;
+}
+
+std::vector<std::string> FileUtils::SplitPath(std::string path)
+{
+    std::replace(path.begin(), path.end(), '\\', '/');
+    return STLUtils::Split(CleanupPath(path), "/");
 }
 
 int FileUtils::MakeDir(const std::string &path)
