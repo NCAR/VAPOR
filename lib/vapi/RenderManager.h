@@ -15,6 +15,7 @@ public:
     ~RenderManager();
     int Render(String imagePath, bool fast=false);
     void SetResolution(int width, int height);
+    vector<double> GetCameraFromFile(std::string &file);
     vector<int> GetResolution() const;
     String GetWinName() const;
 

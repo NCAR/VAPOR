@@ -15,6 +15,7 @@ Project homepage and binary releases can be found at [https://www.vapor.ucar.edu
 
 ## Project Members:
 
+- Nihanth Cherukuru
 - John Clyne
 - Scott Pearse
 - Samuel Li
