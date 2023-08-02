@@ -173,6 +173,8 @@ long NetCDFCollection::GetDimLengthAtTime(string name, long ts)
         for (int i = 0; i < it->second.size(); i++) {
             if (it->second[i] == realTime) {
                 filePath = it->first;
+                if (filePath == "constant")
+                    continue;
                 goto SEARCH_FINISHED;
             }
         }

@@ -278,6 +278,16 @@ void NavigationUtils::LookAt(ControlExec *ce, const vector<double> &position, co
 
 void NavigationUtils::SetTimestep(ControlExec *ce, size_t ts)
 {
+    AnimationParams *aParams = GetAnimationParams(ce);
+    int ots = aParams->GetCurrentTimestep();
+
+    propagateTimestep(ce, ts);
+
+    handleMovingDomainAdjustments(ce, ots, ts);
+}
+
+void NavigationUtils::propagateTimestep(ControlExec *ce, size_t ts)
+{
     DataStatus *dataStatus = ce->GetDataStatus();
     ParamsMgr * paramsMgr = ce->GetParamsMgr();
 
@@ -459,6 +469,100 @@ GUIStateParams *NavigationUtils::GetGUIStateParams(ControlExec *ce)
 
 AnimationParams *NavigationUtils::GetAnimationParams(ControlExec *ce) { return ((AnimationParams *)ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType())); }
 
+
+static vec3 CoordTypeToVec3(const CoordType &c) { return vec3(c[0], c[1], c[2]); }
+static CoordType Vec3ToCoordType(const vec3 &c) { return CoordType {c[0], c[1], c[2]}; }
+
+
+void NavigationUtils::handleMovingDomainAdjustments(ControlExec *ce, size_t ts_from, size_t ts_to)
+{
+    auto paramsMgr = ce->GetParamsMgr();
+    auto guiParams = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    bool trackCamera = guiParams->GetValueLong(GUIStateParams::MovingDomainTrackCameraTag, false);
+    bool trackDomain = guiParams->GetValueLong(GUIStateParams::MovingDomainTrackRenderRegionsTag, false);
+
+    if (trackCamera) movingDomainTrackCamera(ce, ts_from, ts_to);
+    if (trackDomain) movingDomainTrackRenderRegions(ce, ts_from, ts_to);
+}
+
+
+glm::vec3 NavigationUtils::getDomainMovementBetweenTimesteps(ControlExec *ce, string dataset, size_t from, size_t to)
+{
+    auto paramsMgr = ce->GetParamsMgr();
+    auto dataStatus = ce->GetDataStatus();
+    auto guiParams = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    string viz = guiParams->GetActiveVizName();
+
+    CoordType minExts_, maxExts_;
+    dataStatus->GetActiveExtents(paramsMgr, viz, dataset, from, minExts_, maxExts_);
+    vec3 oldMinExts = CoordTypeToVec3(minExts_);
+    vec3 oldMaxExts = CoordTypeToVec3(maxExts_);
+    vec3 oldDomainCenter = (oldMinExts+oldMaxExts)/2.f;
+    dataStatus->GetActiveExtents(paramsMgr, viz, dataset, to, minExts_, maxExts_);
+    vec3 newMinExts = CoordTypeToVec3(minExts_);
+    vec3 newMaxExts = CoordTypeToVec3(maxExts_);
+    vec3 newDomainCenter = (newMinExts+newMaxExts)/2.f;
+    vec3 domainMove = newDomainCenter - oldDomainCenter;
+
+    return domainMove;
+}
+
+
+void NavigationUtils::movingDomainTrackCamera(ControlExec *ce, size_t from, size_t to)
+{
+    auto paramsMgr = ce->GetParamsMgr();
+    auto dataStatus = ce->GetDataStatus();
+    GUIStateParams *guiParams = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    string viz = guiParams->GetActiveVizName();
+    auto viewpointParams = paramsMgr->GetViewpointParams(guiParams->GetActiveVizName());
+    auto datasets = guiParams->GetOpenDataSetNames();
+
+    vec3 domainMoveSum = vec3(0);
+    int nDomainsMoved = 0;
+
+    for (const auto &dataset : datasets) {
+        if (!dataStatus->GetDataMgr(dataset)->HasMovingDomain()) continue;
+        auto domainMove = getDomainMovementBetweenTimesteps(ce, dataset, from, to);
+        domainMoveSum += domainMove;
+        nDomainsMoved++;
+    }
+
+    if (nDomainsMoved) {
+        vec3 domainMove = domainMoveSum / (float)nDomainsMoved;
+        double camMat[16], camPos[3], camDir[3], camUp[3];
+        viewpointParams->GetModelViewMatrix(camMat);
+        viewpointParams->ReconstructCamera(camMat, camPos, camUp, camDir);
+        for (int i = 0; i < 3; i++) camPos[i] += domainMove[i];
+        NavigationUtils::SetAllCameras(ce, camPos, camDir, camUp);
+    }
+}
+
+
+void NavigationUtils::movingDomainTrackRenderRegions(ControlExec *ce, size_t from, size_t to)
+{
+    auto paramsMgr = ce->GetParamsMgr();
+    auto dataStatus = ce->GetDataStatus();
+    GUIStateParams *guiParams = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    string viz = guiParams->GetActiveVizName();
+    auto datasets = guiParams->GetOpenDataSetNames();
+
+    for (const auto &dataset : datasets) {
+        if (!dataStatus->GetDataMgr(dataset)->HasMovingDomain()) continue;
+        auto domainMove = getDomainMovementBetweenTimesteps(ce, dataset, from, to);
+
+        vector<string> renderers;
+        paramsMgr->GetRenderParamNames(viz, dataset, renderers);
+        for (const auto &renderer : renderers) {
+            string _1, _2, className;
+            paramsMgr->RenderParamsLookup(renderer, _1, _2, className);
+            RenderParams *rp = paramsMgr->GetRenderParams(viz, dataset, className, renderer);
+
+            CoordType minExts_, maxExts_;
+            rp->GetBox()->GetExtents(minExts_, maxExts_);
+            rp->GetBox()->SetExtents(Vec3ToCoordType(domainMove+CoordTypeToVec3(minExts_)), Vec3ToCoordType(domainMove+CoordTypeToVec3(maxExts_)));
+        }
+    }
+}
 
 
 // This is some code that someone decided is worth keeping for future reference.

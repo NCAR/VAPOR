@@ -15,6 +15,7 @@ WRF = "wrf"
 CF = "cf"
 MPAS = "mpas"
 BOV = "bov"
+DCP = "dcp"
 UGRID = "ugrid"
 PYTHON = "ram"
 

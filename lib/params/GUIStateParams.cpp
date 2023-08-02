@@ -44,6 +44,8 @@ const string GUIStateParams::m_proj4StringTag = "Proj4StringTag";
 const string GUIStateParams::m_openDataSetsTag = "OpenDataSetsTag";
 const string GUIStateParams::_flowDimensionalityTag = "_flowDimensionalityTag";
 const string GUIStateParams::BookmarksTag = "BookmarksTag";
+const string GUIStateParams::MovingDomainTrackCameraTag = "MovingDomainTrackCameraTag";
+const string GUIStateParams::MovingDomainTrackRenderRegionsTag = "MovingDomainTrackRenderRegionsTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";
 

@@ -160,6 +160,7 @@ int Session::Render(String imagePath, bool fast)
 }
 
 void Session::SetTimestep(int ts) { NavigationUtils::SetTimestep(_controlExec, ts); }
+int Session::GetTimesteps() const { return _controlExec->GetDataStatus()->getMaxTimestep() + 1; }
 
 
 void Session::SetWaspMyBaseErrMsgFilePtrToSTDERR()
