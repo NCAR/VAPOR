@@ -853,18 +853,8 @@ jobs:
           name: update 3rd party libraries
           command: |
             mkdir -p /usr/local/VAPOR-Deps
-            apt update
-            apt install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
-            pip3 install gdown
-            #gdown https://drive.google.com/uc?id=15-wSWR2H8swbpO7GvPueeaQrD56oLhxq
-            #gdown https://drive.google.com/uc?id=12kHLQ8mP896lByMZutiawORsBrpNuZzv
-            #gdown https://drive.google.com/uc?id=d/16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6
             id="16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6"
-            #filename="/root/project/2019-Aug-Ubuntu22.tar.xz"
             filename="2023-Jun-Ubuntu20.tar.xz"
-            #curl -L -s -o '2023-Jun-Ubuntu20.tar.xz' 'https://drive.google.com/uc?id=16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6&confirm=t'
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
           no_output_timeout: 45m
@@ -872,15 +862,15 @@ jobs:
       - run:
           name: update cmake
           command: |
-            sudo apt remove --purge --auto-remove cmake
-            sudo apt install -y software-properties-common lsb-release && \
-            sudo apt clean all
+            apt remove --purge --auto-remove cmake
+            apt install -y software-properties-common lsb-release && \
+            apt clean all
             wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-            sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
-            sudo apt install kitware-archive-keyring
-            sudo rm /etc/apt/trusted.gpg.d/kitware.gpg
-            sudo apt update
-            sudo apt install cmake
+            apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+            apt install kitware-archive-keyring
+            rm /etc/apt/trusted.gpg.d/kitware.gpg
+            apt update
+            apt install cmake
 
       - run:
           name: make installer
