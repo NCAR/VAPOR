@@ -944,11 +944,6 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
 
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
-
   test_clang_format:
     docker:
       - image: ubuntu:20.04
