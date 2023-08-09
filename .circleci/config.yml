@@ -835,7 +835,7 @@ jobs:
       - run:
           name: acquire prerequisites
           command: |
-            DEBIAN_FRONTEND=noninteractive
+            export DEBIAN_FRONTEND=noninteractive
             apt update
             apt install -y curl
             apt install -y xz-utils
@@ -1479,18 +1479,18 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      - build_centos7
+      #- build_centos7
       #- build_centos7_installer
-      - build_ubuntu18
-      - build_python_api_ubuntuDebug
-      - build_python_api_ubuntu
+      #- build_ubuntu18
+      #- build_python_api_ubuntuDebug
+      #- build_python_api_ubuntu
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
       #- build_macOSx86_installer
       #- build_M1_installer
-      #- build_ubuntu20_installer
+      - build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
       #- build_ubuntu20_libs
