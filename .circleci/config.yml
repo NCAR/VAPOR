@@ -169,6 +169,7 @@ jobs:
       - run:
           name: make VAPOR
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
@@ -182,8 +183,8 @@ jobs:
                   -DCMAKE_C_COMPILER=clang \
                   -DUSE_OMP=ON \
                   ..
-            make -j6
-            make installer -j
+            make -j8
+            make installer
             mkdir -p /tmp/workspace/installers
             mv *.dmg /tmp/workspace/installers
           no_output_timeout: 30m
