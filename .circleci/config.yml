@@ -832,6 +832,8 @@ jobs:
     resource_class: large
 
     steps:
+      - checkout
+
       - run:
           name: acquire prerequisites
           command: |
@@ -850,8 +852,6 @@ jobs:
             filename="2023-Jun-Ubuntu20.tar.xz"
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
-
-      - checkout
 
       - run:
           name: make installer
