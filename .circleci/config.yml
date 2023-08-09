@@ -825,7 +825,7 @@ jobs:
                  exit 0
               fi
 
-  build_ubuntu20_libs2:
+  build_ubuntu20_installer2:
     docker:
       - image: ubuntu:20.04
 
