@@ -860,8 +860,12 @@ jobs:
             pip3 install gdown
             #gdown https://drive.google.com/uc?id=15-wSWR2H8swbpO7GvPueeaQrD56oLhxq
             #gdown https://drive.google.com/uc?id=12kHLQ8mP896lByMZutiawORsBrpNuZzv
-            gdown https://drive.google.com/uc?id=d/16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6
-            filename="/root/project/2019-Aug-Ubuntu22.tar.xz"
+            #gdown https://drive.google.com/uc?id=d/16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6
+            id="16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6"
+            #filename="/root/project/2019-Aug-Ubuntu22.tar.xz"
+            filename="2023-Jun-Ubuntu20.tar.xz"
+            #curl -L -s -o '2023-Jun-Ubuntu20.tar.xz' 'https://drive.google.com/uc?id=16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6&confirm=t'
+            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
           no_output_timeout: 45m
 
