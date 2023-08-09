@@ -143,19 +143,6 @@ jobs:
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
-          name: Get third party libraries
-          command: |
-            pip3 install gdown
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod 777 /usr/local/VAPOR-Deps
-            cd /usr/local/VAPOR-Deps
-            gdown https://drive.google.com/uc?id=1w0w1LtOpZy6yMJbvMIcrMSZ3PP9AHIxo
-            cd /usr/local/VAPOR-Deps
-            tar xf 2023-Jun-macOSx86.tar.xz -C /usr/local/VAPOR-Deps
-            ln -s 2023-Jun current
-            chmod -R 777 /usr/local/VAPOR-Deps
-
-      - run:
           name: Get cmake
           command: |
             brew install cmake
