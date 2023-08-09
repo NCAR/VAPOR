@@ -904,6 +904,17 @@ jobs:
             apt install -y clang-tidy
             apt install -y lsb-release
 
+            # all for cmake
+            apt-get update
+            apt-get install -y gpg wget
+            wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+            dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+            wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+            echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
+            DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
+            apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
+            apt install -y cmake --allow-unauthenticated
+
       - run:
           name: update 3rd party libraries
           command: |
@@ -913,16 +924,6 @@ jobs:
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
           no_output_timeout: 45m
-
-      - run:
-          name: update cmake
-          command: |
-            apt remove -y --purge --auto-remove cmake
-            apt install -y libssl-dev
-            apt install -y build-essential git
-            git clone https://github.com/Kitware/CMake/
-            cd CMake
-            ./bootstrap && make && make install
 
       - run:
           name: make installer
