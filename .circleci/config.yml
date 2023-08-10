@@ -522,26 +522,26 @@ jobs:
             conda install -y conda-build
             cd /root/project/conda
 
-      - run:
-          name: build conda installer debug
-          command: |
+            #conda build .
             DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
-            cd /usr/local/conda-bld/linux-64/tarBallDir
-            fileName=${ls}
-            newFileName=${fileName//vapor/vaporUbuntu}
-            mkdir -p /tmp/workspace/installers
-            cp /usr/local/conda-bld/linux-64/tarBallDir/*.tar.bz2 /tmp/workspace/installers/
-          no_output_timeout: 120m
+
+      #- run:
+      #    name: build conda installer2
+      #    command: |
+      #      DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
+      #      mkdir /usr/local/conda-bld/linux-64/tarBallDir
+      #      mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
+      #      cd /usr/local/conda-bld/linux-64/tarBallDir
+      #      fileName=${ls}
+      #      newFileName=${fileName//vapor/vaporUbuntu}
+      #      mkdir -p /tmp/workspace/installers
+      #      cp /usr/local/conda-bld/linux-64/tarBallDir/*.tar.bz2 /tmp/workspace/installers/
+      #    no_output_timeout: 120m
 
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
 
   build_python_api_centos:
     docker:
