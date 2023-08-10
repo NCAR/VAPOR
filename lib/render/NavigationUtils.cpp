@@ -279,7 +279,7 @@ void NavigationUtils::LookAt(ControlExec *ce, const vector<double> &position, co
 void NavigationUtils::SetTimestep(ControlExec *ce, size_t ts)
 {
     AnimationParams *aParams = GetAnimationParams(ce);
-    int ots = aParams->GetCurrentTimestep();
+    size_t ots = aParams->GetCurrentTimestep();
 
     propagateTimestep(ce, ts);
 
