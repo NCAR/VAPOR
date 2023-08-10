@@ -526,6 +526,7 @@ jobs:
             DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
+          no_output_timeout: 120m
 
       #- run:
       #    name: build conda installer2
