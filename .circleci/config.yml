@@ -528,19 +528,6 @@ jobs:
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
           no_output_timeout: 120m
 
-      #- run:
-      #    name: build conda installer2
-      #    command: |
-      #      DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
-      #      mkdir /usr/local/conda-bld/linux-64/tarBallDir
-      #      mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
-      #      cd /usr/local/conda-bld/linux-64/tarBallDir
-      #      fileName=${ls}
-      #      newFileName=${fileName//vapor/vaporUbuntu}
-      #      mkdir -p /tmp/workspace/installers
-      #      cp /usr/local/conda-bld/linux-64/tarBallDir/*.tar.bz2 /tmp/workspace/installers/
-      #    no_output_timeout: 120m
-
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
 
@@ -1454,25 +1441,25 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      #- build_centos7
+      - build_centos7
       #- build_centos7_installer
-      #- build_ubuntu18
+      - build_ubuntu18
       - build_python_api_ubuntuDebug
       - build_python_api_ubuntu
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
-      #- build_win10_installer
-      #- build_macOSx86_installer
-      #- build_M1_installer
-      #- build_ubuntu20_installer
-      #- build_ubuntu22_installer
-      #- build_centos7_installer
-      #- build_ubuntu20_libs
-      #- build_ubuntu22_libs
-      #- build_centos7_libs
-      #- build_macOSx86_libs
-      #- build_M1_libs
+      - build_win10_installer
+      - build_macOSx86_installer
+      - build_M1_installer
+      - build_ubuntu20_installer
+      - build_ubuntu22_installer
+      - build_centos7_installer
+      - build_ubuntu20_libs
+      - build_ubuntu22_libs
+      - build_centos7_libs
+      - build_macOSx86_libs
+      - build_M1_libs
       #- build_suse_libs
       #- build_windows_libs
       #- release_weekly_installers:
