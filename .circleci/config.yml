@@ -521,6 +521,10 @@ jobs:
             conda config --add channels conda-forge
             conda install -y conda-build
             cd /root/project/conda
+
+      - run:
+          name: build conda installer debug
+          command: |
             DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
