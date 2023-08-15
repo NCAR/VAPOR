@@ -134,17 +134,13 @@ jobs:
       - checkout
 
       - run:
-          name: Get third party libraries
+          name: acquire 3rd party libraries
           command: |
-            pip3 install gdown
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod 777 /usr/local/VAPOR-Deps
-            cd /usr/local/VAPOR-Deps
-            gdown https://drive.google.com/uc?id=1w0w1LtOpZy6yMJbvMIcrMSZ3PP9AHIxo
-            cd /usr/local/VAPOR-Deps
-            tar xf 2023-Jun-macOSx86.tar.xz -C /usr/local/VAPOR-Deps
-            ln -s 2023-Jun current
-            chmod -R 777 /usr/local/VAPOR-Deps
+            mkdir -p /usr/local/VAPOR-Deps
+            id="17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn"
+            filename="2023-Jun-macOSx86.tar.xz"
+            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+            tar -xf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
           name: Get cmake
@@ -173,6 +169,7 @@ jobs:
       - run:
           name: make VAPOR
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
@@ -186,8 +183,8 @@ jobs:
                   -DCMAKE_C_COMPILER=clang \
                   -DUSE_OMP=ON \
                   ..
-            make -j6
-            make installer -j
+            make -j8
+            make installer
             mkdir -p /tmp/workspace/installers
             mv *.dmg /tmp/workspace/installers
           no_output_timeout: 30m
@@ -207,6 +204,8 @@ jobs:
 
     resource_class: macos.m1.large.gen1
     steps:
+      - checkout
+
       - run:
           name: Make VAPOR-Deps
           command: |
@@ -214,22 +213,14 @@ jobs:
             sudo chmod -R 777 /usr/local/VAPOR-Deps
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
 
-      - checkout
-
       - run:
-          name: Get third party libraries
+          name: acquire 3rd party libraries
           command: |
-            pip3 install gdown
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod 777 /usr/local/VAPOR-Deps
-            cd /usr/local/VAPOR-Deps
-            #gdown https://drive.google.com/uc?id=1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg
-            gdown https://drive.google.com/uc?id=1FarGnK2dIjilboX-9AUVpI4OvmL7Q6xR
-            cd /usr/local/VAPOR-Deps
-            #tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
-            tar xf 2023-Jun-M1.tar.xz -C /usr/local/VAPOR-Deps
-            ln -s 2023-Jun current
-            chmod -R 777 /usr/local/VAPOR-Deps
+            mkdir -p /usr/local/VAPOR-Deps
+            id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
+            filename="2023-Jun-M1.tar.xz"
+            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+            tar -xf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
           name: Get cmake
@@ -258,26 +249,26 @@ jobs:
       - run:
           name: make VAPOR
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
             git checkout $CIRCLE_BRANCH
             export PATH=/opt/local/bin:$PATH
             sudo port select --set clang mp-clang-13
-            cmake -DBUILD_OSP=OFF \
-                  -DCPACK_BINARY_DRAGNDROP=ON \
+            cmake -DCPACK_BINARY_DRAGNDROP=ON \
                   -DCMAKE_BUILD_TYPE:String=Release \
                   -DDIST_INSTALLER:string=ON \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
-                  -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
                   -DUSE_OMP=ON \
                   ..
             make -j8
             make installer
+            for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/DarwinM1}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.dmg /tmp/workspace/installers
-            for f in /tmp/workspace/installers/VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/DarwinM1}" ; done
+            ls /tmp/workspace/installers
           no_output_timeout: 30m
 
       - store_artifacts:
@@ -490,14 +481,14 @@ jobs:
           name: conda build .
           command: |
             cd /root/project/conda
-            conda update -n base -c defaults conda
+            conda update -y -n base -c defaults conda
             conda install -y conda-build
             conda config --add channels conda-forge
             conda config --add channels ncar-vapor
             conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
-          no_output_timeout: 45m
+          no_output_timeout: 180m
  
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
@@ -525,28 +516,20 @@ jobs:
       - run:
           name: build conda installer
           command: |
-            conda update -n base -c defaults conda
+            conda update -y -n base -c defaults conda
             conda config --add channels ncar-vapor
             conda config --add channels conda-forge
             conda install -y conda-build
             cd /root/project/conda
+
+            #conda build .
             DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
             mkdir /usr/local/conda-bld/linux-64/tarBallDir
             mv /usr/local/conda-bld/linux-64/*.tar.bz2 /usr/local/conda-bld/linux-64/tarBallDir
-            cd /usr/local/conda-bld/linux-64/tarBallDir
-            fileName=${ls}
-            newFileName=${fileName//vapor/vaporUbuntu}
-            mkdir -p /tmp/workspace/installers
-            cp /usr/local/conda-bld/linux-64/tarBallDir/*.tar.bz2 /tmp/workspace/installers/
-          no_output_timeout: 45m
+          no_output_timeout: 180m
 
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
 
   build_python_api_centos:
     docker:
@@ -829,13 +812,15 @@ jobs:
     docker:
       - image: ubuntu:20.04
 
+    resource_class: large
+
     steps:
       - checkout
 
       - run:
           name: acquire prerequisites
           command: |
-            DEBIAN_FRONTEND=noninteractive
+            export DEBIAN_FRONTEND=noninteractive
             apt update
             apt install -y curl
             apt install -y xz-utils
@@ -848,43 +833,34 @@ jobs:
             apt install -y valgrind
             apt install -y clang-tidy
             apt install -y lsb-release
+            git config --global --add safe.directory /tmp/_circleci_local_build_repo
 
+            # all for cmake
+            apt-get update
+            apt-get install -y gpg wget
+            wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+            dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+            wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+            echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
+            DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
+            apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
+            apt install -y cmake --allow-unauthenticated
+      
       - run:
-          name: update 3rd party libraries
+          name: acquire 3rd party libraries
           command: |
             mkdir -p /usr/local/VAPOR-Deps
-            apt update
-            apt install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
-            pip3 install gdown
-            #gdown https://drive.google.com/uc?id=15-wSWR2H8swbpO7GvPueeaQrD56oLhxq
-            gdown https://drive.google.com/uc?id=12kHLQ8mP896lByMZutiawORsBrpNuZzv
-            filename="/root/project/2019-Aug-Ubuntu22.tar.xz"
+            id="16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6"
+            filename="2023-Jun-Ubuntu20.tar.xz"
+            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
-          no_output_timeout: 45m
-
-      - run:
-          name: update cmake
-          command: |
-            sudo apt remove --purge --auto-remove cmake
-            sudo apt install -y software-properties-common lsb-release && \
-            sudo apt clean all
-            wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-            sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
-            sudo apt install kitware-archive-keyring
-            sudo rm /etc/apt/trusted.gpg.d/kitware.gpg
-            sudo apt update
-            sudo apt install cmake
 
       - run:
           name: make installer
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
-            #git checkout main
-            #git reset --hard origin/main
-            git pull
             cmake -DCMAKE_BUILD_TYPE:String=Release \
                   -DDIST_INSTALLER:string=ON \
                   -DUSE_OMP=ON \
@@ -897,11 +873,6 @@ jobs:
 
       - store_artifacts:
           path: /tmp/workspace/installers
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
 
   build_ubuntu22_installer:
     docker:
@@ -926,41 +897,37 @@ jobs:
             apt install -y clang-tidy
             apt install -y lsb-release
 
+            # all for cmake
+            apt-get update
+            apt-get install -y gpg wget
+            wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+            dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+            wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+            echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
+            DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
+            apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
+            apt install -y cmake --allow-unauthenticated
+
       - run:
           name: update 3rd party libraries
           command: |
             mkdir -p /usr/local/VAPOR-Deps
-            apt update
-            apt install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=15-wSWR2H8swbpO7GvPueeaQrD56oLhxq
-            filename="/root/project/2019-Aug-Ubuntu22.tar.xz"
+            id="1gqUxxJJA4iGnAPvI1EDaFFnrlbALnkeO"
+            filename="2023-Jun-Ubuntu22.tar.xz"
+            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
-
-      - run:
-          name: update cmake
-          command: |
-            apt remove -y --purge --auto-remove cmake
-            apt install -y libssl-dev
-            apt install -y build-essential git
-            git clone https://github.com/Kitware/CMake/
-            cd CMake
-            ./bootstrap && make && make install
+          no_output_timeout: 45m
 
       - run:
           name: make installer
           command: |
-            echo "deb http://security.ubuntu.com/ubuntu focal-security main" >> /etc/apt/sources.list
-            sudo apt-get update
-            sudo apt-get install libicu66
+            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
-            git checkout main
-            git reset --hard origin/main
-            git pull
-            cmake -DCMAKE_BUILD_TYPE:String=Release cmake -DPYTHONVERSION=3.9 -DQTDIR=/usr/local/VAPOR-Deps/2019-Aug/Qt/5.15.2/gcc_64 -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
+            cmake -DCMAKE_BUILD_TYPE:String=Release \
+                  -DDIST_INSTALLER:string=ON \
+                  -DUSE_OMP=ON \
+                  ..
             make -j4
             make installer
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu22}" ; done
@@ -969,11 +936,6 @@ jobs:
 
       - store_artifacts:
           path: /tmp/workspace/installers
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
 
   test_clang_format:
     docker:
