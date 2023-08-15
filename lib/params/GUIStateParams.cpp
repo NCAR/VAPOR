@@ -314,7 +314,11 @@ BookmarkParams *GUIStateParams::GetBookmark(int i) const
     return (BookmarkParams *)_bookmarks->GetParams(_bookmarks->GetNames()[i]);
 }
 
-void GUIStateParams::_init() { SetActiveVizName(""); }
+void GUIStateParams::_init() {
+    SetActiveVizName("");
+    SetValueLong(MovingDomainTrackCameraTag, "", true);
+    SetValueLong(MovingDomainTrackRenderRegionsTag, "", true);
+}
 
 void GUIStateParams::ActiveRenderer::SetActiveRenderer(string vizWin, string renderType, string renderInst)
 {
