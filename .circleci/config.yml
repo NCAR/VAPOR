@@ -256,7 +256,8 @@ jobs:
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
-            git pull && git reset --hard origin/main
+            #git pull && git reset --hard origin/main
+            git reset --hard origin/main && git pull
             export PATH=/opt/local/bin:$PATH
             sudo port select --set clang mp-clang-13
             cmake -DCPACK_BINARY_DRAGNDROP=ON \
