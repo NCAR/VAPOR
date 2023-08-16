@@ -16,6 +16,7 @@ PRegionSelector::PRegionSelector(const std::string &label) : PSection(label)
 PRegionSelector1D::PRegionSelector1D(int dim) : PLineItem("", dim == 0 ? "X" : dim == 1 ? "Y" : "Z", _slider = new QRangeSliderTextCombo), _dim(dim)
 {
     QObject::connect(_slider, &QRangeSliderTextCombo::ValueChanged, this, &PRegionSelector1D::sliderValueChanged);
+    _slider->AllowCustomRange();
 }
 
 void PRegionSelector1D::updateGUI() const

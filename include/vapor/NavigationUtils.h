@@ -52,4 +52,11 @@ public:
     static VAPoR::ViewpointParams *GetActiveViewpointParams(ControlExec *ce);
     static GUIStateParams *        GetGUIStateParams(ControlExec *ce);
     static AnimationParams *       GetAnimationParams(ControlExec *ce);
+
+private:
+    static void propagateTimestep(ControlExec *ce, size_t ts);
+    static void handleMovingDomainAdjustments(ControlExec *ce, size_t ts_from, size_t ts_to);
+    static glm::vec3 getDomainMovementBetweenTimesteps(ControlExec *ce, std::string dataset, size_t from, size_t to);
+    static void movingDomainTrackCamera(ControlExec *ce, size_t from, size_t to);
+    static void movingDomainTrackRenderRegions(ControlExec *ce, size_t from, size_t to);
 };
