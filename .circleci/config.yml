@@ -262,7 +262,7 @@ jobs:
             export PATH=/opt/local/bin:$PATH
             sudo port select --set clang mp-clang-13
             cmake -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Release \
+                  -DCMAKE_BUILD_TYPE:String=Debug \
                   -DDIST_INSTALLER:string=ON \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
