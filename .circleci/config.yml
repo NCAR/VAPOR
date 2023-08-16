@@ -142,6 +142,7 @@ jobs:
             filename="2023-Jun-macOSx86.tar.xz"
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
+            sudo xattr -rds com.apple.quarantine /usr/local/VAPOR-Deps
 
       - run:
           name: Get cmake
@@ -222,6 +223,7 @@ jobs:
             filename="2023-Jun-M1.tar.xz"
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
+            sudo xattr -rds com.apple.quarantine /usr/local/VAPOR-Deps
 
       - run:
           name: Get cmake
