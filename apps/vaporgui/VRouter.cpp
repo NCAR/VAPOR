@@ -1,6 +1,11 @@
 #include "VRouter.h"
 #include "vapor/STLUtils.h"
 
+VRouter::VRouter() 
+: VContainer(_stack = new QStackedWidget)
+{
+}
+
 VRouter::VRouter(AbstractWidgetGroup<VRouter, QWidget>::List children)
 : VContainer(_stack = new QStackedWidget)
 {
