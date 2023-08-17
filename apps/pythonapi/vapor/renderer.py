@@ -259,6 +259,23 @@ class FlowRenderer(Renderer, wrap=link.VAPoR.FlowParams):
         return BoundingBox(self._params.GetIntegrationBox())
 
 
+link.include('vapor/ParticleRenderer.h')
+link.include('vapor/ParticleParams.h')
+class ParticleRenderer(Renderer, wrap=link.VAPoR.ParticleParams):
+    _tags = ParamsTagWrapperList("""
+        long StrideTag
+        
+        long ShowDirectionTag
+        double RenderRadiusScalarTag
+        double DirectionScaleTag
+        
+        double PhongAmbientTag
+        double PhongDiffuseTag
+        double PhongSpecularTag
+        double PhongShininessTag
+    """)
+
+
 link.include('vapor/WireFrameRenderer.h')
 link.include('vapor/WireFrameParams.h')
 class WireFrameRenderer(Renderer, wrap=link.VAPoR.WireFrameParams):

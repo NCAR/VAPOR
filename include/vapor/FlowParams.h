@@ -363,7 +363,7 @@ public:
 
     //! Specifies the Phong Shininess lighting coefficient (https://en.wikipedia.org/wiki/Phong_reflection_model).
     //! Applies data of type: double.
-    //! Typical values: 0.0 to 1.0.
+    //! Typical values: 0.0 to 100.0.
     //! Valid values: DBL_MIN to DBL_MAX.
     static const std::string PhongShininessTag;
 

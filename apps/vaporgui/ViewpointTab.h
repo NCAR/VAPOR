@@ -11,6 +11,7 @@ class ViewpointTab : public QWidget, public EventRouter {
     Q_OBJECT
 
     PWidget *_pg = nullptr;
+    PWidget *_movingDomainSection = nullptr;
 
 public:
     ViewpointTab(VAPoR::ControlExec *ce);

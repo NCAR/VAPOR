@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QTimer>
+#include <glm/fwd.hpp>
 
 class AnimationParams;
 namespace VAPoR {

@@ -787,6 +787,21 @@ string DataMgr::GetTimeCoordVarName() const
     return ("");
 }
 
+bool DataMgr::HasTimeVaryingCoordinates() const
+{
+    const auto time = GetTimeCoordVarName();
+    for (const auto &v : GetCoordVarNames()) {
+        if (v == time) continue;
+        if (IsTimeVarying(v)) return true;
+    }
+    return false;
+}
+
+bool DataMgr::HasMovingDomain() const
+{
+    return HasTimeVaryingCoordinates();
+}
+
 bool DataMgr::GetVarCoordVars(string varname, bool spatial, std::vector<string> &coord_vars) const
 {
     VAssert(_dc);

@@ -294,6 +294,9 @@ public:
     //
     string GetTimeCoordVarName() const;
 
+    bool HasTimeVaryingCoordinates() const;
+    bool HasMovingDomain() const;
+
     //! Return an ordered list of a data variable's coordinate names
     //!
     //! Returns a list of a coordinate variable names for the variable

@@ -33,6 +33,7 @@ public:
 
     int  Render(String imagePath, bool fast=false);
     void SetTimestep(int ts);
+    int GetTimesteps() const;
     
     static void SetWaspMyBaseErrMsgFilePtrToSTDERR();
     

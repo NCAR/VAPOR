@@ -56,3 +56,20 @@ class Camera():
     def SetUp       (self, v:Vec3): NavigationUtils.SetCameraUp(self.ce, v)
     def SetTarget   (self, v:Vec3): NavigationUtils.SetCameraTarget(self.ce, v)
 
+    def __GUIStateParams(self) -> link.GUIStateParams:
+        pm = self.ce.GetParamsMgr()
+        gsp = pm.GetParams(link.GUIStateParams.GetClassType())
+        return gsp
+
+
+    def TrackMovingDomain(self, on=True):
+        """Camera should follows the moving domain"""
+        gsp = self.__GUIStateParams()
+        gsp.SetValueLong(gsp.MovingDomainTrackCameraTag, "", on)
+        print(f"{gsp.MovingDomainTrackCameraTag} = {bool(gsp.GetValueLong(gsp.MovingDomainTrackCameraTag, 0))}")
+
+    def TrackMovingDomainRenderRegions(self, on=True):
+        """Renderer regions will be tracked relative to the moving domain"""
+        gsp = self.__GUIStateParams()
+        gsp.SetValueLong(gsp.MovingDomainTrackRenderRegionsTag, "", on)
+

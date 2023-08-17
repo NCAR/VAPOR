@@ -210,6 +210,8 @@ public:
     static const string m_openDataSetsTag;
     static const string _flowDimensionalityTag;
     static const string BookmarksTag;
+    static const string MovingDomainTrackCameraTag;
+    static const string MovingDomainTrackRenderRegionsTag;
 
 private:
     MouseModeParams *m_mouseModeParams;

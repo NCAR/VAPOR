@@ -2,13 +2,18 @@
 #include <vapor/ControlExecutive.h>
 #include <vapor/AnimationParams.h>
 #include <vapor/NavigationUtils.h>
+#include <vapor/GUIStateParams.h>
 
 using namespace VAPoR;
 
 AnimationController::AnimationController(VAPoR::ControlExec *ce) : _controlExec(ce), _myTimer(new QTimer(this)) {}
 
+using glm::vec3;
 
-void AnimationController::setCurrentTimestep(size_t ts) const { NavigationUtils::SetTimestep(_controlExec, ts); }
+void AnimationController::setCurrentTimestep(size_t ts) const {
+    NavigationUtils::SetTimestep(_controlExec, ts);
+}
+
 
 // Insert values from params into tab panel
 //
