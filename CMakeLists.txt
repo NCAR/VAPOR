@@ -445,13 +445,13 @@ if (APPLE)
 		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
 		    	)
-            file (GLOB COCOA_LIBS ${QTDIR}/plugins/platforms/libqcocoa.dylib)
+            file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)
 	        install (
                 FILES ${COCOA_LIBS}
                 DESTINATION ${INSTALL_BIN_DIR}/platforms
                 COMPONENT Dependencies
                 )
-            file (GLOB STYLE_LIBS ${QTDIR}/plugins/styles/libqmacstyle.dylib)
+            file (GLOB STYLE_LIBS ${THIRD_PARTY_DIR}/plugins/styles/libqmacstyle.dylib)
 	        install (
                 FILES ${STYLE_LIBS}
                 DESTINATION ${INSTALL_BIN_DIR}/styles
@@ -566,7 +566,7 @@ if (UNIX AND NOT APPLE)
                 COMPONENT Dependencies
             )
 
-		    file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
+		    file (GLOB XCBQPA_FILES ${THIRD_PARTY_LIB_DIR}/libQt5XcbQpa.*)
 		    install (
 		    	FILES ${XCBQPA_FILES}
 		    	DESTINATION ${INSTALL_LIB_DIR}
