@@ -11,7 +11,8 @@ class VRouter : public VContainer, public AbstractWidgetGroup<VRouter, QWidget> 
     QWidget *_emptyWidget = nullptr;
 
 public:
-    VRouter(List children = {});
+	VRouter();
+	VRouter(List children);
     VRouter *Add(QWidget *w) override;
 
     void Show(QWidget *w);
