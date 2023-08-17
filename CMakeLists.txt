@@ -566,7 +566,7 @@ if (UNIX AND NOT APPLE)
                 COMPONENT Dependencies
             )
 
-		    file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
+		    file (GLOB XCBQPA_FILES ${THIRD_PARTY_LIB_DIR}/libQt5XcbQpa.*)
 		    install (
 		    	FILES ${XCBQPA_FILES}
 		    	DESTINATION ${INSTALL_LIB_DIR}
