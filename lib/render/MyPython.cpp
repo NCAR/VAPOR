@@ -187,8 +187,10 @@ int MyPython::rerouteSTDIO()
                          "		self.value = 'VAPOR_PY: '\n"
                          "	def write(self, txt):\n"
                          "		self.value += txt\n"
+                         "	def flush(self): pass\n"
                          "catchErr = CatchErr()\n"
-                         "sys.stderr = catchErr\n";
+                         "sys.stderr = catchErr\n"
+                        ;
 
     // Catch stderr from Python to a string.
     //
@@ -208,8 +210,10 @@ int MyPython::rerouteSTDIO()
                          "		self.value = ''\n"
                          "	def write(self, txt):\n"
                          "		self.value += txt\n"
+                         "	def flush(self): pass\n"
                          "catchOut = CatchOut()\n"
-                         "sys.stdout = catchOut\n";
+                         "sys.stdout = catchOut\n"
+                        ;
 
     // Catch stdout from Python to a string.
     //
@@ -218,7 +222,7 @@ int MyPython::rerouteSTDIO()
         MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
         return (-1);
     }
-    
+
     return 0;
 }
 
@@ -226,6 +230,8 @@ int MyPython::rerouteSTDIO()
 //
 string MyPython::PyErr()
 {
+    PyErr_Print();
+
     PyObject *pMain = PyImport_AddModule("__main__");
 
     PyObject *catcher = NULL;
@@ -234,7 +240,6 @@ string MyPython::PyErr()
     // If catcher is NULL the Python message will be written
     // to stderr. Otherwise it is writter to the catchErr object.
     //
-    PyErr_Print();
 
     if (!catcher) { return ("Failed to initialize Python error catcher!!!"); }
 
