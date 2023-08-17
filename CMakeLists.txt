@@ -445,13 +445,13 @@ if (APPLE)
 		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
 		    	)
-            file (GLOB COCOA_LIBS ${QTDIR}/plugins/platforms/libqcocoa.dylib)
+            file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)
 	        install (
                 FILES ${COCOA_LIBS}
                 DESTINATION ${INSTALL_BIN_DIR}/platforms
                 COMPONENT Dependencies
                 )
-            file (GLOB STYLE_LIBS ${QTDIR}/plugins/styles/libqmacstyle.dylib)
+            file (GLOB STYLE_LIBS ${THIRD_PARTY_DIR}/plugins/styles/libqmacstyle.dylib)
 	        install (
                 FILES ${STYLE_LIBS}
                 DESTINATION ${INSTALL_BIN_DIR}/styles
