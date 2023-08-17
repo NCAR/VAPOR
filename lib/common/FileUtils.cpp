@@ -97,7 +97,7 @@ std::string FileUtils::Realpath(const std::string &path)
 {
 #ifdef WIN32
     char real[_MAX_PATH];
-    if(_fullpath(real, path, _MAX_PATH))
+    if(_fullpath(real, path.c_str(), _MAX_PATH))
         return string(real);
     return path;
 #else

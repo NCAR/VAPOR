@@ -43,8 +43,7 @@ jobs:
             Copy-Item site_files\* -Destination .
             mkdir build
             cd build
-            git pull 
-            git reset --hard origin/main
+            git checkout $CIRCLE_BRANCH
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DDIST_INSTALLER:string=ON -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_OSP=OFF -G 'Visual Studio 16 2019' -A x64
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\project\tmp\workspace\installers
@@ -142,7 +141,6 @@ jobs:
             filename="2023-Jun-macOSx86.tar.xz"
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
-            sudo xattr -rds com.apple.quarantine /usr/local/VAPOR-Deps
 
       - run:
           name: Get cmake
@@ -175,7 +173,7 @@ jobs:
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
-            git pull && git reset --hard origin/main
+            git checkout $CIRCLE_BRANCH
             export PATH=/opt/local/bin:$PATH
             sudo port select --set clang mp-clang-13
             cmake -DCPACK_BINARY_DRAGNDROP=ON \
@@ -223,7 +221,6 @@ jobs:
             filename="2023-Jun-M1.tar.xz"
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
-            sudo xattr -rds com.apple.quarantine /usr/local/VAPOR-Deps
 
       - run:
           name: Get cmake
@@ -256,13 +253,11 @@ jobs:
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
-            #git pull && git reset --hard origin/main
-            #git reset --hard origin/main && git pull
-            git pull origin main && git reset --hard origin/main
+            git checkout $CIRCLE_BRANCH
             export PATH=/opt/local/bin:$PATH
             sudo port select --set clang mp-clang-13
             cmake -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Debug \
+                  -DCMAKE_BUILD_TYPE:String=Release \
                   -DDIST_INSTALLER:string=ON \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
@@ -319,7 +314,7 @@ jobs:
           name: make installer
           command: |
             cd /root/project/build
-            git checkout origin/main
+            git checkout $CIRCLE_BRANCH
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
             make -j4
             make installer
@@ -355,7 +350,7 @@ jobs:
           name: cmake3 and make
           command: |
             cd /root/project/build
-            git pull && git reset --hard origin/main
+            git checkout $CIRCLE_BRANCH
             cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m -DPYTHONVERSION=3.6 ..
             make -j2
             make installer -j2
@@ -866,7 +861,6 @@ jobs:
             ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
-            git pull && git reset --hard origin/main
             cmake -DCMAKE_BUILD_TYPE:String=Release \
                   -DDIST_INSTALLER:string=ON \
                   -DUSE_OMP=ON \
@@ -879,6 +873,11 @@ jobs:
 
       - store_artifacts:
           path: /tmp/workspace/installers
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - installers
 
   build_ubuntu22_installer:
     docker:
@@ -930,7 +929,6 @@ jobs:
             ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
-            git pull && git reset --hard origin/main
             cmake -DCMAKE_BUILD_TYPE:String=Release \
                   -DDIST_INSTALLER:string=ON \
                   -DUSE_OMP=ON \
@@ -1477,7 +1475,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "05 00 * * 4" #Mountain Standard Time +6
+             cron: "40 12 * * 4" #Time is GMT
              filters:
                branches:
                  only: main
