@@ -262,7 +262,7 @@ jobs:
             export PATH=/opt/local/bin:$PATH
             sudo port select --set clang mp-clang-13
             cmake -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Debug \
+                  -DCMAKE_BUILD_TYPE:String=Release \
                   -DDIST_INSTALLER:string=ON \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
@@ -607,7 +607,7 @@ jobs:
             cd /tmp/workspace/installers
             fileName=${ls}
             newFileName=${fileName//vapor/vaporUbuntu}
-          no_output_timeout: 30m
+          no_output_timeout: 180m
 
       - store_artifacts:
           path: /tmp/workspace/installers
