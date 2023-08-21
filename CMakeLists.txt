@@ -556,8 +556,26 @@ if (UNIX AND NOT APPLE)
 		        	DESTINATION ${INSTALL_LIB_DIR}
 		        	COMPONENT Dependencies
 		        	)
-                        endif ()
-                    endif ()
+                endif ()
+            else()
+                install (
+                    DIRECTORY ${QTDIR}/plugins/xcbglintegrations
+                    DESTINATION ${INSTALL_LIB_DIR}
+                    COMPONENT Dependencies
+                )
+                install (
+                FILES ${QTDIR}/plugins/platforms/libqxcb.so
+                DESTINATION ${INSTALL_LIB_DIR}/platforms
+                COMPONENT Dependencies
+                )
+
+                file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
+                install (
+                    FILES ${XCBQPA_FILES}
+                    DESTINATION ${INSTALL_LIB_DIR}
+                    COMPONENT Dependencies
+                )
+            endif ()
 
             file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinput.*)
             install (
