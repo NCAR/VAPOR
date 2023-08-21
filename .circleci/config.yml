@@ -351,7 +351,15 @@ jobs:
           command: |
             cd /root/project/build
             git checkout $CIRCLE_BRANCH
-            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m -DPYTHONVERSION=3.6 ..
+            cmake3 \
+            -DCMAKE_BUILD_TYPE:String=Release \
+            -DDIST_INSTALLER:string=ON \
+            -DUSE_OMP=ON \
+            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
+            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
+            -DPYTHONVERSION=3.6 \
+            -DQTDIR=/usr/local/VAPOR-Deps/2019-Aug/Qt/5.13.2/gcc_64 \
+            ..
             make -j2
             make installer -j2
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7}" ; done
@@ -1446,11 +1454,11 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      - build_centos7
+      #- build_centos7
       #- build_centos7_installer
-      - build_ubuntu18
-      - build_python_api_ubuntuDebug
-      - build_python_api_ubuntu
+      #- build_ubuntu18
+      #- build_python_api_ubuntuDebug
+      #- build_python_api_ubuntu
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
@@ -1459,7 +1467,7 @@ workflows:
       #- build_M1_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
-      #- build_centos7_installer
+      - build_centos7_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
       #- build_centos7_libs
