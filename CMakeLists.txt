@@ -557,6 +557,7 @@ if (UNIX AND NOT APPLE)
 		        	COMPONENT Dependencies
 		        	)
                 endif ()
+                file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
             else()
                 install (
                     DIRECTORY ${QTDIR}/plugins/xcbglintegrations
@@ -590,7 +591,8 @@ if (UNIX AND NOT APPLE)
 		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
 		    	)
-        endif ()
+            file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
+        endif (DIST STREQUAL "Ubuntu")
 
 		if (BUILD_OSP)
 			file (GLOB INSTALL_OSPRAY_LIBS ${OSPRAYDIR}/lib/*.so*)
@@ -601,7 +603,6 @@ if (UNIX AND NOT APPLE)
 				)
 		endif ()
 
-        file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
 			install (
 				FILES ${HDF5_PLUGINS}
 				DESTINATION "${INSTALL_SHARE_DIR}/plugins"
