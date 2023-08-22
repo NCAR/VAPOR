@@ -556,8 +556,27 @@ if (UNIX AND NOT APPLE)
 		        	DESTINATION ${INSTALL_LIB_DIR}
 		        	COMPONENT Dependencies
 		        	)
-                        endif ()
-                    endif ()
+                endif ()
+                file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
+            else()
+                install (
+                    DIRECTORY ${QTDIR}/plugins/xcbglintegrations
+                    DESTINATION ${INSTALL_LIB_DIR}
+                    COMPONENT Dependencies
+                )
+                install (
+                FILES ${QTDIR}/plugins/platforms/libqxcb.so
+                DESTINATION ${INSTALL_LIB_DIR}/platforms
+                COMPONENT Dependencies
+                )
+
+                file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
+                install (
+                    FILES ${XCBQPA_FILES}
+                    DESTINATION ${INSTALL_LIB_DIR}
+                    COMPONENT Dependencies
+                )
+            endif ()
 
             file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinput.*)
             install (
@@ -572,7 +591,8 @@ if (UNIX AND NOT APPLE)
 		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
 		    	)
-        endif ()
+            file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
+        endif (DIST STREQUAL "Ubuntu")
 
 		if (BUILD_OSP)
 			file (GLOB INSTALL_OSPRAY_LIBS ${OSPRAYDIR}/lib/*.so*)
@@ -583,7 +603,6 @@ if (UNIX AND NOT APPLE)
 				)
 		endif ()
 
-        file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
 			install (
 				FILES ${HDF5_PLUGINS}
 				DESTINATION "${INSTALL_SHARE_DIR}/plugins"
