@@ -264,7 +264,7 @@ jobs:
             git pull origin main && git reset --hard origin/main
             export PATH=/opt/local/bin:$PATH
             sudo port select --set clang mp-clang-13
-            cmake -DBUILD_OSP=OFF\ 
+            cmake -DBUILD_OSP=OFF \ 
                   -DCPACK_BINARY_DRAGNDROP=ON \
                   -DCMAKE_BUILD_TYPE:String=Release \
                   -DDIST_INSTALLER:string=ON \
