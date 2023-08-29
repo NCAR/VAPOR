@@ -1,7 +1,8 @@
 if (APPLE)
     #if (NOT DEFINED THIRD_PARTY_DIR)
-        set (THIRD_PARTY_DIR     /usr/local/VAPOR-Deps/current			           )
+    set (THIRD_PARTY_DIR     /usr/local/VAPOR-Deps/current			           )
     #endif()
+
     #set (QTDIR               /usr/local/VAPOR-Deps/current/Qt/5.15.8/clang_64 )
     if (NOT DEFINED QTDIR)
         set (QTDIR               /usr/local/VAPOR-Deps/current/Qt/lib/cmake )
