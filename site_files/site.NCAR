@@ -7,7 +7,7 @@ if (APPLE)
         set (QTDIR               /usr/local/VAPOR-Deps/current/Qt/lib/cmake )
     endif()
     list (APPEND CMAKE_PREFIX_PATH ${QTDIR}/lib/cmake                          )
-    message("cmake prefix path (${CMAKE_PREFIX_PATH})"
+    message("cmake prefix path ${CMAKE_PREFIX_PATH}"                           )
 	set (OSPRAYDIR           ${THIRD_PARTY_DIR}/Ospray                         )
 elseif (UNIX AND NOT APPLE)
     if (NOT DEFINED THIRD_PARTY_DIR)
