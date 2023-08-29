@@ -219,8 +219,10 @@ jobs:
           name: acquire 3rd party libraries
           command: |
             mkdir -p /usr/local/VAPOR-Deps
-            id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
-            filename="2023-Jun-M1.tar.xz"
+            #id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
+            #filename="2023-Jun-M1.tar.xz"
+            id="1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg"
+            filename="2019-Aug-Darwin.tar.xz"
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
             sudo xattr -rds com.apple.quarantine /usr/local/VAPOR-Deps
@@ -252,7 +254,8 @@ jobs:
       - run:
           name: make VAPOR
           command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
+            #ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
+            ln -s /usr/local/VAPOR-Deps/2019-Aug /usr/local/VAPOR-Deps/current
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
@@ -267,6 +270,7 @@ jobs:
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
                   -DUSE_OMP=ON \
+                  -DQTDIR=/usr/local/VAPOR-Deps/current/Qt/5.13.2/clang_64
                   ..
             make -j8
             make installer
@@ -1462,19 +1466,19 @@ workflows:
     jobs:
       #- clang-tidy
       #- build_centos7
-      - build_centos7_installer
+      #- build_centos7_installer
       #- build_ubuntu18
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
       #- build_python_api_centos
-      - build_python_api_osx
+      #- build_python_api_osx
       #- test_clang_format
-      - build_win10_installer
-      - build_macOSx86_installer
+      #- build_win10_installer
+      #- build_macOSx86_installer
       - build_M1_installer
-      - build_ubuntu20_installer
-      - build_ubuntu22_installer
-      - build_centos7_installer
+      #- build_ubuntu20_installer
+      #- build_ubuntu22_installer
+      #- build_centos7_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
       #- build_centos7_libs
