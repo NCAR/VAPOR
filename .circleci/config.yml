@@ -270,7 +270,7 @@ jobs:
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
                   -DUSE_OMP=ON \
-                  -DQTDIR=/usr/local/VAPOR-Deps/current/Qt/5.13.2/clang_64
+                  -DQTDIR=/usr/local/VAPOR-Deps/current/Qt/5.13.2/clang_64 \
                   ..
             make -j8
             make installer
