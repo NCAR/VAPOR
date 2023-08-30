@@ -204,7 +204,7 @@ jobs:
       #xcode: "14.2.0"
       xcode: "13.4.1"
 
-    @resource_class: macos.m1.large.gen1
+    #resource_class: macos.m1.large.gen1
     steps:
       - checkout
 
