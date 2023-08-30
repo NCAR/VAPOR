@@ -219,8 +219,13 @@ jobs:
           name: acquire 3rd party libraries
           command: |
             mkdir -p /usr/local/VAPOR-Deps
-            id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
-            filename="2023-Jun-M1.tar.xz"
+            # 2023-Jun-x86
+            id="17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn"
+            filename="2023-Jun-macOSx86.tar.xz
+            # 2023-Jun-m1
+            #id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
+            #filename="2023-Jun-M1.tar.xz"
+            # 2019-Aug
             #id="1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg"
             #filename="2019-Aug-Darwin.tar.xz"
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
@@ -264,6 +269,7 @@ jobs:
             git pull origin main && git reset --hard origin/main
             export PATH=/opt/local/bin:$PATH
             sudo port select --set clang mp-clang-13
+            pwd
             cmake -DBUILD_OSP=OFF \ 
                   -DCPACK_BINARY_DRAGNDROP=ON \
                   -DCMAKE_BUILD_TYPE:String=Release \
@@ -274,6 +280,22 @@ jobs:
                   ..
                   #-DQTDIR=/usr/local/VAPOR-Deps/current/Qt/5.13.2/clang_64 \
                   #-DPYTHONVERSION=3.6 \
+
+            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
+            cp site_files/site.NCAR site.local
+            mkdir build
+            cd build
+            git pull && git reset --hard origin/main
+            export PATH=/opt/local/bin:$PATH
+            sudo port select --set clang mp-clang-13
+            cmake -DCPACK_BINARY_DRAGNDROP=ON \
+                  -DCMAKE_BUILD_TYPE:String=Release \
+                  -DDIST_INSTALLER:string=ON \
+                  -DCMAKE_CXX_COMPILER=clang++ \
+                  -DCMAKE_C_COMPILER=clang \
+                  -DUSE_OMP=ON \
+                  ..
+
             make -j8
             make installer
             for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/DarwinM1}" ; done
