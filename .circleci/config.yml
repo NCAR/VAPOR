@@ -204,7 +204,7 @@ jobs:
       #xcode: "14.2.0"
       xcode: "13.4.1"
 
-    resource_class: macos.m1.large.gen1
+    @resource_class: macos.m1.large.gen1
     steps:
       - checkout
 
@@ -221,8 +221,10 @@ jobs:
             mkdir -p /usr/local/VAPOR-Deps
             #id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
             #filename="2023-Jun-M1.tar.xz"
-            id="1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg"
-            filename="2019-Aug-Darwin.tar.xz"
+            #id="1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg"
+            #filename="2019-Aug-Darwin.tar.xz"
+            id="17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn"
+            filename="2023-Jun-macOSx86.tar.xz"
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
             sudo xattr -rds com.apple.quarantine /usr/local/VAPOR-Deps
@@ -270,8 +272,7 @@ jobs:
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_C_COMPILER=clang \
                   -DUSE_OMP=ON \
-                  -DQTDIR=/usr/local/VAPOR-Deps/current/Qt/5.13.2/clang_64 \
-                  -DPYTHONVERSION=3.6 \
+                  -DBUILD_OSP=OFF \
                   ..
             make -j8
             make installer
@@ -1475,7 +1476,7 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
-      #- build_macOSx86_installer
+      - build_macOSx86_installer
       - build_M1_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
