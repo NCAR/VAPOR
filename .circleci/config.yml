@@ -270,32 +270,15 @@ jobs:
             export PATH=/opt/local/bin:$PATH
             sudo port select --set clang mp-clang-13
             pwd
-            cmake -DBUILD_OSP=OFF \ 
-                  -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DCMAKE_CXX_COMPILER=clang++ \
-                  -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=ON \
-                  ..
-                  #-DQTDIR=/usr/local/VAPOR-Deps/current/Qt/5.13.2/clang_64 \
-                  #-DPYTHONVERSION=3.6 \
-
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
-            cp site_files/site.NCAR site.local
-            mkdir build
-            cd build
-            git pull && git reset --hard origin/main
-            export PATH=/opt/local/bin:$PATH
-            sudo port select --set clang mp-clang-13
-            cmake -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DCMAKE_CXX_COMPILER=clang++ \
-                  -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=ON \
-                  ..
-
+            cmake \
+            -DBUILD_OSP=OFF \ 
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_BUILD_TYPE:String=Release \
+            -DDIST_INSTALLER:string=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DUSE_OMP=ON \
+            ..
             make -j8
             make installer
             for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/DarwinM1}" ; done
@@ -1498,7 +1481,7 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
-      #- build_macOSx86_installer
+      - build_macOSx86_installer
       - build_M1_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
