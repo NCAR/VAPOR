@@ -221,7 +221,7 @@ jobs:
             mkdir -p /usr/local/VAPOR-Deps
             # 2023-Jun-x86
             id="17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn"
-            filename="2023-Jun-macOSx86.tar.xz
+            filename="2023-Jun-macOSx86.tar.xz"
             # 2023-Jun-m1
             #id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
             #filename="2023-Jun-M1.tar.xz"
