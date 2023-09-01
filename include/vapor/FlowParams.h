@@ -151,6 +151,10 @@ public:
     //! \retval std::vector<std::string> - A vector containing the variables being written to the specified output file name.
     std::vector<std::string> GetFlowOutputMoreVariables() const;
 
+    //! One or more variable to be sampled along flowlines and written to an output file.
+    //! \param[in] std::vector<std::string> - A vector containing the variables being written to the specified output file name.
+    void SetFlowOutputMoreVariables(std::vector<std::string> vars);
+
     //! Inquires whether the current flow advection scheme is periodic.
     //! \details IE - Do pathlines or streamlines continue on the opposite side of the domain when the exit it?  Similar to when PAC-MAN exits the right side of the screen, and re-enters on the left.\n
     //! Note: this result vector could be of size 2 or 3.
