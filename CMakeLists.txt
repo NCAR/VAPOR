@@ -41,7 +41,7 @@ endif()
 
 set (VERSION_MAJOR 3)
 set (VERSION_MINOR 9)
-set (VERSION_MICRO 0)
+set (VERSION_MICRO 1)
 set (VERSION_RC )
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
 	get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
