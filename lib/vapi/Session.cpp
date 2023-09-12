@@ -155,6 +155,10 @@ int Session::Render(String imagePath, bool fast)
         LogWarning("Nothing to render");
         return -1;
     }
+    if (_controlExec->GetParamsMgr()->GetDataMgrNames() != getGUIStateParams()->GetOpenDataSetNames()) {
+        LogWarning("Cannot render: There are missing datasets");
+        return -1;
+    }
 
     return _renderManager->Render(imagePath, fast);
 }
@@ -239,9 +243,8 @@ void Session::loadAllParamsDatasets()
         } else {
             getGUIStateParams()->RemoveOpenDateSet(name);
 
-            string err = "This session links to the dataset " + name + " which was not found. Please open this dataset if it is in a different location";
+            string details = "This session links to the dataset " + name + " which was not found. Please open this dataset if it is in a different location\n";
 
-            string details;
             for (const auto &path : paths)
                 if (!FileUtils::Exists(path)) details += "\"" + path + "\" not found.\n";
 
