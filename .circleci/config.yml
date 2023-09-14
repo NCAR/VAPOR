@@ -844,7 +844,7 @@ jobs:
             filename="2023-Sept-SUSE.tar.xz"
             curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
             tar -xf ${filename} -C /usr/local/VAPOR-Deps
-            ln -s /usr/local/VAPOR-Deps/2023-Sept current
+            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
 
       - run:
           name: make installer
