@@ -828,8 +828,9 @@ jobs:
       - run:
           name: acquire prerequisites
           command: |
-            zypper in -t -y pattern devel_C_C++
+            zypper in -t pattern devel_C_C++
             zypper install -y \
+                gcc7-fortran \
                 cmake \
                 curl \
                 libicu-devel \
