@@ -46,6 +46,7 @@ set (VERSION_RC )
 message("CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE}")
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
 	get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
+    message("VERSION_COMMIT ${VERSION_COMMIT}")
 	execute_process (
 		COMMAND git rev-parse --short ${VERSION_COMMIT}
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
