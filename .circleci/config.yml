@@ -822,8 +822,8 @@ jobs:
 
     resource_class: large
 
-  steps:
-    - checkout
+    steps:
+      - checkout
 
   build_ubuntu20_installer:
     docker:
