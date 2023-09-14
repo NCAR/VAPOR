@@ -1468,7 +1468,7 @@ workflows:
       #- build_ubuntu18
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
-       - build_openSUSE_installer
+      - build_openSUSE_installer
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
