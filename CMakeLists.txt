@@ -530,23 +530,25 @@ if (UNIX AND NOT APPLE)
 		    )
 
             # Include necessary libraries for Ubuntu
-            file(READ "/etc/issue" ETC_ISSUE)
-            string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
-            if(DIST STREQUAL "Ubuntu")
-                find_program(LSB_RELEASE_EXEC lsb_release)
-                execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
-                    OUTPUT_VARIABLE LSB_RELEASE
-                    OUTPUT_STRIP_TRAILING_WHITESPACE
-                )
-                if(${LSB_RELEASE} MATCHES "^2[02].")
-		            file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
-		            install (
-		        	FILES ${XCB_FILES}
-		        	DESTINATION ${INSTALL_LIB_DIR}
-		        	COMPONENT Dependencies
-		        	)
-                endif (${LSB_RELEASE} MATCHES "^2[02].")
-            endif (DIST STREQUAL "Ubuntu")
+            if (EXISTS /etc/issue)
+                file(READ "/etc/issue" ETC_ISSUE)
+                string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
+                if(DIST STREQUAL "Ubuntu")
+                    find_program(LSB_RELEASE_EXEC lsb_release)
+                    execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
+                        OUTPUT_VARIABLE LSB_RELEASE
+                        OUTPUT_STRIP_TRAILING_WHITESPACE
+                    )
+                    if(${LSB_RELEASE} MATCHES "^2[02].")
+                        file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
+                        install (
+                        FILES ${XCB_FILES}
+                        DESTINATION ${INSTALL_LIB_DIR}
+                        COMPONENT Dependencies
+                        )
+                    endif (${LSB_RELEASE} MATCHES "^2[02].")
+                endif (DIST STREQUAL "Ubuntu")
+            endif (EXISTS /etc/issue)
 
             install (
                 FILES ${QTDIR}/plugins/platforms/libqxcb.so
