@@ -862,7 +862,7 @@ jobs:
             mv *.sh /tmp/workspace/installers
 
       - store_artifacts:
-          path: /tmp/workspace/installer
+          path: /tmp/workspace/installers
 
   build_ubuntu20_installer:
     docker:
