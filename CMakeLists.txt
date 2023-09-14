@@ -527,27 +527,16 @@ if (UNIX AND NOT APPLE)
 		    	DIRECTORY ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}
 		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
-		    	)
+		    )
 
-                    # Include necessary libraries for Ubuntu
-                    file(READ "/etc/issue" ETC_ISSUE)
-                    string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
+            # Include necessary libraries for Ubuntu
+            file(READ "/etc/issue" ETC_ISSUE)
+            string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
             if(DIST STREQUAL "Ubuntu")
-                install (
-                    FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
-                    DESTINATION ${INSTALL_LIB_DIR}/platforms
-                    COMPONENT Dependencies
-                    )
-
-                install (
-                    DIRECTORY ${THIRD_PARTY_DIR}/plugins/xcbglintegrations
-                    DESTINATION ${INSTALL_LIB_DIR}
-                    COMPONENT Dependencies
-                )
-                        find_program(LSB_RELEASE_EXEC lsb_release)
-                        execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
-                            OUTPUT_VARIABLE LSB_RELEASE
-                            OUTPUT_STRIP_TRAILING_WHITESPACE
+                find_program(LSB_RELEASE_EXEC lsb_release)
+                execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
+                    OUTPUT_VARIABLE LSB_RELEASE
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
                 )
                 if(${LSB_RELEASE} MATCHES "^2[02].")
 		            file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
@@ -556,27 +545,20 @@ if (UNIX AND NOT APPLE)
 		        	DESTINATION ${INSTALL_LIB_DIR}
 		        	COMPONENT Dependencies
 		        	)
-                endif ()
-                file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
-            else()
-                install (
-                    DIRECTORY ${QTDIR}/plugins/xcbglintegrations
-                    DESTINATION ${INSTALL_LIB_DIR}
-                    COMPONENT Dependencies
-                )
-                install (
+                endif (${LSB_RELEASE} MATCHES "^2[02].")
+            endif (DIST STREQUAL "Ubuntu")
+
+            install (
                 FILES ${QTDIR}/plugins/platforms/libqxcb.so
                 DESTINATION ${INSTALL_LIB_DIR}/platforms
                 COMPONENT Dependencies
-                )
+            )
 
-                file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
-                install (
-                    FILES ${XCBQPA_FILES}
-                    DESTINATION ${INSTALL_LIB_DIR}
-                    COMPONENT Dependencies
-                )
-            endif ()
+            install (
+                DIRECTORY ${QTDIR}/plugins/xcbglintegrations
+                DESTINATION ${INSTALL_LIB_DIR}
+                COMPONENT Dependencies
+            )
 
             file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinput.*)
             install (
@@ -585,30 +567,29 @@ if (UNIX AND NOT APPLE)
                 COMPONENT Dependencies
             )
 
-		    file (GLOB XCBQPA_FILES ${THIRD_PARTY_LIB_DIR}/libQt5XcbQpa.*)
-		    install (
-		    	FILES ${XCBQPA_FILES}
-		    	DESTINATION ${INSTALL_LIB_DIR}
-		    	COMPONENT Dependencies
-		    	)
-            file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
-        endif (DIST STREQUAL "Ubuntu")
+            file (GLOB XCBQPA_FILES ${THIRD_PARTY_LIB_DIR}/libQt5XcbQpa.*)
+            install (
+                FILES ${XCBQPA_FILES}
+                DESTINATION ${INSTALL_LIB_DIR}
+                COMPONENT Dependencies
+            )
 
-		if (BUILD_OSP)
-			file (GLOB INSTALL_OSPRAY_LIBS ${OSPRAYDIR}/lib/*.so*)
-			install (
-				FILES ${INSTALL_OSPRAY_LIBS}
-				DESTINATION ${INSTALL_LIB_DIR}
-				COMPONENT Dependencies
-				)
-		endif ()
+            if (BUILD_OSP)
+                file (GLOB INSTALL_OSPRAY_LIBS ${OSPRAYDIR}/lib/*.so*)
+                install (
+                    FILES ${INSTALL_OSPRAY_LIBS}
+                    DESTINATION ${INSTALL_LIB_DIR}
+                    COMPONENT Dependencies
+                    )
+            endif (BUILD_OSP)
 
-			install (
-				FILES ${HDF5_PLUGINS}
-				DESTINATION "${INSTALL_SHARE_DIR}/plugins"
-				COMPONENT Dependencies
-				)
-
+            file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
+            install (
+                FILES ${HDF5_PLUGINS}
+                DESTINATION "${INSTALL_SHARE_DIR}/plugins"
+                COMPONENT Dependencies
+            )
+        endif (NOT BUILD_PYTHON)
 	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 endif (UNIX AND NOT APPLE)
 
