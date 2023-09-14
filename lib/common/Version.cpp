@@ -38,7 +38,6 @@ const string &Version::GetFullVersionString()
     oss << "." << GetBuildHash();
     _formatString = oss.str();
     StrRmWhiteSpace(_formatString);
-    std::cout << "_fullVersionString " << _formatString << std::endl;
     return (_formatString);
 }
 
