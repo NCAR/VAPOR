@@ -830,6 +830,7 @@ jobs:
           command: |
             zypper install -y -t pattern devel_C_C++
             zypper install -y \
+                git \
                 gcc7-fortran \
                 cmake \
                 curl \
