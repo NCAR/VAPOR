@@ -1116,7 +1116,9 @@ jobs:
       - run:
           name: acquire prerequisites
           command: |
-            zypper install -y curl
+            zypper install -y \
+            curl \
+            tar
 
       - run:
           name: get source files
