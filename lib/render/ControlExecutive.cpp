@@ -18,6 +18,7 @@
 #include <vapor/Visualizer.h>
 #include <vapor/DataStatus.h>
 #include <vapor/GUIStateParams.h>
+#include <vapor/NavigationUtils.h>
 
 #include <vapor/VolumeRenderer.h>
 #include <vapor/VolumeIsoRenderer.h>
@@ -199,6 +200,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
             return -1;
         }
 
+        rp->SetCurrentTimestep(NavigationUtils::GetCurrentTimeStep(this));
         int rc = rp->Initialize();
         if (rc < 0) {
             SetErrMsg("Failed to initialize of type \"%s\"", renderType.c_str());
