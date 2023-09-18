@@ -10,17 +10,6 @@
 
 set -e
 
-#OS="CentOS"
-baseDir='/usr/local/VAPOR-Deps'
-if [ "$OS" != "openSUSE" ]; then
-    srcDir="$baseDir/2023-Jun-src"
-else
-    srcDir="$baseDir/2023-Sept-src"
-fi
-echo srcDir $srcDir
-echo OS ${OS}
-installDir="$baseDir/current"
-archiveName="2023-Jun"
 
 while getopts o:b:i flag
 do
@@ -31,6 +20,20 @@ do
     esac
 done
 
+#OS="CentOS"
+baseDir='/usr/local/VAPOR-Deps'
+if [ "$OS" != "openSUSE" ]; then
+    srcDir="$baseDir/2023-Jun-src"
+    echo wtf case A
+else
+    srcDir="$baseDir/2023-Sept-src"
+    echo wtf case A
+fi
+echo srcDir $srcDir
+echo OS ${OS}
+
+installDir="$baseDir/current"
+archiveName="2023-Jun"
 getMacOSMinVersion() {
     if [ "$OS" == "macOSx86" ]; then
         echo "10.15.0"
