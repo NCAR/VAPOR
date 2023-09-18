@@ -1116,7 +1116,7 @@ jobs:
       - run:
           name: acquire prerequisites
           command: |
-            echo "test"
+            zypper install -y curl
 
       - run:
           name: get source files
