@@ -800,37 +800,37 @@ elif [ "$OS" == "openSUSE" ]; then
     #susePrerequisites
 fi
 
-#openssl
-#libpng
-#jpeg
-#tiff
-#sqlite
-#ssh
-#curl
-#proj
-#geotiff
+openssl
+libpng
+jpeg
+tiff
+sqlite
+ssh
+curl
+proj
+geotiff
 
 #if [ "$OS" != "openSUSE" ]; then
 #    openssl
 #fi
-#zlib
-#pythonVapor
-#assimp
-#szip
-#hdf5
-#netcdf
-#expat
-#udunits
-#freetype
-#if [ "$OS" == "Ubuntu" ] ; then
-#   xinerama
-#fi         
-#ospray
-#glm
-#gte
-#images
+zlib
+pythonVapor
+assimp
+szip
+hdf5
+netcdf
+expat
+udunits
+freetype
+if [ "$OS" == "Ubuntu" ] ; then
+   xinerama
+fi         
+ospray
+glm
+gte
+images
 qt
-#if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
-#    add_rpath
-#fi         
-#renameAndCompress
+if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
+    add_rpath
+fi         
+renameAndCompress
