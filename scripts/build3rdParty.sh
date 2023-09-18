@@ -16,8 +16,8 @@ if [ "$OS" != "openSUSE" ]; then
     srcDir="$baseDir/2023-Jun-src"
 else
     srcDir="$baseDir/2023-Sept-src"
-
 fi
+echo srcDir $srcDir
 installDir="$baseDir/current"
 archiveName="2023-Jun"
 
