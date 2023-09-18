@@ -18,7 +18,7 @@ else
     srcDir="$baseDir/2023-Sept-src"
 fi
 echo srcDir $srcDir
-echo OS $OS
+echo OS ${OS}
 installDir="$baseDir/current"
 archiveName="2023-Jun"
 
