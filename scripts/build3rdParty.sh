@@ -12,7 +12,12 @@ set -e
 
 #OS="CentOS"
 baseDir='/usr/local/VAPOR-Deps'
-srcDir="$baseDir/2023-Jun-src"
+if [ "$OS" != "openSUSE" ]; then
+    srcDir="$baseDir/2023-Jun-src"
+else
+    srcDir="$baseDir/2023-Sept-src"
+
+fi
 installDir="$baseDir/current"
 archiveName="2023-Jun"
 
