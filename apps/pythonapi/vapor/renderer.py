@@ -209,7 +209,10 @@ class FlowRenderer(Renderer, wrap=link.VAPoR.FlowParams):
         SetSeedInputFilename
         GetFlowlineOutputFilename
         SetFlowlineOutputFilename
+        GetNeedFlowlineOutput
+        SetNeedFlowlineOutput
         GetFlowOutputMoreVariables
+        SetFlowOutputMoreVariables
         GetPeriodic
         SetPeriodic
         GetGridNumOfSeeds
