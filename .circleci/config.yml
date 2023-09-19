@@ -836,7 +836,8 @@ jobs:
                 curl \
                 libicu-devel \
                 freeglut-devel \
-                gzip
+                gzip \
+                xz
                 
       - run:
           name: acquire 3rd party libraries
