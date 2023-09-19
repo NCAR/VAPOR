@@ -1123,7 +1123,8 @@ jobs:
             tar \
             gzip \
             xz \
-            zlib-devel
+            zlib-devel \
+            bzip2
 
       - run:
           name: get source files
