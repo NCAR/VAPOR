@@ -1122,7 +1122,8 @@ jobs:
             curl \
             tar \
             gzip \
-            xz
+            xz \
+            zlib-devel
 
       - run:
           name: get source files
