@@ -1126,7 +1126,8 @@ jobs:
             zlib-devel \
             bzip2 \
             make \
-            which
+            which \
+            git
 
       - run:
           name: get source files
