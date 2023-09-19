@@ -830,14 +830,14 @@ jobs:
           command: |
             zypper install -y -t pattern devel_C_C++
             zypper install -y \
+                gzip \
+                xz \
                 git \
                 gcc7-fortran \
                 cmake \
                 curl \
                 libicu-devel \
-                freeglut-devel \
-                gzip \
-                xz
+                freeglut-devel
                 
       - run:
           name: acquire 3rd party libraries
