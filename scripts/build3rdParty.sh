@@ -22,7 +22,7 @@ done
 
 #OS="CentOS"
 baseDir='/usr/local/VAPOR-Deps'
-if [ "$OS" != "openSUSE" ]; then
+if [ "$OS" != "suse" ]; then
     srcDir="$baseDir/2023-Jun-src"
     echo wtf case A
 else
@@ -88,7 +88,7 @@ susePrerequisites() {
     CXX='g++'
     zypper update -y
 
-    zypper install cmake
+    zypper install -y cmake
 
     zypper install -y \
         libqt5-qtbase-devel \
@@ -556,7 +556,7 @@ proj() {
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     elif [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
-    elif [ "$OS" == "openSUSE" ]; then
+    elif [ "$OS" == "suse" ]; then
         args+=(-DCURL_INCLUDE_DIR=$installDir/include)
         args+=(-DCURL_LIBRARY=$installDir/lib/libcurl.so)
     fi
@@ -579,7 +579,7 @@ geotiff() {
         --with-libtiff=$installDir
     )
 
-    #if [ "$OS" == "openSUSE" ]; then
+    #if [ "$OS" == "suse" ]; then
     #    LDFLAGS=-L/usr/lib64 -L$installDir/lib \
     #else
     #    LDFLAGS=-L$installDir/lib \
@@ -735,7 +735,7 @@ qt() {
         -nomake examples
         -nomake tests
     )
-    if [ "$OS" == "Ubuntu" ] || [ "$OS" = "openSUSE" ]; then
+    if [ "$OS" == "Ubuntu" ] || [ "$OS" = "suse" ]; then
         args+=(-feature-freetype)
         args+=(-qt-freetype)
         args+=(-opengl desktop)
@@ -799,9 +799,8 @@ elif [ "$OS" == "CentOS" ]; then
     centosPrerequisites
 elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
-elif [ "$OS" == "openSUSE" ]; then
-    echo foo
-    #susePrerequisites
+elif [ "$OS" == "suse" ]; then
+    susePrerequisites
 fi
 
 openssl
@@ -814,7 +813,7 @@ curl
 proj
 geotiff
 
-#if [ "$OS" != "openSUSE" ]; then
+#if [ "$OS" != "suse" ]; then
 #    openssl
 #fi
 zlib

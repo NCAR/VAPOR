@@ -816,7 +816,7 @@ jobs:
                  exit 0
               fi
 
-  build_openSUSE_installer:
+  build_suse_installer:
     docker:
       - image: opensuse/leap
 
@@ -835,7 +835,8 @@ jobs:
                 cmake \
                 curl \
                 libicu-devel \
-                freeglut-devel
+                freeglut-devel \
+                gzip
                 
       - run:
           name: acquire 3rd party libraries
@@ -1135,7 +1136,7 @@ jobs:
           name: build libraries
           command: |
             chmod 777 /root/project/scripts/build3rdParty.sh
-            /root/project/scripts/build3rdParty.sh -o openSUSE
+            /root/project/scripts/build3rdParty.sh -o suse
 
       - run:
           name: make installer
@@ -1504,7 +1505,7 @@ workflows:
       #- build_M1_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
-      #- build_openSUSE_installer
+      #- build_suse_installer
       #- build_centos7_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
