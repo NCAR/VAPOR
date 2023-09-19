@@ -1121,6 +1121,7 @@ jobs:
             zypper install -y \
             curl \
             tar \
+            gzip \
             xz
 
       - run:
