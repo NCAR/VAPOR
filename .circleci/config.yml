@@ -988,6 +988,7 @@ jobs:
       - run:
           name: make installer
           command: |
+            rm -rf /usr/local/VAPOR-Deps/current
             ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
@@ -1010,7 +1011,7 @@ jobs:
             /tmp/workspace/installers
 
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Sept-SUSE.tar.xz
+          path: /usr/local/VAPOR-Deps/2023-Sept-suse.tar.xz
 
   build_ubuntu20_libs:
     docker:
