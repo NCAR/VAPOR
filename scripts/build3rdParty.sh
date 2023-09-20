@@ -32,7 +32,6 @@ echo srcDir $srcDir
 echo OS ${OS}
 
 installDir="$baseDir/current"
-archiveName="2023-Jun"
 getMacOSMinVersion() {
     if [ "$OS" == "macOSx86" ]; then
         echo "10.15.0"
