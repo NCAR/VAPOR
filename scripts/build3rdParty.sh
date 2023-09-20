@@ -24,11 +24,9 @@ baseDir='/usr/local/VAPOR-Deps'
 if [ "$OS" != "suse" ]; then
     srcDir="$baseDir/2023-Jun-src"
     archiveName="2023-Jun"
-    echo wtf case A
 else
     srcDir="$baseDir/2023-Sept-src"
     archiveName="2023-Sept"
-    echo wtf case A
 fi
 echo srcDir $srcDir
 echo OS ${OS}
