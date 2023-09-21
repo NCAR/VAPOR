@@ -10,12 +10,6 @@
 
 set -e
 
-#OS="CentOS"
-baseDir='/usr/local/VAPOR-Deps'
-srcDir="$baseDir/2023-Jun-src"
-installDir="$baseDir/current"
-archiveName="2023-Jun"
-
 while getopts o:b:i flag
 do
     case "${flag}" in
@@ -25,6 +19,19 @@ do
     esac
 done
 
+#OS="CentOS"
+baseDir='/usr/local/VAPOR-Deps'
+if [ "$OS" != "suse" ]; then
+    srcDir="$baseDir/2023-Jun-src"
+    archiveName="2023-Jun"
+else
+    srcDir="$baseDir/2023-Sept-src"
+    archiveName="2023-Sept"
+fi
+echo srcDir $srcDir
+echo OS ${OS}
+
+installDir="$baseDir/current"
 getMacOSMinVersion() {
     if [ "$OS" == "macOSx86" ]; then
         echo "10.15.0"
@@ -34,15 +41,9 @@ getMacOSMinVersion() {
 }
 macOSMinVersion=$(getMacOSMinVersion)
 
-if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
-    shopt -s expand_aliases
-    alias make='make -j8'
-    alias
-else
-    shopt -s expand_aliases
-    alias make='make -j4'
-    alias
-fi
+shopt -s expand_aliases
+alias make='make -j8'
+alias
 
 if [ "$OS" == "CentOS" ]; then
     shopt -s expand_aliases
@@ -72,6 +73,47 @@ macOSPrerequisites() {
     #brew install gettext
     #brew link gettext --force
     brew uninstall --ignore-dependencies gettext
+}
+
+susePrerequisites() {
+    CC='gcc'
+    CXX='g++'
+    zypper update -y
+
+    zypper install -y cmake
+
+    zypper install -y \
+        libqt5-qtbase-devel \
+        libicu-devel \
+        m4 \
+        libXau-devel \
+        autoconf \
+        libtool \
+        libxcb-xinerama0 \
+        pkg-config \
+        unzip \
+        gcc7-fortran
+    
+    # Qt
+    zypper install -y \
+        libX11-xcb1 \
+        libXinerama-devel \
+        freeglut-devel \
+        libGLU1 \
+        libXrender-devel \
+        libXi-devel \
+        libxkbcommon-devel \
+        libxkbcommon-x11-devel \
+        libSM-devel \
+        libICE-devel
+
+    # Additional suse dependencies https://github.com/bincrafters/community/issues/1229
+    zypper install -y \
+        xcb-util-wm-devel \
+        xcb-util-image-devel \
+        xcb-util-keysyms-devel \
+        libxcb-devel \
+        xcb-util-renderutil-devel
 }
 
 ubuntuPrerequisites() {
@@ -139,39 +181,6 @@ windowsPrerequisites() {
     #choco install visualstudio2019-workload-vctools python cmake -y
     #setx /M PATH "%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
     #python -m pip install gdown
-}
-
-centosPrerequisites() {
-    CC='gcc'
-    CXX='g++'
-	yum install -y epel-release
-	yum update -y
-	yum install -y \
-        kernel-devel \
-        gcc \
-        gcc-c++ \
-        cmake3 \
-        make \
-        xz-devel \
-        zlib-devel \
-        openssl-devel \
-        expat-devel \
-        libcurl-devel \
-        which \
-        mesa-libGL-devel \
-        mesa-libGLU-devel \
-        libXtst-devel \
-        libxcb \
-        libxcb-devel \
-        xcb-util \
-        xcb-util-devel \
-        mesa-libGL-devel \
-        libxkbcommon-devel
-
-    cmake --version
-    cmake3 --version
-
-    yum groupinstall -y "Development Tools"
 }
 
 libpng() {
@@ -259,19 +268,24 @@ szip() {
 hdfVersion='1.12.2'
 hdf5() {
     cd $srcDir
-    if [ "$OS" == "Ubuntu" ] || [ "$OS" == "CentOS" ]; then
+    #if [ "$OS" == "Ubuntu" ] || [ "$OS" == "CentOS" ]; then
         #tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64.tar.gz && cd hdf              # use this line for versions > 12.12.2
-        tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf         # use this line for versions = 12.12.2
-        ./HDF5-$hdfVersion-Linux.sh --prefix=$installDir --exclude-subdir --skip-license
-    elif [ "$OS" == "macOSx86" ]; then
+    #    tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf         # use this line for versions = 12.12.2
+    #    ./HDF5-$hdfVersion-Linux.sh --prefix=$installDir --exclude-subdir --skip-license
+    #elif [ "$OS" == "macOSx86" ]; then
+    if [ "$OS" == "macOSx86" ]; then
         tar xvf hdf5/hdf5-$hdfVersion-Std-macos11_64-clang.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
     elif [ "$OS" == "M1" ]; then
         tar xvf hdf5/hdf5-$hdfVersion-Std-macos11m1_64-clang.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
+    else
+        #tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64.tar.gz && cd hdf              # use this line for versions > 12.12.2
+        tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf         # use this line for versions = 12.12.2
+        ./HDF5-$hdfVersion-Linux.sh --prefix=$installDir --exclude-subdir --skip-license
     fi
 
-    ln -s $installDir/HDF_Group/HDF5/$hdfVersion/lib/plugin/ $installDir/share/plugins
+    ln -fs $installDir/HDF_Group/HDF5/$hdfVersion/lib/plugin/ $installDir/share/plugins
 }
 
 netcdf() {
@@ -408,6 +422,51 @@ sqlite() {
     make && make install
 }
 
+curl() {
+    echo $LD_LIBRARY_PATH
+    echo $DYLD_LIBRARY_PATH
+    cd $srcDir
+    local library='curl-8.2.1' # works
+    rm -rf $library || true
+    tar xvf $srcDir/$library.tar.xz
+    mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
+    
+    args=(
+        -DCMAKE_PREFIX_PATH=$installDir
+        -DCMAKE_INSTALL_LIBDIR=lib
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DPROJ_COMPILER_NAME=$CXX
+        -DCMAKE_LIBRARY_PATH=$installDir/lib
+        -DCMAKE_INCLUDE_PATH=$installDir/include
+        -DCMAKE_INSTALL_RPATH=$installDir/lib
+    )
+
+    cmake "${args[@]}" ..
+
+    make && make install
+}
+
+ssh() {
+    cd $srcDir
+    local library='libssh-0.10.0' # works
+    rm -rf $library || true
+    tar xvf $srcDir/$library.tar.xz
+    mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
+    
+    args=(
+        -DCMAKE_PREFIX_PATH=$installDir
+        -DCMAKE_INSTALL_LIBDIR=lib
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DPROJ_COMPILER_NAME=$CXX
+        -DCMAKE_LIBRARY_PATH=$installDir/lib
+        -DCMAKE_INCLUDE_PATH=$installDir/include
+    )
+
+    cmake "${args[@]}" ..
+
+    make && make install
+}
+
 proj() {
     cd $srcDir
     #local library='proj-9.1.0' # does not work
@@ -438,38 +497,11 @@ proj() {
     if [ "$OS" == "M1" ]; then
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
-    fi
-    if [ "$OS" == "macOSx86" ]; then
+    elif [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
-    fi
-    cmake "${args[@]}" ..
-
-    make && make install
-}
-
-#CPPFLAGS=-I$/usr/local/VAPOR-Deps/current/include LDFLAGS=-L/usr/local/VAPOR-Deps/current/lib CC=gcc CXX=g++ ./configure -prefix=/usr/local/VAPOR-Deps/current --with-zlib=yes --with-jpeg=yes --with-proj=/usr/local/VAPOR-Deps/current --with-libtiff=/usr/local/VAPOR-Deps/current/lib64
-geotiff2() {
-    cd $srcDir
-    local library='libgeotiff-1.7.1'
-    rm -rf $library || true
-    tar xvf $srcDir/$library.tar.gz && mkdir $srcDir/$library/build && cd $_
-
-    args=(
-        -DCMAKE_BUILD_TYPE=Release
-        -DCMAKE_INSTALL_PREFIX=$installDir
-        -DPROJ_DIR=$installDir
-#        -DTIFF_DIR=$installDir
-#        -DZLIB_DIR=$installDir
-        -DWITH_JPEG=ON
-        -DWITH_ZLIB=ON
-    )
-    if [ "$OS" == "M1" ]; then
-        args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
-    fi
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(-DCMAKE_SKIP_RPATH=ON)
-        args+=(-DCMAKE_SKIP_INSTALL_RPATH=ON)
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+    elif [ "$OS" == "suse" ]; then
+        args+=(-DCURL_INCLUDE_DIR=$installDir/include)
+        args+=(-DCURL_LIBRARY=$installDir/lib/libcurl.so)
     fi
     cmake "${args[@]}" ..
 
@@ -490,8 +522,12 @@ geotiff() {
         --with-libtiff=$installDir
     )
 
+    #if [ "$OS" == "suse" ]; then
+    #    LDFLAGS=-L/usr/lib64 -L$installDir/lib \
+    #else
+    #    LDFLAGS=-L$installDir/lib \
+    #fi
     CPPFLAGS=-I$installDir/include \
-    LDFLAGS=-L$installDir/lib \
     CC=$CC \
     CXX=$CXX \
     ./configure "${args[@]}"
@@ -517,7 +553,11 @@ xinerama() {
 
 openssl() {
     cd $srcDir
-    local library='openssl-1.1.1t'
+    if [ "$OS" != "suse" ]; then
+        local library='openssl-1.1.1t'
+    else
+        local library='openssl-1.1.1w'
+    fi
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
 
@@ -621,6 +661,7 @@ qt() {
         mkdir -p $srcDir/$library/build
         cd $srcDir/$library/build
     else 
+        rm -rf qt-everywhere-src-5.15.8 || true
         tar xf $srcDir/qt-everywhere-opensource-src-5.15.8.tar.xz
         mkdir -p $srcDir/qt-everywhere-src-5.15.8/build
         cd $srcDir/qt-everywhere-src-5.15.8/build
@@ -640,10 +681,14 @@ qt() {
         -nomake examples
         -nomake tests
     )
-    if [ "$OS" == "Ubuntu" ] || [ "$OS" = "CentOS" ]; then
+    if [ "$OS" == "Ubuntu" ] || [ "$OS" = "suse" ]; then
         args+=(-feature-freetype)
         args+=(-qt-freetype)
         args+=(-opengl desktop)
+        # opensuse new args
+        args+=(-xcb)
+        args+=(-xcb-xlib)
+        args+=(-bundled-xcb-xinput)
     fi
 
     CPPFLAGS=-I$installDir/include \
@@ -700,12 +745,24 @@ elif [ "$OS" == "CentOS" ]; then
     centosPrerequisites
 elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
+elif [ "$OS" == "suse" ]; then
+    susePrerequisites
 fi
 
 openssl
+libpng
+jpeg
+tiff
+sqlite
+ssh
+curl
+proj
+geotiff
+
+#    openssl
+#fi
 zlib
 pythonVapor
-libpng
 assimp
 szip
 hdf5
@@ -713,12 +770,6 @@ netcdf
 expat
 udunits
 freetype
-jpeg
-tiff
-sqlite
-proj
-geotiff
-##geotiff2
 if [ "$OS" == "Ubuntu" ] ; then
    xinerama
 fi         
