@@ -47,7 +47,7 @@ if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
     alias
 else
     shopt -s expand_aliases
-    alias make='make -j4'
+    alias make='make -j8'
     alias
 fi
 
