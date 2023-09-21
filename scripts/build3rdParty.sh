@@ -41,15 +41,9 @@ getMacOSMinVersion() {
 }
 macOSMinVersion=$(getMacOSMinVersion)
 
-if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
-    shopt -s expand_aliases
-    alias make='make -j8'
-    alias
-else
-    shopt -s expand_aliases
-    alias make='make -j8'
-    alias
-fi
+shopt -s expand_aliases
+alias make='make -j8'
+alias
 
 if [ "$OS" == "CentOS" ]; then
     shopt -s expand_aliases
