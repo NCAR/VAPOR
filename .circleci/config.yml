@@ -951,7 +951,7 @@ jobs:
     docker:
       - image: opensuse/leap:latest
 
-    resource_class: large
+    resource_class: xlarge
 
     steps:
       - checkout
@@ -1000,7 +1000,7 @@ jobs:
                   -DDIST_INSTALLER=ON \
                   -DUSE_OMP=ON \
                   ..
-            make -j
+            make -j8
             make installer
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/SUSE}" ; done
             mkdir -p /tmp/workspace/installers
