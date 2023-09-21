@@ -114,22 +114,6 @@ susePrerequisites() {
         xcb-util-keysyms-devel \
         libxcb-devel \
         xcb-util-renderutil-devel
-
-
-        #build-essential \
-        #libgl1-mesa-dev \
-
-        #qtbase5-dev \
-        #libcurl4-openssl-dev \
-#libxcb-xinerama0-dev \
-        #libssl-dev
-        #'^libxcb.*-dev' \
-        #libx11-xcb-dev \
-        #freeglut3-dev \
-        #libglu1-mesa-dev \
-        #libxrender-dev \
-        #libxi-dev \
-        #libxkbcommon-dev \
 }
 
 ubuntuPrerequisites() {
@@ -198,38 +182,6 @@ windowsPrerequisites() {
     #setx /M PATH "%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
     #python -m pip install gdown
 }
-
-centosPrerequisites() {
-    CC='gcc'
-    CXX='g++'
-	yum install -y epel-release
-	yum update -y
-	yum install -y \
-        kernel-devel \
-        gcc \
-        gcc-c++ \
-        cmake3 \
-        make \
-        xz-devel \
-        zlib-devel \
-        openssl-devel \
-        expat-devel \
-        libcurl-devel \
-        which \
-        mesa-libGL-devel \
-        mesa-libGLU-devel \
-        libXtst-devel \
-        libxcb \
-        libxcb-devel \
-        xcb-util \
-        xcb-util-devel \
-        mesa-libGL-devel \
-        libxkbcommon-devel
-
-    cmake --version
-    cmake3 --version
-
-    yum groupinstall -y "Development Tools"
 }
 
 libpng() {
@@ -602,8 +554,11 @@ xinerama() {
 
 openssl() {
     cd $srcDir
-    #local library='openssl-1.1.1t'
-    local library='openssl-1.1.1w'
+    if [ "$OS" != "suse" ]; then
+        local library='openssl-1.1.1t'
+    else
+        local library='openssl-1.1.1w'
+    fi
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
 
@@ -805,7 +760,6 @@ curl
 proj
 geotiff
 
-#if [ "$OS" != "suse" ]; then
 #    openssl
 #fi
 zlib
