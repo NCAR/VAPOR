@@ -268,11 +268,6 @@ szip() {
 hdfVersion='1.12.2'
 hdf5() {
     cd $srcDir
-    #if [ "$OS" == "Ubuntu" ] || [ "$OS" == "CentOS" ]; then
-        #tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64.tar.gz && cd hdf              # use this line for versions > 12.12.2
-    #    tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf         # use this line for versions = 12.12.2
-    #    ./HDF5-$hdfVersion-Linux.sh --prefix=$installDir --exclude-subdir --skip-license
-    #elif [ "$OS" == "macOSx86" ]; then
     if [ "$OS" == "macOSx86" ]; then
         tar xvf hdf5/hdf5-$hdfVersion-Std-macos11_64-clang.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
@@ -280,8 +275,7 @@ hdf5() {
         tar xvf hdf5/hdf5-$hdfVersion-Std-macos11m1_64-clang.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
     else
-        #tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64.tar.gz && cd hdf              # use this line for versions > 12.12.2
-        tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf         # use this line for versions = 12.12.2
+        tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Linux.sh --prefix=$installDir --exclude-subdir --skip-license
     fi
 
