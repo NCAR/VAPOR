@@ -19,13 +19,17 @@ commands:
         type: string
     steps:
       - run:
-          name: get macOSx86 libraries
+          name: get third party libraries
           command: |
               mkdir -p /usr/local/VAPOR-Deps
+              chmod -R 777 /usr/local/VAPOR-Deps
+              chown -R `whoami` /usr/local/VAPOR-Deps
               id=<<parameters.driveID>>
               filename=<<parameters.fileName>>
               curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
               tar -xf ${filename} -C /usr/local/VAPOR-Deps
+              archivename=`echo ${filename} | grep -o '[0-9]\{4\}-[A-Za-z]\{3\}'`
+              ln -s /usr/local/VAPOR-Deps/${archivename} /usr/local/VAPOR-Deps/current
 
 jobs:
   build_win10_installer:
@@ -141,12 +145,12 @@ jobs:
     macos:
       xcode: "13.4.1"
     steps:
-      - run:
-          name: Make VAPOR-Deps
-          command: |
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-            sudo chown -R `whoami` /usr/local/VAPOR-Deps
+      #- run:
+      #    name: Make VAPOR-Deps
+      #    command: |
+      #      sudo mkdir -p /usr/local/VAPOR-Deps
+      #      sudo chmod -R 777 /usr/local/VAPOR-Deps
+      #      sudo chown -R `whoami` /usr/local/VAPOR-Deps
 
       - checkout
       - get_libraries:
@@ -180,7 +184,6 @@ jobs:
       - run:
           name: make VAPOR
           command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
@@ -224,14 +227,18 @@ jobs:
             sudo chmod -R 777 /usr/local/VAPOR-Deps
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
 
-      - run:
-          name: acquire 3rd party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
-            filename="2023-Jun-M1.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+      - get_libraries:
+          fileName: 2023-Jun-M1.tar.xz
+          driveID: 1QEyOZWinJmLVnbCnEq43QtskDirmP_9d
+
+      #- run:
+      #    name: acquire 3rd party libraries
+      #    command: |
+      #      mkdir -p /usr/local/VAPOR-Deps
+      #      id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
+      #      filename="2023-Jun-M1.tar.xz"
+      #      curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+      #      tar -xf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
           name: Get cmake
@@ -336,49 +343,6 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
 
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
-
-  build_centos7_installer:
-    docker:
-      - image: sgpearse/vapor3-centos7:latest
-  
-    steps:
-      - checkout
-
-      - run:
-          name: update 3rd party libraries
-          command: |
-            rm -rf /usr/local/VAPOR-Deps/2019-Aug
-            pip3 install gdown --upgrade
-            gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
-            filename="/root/project/2019-Aug-CentOS.tar.xz"
-            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
- 
-      - run:
-          name: cmake3 and make
-          command: |
-            cd /root/project/build
-            git checkout $CIRCLE_BRANCH
-            cmake3 \
-            -DCMAKE_BUILD_TYPE:String=Release \
-            -DDIST_INSTALLER:string=ON \
-            -DUSE_OMP=ON \
-            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
-            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
-            -DPYTHONVERSION=3.6 \
-            -DQTDIR=/usr/local/VAPOR-Deps/2019-Aug/Qt/5.13.2/gcc_64 \
-            ..
-            make -j2
-            make installer -j2
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
-      - store_artifacts:
-          path: /tmp/workspace/installers
-      
       - persist_to_workspace:
           root: *workspace_root
           paths:
@@ -549,45 +513,6 @@ jobs:
 
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
-
-  build_python_api_centos:
-    docker:
-      - image: centos:7
-
-    resource_class: large
-
-    steps:
-      - run:
-          name: install miniconda
-          command: |
-            yum install -y wget
-            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
-            bash ~/miniconda.sh -b -p ~/miniconda 
-
-      - checkout
-
-      - run:
-          name: acquire map image archive
-          command: |
-            cd /root
-            yum update -y
-            yum install -y git
-            git clone https://github.com/NCAR/VAPOR-Data.git
-
-      - run:
-          name: conda build .
-          command: |
-            cd /root/project/conda
-            export PATH=/root/miniconda/bin:$PATH
-            conda config --add channels conda-forge
-            conda install -y conda-build
-            conda build .
-            DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
-            mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
-            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
- 
-      - store_artifacts:
-          path: /root/miniconda/conda-bld/linux-64/tarBallDir
 
   build_python_api_osx:
     macos:
@@ -865,14 +790,17 @@ jobs:
             apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
             apt install -y cmake --allow-unauthenticated
       
-      - run:
-          name: acquire 3rd party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id="16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6"
-            filename="2023-Jun-Ubuntu20.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+      #- run:
+      #    name: acquire 3rd party libraries
+      #    command: |
+      #      mkdir -p /usr/local/VAPOR-Deps
+      #      id="16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6"
+      #      filename="2023-Jun-Ubuntu20.tar.xz"
+      #      curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+      #      tar -xf ${filename} -C /usr/local/VAPOR-Deps
+      - get_libraries:
+          fileName: 2023-Jun-Ubuntu20.tar.xz
+          driveID: 16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6
 
       - run:
           name: make installer
@@ -932,15 +860,18 @@ jobs:
             apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
             apt install -y cmake --allow-unauthenticated
 
-      - run:
-          name: update 3rd party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id="1gqUxxJJA4iGnAPvI1EDaFFnrlbALnkeO"
-            filename="2023-Jun-Ubuntu22.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
-          no_output_timeout: 45m
+#      - run:
+#          name: update 3rd party libraries
+#          command: |
+#            mkdir -p /usr/local/VAPOR-Deps
+#            id="1gqUxxJJA4iGnAPvI1EDaFFnrlbALnkeO"
+#            filename="2023-Jun-Ubuntu22.tar.xz"
+#            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+#            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+#          no_output_timeout: 45m
+      - get_libraries:
+          fileName: 2023-Jun-Ubuntu22.tar.xz
+          driveID: 1gqUxxJJA4iGnAPvI1EDaFFnrlbALnkeO
 
       - run:
           name: make installer
@@ -1267,6 +1198,10 @@ jobs:
     steps:
       - checkout
 
+      #- get_libraries:
+      #    fileName: 2023-Jun-src.tar.xz
+      #    driveID: 1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+
       - run:
           name: get source files
           command: |
@@ -1412,35 +1347,6 @@ jobs:
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Jun-M1.tar.xz
 
-  build_centos7_libs:
-    docker:
-      - image: centos:7
-
-    resource_class: large
-
-    steps:
-      - checkout
-
-      - run:
-          name: get source files
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            yum update -y
-            yum install -y python3-pip
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/root/project/2023-Jun-src.tar.xz"
-            tar xvf ${filename} -C /usr/local/VAPOR-Deps
-
-      - run:
-          name: build libraries
-          command: |
-            chmod 777 /root/project/scripts/build3rdParty.sh
-            /root/project/scripts/build3rdParty.sh -o CentOS
-
-      - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Jun-CentOS.tar.xz
-
   build_win10_libs:
     executor: win/default
     steps:
@@ -1475,9 +1381,9 @@ workflows:
       #- test_clang_format
       #- build_win10_installer
       - build_macOSx86_installer
-      #- build_M1_installer
-      #- build_ubuntu20_installer
-      #- build_ubuntu22_installer
+      - build_M1_installer
+      - build_ubuntu20_installer
+      - build_ubuntu22_installer
       #- build_centos7_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
