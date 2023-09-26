@@ -1406,7 +1406,7 @@ workflows:
                  only: main
       jobs:
         - build_ubuntu20_installer
-        - build_centos7_installer
+        #- build_centos7_installer
         - build_macOSx86_installer
         - build_M1_installer
         - build_win10_installer
@@ -1415,7 +1415,7 @@ workflows:
         - release_weekly_installers:
             requires:
               - build_ubuntu20_installer
-              - build_centos7_installer
+              #- build_centos7_installer
               - build_macOSx86_installer
               - build_M1_installer
               - build_win10_installer
