@@ -11,21 +11,21 @@ references:
       at: *workspace_root
 
 commands:
-  get3rdPartyLibraries:
+  get_libraries:
     parameters:
-      filename:
+      fileName:
         type: string
       driveID:
         type: string
     steps:
       - run:
-        name: get macOSx86 libraries
-        command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id=<<parameters.driveID>>
-            filename=<<parameters.fileName>>
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+          name: get macOSx86 libraries
+          command: |
+              mkdir -p /usr/local/VAPOR-Deps
+              id=<<parameters.driveID>>
+              filename=<<parameters.fileName>>
+              curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+              tar -xf ${filename} -C /usr/local/VAPOR-Deps
 
 jobs:
   build_win10_installer:
@@ -149,7 +149,7 @@ jobs:
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
 
       - checkout
-      - get_macOSx86_libraries:
+      - get_libraries:
           fileName: 2023-Jun-macOSx86.tar.xz
           driveID: 17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn
 
