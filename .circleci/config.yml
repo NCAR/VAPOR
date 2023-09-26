@@ -10,6 +10,23 @@ references:
     attach_workspace:
       at: *workspace_root
 
+commands:
+  get3rdPartyLibraries:
+    parameters:
+      filename:
+        type: string
+      driveID:
+        type: string
+    steps:
+      - run:
+        name: get macOSx86 libraries
+        command: |
+            mkdir -p /usr/local/VAPOR-Deps
+            id=<<parameters.driveID>>
+            filename=<<parameters.fileName>>
+            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+
 jobs:
   build_win10_installer:
     executor: win/default
@@ -132,15 +149,9 @@ jobs:
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
 
       - checkout
-
-      - run:
-          name: acquire 3rd party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id="17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn"
-            filename="2023-Jun-macOSx86.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+      - get_macOSx86_libraries:
+          fileName: 2023-Jun-macOSx86.tar.xz
+          driveID: 17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn
 
       - run:
           name: Get cmake
@@ -1454,16 +1465,16 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      - build_centos7
+      #- build_centos7
       #- build_centos7_installer
-      - build_ubuntu18
+      #- build_ubuntu18
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
       #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
-      #- build_macOSx86_installer
+      - build_macOSx86_installer
       #- build_M1_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
