@@ -57,15 +57,15 @@ DimsType StretchedGrid::GetCoordDimensions(size_t dim) const
 
 void StretchedGrid::GetBoundingBox(const DimsType &min, const DimsType &max, CoordType &minu, CoordType &maxu) const
 {
-    DimsType cMin;
+    DimsType cMin = {0,0,0};
     ClampIndex(min, cMin);
 
-    DimsType cMax;
+    DimsType cMax = {0,0,0};
     ClampIndex(max, cMax);
 
     for (int i = 0; i < GetNodeDimensions().size(); i++) { VAssert(cMin[i] <= cMax[i]); }
 
-    for (int i = 0; i < GetGeometryDim(); i++) {
+    for (int i = 0; i < 3; i++) {
         minu[i] = 0.0;
         maxu[i] = 0.0;
     }
