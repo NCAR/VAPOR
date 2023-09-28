@@ -161,24 +161,24 @@ jobs:
           command: |
             brew install cmake
 
-      #- run:
-      #    name: Get MacPorts
-      #    command: |
-      #      curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
-      #      tar xf MacPorts-2.7.1.tar.bz2
-      #      cd MacPorts-2.7.1/
-      #      ./configure
-      #      make -j6
-      #      sudo make install
+      - run:
+          name: Get MacPorts
+          command: |
+            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
+            tar xf MacPorts-2.7.1.tar.bz2
+            cd MacPorts-2.7.1/
+            ./configure
+            make -j6
+            sudo make install
 
-      #- run:
-      #    name: Get clang13
-      #    command: |
-      #      sudo /opt/local/bin/port selfupdate
-      #      (sudo yes || true) | sudo /opt/local/bin/port install clang-13
-      #      sudo /opt/local/bin/port select --set clang mp-clang-13
-      #      /opt/local/bin/clang++ -v > clangVersion.txt
-      #    no_output_timeout: 30m
+      - run:
+          name: Get clang13
+          command: |
+            sudo /opt/local/bin/port selfupdate
+            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
+            sudo /opt/local/bin/port select --set clang mp-clang-13
+            /opt/local/bin/clang++ -v > clangVersion.txt
+          no_output_timeout: 30m
 
       - run:
           name: make VAPOR
@@ -233,38 +233,29 @@ jobs:
           driveID: 1QEyOZWinJmLVnbCnEq43QtskDirmP_9d
           sudo: sudo
 
-      #- run:
-      #    name: acquire 3rd party libraries
-      #    command: |
-      #      mkdir -p /usr/local/VAPOR-Deps
-      #      id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
-      #      filename="2023-Jun-M1.tar.xz"
-      #      curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-      #      tar -xf ${filename} -C /usr/local/VAPOR-Deps
-
       - run:
           name: Get cmake
           command: |
             brew install cmake
 
-      #- run:
-      #    name: Get MacPorts
-      #    command: |
-      #      curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
-      #      tar xf MacPorts-2.7.1.tar.bz2
-      #      cd MacPorts-2.7.1/
-      #      ./configure
-      #      make -j8
-      #      sudo make install
+      - run:
+          name: Get MacPorts
+          command: |
+            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
+            tar xf MacPorts-2.7.1.tar.bz2
+            cd MacPorts-2.7.1/
+            ./configure
+            make -j8
+            sudo make install
 
-      #- run:
-      #    name: Get clang13
-      #    command: |
-      #      sudo /opt/local/bin/port selfupdate
-      #      (sudo yes || true) | sudo /opt/local/bin/port install clang-13
-      #      sudo /opt/local/bin/port select --set clang mp-clang-13
-      #      /opt/local/bin/clang++ -v > clangVersion.txt
-      #    no_output_timeout: 30m
+      - run:
+          name: Get clang13
+          command: |
+            sudo /opt/local/bin/port selfupdate
+            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
+            sudo /opt/local/bin/port select --set clang mp-clang-13
+            /opt/local/bin/clang++ -v > clangVersion.txt
+          no_output_timeout: 30m
 
       - run:
           name: make VAPOR
