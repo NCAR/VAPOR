@@ -188,6 +188,7 @@ jobs:
             cd build
             git checkout $CIRCLE_BRANCH
             export PATH=/opt/local/bin:$PATH
+            softwareupdate --install-rosetta --aggree-to-license
             #sudo port select --set clang mp-clang-13
             cmake -DCPACK_BINARY_DRAGNDROP=ON \
                   -DCMAKE_BUILD_TYPE:String=Release \
