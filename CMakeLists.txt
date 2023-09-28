@@ -22,20 +22,24 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(APPLE)
+    option (MACOS_BUILD_ARM64 "Build for arm64 (ON) or x86 (OFF)" ON)
+
     # Check if the target architecture is arm64
-    include(CheckCXXSourceRuns)
-    set(CMAKE_REQUIRED_FLAGS "-arch arm64")
-    set(CHECK_ARM64_SOURCE_CODE "int main() { return 0; }")
-    check_cxx_source_runs("${CHECK_ARM64_SOURCE_CODE}" IS_ARM64)
-    if(IS_ARM64)
+    #include(CheckCXXSourceRuns)
+    #set(CMAKE_REQUIRED_FLAGS "-arch arm64")
+    #set(CHECK_ARM64_SOURCE_CODE "int main() { return 0; }")
+    #check_cxx_source_runs("${CHECK_ARM64_SOURCE_CODE}" IS_ARM64)
+    #if(IS_ARM64)
+    if(MACOS_BUILD_ARM64)
         message("Building on macOS M1 architecture (arm64)")
         # Set a flag or perform actions specific to M1 architecture
-        set(M1_ARCHITECTURE TRUE CACHE BOOL "Building on macOS M1 architecture")
+        #set(M1_ARCHITECTURE TRUE CACHE BOOL "Building on macOS arm64 M1 architecture")
         set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum OS X deployment version" FORCE)
-
+        set(CMAKE_OSX_ARCHITECTURES "arm64")
     else()
         message("Building on macOS x86 architecture")
         set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version" FORCE)
+        set(CMAKE_OSX_ARCHITECTURES "x86_64")
     endif()
 endif()
 
@@ -66,7 +70,7 @@ elseif (WIN32)
 	add_definitions (-DWIN32 -DNOMINMAX)
 	add_definitions (-DGLAD_API_CALL_EXPORT)
 endif()
-
+message("           FOO")
 # compiler warning flags
 if (NOT WIN32)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -Wno-overloaded-virtual -Wno-parentheses")
@@ -96,7 +100,28 @@ option (USE_OMP "Use OpenMP on some calculations" OFF)
 option (CONDA_BUILD "Use Conda to build" OFF)
 
 if( USE_OMP )
+    #message("CMAKE_C_COMPILER_ID ${CMAKE_C_COMPILER_ID}")
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_C "${CMAKE_C_COMPILER}")
+        set(OpenMP_C_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+        set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
+        set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+        set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+        set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
+    endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+      set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+      set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+      set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
+      set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+      set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+      set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+    endif()
+    #set(OpenMP_DIR ${THIRD_PARTY_DIR})
+    #find_package(OpenMP REQUIRED PATHS ${THIRD_PARTY_DIR})
     find_package(OpenMP REQUIRED)
+    #find_package(OPENMP REQUIRED)
+    #find_package(OpenMP REQUIRED PATHS /opt/local/lib/libomp)
     if( OpenMP_CXX_FOUND AND OpenMP_CXX_FLAGS )
         message(STATUS "OpenMP found! (${OpenMP_CXX_LIB_NAMES})")
     else()
@@ -431,7 +456,6 @@ if (APPLE)
         if (BUILD_OSP)
             file (GLOB INSTALL_OSP_LIBS ${OSPRAYDIR}/lib/*.dylib) 
             message (STATUS "OSPRAYDIR ${OSPRAYDIR}")
-            message (STATUS "OSPRAYDIR ${INSTALL_OSP_LIBS}")
 		    install (
 		    	FILES ${INSTALL_OSP_LIBS}
 		    	DESTINATION ${INSTALL_LIB_DIR}
@@ -459,14 +483,14 @@ if (APPLE)
                 )
         endif ()
 
-        if (USE_OMP)
-            get_filename_component(OMP_PATH ${OpenMP_CXX_LIBRARIES} REALPATH)
-            install (
-                FILES ${OMP_PATH}
-                DESTINATION ${INSTALL_LIB_DIR}
-                COMPONENT Dependencies
-                )
-        endif ()
+        #if (USE_OMP)
+        #    get_filename_component(OMP_PATH ${OpenMP_CXX_LIBRARIES} REALPATH)
+        #    install (
+        #        FILES ${OMP_PATH}
+        #        DESTINATION ${INSTALL_LIB_DIR}
+        #        COMPONENT Dependencies
+        #        )
+        #endif ()
         file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
         message (STATUS "plugins ${HDF5_PLUGINS}")
 		install (
