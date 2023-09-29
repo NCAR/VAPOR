@@ -498,7 +498,7 @@ proj() {
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     elif [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
-    elif [ "$OS" == "suse" ]; then
+    else
         args+=(-DCURL_INCLUDE_DIR=$installDir/include)
         args+=(-DCURL_LIBRARY=$installDir/lib/libcurl.so)
     fi
@@ -755,6 +755,7 @@ fi
 #    openmp
 #fi
 openssl
+zlib
 libpng
 jpeg
 tiff
@@ -766,7 +767,6 @@ geotiff
 
 #    openssl
 #fi
-zlib
 pythonVapor
 assimp
 szip
