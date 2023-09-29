@@ -39,12 +39,6 @@ shopt -s expand_aliases
 alias make='make -j8'
 alias
 
-if [ "$OS" == "CentOS" ]; then
-    shopt -s expand_aliases
-    alias cmake=cmake3
-    alias
-fi
-
 macOSx86Prerequisites() {
     brew uninstall python@3.9
     macOSPrerequisites
@@ -558,11 +552,12 @@ xinerama() {
 
 openssl() {
     cd $srcDir
-    if [ "$OS" != "suse" ]; then
-        local library='openssl-1.1.1t'
-    else
-        local library='openssl-1.1.1w'
-    fi
+    #if [ "$OS" != "suse" ]; then
+    #    local library='openssl-1.1.1t'
+    #else
+    #    local library='openssl-1.1.1w'
+    #fi
+    local library='openssl-1.1.1t'
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
 

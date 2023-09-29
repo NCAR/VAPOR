@@ -1186,17 +1186,6 @@ jobs:
       #      sudo chmod -R 777 /usr/local/VAPOR-Deps
       #      ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
 
-      - get_libraries:
-          fileName: 2023-Sept-src.tar.xz
-          driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
-          sudo: sudo
-
-      - run:
-          name: build libraries
-          command: |
-            chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
-            /Users/distiller/project/scripts/build3rdParty.sh -o macOSx86
-
       - run:
           name: Get MacPorts
           command: |
@@ -1215,6 +1204,17 @@ jobs:
             sudo /opt/local/bin/port select --set clang mp-clang-13
             /opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 30m
+
+      - get_libraries:
+          fileName: 2023-Sept-src.tar.xz
+          driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
+          sudo: sudo
+
+      - run:
+          name: build libraries
+          command: |
+            chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
+            /Users/distiller/project/scripts/build3rdParty.sh -o macOSx86
 
       - run:
           name: make VAPOR
@@ -1273,12 +1273,6 @@ jobs:
       #      sudo chmod -R 777 /usr/local/VAPOR-Deps
 
       - run:
-          name: build libraries
-          command: |
-            chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
-            /Users/distiller/project/scripts/build3rdParty.sh -o M1
-
-      - run:
           name: Get MacPorts
           command: |
             curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
@@ -1296,6 +1290,12 @@ jobs:
             sudo /opt/local/bin/port select --set clang mp-clang-13
             /opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 30m
+
+      - run:
+          name: build libraries
+          command: |
+            chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
+            /Users/distiller/project/scripts/build3rdParty.sh -o M1
 
       - run:
           name: make VAPOR
