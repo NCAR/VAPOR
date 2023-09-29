@@ -1042,8 +1042,7 @@ jobs:
           command: |
             DEBIAN_FRONTEND=noninteractive
             apt update
-            apt install -y xz-utils
-            apt install -y git
+            apt install -y xz-utils git curl
             git config --global --add safe.directory /tmp/_circleci_local_build_repo
 
       - checkout
@@ -1107,8 +1106,7 @@ jobs:
           command: |
             DEBIAN_FRONTEND=noninteractive
             apt update
-            apt install -y xz-utils
-            apt install -y git
+            apt install -y xz-utils git curl
             git config --global --add safe.directory /tmp/_circleci_local_build_repo
 
       - checkout
@@ -1355,8 +1353,8 @@ workflows:
     jobs:
       #- clang-tidy
       #- build_ubuntu18
-      - build_python_api_ubuntuDebug
-      - build_python_api_ubuntu
+      #- build_python_api_ubuntuDebug
+      #- build_python_api_ubuntu
       #- build_win10_installer
       #- build_macOSx86_installer
       #- build_M1_installer
