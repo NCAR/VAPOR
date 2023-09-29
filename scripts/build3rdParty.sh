@@ -557,7 +557,7 @@ openssl() {
     #else
     #    local library='openssl-1.1.1w'
     #fi
-    local library='openssl-1.1.1t'
+    local library='openssl-1.1.1w'
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
 
