@@ -1078,19 +1078,24 @@ jobs:
 
       - checkout
 
-      - run:
-          name: get source files
-          command: |
-            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-            mkdir -p /usr/local/VAPOR-Deps
-            apt update
-            apt install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/root/project/2023-Jun-src.tar.xz"
-            tar --no-same-owner -xf ${filename} -C /usr/local/VAPOR-Deps
+      - get_libraries:
+          fileName: 2023-Sept-src.tar.xz
+          driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
+          sudo: sudo
+
+      #- run:
+      #    name: get source files
+      #    command: |
+      #      #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
+      #      mkdir -p /usr/local/VAPOR-Deps
+      #      apt update
+      #      apt install -y python3-pip
+      #      pip3 install --upgrade pip
+      #      pip3 install scikit-build command
+      #      pip3 install gdown
+      #      gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+      #      filename="/root/project/2023-Jun-src.tar.xz"
+      #      tar --no-same-owner -xf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
           name: build libraries
@@ -1139,19 +1144,24 @@ jobs:
 
       - checkout
 
-      - run:
-          name: get source files
-          command: |
-            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-            mkdir -p /usr/local/VAPOR-Deps
-            apt update
-            apt install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/root/project/2023-Jun-src.tar.xz"
-            tar --no-same-owner -xf ${filename} -C /usr/local/VAPOR-Deps
+      - get_libraries:
+          fileName: 2023-Sept-src.tar.xz
+          driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
+          sudo: sudo
+
+      #- run:
+      #    name: get source files
+      #    command: |
+      #      #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
+      #      mkdir -p /usr/local/VAPOR-Deps
+      #      apt update
+      #      apt install -y python3-pip
+      #      pip3 install --upgrade pip
+      #      pip3 install scikit-build command
+      #      pip3 install gdown
+      #      gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+      #      filename="/root/project/2023-Jun-src.tar.xz"
+      #      tar --no-same-owner -xf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
           name: build libraries
@@ -1195,17 +1205,25 @@ jobs:
       #    fileName: 2023-Jun-src.tar.xz
       #    driveID: 1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
 
-      - run:
-          name: get source files
-          command: |
-            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/Users/distiller/project/2023-Jun-src.tar.xz"
-            sudo tar xvf $filename -C /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
+      #- run:
+      #    name: get source files
+      #    command: |
+      #      #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
+      #      sudo mkdir -p /usr/local/VAPOR-Deps
+      #      sudo chmod -R 777 /usr/local/VAPOR-Deps
+      #      pip3 install gdown
+      #      #gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+      #      #filename="/Users/distiller/project/2023-Jun-src.tar.xz"
+      #      gdown https://drive.google.com/uc?id=1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
+      #      filename="/Users/distiller/project/2023-Sept-src.tar.xz"
+      #      sudo tar xvf $filename -C /usr/local/VAPOR-Deps
+      #      sudo chmod -R 777 /usr/local/VAPOR-Deps
+      #      ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
+
+      - get_libraries:
+          fileName: 2023-Sept-src.tar.xz
+          driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
+          sudo: sudo
 
       - run:
           name: build libraries
@@ -1235,7 +1253,6 @@ jobs:
       - run:
           name: make VAPOR
           command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
             brew install gettext
             cp site_files/site.NCAR site.local
             mkdir build
@@ -1272,17 +1289,22 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: get source files
-          command: |
-            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/Users/distiller/project/2023-Jun-src.tar.xz"
-            sudo tar xvf $filename -C /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
+      - get_libraries:
+          fileName: 2023-Sept-src.tar.xz
+          driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
+          sudo: sudo
+
+      #- run:
+      #    name: get source files
+      #    command: |
+      #      #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
+      #      sudo mkdir -p /usr/local/VAPOR-Deps
+      #      sudo chmod -R 777 /usr/local/VAPOR-Deps
+      #      pip3 install gdown
+      #      gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
+      #      filename="/Users/distiller/project/2023-Jun-src.tar.xz"
+      #      sudo tar xvf $filename -C /usr/local/VAPOR-Deps
+      #      sudo chmod -R 777 /usr/local/VAPOR-Deps
 
       - run:
           name: build libraries
@@ -1373,17 +1395,17 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
-      - build_macOSx86_installer
-      - build_M1_installer
+      #- build_macOSx86_installer
+      #- build_M1_installer
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_centos7_installer
-      #- build_ubuntu20_libs
-      #- build_ubuntu22_libs
+      - build_ubuntu20_libs
+      - build_ubuntu22_libs
       #- build_centos7_libs
-      #- build_macOSx86_libs
-      #- build_M1_libs
-      #- build_suse_libs
+      - build_macOSx86_libs
+      - build_M1_libs
+      - build_suse_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:

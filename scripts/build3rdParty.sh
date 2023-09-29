@@ -174,6 +174,22 @@ centosPrerequisites() {
     yum groupinstall -y "Development Tools"
 }
 
+openmp() {
+    cd $srcDir
+    local library='openmp'
+    rm -rf $library || true
+    tar xvf $srcDir/$library.tar.xz 
+    mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
+
+    args=(
+        -DCMAKE_INSTALL_PREFIX=$installDir
+        -DCMAKE_C_COMPILER=$CC
+        -DCMAKE_CXX_COMPILER=$CXX
+    )
+    cmake "${args[@]}" ..
+    make && make install
+}
+
 libpng() {
     cd $srcDir
     local library='libpng-1.6.39'
@@ -581,7 +597,9 @@ ospray() {
     if [ "$OS" == "M1" ]; then
         # 6/2/2023 - CircleCI was having difficulty targeting arm64 for Ospray's build.
         #            Workaround: compile Ospray locally and add it to the source .tar.xz bundle
-        cd $srcDir/ospray/osprayM1
+        local library='osprayM1'
+        rm -rf ospray/$library || true
+        tar xvf $srcDir/ospray/$library.tar.xz && cd $srcDir/$library
     elif [ "$OS" == "macOSx86" ]; then
         local library='ospray-2.11.0.x86_64.macosx'
         rm -rf ospray/$library || true
@@ -702,6 +720,9 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
+if [ "$OS" == "macOSx86" || "$OS" == "M1" ]; then
+    openmp
+fi
 openssl
 zlib
 pythonVapor
