@@ -1081,7 +1081,6 @@ jobs:
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
-          sudo: sudo
 
       #- run:
       #    name: get source files
@@ -1147,7 +1146,6 @@ jobs:
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
-          sudo: sudo
 
       #- run:
       #    name: get source files

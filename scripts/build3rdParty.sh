@@ -720,7 +720,7 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-if [ "$OS" == "macOSx86" || "$OS" == "M1" ]; then
+if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
     openmp
 fi
 openssl
