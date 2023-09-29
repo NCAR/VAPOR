@@ -21,7 +21,7 @@ commands:
         type: string
         default: ""
       makeSymlink:
-        type: bool
+        type: integer
         default: 1
     steps:
       - run:
@@ -35,7 +35,7 @@ commands:
               curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
               tar -xf ${filename} -C /usr/local/VAPOR-Deps
               archivename=`echo ${filename} | grep -o '[0-9]\{4\}-[A-Za-z]\{3\}'`
-              if [ << parameters.makeSymlink >> == 1 ]; then ln -s /usr/local/VAPOR-Deps/${archivename} /usr/local/VAPOR-Deps/current; fi
+              if [ << parameters.makeSymlink >> ]; then ln -s /usr/local/VAPOR-Deps/${archivename} /usr/local/VAPOR-Deps/current; fi
 
 jobs:
   build_win10_installer:
@@ -1214,7 +1214,7 @@ jobs:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
           sudo: sudo
-          makeSymlink: false        
+          makeSymlink: 0
 
 
       - run:
@@ -1266,7 +1266,7 @@ jobs:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
           sudo: sudo
-          makeSymlink: false        
+          makeSymlink: 0
 
       #- run:
       #    name: get source files
