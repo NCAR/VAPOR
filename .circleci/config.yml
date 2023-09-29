@@ -37,7 +37,7 @@ commands:
               archivename=`echo ${filename} | grep -o '[0-9]\{4\}-[A-Za-z]\{3\}'`
               if [ << parameters.makeSymlink >> ]; then ln -s /usr/local/VAPOR-Deps/${archivename} /usr/local/VAPOR-Deps/current; fi
               if [ << parameters.makeSymlink >> ]; then echo "Making SYMLINK"; fi
-              if [ <<parameters.makeSymlink>> ]; then echo << parameters.symlink>>; fi
+              if [ <<parameters.makeSymlink>> ]; then echo <<parameters.makeSymlink>>; fi
 
 jobs:
   build_win10_installer:
