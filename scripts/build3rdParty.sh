@@ -492,6 +492,7 @@ proj() {
         -DPROJ_COMPILER_NAME=$CXX
         -DCMAKE_LIBRARY_PATH=$installDir/lib
         -DCMAKE_INCLUDE_PATH=$installDir/include
+        -DCURL_LIBRARY=$installDir/lib/libcurl.so
     )
     if [ "$OS" == "M1" ]; then
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
@@ -500,7 +501,7 @@ proj() {
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     else
         args+=(-DCURL_INCLUDE_DIR=$installDir/include)
-        args+=(-DCURL_LIBRARY=$installDir/lib/libcurl.so)
+        #args+=(-DCURL_LIBRARY=$installDir/lib/libcurl.so)
     fi
     cmake "${args[@]}" ..
 
