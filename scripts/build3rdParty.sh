@@ -751,9 +751,9 @@ elif [ "$OS" == "suse" ]; then
     susePrerequisites
 fi
 
-if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
-    openmp
-fi
+#if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
+#    openmp
+#fi
 openssl
 libpng
 jpeg

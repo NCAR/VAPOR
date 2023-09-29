@@ -20,6 +20,9 @@ commands:
       sudo:
         type: string
         default: ""
+      makeSymlink:
+        type: bool
+        default: 1
     steps:
       - run:
           name: get third party libraries
@@ -32,7 +35,7 @@ commands:
               curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
               tar -xf ${filename} -C /usr/local/VAPOR-Deps
               archivename=`echo ${filename} | grep -o '[0-9]\{4\}-[A-Za-z]\{3\}'`
-              ln -s /usr/local/VAPOR-Deps/${archivename} /usr/local/VAPOR-Deps/current
+              if [ << parameters.makeSymlink >> == 1 ]; then ln -s /usr/local/VAPOR-Deps/${archivename} /usr/local/VAPOR-Deps/current; fi
 
 jobs:
   build_win10_installer:
@@ -1050,6 +1053,7 @@ jobs:
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
+          makeSymlink: 0
 
       #- run:
       #    name: get source files
@@ -1114,6 +1118,7 @@ jobs:
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
+          makeSymlink: 0
 
       #- run:
       #    name: get source files
@@ -1209,6 +1214,8 @@ jobs:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
           sudo: sudo
+          makeSymlink: false        
+
 
       - run:
           name: build libraries
@@ -1259,6 +1266,7 @@ jobs:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
           sudo: sudo
+          makeSymlink: false        
 
       #- run:
       #    name: get source files
