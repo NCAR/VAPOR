@@ -12,7 +12,7 @@ set -e
 
 #OS="CentOS"
 baseDir='/usr/local/VAPOR-Deps'
-srcDir="$baseDir/2023-Jun-src"
+srcDir="$baseDir/2023-Sept-src"
 installDir="$baseDir/current"
 archiveName="2023-Jun"
 
@@ -92,6 +92,7 @@ ubuntuPrerequisites() {
     apt install -y cmake --allow-unauthenticated
 
     apt install -y \
+        curl \
         build-essential \
         libgl1-mesa-dev \
         qtbase5-dev \
