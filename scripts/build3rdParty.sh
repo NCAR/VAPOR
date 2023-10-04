@@ -587,7 +587,8 @@ pythonVapor() {
     #LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/lib -I$(brew --prefix openssl)/lib" \
     #CPPFLAGS="-I$installDir/include -I$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
     if [ "$OS" = "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(--with-openssl=$(brew --prefix openssl@1.1))
+        #args+=(--with-openssl=$(brew --prefix openssl@1.1))
+        args+=(--with-openssl=$installDir/lib
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
         args+=(--with-tcltk-includes="$(pkg-config --cflags tcl tk)")
         #args+=(--with-macosx-version-min=$macOSMinVersion)

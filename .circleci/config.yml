@@ -693,6 +693,7 @@ jobs:
                 gcc7-fortran \
                 cmake \
                 curl \
+                libomp-devel \
                 libicu-devel \
                 freeglut-devel
                 
@@ -742,6 +743,7 @@ jobs:
             apt install -y xz-utils
             apt install -y git
             apt install -y g++
+            apt install -y libomp-dev
             apt install -y freeglut3-dev
             apt install -y libexpat1-dev
             apt install -y libglib2.0-0
@@ -813,6 +815,7 @@ jobs:
             apt install -y xz-utils
             apt install -y git
             apt install -y g++
+            apt install -y libomp-dev
             apt install -y freeglut3-dev
             apt install -y libexpat1-dev
             apt install -y libglib2.0-0
@@ -984,6 +987,7 @@ jobs:
             tar \
             gzip \
             xz \
+            libomp-devel \
             zlib-devel \
             bzip2 \
             make \
