@@ -36,6 +36,7 @@ commands:
               tar -xf ${filename} -C /usr/local/VAPOR-Deps
               archivename=`echo ${filename} | grep -o '[0-9]\{4\}-[A-Za-z]\{3\}'`
               if [ << parameters.makeSymlink >> == 1 ]; then ln -s /usr/local/VAPOR-Deps/${archivename} /usr/local/VAPOR-Deps/current; fi
+              if [ << parameters.makeSymlink >> == 1 ]; then echo MAKING SYMLINK; fi
 
 jobs:
   build_win10_installer:
@@ -783,7 +784,6 @@ jobs:
       - run:
           name: make installer
           command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
             cmake -DCMAKE_BUILD_TYPE:String=Release \
@@ -855,7 +855,6 @@ jobs:
       - run:
           name: make installer
           command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
             cmake -DCMAKE_BUILD_TYPE:String=Release \
