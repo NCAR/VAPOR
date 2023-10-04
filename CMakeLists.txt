@@ -103,32 +103,7 @@ option (USE_OMP "Use OpenMP on some calculations" OFF)
 option (CONDA_BUILD "Use Conda to build" OFF)
 
 if( USE_OMP )
-    #message("CMAKE_C_COMPILER_ID ${CMAKE_C_COMPILER_ID}")
-    #if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-    #    set(OpenMP_C "${CMAKE_C_COMPILER}")
-    #    set(OpenMP_C_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
-    #    set(OpenMP_C_FLAGS "-Wno-unused-command-line-argument")
-    #    set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
-    #    set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
-    #    set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
-    #    set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
-    #endif()
-    #if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    #    set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
-    #    set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
-    #    set(OpenMP_CXX_FLAGS "-Wno-unused-command-line-argument")
-    #    set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
-    #    set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-    #    set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-    #    set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-    #endif()
-    #set(OpenMP_DIR ${THIRD_PARTY_DIR})
-    #find_package(OpenMP REQUIRED PATHS ${THIRD_PARTY_DIR})
-    #find_package(OpenMP PATHS ${THIRD_PARTY_DIR} REQUIRED) # does not work https://stackoverflow.com/questions/72413095/how-to-specific-installed-include-lib-path-when-using-cmake-find-package-module
-    #set(OpenMP_ROOT ${THIRD_PARTY_DIR})
-    #find_package(OpenMP PATHS REQUIRED)
-    #find_package(OPENMP REQUIRED)
-    #find_package(OpenMP REQUIRED PATHS /opt/local/lib/libomp)
+    find_package(OpenMP REQUIRED)
     if( OpenMP_CXX_FOUND AND OpenMP_CXX_FLAGS )
         message(STATUS "OpenMP found! (${OpenMP_CXX_LIB_NAMES})")
     else()
@@ -490,14 +465,14 @@ if (APPLE)
                 )
         endif ()
 
-        #if (USE_OMP)
-        #    get_filename_component(OMP_PATH ${OpenMP_CXX_LIBRARIES} REALPATH)
-        #    install (
-        #        FILES ${OMP_PATH}
-        #        DESTINATION ${INSTALL_LIB_DIR}
-        #        COMPONENT Dependencies
-        #        )
-        #endif ()
+        if (USE_OMP)
+            get_filename_component(OMP_PATH ${OpenMP_CXX_LIBRARIES} REALPATH)
+            install (
+                FILES ${OMP_PATH}
+                DESTINATION ${INSTALL_LIB_DIR}
+                COMPONENT Dependencies
+                )
+        endif ()
         file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
         message (STATUS "plugins ${HDF5_PLUGINS}")
 		install (
