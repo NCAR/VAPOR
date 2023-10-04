@@ -8,7 +8,7 @@
 #
 #                       xargs rm < install_manifest.txt
 
-set -e
+set -xe
 
 while getopts o:b:i flag
 do
@@ -367,8 +367,6 @@ jpeg() {
     tar xvf $srcDir/jpegsrc.v9e.tar.gz
     cd $srcDir/jpeg-9e
 
-    echo target $MACOSX_DEPLOYMENT_TARGET
-
     args=(
         --prefix=$installDir
     )
@@ -422,8 +420,6 @@ sqlite() {
 }
 
 curl() {
-    echo $LD_LIBRARY_PATH
-    echo $DYLD_LIBRARY_PATH
     cd $srcDir
     local library='curl-8.2.1' # works
     rm -rf $library || true
@@ -494,6 +490,7 @@ proj() {
         -DCURL_LIBRARY=$installDir/lib/libcurl.so
     )
     if [ "$OS" == "M1" ]; then
+        args+=(_DCURL_LIBRARY=$installDir/lib/libcurl.dylib
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     elif [ "$OS" == "macOSx86" ]; then
@@ -502,6 +499,7 @@ proj() {
         args+=(-DCURL_INCLUDE_DIR=$installDir/include)
         #args+=(-DCURL_LIBRARY=$installDir/lib/libcurl.so)
     fi
+    echo cmake "${args[@]}" ..
     cmake "${args[@]}" ..
 
     make && make install
