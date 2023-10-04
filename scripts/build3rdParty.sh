@@ -490,7 +490,7 @@ proj() {
         -DCURL_LIBRARY=$installDir/lib/libcurl.so
     )
     if [ "$OS" == "M1" ]; then
-        args+=(_DCURL_LIBRARY=$installDir/lib/libcurl.dylib
+        args+=(_DCURL_LIBRARY=$installDir/lib/libcurl.dylib)
         args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     elif [ "$OS" == "macOSx86" ]; then
