@@ -20,9 +20,6 @@ commands:
       sudo:
         type: string
         default: ""
-      makeSymlink:
-        type: integer
-        default: 1
     steps:
       - run:
           name: get third party libraries
@@ -35,8 +32,6 @@ commands:
               curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
               tar -xf ${filename} -C /usr/local/VAPOR-Deps
               archivename=`echo ${filename} | grep -o '[0-9]\{4\}-[A-Za-z]\{3\}'`
-              if [ << parameters.makeSymlink >> == 1 ]; then ln -s /usr/local/VAPOR-Deps/${archivename}/ /usr/local/VAPOR-Deps/current; fi
-              if [ << parameters.makeSymlink >> == 1 ]; then echo MAKING SYMLINK; fi
 
 jobs:
   build_win10_installer:
@@ -187,6 +182,7 @@ jobs:
       - run:
           name: make VAPOR
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
@@ -715,6 +711,7 @@ jobs:
       - run:
           name: make installer
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
             cmake -DCMAKE_BUILD_TYPE=Release \
@@ -784,6 +781,7 @@ jobs:
       - run:
           name: make installer
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
             cmake -DCMAKE_BUILD_TYPE:String=Release \
@@ -855,6 +853,7 @@ jobs:
       - run:
           name: make installer
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
             cmake -DCMAKE_BUILD_TYPE:String=Release \
@@ -1061,7 +1060,6 @@ jobs:
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
-          makeSymlink: 0
 
       #- run:
       #    name: get source files
@@ -1126,21 +1124,6 @@ jobs:
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
-          makeSymlink: 0
-
-      #- run:
-      #    name: get source files
-      #    command: |
-      #      #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-      #      mkdir -p /usr/local/VAPOR-Deps
-      #      apt update
-      #      apt install -y python3-pip
-      #      pip3 install --upgrade pip
-      #      pip3 install scikit-build command
-      #      pip3 install gdown
-      #      gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-      #      filename="/root/project/2023-Jun-src.tar.xz"
-      #      tar --no-same-owner -xf ${filename} -C /usr/local/VAPOR-Deps
 
       - run:
           name: build libraries
@@ -1222,7 +1205,6 @@ jobs:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
           sudo: sudo
-          makeSymlink: 0
 
 
       - run:
@@ -1234,6 +1216,7 @@ jobs:
       - run:
           name: make VAPOR
           command: |
+            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
             brew install gettext
             cp site_files/site.NCAR site.local
             mkdir build
@@ -1274,7 +1257,6 @@ jobs:
           fileName: 2023-Sept-src.tar.xz
           driveID: 1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a
           sudo: sudo
-          makeSymlink: 0
 
       #- run:
       #    name: get source files
