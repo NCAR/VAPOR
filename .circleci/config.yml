@@ -1050,7 +1050,7 @@ jobs:
           command: |
             DEBIAN_FRONTEND=noninteractive
             apt update
-            apt install -y xz-utils git curl
+            apt install -y xz-utils git curl libomp-dev
             git config --global --add safe.directory /tmp/_circleci_local_build_repo
 
       - checkout
@@ -1115,7 +1115,7 @@ jobs:
           command: |
             DEBIAN_FRONTEND=noninteractive
             apt update
-            apt install -y xz-utils git curl
+            apt install -y xz-utils git curl libomp-dev
             git config --global --add safe.directory /tmp/_circleci_local_build_repo
 
       - checkout
