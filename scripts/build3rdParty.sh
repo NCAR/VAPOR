@@ -434,7 +434,6 @@ curl() {
         -DCMAKE_PREFIX_PATH=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
         -DCMAKE_INSTALL_PREFIX=$installDir
-        -DPROJ_COMPILER_NAME=$CXX
         -DCMAKE_LIBRARY_PATH=$installDir/lib
         -DCMAKE_INCLUDE_PATH=$installDir/include
         -DCMAKE_INSTALL_RPATH=$installDir/lib
@@ -761,8 +760,10 @@ libpng
 jpeg
 tiff
 sqlite
-ssh
-curl
+if [ "$OS" != "macOSx86" ] || [ "$OS" != "M1" ]; then
+    ssh
+    curl
+fi
 proj
 geotiff
 

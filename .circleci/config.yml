@@ -978,6 +978,7 @@ jobs:
       - run:
           name: acquire prerequisites
           command: |
+            zypper install -y -t pattern devel_C_C++
             zypper install -y \
             curl \
             tar \
@@ -1079,7 +1080,7 @@ jobs:
       - run:
           name: make installer
           command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
+            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
             cmake -DCMAKE_BUILD_TYPE:String=Release \
@@ -1144,7 +1145,7 @@ jobs:
       - run:
           name: make installer
           command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
+            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
             mkdir -p /root/project/build
             cd /root/project/build
             cmake -DCMAKE_BUILD_TYPE:String=Release \
@@ -1370,7 +1371,7 @@ workflows:
       #- build_ubuntu22_installer
       - build_ubuntu20_libs
       - build_ubuntu22_libs
-      - build_macOSx86_libs
+      #- build_macOSx86_libs
       - build_M1_libs
       - build_suse_libs
       #- build_suse_installer
