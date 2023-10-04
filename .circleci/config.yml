@@ -233,7 +233,7 @@ jobs:
 
       - get_libraries:
           fileName: 2023-Sept-M1.tar.xz
-          driveID: 1QEyOZWinJmLVnbCnEq43QtskDirmP_9d
+          driveID: 14610-_oYbF_qbiO3WoOu0FQhNNvzX6p7
           sudo: sudo
 
       - run:
@@ -697,15 +697,19 @@ jobs:
                 libicu-devel \
                 freeglut-devel
                 
-      - run:
-          name: acquire 3rd party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id="1pvdYktXqFM5_8kNd8lG1TT5-rI8Mspyf"
-            filename="2023-Sept-SUSE.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
-            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
+      - get_libraries:
+          fileName: 2023-Sept-SUSE.tar.xz
+          driveID: 1pvdYktXqFM5_8kNd8lG1TT5-rI8Mspyf
+
+      #- run:
+      #    name: acquire 3rd party libraries
+      #    command: |
+      #      mkdir -p /usr/local/VAPOR-Deps
+      #      id="1pvdYktXqFM5_8kNd8lG1TT5-rI8Mspyf"
+      #      filename="2023-Sept-SUSE.tar.xz"
+      #      curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+      #      tar -xf ${filename} -C /usr/local/VAPOR-Deps
+      #      ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
 
       - run:
           name: make installer
@@ -774,7 +778,7 @@ jobs:
       #      tar -xf ${filename} -C /usr/local/VAPOR-Deps
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
-          driveID: 16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6
+          driveID: 12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5
 
       - run:
           name: make installer
@@ -846,7 +850,7 @@ jobs:
 #          no_output_timeout: 45m
       - get_libraries:
           fileName: 2023-Sept-Ubuntu22.tar.xz
-          driveID: 1gqUxxJJA4iGnAPvI1EDaFFnrlbALnkeO
+          driveID: 17Uv6wTePyRKfN10Iv00JKzeLc2W43NYk
 
       - run:
           name: make installer
@@ -1370,15 +1374,15 @@ workflows:
       #- build_python_api_ubuntu
       #- build_win10_installer
       #- build_macOSx86_installer
-      #- build_M1_installer
-      #- build_ubuntu20_installer
-      #- build_ubuntu22_installer
-      - build_ubuntu20_libs
-      - build_ubuntu22_libs
+      - build_M1_installer
+      - build_ubuntu20_installer
+      - build_ubuntu22_installer
+      #- build_ubuntu20_libs
+      #- build_ubuntu22_libs
       #- build_macOSx86_libs
-      - build_M1_libs
-      - build_suse_libs
-      #- build_suse_installer
+      #- build_M1_libs
+      #- build_suse_libs
+      - build_suse_installer
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
