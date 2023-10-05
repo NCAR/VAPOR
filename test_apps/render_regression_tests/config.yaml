@@ -65,11 +65,19 @@ MOM4/JinHeeYuk/ocean_eta:
 MOM4/JinHeeYuk/ocean_salt:
   files: Source/MOM4/JinHeeYuk/ocean_salt/*.nc
   type: cf
-  renderers: 3D
+  renderers:
+    - Image
+    - Volume
+    - IsoSurface
 
 MOM4/om3/ocean_residency_snap:
   files: Source/MOM4/om3/ocean_residency_snap/*.nc
   type: cf
+  renderers:
+    - TwoDData
+    - Image
+    - Volume
+    - IsoSurface
 
 MPAS/MPAS-O:
   files: Source/MPAS/MPAS-O/*.nc
@@ -112,11 +120,18 @@ MPAS/RosimarRiosBerrios:
 POP/KISTI:
   files: Source/POP/KISTI/*.nc
   type: cf
-  renderers: 2D
+  renderers:
+    Image:
+    TwoDData:
+    Flow2D:
+      XFieldVariable: HUS
+      YFieldVariable: HUW
+
 
 ROMS/his:
   files: Source/ROMS/his/*.nc
   type: cf
+  timestep: 1
   renderers:
     default:
     IsoSurface: temp
@@ -311,59 +326,71 @@ WRF/HRRR:
 BOV/256i.bov:
   files: Source/BOV/256i.bov
   type: bov
-  renderers: 3D
+  renderers: IsoSurface
+
 
 BOV/256f.bov:
   files: Source/BOV/256f.bov
   type: bov
-  renderers: 3D
+  renderers: IsoSurface
 
 BOV/256d.bov:
   files: Source/BOV/256d.bov
   type: bov
-  renderers: 3D
+  renderers: IsoSurface
 
 BOV/multiTimeMultiVar:
   files: Source/BOV/multiTimeMultiVar/*.bov
   type: bov
-  renderers: 3D
+  renderers: IsoSurface
 
 BOV/relativePath1.bov:
   files: Source/BOV/relativePath1.bov
   type: bov
-  renderers: 3D
+  renderers: IsoSurface
 
 BOV/relativePath2.bov:
   files: Source/BOV/relativePath2.bov
   type: bov
-  renderers: 3D
+  renderers: IsoSurface
 
 BOV/relativePath3.bov:
   files: Source/BOV/relativePath3.bov
   type: bov
-  renderers: 3D
+  renderers: IsoSurface
 
 BOV/relativePath4.bov:
   files: Source/BOV/relativePath4.bov
   type: bov
-  renderers: 3D
+  renderers: IsoSurface
 
 UGRID/NOAA-geoflow/large:
   files: Source/UGRID/NOAA-geoflow/large/*.nc
   type: ugrid
   renderers:
-    - Image
-    - Flow3D
+    Image:
+    Flow3D:
+      XFieldVariable: v1
+      YFieldVariable: v2
+      ZFieldVariable: v3
 
 UGRID/NOAA-geoflow/small:
   files: Source/UGRID/NOAA-geoflow/small/*.nc
   type: ugrid
   renderers:
-    - Image
-    - Flow3D
+    Image:
+    Flow3D:
+      XFieldVariable: v1
+      YFieldVariable: v2
+      ZFieldVariable: v3
 
 UGRID/NOAA-geoflow/2D:
   files: Source/UGRID/NOAA-geoflow/2D/*.nc
   type: ugrid
-  renderers: 2D
+  renderers:
+    TwoDData:
+    Image:
+    Flow2D:
+      XFieldVariable: v1
+      YFieldVariable: v2
 

@@ -117,9 +117,12 @@ def TestCanBeRunConcurrently(test:dict) -> bool:
 
 def GenerateTests(config, tests):
     for name, test in tests.items():
-        files = [locateRelPath(f, config['dataRootDir']) for f in alwaysList(extract(test, 'files'))]
-        files = sorted(chain.from_iterable(map(glob, files)))
+        file_globs = [locateRelPath(f, config['dataRootDir']) for f in alwaysList(extract(test, 'files'))]
+        files = sorted(chain.from_iterable(map(glob, file_globs)))
         dataType = extract(test, 'type')
+
+        if not files:
+            print("WARNING: files not found:", file_globs)
 
         if extract(test, 'skip'):
             continue
