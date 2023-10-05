@@ -217,7 +217,7 @@ jobs:
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
-            -DMACOS_BUILD_ARM64=OFF \
+            -DMACOS_BUILD_ARM64=OFF
           moveToCommand: ${f/Darwin/DarwinM1}
 
       #- run:
@@ -303,7 +303,7 @@ jobs:
           compileArgs: |
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_C_COMPILER=clang
           moveToCommand: ${f/Darwin/DarwinM1}
 
       - store_artifacts:
