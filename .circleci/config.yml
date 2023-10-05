@@ -40,8 +40,10 @@ commands:
         default: main
       beforeCompile:
         type: string
+        default: ""
       compileArgs:
         type: string
+        default: ""
       moveToCommand:
         type: string
     steps:
