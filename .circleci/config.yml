@@ -300,12 +300,12 @@ jobs:
       - build_vapor:
           beforeCompile: export PATH=/opt/local/bin:$PATH
           compileArgs: |
-            -DCPACK_BINARY_DRAGNDROP=ON
-            -DCMAKE_BUILD_TYPE:String=Release
-            -DDIST_INSTALLER:string=ON
-            -DCMAKE_CXX_COMPILER=clang++
-            -DCMAKE_C_COMPILER=clang
-            -DUSE_OMP=ON
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_BUILD_TYPE:String=Release \
+            -DDIST_INSTALLER:string=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DUSE_OMP=ON \
           moveToCommand: ${f/Darwin/DarwinM1}
 
       - run:
