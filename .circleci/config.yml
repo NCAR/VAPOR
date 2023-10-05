@@ -697,7 +697,7 @@ jobs:
     docker:
       - image: opensuse/leap
 
-    resource_class: large
+    resource_class: xlarge
 
     steps:
       - checkout
@@ -731,21 +731,24 @@ jobs:
       #      tar -xf ${filename} -C /usr/local/VAPOR-Deps
       #      ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
 
-      - run:
-          name: make installer
-          command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
-            mkdir -p /root/project/build
-            cd /root/project/build
-            cmake -DCMAKE_BUILD_TYPE=Release \
-                  -DDIST_INSTALLER=ON \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j4
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/SUSE}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
+      - build_vapor:
+          moveToCommand: ${f/Linux/SUSE}
+
+      #- run:
+      #    name: make installer
+      #    command: |
+      #      ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
+      #      mkdir -p /root/project/build
+      #      cd /root/project/build
+      #      cmake -DCMAKE_BUILD_TYPE=Release \
+      #            -DDIST_INSTALLER=ON \
+      #            -DUSE_OMP=ON \
+      #            ..
+      #      make -j4
+      #      make installer
+      #      for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/SUSE}" ; done
+      #      mkdir -p /tmp/workspace/installers
+      #      mv *.sh /tmp/workspace/installers
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -754,7 +757,7 @@ jobs:
     docker:
       - image: ubuntu:20.04
 
-    resource_class: large
+    resource_class: xlarge
 
     steps:
       - checkout
@@ -801,21 +804,24 @@ jobs:
           fileName: 2023-Sept-Ubuntu20.tar.xz
           driveID: 12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5
 
-      - run:
-          name: make installer
-          command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
-            mkdir -p /root/project/build
-            cd /root/project/build
-            cmake -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j4
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu20}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
+      - build_vapor:
+          moveToCommand: ${f/Linux/Ubuntu20}
+
+      #- run:
+      #    name: make installer
+      #    command: |
+      #      ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
+      #      mkdir -p /root/project/build
+      #      cd /root/project/build
+      #      cmake -DCMAKE_BUILD_TYPE:String=Release \
+      #            -DDIST_INSTALLER:string=ON \
+      #            -DUSE_OMP=ON \
+      #            ..
+      #      make -j4
+      #      make installer
+      #      for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu20}" ; done
+      #      mkdir -p /tmp/workspace/installers
+      #      mv *.sh /tmp/workspace/installers
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -864,21 +870,24 @@ jobs:
           fileName: 2023-Sept-Ubuntu22.tar.xz
           driveID: 17Uv6wTePyRKfN10Iv00JKzeLc2W43NYk
 
-      - run:
-          name: make installer
-          command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
-            mkdir -p /root/project/build
-            cd /root/project/build
-            cmake -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j4
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu22}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
+      - build_vapor:
+          moveToCommand: ${f/Linux/Ubuntu20}
+
+      #- run:
+      #    name: make installer
+      #    command: |
+      #      ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
+      #      mkdir -p /root/project/build
+      #      cd /root/project/build
+      #      cmake -DCMAKE_BUILD_TYPE:String=Release \
+      #            -DDIST_INSTALLER:string=ON \
+      #            -DUSE_OMP=ON \
+      #            ..
+      #      make -j4
+      #      make installer
+      #      for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu22}" ; done
+      #      mkdir -p /tmp/workspace/installers
+      #      mv *.sh /tmp/workspace/installers
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -1370,14 +1379,14 @@ workflows:
       #- build_win10_installer
       - build_macOSx86_installer
       - build_M1_installer
-      #- build_ubuntu20_installer
-      #- build_ubuntu22_installer
+      - build_ubuntu20_installer
+      - build_ubuntu22_installer
+      - build_suse_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
       #- build_macOSx86_libs
       #- build_M1_libs
       #- build_suse_libs
-      #- build_suse_installer
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
