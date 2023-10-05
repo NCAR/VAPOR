@@ -35,7 +35,14 @@ commands:
 
   build_vapor:
     parameters:
+      branch:
+        type: string
+        default: main
+      beforeCompile:
+        type: string
       compileArgs:
+        type: string
+      moveToCommand:
         type: string
     steps:
       - run:
@@ -45,22 +52,26 @@ commands:
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
-            git checkout $CIRCLE_BRANCH
-            export PATH=/opt/local/bin:$PATH
-            softwareupdate --install-rosetta --aggree-to-license
-            sudo port select --set clang mp-clang-13
-            cmake -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DCMAKE_CXX_COMPILER=clang++ \
-                  -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=ON \
-                  -DMACOS_BUILD_ARM64=OFF \
-                  ..
+            git checkout <<parameters.branch>>
+            <<parameters.beforeCompile>>
+            #export PATH=/opt/local/bin:$PATH
+            #softwareupdate --install-rosetta --aggree-to-license
+            #sudo port select --set clang mp-clang-13
+            #cmake -DCPACK_BINARY_DRAGNDROP=ON \
+            #      -DCMAKE_BUILD_TYPE:String=Release \
+            #      -DDIST_INSTALLER:string=ON \
+            #      -DCMAKE_CXX_COMPILER=clang++ \
+            #      -DCMAKE_C_COMPILER=clang \
+            #      -DUSE_OMP=ON \
+            #      -DMACOS_BUILD_ARM64=OFF \
+            #      ..
+            cmake <<parameters.compileArgs>> ..
             make -j8
             make installer
+            for f in VAPOR3-*.dmg ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
-            mv *.dmg /tmp/workspace/installers
+            mv VAPOR3-* /tmp/workspace/installers
+            ls /tmp/workspace/installers
 
 jobs:
   build_win10_installer:
@@ -285,6 +296,17 @@ jobs:
             sudo /opt/local/bin/port select --set clang mp-clang-13
             /opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 30m
+
+      - build_vapor:
+          beforeCompile: export PATH=/opt/local/bin:$PATH
+          compileArgs: |
+            -DCPACK_BINARY_DRAGNDROP=ON
+            -DCMAKE_BUILD_TYPE:String=Release
+            -DDIST_INSTALLER:string=ON
+            -DCMAKE_CXX_COMPILER=clang++
+            -DCMAKE_C_COMPILER=clang
+            -DUSE_OMP=ON
+          moveToCommand: ${f/Darwin/DarwinM1}
 
       - run:
           name: make VAPOR
