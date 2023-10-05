@@ -37,7 +37,7 @@ commands:
     parameters:
       branch:
         type: string
-        default: main
+        default: $CIRCLE_BRANCH
       beforeCompile:
         type: string
         default: ""
@@ -63,7 +63,7 @@ commands:
             <<parameters.compileArgs>> ..
             make -j8
             make installer
-            for f in VAPOR3-*.dmg ; do mv "$f" "<<parameters.moveToCommand>>" ; done
+            for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
             mv VAPOR3-* /tmp/workspace/installers
             ls /tmp/workspace/installers
