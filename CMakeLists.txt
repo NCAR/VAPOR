@@ -543,8 +543,7 @@ if (UNIX AND NOT APPLE)
                         DESTINATION ${INSTALL_LIB_DIR}
                         COMPONENT Dependencies
                     )
-                    endif (${LSB_RELEASE} MATCHES "^2[02].")
-                endif (DIST STREQUAL "Ubuntu")
+                endif (DIST STREQUAL "Ubuntu 22")
             endif (EXISTS /etc/issue)
 
             install (
