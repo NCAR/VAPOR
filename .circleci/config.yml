@@ -1314,15 +1314,15 @@ workflows:
     jobs:
       #- clang-tidy
       #- build_ubuntu18
-      - build_python_api_ubuntuDebug
-      - build_python_api_ubuntu
+      #- build_python_api_ubuntuDebug
+      #- build_python_api_ubuntu
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
       #- build_macOSx86_installer
       #- build_M1_installer
       - build_ubuntu20_installer
-      #- build_ubuntu22_installer
+      - build_ubuntu22_installer
       - build_suse_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
