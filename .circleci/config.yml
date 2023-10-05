@@ -151,7 +151,7 @@ jobs:
           no_output_timeout: 30m
 
       - build_vapor:
-          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupudate --install-rosetta --agree-to-license
+          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license
           compileArgs: |
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
