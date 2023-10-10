@@ -330,49 +330,6 @@ jobs:
           paths:
             - installers
 
-  build_centos7_installer:
-    docker:
-      - image: sgpearse/vapor3-centos7:latest
-  
-    steps:
-      - checkout
-
-      - run:
-          name: update 3rd party libraries
-          command: |
-            rm -rf /usr/local/VAPOR-Deps/2019-Aug
-            pip3 install gdown --upgrade
-            gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
-            filename="/root/project/2019-Aug-CentOS.tar.xz"
-            bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
- 
-      - run:
-          name: cmake3 and make
-          command: |
-            cd /root/project/build
-            git checkout $CIRCLE_BRANCH
-            cmake3 \
-            -DCMAKE_BUILD_TYPE:String=Release \
-            -DDIST_INSTALLER:string=ON \
-            -DUSE_OMP=ON \
-            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
-            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
-            -DPYTHONVERSION=3.6 \
-            -DQTDIR=/usr/local/VAPOR-Deps/2019-Aug/Qt/5.13.2/gcc_64 \
-            ..
-            make -j2
-            make installer -j2
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
-      - store_artifacts:
-          path: /tmp/workspace/installers
-      
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
-
   clang-tidy:
     docker:
       - image: ubuntu:latest
@@ -539,45 +496,6 @@ jobs:
       - store_artifacts:
           path: /usr/local/conda-bld/linux-64/tarBallDir
 
-  build_python_api_centos:
-    docker:
-      - image: centos:7
-
-    resource_class: large
-
-    steps:
-      - run:
-          name: install miniconda
-          command: |
-            yum install -y wget
-            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
-            bash ~/miniconda.sh -b -p ~/miniconda 
-
-      - checkout
-
-      - run:
-          name: acquire map image archive
-          command: |
-            cd /root
-            yum update -y
-            yum install -y git
-            git clone https://github.com/NCAR/VAPOR-Data.git
-
-      - run:
-          name: conda build .
-          command: |
-            cd /root/project/conda
-            export PATH=/root/miniconda/bin:$PATH
-            conda config --add channels conda-forge
-            conda install -y conda-build
-            conda build .
-            DEBUG_BUILD=false MAP_IMAGES_PATH="/root/VAPOR-Data/images" conda build .
-            mkdir /root/miniconda/conda-bld/linux-64/tarBallDir
-            mv /root/miniconda/conda-bld/linux-64/*.tar.bz2 /root/miniconda/conda-bld/linux-64/tarBallDir
- 
-      - store_artifacts:
-          path: /root/miniconda/conda-bld/linux-64/tarBallDir
-
   build_python_api_osx:
     macos:
       xcode: "13.4.1"
@@ -741,80 +659,56 @@ jobs:
                exit 0
             fi
 
-  build_centos7:
-      docker:
-        - image: sgpearse/vapor3-centos7:latest
-  
-      steps:
-        - checkout
-  
-        - run:
-            name: update 3rd party libraries
-            command: |
-              rm -rf /usr/local/VAPOR-Deps/2019-Aug
-              pip3 install gdown --upgrade
-              gdown https://drive.google.com/uc?id=1S9DwySMnQrBuUUZGKolD__WQrjTmLgyn
-              filename="/root/project/2019-Aug-CentOS.tar.xz"
-              bsdtar -xf ${filename} -C /usr/local/VAPOR-Deps
- 
-        - run:
-            name: make debug
-            command: |
-              cd /root/project/build
-              cmake3 -DBUILD_TEST_APPS=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
-              make -j2 2>&1 | tee /tmp/debugOutput.txt
-              make clean
-        
-        - store_artifacts:
-            path: /tmp/debugOutput.txt
-  
-        - run:
-            name: make debug with omp
-            command: |
-              cd /root/project/build
-              cmake3 -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
-              make -j2 2>&1 | tee /tmp/debugOutputWithOMP.txt
-              make clean
-        - store_artifacts:
-            path: /tmp/debugOutputWithOMP.txt
-  
-        - run:
-            name: make release
-            command: |
-              cd /root/project/build
-              cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
-              make -j2 2>&1 | tee /tmp/releaseOutput.txt
-              make clean
-        - store_artifacts:
-            path: /tmp/releaseOutput.txt
-        
-        - run:
-            name: make release with omp
-            command: |
-              cd /root/project/build
-              cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
-              make -j2 2>&1 | tee /tmp/releaseOutputWithOMP.txt
-        - store_artifacts:
-            path: /tmp/releaseOutputWithOMP.txt
-  
-        - run:
-            name: check for Debug warnings
-            command: |
-              if grep -q warning /tmp/debugOutput.txt; then
-                 cat /tmp/debugOutput.txt
-                 exit -1
-              else
-                 exit 0
-              fi
-        - run:
-            name: check for Release warnings
-            command: |
-              if grep -q warning /tmp/releaseOutput.txt; then
-                 cat /tmp/releaseOutput.txt
-                 exit -1
-              else
-                 exit 0
-              fi
+  build_suse_installer:
+    docker:
+      - image: opensuse/leap
+
+    resource_class: large
+
+    steps:
+      - checkout
+
+      - run:
+          name: acquire prerequisites
+          command: |
+            zypper install -y -t pattern devel_C_C++
+            zypper install -y \
+                gzip \
+                xz \
+                git \
+                gcc7-fortran \
+                cmake \
+                curl \
+                libicu-devel \
+                freeglut-devel
+                
+      - run:
+          name: acquire 3rd party libraries
+          command: |
+            mkdir -p /usr/local/VAPOR-Deps
+            id="1pvdYktXqFM5_8kNd8lG1TT5-rI8Mspyf"
+            filename="2023-Sept-SUSE.tar.xz"
+            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
+
+      - run:
+          name: make installer
+          command: |
+            mkdir -p /root/project/build
+            cd /root/project/build
+            cmake -DCMAKE_BUILD_TYPE=Release \
+                  -DDIST_INSTALLER=ON \
+                  -DUSE_OMP=ON \
+                  ..
+            make -j4
+            make installer
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/SUSE}" ; done
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
+
+      - store_artifacts:
+          path: /tmp/workspace/installers
 
   build_ubuntu20_installer:
     docker:
@@ -1038,9 +932,6 @@ jobs:
             a="Ubuntu18:  "
             sha=`shasum -a 256 VAPOR3*Ubuntu*`
             ubuntuSha=$a$sha$endl
-            os="CentOS:    "
-            sha=`shasum -a 256 VAPOR3*CentOS7*`
-            centosSha=$os$sha$endl
             #os="OSX:       "
             #sha=`shasum -a 256 VAPOR3*Darwin*`
             #osxSha=$os$sha$endl
@@ -1050,7 +941,7 @@ jobs:
             #os="Windows:   "
             #sha=`shasum -a 256 VAPOR3*win64*`
             #winSha=$os$sha$endl
-            shaMessage="$title$ubuntuSha$centosSha$osxSha$m1Sha$winSha"
+            shaMessage="$title$ubuntuSha$osxSha$m1Sha$winSha"
             date=`date +"%d_%m_%y"`
             echo $shaMessage > "/tmp/workspace/installers/sha256.txt"
             echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
@@ -1060,76 +951,73 @@ jobs:
     docker:
       - image: opensuse/leap:latest
 
-    resource_class: large
+    resource_class: xlarge
 
     steps:
       - checkout
-#      - run:
-#          name: acquire prerequisites
-#          command: |
-#            echo "test"
+      - run:
+          name: acquire prerequisites
+          command: |
+            zypper install -y \
+            curl \
+            tar \
+            gzip \
+            xz \
+            zlib-devel \
+            bzip2 \
+            make \
+            which \
+            git
 
-#      - run:
-#          name: acquire prerequisites
-#          command: |
-#            DEBIAN_FRONTEND=noninteractive
-#            apt update
-#            apt install -y xz-utils
-#            apt install -y git
-#            git config --global --add safe.directory /tmp/_circleci_local_build_repo
-#
-#      - checkout
-#
-#      - run:
-#          name: get source files
-#          command: |
-#            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-#            mkdir -p /usr/local/VAPOR-Deps
-#            apt update
-#            apt install -y python3-pip
-#            pip3 install --upgrade pip
-#            pip3 install scikit-build command
-#            pip3 install gdown
-#            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-#            filename="/root/project/2023-Jun-src.tar.xz"
-#            tar -xf ${filename} -C /usr/local/VAPOR-Deps
-#
-#      - run:
-#          name: build libraries
-#          command: |
-#            chmod 777 /root/project/scripts/build3rdParty.sh
-#            /root/project/scripts/build3rdParty.sh -o Ubuntu
-#
-#      - run:
-#          name: make installer
-#          command: |
-#            mkdir -p /root/project/build
-#            cd /root/project/build
-#            git checkout main
-#            git reset --hard origin/main
-#            git pull
-#            cmake -DCMAKE_BUILD_TYPE:String=Release \
-#                  -DDIST_INSTALLER:string=ON \
-#                  -DUSE_OMP=ON \
-#                  ..
-#            make -j
-#            make installer
-#            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu20}" ; done
-#            mkdir -p /tmp/workspace/installers
-#            mv *.sh /tmp/workspace/installers
-#
-#      - store_artifacts:
-#          path: |
-#            /tmp/workspace/installers
-#
-#      - store_artifacts:
-#          path: /usr/local/VAPOR-Deps/2023-Jun-Ubuntu.tar.xz
+      - run:
+          name: get source files
+          command: |
+            #https://drive.google.com/file/d/1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a/view?usp=sharing
+            mkdir -p /usr/local/VAPOR-Deps
+            id="1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a"
+            filename="2023-Sept-src.tar.xz"
+            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+
+      - run:
+          name: build libraries
+          command: |
+            chmod 777 /root/project/scripts/build3rdParty.sh
+            /root/project/scripts/build3rdParty.sh -o suse
+
+      - run:
+          name: make installer
+          command: |
+            rm -rf /usr/local/VAPOR-Deps/current
+            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
+            mkdir -p /root/project/build
+            cd /root/project/build
+            git checkout $CIRCLE_BRANCH
+            #git checkout main
+            #git reset --hard origin/main
+            #git pull
+            cmake -DCMAKE_BUILD_TYPE=Release \
+                  -DDIST_INSTALLER=ON \
+                  -DUSE_OMP=ON \
+                  ..
+            make -j8
+            make installer
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/SUSE}" ; done
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
+
+      - store_artifacts:
+          path: |
+            /tmp/workspace/installers
+
+      - store_artifacts:
+          path: /usr/local/VAPOR-Deps/2023-Sept-suse.tar.xz
 
   build_ubuntu20_libs:
     docker:
       - image: ubuntu:20.04
 
-    resource_class: large
+    resource_class: xlarge
 
     steps:
       - run:
@@ -1190,7 +1078,7 @@ jobs:
     docker:
       - image: ubuntu:22.04
 
-    resource_class: large
+    resource_class: xlarge
 
     steps:
       - run:
@@ -1401,35 +1289,6 @@ jobs:
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Jun-M1.tar.xz
 
-  build_centos7_libs:
-    docker:
-      - image: centos:7
-
-    resource_class: large
-
-    steps:
-      - checkout
-
-      - run:
-          name: get source files
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            yum update -y
-            yum install -y python3-pip
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/root/project/2023-Jun-src.tar.xz"
-            tar xvf ${filename} -C /usr/local/VAPOR-Deps
-
-      - run:
-          name: build libraries
-          command: |
-            chmod 777 /root/project/scripts/build3rdParty.sh
-            /root/project/scripts/build3rdParty.sh -o CentOS
-
-      - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Jun-CentOS.tar.xz
-
   build_win10_libs:
     executor: win/default
     steps:
@@ -1454,30 +1313,25 @@ workflows:
   build:
     jobs:
       #- clang-tidy
-      - build_centos7
-      #- build_centos7_installer
-      - build_ubuntu18
+      #- build_ubuntu18
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
-      #- build_python_api_centos
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
       #- build_macOSx86_installer
       #- build_M1_installer
-      #- build_ubuntu20_installer
-      #- build_ubuntu22_installer
-      #- build_centos7_installer
+      - build_ubuntu20_installer
+      - build_ubuntu22_installer
+      - build_suse_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
-      #- build_centos7_libs
       #- build_macOSx86_libs
       #- build_M1_libs
       #- build_suse_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
-      #      - build_centos7_installer
       #      - build_macOSx86_installer
       #      - build_win10_installer
   weekly:
@@ -1489,7 +1343,6 @@ workflows:
                  only: main
       jobs:
         - build_ubuntu20_installer
-        - build_centos7_installer
         - build_macOSx86_installer
         - build_M1_installer
         - build_win10_installer
@@ -1498,7 +1351,6 @@ workflows:
         - release_weekly_installers:
             requires:
               - build_ubuntu20_installer
-              - build_centos7_installer
               - build_macOSx86_installer
               - build_M1_installer
               - build_win10_installer
