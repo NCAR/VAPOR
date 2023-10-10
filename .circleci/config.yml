@@ -135,9 +135,9 @@ jobs:
           command: |
             brew install cmake
             # MacPorts
-            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
-            tar xf MacPorts-2.7.1.tar.bz2
-            cd MacPorts-2.7.1/
+            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
+            tar xf MacPorts-2.8.1.tar.bz2
+            cd MacPorts-2.8.1/
             ./configure
             make -j6
             sudo make install
