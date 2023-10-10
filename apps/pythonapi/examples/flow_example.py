@@ -123,3 +123,21 @@ with open("flow_seeds.txt", "w") as f:
 ren.SetSeedGenMode(ren.FlowSeedMode.LIST)
 ren.SetSeedInputFilename("flow_seeds.txt")
 ses.Show()
+
+# %% [md]
+#
+# ### Outputting Flow Lines
+#
+# The advected flow lines can be saved to a .csv file
+#
+# %%
+ren.SetFlowlineOutputFilename("flow_output.csv") # Needs to be set once per renderer
+ren.SetFlowOutputMoreVariables([U, V]) # Optionally specify additional variables to sample at each point
+
+ren.SetNeedFlowlineOutput(True) # Needs to be called before each render call that should output the computed flow in a .csv file
+_ = ses.RenderToImage() # This returns a PIL image variable that is not displayed by default and can be ignored if only saving flow output
+
+# %%
+import pandas as pd
+pd.read_csv("flow_output.csv", sep=",").head(10)
+

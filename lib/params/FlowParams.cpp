@@ -202,6 +202,7 @@ std::string FlowParams::GetFlowlineOutputFilename() const { return GetValueStrin
 void        FlowParams::SetFlowlineOutputFilename(const std::string &name) { SetValueString(_flowlineOutputFilenameTag, "filename for output flow lines", name); }
 
 std::vector<std::string> FlowParams::GetFlowOutputMoreVariables() const { return GetValueStringVec(_flowOutputMoreVariablesTag); }
+void FlowParams::SetFlowOutputMoreVariables(std::vector<std::string> vars) { SetValueStringVec(_flowOutputMoreVariablesTag, "", vars); }
 
 int FlowParams::GetFlowDirection() const { return GetValueLong(_flowDirectionTag, (int)FlowDir::FORWARD); }
 

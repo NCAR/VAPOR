@@ -158,7 +158,8 @@ int RenderParams::Initialize()
     // look for others
     //
     string varname = GetVariableName();
-    size_t ts = 0;
+    size_t ts = GetCurrentTimestep();
+    size_t tsInit = ts;
     int    ndim = _maxDim;
     bool   foundVar = false;
     if (!varname.empty()) {
@@ -175,7 +176,10 @@ int RenderParams::Initialize()
             bool ok = DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, ndim, varname, ts);
             if (ok) {
                 foundVar = true;
-                break;
+                if (_dataMgr->VariableExists(tsInit, varname, 0, 0)) {
+                    ts = tsInit;
+                    break;
+                }
             }
         }
     }
