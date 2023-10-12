@@ -753,25 +753,23 @@ jobs:
           command: curl -h
 
       - restore_cache:
-          name: restore xz
+          name: restore pip
           keys:
-            - xz-dependencies
+            - pip-dependencies
 
       - run:
-          name: acquire prerequisites
+          name: acquire pip
           command: |
-            export DEBIAN_FRONTEND=noninteractive
-            apt update
-            apt install -y curl
+            apt install -y pip
 
       - save_cache:
-          key: xz-dependencies
+          key: pip-dependencies
           paths:
             - /var/cache/apt/archives
 
       - run:
-          name: test xz
-          command: tar -xzvf
+          name: test pip
+          command: pip --help
 
   build_ubuntu22_installer:
     docker:
