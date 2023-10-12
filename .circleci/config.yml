@@ -1,3 +1,8 @@
+anchors:
+  - &ubuntu20LibID    "12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5"
+  - &macOSx86LibID    "17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn"
+  - &macportsVersion  "2.8.1"
+
 version: 2.1
 
 orbs:
@@ -127,8 +132,26 @@ jobs:
 
       - get_libraries:
           fileName: 2023-Jun-macOSx86.tar.xz
-          driveID: 17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn
+          #driveID: 17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn
+          driveID: *macOSx86LibID
           sudo: sudo
+
+- restore_cache:
+  name: restore curl
+  keys:
+    - curl-dependencies
+
+- run:
+  name: acquire prerequisites
+  command: |
+    export DEBIAN_FRONTEND=noninteractive
+    apt update
+    apt install -y curl
+
+- save_cache:
+  key: curl-dependencies
+  paths:
+    - /var/cache/apt/archives
 
       - run:
           name: Get dependencies
@@ -136,6 +159,7 @@ jobs:
             brew install cmake
             # MacPorts
             curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
+            #- &macportsVersion  "2.8.1"
             tar xf MacPorts-2.8.1.tar.bz2
             cd MacPorts-2.8.1/
             ./configure
@@ -682,36 +706,13 @@ jobs:
             apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
             apt install -y cmake --allow-unauthenticated
       
-      #- run:
-      #    name: acquire 3rd party libraries
-      #    command: |
-      #      mkdir -p /usr/local/VAPOR-Deps
-      #      id="16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6"
-      #      filename="2023-Jun-Ubuntu20.tar.xz"
-      #      curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-      #      tar -xf ${filename} -C /usr/local/VAPOR-Deps
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
-          driveID: 12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5
+          #driveID: 12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5
+          driveID: *ubuntu20LibID
 
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
-
-      #- run:
-      #    name: make installer
-      #    command: |
-      #      ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
-      #      mkdir -p /root/project/build
-      #      cd /root/project/build
-      #      cmake -DCMAKE_BUILD_TYPE:String=Release \
-      #            -DDIST_INSTALLER:string=ON \
-      #            -DUSE_OMP=ON \
-      #            ..
-      #      make -j4
-      #      make installer
-      #      for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu20}" ; done
-      #      mkdir -p /tmp/workspace/installers
-      #      mv *.sh /tmp/workspace/installers
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -742,6 +743,7 @@ jobs:
             export DEBIAN_FRONTEND=noninteractive
             apt update
             apt install -y curl
+            echo *ubuntu20LibId
 
       - save_cache:
           key: curl-dependencies
