@@ -732,9 +732,9 @@ jobs:
       - checkout
 
       - restore_cache:
-          name: restore apt dependencies
+          name: restore curl
           keys:
-            - apt-dependencies
+            - curl-dependencies
 
       - run:
           name: acquire prerequisites
@@ -744,7 +744,7 @@ jobs:
             apt install -y curl
 
       - save_cache:
-          key: apt-dependencies
+          key: curl-dependencies
           paths:
             - /var/cache/apt/archives
 
@@ -753,24 +753,25 @@ jobs:
           command: curl -h
 
       - restore_cache:
-          name: restore 3rd party
+          name: restore xz
           keys:
-            - 3rd-party
-
-      - get_libraries:
-          fileName: 2023-Sept-Ubuntu20.tar.xz
-          driveID: 12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5
-
-      - save_cache:
-          key: 3rd-party
-          paths:
-            - /usr/local/VAPOR-Deps
+            - xz-dependencies
 
       - run:
-          name: test libs
-          command: ls /usr/local/VAPOR-Deps
+          name: acquire prerequisites
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            apt update
+            apt install -y curl
 
-      - checkout
+      - save_cache:
+          key: xz-dependencies
+          paths:
+            - /var/cache/apt/archives
+
+      - run:
+          name: test xz
+          command: tar -xzvf
 
   build_ubuntu22_installer:
     docker:
