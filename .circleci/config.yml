@@ -167,7 +167,7 @@ jobs:
           driveID: *macOSx86LibID
           sudo: sudo
 
-      - build_vapor_x86:
+      - build_vapor:
           beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-13
           compileArgs: |
             -DCPACK_BINARY_DRAGNDROP=ON \
@@ -177,7 +177,7 @@ jobs:
           moveToCommand: ${f/Darwin/Darwinx86}
 
       - run:
-          name: Get dependencies
+          name: remove old libraries
           command: rm -rf /usr/local/VAPOR-Deps/*
 
       - get_libraries:
@@ -185,7 +185,7 @@ jobs:
           driveID: *macOSM1LibID
           sudo: sudo
 
-      - build_vapor_M1:
+      - build_vapor:
           beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-13
           compileArgs: |
             -DCPACK_BINARY_DRAGNDROP=ON \
