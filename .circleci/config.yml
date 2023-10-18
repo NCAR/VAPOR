@@ -151,7 +151,7 @@ jobs:
             sudo make install
             sudo /opt/local/bin/port -v selfupdate
             # CMake
-            (sudo yes || true) /opt/local/bin/port install cmake
+            (sudo yes || true) | sudo /opt/local/bin/port install cmake
             # clang
             sudo /opt/local/bin/port selfupdate
             (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
