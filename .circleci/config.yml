@@ -128,7 +128,7 @@ jobs:
 
   build_macOS_installers:
     macos:
-      xcode: "13.4.1"
+      xcode: "14.3.1"
     resource_class: macos.m1.large.gen1
 
     steps:
@@ -142,7 +142,6 @@ jobs:
       - run:
           name: Get dependencies
           command: |
-            brew install cmake
             # MacPorts
             curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
             tar xf MacPorts-2.8.1.tar.bz2
@@ -150,6 +149,8 @@ jobs:
             ./configure
             make -j6
             sudo make install
+            # CMake
+            sudo /opt/local/bin/port install cmake
             # clang
             sudo /opt/local/bin/port selfupdate
             (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
@@ -667,6 +668,17 @@ jobs:
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
 
+      - run:
+          name: remove old libraries
+          command: rm -rf /usr/local/VAPOR-Deps/*
+
+      - get_libraries:
+          fileName: 2023-Sept-Ubuntu22.tar.xz
+          driveID: *ubuntu22LibID
+
+      - build_vapor:
+          moveToCommand: ${f/Linux/Ubuntu20}
+
       - store_artifacts:
           path: /tmp/workspace/installers
 
@@ -1151,10 +1163,10 @@ workflows:
       #- build_macOSx86_installer
       #- build_macOS_installers
       #- build_M1_installer
-      #- build_ubuntu20_installer
+      - build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_suse_installer
-      - build
+      #- build
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
       #- build_macOSx86_libs
