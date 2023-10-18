@@ -60,7 +60,7 @@ commands:
             libraryDir=`ls /usr/local/VAPOR-Deps`
             ln -s $libraryDir /usr/local/VAPOR-Deps/current
             cp site_files/site.NCAR site.local
-            mkdir build
+            mkdir -p build
             cd build
             git checkout <<parameters.branch>>
             <<parameters.beforeCompile>>
