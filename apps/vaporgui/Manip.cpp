@@ -444,7 +444,7 @@ bool TranslateStretchManip::startHandleSlide(const double mouseCoords[2], int ha
 
     if (!_projectPointToWin(boxCtr, winCoords)) return false;
 
-    boxCtr[handleNum] += 0.1f;
+    boxCtr[handleNum] *= 1.1f;
 
     if (!_projectPointToWin(boxCtr, dispCoords)) return false;
 
