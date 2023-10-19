@@ -269,9 +269,7 @@ void DataStatus::GetActiveExtents(const ParamsMgr *paramsMgr, string winName, st
         // If we didn't find any enabled variable use the first variables
         // found in each data set
         //
-        size_t l_ts;
-        varMap = _getFirstVar(dataSetName, l_ts);
-        ts = l_ts;
+        varMap = _getFirstVar(dataSetName, ts);
     }
 
     _getExtents(ts, varMap, minExts, maxExts);

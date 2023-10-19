@@ -24,6 +24,8 @@
 #include "vapor/VAssert.h"
 #include <algorithm>
 #include <cfloat>
+#include <vector>
+#include <numeric>
 
 #include <vapor/DataMgr.h>
 #include <vapor/Proj4API.h>
@@ -375,9 +377,16 @@ double DataMgrUtils::Get2DRendererDefaultZ(DataMgr *dataMgr, size_t ts, int refL
 bool DataMgrUtils::GetFirstExistingVariable(DataMgr *dataMgr, int level, int lod, int ndim, string &varname, size_t &ts)
 {
     varname.clear();
-    ts = 0;
     size_t numTS = dataMgr->GetTimeCoordinates().size();
-    for (size_t l_ts = 0; l_ts < numTS; l_ts++) {
+
+    if (ts < 0 || ts >= numTS)
+        ts = 0;
+
+    std::vector<size_t> timesteps(numTS);
+    std::iota(timesteps.begin(), timesteps.end(), 0);
+    std::sort(timesteps.begin(), timesteps.end(), [ts](size_t a, size_t b) { return abs((long)ts-(long)a) < abs((long)ts-(long)b); });
+
+    for (size_t l_ts : timesteps) {
         bool ok = GetFirstExistingVariable(dataMgr, l_ts, level, lod, ndim, varname);
         if (ok) {
             ts = l_ts;
