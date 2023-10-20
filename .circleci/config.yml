@@ -136,7 +136,7 @@ jobs:
 
       - run:
           name: permit cache restore
-          command: sudo chmod -R /opt
+          command: sudo chmod -R 777 /opt
 
       - restore_cache:
           name: restore dependencies
