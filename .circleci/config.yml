@@ -136,7 +136,7 @@ jobs:
 
       - run:
           name: permit cache restore
-          command: sudo chown -R circleci:circleci /opt
+          command: sudo chmod -R /opt
 
       - restore_cache:
           name: restore dependencies
