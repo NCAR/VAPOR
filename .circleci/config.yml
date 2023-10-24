@@ -670,61 +670,6 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
 
-  build:
-    docker:
-      - image: ubuntu:20.04
-
-    resource_class: small
-
-    steps:
-
-      - checkout
-
-      - restore_cache:
-          name: restore curl
-          keys:
-            - curl-dependencies
-
-      - run:
-          name: acquire prerequisites
-          command: |
-            export DEBIAN_FRONTEND=noninteractive
-            apt update
-            apt install -y curl
-            echo *ubuntu20LibId
-
-      - save_cache:
-          key: curl-dependencies
-          paths:
-            - /var/cache/apt/archives
-
-      - run:
-          name: test curl
-          command: curl -h
-
-      - restore_cache:
-          name: restore pip
-          keys:
-            - pip-dependencies
-
-      - run:
-          name: acquire pip
-          command: |
-            apt install -y pip
-
-      - save_cache:
-          key: pip-dependencies
-          paths:
-            - /var/cache/apt/archives
-
-      - get_libraries:
-          fileName: 2023-Sept-Ubuntu20.tar.xz
-          driveID: *ubuntu20LibID
-
-      - run:
-          name: test pip
-          command: pip --help; ls /usr/local/VAPOR-Deps
-
   build_ubuntu22_installer:
     docker:
       - image: ubuntu:22.04
@@ -766,22 +711,6 @@ jobs:
 
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
-
-      #- run:
-      #    name: make installer
-      #    command: |
-      #      ln -s /usr/local/VAPOR-Deps/2023-Sept/ /usr/local/VAPOR-Deps/current
-      #      mkdir -p /root/project/build
-      #      cd /root/project/build
-      #      cmake -DCMAKE_BUILD_TYPE:String=Release \
-      #            -DDIST_INSTALLER:string=ON \
-      #            -DUSE_OMP=ON \
-      #            ..
-      #      make -j4
-      #      make installer
-      #      for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu22}" ; done
-      #      mkdir -p /tmp/workspace/installers
-      #      mv *.sh /tmp/workspace/installers
 
       - store_artifacts:
           path: /tmp/workspace/installers

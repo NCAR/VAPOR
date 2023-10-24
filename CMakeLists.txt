@@ -93,10 +93,6 @@ option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will
 option (USE_OMP "Use OpenMP on some calculations" OFF)
 option (CONDA_BUILD "Use Conda to build" OFF)
 
-#set(OPENMP_LIBRARIES ${THIRD_PARTY_LIB_DIR})
-#set(OPENMP_INCLUDES ${THIRD_PARTY_INC_DIR})
-#message("set(OPENMP_LIBRARIES " ${THIRD_PARTY_LIB_DIR})
-
 if( USE_OMP )
     find_package(OpenMP REQUIRED)
     if( OpenMP_CXX_FOUND AND OpenMP_CXX_FLAGS )
@@ -106,7 +102,6 @@ if( USE_OMP )
     endif()
 endif()
 
-include_directories ("${PROJECT_SOURCE_DIR}/include")
 set (GENERATE_FULL_INSTALLER ON)
 if (BUILD_GUI)
 	set (BUILD_VDC ON)
