@@ -161,7 +161,6 @@ jobs:
             # CMake
             (sudo yes || true) | sudo /opt/local/bin/port install cmake
             # clang
-            sudo /opt/local/bin/port selfupdate
             (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
             sudo /opt/local/bin/port select --set clang mp-clang-17
             /opt/local/bin/clang++ -v > clangVersion.txt
