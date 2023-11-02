@@ -200,7 +200,7 @@ jobs:
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
-            -DMACOS_BUILD_ARM64=OFF \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
           moveToCommand: ${f/Darwin/Darwinx86}
 
       - store_artifacts:
@@ -1015,7 +1015,7 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
-      #- build_macOS_installers
+      - build_macOS_installers
       - build_ubuntu20_installer
       - build_ubuntu22_installer
       - build_suse_installer
