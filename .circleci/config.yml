@@ -707,6 +707,41 @@ jobs:
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
 
+RUN mkdir -p /smokeTestData
+RUN fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t" \
+    && filename="/tmp/smokeTestData.tar.gz" \
+    && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
+    && curl -Lb ./cookie \
+    "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
+    -o ${filename}
+RUN tar -xf /tmp/smokeTestData.tar.gz \
+    -C /smokeTestData \
+    && chown -R root:root /smokeTestData
+RUN chmod -R 777 /smokeTestData
+
+      - run:
+          name: Acquire smoke test data
+          command: |
+            mkdir -p /smokeTestData
+            fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t"
+            filename="/tmp/smokeTestData.tar.gz"
+            curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null
+            curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" -o ${filename}
+            tar -xf /tmp/smokeTestData.tar.gz -C /smokeTestData
+            chown -R root:root /smokeTestData
+            chmod -R 777 /smokeTestData
+
+      - run:
+          name: Smoke test
+          command: |
+            python3 /root/project/test_apps/smokeTests/smokeTests.py \
+            -testDataRoot=/smokeTestData/smokeTestData \
+            -binaryRoot=/root/project/build/test_binaries \
+            -resultsDir=/root/project/test_apps/smokeTests/testResults
+
+      - store_artifacts:
+          path: /root/project/test_apps/smokeTests/testResults
+
       - store_artifacts:
           path: /tmp/workspace/installers
 
