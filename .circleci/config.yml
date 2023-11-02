@@ -1,4 +1,5 @@
 anchors:
+  - &current3rdParty  "2023-Jun"
   - &srcLibID         "1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a"
   - &ubuntu20LibID    "12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5"
   - &ubuntu22LibID    "17Uv6wTePyRKfN10Iv00JKzeLc2W43NYk"
@@ -69,7 +70,8 @@ commands:
             -DDIST_INSTALLER:string=ON \
             -DUSE_OMP=ON \
             <<parameters.compileArgs>> ..
-            make -j8
+            #make -j8
+            make
             make installer
             for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
@@ -534,11 +536,9 @@ jobs:
     docker:
       - image: opensuse/leap
 
-    resource_class: xlarge
+    resource_class: x86.xlarge
 
     steps:
-      - checkout
-
       - run:
           name: acquire prerequisites
           command: |
@@ -554,24 +554,14 @@ jobs:
                 libicu-devel \
                 freeglut-devel
                 
+      - checkout
+
       - get_libraries:
           fileName: 2023-Sept-SUSE.tar.xz
           driveID: *suseLibID
 
       - build_vapor:
           moveToCommand: ${f/Linux/SUSE}
-
-RUN mkdir -p /smokeTestData
-RUN fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t" \
-    && filename="/tmp/smokeTestData.tar.gz" \
-    && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
-    && curl -Lb ./cookie \
-    "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
-    -o ${filename}
-RUN tar -xf /tmp/smokeTestData.tar.gz \
-    -C /smokeTestData \
-    && chown -R root:root /smokeTestData
-RUN chmod -R 777 /smokeTestData
 
       - run:
           name: Acquire smoke test data
@@ -836,7 +826,7 @@ RUN chmod -R 777 /smokeTestData
             /tmp/workspace/installers
 
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Sept-suse.tar.xz
+          path: /usr/local/VAPOR-Deps/2023-Sept-SUSE.tar.xz
 
   build_ubuntu20_libs:
     docker:
