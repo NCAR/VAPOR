@@ -12,7 +12,6 @@ include (buildutils/GetGitRevisionDescription.cmake)
 include (buildutils/OpenMPInstaller.cmake)
 
 set (CMAKE_CXX_STANDARD 11)
-
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -21,17 +20,26 @@ if(NOT CMAKE_BUILD_TYPE)
 	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "DEBUG" "RELEASE" "RELWITHDEBINFO")
 endif()
 
-message("processor ${CMAKE_SYSTEM_PROCESSOR}")
-
 if(APPLE)
-    if(CMAKE_OSX_ARCHITECTURES MATCHES "arm64")
+    if(NOT DEFINED CMAKE_OSX_ARCHITECTURES)
+        # Check if the target architecture is arm64
+        include(CheckCXXSourceRuns)
+        set(CMAKE_REQUIRED_FLAGS "-arch arm64")
+        set(CHECK_ARM64_SOURCE_CODE "int main() { return 0; }")
+        check_cxx_source_runs("${CHECK_ARM64_SOURCE_CODE}" IS_ARM64)
+        if(IS_ARM64)
+            set(CMAKE_OSX_ARCHITECTURES arm64)
+        else()
+            set(CMAKE_OSX_ARCHITECTURES x86_64)
+        endif()
+    endif()
+
+    if (CMAKE_OSX_ARCHITECTURES MATCHES "arm64")
         message("Building on macOS M1 architecture (arm64)")
         set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum OS X deployment version" FORCE)
-    elseif(CMAKE_OSX_ARCHITECTURES MATCHES "x86_64")
+    else()
         message("Building on macOS x86 architecture")
         set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version" FORCE)
-    else()
-        message(FATAL_ERROR "Invalid CMAKE_OSX_ARCHITECTURES value: ${CMAKE_OSX_ARCHITECTURES}.  Options are arm64 or x86_64.")
     endif()
 endif()
 
