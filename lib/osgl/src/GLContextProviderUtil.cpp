@@ -1,5 +1,7 @@
-#include <vapor/GLContextProviderUtil.h>
-#include <vapor/GLInclude.h>
+#include <osgl/GLContextProviderUtil.h>
+#include <osgl/GLInclude.h>
+
+using namespace OSGL;
 
 String GLContextProviderUtil::GetGLVersion() {
     const char *s = (const char *)glGetString(GL_VERSION);

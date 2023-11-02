@@ -84,6 +84,7 @@ cmake .. \
     -DBUILD_UTL=OFF \
     -DBUILD_GUI=OFF \
     -DBUILD_OSP=OFF \
+    -DBUNDLED_OSGL=OFF \
     -DPython_EXECUTABLE="$PYTHON" \
     -DCMAKE_INSTALL_PREFIX="$PREFIX" \
     $CMAKE_EXTRA \

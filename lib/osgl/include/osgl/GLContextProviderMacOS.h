@@ -1,11 +1,13 @@
 #pragma once
 
-#include <vapor/GLContext.h>
+#include <osgl/GLContext.h>
 
 //! \class GLContextProviderMacOS
 //! \ingroup HeadlessGL
 //! \brief Creates an OpenGL context using macOS's libraries.
 //! \author Stas Jaroszynski
+
+namespace OSGL {
 
 class OSGL_API GLContextProviderMacOS {
     class GLContextMacOS : public GLContext {
@@ -22,3 +24,5 @@ class OSGL_API GLContextProviderMacOS {
 public:
     static GLContext *CreateContext();
 };
+
+}

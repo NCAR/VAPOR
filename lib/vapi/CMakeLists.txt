@@ -18,7 +18,7 @@ add_library (vapi SHARED ${SRCS} ${HDRS})
 target_link_libraries (
     vapi
 	render
-    osgl
+    ${OSGL}
 )
 
 if (APPLE)

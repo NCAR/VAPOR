@@ -1,5 +1,7 @@
-#include <vapor/GLContext.h>
-#include <vapor/GLContextProviderUtil.h>
+#include <osgl/GLContext.h>
+#include <osgl/GLContextProviderUtil.h>
+
+using namespace OSGL;
 
 String GLContext::GetVersion()
 {

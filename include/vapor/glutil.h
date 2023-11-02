@@ -47,7 +47,7 @@
     #define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
 #endif
 
-#include <vapor/GLInclude.h>
+#include <osgl/GLInclude.h>
 #include <cmath>
 #include <vector>
 #include <string>

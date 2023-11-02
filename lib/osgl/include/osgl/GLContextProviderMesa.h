@@ -1,10 +1,12 @@
 #pragma once
-#include <vapor/GLContext.h>
+#include <osgl/GLContext.h>
 
 //! \class GLContextProviderMesa
 //! \ingroup HeadlessGL
 //! \brief Uses OSMesa for headless OpenGL Context creation.
 //! \author Stas Jaroszynski
+
+namespace OSGL {
 
 class OSGL_API GLContextProviderMesa {
     class GLContextMesa : public GLContext {
@@ -21,3 +23,5 @@ class OSGL_API GLContextProviderMesa {
 public:
     static GLContext *CreateContext();
 };
+
+}

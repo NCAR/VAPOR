@@ -1,9 +1,11 @@
-#include <vapor/GLContextProvider.h>
-#include <vapor/GLContextProviderMacOS.h>
-#include <vapor/GLContextProviderMesa.h>
-#include <vapor/GLContextProviderEGL.h>
-#include <vapor/GLContextProviderNvidia.h>
-#include <vapor/GLContextProviderUtil.h>
+#include <osgl/GLContextProvider.h>
+#include <osgl/GLContextProviderMacOS.h>
+#include <osgl/GLContextProviderMesa.h>
+#include <osgl/GLContextProviderEGL.h>
+#include <osgl/GLContextProviderNvidia.h>
+#include <osgl/GLContextProviderUtil.h>
+
+using namespace OSGL;
 
 GLContext *GLContextProvider::CreateContext()
 {

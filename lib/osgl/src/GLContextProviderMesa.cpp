@@ -1,7 +1,9 @@
-#include <vapor/GLContextProviderMesa.h>
+#include <osgl/GLContextProviderMesa.h>
+
+using namespace OSGL;
 
 #if BUILD_MESA
-    #include <vapor/GLAD.h>
+    #include <osgl/GLAD.h>
     #include <GL/osmesa.h>
 
 GLContextProviderMesa::GLContextMesa::GLContextMesa(void *ctx) : _ctx(ctx) {}

@@ -1,9 +1,9 @@
 //#include <vapor/glutil.h>
 
 #include <stdio.h>
-#include <vapor/GLContextProvider.h>
-#include <vapor/GLInclude.h>
-#include <vapor/Log.h>
+#include <osgl/GLContextProvider.h>
+#include <osgl/GLInclude.h>
+#include <osgl/Log.h>
 #include <vapor/Session.h>
 #include <vapor/VAssert.h>
 #include <vapor/MyBase.h>
