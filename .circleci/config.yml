@@ -71,7 +71,7 @@ commands:
             -DUSE_OMP=ON \
             <<parameters.compileArgs>> ..
             #make -j8
-            make
+            make -j4
             make installer
             for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
@@ -601,7 +601,7 @@ jobs:
     docker:
       - image: opensuse/leap
 
-    resource_class: x86.xlarge
+    resource_class: large
 
     steps:
       - run:
