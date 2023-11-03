@@ -79,6 +79,45 @@ commands:
             ls /tmp/workspace/installers
           no_output_timeout: 30m
 
+  test_command:
+    steps:
+      - run:
+          name: foo
+          command: echo foo
+      - run:
+          name: foo
+          command: echo foo
+
+  smoke_tests:
+    steps:
+      - restore_cache:
+          name: restore smoke test data
+          keys:
+            - smoke-test-data
+      - run:
+          name: Acquire smoke test data
+          command: |
+            if [ -z "$(ls -A /smokeTestData)" ]; then
+                mkdir -p /smokeTestData
+                fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t"
+                filename="/tmp/smokeTestData.tar.gz"
+                curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null
+                curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" -o ${filename}
+                tar -xf /tmp/smokeTestData.tar.gz -C /smokeTestData
+                chown -R root:root /smokeTestData
+                chmod -R 777 /smokeTestData
+            fi
+      - save_cache:
+          key: smoke-test-data
+          paths:
+            - /smokeTestData
+      - run:
+          name: Smoke tests
+          command: |
+            python3 /root/project/test_apps/smokeTests/smokeTests.py \
+            -testDataRoot=/smokeTestData/smokeTestData \
+            -binaryRoot=~/project/build/test_binaries \
+            -resultsDir=~/project/test_apps/smokeTests/testResults
 
 jobs:
   build_win10_installer:
@@ -450,7 +489,12 @@ jobs:
           name: make debug
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
+            cmake \
+            -DBUILD_TEST_APPS=ON \
+            -DPYTHONVERSION=3.6 \
+            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
+            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
+            ..
             make -j2 2>&1 | tee /tmp/debugOutput.txt
             make clean
       
@@ -461,7 +505,12 @@ jobs:
           name: make debug with omp
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
+            cmake \
+            -DBUILD_TEST_APPS=ON \  
+            -DUSE_OMP=ON -DPYTHONVERSION=3.6 \
+            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
+            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
+            ..
             make -j2 2>&1 | tee /tmp/debugOutputWithOMP.txt
             make clean
       
@@ -472,7 +521,13 @@ jobs:
           name: make release
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
+            cmake \
+            -DBUILD_TEST_APPS=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPYTHONVERSION=3.6 \
+            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
+            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
+            ..
             make -j2 2>&1 | tee /tmp/releaseOutput.txt
             make clean
       
@@ -483,7 +538,13 @@ jobs:
           name: make release with omp
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
+            cmake \
+            -DBUILD_TEST_APPS=ON \
+            -DUSE_OMP=ON \
+            -DPYTHONVERSION=3.6 \
+            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
+            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
+            ..
             make -j2 2>&1 | tee /tmp/releaseOutputWithOMP.txt
       - store_artifacts:
           path: /tmp/releaseOutputWithOMP.txt
@@ -491,7 +552,11 @@ jobs:
       - run:
           name: Smoke test
           command: |
-            python3 /root/project/test_apps/smokeTests/smokeTests.py -testDataRoot=/smokeTestData/smokeTestData -binaryRoot=/root/project/build/test_binaries -resultsDir=/root/project/test_apps/smokeTests/testResults
+            python3 \
+            /root/project/test_apps/smokeTests/smokeTests.py \
+            -testDataRoot=/smokeTestData/smokeTestData \
+            -binaryRoot=/root/project/build/test_binaries \
+            -resultsDir=/root/project/test_apps/smokeTests/testResults
       - store_artifacts:
           path: /root/project/test_apps/smokeTests/testResults
 
@@ -562,26 +627,27 @@ jobs:
 
       - build_vapor:
           moveToCommand: ${f/Linux/SUSE}
+          compileArgs: -DBUILD_TEST_APPS=ON
 
-      - run:
-          name: Acquire smoke test data
-          command: |
-            mkdir -p /smokeTestData
-            fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t"
-            filename="/tmp/smokeTestData.tar.gz"
-            curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null
-            curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" -o ${filename}
-            tar -xf /tmp/smokeTestData.tar.gz -C /smokeTestData
-            chown -R root:root /smokeTestData
-            chmod -R 777 /smokeTestData
+      - smoke_tests
 
-      - run:
-          name: Smoke test
-          command: |
-            python3 /root/project/test_apps/smokeTests/smokeTests.py \
-            -testDataRoot=/smokeTestData/smokeTestData \
-            -binaryRoot=/root/project/build/test_binaries \
-            -resultsDir=/root/project/test_apps/smokeTests/testResults
+      #- run:
+      #    name: Smoke tests
+      #    command: |
+      #      # Acquire smoketest data
+      #      mkdir -p /smokeTestData
+      #      fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t"
+      #      filename="/tmp/smokeTestData.tar.gz"
+      #      curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null
+      #      curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" -o ${filename}
+      #      tar -xf /tmp/smokeTestData.tar.gz -C /smokeTestData
+      #      chown -R root:root /smokeTestData
+      #      chmod -R 777 /smokeTestData
+      #      # Run smoketests
+      #      python3 /root/project/test_apps/smokeTests/smokeTests.py \
+      #      -testDataRoot=/smokeTestData/smokeTestData \
+      #      -binaryRoot=~/project/build/test_binaries \
+      #      -resultsDir=~/project/test_apps/smokeTests/testResults
 
       - store_artifacts:
           path: /root/project/test_apps/smokeTests/testResults
@@ -1041,8 +1107,8 @@ workflows:
       #- test_clang_format
       #- build_win10_installer
       #- build_macOS_installers
-      - build_ubuntu20_installer
-      - build_ubuntu22_installer
+      #- build_ubuntu20_installer
+      #- build_ubuntu22_installer
       - build_suse_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
