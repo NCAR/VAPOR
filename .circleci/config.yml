@@ -641,20 +641,20 @@ jobs:
                 
       - checkout
 
-      - get_libraries:
-          fileName: 2023-Sept-SUSE.tar.xz
-          driveID: *suseLibID
+      #- get_libraries:
+      #    fileName: 2023-Sept-SUSE.tar.xz
+      #    driveID: *suseLibID
 
-      - build_vapor:
-          moveToCommand: ${f/Linux/SUSE}
-          compileArgs: -DBUILD_TEST_APPS=ON
+      #- build_vapor:
+      #    moveToCommand: ${f/Linux/SUSE}
+      #    compileArgs: -DBUILD_TEST_APPS=ON
 
       #- smoke_tests
 
       - persist_to_workspace:
-          root: ~/
+          root: /
           paths:
-            - project/build
+            - ~/
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -668,7 +668,7 @@ jobs:
     steps:
       - suse_prerequisites
       - attach_workspace:
-          at: ~/project/build
+          at: ~/
       - smoke_tests
 
   build_ubuntu20_installer:
