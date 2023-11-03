@@ -645,6 +645,9 @@ jobs:
     resource_class: medium
     steps:
       #- suse_prerequisites
+      - run:
+          name: foo
+          command: zypper install -y gzip
       - attach_workspace:
           at: /
       - smoke_tests
