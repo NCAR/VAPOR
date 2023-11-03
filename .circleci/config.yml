@@ -106,6 +106,8 @@ commands:
                 tar --no-same-owner -xf /tmp/smokeTestData.tar.gz -C /smokeTestData
                 chown -R root:root /smokeTestData
                 chmod -R 777 /smokeTestData
+            else
+                echo "Data already acquired"
             fi
       - save_cache:
           key: smoke-test-data
@@ -114,7 +116,7 @@ commands:
       - run:
           name: Smoke tests
           command: |
-            python3 /root/project/test_apps/smokeTests/smokeTests.py \
+            python3 ~/project/test_apps/smokeTests/smokeTests.py \
             -testDataRoot=/smokeTestData/smokeTestData \
             -binaryRoot=~/project/build/test_binaries \
             -resultsDir=~/project/test_apps/smokeTests/testResults
@@ -619,52 +621,27 @@ jobs:
   build_suse_installer:
     docker:
       - image: opensuse/leap
-
     resource_class: large
-
     steps:
-      #- run:
-      #    name: acquire prerequisites
-      #    command: |
-      #      zypper install -y -t pattern devel_C_C++
-      #      zypper install -y \
-      #          gzip \
-      #          xz \
-      #          git \
-      #          gcc7-fortran \
-      #          cmake \
-      #          curl \
-      #          libomp-devel \
-      #          libicu-devel \
-      #          freeglut-devel
       - suse_prerequisites
-                
       - checkout
-
-      #- get_libraries:
-      #    fileName: 2023-Sept-SUSE.tar.xz
-      #    driveID: *suseLibID
-
-      #- build_vapor:
-      #    moveToCommand: ${f/Linux/SUSE}
-      #    compileArgs: -DBUILD_TEST_APPS=ON
-
-      #- smoke_tests
-
+      - get_libraries:
+          fileName: 2023-Sept-SUSE.tar.xz
+          driveID: *suseLibID
+      - build_vapor:
+          moveToCommand: ${f/Linux/SUSE}
+          compileArgs: -DBUILD_TEST_APPS=ON
       - persist_to_workspace:
           root: ~/
           paths:
             - project
-
       - store_artifacts:
           path: /tmp/workspace/installers
 
   suse_smoke_tests:
     docker:
       - image: opensuse/leap
-
     resource_class: medium
-
     steps:
       - suse_prerequisites
       - attach_workspace:
