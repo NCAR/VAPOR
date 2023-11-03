@@ -118,6 +118,9 @@ commands:
             -testDataRoot=/smokeTestData/smokeTestData \
             -binaryRoot=~/project/build/test_binaries \
             -resultsDir=~/project/test_apps/smokeTests/testResults
+      - store_artifacts:
+          path: ~/project/test_apps/smokeTests/testResults
+
 
 jobs:
   build_win10_installer:
@@ -629,31 +632,25 @@ jobs:
           moveToCommand: ${f/Linux/SUSE}
           compileArgs: -DBUILD_TEST_APPS=ON
 
-      - smoke_tests
+      #- smoke_tests
 
-      #- run:
-      #    name: Smoke tests
-      #    command: |
-      #      # Acquire smoketest data
-      #      mkdir -p /smokeTestData
-      #      fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t"
-      #      filename="/tmp/smokeTestData.tar.gz"
-      #      curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null
-      #      curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" -o ${filename}
-      #      tar -xf /tmp/smokeTestData.tar.gz -C /smokeTestData
-      #      chown -R root:root /smokeTestData
-      #      chmod -R 777 /smokeTestData
-      #      # Run smoketests
-      #      python3 /root/project/test_apps/smokeTests/smokeTests.py \
-      #      -testDataRoot=/smokeTestData/smokeTestData \
-      #      -binaryRoot=~/project/build/test_binaries \
-      #      -resultsDir=~/project/test_apps/smokeTests/testResults
-
-      - store_artifacts:
-          path: /root/project/test_apps/smokeTests/testResults
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - build
 
       - store_artifacts:
           path: /tmp/workspace/installers
+
+  suse_smoke_tests:
+    docker:
+      - image: opensuse/leap
+
+    resource_class: medium
+
+    steps:
+      - attach_workspace:
+          at: ~/project/build
 
   build_ubuntu20_installer:
     docker:
@@ -1110,6 +1107,9 @@ workflows:
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       - build_suse_installer
+      - suse_smoke_tests:
+          requires:
+            - build_suse_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
       #- build_macOSx86_libs
