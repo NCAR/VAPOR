@@ -1,3 +1,11 @@
+anchors:
+  - &srcLibID         "1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a"
+  - &ubuntu20LibID    "12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5"
+  - &ubuntu22LibID    "17Uv6wTePyRKfN10Iv00JKzeLc2W43NYk"
+  - &macOSx86LibID    "17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn"
+  - &macOSM1LibID     "14610-_oYbF_qbiO3WoOu0FQhNNvzX6p7"
+  - &suseLibID        "1pvdYktXqFM5_8kNd8lG1TT5-rI8Mspyf"
+
 version: 2.1
 
 orbs:
@@ -9,6 +17,66 @@ references:
   attach_workspace: &attach_workspace
     attach_workspace:
       at: *workspace_root
+
+commands:
+  get_libraries:
+    parameters:
+      fileName:
+        type: string
+      driveID:
+        type: string
+      sudo:
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: get third party libraries
+          command: |
+              <<parameters.sudo>> mkdir -p /usr/local/VAPOR-Deps
+              <<parameters.sudo>> chmod -R 777 /usr/local/VAPOR-Deps
+              <<parameters.sudo>> chown -R `whoami` /usr/local/VAPOR-Deps
+              id=<<parameters.driveID>>
+              filename=<<parameters.fileName>>
+              curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+              tar -xf ${filename} -C /usr/local/VAPOR-Deps
+
+  build_vapor:
+    parameters:
+      branch:
+        type: string
+        default: $CIRCLE_BRANCH
+      beforeCompile:
+        type: string
+        default: ""
+      compileArgs:
+        type: string
+        default: ""
+      moveToCommand:
+        type: string
+    steps:
+      - run:
+          name: build vapor
+          command: |
+            libraryDir=`ls /usr/local/VAPOR-Deps`
+            ln -s $libraryDir /usr/local/VAPOR-Deps/current
+            cp site_files/site.NCAR site.local
+            mkdir -p build
+            cd build
+            git checkout <<parameters.branch>>
+            <<parameters.beforeCompile>>
+            cmake \
+            -DCMAKE_BUILD_TYPE:String=Release \
+            -DDIST_INSTALLER:string=ON \
+            -DUSE_OMP=ON \
+            <<parameters.compileArgs>> ..
+            make -j8
+            make installer
+            for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
+            mkdir -p /tmp/workspace/installers
+            mv VAPOR3-* /tmp/workspace/installers
+            ls /tmp/workspace/installers
+          no_output_timeout: 30m
+
 
 jobs:
   build_win10_installer:
@@ -58,277 +126,84 @@ jobs:
           paths:
             - installers
 
-  setup_osx:
+  build_macOS_installers:
     macos:
-      xcode: "13.4.1"
-    steps:
-      - run:
-          name: Make VAPOR-Deps
-          command: |
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-            sudo chown -R `whoami` /usr/local/VAPOR-Deps
+      xcode: "14.3.1"
+    resource_class: macos.m1.large.gen1
 
+    steps:
       - checkout
 
       - run:
-          name: Get third party libraries
-          command: |
-            pip3 install gdown
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod 777 /usr/local/VAPOR-Deps
-            cd /usr/local/VAPOR-Deps
-            gdown https://drive.google.com/uc?id=1Q-IXlP_OgZSXsWKmT-smyrW9xnR-dUfg
-            cd /usr/local/VAPOR-Deps
-            tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
-            chmod -R 777 /usr/local/VAPOR-Deps
+          name: permit cache restore
+          command: sudo chmod -R 777 /opt
+
+      - restore_cache:
+          name: restore dependencies
+          keys:
+            - macos-deps
 
       - run:
-          name: Get cmake
+          name: Get dependencies
           command: |
-            brew install cmake
-
-      - run:
-          name: Get MacPorts
-          command: |
-            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
-            tar xf MacPorts-2.7.1.tar.bz2
-            cd MacPorts-2.7.1/
+            # MacPorts
+            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
+            tar xf MacPorts-2.8.1.tar.bz2
+            cd MacPorts-2.8.1/
             ./configure
             make -j6
-            sudo make install -j6
+            sudo make install
 
-      - run:
-          name: Get libomp
-          command: |
-            #sudo /opt/local/bin/port selfupdate
-            #(sudo yes || true) | sudo /opt/local/bin/port install libomp
-          no_output_timeout: 30m
+            # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
+            # Therefore, skip selfupdate until we know we want a newer version of clang
+                #sudo /opt/local/bin/port -v selfupdate
 
-      - run:
-          name: Get clang13
-          command: |
-            sudo /opt/local/bin/port selfupdate
-            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
-            sudo /opt/local/bin/port select --set clang mp-clang-13
+            # CMake
+            (sudo yes || true) | sudo /opt/local/bin/port install cmake
+            # clang
+            (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
+            sudo /opt/local/bin/port select --set clang mp-clang-17
             /opt/local/bin/clang++ -v > clangVersion.txt
-          no_output_timeout: 30m
+          no_output_timeout: 45m
 
       - save_cache:
-          key: osx-{{ .Environment.CIRCLE_SHA1 }}
+          key: macos-deps
           paths:
-            - /usr/local/VAPOR-Deps
-            - /opt/local/bin
+            - /opt/local
 
-  build_macOSx86_installer:
-    macos:
-      xcode: "13.4.1"
-    steps:
-      - run:
-          name: Make VAPOR-Deps
-          command: |
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-            sudo chown -R `whoami` /usr/local/VAPOR-Deps
+      - get_libraries:
+          fileName: 2023-Sept-M1.tar.xz
+          driveID: *macOSM1LibID
+          sudo: sudo
 
-      - checkout
-
-      - run:
-          name: acquire 3rd party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id="17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn"
-            filename="2023-Jun-macOSx86.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+      - build_vapor:
+          beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          compileArgs: |
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+          moveToCommand: ${f/Darwin/DarwinM1}
 
       - run:
-          name: Get cmake
-          command: |
-            brew install cmake
+          name: remove old libraries
+          command: rm -rf /usr/local/VAPOR-Deps/*
 
-      - run:
-          name: Get MacPorts
-          command: |
-            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
-            tar xf MacPorts-2.7.1.tar.bz2
-            cd MacPorts-2.7.1/
-            ./configure
-            make -j6
-            sudo make install
+      - get_libraries:
+          fileName: 2023-Jun-macOSx86.tar.xz
+          driveID: *macOSx86LibID
+          sudo: sudo
 
-      - run:
-          name: Get clang13
-          command: |
-            sudo /opt/local/bin/port selfupdate
-            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
-            sudo /opt/local/bin/port select --set clang mp-clang-13
-            /opt/local/bin/clang++ -v > clangVersion.txt
-          no_output_timeout: 30m
-
-      - run:
-          name: make VAPOR
-          command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
-            cp site_files/site.NCAR site.local
-            mkdir build
-            cd build
-            git checkout $CIRCLE_BRANCH
-            export PATH=/opt/local/bin:$PATH
-            sudo port select --set clang mp-clang-13
-            cmake -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DCMAKE_CXX_COMPILER=clang++ \
-                  -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j8
-            make installer
-            mkdir -p /tmp/workspace/installers
-            mv *.dmg /tmp/workspace/installers
-          no_output_timeout: 30m
+      - build_vapor:
+          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
+          compileArgs: |
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+          moveToCommand: ${f/Darwin/Darwinx86}
 
       - store_artifacts:
           path: /tmp/workspace/installers
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
-
-  build_M1_installer:
-    macos:
-      #xcode: "14.2.0"
-      xcode: "13.4.1"
-
-    resource_class: macos.m1.large.gen1
-    steps:
-      - checkout
-
-      - run:
-          name: Make VAPOR-Deps
-          command: |
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-            sudo chown -R `whoami` /usr/local/VAPOR-Deps
-
-      - run:
-          name: acquire 3rd party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id="1QEyOZWinJmLVnbCnEq43QtskDirmP_9d"
-            filename="2023-Jun-M1.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
-
-      - run:
-          name: Get cmake
-          command: |
-            brew install cmake
-
-      - run:
-          name: Get MacPorts
-          command: |
-            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
-            tar xf MacPorts-2.7.1.tar.bz2
-            cd MacPorts-2.7.1/
-            ./configure
-            make -j8
-            sudo make install
-
-      - run:
-          name: Get clang13
-          command: |
-            sudo /opt/local/bin/port selfupdate
-            (sudo yes || true) | sudo /opt/local/bin/port install clang-13
-            sudo /opt/local/bin/port select --set clang mp-clang-13
-            /opt/local/bin/clang++ -v > clangVersion.txt
-          no_output_timeout: 30m
-
-      - run:
-          name: make VAPOR
-          command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
-            cp site_files/site.NCAR site.local
-            mkdir build
-            cd build
-            git checkout $CIRCLE_BRANCH
-            export PATH=/opt/local/bin:$PATH
-            sudo port select --set clang mp-clang-13
-            cmake -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DCMAKE_CXX_COMPILER=clang++ \
-                  -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j8
-            make installer
-            for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/DarwinM1}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.dmg /tmp/workspace/installers
-            ls /tmp/workspace/installers
-          no_output_timeout: 30m
-
-      - store_artifacts:
-          path: /tmp/workspace/installers
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
-
-
-  build_ubuntu18_installer:
-    docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
-
-    steps:
-      - checkout
-
-      - run:
-          name: update 3rd party libraries
-          command: |
-            rm -rf /usr/local/VAPOR-Deps/2019-Aug
-            apt update
-            apt install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
-            filename="/root/project/2019-Aug-Ubuntu.tar.xz"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
- 
-      - run:
-          name: update cmake
-          command: |
-            apt remove -y --purge --auto-remove cmake
-            apt install -y libssl-dev
-            apt install -y build-essential git
-            git clone https://github.com/Kitware/CMake/
-            cd CMake
-            ./bootstrap && make && make install
-
-      - run:
-          name: make installer
-          command: |
-            cd /root/project/build
-            git checkout $CIRCLE_BRANCH
-            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON ..
-            make -j4
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu18}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
-
-      - store_artifacts:
-          path: /tmp/workspace/installers
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
 
   clang-tidy:
     docker:
@@ -533,11 +408,6 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
 
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
-
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -663,7 +533,7 @@ jobs:
     docker:
       - image: opensuse/leap
 
-    resource_class: large
+    resource_class: xlarge
 
     steps:
       - checkout
@@ -679,33 +549,16 @@ jobs:
                 gcc7-fortran \
                 cmake \
                 curl \
+                libomp-devel \
                 libicu-devel \
                 freeglut-devel
                 
-      - run:
-          name: acquire 3rd party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id="1pvdYktXqFM5_8kNd8lG1TT5-rI8Mspyf"
-            filename="2023-Sept-SUSE.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
-            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
+      - get_libraries:
+          fileName: 2023-Sept-SUSE.tar.xz
+          driveID: *suseLibID
 
-      - run:
-          name: make installer
-          command: |
-            mkdir -p /root/project/build
-            cd /root/project/build
-            cmake -DCMAKE_BUILD_TYPE=Release \
-                  -DDIST_INSTALLER=ON \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j4
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/SUSE}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
+      - build_vapor:
+          moveToCommand: ${f/Linux/SUSE}
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -714,7 +567,7 @@ jobs:
     docker:
       - image: ubuntu:20.04
 
-    resource_class: large
+    resource_class: xlarge
 
     steps:
       - checkout
@@ -728,6 +581,7 @@ jobs:
             apt install -y xz-utils
             apt install -y git
             apt install -y g++
+            apt install -y libomp-dev
             apt install -y freeglut3-dev
             apt install -y libexpat1-dev
             apt install -y libglib2.0-0
@@ -748,38 +602,15 @@ jobs:
             apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
             apt install -y cmake --allow-unauthenticated
       
-      - run:
-          name: acquire 3rd party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id="16xcR2NFWRg6bROQg8JL1-Ezni14p4mQ6"
-            filename="2023-Jun-Ubuntu20.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+      - get_libraries:
+          fileName: 2023-Sept-Ubuntu20.tar.xz
+          driveID: *ubuntu20LibID
 
-      - run:
-          name: make installer
-          command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
-            mkdir -p /root/project/build
-            cd /root/project/build
-            cmake -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j4
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu20}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
+      - build_vapor:
+          moveToCommand: ${f/Linux/Ubuntu20}
 
       - store_artifacts:
           path: /tmp/workspace/installers
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
 
   build_ubuntu22_installer:
     docker:
@@ -796,6 +627,7 @@ jobs:
             apt install -y xz-utils
             apt install -y git
             apt install -y g++
+            apt install -y libomp-dev
             apt install -y freeglut3-dev
             apt install -y libexpat1-dev
             apt install -y libglib2.0-0
@@ -815,31 +647,12 @@ jobs:
             apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
             apt install -y cmake --allow-unauthenticated
 
-      - run:
-          name: update 3rd party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            id="1gqUxxJJA4iGnAPvI1EDaFFnrlbALnkeO"
-            filename="2023-Jun-Ubuntu22.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
-          no_output_timeout: 45m
+      - get_libraries:
+          fileName: 2023-Sept-Ubuntu22.tar.xz
+          driveID: *ubuntu22LibID
 
-      - run:
-          name: make installer
-          command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
-            mkdir -p /root/project/build
-            cd /root/project/build
-            cmake -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j4
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu22}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
+      - build_vapor:
+          moveToCommand: ${f/Linux/Ubuntu20}
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -969,15 +782,9 @@ jobs:
             which \
             git
 
-      - run:
-          name: get source files
-          command: |
-            #https://drive.google.com/file/d/1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a/view?usp=sharing
-            mkdir -p /usr/local/VAPOR-Deps
-            id="1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a"
-            filename="2023-Sept-src.tar.xz"
-            curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-            tar -xf ${filename} -C /usr/local/VAPOR-Deps
+      - get_libraries:
+          fileName: 2023-Sept-src.tar.xz
+          driveID: *srcLibID
 
       - run:
           name: build libraries
@@ -985,26 +792,8 @@ jobs:
             chmod 777 /root/project/scripts/build3rdParty.sh
             /root/project/scripts/build3rdParty.sh -o suse
 
-      - run:
-          name: make installer
-          command: |
-            rm -rf /usr/local/VAPOR-Deps/current
-            ln -s /usr/local/VAPOR-Deps/2023-Sept /usr/local/VAPOR-Deps/current
-            mkdir -p /root/project/build
-            cd /root/project/build
-            git checkout $CIRCLE_BRANCH
-            #git checkout main
-            #git reset --hard origin/main
-            #git pull
-            cmake -DCMAKE_BUILD_TYPE=Release \
-                  -DDIST_INSTALLER=ON \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j8
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/SUSE}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
+      - build_vapor:
+          moveToCommand: ${f/Linux/Ubuntu20}
 
       - store_artifacts:
           path: |
@@ -1025,25 +814,14 @@ jobs:
           command: |
             DEBIAN_FRONTEND=noninteractive
             apt update
-            apt install -y xz-utils
-            apt install -y git
+            apt install -y xz-utils git curl libomp-dev
             git config --global --add safe.directory /tmp/_circleci_local_build_repo
 
       - checkout
 
-      - run:
-          name: get source files
-          command: |
-            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-            mkdir -p /usr/local/VAPOR-Deps
-            apt update
-            apt install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/root/project/2023-Jun-src.tar.xz"
-            tar --no-same-owner -xf ${filename} -C /usr/local/VAPOR-Deps
+      - get_libraries:
+          fileName: 2023-Sept-src.tar.xz
+          driveID: *srcLibID
 
       - run:
           name: build libraries
@@ -1052,27 +830,14 @@ jobs:
             /root/project/scripts/build3rdParty.sh -o Ubuntu
           no_output_timeout: 60m
 
-      - run:
-          name: make installer
-          command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
-            mkdir -p /root/project/build
-            cd /root/project/build
-            cmake -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j4
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu20}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
+      - build_vapor:
+          moveToCommand: ${f/Linux/Ubuntu20}
 
       - store_artifacts:
           path: /tmp/workspace/installers
       
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Jun-Ubuntu.tar.xz
+          path: /usr/local/VAPOR-Deps/2023-Sept-Ubuntu.tar.xz
 
   build_ubuntu22_libs:
     docker:
@@ -1086,25 +851,14 @@ jobs:
           command: |
             DEBIAN_FRONTEND=noninteractive
             apt update
-            apt install -y xz-utils
-            apt install -y git
+            apt install -y xz-utils git curl libomp-dev
             git config --global --add safe.directory /tmp/_circleci_local_build_repo
 
       - checkout
 
-      - run:
-          name: get source files
-          command: |
-            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-            mkdir -p /usr/local/VAPOR-Deps
-            apt update
-            apt install -y python3-pip
-            pip3 install --upgrade pip
-            pip3 install scikit-build command
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/root/project/2023-Jun-src.tar.xz"
-            tar --no-same-owner -xf ${filename} -C /usr/local/VAPOR-Deps
+      - get_libraries:
+          fileName: 2023-Sept-src.tar.xz
+          driveID: *srcLibID
 
       - run:
           name: build libraries
@@ -1113,27 +867,14 @@ jobs:
             /root/project/scripts/build3rdParty.sh -o Ubuntu
           no_output_timeout: 60m
 
-      - run:
-          name: make installer
-          command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
-            mkdir -p /root/project/build
-            cd /root/project/build
-            cmake -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j4
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu22}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
+      - build_vapor:
+          moveToCommand: ${f/Linux/Ubuntu20}
 
       - store_artifacts:
           path: /tmp/workspace/installers
 
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Jun-Ubuntu.tar.xz
+          path: /usr/local/VAPOR-Deps/2023-Sept-Ubuntu.tar.xz
 
   build_macOSx86_libs:
     macos:
@@ -1145,24 +886,6 @@ jobs:
       - checkout
 
       - run:
-          name: get source files
-          command: |
-            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/Users/distiller/project/2023-Jun-src.tar.xz"
-            sudo tar xvf $filename -C /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-
-      - run:
-          name: build libraries
-          command: |
-            chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
-            /Users/distiller/project/scripts/build3rdParty.sh -o macOSx86
-
-      - run:
           name: Get MacPorts
           command: |
             curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.7.1.tar.bz2
@@ -1181,35 +904,31 @@ jobs:
             /opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 30m
 
+      - get_libraries:
+          fileName: 2023-Sept-src.tar.xz
+          driveID: *srcLibID
+          sudo: sudo
+
       - run:
-          name: make VAPOR
+          name: build libraries
           command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
-            brew install gettext
-            cp site_files/site.NCAR site.local
-            mkdir build
-            cd build
-            git checkout $CIRCLE_BRANCH
-            export PATH=/opt/local/bin:$PATH
-            sudo port select --set clang mp-clang-13
-            cmake -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DCMAKE_CXX_COMPILER=clang++ \
-                  -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j6
-            make installer
-            mkdir -p /tmp/workspace/installers
-            mv VAPOR3*.dmg /tmp/workspace/installers
-          no_output_timeout: 20m
+            chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
+            /Users/distiller/project/scripts/build3rdParty.sh -o macOSx86
+
+      - build_vapor:
+          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-13
+          compileArgs: |
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DMACOS_BUILD_ARM64=OFF \
+          moveToCommand: ${f/Darwin/DarwinM1}
 
       - store_artifacts:
           path: /tmp/workspace/installers
       
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Jun-macOSx86.tar.xz
+          path: /usr/local/VAPOR-Deps/2023-Sept-macOSx86.tar.xz
 
   build_M1_libs:
     macos:
@@ -1221,23 +940,10 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: get source files
-          command: |
-            #https://drive.google.com/file/d/1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z/view?usp=share_link
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-            pip3 install gdown
-            gdown https://drive.google.com/uc?id=1FG8ngmz9Tk3HKZgGejqwtbkBAVonm91z
-            filename="/Users/distiller/project/2023-Jun-src.tar.xz"
-            sudo tar xvf $filename -C /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local/VAPOR-Deps
-
-      - run:
-          name: build libraries
-          command: |
-            chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
-            /Users/distiller/project/scripts/build3rdParty.sh -o M1
+      - get_libraries:
+          fileName: 2023-Sept-src.tar.xz
+          driveID: *srcLibID
+          sudo: sudo
 
       - run:
           name: Get MacPorts
@@ -1259,35 +965,24 @@ jobs:
           no_output_timeout: 30m
 
       - run:
-          name: make VAPOR
+          name: build libraries
           command: |
-            ln -s /usr/local/VAPOR-Deps/2023-Jun /usr/local/VAPOR-Deps/current
-            cp site_files/site.NCAR site.local
-            mkdir build
-            cd build
-            git checkout $CIRCLE_BRANCH
-            export PATH=/opt/local/bin:$PATH
-            sudo port select --set clang mp-clang-13
-            cmake -DCPACK_BINARY_DRAGNDROP=ON \
-                  -DCMAKE_BUILD_TYPE:String=Release \
-                  -DDIST_INSTALLER:string=ON \
-                  -DCMAKE_CXX_COMPILER=clang++ \
-                  -DCMAKE_C_COMPILER=clang \
-                  -DUSE_OMP=ON \
-                  ..
-            make -j8
-            make installer
-            for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/DarwinM1}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.dmg /tmp/workspace/installers
-            ls /tmp/workspace/installers
-          no_output_timeout: 30m
+            chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
+            /Users/distiller/project/scripts/build3rdParty.sh -o M1
+
+      - build_vapor:
+          beforeCompile: export PATH=/opt/local/bin:$PATH
+          compileArgs: |
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+          moveToCommand: ${f/Darwin/DarwinM1}
 
       - store_artifacts:
           path: /tmp/workspace/installers
       
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Jun-M1.tar.xz
+          path: /usr/local/VAPOR-Deps/2023-Sept-M1.tar.xz
 
   build_win10_libs:
     executor: win/default
@@ -1319,8 +1014,7 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
-      #- build_macOSx86_installer
-      #- build_M1_installer
+      #- build_macOS_installers
       - build_ubuntu20_installer
       - build_ubuntu22_installer
       - build_suse_installer
@@ -1332,8 +1026,11 @@ workflows:
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:
-      #      - build_macOSx86_installer
       #      - build_win10_installer
+      #      - build_macOS_installers
+      #      - build_ubuntu20_installer
+      #      - build_ubuntu22_installer
+      #      - build_suse_installer
   weekly:
       triggers:
         - schedule:
@@ -1342,17 +1039,19 @@ workflows:
                branches:
                  only: main
       jobs:
+        - build_suse_installer
         - build_ubuntu20_installer
-        - build_macOSx86_installer
-        - build_M1_installer
+        - build_ubuntu22_installer
+        - build_macOS_installers
         - build_win10_installer
         #- build_python_api_ubuntu
         #- build_python_api_osx
         - release_weekly_installers:
             requires:
+              - build_suse_installer
               - build_ubuntu20_installer
-              - build_macOSx86_installer
-              - build_M1_installer
+              - build_ubuntu22_installer
+              - build_macOS_installers
               - build_win10_installer
               #- build_python_api_ubuntu
               #- build_python_api_osx
