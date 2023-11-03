@@ -642,11 +642,12 @@ jobs:
   suse_smoke_tests:
     docker:
       - image: opensuse/leap
+    working_director: /
     resource_class: medium
     steps:
       - suse_prerequisites
       - attach_workspace:
-          at: ~/
+          at: /
       - smoke_tests
 
   build_ubuntu20_installer:
