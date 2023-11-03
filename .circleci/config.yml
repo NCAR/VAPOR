@@ -632,9 +632,10 @@ jobs:
           moveToCommand: ${f/Linux/SUSE}
           compileArgs: -DBUILD_TEST_APPS=ON
       - persist_to_workspace:
-          root: ~/
+          root: /
           paths:
-            - project
+            - root/project
+            - usr/local/VAPOR-Deps
       - store_artifacts:
           path: /tmp/workspace/installers
 
