@@ -271,7 +271,7 @@ int ParticleRenderer::_renderParticlesHelper()
     shader->SetUniform("phongAmbient", (float)rp->GetValueDouble(ParticleParams::PhongAmbientTag, 0.4));
     shader->SetUniform("phongDiffuse", (float)rp->GetValueDouble(ParticleParams::PhongDiffuseTag, 0.8));
     shader->SetUniform("phongSpecular", (float)rp->GetValueDouble(ParticleParams::PhongSpecularTag, 0.0));
-    shader->SetUniform("phongShininess", (float)rp->GetValueDouble(ParticleParams::PhongShininessTag, 2.));
+    shader->SetUniform("phongShininess", (float)(100 * powf(rp->GetValueDouble(ParticleParams::PhongShininessTag, 0.01), 2)));
 
     shader->SetUniform("mapRange", glm::make_vec2(_colorMapRange));
 
