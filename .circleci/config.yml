@@ -628,24 +628,23 @@ jobs:
       - get_libraries:
           fileName: 2023-Sept-SUSE.tar.xz
           driveID: *suseLibID
-      - build_vapor:
-          moveToCommand: ${f/Linux/SUSE}
-          compileArgs: -DBUILD_TEST_APPS=ON
+      #- build_vapor:
+      #    moveToCommand: ${f/Linux/SUSE}
+      #    compileArgs: -DBUILD_TEST_APPS=ON
       - persist_to_workspace:
           root: /
           paths:
             - root/project
             - usr/local/VAPOR-Deps
-      - store_artifacts:
-          path: /tmp/workspace/installers
+      #- store_artifacts:
+      #    path: /tmp/workspace/installers
 
   suse_smoke_tests:
     docker:
       - image: opensuse/leap
-    working_director: /
     resource_class: medium
     steps:
-      - suse_prerequisites
+      #- suse_prerequisites
       - attach_workspace:
           at: /
       - smoke_tests
