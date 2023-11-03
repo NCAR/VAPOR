@@ -644,10 +644,7 @@ jobs:
       - image: opensuse/leap
     resource_class: medium
     steps:
-      #- suse_prerequisites
-      - run:
-          name: foo
-          command: zypper install -y gzip
+      - suse_prerequisites
       - attach_workspace:
           at: /
       - smoke_tests
