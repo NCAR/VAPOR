@@ -121,6 +121,22 @@ commands:
       - store_artifacts:
           path: ~/project/test_apps/smokeTests/testResults
 
+  suse_prerequisites:
+    steps:
+      - run:
+          name: Acquire suse prerequisites
+          command: |
+            zypper install -y -t pattern devel_C_C++
+            zypper install -y \
+                gzip \
+                xz \
+                git \
+                gcc7-fortran \
+                cmake \
+                curl \
+                libomp-devel \
+                libicu-devel \
+                freeglut-devel
 
 jobs:
   build_win10_installer:
@@ -607,20 +623,21 @@ jobs:
     resource_class: large
 
     steps:
-      - run:
-          name: acquire prerequisites
-          command: |
-            zypper install -y -t pattern devel_C_C++
-            zypper install -y \
-                gzip \
-                xz \
-                git \
-                gcc7-fortran \
-                cmake \
-                curl \
-                libomp-devel \
-                libicu-devel \
-                freeglut-devel
+      #- run:
+      #    name: acquire prerequisites
+      #    command: |
+      #      zypper install -y -t pattern devel_C_C++
+      #      zypper install -y \
+      #          gzip \
+      #          xz \
+      #          git \
+      #          gcc7-fortran \
+      #          cmake \
+      #          curl \
+      #          libomp-devel \
+      #          libicu-devel \
+      #          freeglut-devel
+      - suse_prerequisites
                 
       - checkout
 
@@ -649,8 +666,10 @@ jobs:
     resource_class: medium
 
     steps:
+      - suse_prerequisites
       - attach_workspace:
           at: ~/project/build
+      - smoke_tests
 
   build_ubuntu20_installer:
     docker:
