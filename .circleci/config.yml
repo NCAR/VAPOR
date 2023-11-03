@@ -668,7 +668,7 @@ jobs:
     steps:
       - suse_prerequisites
       - attach_workspace:
-          at: ~/
+          at: /
       - smoke_tests
 
   build_ubuntu20_installer:
