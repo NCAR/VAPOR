@@ -103,7 +103,7 @@ commands:
                 filename="/tmp/smokeTestData.tar.gz"
                 curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null
                 curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" -o ${filename}
-                tar -xf /tmp/smokeTestData.tar.gz -C /smokeTestData
+                tar --no-same-owner -xf /tmp/smokeTestData.tar.gz -C /smokeTestData
                 chown -R root:root /smokeTestData
                 chmod -R 777 /smokeTestData
             fi
