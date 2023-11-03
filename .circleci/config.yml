@@ -652,9 +652,9 @@ jobs:
       #- smoke_tests
 
       - persist_to_workspace:
-          root: ~/project
+          root: ~/
           paths:
-            - build
+            - project/build
 
       - store_artifacts:
           path: /tmp/workspace/installers
