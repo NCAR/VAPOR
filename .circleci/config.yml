@@ -70,7 +70,6 @@ commands:
             -DDIST_INSTALLER:string=ON \
             -DUSE_OMP=ON \
             <<parameters.compileArgs>> ..
-            #make -j8
             make -j4
             make installer
             for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
@@ -78,15 +77,6 @@ commands:
             mv VAPOR3-* /tmp/workspace/installers
             ls /tmp/workspace/installers
           no_output_timeout: 30m
-
-  test_command:
-    steps:
-      - run:
-          name: foo
-          command: echo foo
-      - run:
-          name: foo
-          command: echo foo
 
   smoke_tests:
     steps:
@@ -223,7 +213,6 @@ jobs:
             # CMake
             (sudo yes || true) | sudo /opt/local/bin/port install cmake
             # clang
-            sudo /opt/local/bin/port selfupdate
             (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
             sudo /opt/local/bin/port select --set clang mp-clang-17
             /opt/local/bin/clang++ -v > clangVersion.txt
@@ -262,7 +251,7 @@ jobs:
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
-            -DMACOS_BUILD_ARM64=OFF \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
           moveToCommand: ${f/Darwin/Darwinx86}
 
       - store_artifacts:
@@ -1103,6 +1092,7 @@ workflows:
       #- build_macOS_installers
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
+      - build_ubuntu20_installer
       - build_suse_installer
       - suse_smoke_tests:
           requires:
