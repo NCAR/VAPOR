@@ -371,12 +371,60 @@ void ControlExec::LoadState(const XmlNode *rootNode)
     _paramsMgr->EndSaveStateGroup();
 }
 
-int ControlExec::LoadState(string stateFile)
+int ControlExec::LoadState(string stateFile, LoadStateRelAndAbsPathsExistAction relAndAbsPathsExistAction)
 {
     _paramsMgr->BeginSaveStateGroup("Load state");
 
     vector<string> vizNames = GetVisualizerNames();
     for (int i = 0; i < vizNames.size(); i++) { RemoveVisualizer(vizNames[i]); }
+
+    // Bug prevents using the real PM here
+    ParamsMgr tempPM({GUIStateParams::GetClassType()});
+    if (tempPM.LoadState(stateFile) < 0) {
+        _paramsMgr->EndSaveStateGroup();
+        return -1;
+    }
+
+    GUIStateParams *tmpGsp = (GUIStateParams *)tempPM.GetParams(GUIStateParams::GetClassType());
+    map<string, vector<string>> useRelativePaths;
+    auto sesDir = FileUtils::Dirname(stateFile);
+
+    for (auto dataset : tmpGsp->GetOpenDataSetNames()) {
+        auto paths = tmpGsp->GetOpenDataSetPaths(dataset);
+        auto relPaths = tmpGsp->GetOpenDataSetRelativePaths(dataset);
+        for (int i = 0; i < relPaths.size(); i++) relPaths[i] = FileUtils::JoinPaths({sesDir, relPaths[i]});
+        if (relPaths.empty())
+            continue;
+
+        auto absoluteExist = std::all_of(paths.begin(),    paths.end(),    [](string p){return FileUtils::Exists(p);});
+        auto relativeExist = std::all_of(relPaths.begin(), relPaths.end(), [](string p){return FileUtils::Exists(p);});
+
+        if (absoluteExist && !relativeExist) continue;
+        if (!absoluteExist && relativeExist) {
+//            tmpGsp->InsertOpenDateSet(dataset, tmpGsp->GetOpenDataSetFormat(dataset), relPaths);
+            useRelativePaths[dataset] = relPaths;
+            continue;
+        }
+        if (absoluteExist && relativeExist) {
+            bool same = paths.size() == relPaths.size();
+            for (int i = 0; i < paths.size() && same; i++)
+                same &= FileUtils::AreSameFile(paths[i], relPaths[i]);
+
+            if (same) continue;
+
+            switch (relAndAbsPathsExistAction) {
+                case LoadStateRelAndAbsPathsExistAction::LoadAbs:
+                    continue;
+                case LoadStateRelAndAbsPathsExistAction::LoadRel:
+//                    tmpGsp->InsertOpenDateSet(dataset, tmpGsp->GetOpenDataSetFormat(dataset), relPaths);
+                    useRelativePaths[dataset] = relPaths;
+                    continue;
+                case LoadStateRelAndAbsPathsExistAction::Ask:
+                    _paramsMgr->EndSaveStateGroup();
+                    throw RelAndAbsPathsExistException(paths[0], relPaths[0]);
+            }
+        }
+    }
 
     int rc = _paramsMgr->LoadState(stateFile);
     if (rc < 0) {
@@ -384,20 +432,9 @@ int ControlExec::LoadState(string stateFile)
         return (-1);
     }
 
-    GUIStateParams *gsp = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
-    auto sesDir = FileUtils::Dirname(stateFile);
-
-    for (auto dataset : gsp->GetOpenDataSetNames()) {
-        auto paths = gsp->GetOpenDataSetPaths(dataset);
-        if (std::all_of(paths.begin(), paths.end(), [](string p){return FileUtils::Exists(p);}))
-            continue;
-
-        for (int i = 0; i < paths.size(); i++) {
-            if (!FileUtils::IsPathAbsolute(paths[i]))
-                paths[i] = FileUtils::JoinPaths({sesDir, paths[i]});
-        }
-        gsp->InsertOpenDateSet(dataset, gsp->GetOpenDataSetFormat(dataset), paths);
-    }
+    auto gsp = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    for (const auto &it : useRelativePaths)
+        gsp->InsertOpenDateSet(it.first, gsp->GetOpenDataSetFormat(it.first), it.second);
 
     vizNames = _paramsMgr->GetVisualizerNames();
     for (int i = 0; i < vizNames.size(); i++) {
@@ -778,62 +815,37 @@ int ControlExec::SaveSession(string filename)
 {
     ofstream fileout;
     const XmlNode *node = nullptr;
-    int ret = 0;
 
     GUIStateParams *gsp = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
     bool saveStateEnabled = _paramsMgr->GetSaveStateEnabled();
     _paramsMgr->SetSaveStateEnabled(false);
-
-    bool useRel = true;
-    auto sesDir = FileUtils::Realpath(FileUtils::Dirname(filename));
     auto datasets = gsp->GetOpenDataSetNames();
-    vector<vector<string>> originalPaths(datasets.size());
-    vector<vector<string>> newPaths(datasets.size());
-    vector<string> formats(datasets.size());
-
-    for (int i = 0; i < datasets.size() && useRel; i++) {
-        originalPaths[i] = gsp->GetOpenDataSetPaths(datasets[i]);
-        newPaths[i].resize(originalPaths[i].size());
-        formats[i] = gsp->GetOpenDataSetFormat(datasets[i]);
-
-        for (int j = 0; j < originalPaths[i].size() && useRel; j++) {
-            newPaths[i][j] = FileUtils::Realpath(originalPaths[i][j]);
-
-            if (FileUtils::IsSubpath(sesDir, newPaths[i][j]))
-                newPaths[i][j] = FileUtils::JoinPaths({".", newPaths[i][j].substr(1+sesDir.size())});
-            else
-                useRel = false;
+    for (auto dataset : datasets) {
+        auto paths = gsp->GetOpenDataSetPaths(dataset);
+        auto format = gsp->GetOpenDataSetFormat(dataset);
+        vector<string> relpaths(paths.size());
+        for (int i = 0; i < paths.size(); i++) {
+            paths[i] = FileUtils::Realpath(paths[i]);
+            relpaths[i] = FileUtils::Relpath(paths[i], filename);
         }
+        gsp->InsertOpenDateSet(dataset, format, paths, relpaths);
     }
-
-    if (useRel)
-        for (int i = 0; i < datasets.size(); i++)
-            gsp->InsertOpenDateSet(datasets[i], formats[i], newPaths[i]);
+    _paramsMgr->SetSaveStateEnabled(saveStateEnabled);
 
     fileout.open(filename.c_str());
     if (!fileout) {
         SetErrMsg("Unable to open output session file : %M");
-        goto return_error;
+        return -1;
     }
 
     node = _paramsMgr->GetXMLRoot();
     XmlNode::streamOut(fileout, *node);
     if (fileout.bad()) {
         SetErrMsg("Unable to write output session file : %M");
-        goto return_error;
+        return -1;
     }
 
-    cleanup:
-    if (useRel)
-        for (int i = 0; i < datasets.size(); i++)
-            gsp->InsertOpenDateSet(datasets[i], formats[i], originalPaths[i]);
-
-    _paramsMgr->SetSaveStateEnabled(saveStateEnabled);
-    return ret;
-
-    return_error:
-    ret = -1;
-    goto cleanup;
+    return 0;
 }
 
 RenderParams *ControlExec::GetRenderParams(string winName, string dataSetName, string renderType, string instName) const

@@ -12,6 +12,8 @@ template<typename T> bool Contains(const std::vector<T> &toSearch, const T &obje
 
 template<typename T> void AppendTo(std::vector<T> &a, const std::vector<T> &b) { a.insert(a.end(), b.begin(), b.end()); }
 
+template<typename T> std::vector<T> Slice(const std::vector<T> &a, int from, int to = -1) { return std::vector<T>(a.begin() + from, to < 0 ? a.end() : a.begin() + to); }
+
 template<typename T> vector<T> Filter(const std::vector<T> &v, std::function<bool(const T&)> f) {
     vector<T> v2;
     std::copy_if(v.begin(), v.end(), std::back_inserter(v2), f);

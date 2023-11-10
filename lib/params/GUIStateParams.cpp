@@ -47,6 +47,7 @@ const string GUIStateParams::BookmarksTag = "BookmarksTag";
 const string GUIStateParams::MovingDomainTrackCameraTag = "MovingDomainTrackCameraTag";
 const string GUIStateParams::MovingDomainTrackRenderRegionsTag = "MovingDomainTrackRenderRegionsTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
+const string GUIStateParams::DataSetParam::m_dataSetRelativePathsTag = "DataSetRelativePathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";
 
 //
@@ -250,6 +251,13 @@ vector<string> GUIStateParams::GetOpenDataSetPaths(string dataSetName) const
     return (paths);
 }
 
+vector<string> GUIStateParams::GetOpenDataSetRelativePaths(string dataSetName) const
+{
+    DataSetParam *dsParams = (DataSetParam *)m_openDataSets->GetParams(dataSetName);
+    if (!dsParams) { return (vector<string>()); }
+    return dsParams->GetRelativePaths();
+}
+
 string GUIStateParams::GetOpenDataSetFormat(string dataSetName) const
 {
     DataSetParam *dsParams = (DataSetParam *)m_openDataSets->GetParams(dataSetName);
@@ -259,13 +267,16 @@ string GUIStateParams::GetOpenDataSetFormat(string dataSetName) const
     return (dsParams->GetFormat());
 }
 
-void GUIStateParams::InsertOpenDateSet(string dataSetName, string format, const vector<string> &paths)
+void GUIStateParams::InsertOpenDateSet(string dataSetName, string format, const vector<string> &paths, const vector<string> &relPaths)
 {
     m_openDataSets->Remove(dataSetName);
 
     DataSetParam dsParam(_ssave);
     dsParam.SetPaths(paths);
     dsParam.SetFormat(format);
+
+    if (relPaths.size() == paths.size())
+        dsParam.SetRelativePaths(relPaths);
 
     m_openDataSets->Insert(&dsParam, dataSetName);
 }

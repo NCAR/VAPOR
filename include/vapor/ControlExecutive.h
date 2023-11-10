@@ -50,6 +50,15 @@ public:
     //
     virtual void LoadState(const XmlNode *node);
 
+    class RelAndAbsPathsExistException : public std::exception {
+    public:
+        const std::string AbsolutePath;
+        const std::string RelativePath;
+        RelAndAbsPathsExistException(const std::string &absolute, const std::string &relative)
+                : AbsolutePath(absolute), RelativePath(relative) {}
+    };
+    enum class LoadStateRelAndAbsPathsExistAction { Ask, LoadAbs, LoadRel };
+
     //!	Restore the session state from a session state file
     //!
     //! This method sets the session state based on the contents of the
@@ -64,7 +73,7 @@ public:
     //! fails the session state remains unchanged
     //!
     //
-    virtual int LoadState(string stateFile);
+    virtual int LoadState(string stateFile, LoadStateRelAndAbsPathsExistAction relAndAbsPathsExistAction = LoadStateRelAndAbsPathsExistAction::LoadAbs);
 
     //! Set number of execution threads
     //!

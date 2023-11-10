@@ -1307,14 +1307,29 @@ void MainForm::sessionOpenHelper(string fileName, bool loadDatasets)
 
     closeAllParamsDatasets();
 
-    if (!fileName.empty()) {
-        int rc = _controlExec->LoadState(fileName);
-        if (rc < 0) {
-            MSG_ERR("Failed to restore session from file");
+    auto action = loadDatasets
+            ? ControlExec::LoadStateRelAndAbsPathsExistAction::Ask
+            : ControlExec::LoadStateRelAndAbsPathsExistAction::LoadAbs;
+
+    retryLoad:
+    try {
+        if (!fileName.empty()) {
+            int rc = _controlExec->LoadState(fileName, action);
+            if (rc < 0) {
+                MSG_ERR("Failed to restore session from file");
+                _controlExec->LoadState();
+            }
+        } else {
             _controlExec->LoadState();
         }
-    } else {
-        _controlExec->LoadState();
+    } catch(ControlExec::RelAndAbsPathsExistException e) {
+        QStringList items({QString::fromStdString(e.AbsolutePath), QString::fromStdString(e.RelativePath)});
+        bool ok;
+        QString item = QInputDialog::getItem(this, tr("Load Data"), tr("Multiple dataset options found. Select which to load."), items, 0, false, &ok);
+        if (!ok || item.isEmpty()) return;
+        if (item.toStdString() == e.RelativePath) action = ControlExec::LoadStateRelAndAbsPathsExistAction::LoadRel;
+        if (item.toStdString() == e.AbsolutePath) action = ControlExec::LoadStateRelAndAbsPathsExistAction::LoadAbs;
+        goto retryLoad;
     }
 
     GetSettingsParams()->LoadFromSettingsFile();

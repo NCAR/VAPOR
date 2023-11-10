@@ -64,12 +64,13 @@ public:
     std::vector<string> GetOpenDataSetNames() const { return (m_openDataSets->GetNames()); }
 
     std::vector<string> GetOpenDataSetPaths(string dataSetName) const;
+    std::vector<string> GetOpenDataSetRelativePaths(string dataSetName) const;
 
     string GetOpenDataSetFormat(string dataSetName) const;
 
     void RemoveOpenDateSet(string dataSetName) { m_openDataSets->Remove(dataSetName); }
 
-    void InsertOpenDateSet(string dataSetName, string format, const std::vector<string> &paths);
+    void InsertOpenDateSet(string dataSetName, string format, const std::vector<string> &paths, const std::vector<string> &relPaths={});
 
     //! method sets the current session path
     //! \param[in] path string
@@ -153,6 +154,10 @@ public:
 
         std::vector<string> GetPaths() const { return (GetValueStringVec(m_dataSetPathsTag)); };
 
+        void SetRelativePaths(const std::vector<string> &paths) { SetValueStringVec(m_dataSetRelativePathsTag, "Data set relative paths", paths); }
+        std::vector<string> GetRelativePaths() const { return (GetValueStringVec(m_dataSetRelativePathsTag)); };
+        bool HasRelativePaths() const { return !GetRelativePaths().empty(); };
+
         void SetFormat(string format) { SetValueString(m_dataSetFormatTag, "Data set format", format); }
 
         string GetFormat() const { return (GetValueString(m_dataSetFormatTag, "vdc")); }
@@ -161,6 +166,7 @@ public:
 
     private:
         static const string m_dataSetPathsTag;
+        static const string m_dataSetRelativePathsTag;
         static const string m_dataSetFormatTag;
     };
 
