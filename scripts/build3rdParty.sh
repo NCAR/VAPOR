@@ -367,8 +367,8 @@ jpeg() {
     args=(
         --prefix=$installDir
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(--host=arm-apple-darwin)
+    if [ "$OS" == "macOSx86" ] ; then
+        args+=(--host=x86_64-apple-darwin)
     fi
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
@@ -752,9 +752,6 @@ ssh
 curl
 proj
 geotiff
-
-#    openssl
-#fi
 zlib
 pythonVapor
 assimp
@@ -775,4 +772,4 @@ qt
 if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
     add_rpath
 fi         
-renameAndCompress
+erenameAndCompress
