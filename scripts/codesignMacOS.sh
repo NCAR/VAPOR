@@ -3,23 +3,21 @@
 clear
 #echo $(bash --version)
 
-baseDir="/Applications/vapor.app/Contents"
-binDir="${baseDir}/MacOS"
-libDir="${baseDir}/Frameworks"
-pyDir="${libDir}/python3.9/__pycache__"
-#codesignSignature="sudo codesign --force --verbose=2 --sign DQ4ZFL4KLF --options runtime --timestamp"
-codesignSignature="sudo codesign --verbose=2 --sign DQ4ZFL4KLF --options runtime --timestamp"
 
-fileTypes=(
-    "library"
-    "byte-compiled"
-    "executable"
-)
+baseDir="/Applications/vapor.app"
+binDir="${baseDir}/Contents/MacOS"
+libDir="${baseDir}/Contents/Frameworks"
+pyDir="${libDir}/python3.9"
+#codesignSignature="sudo codesign --force --verbose=2 --sign DQ4ZFL4KLF --options runtime --timestamp"
+declare codesignSignature="sudo codesign --verbose=2 --sign DQ4ZFL4KLF --options runtime --timestamp"
+declare removeCodeSignature="sudo codesign --remove-signature"
+declare verifyCodeSignature="codesign --verify --deep --strict --verbose=2"
 
 declare depth=0
-codeSign() {
+recurseOnRpath() {
     ((depth++))
     local fileName=$1
+    local command=$2
     local isBinary=$(file -L --mime-type -b $fileName | grep -c "application/x-mach-binary")
 
     if [ $isBinary == 1 ]; then 
@@ -30,19 +28,90 @@ codeSign() {
             while [ $index -gt 0 ]; do
                 local dep=${deps[$index]}
                 dep="${dep//@rpath/$libDir}"
-                codeSign $dep
+                recurseOnRpath $dep $command
                 index=$((index-1))
             done
         fi
         printf "signing d:$depth %*s%s" $((depth * 2)) ' ' "$fileName"
-        $codesignSignature $fileName
         echo
+        if [ "$command" == "add" ]; then
+            echo "$codesignSignature $fileName"
+            $codesignSignature $fileName
+        elif [ "$command" == "remove" ]; then
+            echo "$removeCodeSignature $fileName"
+            $removeCodeSignature $fileName
+        elif [ "$command" == "verify" ]; then
+            #echo "$verifyCodeSignature $fileName"
+            $verifyCodeSignature $fileName
+        fi
     fi
 
     ((depth--))
 }
 
-codeSign $libDir/QtWidgets.framework/QtWidgets
+#codeSign $libDir/QtWidgets.framework/QtWidgets
+#codeSign $libDir/QtMultimedia.framework/QtMultimedia
+
+# Remove all pre-existing code signatures
+#for file in $(find $libDir -name "*"); do
+#    recurseOnRpath $file "remove"
+#done
+
+# Codesign all libraries, dependencies first
+#for file in $(find $libDir -name "*"); do
+#    recurseOnRpath $file "add"
+#done
+
+# Verify codesignature of all libraries
+#for file in $(find $libDir -name "*"); do
+#    recurseOnRpath $file "verify"
+#done
+
+# Codesign all python .so files
+#for file in $(find $pyDir/lib-dynload -name "*.so"); do
+#    $removeCodeSignature $file
+#    $codesignSignature $file
+#done
+
+# Codesign all python site-package files
+for file in $(find $pyDir/site-packages -name "*.pyc"); do
+    $file "add"
+done
+
+# Codesign this one too
+$codesignSignature $pyDir/config-3.9-darwin/python.o
+
+# Codesign all .pyc files
+#for file in $(find $pyDir -name "*.pyc"); do
+#    $codesignSignature $file
+#done
+
+# Codesign all executables
+#for file in $(find $binDir -name "*"); do
+#    $removeCodeSignature $file
+#    $codesignSignature $file
+#done
+
+# Codesign the bundle
+$codesignSignature $baseDir
+
+# repackage the .dmg
+#version=$($baseDir/Contents/MacOS/vaporversion)
+#version=3.9.1
+#hdiutil create -srcFolder $baseDir -o VAPOR3-$version-M1signed.dmg
+
+# app-specific passwords: https://support.apple.com/en-us/102654
+#xcrun notarytool store-credentials "notarytool-password" --apple-id pearse@ucar.edu --team-id DQ4ZFL4KLF --password ikwg-fgol-pqvk-igvq
+
+# notarize
+#xcrun notarytool submit VAPOR3-3.9.1-M1signed.dmg --keychain-profile "notarytool-password" --wait
+
+
+
+
+
+
+
 
 # NEED TO CONFIRM:
 # codesign Python .pyc files
