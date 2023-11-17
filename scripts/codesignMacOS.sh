@@ -7,58 +7,14 @@ baseDir="/Applications/vapor.app/Contents"
 binDir="${baseDir}/MacOS"
 libDir="${baseDir}/Frameworks"
 pyDir="${libDir}/python3.9/__pycache__"
-#declare -a libTypes=("so" "dylib" "framework" "pyc")
-declare -a libTypes=("so" "dylib" "framework")
 #codesignSignature="sudo codesign --force --verbose=2 --sign DQ4ZFL4KLF --options runtime --timestamp"
 codesignSignature="sudo codesign --verbose=2 --sign DQ4ZFL4KLF --options runtime --timestamp"
-
-libraries=(
-    "libtbbmalloc"
-    "libopenvkl"
-    "libopenvkl_malloc"
-    "libtbb"
-    "libcrypto"
-    "libispcrt"
-    "libomp"
-    "libssl"
-    "libpng"
-    "libjpeg"
-    "libtiff"
-    "libsqlite"
-    "libssh"
-    "libcurl"
-    "libproj"
-    "libgeotiff"
-    "libz"
-    "libassimp"
-    "libsz"
-    "libhdf5"
-    "libnetcdf"
-    "libexpat"
-    "libudunits"
-    "libfreetype"
-    "libembree"
-    "libospray"
-    "libosgl"
-)
 
 fileTypes=(
     "library"
     "byte-compiled"
     "executable"
 )
-
-#python3.9
-#Qt
-
-#codesign()
-#    for each library
-#        compile list of dependencies
-#            if num of @rpath == 1
-#                if not codesigned
-#                    codesign
-#            else 
-#                for each @rpath
 
 declare depth=0
 codeSign() {
@@ -87,43 +43,6 @@ codeSign() {
 }
 
 codeSign $libDir/QtWidgets.framework/QtWidgets
-
-foo() {
-    for (( i=10 ; i>0 ; i-- )); do
-        echo $i
-        foo
-        echo $i
-    done
-}
-
-#foo
-
-#TO DO: iterate libraries in above order
-# codesign libraries
-#for library in "${libraries[@]}"; do
-#    echo $library
-#    for fileName in $(ls $libDir |grep $library); do
-#        echo "    $fileName"
-#        rm $baseDir/copies/$fileName
-#        #$codesignSignature $file
-#    done
-#done
-
-#for library in "${libraries[@]}"; do
-#    echo $library
-#    for fileName in $(ls $libDir |grep $library); do
-#        myFileType=$(file fileName)
-#        for fileType in "${fileTypes[@]}"; do
-#            if [[ $myFileType == *"$fileType"* ]]; then
-#                echo lib $file
-#                #$codesignSignature $file
-#            fi
-#        done
-#    done
-#done
-
-#for libType in "${libTypes[@]}"; do
-    #for fileName in $(find $libDir -name *.$libType);
 
 # NEED TO CONFIRM:
 # codesign Python .pyc files
