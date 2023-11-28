@@ -488,6 +488,27 @@ if (APPLE)
             )
 
     endif ()
+
+    #uet (CPACK_PACKAGE_NAME              ${PROJECT_NAME})
+    #set (CPACK_PACKAGE_EXECUTABLES       codesignTest)
+    #set (CPACK_BINARY_DRAGNDROP          ON)
+    #set (CPACK_BINARY_STGZ               OFF)
+    #set (CPACK_BINARY_TGZ                OFF)
+    #set (CPACK_BINARY_TZ                 OFF)
+
+    ## Modify our codesigning script to reference local
+    ## environment variable $CMAKE_RUNTIME_OUTPUT_DIRECTORY
+    #set(CODESIGN_RAW_SCRIPT     "${CMAKE_SOURCE_DIR}/buildutils/macCodeSign.cmake")
+    #set(CODESIGN_UPDATED_SCRIPT "${CMAKE_SOURCE_DIR}/buildutils/macCodeSign_updated.cmake")
+    #configure_file(
+    #    ${CODESIGN_RAW_SCRIPT}
+    #    ${CODESIGN_UPDATED_SCRIPT}
+    #    @ONLY
+    #)
+
+    # Configure our modified codesigning script to run during "make install"
+    set(CPACK_INSTALL_SCRIPTS ${CODESIGN_UPDATED_SCRIPT})
+
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)

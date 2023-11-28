@@ -49,51 +49,104 @@ recurseOnRpath() {
     ((depth--))
 }
 
+recurseOnLoaderPath() {
+    ((depth++))
+    local fileName=$1
+    local command=$2
+    local isBinary=$(file -L --mime-type -b $fileName | grep -c "application/x-mach-binary")
+
+    if [ $isBinary == 1 ]; then 
+        local deps=($(otool -L $fileName | awk '/@loader_path/{print $1}')) # gather an array of @rpath dependencies
+        local numDeps=${#deps[@]}
+        if [ numDeps > 0 ]; then
+            local index=$((numDeps-1))
+            while [ $index -gt 0 ]; do
+                local dep=${deps[$index]}
+                dep="${dep//@loader_path/$pyDir/site-packages}"
+                recurseOnLoaderPath $dep $command
+                index=$((index-1))
+            done
+        fi
+        printf "signing d:$depth %*s%s" $((depth * 2)) ' ' "$fileName"
+        echo
+        if [ "$command" == "add" ]; then
+            echo "$codesignSignature $fileName"
+            $codesignSignature $fileName
+        elif [ "$command" == "remove" ]; then
+            echo "$removeCodeSignature $fileName"
+            $removeCodeSignature $fileName
+        elif [ "$command" == "verify" ]; then
+            #echo "$verifyCodeSignature $fileName"
+            $verifyCodeSignature $fileName
+        fi
+    fi
+
+    ((depth--))
+}
+
 #codeSign $libDir/QtWidgets.framework/QtWidgets
 #codeSign $libDir/QtMultimedia.framework/QtMultimedia
 
+###################
+#
+# Libraries
+#
+###################
+
 # Remove all pre-existing code signatures
-#for file in $(find $libDir -name "*"); do
-#    recurseOnRpath $file "remove"
-#done
+for file in $(find $libDir -name "*"); do
+    recurseOnRpath $file "remove"
+done
 
 # Codesign all libraries, dependencies first
-#for file in $(find $libDir -name "*"); do
-#    recurseOnRpath $file "add"
-#done
+for file in $(find $libDir -name "*"); do
+    recurseOnRpath $file "add"
+done
 
 # Verify codesignature of all libraries
-#for file in $(find $libDir -name "*"); do
-#    recurseOnRpath $file "verify"
-#done
+for file in $(find $libDir -name "*"); do
+    recurseOnRpath $file "verify"
+done
+
+###################
+#
+# Python
+#
+###################
 
 # Codesign all python .so files
-#for file in $(find $pyDir/lib-dynload -name "*.so"); do
-#    $removeCodeSignature $file
-#    $codesignSignature $file
-#done
-
-# Codesign all python site-package files
-for file in $(find $pyDir/site-packages -name "*.pyc"); do
-    $file "add"
+for file in $(find $pyDir/lib-dynload -name "*.so"); do
+    $removeCodeSignature $file
+    $codesignSignature $file
 done
 
 # Codesign this one too
 $codesignSignature $pyDir/config-3.9-darwin/python.o
 
+# Codesign python site-packages libraries
+for file in $(find $pyDir/site-packages -name "*.so"); do
+    recurseOnLoaderPath $file "add"
+done
+
 # Codesign all .pyc files
-#for file in $(find $pyDir -name "*.pyc"); do
-#    $codesignSignature $file
-#done
+for file in $(find $pyDir -name "*.pyc"); do
+    $codesignSignature $file
+done
+
+###################
+#
+# Executables
+#
+###################
 
 # Codesign all executables
-#for file in $(find $binDir -name "*"); do
-#    $removeCodeSignature $file
-#    $codesignSignature $file
-#done
+for file in $(find $binDir -name "*"); do
+    $removeCodeSignature $file
+    $codesignSignature $file
+done
 
 # Codesign the bundle
-$codesignSignature $baseDir
+$codesignSignature --force $baseDir
 
 # repackage the .dmg
 #version=$($baseDir/Contents/MacOS/vaporversion)
