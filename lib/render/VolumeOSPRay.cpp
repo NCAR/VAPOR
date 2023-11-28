@@ -208,7 +208,7 @@ int VolumeOSPRay::LoadData(const Grid *grid)
         ospSetObjectAsData(group, "geometry", OSP_GEOMETRIC_MODEL, _ospIsoModel);
     else
         ospSetObjectAsData(group, "volume", OSP_VOLUMETRIC_MODEL, _ospVolumeModel);
-    if (p->GetValueLong("osp_enable_clipping", false)) ospSetObjectAsData(group, "clippingGeometry", OSP_GEOMETRIC_MODEL, clipModel);
+    if (p->GetValueLong("osp_enable_clipping", true)) ospSetObjectAsData(group, "clippingGeometry", OSP_GEOMETRIC_MODEL, clipModel);
     //    ospSetObjectAsData(group, "geometry", OSP_GEOMETRIC_MODEL, clipModel);
     ospCommit(group);
     ospRelease(clipModel);

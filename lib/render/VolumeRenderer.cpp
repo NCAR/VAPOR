@@ -111,7 +111,7 @@ int VolumeRenderer::_paintGL(bool fast)
     CheckCache(_cache.osp_force_regular, p->GetValueLong("osp_force_regular", 0));
     CheckCache(_cache.osp_test_volume, p->GetValueLong("osp_test_volume", 0));
     CheckCache(_cache.osp_decompose, p->GetValueLong("osp_decompose", 0));
-    CheckCache(_cache.osp_enable_clipping, p->GetValueLong("osp_enable_clipping", 0));
+    CheckCache(_cache.osp_enable_clipping, p->GetValueLong("osp_enable_clipping", 1));
 
     if (_initializeAlgorithm() < 0) return -1;
     if (_loadData() < 0) return -1;
