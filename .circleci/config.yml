@@ -1,4 +1,5 @@
 anchors:
+  - &current3rdParty  "2023-Jun"
   - &srcLibID         "1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a"
   - &ubuntu20LibID    "12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5"
   - &ubuntu22LibID    "17Uv6wTePyRKfN10Iv00JKzeLc2W43NYk"
@@ -69,7 +70,7 @@ commands:
             -DDIST_INSTALLER:string=ON \
             -DUSE_OMP=ON \
             <<parameters.compileArgs>> ..
-            make -j8
+            make -j4
             make installer
             for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
@@ -77,6 +78,57 @@ commands:
             ls /tmp/workspace/installers
           no_output_timeout: 30m
 
+  smoke_tests:
+    steps:
+      - restore_cache:
+          name: restore smoke test data
+          keys:
+            - smoke-test-data
+      - run:
+          name: Acquire smoke test data
+          command: |
+            if [ -z "$(ls -A /smokeTestData)" ]; then
+                mkdir -p /smokeTestData
+                fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t"
+                filename="/tmp/smokeTestData.tar.gz"
+                curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null
+                curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" -o ${filename}
+                tar --no-same-owner -xf /tmp/smokeTestData.tar.gz -C /smokeTestData
+                chown -R root:root /smokeTestData
+                chmod -R 777 /smokeTestData
+            else
+                echo "Data already acquired"
+            fi
+      - save_cache:
+          key: smoke-test-data
+          paths:
+            - /smokeTestData
+      - run:
+          name: Smoke tests
+          command: |
+            python3 ~/project/test_apps/smokeTests/smokeTests.py \
+            -testDataRoot=/smokeTestData/smokeTestData \
+            -binaryRoot=~/project/build/test_binaries \
+            -resultsDir=~/project/test_apps/smokeTests/testResults
+      - store_artifacts:
+          path: ~/project/test_apps/smokeTests/testResults
+
+  suse_prerequisites:
+    steps:
+      - run:
+          name: Acquire suse prerequisites
+          command: |
+            zypper install -y -t pattern devel_C_C++
+            zypper install -y \
+                gzip \
+                xz \
+                git \
+                gcc7-fortran \
+                cmake \
+                curl \
+                libomp-devel \
+                libicu-devel \
+                freeglut-devel
 
 jobs:
   build_win10_installer:
@@ -447,7 +499,12 @@ jobs:
           name: make debug
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
+            cmake \
+            -DBUILD_TEST_APPS=ON \
+            -DPYTHONVERSION=3.6 \
+            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
+            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
+            ..
             make -j2 2>&1 | tee /tmp/debugOutput.txt
             make clean
       
@@ -458,7 +515,12 @@ jobs:
           name: make debug with omp
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
+            cmake \
+            -DBUILD_TEST_APPS=ON \  
+            -DUSE_OMP=ON -DPYTHONVERSION=3.6 \
+            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
+            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
+            ..
             make -j2 2>&1 | tee /tmp/debugOutputWithOMP.txt
             make clean
       
@@ -469,7 +531,13 @@ jobs:
           name: make release
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
+            cmake \
+            -DBUILD_TEST_APPS=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPYTHONVERSION=3.6 \
+            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
+            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
+            ..
             make -j2 2>&1 | tee /tmp/releaseOutput.txt
             make clean
       
@@ -480,7 +548,13 @@ jobs:
           name: make release with omp
           command: |
             cd /root/project/build
-            cmake -DBUILD_TEST_APPS=ON -DUSE_OMP=ON -DPYTHONVERSION=3.6 -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m ..
+            cmake \
+            -DBUILD_TEST_APPS=ON \
+            -DUSE_OMP=ON \
+            -DPYTHONVERSION=3.6 \
+            -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/2019-Aug \
+            -DPython_INCLUDE_DIRS=/usr/local/VAPOR-Deps/2019-Aug/include/python3.6m \
+            ..
             make -j2 2>&1 | tee /tmp/releaseOutputWithOMP.txt
       - store_artifacts:
           path: /tmp/releaseOutputWithOMP.txt
@@ -488,7 +562,11 @@ jobs:
       - run:
           name: Smoke test
           command: |
-            python3 /root/project/test_apps/smokeTests/smokeTests.py -testDataRoot=/smokeTestData/smokeTestData -binaryRoot=/root/project/build/test_binaries -resultsDir=/root/project/test_apps/smokeTests/testResults
+            python3 \
+            /root/project/test_apps/smokeTests/smokeTests.py \
+            -testDataRoot=/smokeTestData/smokeTestData \
+            -binaryRoot=/root/project/build/test_binaries \
+            -resultsDir=/root/project/test_apps/smokeTests/testResults
       - store_artifacts:
           path: /root/project/test_apps/smokeTests/testResults
 
@@ -532,36 +610,33 @@ jobs:
   build_suse_installer:
     docker:
       - image: opensuse/leap
-
-    resource_class: xlarge
-
+    resource_class: large
     steps:
+      - suse_prerequisites
       - checkout
-
-      - run:
-          name: acquire prerequisites
-          command: |
-            zypper install -y -t pattern devel_C_C++
-            zypper install -y \
-                gzip \
-                xz \
-                git \
-                gcc7-fortran \
-                cmake \
-                curl \
-                libomp-devel \
-                libicu-devel \
-                freeglut-devel
-                
       - get_libraries:
           fileName: 2023-Sept-SUSE.tar.xz
           driveID: *suseLibID
-
       - build_vapor:
           moveToCommand: ${f/Linux/SUSE}
-
+          compileArgs: -DBUILD_TEST_APPS=ON
+      - persist_to_workspace:
+          root: /
+          paths:
+            - root/project
+            - usr/local/VAPOR-Deps
       - store_artifacts:
           path: /tmp/workspace/installers
+
+  suse_smoke_tests:
+    docker:
+      - image: opensuse/leap
+    resource_class: medium
+    steps:
+      - suse_prerequisites
+      - attach_workspace:
+          at: /
+      - smoke_tests
 
   build_ubuntu20_installer:
     docker:
@@ -800,7 +875,7 @@ jobs:
             /tmp/workspace/installers
 
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Sept-suse.tar.xz
+          path: /usr/local/VAPOR-Deps/2023-Sept-SUSE.tar.xz
 
   build_ubuntu20_libs:
     docker:
@@ -1015,9 +1090,13 @@ workflows:
       #- test_clang_format
       #- build_win10_installer
       #- build_macOS_installers
+      #- build_ubuntu20_installer
+      #- build_ubuntu22_installer
       - build_ubuntu20_installer
-      - build_ubuntu22_installer
       - build_suse_installer
+      - suse_smoke_tests:
+          requires:
+            - build_suse_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
       #- build_macOSx86_libs

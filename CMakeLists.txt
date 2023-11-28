@@ -40,6 +40,7 @@ if(APPLE)
     else()
         message("Building on macOS x86 architecture")
         set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version" FORCE)
+        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "macOS build architecture" FORCE)
     endif()
 endif()
 
@@ -166,7 +167,6 @@ else()
     endif()
 endif()
 
-include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories ("${PROJECT_SOURCE_DIR}/lib/osgl/include")
 include_directories ("${PROJECT_SOURCE_DIR}/lib/osgl/glad/include")
 
