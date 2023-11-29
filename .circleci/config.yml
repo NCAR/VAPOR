@@ -1092,7 +1092,7 @@ workflows:
       #- build_macOS_installers
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
-      - build_ubuntu20_installer
+      # - build_ubuntu20_installer
       - build_suse_installer
       - suse_smoke_tests:
           requires:
