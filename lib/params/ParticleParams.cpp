@@ -53,7 +53,7 @@ void ParticleParams::_init()
     SetValueDouble(PhongAmbientTag, "", .4);
     SetValueDouble(PhongDiffuseTag, "", .8);
     SetValueDouble(PhongSpecularTag, "", 0.);
-    SetValueDouble(PhongShininessTag, "", 2.);
+    SetValueDouble(PhongShininessTag, "", 0.5);
 
     RenderParams::SetDefaultVariables(3, true);
 }
