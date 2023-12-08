@@ -143,6 +143,7 @@ int FlowParams::Initialize()
     SetVelocityMultiplier(1.0);
     SetFirstStepSizeMultiplier(1.0);
     SetUseFixedAdvectionSteps(false);
+    SetFixedAdvectionStepSize(0.0);
     SetPeriodic(vector<bool>(3, false));
     SetGridNumOfSeeds({5, 5, 1});
     SetRandomNumOfSeeds(50);
@@ -187,11 +188,15 @@ double FlowParams::GetFirstStepSizeMultiplier() const { return GetValueDouble(_f
 
 bool FlowParams::GetUseFixedAdvectionSteps() const { return GetValueLong(_fixedAdvectionStepTag, 0); }
 
+double FlowParams::GetFixedAdvectionStepSize() const { return GetValueDouble(_fixedAdvectionStepSizeTag, 0.0); }
+
 void FlowParams::SetVelocityMultiplier(double coeff) { SetValueDouble(_velocityMultiplierTag, "Field Scale Factor", coeff); }
 
 void FlowParams::SetFirstStepSizeMultiplier(double coeff) { SetValueDouble(_firstStepSizeMultiplierTag, "first step size multiplier", coeff); }
 
-void FlowParams::SetUseFixedAdvectionSteps(bool fixed) { SetValueLong(_fixedAdvectionStepTag, "", long(fixed)); }
+void FlowParams::SetUseFixedAdvectionSteps(bool fixed) { SetValueLong(_fixedAdvectionStepTag, "Use Fixed Advection Steps", long(fixed)); }
+
+void FlowParams::SetFixedAdvectionStepSize(double step) { SetValueDouble(_fixedAdvectionStepSizeTag, "Fixed Advection Step Size", step); }
 
 long FlowParams::GetSteadyNumOfSteps() const { return GetValueLong(_steadyNumOfStepsTag, 100); }
 

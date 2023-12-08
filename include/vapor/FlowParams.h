@@ -88,7 +88,10 @@ public:
     //! \retval bool - If VAPOR uses fixed advection steps.
     bool GetUseFixedAdvectionSteps() const;
 
-    double Get
+    //! Get the fixed advection step size to be used.
+    //! \copydetails FlowParams::GetUseFixedAdvectionSteps()
+    //! \retval double - Fixed advection step size to be used.
+    double GetFixedAdvectionStepSize() const;
     
     //! Set the multiplier being applied to the flow advection algorithm.
     //! \copydetails FlowParams::GetVelocityMultiplier()
@@ -104,6 +107,11 @@ public:
     //! \copydetails FlowParams::GetUseFixedAdvectionSteps()
     //! \param[in] bool - If VAPOR uses fixed advection steps.
     void SetUseFixedAdvectionSteps(bool);
+
+    //! Set the fixed advection step size to be used.
+    //! \copydetails FlowParams::GetUseFixedAdvectionSteps()
+    //! \param[in] bool - User-specified value to be used for fixed step advection.
+    void SetFixedAdvectionStepSize(double);
 
     //! Get the target number of steps to advect a steady flow line (aka a streamline).
     //! \copydetails FlowParams::SetSteadyNumOfSteps()
