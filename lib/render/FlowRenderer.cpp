@@ -808,21 +808,35 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
 
     // Check velocity multiplier
     // If the multiplier is changed, then the entire stream is out of date
-    const auto velMult = params->GetVelocityMultiplier();
-    if (_cache_velocityMltp != velMult) {
-        _cache_velocityMltp = velMult;
+    if (_cache_velocityMltp != params->GetVelocityMultiplier()) {
+        _cache_velocityMltp = params->GetVelocityMultiplier();
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
     // Check first step size multiplier
     // If the multiplier is changed, then the entire stream is out of date
-    const auto firstMult = params->GetFirstStepSizeMultiplier();
-    if (_cache_firstStepSizeMltp != firstMult) {
-        _cache_firstStepSizeMltp = firstMult;
+    if (_cache_firstStepSizeMltp != params->GetFirstStepSizeMultiplier()) {
+        _cache_firstStepSizeMltp = params->GetFirstStepSizeMultiplier();
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
+
+    // Check if using the fixed advection steps.
+    // If changed, then the entire stream is out ot date.
+    if (_cache_usedFixedAdvectionSteps != params->GetUseFixedAdvectionSteps()) {
+      _cache_usedFixedAdvectionSteps = params->GetUseFixedAdvectionSteps();
+      _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+      _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+
+    // Check if the fixed advection step size is out of date only when specified to use fixed steps.
+    if (_cache_usedFixedAdvectionSteps && _cache_fixedAdvectionStepSize != params->GetFixedAdvectionStepSize()) {
+      _cache_fixedAdvectionStepSize = params->GetFixedAdvectionStepSize();
+      _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+      _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+    
 
     // Check periodicity
     // If periodicity changes along any dimension, then the entire stream is out of date
