@@ -824,14 +824,14 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
 
     // Check if using the fixed advection steps.
     // If changed, then the entire stream is out ot date.
-    if (_cache_usedFixedAdvectionSteps != params->GetUseFixedAdvectionSteps()) {
-      _cache_usedFixedAdvectionSteps = params->GetUseFixedAdvectionSteps();
+    if (_cache_useFixedAdvectionSteps != params->GetUseFixedAdvectionSteps()) {
+      _cache_useFixedAdvectionSteps = params->GetUseFixedAdvectionSteps();
       _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
       _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
     // Check if the fixed advection step size is out of date only when specified to use fixed steps.
-    if (_cache_usedFixedAdvectionSteps && _cache_fixedAdvectionStepSize != params->GetFixedAdvectionStepSize()) {
+    if (_cache_useFixedAdvectionSteps && _cache_fixedAdvectionStepSize != params->GetFixedAdvectionStepSize()) {
       _cache_fixedAdvectionStepSize = params->GetFixedAdvectionStepSize();
       _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
       _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;

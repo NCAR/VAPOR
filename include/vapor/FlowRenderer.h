@@ -81,7 +81,7 @@ private:
     bool                _cache_integrationSetAllToFinalValue;
     float               _cache_integrationDistScalar;
     std::vector<double> _cache_integrationVolume;
-    bool                _cache_usedFixedAdvectionSteps = false;
+    bool                _cache_useFixedAdvectionSteps = false;
     double              _cache_fixedAdvectionStepSize = 0.0;
 
     // This Advection class is only used in bi-directional advection mode
