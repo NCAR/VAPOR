@@ -108,6 +108,53 @@ std::string FileUtils::Realpath(const std::string &path)
 #endif
 }
 
+std::string FileUtils::Relpath(std::string path, std::string to)
+{
+    path = Realpath(path);
+    to = Realpath(to);
+    if (!IsDirectory(to))
+        to = Dirname(to);
+
+    auto common = CommonAncestor({path, to});
+    auto commonLevels = SplitPath(common).size();
+
+    path = JoinPaths(STLUtils::Slice(SplitPath(path), commonLevels));
+    to = JoinPaths(STLUtils::Slice(SplitPath(to), commonLevels));
+
+    for (const auto &_ : SplitPath(to))
+        path = JoinPaths({"..", path});
+
+    return path;
+}
+
+std::string FileUtils::CommonAncestor(const std::vector<std::string> &paths_)
+{
+    if (paths_.empty())
+        return "";
+
+    std::vector<std::vector<std::string>> paths;
+    for (const auto &path : paths_)
+        paths.push_back(SplitPath(path));
+
+    int min_depth = 100000;
+    for (const auto &path : paths)
+        min_depth = min(min_depth, (int)path.size());
+
+    int same_depth = 0;
+    for (int i = 0; i < min_depth; i++) {
+        for (const auto &path: paths)
+            if (path[i] != paths[0][i])
+                goto stop;
+        same_depth = i+1;
+    }
+    stop:
+
+    if (same_depth <= 0)
+        return "";
+
+    return JoinPaths(std::vector<string>(paths[0].begin(), paths[0].begin() + same_depth));
+}
+
 std::string FileUtils::Extension(const std::string &path)
 {
     string basename = Basename(path);
@@ -141,8 +188,12 @@ std::string FileUtils::POSIXPathToCurrentOS(const std::string &path)
 
 std::string FileUtils::CleanupPath(std::string path)
 {
+#ifdef WIN32
+    std::replace(path.begin(), path.end(), '\\', '/');
+#endif
     while (path.length() > 1 && (path.back() == '/' || path.back() == '\\')) path.pop_back();
-    if (path == "") path = ".";
+    while (path.find("//") != std::string::npos) path = STLUtils::ReplaceAll(path, "//", "/");
+    if (path == "") path = "";
     return path;
 }
 
@@ -174,6 +225,28 @@ bool FileUtils::IsSubpath(const std::string &dir, const std::string &path){
     return STLUtils::BeginsWith(FileUtils::SplitPath(path), FileUtils::SplitPath(dir));
 }
 
+#ifndef WIN32
+static unsigned long long GetFileInode(const std::string &path) {
+    struct STAT64 s;
+    if (STAT64(path.c_str(), &s) != 0)
+        return 0;
+    return s.st_ino;
+}
+#endif
+
+bool FileUtils::AreSameFile(const std::string &pathA, const std::string &pathB)
+{
+#ifdef WIN32
+    if (Realpath(pathA) != Realpath(pathB)) return false;
+    if (GetFileType(pathA) != GetFileType(pathB)) return false;
+    if (!IsDirectory(pathA) && GetFileSize(pathA) != GetFileSize(pathB)) return false;
+    if (GetFileModifiedTime(pathA) != GetFileModifiedTime(pathB)) return false;
+    return true;
+#else
+    return GetFileInode(pathA) == GetFileInode(pathB);
+#endif
+}
+
 FileType FileUtils::GetFileType(const std::string &path)
 {
     struct STAT64 s;
@@ -186,6 +259,14 @@ FileType FileUtils::GetFileType(const std::string &path)
             return FileType::Other;
     } else
         return FileType::Does_Not_Exist;
+}
+
+long long FileUtils::GetFileSize(const std::string &path)
+{
+    struct STAT64 s;
+    if (STAT64(path.c_str(), &s) != 0)
+        return -1;
+    return s.st_size;
 }
 
 std::vector<std::string> FileUtils::ListFiles(const std::string &path)
@@ -229,7 +310,7 @@ std::vector<std::string> FileUtils::ListFiles(const std::string &path)
 #endif
 }
 
-std::string FileUtils::JoinPaths(const std::initializer_list<std::string> &paths)
+std::string FileUtils::JoinPaths(const std::vector<std::string> &paths)
 {
     string path;
     for (auto it = paths.begin(); it != paths.end(); ++it) {
@@ -238,13 +319,16 @@ std::string FileUtils::JoinPaths(const std::initializer_list<std::string> &paths
             path += *it;
         }
     }
-    return path;
+    return CleanupPath(path);
 }
 
 std::vector<std::string> FileUtils::SplitPath(std::string path)
 {
     std::replace(path.begin(), path.end(), '\\', '/');
-    return STLUtils::Split(CleanupPath(path), "/");
+    auto parts = STLUtils::Split(CleanupPath(path), "/");
+    if (!path.empty() && path[0] == '/')
+        parts[0] = "/";
+    return STLUtils::Filter<std::string>(parts, [](const std::string &s) { return !s.empty(); });
 }
 
 int FileUtils::MakeDir(const std::string &path)
