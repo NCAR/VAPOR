@@ -268,6 +268,10 @@ int FlowRenderer::_paintGL(bool fast)
 
     if (!_advectionComplete) {
         auto deltaT = _cache_deltaT;
+        const auto fixedSteps = params->GetUseFixedAdvectionSteps();
+        if (fixedSteps && params->GetFixedAdvectionStepSize() > 0.0)
+          deltaT = params->GetFixedAdvectionStepSize();
+
         rv = flow::ADVECT_HAPPENED;
 
         // Advection scheme 1: advect a maximum number of steps.
@@ -280,15 +284,16 @@ int FlowRenderer::_paintGL(bool fast)
 
             Progress::StartIndefinite("Performing flowline calculations");
             Progress::Update(0);
-            rv = _advection.AdvectSteps(&_velocityField, deltaT, numOfSteps);
+            rv = _advection.AdvectSteps(&_velocityField, deltaT, numOfSteps, fixedSteps);
             _printNonZero(rv, __FILE__, __func__, __LINE__);
 
             // If the advection is bi-directional
             if (_2ndAdvection) {
+                Progress::Update(5);
                 assert(deltaT > 0.0);
                 auto deltaT2 = deltaT * -1.0;
 
-                rv = _2ndAdvection->AdvectSteps(&_velocityField, deltaT2, numOfSteps);
+                rv = _2ndAdvection->AdvectSteps(&_velocityField, deltaT2, numOfSteps, fixedSteps);
                 _printNonZero(rv, __FILE__, __func__, __LINE__);
             }
             Progress::Finish();
@@ -298,7 +303,7 @@ int FlowRenderer::_paintGL(bool fast)
         // This scheme is used for unsteady flow
         else {
             for (int i = 1; i <= _cache_currentTS; i++) {
-                rv = _advection.AdvectTillTime(&_velocityField, _timestamps.at(i - 1), deltaT, _timestamps.at(i));
+                rv = _advection.AdvectTillTime(&_velocityField, _timestamps.at(i - 1), deltaT, _timestamps.at(i), fixedSteps);
                 _printNonZero(rv, __FILE__, __func__, __LINE__);
             }
         }
@@ -803,21 +808,35 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
 
     // Check velocity multiplier
     // If the multiplier is changed, then the entire stream is out of date
-    const auto velMult = params->GetVelocityMultiplier();
-    if (_cache_velocityMltp != velMult) {
-        _cache_velocityMltp = velMult;
+    if (_cache_velocityMltp != params->GetVelocityMultiplier()) {
+        _cache_velocityMltp = params->GetVelocityMultiplier();
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
     // Check first step size multiplier
     // If the multiplier is changed, then the entire stream is out of date
-    const auto firstMult = params->GetFirstStepSizeMultiplier();
-    if (_cache_firstStepSizeMltp != firstMult) {
-        _cache_firstStepSizeMltp = firstMult;
+    if (_cache_firstStepSizeMltp != params->GetFirstStepSizeMultiplier()) {
+        _cache_firstStepSizeMltp = params->GetFirstStepSizeMultiplier();
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
+
+    // Check if using the fixed advection steps.
+    // If changed, then the entire stream is out ot date.
+    if (_cache_useFixedAdvectionSteps != params->GetUseFixedAdvectionSteps()) {
+      _cache_useFixedAdvectionSteps = params->GetUseFixedAdvectionSteps();
+      _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+      _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+
+    // Check if the fixed advection step size is out of date only when specified to use fixed steps.
+    if (_cache_useFixedAdvectionSteps && _cache_fixedAdvectionStepSize != params->GetFixedAdvectionStepSize()) {
+      _cache_fixedAdvectionStepSize = params->GetFixedAdvectionStepSize();
+      _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+      _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+    
 
     // Check periodicity
     // If periodicity changes along any dimension, then the entire stream is out of date

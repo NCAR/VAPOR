@@ -81,6 +81,17 @@ public:
     //!          In such cases, users may manually apply a multiplier to the first step size.
     //! \retval double - First step size multiplier for flow rendering.
     double GetFirstStepSizeMultiplier() const;
+
+    //! Get the boolean that indicates if the flow advection uses fixed step sizes.
+    //! \details VAPOR adjusts its advection step sizes automatically based on the curvature of the past few steps.\n
+    //!          This behavior, however, can be disabled, in which case the user-provided step size will be used.\n
+    //! \retval bool - If VAPOR uses fixed advection steps.
+    bool GetUseFixedAdvectionSteps() const;
+
+    //! Get the fixed advection step size to be used.
+    //! \copydetails FlowParams::GetUseFixedAdvectionSteps()
+    //! \retval double - Fixed advection step size to be used.
+    double GetFixedAdvectionStepSize() const;
     
     //! Set the multiplier being applied to the flow advection algorithm.
     //! \copydetails FlowParams::GetVelocityMultiplier()
@@ -91,6 +102,16 @@ public:
     //! \copydetails FlowParams::GetFirstStepSizeMultiplier()
     //! \param[in] double - Velocity field multiplier for flow rendering
     void SetFirstStepSizeMultiplier(double);
+
+    //! Set the boolean that indicates if the flow advection uses fixed step sizes.
+    //! \copydetails FlowParams::GetUseFixedAdvectionSteps()
+    //! \param[in] bool - If VAPOR uses fixed advection steps.
+    void SetUseFixedAdvectionSteps(bool);
+
+    //! Set the fixed advection step size to be used.
+    //! \copydetails FlowParams::GetUseFixedAdvectionSteps()
+    //! \param[in] bool - User-specified value to be used for fixed step advection.
+    void SetFixedAdvectionStepSize(double);
 
     //! Get the target number of steps to advect a steady flow line (aka a streamline).
     //! \copydetails FlowParams::SetSteadyNumOfSteps()
@@ -374,6 +395,8 @@ public:
     static const std::string _isSteadyTag;
     static const std::string _velocityMultiplierTag;
     static const std::string _firstStepSizeMultiplierTag;
+    static const std::string _fixedAdvectionStepTag;
+    static const std::string _fixedAdvectionStepSizeTag;
     static const std::string _steadyNumOfStepsTag;
     static const std::string _seedGenModeTag;
     static const std::string _seedInputFilenameTag;

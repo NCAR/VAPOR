@@ -28,10 +28,10 @@ public:
     //
     // Advect all particles as long as they are within spatial and temporal boundary
     // for a specified number if steps.
-    int AdvectSteps(Field *velocityField, double deltaT, size_t maxSteps, ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
+    int AdvectSteps(Field *velocityField, double deltaT, size_t maxSteps, bool fixedStepSize, ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
     // Advect as many steps as necessary to reach a certain time: targetT.
     // Note: it only considers particles that have already passed startT.
-    int AdvectTillTime(Field *velocityField, double startT, double deltaT, double targetT, ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
+    int AdvectTillTime(Field *velocityField, double startT, double deltaT, double targetT, bool fixedStepSize, ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
 
     // Retrieve field values of a particle based on its location, and put the result in
     // the "value" field or the "properties" field of a particle
@@ -109,8 +109,8 @@ private:
     // Print return code if it's non-zero and compiled in debug mode.
     void _printNonZero(int rtn, const char *file, const char *func, int line) const;
 
-    void        _calculateParticleIntegratedValue(Particle &p, const Particle &prev, const Field *scalarField, const bool skipNonZero, const float distScale,
-                                                  const std::vector<double> &integrateWithinVolumeMin, const std::vector<double> &integrateWithinVolumeMax) const;
+    void _calculateParticleIntegratedValue(Particle &p, const Particle &prev, const Field *scalarField, const bool skipNonZero, const float distScale,
+                                           const std::vector<double> &integrateWithinVolumeMin, const std::vector<double> &integrateWithinVolumeMax) const;
     static bool _isParticleInsideVolume(const Particle &p, const std::vector<double> &min, const std::vector<double> &max);
 };
 }; // namespace flow

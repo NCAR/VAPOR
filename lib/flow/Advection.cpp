@@ -34,7 +34,7 @@ int Advection::CheckReady() const
     return 0;
 }
 
-int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVECTION_METHOD method)
+int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, bool fixedStepSize, ADVECTION_METHOD method)
 {
     int ready = CheckReady();
     if (ready != 0) return ready;
@@ -57,8 +57,8 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
                 break;                // terminate stream immediately.
 
             double dt = deltaT;
-            if (s.size() > 2)    // If there are at least 3 particles in the stream and
-            {                    // neither is a separator, we also adjust *dt*
+            if (!fixedStepSize && s.size() > 2)   // When not using fixed step sizes and there are at least 3 particles in the stream,
+            {                                     // none is a separator, we adjust *dt*.
                 const auto &past1 = s[s.size() - 2];
                 const auto &past2 = s[s.size() - 3];
                 if ((!past1.IsSpecial()) && (!past2.IsSpecial())) {
@@ -186,7 +186,7 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
         return NO_ADVECT_HAPPENED;
 }
 
-int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, double targetT, ADVECTION_METHOD method)
+int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, double targetT, bool fixedStepSize, ADVECTION_METHOD method)
 {
     int ready = CheckReady();
     if (ready != 0) return ready;
@@ -247,8 +247,8 @@ int Advection::AdvectTillTime(Field *velocity, double startT, double deltaT, dou
             } // Finish the out-of-volume condition
 
             double dt = deltaT;
-            if (s.size() > 2)    // If there are at least 3 particles in the stream,
-            {                    // we also adjust *dt*
+            if (!fixedStepSize && s.size() > 2)
+            {
                 double mindt = deltaT / 20.0, maxdt = deltaT * 20.0;
                 maxdt = glm::min(maxdt, targetT - p0.time);
                 const auto &past1 = s[s.size() - 2];

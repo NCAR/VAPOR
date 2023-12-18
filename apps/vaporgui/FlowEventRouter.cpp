@@ -100,7 +100,9 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
 
         new PSection("Advanced Options", {
             (new PDoubleInput(FP::_velocityMultiplierTag, "Vector Field Multiplier"))->SetTooltip( "Apply a multiplier to the velocity field."),
-            (new PDoubleInput(FP::_firstStepSizeMultiplierTag, "First Step Size Multiplier"))->SetTooltip( "Apply a multiplier to the auto-calculated first step size. Very occasionally a value bigger than 1.0 is needed here.")
+            (new PDoubleInput(FP::_firstStepSizeMultiplierTag, "First Step Size Multiplier"))->SetTooltip( "Apply a multiplier to the auto-calculated first step size. Very occasionally a value bigger than 1.0 is needed here."),
+            (new PCheckbox(FP::_fixedAdvectionStepTag, "Use Fixed Advection Steps"))->SetTooltip( "The user may provide an advection step size, so that VAPOR disables dynamic step size adjustments and always uses the fixed step size."),
+            (new PShowIf(FP::_fixedAdvectionStepTag))->Then(new PDoubleInput(FP::_fixedAdvectionStepSizeTag, "  |--- Fixed Advection Step Size"))->SetTooltip( "Use this specific value as the fixed advection step size."),
         }),
     }));
     
