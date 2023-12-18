@@ -149,15 +149,15 @@ done
 $codesignSignature --force $baseDir
 
 # repackage the .dmg
-#version=$($baseDir/Contents/MacOS/vaporversion)
-#version=3.9.1
-#hdiutil create -srcFolder $baseDir -o VAPOR3-$version-M1signed.dmg
+version=$($baseDir/Contents/MacOS/vaporversion)
+version=3.9.1
+hdiutil create -srcFolder $baseDir -o VAPOR3-$version-M1signed.dmg
 
 # app-specific passwords: https://support.apple.com/en-us/102654
-#xcrun notarytool store-credentials "notarytool-password" --apple-id pearse@ucar.edu --team-id DQ4ZFL4KLF --password ikwg-fgol-pqvk-igvq
+xcrun notarytool store-credentials "notarytool-password" --apple-id pearse@ucar.edu --team-id DQ4ZFL4KLF --password ikwg-fgol-pqvk-igvq
 
 # notarize
-#xcrun notarytool submit VAPOR3-3.9.1-M1signed.dmg --keychain-profile "notarytool-password" --wait
+xcrun notarytool submit VAPOR3-3.9.1-M1signed.dmg --keychain-profile "notarytool-password" --wait
 
 
 
