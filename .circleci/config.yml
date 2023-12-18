@@ -213,7 +213,8 @@ jobs:
                 #sudo /opt/local/bin/port -v selfupdate
 
             # CMake
-            (sudo yes || true) | sudo /opt/local/bin/port install cmake
+            #(sudo yes || true) | sudo /opt/local/bin/port install cmake
+            brew install cmake
             # clang
             (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
             sudo /opt/local/bin/port select --set clang mp-clang-17
