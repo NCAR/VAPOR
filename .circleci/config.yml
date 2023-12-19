@@ -70,6 +70,7 @@ commands:
             cd build
             #git checkout <<parameters.branch>>
             git reset --hard origin/main
+            git checkout main
             git pull origin main
             <<parameters.beforeCompile>>
             cmake \
@@ -135,7 +136,8 @@ commands:
                 curl \
                 libomp-devel \
                 libicu-devel \
-                freeglut-devel
+                freeglut-devel \
+                openssh-clients
 
 jobs:
   build_win10_installer:
