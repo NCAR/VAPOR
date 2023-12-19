@@ -21,7 +21,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(APPLE)
-    if(NOT DEFINED $CMAKE_OSX_ARCHITECTURES)
+    if(NOT DEFINED CMAKE_OSX_ARCHITECTURES)
         # Check if the target architecture is arm64
         include(CheckCXXSourceRuns)
         set(CMAKE_REQUIRED_FLAGS "-arch arm64")
