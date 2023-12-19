@@ -69,8 +69,8 @@ commands:
             mkdir -p build
             cd build
             #git checkout <<parameters.branch>>
-            git pull origin main
             git reset --hard origin/main
+            git pull origin main
             <<parameters.beforeCompile>>
             cmake \
             -DCMAKE_BUILD_TYPE:String=Release \
