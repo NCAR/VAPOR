@@ -1113,7 +1113,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "40 12 2 * *" #Time is GMT
+             cron: "40 12 * * tue" #Time is GMT
              filters:
                branches:
                  only: main
