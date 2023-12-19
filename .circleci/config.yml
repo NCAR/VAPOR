@@ -69,7 +69,7 @@ commands:
             mkdir -p build
             cd build
             #git checkout <<parameters.branch>>
-            git pull
+            git pull origin main
             git reset --hard origin/main
             <<parameters.beforeCompile>>
             cmake \
