@@ -246,6 +246,8 @@ jobs:
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DBUILD_OSP=OFF \
           moveToCommand: ${f/Darwin/DarwinM1}
 
       #- run:
