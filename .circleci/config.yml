@@ -42,7 +42,9 @@ commands:
               filename=<<parameters.fileName>>
               curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
               tar -xf ${filename} -C $thirdPartyRoot
-              <<parameters.sudo>> ln -s $thirdPartyRoot/$filename $thirdPartyRoot/current
+              libraryDir=`ls ${thirdPartyRoot}`
+              <<parameters.sudo>> ln -s $libraryDir $thirdPartyRoot/current
+              #<<parameters.sudo>> ln -s $thirdPartyRoot/$filename $thirdPartyRoot/current
 
   build_vapor:
     parameters:
