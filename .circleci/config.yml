@@ -710,7 +710,7 @@ jobs:
 
       - build_vapor:
           branch: main
-          beforeCompile: cd ~/project; git checkout origin/3.9.1 -- CMakeLists.txt
+          beforeCompile: git checkout origin/3.9.1 -- CMakeLists.txt
           moveToCommand: ${f/Linux/Ubuntu20}
 
       - store_artifacts:
