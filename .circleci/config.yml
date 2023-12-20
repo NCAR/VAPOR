@@ -250,7 +250,8 @@ jobs:
           sudo: sudo
 
       - build_vapor:
-          beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          #beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
           branch: main
           compileArgs: |
             -DCPACK_BINARY_DRAGNDROP=ON \
