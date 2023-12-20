@@ -159,7 +159,10 @@ jobs:
             ls
             python .circleci/downloadWin3rdParty.py
             cd /c/Users/circleci/project
-            git status
+            git reset --hard origin/main
+            git checkout main
+            git pull origin main
+            git log
           no_output_timeout: 20m
       - run:
           name: dos2unix
@@ -176,9 +179,9 @@ jobs:
             cd build
             #git checkout $CIRCLE_BRANCH
             choco install git -y
-            git reset --hard origin/main
-            git checkout main
-            git pull origin main
+            #git reset --hard origin/main
+            #git checkout main
+            #git pull origin main
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DDIST_INSTALLER:string=ON -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_OSP=OFF -G 'Visual Studio 16 2019' -A x64
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\project\tmp\workspace\installers
@@ -251,16 +254,18 @@ jobs:
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DBUILD_OSP=OFF \
           moveToCommand: ${f/Darwin/DarwinM1}
 
       #- run:
       #    name: remove old libraries
       #    command: rm -rf /usr/local/VAPOR-Deps/*
 
-      - get_libraries:
-          fileName: 2023-Jun-macOSx86.tar.xz
-          driveID: *macOSx86LibID
-          sudo: sudo
+      #- get_libraries:
+      #    fileName: 2023-Jun-macOSx86.tar.xz
+      #    driveID: *macOSx86LibID
+      #    sudo: sudo
 
       - build_vapor:
           beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
@@ -270,7 +275,6 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
-            -DBUILD_OSP=OFF \
           moveToCommand: ${f/Darwin/Darwinx86}
 
       - store_artifacts:
@@ -1111,7 +1115,7 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       - build_win10_installer
-      #- build_macOS_installers
+      - build_macOS_installers
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_suse_installer
