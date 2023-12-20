@@ -158,6 +158,8 @@ jobs:
             pwd
             ls
             python .circleci/downloadWin3rdParty.py
+            cd /c/Users/circleci/project
+            git status
           no_output_timeout: 20m
       - run:
           name: dos2unix
