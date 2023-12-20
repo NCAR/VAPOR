@@ -550,13 +550,13 @@ if (UNIX AND NOT APPLE)
             endif (EXISTS /etc/issue)
 
             install (
-                FILES ${QTDIR}/plugins/platforms/libqxcb.so
+                FILES ${THIRD_PARTY_LIB_DIR}/plugins/platforms/libqxcb.so
                 DESTINATION ${INSTALL_LIB_DIR}/platforms
                 COMPONENT Dependencies
             )
 
             install (
-                DIRECTORY ${QTDIR}/plugins/xcbglintegrations
+                DIRECTORY ${THIRD_PARTY_LIB_DIR}/plugins/xcbglintegrations
                 DESTINATION ${INSTALL_LIB_DIR}
                 COMPONENT Dependencies
             )
