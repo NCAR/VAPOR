@@ -703,6 +703,8 @@ jobs:
             DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
             apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
             apt install -y cmake --allow-unauthenticated
+            cd ~/project
+            git checkout origin/3.9.1 -- CMakeLists.txt
       
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
