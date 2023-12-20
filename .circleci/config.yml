@@ -246,8 +246,6 @@ jobs:
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
-            -DBUILD_OSP=OFF \
           moveToCommand: ${f/Darwin/DarwinM1}
 
       #- run:
@@ -267,6 +265,7 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DBUILD_OSP=OFF \
           moveToCommand: ${f/Darwin/Darwinx86}
 
       - store_artifacts:
@@ -1106,11 +1105,11 @@ workflows:
       #- build_python_api_ubuntu
       #- build_python_api_osx
       #- test_clang_format
-      - build_win10_installer
+      #- build_win10_installer
       - build_macOS_installers
-      - build_ubuntu20_installer
-      - build_ubuntu22_installer
-      - build_suse_installer
+      #- build_ubuntu20_installer
+      #- build_ubuntu22_installer
+      #- build_suse_installer
       #- suse_smoke_tests:
       #    requires:
       #      - build_suse_installer
