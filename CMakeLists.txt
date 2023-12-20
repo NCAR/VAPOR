@@ -539,14 +539,14 @@ if (UNIX AND NOT APPLE)
             if (EXISTS /etc/issue)
                 file(READ "/etc/issue" ETC_ISSUE)
                 string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
-                if(DIST STREQUAL "Ubuntu 22")
+                #if(DIST STREQUAL "Ubuntu 22")
                     file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
                     install (
                         FILES ${XCB_FILES}
                         DESTINATION ${INSTALL_LIB_DIR}
                         COMPONENT Dependencies
                     )
-                endif (DIST STREQUAL "Ubuntu 22")
+                #endif (DIST STREQUAL "Ubuntu 22")
             endif (EXISTS /etc/issue)
 
             install (
