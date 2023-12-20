@@ -182,6 +182,7 @@ jobs:
             mkdir -p C:\Users\circleci\project\tmp\workspace\installers
             Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers
           no_output_timeout: 45m
+          shell: powershell.exe
 
       - store_artifacts:
           path: C:\Users\circleci\project\tmp\workspace\installers
@@ -1108,10 +1109,10 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       - build_win10_installer
-      - build_macOS_installers
-      - build_ubuntu20_installer
-      - build_ubuntu22_installer
-      - build_suse_installer
+      #- build_macOS_installers
+      #- build_ubuntu20_installer
+      #- build_ubuntu22_installer
+      #- build_suse_installer
       #- suse_smoke_tests:
       #    requires:
       #      - build_suse_installer
