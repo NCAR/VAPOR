@@ -547,7 +547,7 @@ if (UNIX AND NOT APPLE)
                         DESTINATION ${INSTALL_LIB_DIR}
                         COMPONENT Dependencies
                     )
-                )
+                endif(DIST STREQUAL "Ubuntu")
             endif (EXISTS /etc/issue)
 
             install (
