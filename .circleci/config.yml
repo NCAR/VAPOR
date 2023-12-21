@@ -1094,9 +1094,9 @@ workflows:
       - build_ubuntu22_installer
       - build_ubuntu20_installer
       #- build_suse_installer
-      - suse_smoke_tests:
-          requires:
-            - build_suse_installer
+      #- suse_smoke_tests:
+      #    requires:
+      #      - build_suse_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
       #- build_macOSx86_libs
