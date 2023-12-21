@@ -710,7 +710,6 @@ jobs:
 
       - build_vapor:
           branch: main
-          beforeCompile: git checkout origin/3.9.1 -- ../CMakeLists.txt
           moveToCommand: ${f/Linux/Ubuntu20}
 
       - store_artifacts:
@@ -1118,11 +1117,11 @@ workflows:
       #- build_python_api_ubuntu
       #- build_python_api_osx
       #- test_clang_format
-      #- build_win10_installer
-      #- build_macOS_installers
+      - build_win10_installer
+      - build_macOS_installers
       - build_ubuntu20_installer
       - build_ubuntu22_installer
-      #- build_suse_installer
+      - build_suse_installer
       #- suse_smoke_tests:
       #    requires:
       #      - build_suse_installer
