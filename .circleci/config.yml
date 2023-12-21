@@ -727,7 +727,7 @@ jobs:
           driveID: *ubuntu22LibID
 
       - build_vapor:
-          moveToCommand: ${f/Linux/Ubuntu20}
+          moveToCommand: ${f/Linux/Ubuntu22}
 
       - store_artifacts:
           path: /tmp/workspace/installers
