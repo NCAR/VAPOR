@@ -535,18 +535,16 @@ if (UNIX AND NOT APPLE)
 		    	COMPONENT Dependencies
 		    )
 
-            # Include libxcb-xinerama for Ubuntu 22 by reading /etc/issue
+            # Include libxcb-xinerama for Ubuntu 20/22 by reading /etc/issue
             if (EXISTS /etc/issue)
                 file(READ "/etc/issue" ETC_ISSUE)
                 string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
-                if(DIST STREQUAL "Ubuntu 22")
-                    file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
-                    install (
-                        FILES ${XCB_FILES}
-                        DESTINATION ${INSTALL_LIB_DIR}
-                        COMPONENT Dependencies
-                    )
-                endif (DIST STREQUAL "Ubuntu 22")
+                file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
+                install (
+                    FILES ${XCB_FILES}
+                    DESTINATION ${INSTALL_LIB_DIR}
+                    COMPONENT Dependencies
+                )
             endif (EXISTS /etc/issue)
 
             install (
