@@ -540,11 +540,13 @@ if (UNIX AND NOT APPLE)
                 file(READ "/etc/issue" ETC_ISSUE)
                 string(REGEX MATCH "Ubuntu" DIST ${ETC_ISSUE})
                 message("               DIST ${DIST}")
-                file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
-                install (
-                    FILES ${XCB_FILES}
-                    DESTINATION ${INSTALL_LIB_DIR}
-                    COMPONENT Dependencies
+                if(DIST STREQUAL "Ubuntu")
+                    file (GLOB XCB_FILES ${THIRD_PARTY_LIB_DIR}/libxcb-xinerama.*)
+                    install (
+                        FILES ${XCB_FILES}
+                        DESTINATION ${INSTALL_LIB_DIR}
+                        COMPONENT Dependencies
+                    )
                 )
             endif (EXISTS /etc/issue)
 
