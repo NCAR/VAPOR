@@ -195,28 +195,28 @@ jobs:
           keys:
             - macos-deps
 
-      - run:
-          name: Get dependencies
-          command: |
-            # MacPorts
-            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
-            tar xf MacPorts-2.8.1.tar.bz2
-            cd MacPorts-2.8.1/
-            ./configure
-            make -j6
-            sudo make install
+      #- run:
+      #    name: Get dependencies
+      #    command: |
+      #      # MacPorts
+      #      curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
+      #      tar xf MacPorts-2.8.1.tar.bz2
+      #      cd MacPorts-2.8.1/
+      #      ./configure
+      #      make -j6
+      #      sudo make install
 
-            # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
-            # Therefore, skip selfupdate until we know we want a newer version of clang
-            sudo /opt/local/bin/port -v selfupdate
+      #      # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
+      #      # Therefore, skip selfupdate until we know we want a newer version of clang
+      #      sudo /opt/local/bin/port -v selfupdate
 
-            # CMake
-            (sudo yes || true) | sudo /opt/local/bin/port install cmake
-            # clang
-            (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
-            sudo /opt/local/bin/port select --set clang mp-clang-17
-            /opt/local/bin/clang++ -v > clangVersion.txt
-          no_output_timeout: 45m
+      #      # CMake
+      #      (sudo yes || true) | sudo /opt/local/bin/port install cmake
+      #      # clang
+      #      (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
+      #      sudo /opt/local/bin/port select --set clang mp-clang-17
+      #      /opt/local/bin/clang++ -v > clangVersion.txt
+      #    no_output_timeout: 45m
 
       - save_cache:
           key: macos-deps
@@ -727,7 +727,7 @@ jobs:
           driveID: *ubuntu22LibID
 
       - build_vapor:
-          moveToCommand: ${f/Linux/Ubuntu20}
+          moveToCommand: ${f/Linux/Ubuntu22}
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -1091,7 +1091,7 @@ workflows:
       #- build_win10_installer
       - build_macOS_installers
       #- build_ubuntu20_installer
-      #- build_ubuntu22_installer
+      - build_ubuntu22_installer
       #- build_ubuntu20_installer
       #- build_suse_installer
       #- suse_smoke_tests:
