@@ -210,9 +210,9 @@ jobs:
             make -j6
             sudo make install
 
-      #      # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
-      #      # Therefore, skip selfupdate until we know we want a newer version of clang
-      #      sudo /opt/local/bin/port -v selfupdate
+            # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
+            # Therefore, skip selfupdate until we know we want a newer version of clang
+            #sudo /opt/local/bin/port -v selfupdate
 
             # CMake
             (sudo yes || true) | sudo /opt/local/bin/port install cmake
