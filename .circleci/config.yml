@@ -196,7 +196,7 @@ jobs:
       - restore_cache:
           name: restore dependencies
           keys:
-            - macos-deps
+            - macos-deps2
 
       - run:
           name: Get dependencies
@@ -224,7 +224,7 @@ jobs:
           no_output_timeout: 45m
 
       - save_cache:
-          key: macos-deps
+          key: macos-deps2
           paths:
             - /opt/local
 
@@ -1098,9 +1098,9 @@ workflows:
       #- build_python_api_osx
       #- test_clang_format
       #- build_win10_installer
-      - build_macOS_installers
-      - build_ubuntu20_installer
-      - build_ubuntu22_installer
+      #- build_macOS_installers
+      #- build_ubuntu20_installer
+      #- build_ubuntu22_installer
       - build_suse_installer
       #- suse_smoke_tests:
       #    requires:
