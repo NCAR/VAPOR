@@ -1281,7 +1281,7 @@ private:
     size_t               _topologyDimension = 0;
     float                _missingValue = std::numeric_limits<float>::infinity();
     bool                 _hasMissing = false;
-    int                  _interpolationOrder = 0;    // Order of interpolation
+    int                  _interpolationOrder = 1;    // Order of interpolation
     long                 _nodeIDOffset = 0;
     long                 _cellIDOffset = 0;
     mutable CoordType    _minuCache = {{std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}};
