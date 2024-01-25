@@ -56,7 +56,11 @@ public:
 private:
     static void propagateTimestep(ControlExec *ce, size_t ts);
     static void handleMovingDomainAdjustments(ControlExec *ce, size_t ts_from, size_t ts_to);
+    static std::tuple<glm::vec3, glm::vec3> getDomainExtentsAtTimestep(ControlExec *ce, const std::string &dataset, size_t ts);
     static glm::vec3 getDomainMovementBetweenTimesteps(ControlExec *ce, std::string dataset, size_t from, size_t to);
+    static std::tuple<glm::vec3, glm::vec3> getRendererExtents(const VAPoR::RenderParams *rp);
+    static void setRendererExtents(const VAPoR::RenderParams *rp, const glm::vec3 &minExts, const glm::vec3 &maxExts);
     static void movingDomainTrackCamera(ControlExec *ce, size_t from, size_t to);
     static void movingDomainTrackRenderRegions(ControlExec *ce, size_t from, size_t to);
+    static void movingDomainTrackParticleRenderRegions(ControlExec *ce, size_t from, size_t to);
 };

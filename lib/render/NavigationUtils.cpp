@@ -6,6 +6,7 @@
 #include <vapor/AnimationParams.h>
 #include <vapor/GUIStateParams.h>
 #include <vapor/AnimationParams.h>
+#include <vapor/ParticleParams.h>
 #include <cassert>
 #include <cfloat>
 #include <glm/glm.hpp>
@@ -483,10 +484,11 @@ void NavigationUtils::handleMovingDomainAdjustments(ControlExec *ce, size_t ts_f
 
     if (trackCamera) movingDomainTrackCamera(ce, ts_from, ts_to);
     if (trackDomain) movingDomainTrackRenderRegions(ce, ts_from, ts_to);
+    if (trackDomain) movingDomainTrackParticleRenderRegions(ce, ts_from, ts_to);
 }
 
 
-glm::vec3 NavigationUtils::getDomainMovementBetweenTimesteps(ControlExec *ce, string dataset, size_t from, size_t to)
+std::tuple<glm::vec3, glm::vec3> NavigationUtils::getDomainExtentsAtTimestep(ControlExec *ce, const std::string &dataset, size_t ts)
 {
     auto paramsMgr = ce->GetParamsMgr();
     auto dataStatus = ce->GetDataStatus();
@@ -494,17 +496,39 @@ glm::vec3 NavigationUtils::getDomainMovementBetweenTimesteps(ControlExec *ce, st
     string viz = guiParams->GetActiveVizName();
 
     CoordType minExts_, maxExts_;
-    dataStatus->GetActiveExtents(paramsMgr, viz, dataset, from, minExts_, maxExts_);
-    vec3 oldMinExts = CoordTypeToVec3(minExts_);
-    vec3 oldMaxExts = CoordTypeToVec3(maxExts_);
+    dataStatus->GetActiveExtents(paramsMgr, viz, dataset, ts, minExts_, maxExts_);
+    vec3 minExts = CoordTypeToVec3(minExts_);
+    vec3 maxExts = CoordTypeToVec3(maxExts_);
+
+    return std::make_tuple(minExts, maxExts);
+}
+
+
+glm::vec3 NavigationUtils::getDomainMovementBetweenTimesteps(ControlExec *ce, string dataset, size_t from, size_t to)
+{
+    vec3 oldMinExts, oldMaxExts, newMinExts, newMaxExts;
+    std::tie(oldMinExts, oldMaxExts) = getDomainExtentsAtTimestep(ce, dataset, from);
+    std::tie(newMinExts, newMaxExts) = getDomainExtentsAtTimestep(ce, dataset, to);
+
     vec3 oldDomainCenter = (oldMinExts+oldMaxExts)/2.f;
-    dataStatus->GetActiveExtents(paramsMgr, viz, dataset, to, minExts_, maxExts_);
-    vec3 newMinExts = CoordTypeToVec3(minExts_);
-    vec3 newMaxExts = CoordTypeToVec3(maxExts_);
     vec3 newDomainCenter = (newMinExts+newMaxExts)/2.f;
     vec3 domainMove = newDomainCenter - oldDomainCenter;
 
     return domainMove;
+}
+
+
+std::tuple<glm::vec3, glm::vec3> NavigationUtils::getRendererExtents(const RenderParams *rp)
+{
+    CoordType minExts_, maxExts_;
+    rp->GetBox()->GetExtents(minExts_, maxExts_);
+    return std::make_tuple(CoordTypeToVec3(minExts_), CoordTypeToVec3(maxExts_));
+}
+
+
+void NavigationUtils::setRendererExtents(const RenderParams *rp, const glm::vec3 &minExts, const glm::vec3 &maxExts)
+{
+    rp->GetBox()->SetExtents(Vec3ToCoordType(minExts), Vec3ToCoordType(maxExts));
 }
 
 
@@ -555,11 +579,46 @@ void NavigationUtils::movingDomainTrackRenderRegions(ControlExec *ce, size_t fro
         for (const auto &renderer : renderers) {
             string _1, _2, className;
             paramsMgr->RenderParamsLookup(renderer, _1, _2, className);
+            if (className == ParticleParams::GetClassType())
+                continue;
             RenderParams *rp = paramsMgr->GetRenderParams(viz, dataset, className, renderer);
 
-            CoordType minExts_, maxExts_;
-            rp->GetBox()->GetExtents(minExts_, maxExts_);
-            rp->GetBox()->SetExtents(Vec3ToCoordType(domainMove+CoordTypeToVec3(minExts_)), Vec3ToCoordType(domainMove+CoordTypeToVec3(maxExts_)));
+            vec3 minExts, maxExts;
+            std::tie(minExts, maxExts) = getRendererExtents(rp);
+            setRendererExtents(rp, domainMove+minExts, domainMove+maxExts);
+        }
+    }
+}
+
+
+void NavigationUtils::movingDomainTrackParticleRenderRegions(ControlExec *ce, size_t from, size_t to)
+{
+    auto paramsMgr = ce->GetParamsMgr();
+    GUIStateParams *guiParams = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
+    string viz = guiParams->GetActiveVizName();
+    auto datasets = guiParams->GetOpenDataSetNames();
+
+    for (const auto &dataset : datasets) {
+        vector<string> renderers;
+        paramsMgr->GetRenderParamNames(viz, dataset, renderers);
+        for (const auto &renderer : renderers) {
+            string _1, _2, className;
+            paramsMgr->RenderParamsLookup(renderer, _1, _2, className);
+            if (className != ParticleParams::GetClassType())
+                continue;
+            RenderParams *rp = paramsMgr->GetRenderParams(viz, dataset, className, renderer);
+
+            vec3 dataExtentsFromMin, dataExtentsFromMax, dataExtentsToMin, dataExtentsToMax, rendererExtentsFromMin, rendererExtentsFromMax;
+            std::tie(dataExtentsFromMin,     dataExtentsFromMax)     = getDomainExtentsAtTimestep(ce, dataset, from);
+            std::tie(dataExtentsToMin,       dataExtentsToMax)       = getDomainExtentsAtTimestep(ce, dataset, to);
+            std::tie(rendererExtentsFromMin, rendererExtentsFromMax) = getRendererExtents(rp);
+
+            vec3 rendererExtentsFromMinNorm = (rendererExtentsFromMin - dataExtentsFromMin) / (dataExtentsFromMax - dataExtentsFromMin);
+            vec3 rendererExtentsFromMaxNorm = (rendererExtentsFromMax - dataExtentsFromMin) / (dataExtentsFromMax - dataExtentsFromMin);
+            vec3 rendererExtentsToMin = (dataExtentsToMax - dataExtentsToMin) * rendererExtentsFromMinNorm + dataExtentsToMin;
+            vec3 rendererExtentsToMax = (dataExtentsToMax - dataExtentsToMin) * rendererExtentsFromMaxNorm + dataExtentsToMin;
+
+            setRendererExtents(rp, rendererExtentsToMin, rendererExtentsToMax);
         }
     }
 }
