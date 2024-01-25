@@ -78,6 +78,12 @@ commands:
             mv VAPOR3-* /tmp/workspace/installers
             ls /tmp/workspace/installers
           no_output_timeout: 30m
+      - store_artifacts:
+          path: /tmp/workspace/installers
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - installers
 
   smoke_tests:
     steps:
@@ -258,9 +264,6 @@ jobs:
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
           moveToCommand: ${f/Darwin/Darwinx86}
-
-      - store_artifacts:
-          path: /tmp/workspace/installers
 
   clang-tidy:
     docker:
@@ -626,12 +629,9 @@ jobs:
           moveToCommand: ${f/Linux/SUSE}
           compileArgs: -DBUILD_TEST_APPS=ON
       - persist_to_workspace:
-          root: /
+          root: *workspace_root
           paths:
-            - root/project
-            - usr/local/VAPOR-Deps
-      - store_artifacts:
-          path: /tmp/workspace/installers
+            - installers
 
   suse_smoke_tests:
     docker:
@@ -691,9 +691,6 @@ jobs:
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
 
-      - store_artifacts:
-          path: /tmp/workspace/installers
-
   build_ubuntu22_installer:
     docker:
       - image: ubuntu:22.04
@@ -737,9 +734,6 @@ jobs:
 
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu22}
-
-      - store_artifacts:
-          path: /tmp/workspace/installers
 
   test_clang_format:
     docker:
@@ -1097,10 +1091,10 @@ workflows:
       #- build_python_api_ubuntu
       #- build_python_api_osx
       #- test_clang_format
-      #- build_win10_installer
-      #- build_macOS_installers
+      - build_win10_installer
+      - build_macOS_installers
       - build_ubuntu20_installer
-      #- build_ubuntu22_installer
+      - build_ubuntu22_installer
       - build_suse_installer
       #- suse_smoke_tests:
       #    requires:
@@ -1111,13 +1105,13 @@ workflows:
       #- build_M1_libs
       #- build_suse_libs
       #- build_windows_libs
-      #- release_weekly_installers:
-      #    requires:
-      #      - build_win10_installer
-      #      - build_macOS_installers
-      #      - build_ubuntu20_installer
-      #      - build_ubuntu22_installer
-      #      - build_suse_installer
+      - release_weekly_installers:
+          requires:
+            - build_win10_installer
+            - build_macOS_installers
+            - build_ubuntu20_installer
+            - build_ubuntu22_installer
+            - build_suse_installer
   weekly:
       triggers:
         - schedule:
