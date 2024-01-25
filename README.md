@@ -9,7 +9,7 @@ The VAPOR Data Collection (**VDC**) data model allows users progressively access
 
 Users can perform ad-hoc analysis with VAPOR's interactive Python interpreter; which allows for the creation, modification, and visualization of new variables based on input model data.
 
-VAPOR is a product of the **National Center for Atmospheric Research's Computational and Information Systems Lab**. Support for VAPOR is provided by the U.S. **National Science Foundation** (grants # 03-25934 and 09-06379, ACI-14-40412), and by the **Korea Institute of Science and Technology Information**
+VAPOR is a product of the **NSF National Center for Atmospheric Research's Computational and Information Systems Lab**. Support for VAPOR is provided by the U.S. **National Science Foundation** (grants # 03-25934 and 09-06379, ACI-14-40412), and by the **Korea Institute of Science and Technology Information**
 
 Project homepage and binary releases can be found at [https://www.vapor.ucar.edu/](https://www.vapor.ucar.edu/)
 
