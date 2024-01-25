@@ -23,7 +23,4 @@ class RenderersPanel : public VContainer {
 public:
     RenderersPanel(VAPoR::ControlExec *ce);
     void Update();
-
-signals:
-    void ShowNewRendererModal();
 };

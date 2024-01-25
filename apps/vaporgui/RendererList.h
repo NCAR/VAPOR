@@ -22,7 +22,7 @@ class RendererList : public VContainer {
     NewRendererDialogManager *_nrd;
     
     struct RendererMetadata {
-        bool supports2D, supports3D;
+        bool supports2D, supports3D, supportsParticle;
         string description;
         string iconPath;
         string imagePath;

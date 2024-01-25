@@ -72,6 +72,7 @@ RendererList::RendererList(ControlExec *ce) : VContainer(_lw = new QListWidget),
             _rendererMetadata[rendererType] = {
                 router->Supports2DVariables(),
                 router->Supports3DVariables(),
+                router->SupportsParticleVariables(),
                 router->GetDescription(),
                 router->GetSmallIconImagePath(),
                 router->GetIconImagePath()
@@ -268,8 +269,9 @@ void RendererList::showContextMenu(const QPoint& localPos)
     
     for (const auto &dataset : datasets) {
         DataMgr *dm = _ce->GetDataStatus()->GetDataMgr(dataset);
-        bool has2D = !dm->GetDataVarNames(2).empty();
-        bool has3D = !dm->GetDataVarNames(3).empty();
+        bool has2D = dm->GetDataVarNames(2, DataMgr::VarType::Scalar).size();
+        bool has3D = dm->GetDataVarNames(3, DataMgr::VarType::Scalar).size();
+        bool hasParticle = dm->GetDataVarNames(3, DataMgr::VarType::Particle).size();
         QMenu *datasetMenu = newRendererMenu;
         if (datasets.size() > 1)
             datasetMenu = newRendererMenu->addMenu(QString::fromStdString(dataset));
@@ -278,9 +280,9 @@ void RendererList::showContextMenu(const QPoint& localPos)
                 _ce->ActivateRender(currentViz, dataset, rendererType, _ce->MakeRendererNameUnique(rendererType), false);
             });
             const auto &meta = _rendererMetadata[rendererType];
-            if (!(meta.supports2D && has2D) && !(meta.supports3D && has3D)) {
+            if (!((has2D && meta.supports2D) || (has3D && meta.supports3D) || (hasParticle && meta.supportsParticle))) {
                 action->setEnabled(false);
-                action->setToolTip("This dataset has no 2D/3D variables");
+                action->setToolTip(QString::fromStdString("Dataset \"" + dataset + "\" does not have data supported by this renderer"));
             }
         }
     }
