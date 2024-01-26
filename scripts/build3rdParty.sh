@@ -161,6 +161,20 @@ ubuntuPrerequisites() {
         libxkbcommon-x11-dev
 }
 
+fedoraPrerequisites() {
+    yum install -y \
+    libxcb-devel.x86_64 \
+    libX11-xcb.x86_64 \
+    libxcb.x86_64 \
+    freeglut-devel.x86_64 \
+    mesa-libGLU-devel.x86_64 \
+    libXrender-devel.x86_64 \
+    libXi-devel.x86_64 \
+    libxkbcommon-devel.x86_64 \
+    libxkbcommon-x11-devel.x86_64 \
+    
+}
+
 windowsPrerequisites() {
     CC='i686-w64-mingw-gcc'
     CXX='i686-w64-mingw-g++'

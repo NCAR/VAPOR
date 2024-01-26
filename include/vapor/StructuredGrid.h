@@ -20,7 +20,7 @@ namespace VAPoR {
 //! This abstract base class defines a 2D or 3D structured
 //! grid: a tessellation
 //! of Euculidean space by quadrilaterals (2D) or hexahdrons (3D). Each
-//! grid point can be addressed by an index(i,j,k), where \a i, \p a
+//! grid point can be addressed by an index(i,j,k), where \a i, \p j
 //! and \a k range from 0 to \a dim - 1, where \a dim is the dimension of the
 //! \a I, \a J, or \a K axis, respectively. Moreover, each grid point
 //! has a coordinate in a user-defined coordinate system.
