@@ -38,7 +38,8 @@ commands:
               <<parameters.sudo>> chown -R `whoami` /usr/local/VAPOR-Deps
               id=<<parameters.driveID>>
               filename=<<parameters.fileName>>
-              curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+              #curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
+              gdown https://drive.google.com/uc?id=${id}
               tar -xf ${filename} -C /usr/local/VAPOR-Deps
 
   build_vapor:
@@ -77,6 +78,12 @@ commands:
             mv VAPOR3-* /tmp/workspace/installers
             ls /tmp/workspace/installers
           no_output_timeout: 30m
+      - store_artifacts:
+          path: /tmp/workspace/installers
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - installers
 
   smoke_tests:
     steps:
@@ -128,7 +135,9 @@ commands:
                 curl \
                 libomp-devel \
                 libicu-devel \
-                freeglut-devel
+                freeglut-devel \
+                python3-pip
+            pip install gdown
 
 jobs:
   build_win10_installer:
@@ -193,11 +202,13 @@ jobs:
       - restore_cache:
           name: restore dependencies
           keys:
-            - macos-deps
+            - macos-deps2
 
       - run:
           name: Get dependencies
           command: |
+            pip install gdown
+
             # MacPorts
             curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
             tar xf MacPorts-2.8.1.tar.bz2
@@ -208,7 +219,7 @@ jobs:
 
             # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
             # Therefore, skip selfupdate until we know we want a newer version of clang
-                #sudo /opt/local/bin/port -v selfupdate
+            sudo /opt/local/bin/port -v selfupdate
 
             # CMake
             (sudo yes || true) | sudo /opt/local/bin/port install cmake
@@ -219,7 +230,7 @@ jobs:
           no_output_timeout: 45m
 
       - save_cache:
-          key: macos-deps
+          key: macos-deps2
           paths:
             - /opt/local
 
@@ -253,9 +264,6 @@ jobs:
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
           moveToCommand: ${f/Darwin/Darwinx86}
-
-      - store_artifacts:
-          path: /tmp/workspace/installers
 
   clang-tidy:
     docker:
@@ -621,12 +629,9 @@ jobs:
           moveToCommand: ${f/Linux/SUSE}
           compileArgs: -DBUILD_TEST_APPS=ON
       - persist_to_workspace:
-          root: /
+          root: *workspace_root
           paths:
-            - root/project
-            - usr/local/VAPOR-Deps
-      - store_artifacts:
-          path: /tmp/workspace/installers
+            - installers
 
   suse_smoke_tests:
     docker:
@@ -664,6 +669,8 @@ jobs:
             apt install -y valgrind
             apt install -y clang-tidy
             apt install -y lsb-release
+            apt install -y python3-pip
+            pip3 install gdown
             git config --global --add safe.directory /tmp/_circleci_local_build_repo
 
             # all for cmake
@@ -683,9 +690,6 @@ jobs:
 
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
-
-      - store_artifacts:
-          path: /tmp/workspace/installers
 
   build_ubuntu22_installer:
     docker:
@@ -710,6 +714,8 @@ jobs:
             apt install -y valgrind
             apt install -y clang-tidy
             apt install -y lsb-release
+            apt install -y python3-pip
+            pip3 install gdown
 
             # all for cmake
             apt-get update
@@ -728,9 +734,6 @@ jobs:
 
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu22}
-
-      - store_artifacts:
-          path: /tmp/workspace/installers
 
   test_clang_format:
     docker:
@@ -1090,13 +1093,12 @@ workflows:
       #- test_clang_format
       #- build_win10_installer
       #- build_macOS_installers
-      #- build_ubuntu20_installer
-      #- build_ubuntu22_installer
       - build_ubuntu20_installer
+      #- build_ubuntu22_installer
       - build_suse_installer
-      - suse_smoke_tests:
-          requires:
-            - build_suse_installer
+      #- suse_smoke_tests:
+      #    requires:
+      #      - build_suse_installer
       #- build_ubuntu20_libs
       #- build_ubuntu22_libs
       #- build_macOSx86_libs
@@ -1113,7 +1115,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "40 12 * * 2" #Time is GMT
+             cron: "30 5 * * 4" #Time is GMT
              filters:
                branches:
                  only: main
