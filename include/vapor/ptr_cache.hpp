@@ -39,8 +39,13 @@ class ptr_cache {
 public:
 
     //
-    // Destructor
+    // Constructors and Destructor
     //
+    ptr_cache() = default;
+    ptr_cache(const ptr_cache&) = delete;
+    ptr_cache(const ptr_cache&&) = delete;
+    ptr_cache& operator=(const ptr_cache&) = delete;
+    ptr_cache& operator=(const ptr_cache&&) = delete;
     ~ptr_cache()
     {
       for (auto& p : _element_vector) {

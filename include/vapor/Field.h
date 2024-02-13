@@ -27,7 +27,7 @@ public:
     //
     // Retrieve the number of time steps in this field
     //
-    virtual int GetNumberOfTimesteps() const = 0;
+    virtual uint32_t GetNumberOfTimesteps() const = 0;
 
     //
     // Get the field value at a certain position, at a certain time.
