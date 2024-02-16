@@ -68,9 +68,9 @@ auto VaporField::LockParams() -> int
 
 auto VaporField::UnlockParams() -> int
 {
-    _c_currentTS = 0;
-    _c_refLev = -2;
-    _c_compLev = -2;
+    _c_currentTS = std::numeric_limits<uint32_t>::max(); // almost impossible value
+    _c_refLev = -2;   // Impossible value
+    _c_compLev = -2;  // Impossible value
     _c_vel_mult = 0.0;
     _c_ext_min = {0.0, 0.0, 0.0};
     _c_ext_max = {0.0, 0.0, 0.0};
@@ -318,9 +318,7 @@ int VaporField::GetScalar(double time, glm::vec3 pos, float &scalar) const
         VAssert(rv == 0);
         grid = _getAGrid(floorTS, ScalarName);
         if (grid == nullptr) return GRID_ERROR;
-        if (ScalarName == std::string("winterp"))
-          std::printf("Scalr    %s: t=%.2f, TS=%lu, p=%p,  ", 
-                      ScalarName.data(), time, floorTS, grid);
+
         float floorScalar = grid->GetValue(coords);
         if (floorScalar == grid->GetMissingValue()) { return MISSING_VAL; }
 
