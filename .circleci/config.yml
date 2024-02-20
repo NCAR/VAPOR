@@ -643,6 +643,15 @@ jobs:
           at: /
       - smoke_tests
 
+  linux_installer:
+    docker:
+      - image: ubuntu:wily
+
+    resource_class: xlarge
+
+    steps:
+      - checkout
+
   build_ubuntu20_installer:
     docker:
       - image: ubuntu:20.04
@@ -1093,9 +1102,10 @@ workflows:
       #- test_clang_format
       #- build_win10_installer
       #- build_macOS_installers
-      - build_ubuntu20_installer
+      #- build_ubuntu20_installer
       #- build_ubuntu22_installer
-      - build_suse_installer
+      #- build_suse_installer
+      - linux_installer
       #- suse_smoke_tests:
       #    requires:
       #      - build_suse_installer
