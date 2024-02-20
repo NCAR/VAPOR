@@ -101,7 +101,6 @@ option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
 option (BUILD_TEST_APPS "Build test applications" OFF)
 option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" OFF)
 option (USE_OMP "Use OpenMP on some calculations" OFF)
-option( BUILD_UNIT_TESTS "Build unit tests using GoogleTest" OFF )
 option (CONDA_BUILD "Use Conda to build" OFF)
 
 if( USE_OMP )
