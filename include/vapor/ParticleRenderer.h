@@ -72,9 +72,7 @@ private:
         float      value;
     };
 
-    std::vector<Vertex> _particles;
-
-    std::vector<int> _streamSizes;
+    size_t _particlesCount;
 
     unsigned int _VAO = 0;
     unsigned int _VBO = 0;
@@ -99,8 +97,6 @@ private:
     int  _renderParticlesHelper();
     void _prepareColormap();
     glm::vec3 _getScales();
-    bool _clipOriginToBox( const glm::vec3 &p1);
-    void _clipEndpointToBox( const glm::vec3 &p1, glm::vec3 &p2 ) const;
 };
 
 };    // namespace VAPoR
