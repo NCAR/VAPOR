@@ -113,36 +113,6 @@ if( USE_OMP )
     endif()
 endif()
 
-if( BUILD_UNIT_TESTS )
-  # Control internal options of GoogleTest
-  #
-  set( INSTALL_GTEST OFF CACHE INTERNAL "Not install GoogleTest")
-  set( BUILD_GMOCK ON CACHE INTERNAL "Build gmock")
-
-  # Let's use the new mechanism to incorporate GoogleTest
-  #
-  include(FetchContent)
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
-    message (STATUS "Fetching the latest GoogleTest Framework, CMake version >= 3.24")
-    FetchContent_Declare( googletest
-      URL https://github.com/google/googletest/archive/refs/heads/main.zip
-      DOWNLOAD_EXTRACT_TIMESTAMP NEW )
-  else()
-    message (STATUS "Fetching the latest GoogleTest Framework, CMake version < 3.24")
-    FetchContent_Declare( googletest
-      URL https://github.com/google/googletest/archive/refs/heads/main.zip )
-  endif()
-
-  # Prevent overriding the parent project's compiler/linker settings on Windows
-  #
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  FetchContent_MakeAvailable(googletest)
-
-  enable_testing() # calling this function before adding subdirectory to enable 
-                   # invoking ctest from the top-level build directory.
-  add_subdirectory( gtest_scripts )
-endif()
-
 set (GENERATE_FULL_INSTALLER ON)
 if (BUILD_GUI)
 	set (BUILD_VDC ON)
