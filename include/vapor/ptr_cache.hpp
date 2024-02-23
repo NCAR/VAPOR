@@ -8,7 +8,7 @@
 //
 // Given this design, this cache is expected to keep the ownership of these
 // structures once they're put in the cache, and all other codes will not
-// need to manage these structures. In other words, once an object is evected,
+// need to manage these structures. In other words, once an object is evicted,
 // its destructor will be called.
 //
 // All structures stored in this cache are const qualified, so once a
@@ -17,7 +17,7 @@
 // Caveat: A cache keeps things that it is asked to keep, which in this case are pointers.
 //         This implementation guarantees that pointers and the objects that they point to
 //         are not altered while in the cache, and are properly destroyed when evicted.
-//         The cache guarantees no more than that.
+//         The cache guarantees nothing more than that.
 //-----------------------------------------------------------------------------
 
 #ifndef PTR_CACHE_H
@@ -32,7 +32,8 @@
 namespace VAPoR {
 
 //
-// Note : Key must support == operator and = operator.
+// Note : 1) Key must support == operator and = operator.
+//        2) BigObj must be able to be destructed by delete.
 //
 template<typename Key, typename BigObj, unsigned int Size, bool Query>
 class ptr_cache {
