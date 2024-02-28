@@ -689,15 +689,29 @@ jobs:
             apt install -y \
                 libxcb-icccm4-dev \
                 libxcb-image0 \
-                libxcb-keysyms1
+                libxcb-keysyms1 \
                 libxcb-render-util0 \
                 libxkbcommon-x11-0
 
+      - restore_cache:
+          name: restore intel hpckit cache
+          keys:
+            - hpckit-cache
+
+      - run:
+          name: acquire intel hpckit for bundling ospray
+          command: |
             # For bundling Ospray, which wants Intel's MPI implementation tobe bundled
+            apt install linux-headers-5.15.0-1053-aws
             wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
             echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
             apt update
             apt install -y intel-hpckit
+
+      - save_cache:
+          key: hpckit-cache
+          paths:
+            - /smokeTestData
 
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
