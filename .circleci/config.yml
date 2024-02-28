@@ -686,7 +686,7 @@ jobs:
             apt install -y cmake --allow-unauthenticated
      
             # for AppImage
-            sudo apt-get install fuse libfuse2 fuse3
+            apt-get install -y fuse libfuse2 fuse3
  
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
