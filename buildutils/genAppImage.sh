@@ -25,6 +25,8 @@ rm $linuxdeployqt
 wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/$linuxdeployqt
 chmod 755 $linuxdeployqt
 
+export APPIMAGE_EXTRACT_AND_RUN=1
+
 THIRD_PARTY_DIR=/usr/local/VAPOR-Deps/current;\
 Qt5_DIR=$THIRD_PARTY_DIR/lib/cmake/Qt5;\
 LD_LIBRARY_PATH=$THIRD_PARTY_DIR/lib:\
