@@ -686,9 +686,19 @@ jobs:
             apt install -y cmake --allow-unauthenticated
      
             # for AppImage
-            #apt-get install -y fuse libfuse2 fuse3
-            apt-get install -y fuse libfuse2
- 
+            apt install -y \
+                libxcb-icccm4-dev \
+                libxcb-image0 \
+                libxcb-keysyms1
+                libxcb-render-util0 \
+                libxkbcommon-x11-0
+
+            # For bundling Ospray, which wants Intel's MPI implementation tobe bundled
+            wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+            echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
+            apt update
+            apt install -y intel-hpckit
+
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
           driveID: *ubuntu20LibID
