@@ -76,6 +76,7 @@ commands:
             for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
             mv VAPOR3-* /tmp/workspace/installers
+            mv VAPOR-* /tmp/workspace/installers
             ls /tmp/workspace/installers
           no_output_timeout: 30m
       - store_artifacts:
@@ -683,7 +684,10 @@ jobs:
             DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
             apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
             apt install -y cmake --allow-unauthenticated
-      
+     
+            # for AppImage
+            sudo apt-get install fuse libfuse2 fuse3
+ 
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
           driveID: *ubuntu20LibID
