@@ -104,7 +104,7 @@ option (USE_OMP "Use OpenMP on some calculations" OFF)
 option (CONDA_BUILD "Use Conda to build" OFF)
 if (UNIX AND NOT APPLE)
     include (CMakeDependentOption)
-    cmake_dependent_option (DIST_APPIMAGE "Generate an AppImage for VAPOR's installation across multiple Linux platforms" ON "DIST_INSTALLER" OFF)
+    cmake_dependent_option (DIST_APPIMAGE "Generate an AppImage for VAPOR's installation across multiple Linux platforms" OFF "DIST_INSTALLER" ON)
 endif (UNIX AND NOT APPLE)
 
 if( USE_OMP )
