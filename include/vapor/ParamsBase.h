@@ -28,6 +28,8 @@
 #include <vapor/MyBase.h>
 #include <vapor/XmlNode.h>
 
+#define PARAMS_IMPL_TAG(class, tag) const std::string class::tag = #tag;
+
 namespace VAPoR {
 
 //

@@ -13,6 +13,8 @@ const std::string ParticleParams::ShowDirectionTag = "ShowDirectionTag";
 const std::string ParticleParams::DirectionScaleTag = "DirectionScaleTag";
 const std::string ParticleParams::StrideTag = "StrideTag";
 const std::string ParticleParams::RenderRadiusScalarTag = "RenderRadiusScalarTag";
+PARAMS_IMPL_TAG(ParticleParams, RenderRadiusVariableTag);
+PARAMS_IMPL_TAG(ParticleParams, RenderRadiusVariableStrengthTag);
 const std::string ParticleParams::LightingEnabledTag = "LightingEnabledTag";
 const std::string ParticleParams::RenderRadiusBaseTag = "RenderRadiusBaseTag";
 const std::string ParticleParams::RenderLegacyTag = "RenderLegacyTag";
@@ -47,6 +49,7 @@ void ParticleParams::_init()
     SetValueDouble(DirectionScaleTag, "", 1);
     SetValueLong(StrideTag, "", 1);
     SetValueDouble(RenderRadiusScalarTag, "", 8.);
+    SetValueDouble(RenderRadiusVariableStrengthTag, "", 1.);
     SetValueDouble(RenderRadiusBaseTag, "", -1);
     SetValueLong(RenderLegacyTag, "", false);
     SetValueLong(LightingEnabledTag, "", true);

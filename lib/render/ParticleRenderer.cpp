@@ -159,26 +159,38 @@ int ParticleRenderer::_initializeGL() {
     return 0;
 }
 
-static void SetupParticlePointGL(const int VAO, const int VBO) {
+static void SetupParticlePointGL(const int VAO, const int VBO, const bool dynamicSize) {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), NULL);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void *)sizeof(glm::vec3));
+    int elSize = sizeof(glm::vec4);
+    if (dynamicSize) elSize += sizeof(float);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, elSize, NULL);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, elSize, (void *)sizeof(glm::vec3));
+    if (dynamicSize)
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, elSize, (void *)sizeof(glm::vec4));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    if (dynamicSize)
+        glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
-static void SetupParticleDirectionGL(const int VAO, const int VBO) {
+static void SetupParticleDirectionGL(const int VAO, const int VBO, const bool dynamicSize) {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*7, NULL);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*7, (void *)sizeof(glm::vec3));
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(float)*7, (void *)(2*sizeof(glm::vec3)));
+    int elSize = sizeof(float)*7;
+    if (dynamicSize) elSize += sizeof(float);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, elSize, NULL);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, elSize, (void *)sizeof(glm::vec3));
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, elSize, (void *)(2*sizeof(glm::vec3)));
+    if (dynamicSize)
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, elSize, (void *)(sizeof(float)*7));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
+    if (dynamicSize)
+        glEnableVertexAttribArray(3);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -198,6 +210,7 @@ bool ParticleRenderer::_particleCacheIsDirty() const {
     if (_cacheParams.stride    != p->GetValueLong( ParticleParams::StrideTag, 1)) return true;
     if (_cacheParams.varName   != p->GetVariableName()       ) return true;
     if (_cacheParams.fieldVars != p->GetFieldVariableNames() ) return true;
+    if (_cacheParams.radiusVarName != p->GetValueString( ParticleParams::RenderRadiusVariableTag, "")) return true;
     if (_cacheParams.direction != (bool)p->GetValueLong( ParticleParams::ShowDirectionTag, false)) return true;
     if (_cacheParams.directionScale != p->GetValueDouble( ParticleParams::DirectionScaleTag, false)) return true;
 
@@ -220,6 +233,7 @@ void ParticleRenderer::_resetParticleCache() {
     _cacheParams.stride = p->GetValueLong(ParticleParams::StrideTag, 1);
     _cacheParams.varName = p->GetVariableName();
     _cacheParams.fieldVars = p->GetFieldVariableNames();
+    _cacheParams.radiusVarName = p->GetValueString( ParticleParams::RenderRadiusVariableTag, "");
 }
 
 bool ParticleRenderer::_colormapCacheIsDirty() const {
@@ -264,12 +278,16 @@ int ParticleRenderer::_renderParticlesHelper()
     }
     float radius = radiusBase * rp->GetValueDouble(ParticleParams::RenderRadiusScalarTag, 1.);
 
-    ShaderProgram *shader = nullptr;
-
+    string shaderKey;
     if (_cacheParams.direction)
-        shader = _glManager->shaderManager->GetShader("ParticleDirection");
+        shaderKey = "ParticleDirection";
     else
-        shader = _glManager->shaderManager->GetShader("ParticlePoint");
+        shaderKey = "ParticlePoint";
+
+    if (!_cacheParams.radiusVarName.empty())
+        shaderKey += ":DYNAMIC_RADIUS";
+
+    ShaderProgram *shader = _glManager->shaderManager->GetShader(shaderKey);
     if (!shader) return -1;
 
     double m[16];
@@ -284,6 +302,7 @@ int ParticleRenderer::_renderParticlesHelper()
     shader->SetUniform("MV", _glManager->matrixManager->GetModelViewMatrix());
     shader->SetUniform("aspect", _glManager->matrixManager->GetProjectionAspectRatio());
     shader->SetUniform("radius", radius);
+//    shader->SetUniform("radiusVarStrength", (float)rp->GetValueDouble(ParticleParams::RenderRadiusVariableStrengthTag, 1.));
     shader->SetUniform("dirScale", (float)rp->GetValueDouble(ParticleParams::DirectionScaleTag, 1.));
     shader->SetUniform("lightingEnabled", (bool)rp->GetValueLong(ParticleParams::LightingEnabledTag, true));
     shader->SetUniform("scales", _getScales());
@@ -367,11 +386,20 @@ int ParticleRenderer::_getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const
         }
     }
 
+    if (!_cacheParams.radiusVarName.empty()) {
+        vecGrids.push_back(_dataMgr->GetVariable(_cacheParams.ts, _cacheParams.radiusVarName, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, true));
+    }
+
     return 0;
+}
+
+template<typename T> static void UploadDataBuffer(T buffer) {
+    glBufferData(GL_ARRAY_BUFFER, sizeof(T) * buffer.size(), buffer.data(), GL_STATIC_DRAW);
 }
 
 void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<Grid*>& vecGrids) {
     bool      showDir = _cacheParams.direction;
+    bool      dynamicSize = !_cacheParams.radiusVarName.empty();
     size_t    stride = max(1L, (long)_cacheParams.stride);
     float     dirScale = _cacheParams.directionScale;
     auto      node = grid->ConstNodeBegin(_cacheParams.boxMin, _cacheParams.boxMax);
@@ -379,21 +407,21 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
     CoordType coordsBuf;
     vector<Grid::ConstIterator> dirs;
 
-    if (showDir) for (auto g : vecGrids) dirs.push_back(g->cbegin(_cacheParams.boxMin, _cacheParams.boxMax));
+    if (showDir) for (int i = 0; i < 3; i++) dirs.push_back(vecGrids[i]->cbegin(_cacheParams.boxMin, _cacheParams.boxMax));
+    if (dynamicSize) dirs.push_back(vecGrids[vecGrids.size()-1]);
 
-    struct PointDataT {vec3 pos; float val;};
-    vector<PointDataT> pointData;
-
-    struct DirectionDataT {vec3 pos; vec3 norm; float val;};
-    vector<DirectionDataT> directionData;
+    struct PointDataT {vec3 pos; float val;}; vector<PointDataT> pointData;
+    struct DirectionDataT {vec3 pos; vec3 norm; float val;}; vector<DirectionDataT> directionData;
+    struct PointDynSizeDataT {vec3 pos; float val; float radius;}; vector<PointDynSizeDataT> pointDynSizeData;
+    struct DirectionDynSizeDataT {vec3 pos; vec3 norm; float val; float radius;}; vector<DirectionDynSizeDataT> directionDynSizeData;
 
     _particlesCount = grid->GetCoordDimensions(1)[0] / stride;
 
     if (showDir) {
-        SetupParticleDirectionGL(_VAO, _VBO);
+        SetupParticleDirectionGL(_VAO, _VBO, dynamicSize);
         directionData.reserve(_particlesCount);
     } else {
-        SetupParticlePointGL(_VAO, _VBO);
+        SetupParticlePointGL(_VAO, _VBO, dynamicSize);
         pointData.reserve(_particlesCount);
     }
     assert(glIsVertexArray(_VAO) == GL_TRUE);
@@ -408,9 +436,15 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
 
             if (showDir){
                 const glm::vec3 norm(*(dirs[0]), *(dirs[1]), *(dirs[2]));
-                directionData.push_back({p, norm, value});
+                if (dynamicSize)
+                    directionDynSizeData.push_back({p, norm, value, *(dirs[dirs.size()-1])});
+                else
+                    directionData.push_back({p, norm, value});
             } else {
-                pointData.push_back({p, value});
+                if (dynamicSize)
+                    pointDynSizeData.push_back({p, value, *(dirs[dirs.size()-1])});
+                else
+                    pointData.push_back({p, value});
             }
         }
         step:
@@ -420,10 +454,13 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
 
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    if (showDir)
-        glBufferData(GL_ARRAY_BUFFER, sizeof(DirectionDataT) * directionData.size(), directionData.data(), GL_STATIC_DRAW);
-    else
-        glBufferData(GL_ARRAY_BUFFER, sizeof(PointDataT) * pointData.size(), pointData.data(), GL_STATIC_DRAW);
+    if (dynamicSize) {
+        if (showDir) UploadDataBuffer(directionDynSizeData);
+        else UploadDataBuffer(pointDynSizeData);
+    } else {
+        if (showDir) UploadDataBuffer(directionData);
+        else UploadDataBuffer(pointData);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 

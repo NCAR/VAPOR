@@ -64,6 +64,7 @@ private:
         float               directionScale;
         size_t              stride;
         string              varName;
+        string              radiusVarName;
         std::vector<std::string> fieldVars;
     } _cacheParams;
 
