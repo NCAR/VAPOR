@@ -75,8 +75,8 @@ commands:
             make installer
             for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
-            mv VAPOR3-* /tmp/workspace/installers
-            mv VAPOR-* /tmp/workspace/installers
+            mv VAPOR3-*.sh /tmp/workspace/installers
+            mv VAPOR-*.AppImage /tmp/workspace/installers || true
             ls /tmp/workspace/installers
           no_output_timeout: 30m
       - store_artifacts:
