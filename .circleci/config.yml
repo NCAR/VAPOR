@@ -709,6 +709,8 @@ jobs:
 
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
+          compileArgs: |
+            -DDIST_APPIMAGE=ON
 
   build_ubuntu22_installer:
     docker:
