@@ -3,7 +3,8 @@
 # Exit on error and print commands to stdout
 set -ex
 
-VAPOR="VAPOR3-$1-Linux"
+export VERSION=$1
+VAPOR="VAPOR3-$VERSION-Linux"
 SRC_DIR=$2
 
 ####
@@ -17,6 +18,7 @@ rm -rf $VAPOR/* || true
 cp ${SRC_DIR}/buildutils/AppRun $VAPOR
 cp ${SRC_DIR}/buildutils/vapor.desktop $VAPOR
 cp ${SRC_DIR}/share/images/VAPOR.png $VAPOR
+cp ${SRC_DIR}/share/images/VAPOR.png .
 
 ####
 # Produces a self-contained AppDir with Qt

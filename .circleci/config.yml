@@ -693,11 +693,6 @@ jobs:
                 libxcb-render-util0 \
                 libxkbcommon-x11-0
 
-      - restore_cache:
-          name: restore intel hpckit cache
-          keys:
-            - u20-hpckit-cache
-
       - run:
           name: acquire intel hpckit for bundling ospray
           command: |
@@ -707,11 +702,6 @@ jobs:
             echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
             apt update
             apt install -y intel-hpckit
-
-      - save_cache:
-          key: u20-hpckit-cache
-          paths:
-            - /opt
 
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
