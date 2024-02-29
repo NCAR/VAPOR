@@ -121,8 +121,10 @@ std::string FileUtils::Relpath(std::string path, std::string to)
     path = JoinPaths(STLUtils::Slice(SplitPath(path), commonLevels));
     to = JoinPaths(STLUtils::Slice(SplitPath(to), commonLevels));
 
-    for (const auto &_ : SplitPath(to))
+    for (const auto &_ : SplitPath(to)) {
+        (void)_;
         path = JoinPaths({"..", path});
+    }
 
     return path;
 }

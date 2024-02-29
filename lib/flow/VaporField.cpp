@@ -6,19 +6,16 @@ using namespace flow;
 //
 // Class GridKey
 //
-void GridKey::Reset(uint64_t ts, int32_t ref, int32_t comp, std::string var, const std::vector<double> &min, const std::vector<double> &max)
+void GridKey::Reset(uint32_t ts, int32_t ref, int32_t comp, std::string var, VAPoR::CoordType min, VAPoR::CoordType max)
 {
     _timestep = ts;
     _refLev = ref;
     _compLev = comp;
 
-    _ext_min = {0.0, 0.0, 0.0};
-    _ext_max = {0.0, 0.0, 0.0};
-
-    for (int i = 0; i < min.size(); i++) _ext_min[i] = min[i];
-    for (int i = 0; i < max.size(); i++) _ext_max[i] = max[i];
-
     _varName = std::move(var);
+
+    _ext_min = min;
+    _ext_max = max;
 }
 
 bool GridKey::operator==(const GridKey &other) const
@@ -54,8 +51,6 @@ const VAPoR::Grid *GridWrapper::grid() const { return _gridPtr; }
 //
 // Class VaporField
 //
-VaporField::VaporField(size_t cache_limit) : _recentGrids(cache_limit, false) {}
-
 auto VaporField::LockParams() -> int
 {
     if (!_isReady()) return 1;
@@ -65,11 +60,7 @@ auto VaporField::LockParams() -> int
     _c_refLev = _params->GetRefinementLevel();
     _c_compLev = _params->GetCompressionLevel();
     _c_vel_mult = _params->GetVelocityMultiplier();
-
     _params->GetBox()->GetExtents(_c_ext_min, _c_ext_max);
-
-    for (int i = 0; i < 3; i++) { _c_velocity_grids[i] = _getAGrid(_c_currentTS, this->VelocityNames[i]); }
-    _c_scalar_grid = _getAGrid(_c_currentTS, this->ScalarName);
 
     _params_locked = true;
     return 0;
@@ -77,42 +68,38 @@ auto VaporField::LockParams() -> int
 
 auto VaporField::UnlockParams() -> int
 {
-    _c_currentTS = 0;
-    _c_refLev = -2;
-    _c_compLev = -2;
+    _c_currentTS = std::numeric_limits<uint32_t>::max(); // almost impossible value
+    _c_refLev = -2;   // Impossible value
+    _c_compLev = -2;  // Impossible value
     _c_vel_mult = 0.0;
-    _c_ext_min.clear();
-    _c_ext_max.clear();
-
-    for (int i = 0; i < 3; i++) { _c_velocity_grids[i] = nullptr; }
-    _c_scalar_grid = nullptr;
+    _c_ext_min = {0.0, 0.0, 0.0};
+    _c_ext_max = {0.0, 0.0, 0.0};
 
     _params_locked = false;
     return 0;
 }
 
-bool VaporField::InsideVolumeVelocity(double time, const glm::vec3 &pos) const
+bool VaporField::InsideVolumeVelocity(double time, glm::vec3 pos) const
 {
-    const std::array<double, 3> coords{pos.x, pos.y, pos.z};
+    VAPoR::CoordType            coords{pos.x, pos.y, pos.z};
     const VAPoR::Grid *         grid = nullptr;
     VAssert(_isReady());
 
     // In case of steady field, we only check a specific time step
     if (IsSteady) {
         for (int i = 0; i < 3; i++) {
-            const auto &v = VelocityNames[i];
-            if (_params_locked) {
-                grid = _c_velocity_grids[i];
-            } else {
-                auto currentTS = _params->GetCurrentTimestep();
-                grid = _getAGrid(currentTS, v);
-            }
+          auto currentTS = _c_currentTS;
+          if (!_params_locked)
+              currentTS = _params->GetCurrentTimestep();
+          else
+              assert(currentTS == _params->GetCurrentTimestep());
 
-            if (grid == nullptr) return false;
-            if (!grid->InsideGrid(coords)) return false;
+          grid = _getAGrid(currentTS, VelocityNames[i]);
+          if (grid == nullptr) return false;
+          if (!grid->InsideGrid(coords)) return false;
         }
-    } else    // In case of unsteady, we check two time steps
-    {
+    }
+    else {  // In case of unsteady, we check two time steps
         // First check if the query time is within range
         if (time < _timestamps.front() || time > _timestamps.back()) return false;
 
@@ -141,28 +128,29 @@ bool VaporField::InsideVolumeVelocity(double time, const glm::vec3 &pos) const
     return true;
 }
 
-bool VaporField::InsideVolumeScalar(double time, const glm::vec3 &pos) const
+bool VaporField::InsideVolumeScalar(double time, glm::vec3 pos) const
 {
     // When this variable doesn't exist, it doesn't make sense to say if
     // a position is inside of the volume, so simply return true.
     if (ScalarName.empty()) return true;
 
-    const std::array<double, 3> coords{pos.x, pos.y, pos.z};
+    VAPoR::CoordType            coords{pos.x, pos.y, pos.z};
     const VAPoR::Grid *         grid = nullptr;
     VAssert(_isReady());
 
     // In case of steady field, we only check a specific time step
     if (IsSteady) {
-        if (_params_locked) {
-            grid = _c_scalar_grid;
-        } else {
-            auto currentTS = _params->GetCurrentTimestep();
-            grid = _getAGrid(currentTS, ScalarName);
-        }
+        auto currentTS = _c_currentTS;
+        if (!_params_locked)
+            currentTS = _params->GetCurrentTimestep();
+        else
+            assert(currentTS == _params->GetCurrentTimestep());
+
+        grid = _getAGrid(currentTS, ScalarName);
         if (grid == nullptr) return false;
         return grid->InsideGrid(coords);
-    } else    // In case of unsteady field, we check two time steps
-    {
+    }
+    else {  // In case of unsteady field, we check two time steps
         // First check if the query time is within range
         if (time < _timestamps.front() || time > _timestamps.back()) return false;
 
@@ -215,9 +203,9 @@ int VaporField::GetVelocityIntersection(size_t ts, glm::vec3 &minxyz, glm::vec3 
     return 0;
 }
 
-int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &velocity) const
+int VaporField::GetVelocity(double time, glm::vec3 pos, glm::vec3 &velocity) const
 {
-    const std::array<double, 3> coords{pos.x, pos.y, pos.z};
+    VAPoR::CoordType            coords{pos.x, pos.y, pos.z};
     const VAPoR::Grid *         grid = nullptr;
 
     // Retrieve the missing value and velocity multiplier
@@ -226,13 +214,12 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
 
     if (IsSteady) {
         for (int i = 0; i < 3; i++) {
-            if (_params_locked) {
-                grid = _c_velocity_grids[i];
-            } else {
-                auto currentTS = _params->GetCurrentTimestep();
-                grid = _getAGrid(currentTS, VelocityNames[i]);
-            }
+            auto currentTS = _c_currentTS;
+            if (!_params_locked)
+                currentTS = _params->GetCurrentTimestep();
+            grid = _getAGrid(currentTS, VelocityNames[i]);
             if (grid == nullptr) return GRID_ERROR;
+
             velocity[i] = grid->GetValue(coords);
             missingV[i] = grid->GetMissingValue();
         }
@@ -242,18 +229,16 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
           if (std::isnan(missingV[i]) && std::isnan(velocity[i]))
             hasMissing[i] = true;
         }
-        float mult = _params_locked ? _c_vel_mult : _params->GetVelocityMultiplier();
         if (glm::any(hasMissing)) {
             return MISSING_VAL;
         }
         else {
+            float mult = _params_locked ? _c_vel_mult : _params->GetVelocityMultiplier();
             velocity *= mult;
             return SUCCESS;
         }
     }    // Finish steady case
     else {
-        float mult = _params->GetVelocityMultiplier();
-
         // First check if the query time is within range
         if (time < _timestamps.front() || time > _timestamps.back()) return TIME_ERROR;
 
@@ -268,17 +253,19 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
         for (int i = 0; i < 3; i++) {
             grid = _getAGrid(floorTS, VelocityNames[i]);
             if (grid == nullptr) return GRID_ERROR;
+
             floorVelocity[i] = grid->GetValue(coords);
             missingV[i] = grid->GetMissingValue();
         }
         auto hasMissing = glm::equal(floorVelocity, missingV);
         if (glm::any(hasMissing)) { return MISSING_VAL; }
 
+        float mult = _params->GetVelocityMultiplier();
         if (time == _timestamps[floorTS]) {
             velocity = floorVelocity * mult;
             return 0;
-        } else    // Find the velocity values at the ceiling time step
-        {
+        } 
+        else {  // Find the velocity values at the ceiling time step, then interpolate.
             // We need to make sure there aren't duplicate time stamps
             VAssert(_timestamps[floorTS + 1] > _timestamps[floorTS]);
             for (int i = 0; i < 3; i++) {
@@ -297,30 +284,31 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
     }    // end of unsteady condition
 }
 
-int VaporField::GetScalar(double time, const glm::vec3 &pos, float &scalar) const
+int VaporField::GetScalar(double time, glm::vec3 pos, float &scalar) const
 {
     // When this variable doesn't exist, it doesn't make sense to get a scalar value
     // from it, so just return that fact.
     if (ScalarName.empty()) return NO_FIELD_YET;
 
-    const std::array<double, 3> coords{pos.x, pos.y, pos.z};
+    VAPoR::CoordType            coords{pos.x, pos.y, pos.z};
     const VAPoR::Grid *         grid = nullptr;
 
     if (IsSteady) {
-        if (_params_locked) {
-            grid = _c_scalar_grid;
-        } else {
-            auto currentTS = _params->GetCurrentTimestep();
-            grid = _getAGrid(currentTS, ScalarName);
-        }
+        auto currentTS = _c_currentTS;
+        if (!_params_locked)
+            currentTS = _params->GetCurrentTimestep();
+            
+        grid = _getAGrid(currentTS, ScalarName);
         if (grid == nullptr) return GRID_ERROR;
+
         scalar = grid->GetValue(coords);
         if (scalar == grid->GetMissingValue()) {
             return MISSING_VAL;
-        } else {
+        } 
+        else
             return 0;
-        }
-    } else {
+    } 
+    else {
         // First check if the query time is within range
         if (time < _timestamps.front() || time > _timestamps.back()) return TIME_ERROR;
 
@@ -330,13 +318,15 @@ int VaporField::GetScalar(double time, const glm::vec3 &pos, float &scalar) cons
         VAssert(rv == 0);
         grid = _getAGrid(floorTS, ScalarName);
         if (grid == nullptr) return GRID_ERROR;
+
         float floorScalar = grid->GetValue(coords);
         if (floorScalar == grid->GetMissingValue()) { return MISSING_VAL; }
 
         if (time == _timestamps[floorTS]) {
             scalar = floorScalar;
             return 0;
-        } else {
+        } 
+        else {
             grid = _getAGrid(floorTS + 1, ScalarName);
             if (grid == nullptr) return GRID_ERROR;
 
@@ -365,9 +355,7 @@ void VaporField::AssignDataManager(VAPoR::DataMgr *dmgr)
     _datamgr = dmgr;
 
     // Make a copy of the timestamps from the new data manager
-    const auto &timeCoords = dmgr->GetTimeCoordinates();
-    _timestamps.resize(timeCoords.size());
-    for (size_t i = 0; i < timeCoords.size(); i++) _timestamps[i] = timeCoords[i];
+    _timestamps = dmgr->GetTimeCoordinates();
 }
 
 void VaporField::UpdateParams(const VAPoR::FlowParams *p)
@@ -397,7 +385,7 @@ int VaporField::LocateTimestamp(double time, size_t &floor) const
     }
 }
 
-int VaporField::GetNumberOfTimesteps() const { return _timestamps.size(); }
+uint32_t VaporField::GetNumberOfTimesteps() const { return _timestamps.size(); }
 
 int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
 {
@@ -507,16 +495,16 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
     return 0;
 }
 
-const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &varName) const
+const VAPoR::Grid *VaporField::_getAGrid(uint32_t timestep, const std::string &varName) const
 {
     GridKey key;
     if (_params_locked) {
-        // Because in unsteady case, both currentTS and currentTS will be queried,
+        // Because in unsteady case, both currentTS and currentTS + 1 will be queried,
         // so we do a sanity check here. The assertion will be gone in release mode.
         assert(timestep == _c_currentTS);
         key.Reset(_c_currentTS, _c_refLev, _c_compLev, varName, _c_ext_min, _c_ext_max);
     } else {
-        std::vector<double> extMin, extMax;
+        VAPoR::CoordType extMin, extMax;
         _params->GetBox()->GetExtents(extMin, extMax);
         int refLevel = _params->GetRefinementLevel();
         int compLevel = _params->GetCompressionLevel();
@@ -525,12 +513,11 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
 
     // First check if we have the requested grid in our cache.
     // If it exists, return the grid directly.
-    const auto &grid_wrapper = _recentGrids.query(key);
-    if (grid_wrapper != nullptr) { return grid_wrapper->grid(); }
+    const auto* wrapper = _recentGrids.query(key);
+    if (wrapper != nullptr) { return wrapper->grid(); }
 
-    //
     // There's no such grid in our cache!
-    // Let's create a new grid by doing one of the three things, and then put it in the cache.
+    // Let's create a new grid by doing one of the two things, and then put it in the cache.
     // 1) create it by ourselves if a ConstantGrid is required, or
     // 2) ask for it from the data manager,
     //
@@ -542,14 +529,14 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
     if (key.emptyVar()) {
         // In case of an empty variable name, we generate a constantGrid with zeros.
         grid = new VAPoR::ConstantGrid(0.0f, 3);
-    } else {
-        VAPoR::CoordType extMin;
-        VAPoR::CoordType extMax;
+    } 
+    else {
         if (_params_locked) {
-            VAPoR::Grid::CopyToArr3(_c_ext_min, extMin);
-            VAPoR::Grid::CopyToArr3(_c_ext_max, extMax);
-            grid = _datamgr->GetVariable(_c_currentTS, varName, _c_refLev, _c_compLev, extMin, extMax, true);
-        } else {
+            grid = _datamgr->GetVariable(_c_currentTS, varName, _c_refLev, _c_compLev, 
+                                         _c_ext_min, _c_ext_max, true);
+        } 
+        else {
+            VAPoR::CoordType extMin, extMax;
             _params->GetBox()->GetExtents(extMin, extMax);
             int refLevel = _params->GetRefinementLevel();
             int compLevel = _params->GetCompressionLevel();
@@ -575,4 +562,14 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
     return grid;
 }
 
-void VaporField::ReleaseLockedGrids() { _recentGrids.clear(); }
+
+void VaporField::ReleaseLockedGrids()
+{
+    // Release locked grids by giving the cache a bunch of nullptrs with unique invalid keys.
+    GridKey key;
+    for (int i = 0; i < _recentGrids.size(); i++) {
+      key.Reset(std::numeric_limits<uint32_t>::max(), -(i + 2), -(i + 2), "", 
+                {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
+      _recentGrids.insert(key, nullptr);
+    }
+}

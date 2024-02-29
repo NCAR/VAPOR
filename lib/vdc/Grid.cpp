@@ -106,7 +106,6 @@ void Grid::_grid(const DimsType &dims, const DimsType &bs, const std::vector<flo
     _topologyDimension = topology_dimension;
     _missingValue = INFINITY;
     _hasMissing = false;
-    _interpolationOrder = 1;
     _nodeIDOffset = 0;
     _cellIDOffset = 0;
     _minAbs = {0, 0, 0};

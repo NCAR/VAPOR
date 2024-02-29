@@ -19,8 +19,7 @@ static RendererRegistrar<FlowRenderer> registrar(FlowRenderer::GetClassType(), F
 
 // Constructor
 FlowRenderer::FlowRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr)
-: Renderer(pm, winName, dataSetName, FlowParams::GetClassType(), FlowRenderer::GetClassType(), instName, dataMgr), _velocityField(9),    // big enough to hold velocities for 3 time steps.
-  _colorField(3),                                                                                                                        // big enough to hold scalars for 3 time steps.
+: Renderer(pm, winName, dataSetName, FlowParams::GetClassType(), FlowRenderer::GetClassType(), instName, dataMgr),
   _colorMapTexOffset(0)
 {
 }
@@ -114,7 +113,7 @@ int FlowRenderer::_outputFlowLines()
 
     for (const auto &v : addiVars) {
         // Create a VaporField with this variable
-        flow::VaporField varField(2);
+        flow::VaporField varField;
         varField.AssignDataManager(_dataMgr);
         varField.UpdateParams(params);
         varField.ScalarName = v;
