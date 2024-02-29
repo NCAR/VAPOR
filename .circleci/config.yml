@@ -691,7 +691,8 @@ jobs:
                 libxcb-image0 \
                 libxcb-keysyms1 \
                 libxcb-render-util0 \
-                libxkbcommon-x11-0
+                libxkbcommon-x12-0 \
+                desktop-file-utils
 
       - run:
           name: acquire intel hpckit for bundling ospray
