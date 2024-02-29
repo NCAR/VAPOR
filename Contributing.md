@@ -1,3 +1,3 @@
 # Contributing
 
-To make a contribution to Vapor, see our [Contributor's Guide](https://vapor.readthedocs.io/en/readthedocs/contributing.html).
+To make a contribution to Vapor, see our [Contributor's Guide](https://ncar.github.io/VaporDocumentationWebsite/contributingToVapor.html).

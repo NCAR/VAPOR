@@ -157,7 +157,7 @@ using namespace VAPoR;
 
 const QEvent::Type MainForm::ParamsChangeEvent = (QEvent::Type)QEvent::registerEventType();
 const QEvent::Type MainForm::ParamsIntermediateChangeEvent = (QEvent::Type)QEvent::registerEventType();
-const std::string  MainForm::_documentationURL = "https://vapor.readthedocs.io/en/readthedocs/";
+const std::string  MainForm::_documentationURL = "https://ncar.github.io/VaporDocumentationWebsite/";
 
 namespace {
 
@@ -1889,7 +1889,7 @@ void MainForm::showCitationReminder()
     reminder.append("We depend on evidence of the software's value to the scientific community.  ");
     reminder.append("You are free to use VAPOR as permitted under the terms and conditions of the licence.\n\n ");
     reminder.append("Please cite VAPOR in your publications and presentations. ");
-    reminder.append("Citation details:\n    https://vapor.readthedocs.io/en/readthedocs/licenseAndCitation.html");
+    reminder.append("Citation details:\n    https://www.vapor.ucar.edu/pages/vaporCitationPage.html");
     msgBox.setText(reminder);
 
     msgBox.setStandardButtons(QMessageBox::Ok);
@@ -2298,8 +2298,8 @@ void MainForm::installCLITools()
     }
 
     if (success) {
-        box.setText("Environmental variables set in ~/.profile and ~/.zshrc");
-        box.setInformativeText("Please log out and log back in for changes to take effect.");
+        box.setText("Installation Successful");
+        box.setInformativeText("Environmental variables set in ~/.profile and ~/.zshrc. The vapor command line utilities should be available from the terminal.");
         box.setIcon(QMessageBox::Information);
     } else {
         box.setText("Unable to set environmental variables");

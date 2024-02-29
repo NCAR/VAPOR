@@ -23,7 +23,7 @@ ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     
     AddAppearanceSubtab(new PSection("Image", {
         new PCheckbox(IP::_isGeoRefTag, "Geo Reference"),
-        new PCheckbox(IP::_ignoreTransparencyTag, "Ingore Transparency"),
+        new PCheckbox(IP::_ignoreTransparencyTag, "Ignore Transparency"),
         (new PDoubleSliderEdit(IP::_constantOpacityTag, "Opacity"))->EnableDynamicUpdate(),
         (new PFileOpenSelector(IP::_fileNameTag, "Image File"))->SetFileTypeFilter("TIFF files, tiled images (*.tiff *.tif *.gtif *.tms)"),
         new PTMSLODInput()

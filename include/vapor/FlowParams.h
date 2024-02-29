@@ -151,7 +151,7 @@ public:
     void SetFlowDirection(int);
 
     //! Get the file name/path to a file containing a list of seed points to advect from.
-    //! \details See https://vapor.readthedocs.io/en/readthedocs/usage/flowRenderer.html#seed-distribution-settings
+    //! \details See https://ncar.github.io/VaporDocumentationWebsite/vaporApplicationReference/flowRenderer.html#seed-distribution-settings
     //! \retval string - A file path containing a defined list of seed points to advect from
     std::string GetSeedInputFilename() const;
     
