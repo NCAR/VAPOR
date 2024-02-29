@@ -1,6 +1,8 @@
 #! /bin/bash
 
-set -x
+# Exit on error and print commands to stdout
+set -ex
+
 VAPOR="VAPOR3-$1-Linux"
 SRC_DIR=$2
 
@@ -35,7 +37,7 @@ $THIRD_PARTY_DIR/lib/python3.9/site-packages/Pillow.libs:\
 $THIRD_PARTY_DIR/lib/python3.9/site-packages/scipy.libs:\
 $THIRD_PARTY_DIR/lib/python3.9/site-packages/numpy.libs \
 ./$linuxdeployqt \
-$VAPOR/bin/vapor \
+$VAPOR/vapor.desktop \
 -qmake=$THIRD_PARTY_DIR/bin/qmake \
 -appimage
 

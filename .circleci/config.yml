@@ -711,7 +711,7 @@ jobs:
       - save_cache:
           key: hpckit-cache
           paths:
-            - /smokeTestData
+            - /opt
 
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
