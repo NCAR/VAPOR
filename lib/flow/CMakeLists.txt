@@ -3,7 +3,7 @@ set (SRC
 	Advection.cpp
 	Field.cpp
 	VaporField.cpp
-    AdvectionIO.cpp
+	AdvectionIO.cpp
 )
 
 set (HEADERS
@@ -12,7 +12,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Field.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VaporField.h
 	${PROJECT_SOURCE_DIR}/include/vapor/AdvectionIO.h
-	${PROJECT_SOURCE_DIR}/include/vapor/unique_ptr_cache.hpp
+	${PROJECT_SOURCE_DIR}/include/vapor/ptr_cache.hpp
 )
 
 add_library (flow SHARED ${SRC} ${HEADERS})

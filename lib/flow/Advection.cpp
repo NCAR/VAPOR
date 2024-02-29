@@ -515,7 +515,7 @@ int Advection::CalculateParticleProperties(Field *scalar)
     _propertyVarNames.emplace_back(scalar->ScalarName);
 
     // Test if this scalar field is the same as the one used to calculate particle values,
-    //   if so, copy over the values.
+    // if so, copy over the values.
     if (scalar->ScalarName == _valueVarName) {
         for (auto &s : _streams) {
             for (auto &p : s) { p.AttachProperty(p.value); }
@@ -539,7 +539,8 @@ int Advection::CalculateParticleProperties(Field *scalar)
                 p.AttachProperty(val);
             }
         }
-    } else {
+    } 
+    else {
         size_t mostSteps = 0;
         for (const auto &s : _streams)
             if (s.size() > mostSteps) mostSteps = s.size();
