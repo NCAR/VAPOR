@@ -696,7 +696,7 @@ jobs:
       - restore_cache:
           name: restore intel hpckit cache
           keys:
-            - hpckit-cache
+            - u20-hpckit-cache
 
       - run:
           name: acquire intel hpckit for bundling ospray
@@ -709,7 +709,7 @@ jobs:
             apt install -y intel-hpckit
 
       - save_cache:
-          key: hpckit-cache
+          key: u20-hpckit-cache
           paths:
             - /opt
 

@@ -11,7 +11,7 @@ SRC_DIR=$2
 ####
 
 mkdir -p $VAPOR
-rm -rf $VAPOR/*
+rm -rf $VAPOR/* || true
 ./$VAPOR.sh --skip-license --prefix=$VAPOR
 
 cp ${SRC_DIR}/buildutils/AppRun $VAPOR
@@ -23,7 +23,7 @@ cp ${SRC_DIR}/share/images/VAPOR.png $VAPOR
 ####
 
 linuxdeployqt=linuxdeployqt-continuous-x86_64.AppImage
-rm $linuxdeployqt
+rm $linuxdeployqt || true
 wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/$linuxdeployqt
 chmod 755 $linuxdeployqt
 
@@ -46,7 +46,7 @@ $VAPOR/vapor.desktop \
 ####
 
 appimagetool=appimagetool-x86_64.AppImage
-rm $appimagetool
+rm $appimagetool || true
 wget https://github.com/AppImage/appimagetool/releases/download/continuous/$appimagetool
 chmod 755 $appimagetool
 ./$appimagetool $VAPOR
