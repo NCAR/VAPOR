@@ -136,6 +136,12 @@ commands:
                 gcc7-fortran \
                 cmake \
                 curl \
+                tar \
+                xz \
+                zlib-devel \
+                bzip2 \
+                make \
+                which \
                 libomp-devel \
                 libicu-devel \
                 freeglut-devel \
@@ -848,21 +854,8 @@ jobs:
     resource_class: xlarge
 
     steps:
+      - suse_prerequisites
       - checkout
-      - run:
-          name: acquire prerequisites
-          command: |
-            zypper install -y \
-            curl \
-            tar \
-            gzip \
-            xz \
-            zlib-devel \
-            bzip2 \
-            make \
-            which \
-            git
-
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
           driveID: *srcLibID
