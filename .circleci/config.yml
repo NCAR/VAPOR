@@ -868,7 +868,7 @@ jobs:
             /root/project/scripts/build3rdParty.sh -o suse
 
       - build_vapor:
-          moveToCommand: ${f/Linux/Ubuntu20}
+          moveToCommand: ${f/Linux/SUSE}
 
       - store_artifacts:
           path: |
@@ -876,6 +876,9 @@ jobs:
 
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Sept-SUSE.tar.xz
+
+      - store_artifacts:
+          path: /glade/campaign/cisl/vast/vapor/third-party
 
   build_ubuntu20_libs:
     docker:
