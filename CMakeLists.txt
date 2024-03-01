@@ -519,9 +519,6 @@ if (UNIX AND NOT APPLE)
 			${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt
 			COMMAND touch ${CMAKE_SOURCE_DIR}/CMakeLists.txt
 			)
-        message( STATUS "${CMAKE_SOURCE_DIR}/buildutils/configureAppRun.sh
-            ${PARSE_BINARY} ${EXTRA_LIBS_SEARCH} >
-            ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt")
 	endif ()
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		if (EXISTS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt)
@@ -557,7 +554,6 @@ if (UNIX AND NOT APPLE)
 
             install (
                 FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
-                #DESTINATION ${INSTALL_LIB_DIR}/platforms
                 DESTINATION plugins/platforms
                 COMPONENT Dependencies
             )
