@@ -64,20 +64,27 @@ public:
     //
     auto query(const Key &key) -> const BigObj *
     {
-        // Only need to apply the mutex if `Query` is true.
-        if (Query) const std::lock_guard<std::mutex> lock_gd(_element_vector_mutex);
-
-        auto it = std::find_if(_element_vector.begin(), _element_vector.end(), [&key](element_type &e) { return e.first == key; });
-        if (it == _element_vector.end()) {    // This key does not exist
-            return nullptr;
-        } else {    // This key does exist
-            if (!Query) {
-                return it->second;
-            } else {
-                std::rotate(_element_vector.begin(), it, it + 1);
-                return _element_vector.front().second;
-            }
+      if (Query) {
+        // Use a guard lock if queries can change ordering.
+        const std::lock_guard<std::mutex> lock_gd(_element_vector_mutex);
+        auto it = std::find_if(_element_vector.begin(), _element_vector.end(),
+                               [&key](element_type &e) { return e.first == key; });
+        if (it == _element_vector.end())    // This key does not exist
+          return nullptr;
+        else {                              // This key does exist
+          std::rotate(_element_vector.begin(), it, it + 1);
+          return _element_vector.front().second;
         }
+      }
+      else {
+        // Just query, no change whatsoever.
+        auto it = std::find_if(_element_vector.begin(), _element_vector.end(),
+                               [&key](element_type &e) { return e.first == key; });
+        if (it == _element_vector.end())  // This key does not exist
+          return nullptr;
+        else                              // This key does exist
+          return it->second;
+      }
     }
 
     void insert(const Key &key, const BigObj *ptr)
