@@ -38,8 +38,6 @@ commands:
       - run:
           name: get third party libraries
           command: |
-              ls <<parameters.basedir>>
-              ls *thirdPartyDir
               <<parameters.sudo>> mkdir -p <<parameters.basedir>>
               <<parameters.sudo>> chmod -R 777 <<parameters.basedir>>
               <<parameters.sudo>> chown -R `whoami` <<parameters.basedir>>
