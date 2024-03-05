@@ -102,6 +102,10 @@ option (BUILD_TEST_APPS "Build test applications" OFF)
 option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" OFF)
 option (USE_OMP "Use OpenMP on some calculations" OFF)
 option (CONDA_BUILD "Use Conda to build" OFF)
+if (UNIX AND NOT APPLE)
+    include (CMakeDependentOption)
+    cmake_dependent_option (DIST_APPIMAGE "Generate an AppImage for VAPOR's installation across multiple Linux platforms" OFF "DIST_INSTALLER" ON)
+endif (UNIX AND NOT APPLE)
 
 if( USE_OMP )
     find_package(OpenMP REQUIRED)
@@ -515,7 +519,6 @@ if (UNIX AND NOT APPLE)
 			${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt
 			COMMAND touch ${CMAKE_SOURCE_DIR}/CMakeLists.txt
 			)
-	else ()
 	endif ()
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		if (EXISTS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt)
@@ -551,7 +554,7 @@ if (UNIX AND NOT APPLE)
 
             install (
                 FILES ${THIRD_PARTY_DIR}/plugins/platforms/libqxcb.so
-                DESTINATION ${INSTALL_LIB_DIR}/platforms
+                DESTINATION plugins/platforms
                 COMPONENT Dependencies
             )
 
@@ -596,12 +599,25 @@ endif (UNIX AND NOT APPLE)
 
 if (DIST_INSTALLER)
 	if (UNIX AND NOT APPLE)
-		add_custom_target (
+        if(DIST_APPIMAGE)
+            set (
+                APPIMAGE_COMMAND 
+                bash 
+                ${CMAKE_SOURCE_DIR}/buildutils/genAppImage.sh 
+                ${VERSION_STRING}
+                ${CMAKE_SOURCE_DIR}
+            )
+        else()
+            set (APPIMAGE_COMMAND echo Skipping AppImage generation)
+        endif()
+		
+        add_custom_target (
 			installer
 			WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
 			COMMAND cpack .
+			COMMAND ${APPIMAGE_COMMAND}
 			DEPENDS linuxpreinstall
-			)
+        )
 	else ()
 		add_custom_target (
 			installer
