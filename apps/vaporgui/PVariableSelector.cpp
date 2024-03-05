@@ -8,7 +8,8 @@ typedef VAPoR::DataMgr::VarType VarType;
 
 #define NULL_TEXT "<none>"
 
-PVariableSelector::PVariableSelector(const std::string &tag, const std::string &label) : PStringDropdown(tag, {}, label) {}
+PVariableSelector::PVariableSelector(const std::string &tag, const std::string &label)
+: PStringDropdown(tag, {}, label) { setCustomBlankText(NULL_TEXT); }
 
 void PVariableSelector::updateGUI() const
 {

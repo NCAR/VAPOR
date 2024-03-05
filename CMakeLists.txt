@@ -173,7 +173,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/lib/osgl/glad/include")
 if (WIN32)
 	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 endif ()
-if (BUILD_VDC)
+if (BUILD_VDC AND EXISTS ${PYTHONPATH}/lib-dynload)
 	link_directories (${PYTHONPATH}/lib-dynload)
 endif ()
 
