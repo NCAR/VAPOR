@@ -24,7 +24,8 @@ done
 baseDir='/glade/campaign/cisl/vast/vapor/third-party'
 if [ "$OS" != "suse" ]; then
     srcDir="$baseDir/2023-Jun-src"
-    archiveName="2023-Jun"
+    #archiveName="2023-Jun"
+    archiveName="2024-Mar"
 else
     srcDir="$baseDir/2023-Sept-src"
     archiveName="2023-Sept"
