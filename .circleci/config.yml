@@ -1,4 +1,6 @@
 anchors:
+  #- &thirdPartyDir    "/usr/local/VAPOR-Deps/"
+  - &thirdPartyDir    "/glade/campaign/cisl/vast/vapor/third-party/"
   - &current3rdParty  "2023-Jun"
   - &srcLibID         "1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a"
   - &ubuntu20LibID    "12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5"
@@ -31,7 +33,7 @@ commands:
         default: ""
       basedir:
         type: string
-        default: "/usr/local/VAPOR-Deps"
+        default: *thirdPartyDir
     steps:
       - run:
           name: get third party libraries
@@ -62,8 +64,8 @@ commands:
       - run:
           name: build vapor
           command: |
-            libraryDir=`ls /usr/local/VAPOR-Deps`
-            ln -s $libraryDir /usr/local/VAPOR-Deps/current
+            libraryDir=`ls *thirdPartyDir`
+            ln -s $libraryDir *thirdPartyDir/current
             cp site_files/site.NCAR site.local
             mkdir -p build
             cd build
