@@ -1,7 +1,7 @@
 anchors:
-  #- &thirdPartyDir    "/usr/local/VAPOR-Deps/"
-  - &thirdPartyDir    "/glade/campaign/cisl/vast/vapor/third-party/"
-  - &current3rdParty  "2023-Jun"
+  #- &thirdPartyDir    "/usr/local/VAPOR-Deps"
+  - &thirdPartyDir    "/glade/campaign/cisl/vast/vapor/third-party"
+  - &current3rdParty  "2023-Sept"
   - &srcLibID         "1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a"
   - &ubuntu20LibID    "12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5"
   - &ubuntu22LibID    "17Uv6wTePyRKfN10Iv00JKzeLc2W43NYk"
@@ -46,6 +46,24 @@ commands:
               #curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
               gdown https://drive.google.com/uc?id=${id}
               tar -xf ${filename} -C <<parameters.basedir>>
+
+  build_libraries:
+    parameters:
+      script:
+        type: string
+      os:
+        type: string
+      basedir:
+        type: string
+        default: *thirdPartyDir
+    steps:
+      - run:
+          name: build libraries
+          command: |
+            chmod 777 <<parameters.script>>
+            <<parameters.script>> -o <<parameters.os>>
+      - store_artifacts:
+          path: /tmp/workspace/installers
 
   build_vapor:
     parameters:
@@ -864,26 +882,25 @@ jobs:
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
           driveID: *srcLibID
-          basedir: /glade/campaign/cisl/vast/vapor/third-party
+          basedir: *thirdPartyDir
 
-      - run:
-          name: build libraries
-          command: |
-            chmod 777 /root/project/scripts/build3rdParty.sh
-            /root/project/scripts/build3rdParty.sh -o suse
+      #- run:
+      #    name: build libraries
+      #    command: |
+      #      chmod 777 /root/project/scripts/build3rdParty.sh
+      #      /root/project/scripts/build3rdParty.sh -o suse
+
+      - build_libraries:
+          script: /root/project/scripts/build3rdParty.sh
+          os: suse
+          basedir: *thirdPartyDir
 
       - build_vapor:
           moveToCommand: ${f/Linux/SUSE}
 
-      - store_artifacts:
-          path: |
-            /tmp/workspace/installers
-
-      - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Sept-SUSE.tar.xz
-
-      - store_artifacts:
-          path: /glade/campaign/cisl/vast/vapor/third-party
+#      - store_artifacts:
+#          path: |
+#            /tmp/workspace/installers
 
   build_ubuntu20_libs:
     docker:
@@ -1100,7 +1117,7 @@ workflows:
       #- build_macOS_installers
       #- build_ubuntu20_installer
       #- build_ubuntu22_installer
-      #- build_suse_installer
+      - build_suse_installer
       #- suse_smoke_tests:
       #    requires:
       #      - build_suse_installer
@@ -1108,7 +1125,7 @@ workflows:
       #- build_ubuntu22_libs
       #- build_macOSx86_libs
       #- build_M1_libs
-      - build_suse_libs
+      #- build_suse_libs
       #- build_windows_libs
       #- release_weekly_installers:
       #    requires:

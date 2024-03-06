@@ -22,14 +22,15 @@ done
 #OS="CentOS"
 #baseDir='/usr/local/VAPOR-Deps'
 baseDir='/glade/campaign/cisl/vast/vapor/third-party'
-if [ "$OS" != "suse" ]; then
-    srcDir="$baseDir/2023-Jun-src"
-    #archiveName="2023-Jun"
-    archiveName="2024-Mar"
-else
-    srcDir="$baseDir/2023-Sept-src"
-    archiveName="2023-Sept"
-fi
+srcDir="$baseDir/2023-Sept-src"
+archiveName="2023-Sept"
+#if [ "$OS" != "suse" ]; then
+#    srcDir="$baseDir/2023-Jun-src"
+#    archiveName="2023-Jun"
+#else
+#    srcDir="$baseDir/2023-Sept-src"
+#    archiveName="2023-Sept"
+#fi
 echo srcDir $srcDir
 echo OS ${OS}
 
