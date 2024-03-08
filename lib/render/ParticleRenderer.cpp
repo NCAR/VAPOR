@@ -49,6 +49,9 @@ using namespace VAPoR;
 //};
 #pragma pack(pop)
 
+using glm::vec3;
+static inline vec3 CoordTypeToVec3(const CoordType &c) { return vec3(c[0], c[1], c[2]); }
+
 static RendererRegistrar<ParticleRenderer> registrar(ParticleRenderer::GetClassType(), ParticleParams::GetClassType());
 
 ParticleRenderer::ParticleRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
@@ -153,15 +156,31 @@ int ParticleRenderer::_initializeGL() {
     assert(_VAO);
     assert(_VBO);
 
-    glBindVertexArray(_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    return 0;
+}
+
+static void SetupParticlePointGL(const int VAO, const int VBO) {
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), NULL);
     glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void *)sizeof(glm::vec3));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    return 0; 
+}
+
+static void SetupParticleDirectionGL(const int VAO, const int VBO) {
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*7, NULL);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*7, (void *)sizeof(glm::vec3));
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(float)*7, (void *)(2*sizeof(glm::vec3)));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 bool ParticleRenderer::_particleCacheIsDirty() const {
@@ -246,10 +265,11 @@ int ParticleRenderer::_renderParticlesHelper()
     float radius = radiusBase * rp->GetValueDouble(ParticleParams::RenderRadiusScalarTag, 1.);
 
     ShaderProgram *shader = nullptr;
+
     if (_cacheParams.direction)
-        shader = _glManager->shaderManager->GetShader("FlowTubes"); 
+        shader = _glManager->shaderManager->GetShader("ParticleDirection");
     else
-        shader = _glManager->shaderManager->GetShader("FlowGlyphsSphereSplat");
+        shader = _glManager->shaderManager->GetShader("ParticlePoint");
     if (!shader) return -1;
 
     double m[16];
@@ -264,6 +284,7 @@ int ParticleRenderer::_renderParticlesHelper()
     shader->SetUniform("MV", _glManager->matrixManager->GetModelViewMatrix());
     shader->SetUniform("aspect", _glManager->matrixManager->GetProjectionAspectRatio());
     shader->SetUniform("radius", radius);
+    shader->SetUniform("dirScale", (float)rp->GetValueDouble(ParticleParams::DirectionScaleTag, 1.));
     shader->SetUniform("lightingEnabled", (bool)rp->GetValueLong(ParticleParams::LightingEnabledTag, true));
     shader->SetUniform("scales", _getScales());
     shader->SetUniform("cameraPos", cameraPos);
@@ -284,12 +305,8 @@ int ParticleRenderer::_renderParticlesHelper()
     glEnable(GL_BLEND);
     glBindVertexArray(_VAO);
 
-    size_t offset = 0;
-    for (int n : _streamSizes) {
-        shader->SetUniform("nVertices", n);
-        glDrawArrays(GL_LINE_STRIP_ADJACENCY, offset, n);
-        offset += n;
-    }
+    glDrawArrays(GL_POINTS, 0, _particlesCount);
+    GL_ERR_BREAK();
 
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
@@ -354,9 +371,6 @@ int ParticleRenderer::_getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const
 }
 
 void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<Grid*>& vecGrids) {
-    _particles.clear();
-    _streamSizes.clear();
-
     bool      showDir = _cacheParams.direction;
     size_t    stride = max(1L, (long)_cacheParams.stride);
     float     dirScale = _cacheParams.directionScale;
@@ -367,103 +381,50 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
 
     if (showDir) for (auto g : vecGrids) dirs.push_back(g->cbegin(_cacheParams.boxMin, _cacheParams.boxMax));
 
-    for (size_t i = 0; node != nodeEnd; ++node, ++i) {
-        if (i % stride) {
-            if (showDir)
-                for (auto &it : dirs) ++it;
-            continue;
-        }
+    struct PointDataT {vec3 pos; float val;};
+    vector<PointDataT> pointData;
 
-        _streamSizes.push_back(4);
+    struct DirectionDataT {vec3 pos; vec3 norm; float val;};
+    vector<DirectionDataT> directionData;
 
-        const float value = grid->GetValueAtIndex(*node);
-        grid->GetUserCoordinates(*node, coordsBuf);
-        const glm::vec3 p1(coordsBuf[0], coordsBuf[1], coordsBuf[2]);
+    _particlesCount = grid->GetCoordDimensions(1)[0] / stride;
 
-        if (showDir) {
-            const glm::vec3 n(*(dirs[0]), *(dirs[1]), *(dirs[2]));
-            glm::vec3 p2 = p1 + n * dirScale;
-
-            if (!_clipOriginToBox(p1)) continue;  // continue if particle origin falls outside of box
-            _clipEndpointToBox(p1, p2);
-
-            glm::vec3 prep(-normalize(p1 - p2) + p2);
-            glm::vec3 post( normalize(p1 - p2) + p1);
-
-            _particles.push_back({prep, value});
-            _particles.push_back({glm::vec3(p2[0], p2[1], p2[2]), value});
-            _particles.push_back({glm::vec3(p1[0], p1[1], p1[2]), value});
-            _particles.push_back({post, value});
-
-            for (auto &it : dirs) ++it;
-        }
-        else {
-            if (!_clipOriginToBox(p1)) continue;  // continue if particle origin falls outside of box
-            glm::vec3 prep(-normalize(p1 - p1) + p1);
-            _particles.push_back({prep, value});
-            _particles.push_back({glm::vec3(p1[0], p1[1], p1[2]), value});
-            _particles.push_back({glm::vec3(p1[0], p1[1], p1[2]), value});
-            _particles.push_back({prep, value});
-        }
+    if (showDir) {
+        SetupParticleDirectionGL(_VAO, _VBO);
+        directionData.reserve(_particlesCount);
+    } else {
+        SetupParticlePointGL(_VAO, _VBO);
+        pointData.reserve(_particlesCount);
     }
-    
     assert(glIsVertexArray(_VAO) == GL_TRUE);
     assert(glIsBuffer(_VBO) == GL_TRUE);
 
+    for (size_t i = 0; node != nodeEnd;) {
+        if (i % stride) goto step;
+        {
+            const float value = grid->GetValueAtIndex(*node);
+            grid->GetUserCoordinates(*node, coordsBuf);
+            const vec3 p = CoordTypeToVec3(coordsBuf);
+
+            if (showDir){
+                const glm::vec3 norm(*(dirs[0]), *(dirs[1]), *(dirs[2]));
+                directionData.push_back({p, norm, value});
+            } else {
+                pointData.push_back({p, value});
+            }
+        }
+        step:
+        ++node, ++i;
+        for (auto &it : dirs) ++it;
+    }
+
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _particles.size(), _particles.data(), GL_STREAM_DRAW);
+    if (showDir)
+        glBufferData(GL_ARRAY_BUFFER, sizeof(DirectionDataT) * directionData.size(), directionData.data(), GL_STATIC_DRAW);
+    else
+        glBufferData(GL_ARRAY_BUFFER, sizeof(PointDataT) * pointData.size(), pointData.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-bool ParticleRenderer::_clipOriginToBox( const glm::vec3 &p1) {
-    if      (p1[0] > _cacheParams.boxMax[0]) { _streamSizes.pop_back(); return false; }
-    else if (p1[1] > _cacheParams.boxMax[1]) { _streamSizes.pop_back(); return false; }
-    else if (p1[2] > _cacheParams.boxMax[2]) { _streamSizes.pop_back(); return false; }
-    else if (p1[0] < _cacheParams.boxMin[0]) { _streamSizes.pop_back(); return false; }
-    else if (p1[1] < _cacheParams.boxMin[1]) { _streamSizes.pop_back(); return false; }
-    else if (p1[2] < _cacheParams.boxMin[2]) { _streamSizes.pop_back(); return false; }
-    return true;
-}
-
-void ParticleRenderer::_clipEndpointToBox( const glm::vec3 &p1, glm::vec3 &p2) const {
-    // Trim the endpoints of the particles to the box's extents
-    if (p2[0] > _cacheParams.boxMax[0]) { 
-        float distance = sqrt(pow(_cacheParams.boxMax[0]-p1[0],2)) / sqrt( pow(p2[0]-p1[0],2) );
-        p2[0] = _cacheParams.boxMax[0];
-        p2[1] = p1[1] + (p2[1]-p1[1])*distance;
-        p2[2] = p1[2] + (p2[2]-p1[2])*distance;
-    }
-    else if (p2[0] < _cacheParams.boxMin[0]) {
-        float distance = sqrt(pow(_cacheParams.boxMin[0]-p1[0],2)) / sqrt( pow(p2[0]-p1[0],2) );
-        p2[0] = _cacheParams.boxMin[0];
-        p2[1] = p1[1] + (p2[1]-p1[1])*distance;
-        p2[2] = p1[2] + (p2[2]-p1[2])*distance;
-    }
-    if (p2[1] > _cacheParams.boxMax[1]) {
-        float distance = sqrt(pow(_cacheParams.boxMax[1]-p1[1],2)) / sqrt( pow(p2[1]-p1[1],2) );
-        p2[0] = p1[0] + (p2[0]-p1[0])*distance;
-        p2[1] = _cacheParams.boxMax[1];
-        p2[2] = p1[2] + (p2[2]-p1[2])*distance;
-    }
-    else if (p2[1] < _cacheParams.boxMin[1]) {
-        float distance = sqrt(pow(_cacheParams.boxMin[1]-p1[1],2)) / sqrt( pow(p2[1]-p1[1],2) );
-        p2[0] = p1[0] + (p2[0]-p1[0])*distance;
-        p2[1] = _cacheParams.boxMin[1];
-        p2[2] = p1[2] + (p2[2]-p1[2])*distance;
-    }
-    if (p2[2] > _cacheParams.boxMax[2]) {
-        float distance = sqrt(pow(_cacheParams.boxMax[2]-p1[2],2)) / sqrt( pow(p2[2]-p1[2],2) );
-        p2[0] = p1[0] + (p2[0]-p1[0])*distance;
-        p2[1] = p1[1] + (p2[1]-p1[1])*distance;
-        p2[2] = _cacheParams.boxMax[2];
-    }
-    else if (p2[2] < _cacheParams.boxMin[2]) {
-        float distance = sqrt(pow(_cacheParams.boxMin[2]-p1[2],2)) / sqrt( pow(p2[2]-p1[2],2) );
-        p2[0] = p1[0] + (p2[0]-p1[0])*distance;
-        p2[1] = p1[1] + (p2[1]-p1[1])*distance;
-        p2[2] = _cacheParams.boxMin[2];
-    }
 }
 
 void ParticleRenderer::_renderParticlesLegacy(const Grid* grid, const std::vector<Grid*>& vecGrids) const {
