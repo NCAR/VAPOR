@@ -421,19 +421,20 @@ endif (WIN32)
 if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
-		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
-		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
-        file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
+		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/libhdf5*.dylib) 
+		#file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
+		#file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
+        #file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
-		install (
-			DIRECTORY ${INSTALL_FRAMEWORKS}
-			DESTINATION ${INSTALL_LIB_DIR}
-			COMPONENT Dependencies
-			)
+		#install (
+		#	DIRECTORY ${INSTALL_FRAMEWORKS}
+		#	DESTINATION ${INSTALL_LIB_DIR}
+		#	COMPONENT Dependencies
+		#	)
 
         if (BUILD_OSP)
             file (GLOB INSTALL_OSP_LIBS ${OSPRAYDIR}/lib/*.dylib) 
@@ -446,23 +447,23 @@ if (APPLE)
         endif ()
 
         if (NOT BUILD_PYTHON)
-		    install (
-		    	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
-		    	DESTINATION ${INSTALL_LIB_DIR}
-		    	COMPONENT Dependencies
-		    	)
-            file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)
-	        install (
-                FILES ${COCOA_LIBS}
-                DESTINATION ${INSTALL_BIN_DIR}/platforms
-                COMPONENT Dependencies
-                )
-            file (GLOB STYLE_LIBS ${THIRD_PARTY_DIR}/plugins/styles/libqmacstyle.dylib)
-	        install (
-                FILES ${STYLE_LIBS}
-                DESTINATION ${INSTALL_BIN_DIR}/styles
-                COMPONENT Dependencies
-                )
+		    #install (
+		    #	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
+		    #	DESTINATION ${INSTALL_LIB_DIR}
+		    #	COMPONENT Dependencies
+		    #	)
+            #file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)
+	        #install (
+            #    FILES ${COCOA_LIBS}
+            #    DESTINATION ${INSTALL_BIN_DIR}/platforms
+            #    COMPONENT Dependencies
+            #    )
+            #file (GLOB STYLE_LIBS ${THIRD_PARTY_DIR}/plugins/styles/libqmacstyle.dylib)
+	        #install (
+            #    FILES ${STYLE_LIBS}
+            #    DESTINATION ${INSTALL_BIN_DIR}/styles
+            #    COMPONENT Dependencies
+            #    )
         endif ()
 
         if (USE_OMP)
