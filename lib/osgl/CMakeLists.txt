@@ -1,12 +1,12 @@
 set(LIB osgl)
 
-include(CMakeCopy.cmake)
-
 set(BUILD_MESA_DEFAULT OFF)
-if (BUILD_PYTHON AND (UNIX AND NOT APPLE))
+if (UNIX AND NOT APPLE)
     set(BUILD_MESA_DEFAULT ON)
 endif()
+
 option (BUILD_MESA "Build with OSMesa" ${BUILD_MESA_DEFAULT})
+option (BUILD_OSGL_TESTS "Build tests" ON)
 
 option (SOFTWARE_ONLY "Disable EGL" OFF)
 if (NOT SOFTWARE_ONLY)
@@ -19,11 +19,9 @@ if (NOT PROJECT_NAME)
 	cmake_minimum_required (VERSION 3.10)
     project (${LIB})
 	set (CMAKE_CXX_STANDARD 11)
-    # find_package (OpenGL REQUIRED)
-    # include_directories (${OPENGL_INCLUDE_DIRS})
     set(CMAKE_INSTALL_BINDIR bin)
     set(CMAKE_INSTALL_LIBDIR lib)
-    set(CMAKE_INSTALL_INCLUDEDIR include/vapor)
+    set(CMAKE_INSTALL_INCLUDEDIR include)
     if(NOT CMAKE_BUILD_TYPE)
 	    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
     endif()
@@ -33,25 +31,21 @@ else ()
     set(CMAKE_INSTALL_INCLUDEDIR ${INSTALL_INCLUDE_DIR})
 endif ()
 
-file (GLOB HDRS ./include/vapor/*.h)
-file (GLOB SRCS ./*.cpp)
+file (GLOB HDRS ./include/osgl/*.h)
+file (GLOB SRCS ./src/*.cpp)
 if (APPLE)
-	file (GLOB OBJC_SRCS ./*.mm)
+	file (GLOB OBJC_SRCS ./src/*.mm)
 	list (APPEND SRCS ${OBJC_SRCS})
 endif ()
 
-list(FILTER SRCS EXCLUDE REGEX "test_[^/]*\\.cpp$")
-list(FILTER SRCS EXCLUDE REGEX "ext_[^/]*\\.cpp$")
-
 list(APPEND SRCS glad/src/egl.c glad/src/gl.c)
-list(APPEND HDRS glad/include/glad/egl.h glad/include/glad/gl.h)
-# file(COPY glad/include DESTINATION ${CMAKE_BINARY_DIR})
+# list(APPEND HDRS glad/include/glad/egl.h glad/include/glad/gl.h)
+if (WIN32)
+    list(APPEND SRCS glad/src/wgl.c)
+    # list(APPEND HDRS glad/include/glad/wgl.h)
+endif()
 
 add_library (${LIB} SHARED ${SRCS} ${HDRS})
-# if (NOT SOFTWARE_ONLY)
-#     target_link_libraries (${LIB} ${OPENGL_LIBRARIES})
-# endif()
-target_link_libraries (${LIB} common)
 
 if (APPLE)
 	find_library (APPKIT AppKit)
@@ -70,27 +64,17 @@ if (UNIX AND NOT APPLE)
     endif ()
 endif ()
 
-# if (CONDA_BUILD AND UNIX AND NOT APPLE)
-# target_link_libraries (${LIB} rt)
-# endif()
-
 if (NOT WIN32)
     target_compile_options(${LIB} PRIVATE -Wno-deprecated-declarations)
 endif()
-# target_compile_options(${LIB} PRIVATE -Wno-unknown-warning-option)
-
-# file(COPY ${HDRS} DESTINATION ${CMAKE_BINARY_DIR}/include/vapor)
-# foreach (HDR ${HDRS})
-#     copy(${HDR} ${CMAKE_BINARY_DIR}/include/vapor) # Does not work with xcode...
-# endforeach()
-# target_include_directories (${LIB} PUBLIC ${CMAKE_BINARY_DIR}/include)
 
 target_include_directories (${LIB} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories (${LIB} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
 
 if (WIN32)
-    add_definitions (-DOSGL_EXPORTS)
-    add_definitions (-DGLAD_API_CALL_EXPORT_BUILD)
+    target_compile_definitions(${LIB} PUBLIC GLAD_API_CALL_EXPORT=1)
+    target_compile_definitions(${LIB} PRIVATE GLAD_API_CALL_EXPORT_BUILD=1)
+    target_compile_definitions(${LIB} PRIVATE OSGL_EXPORTS=1)
 endif()
 
 install (
@@ -101,7 +85,7 @@ install (
 
 install (
 	FILES ${HDRS}
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/osgl
 	COMPONENT Libraries
 	)
 
@@ -111,16 +95,7 @@ install (
 	COMPONENT Libraries
     )
 
-set (BUILD_OSGL_TESTS OFF)
-
-if (NOT WIN32 AND BUILD_OSGL_TESTS)
-    file (GLOB TESTS ./test_*.cpp)
-    foreach (TEST ${TESTS})
-        get_filename_component(TEST_NAME "${TEST}" NAME_WE)
-        set(TEST_TARGET "${LIB}_${TEST_NAME}")
-        add_executable(${TEST_TARGET} "${TEST}")
-        target_link_libraries(${TEST_TARGET} ${LIB})
-        target_compile_options(${TEST_TARGET} PRIVATE -Wno-deprecated-declarations)
-        install(TARGETS ${TEST_TARGET} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Libraries)
-    endforeach()
+if (BUILD_OSGL_TESTS)
+    add_subdirectory (tests)
 endif()
+

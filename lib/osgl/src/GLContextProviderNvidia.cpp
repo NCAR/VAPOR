@@ -1,5 +1,7 @@
-#include <vapor/GLContextProviderNvidia.h>
-#include <vapor/STLUtils.h>
+#include <osgl/GLContextProviderNvidia.h>
+#include "STLUtils.h"
+
+using namespace OSGL;
 
 #if BUILD_EGL
 
@@ -7,7 +9,7 @@
     #error EGL only supported on linux
 #endif
 
-    #include <vapor/GLAD.h>
+    #include <osgl/GLAD.h>
     #include <glad/egl.h>
 
 //    Required if using system EGL

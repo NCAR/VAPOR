@@ -1,7 +1,9 @@
-#include <vapor/GLContextProviderMacOS.h>
+#include <osgl/GLContextProviderMacOS.h>
 #include <AppKit/NSOpenGL.h>
-#include <vapor/GLAD.h>
+#include <osgl/GLAD.h>
 #include <OpenGL/CGLContext.h>
+
+using namespace OSGL;
 
 // This uses the macOS native libraries which are written in Objective-C.
 

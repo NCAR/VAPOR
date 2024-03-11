@@ -1,11 +1,13 @@
 #pragma once
 
-#include <vapor/GLContext.h>
+#include <osgl/GLContext.h>
 
 //! \class GLContextProvider
 //! \ingroup HeadlessGL
 //! \brief Interface for creating an OpenGL context.
 //! \author Stas Jaroszynski
+
+namespace OSGL {
 
 class OSGL_API GLContextProvider {
 public:
@@ -17,3 +19,5 @@ public:
 private:
     static bool isContextOk(GLContext *ctx);
 };
+
+}

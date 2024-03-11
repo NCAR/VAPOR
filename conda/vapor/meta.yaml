@@ -39,6 +39,7 @@ requirements:
     - mesalib=21.2.5
     - expat=2.4
     - libcxx=14.0
+    - osgl
   run:
     # Run only
     - xarray=2022 #=2022.3.0
@@ -66,3 +67,4 @@ requirements:
     - {{ pin_compatible('mesalib') }}
     - {{ pin_compatible('expat') }}
     - {{ pin_compatible('libcxx') }}
+    - {{ pin_compatible('osgl') }}

@@ -1,4 +1,4 @@
-#include <vapor/Log.h>
+#include <osgl/Log.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -7,6 +7,8 @@
 #ifdef WIN32
 #include <algorithm>
 #endif
+
+using namespace OSGL;
 
 bool Log::InfoLevelEnabled = true;
 

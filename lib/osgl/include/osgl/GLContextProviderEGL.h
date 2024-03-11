@@ -1,10 +1,12 @@
 #pragma once
-#include <vapor/GLContext.h>
+#include <osgl/GLContext.h>
 
 //! \class GLContextProviderEGL
 //! \ingroup HeadlessGL
 //! \brief Creates an OpenGL context using the EGL library.
 //! \author Stas Jaroszynski
+
+namespace OSGL {
 
 class OSGL_API GLContextProviderEGL {
     class GLContextEGL : public GLContext {
@@ -25,3 +27,5 @@ protected:
     static GLContext * createContextForDisplay(void *display);
     static const char *stringifyEGLError(int e);
 };
+
+}

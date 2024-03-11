@@ -1,0 +1,22 @@
+package:
+  name: osgl
+  version: "0.9.0"
+
+source:
+  path: ..
+
+build:
+  script_env:
+  - DEBUG
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - make=4.3
+    - cmake=3.21.3
+    - mesalib=21.2.5 # [not win]
+    - libcxx=14.0    # [not win]
+    - libcxx         # [win]
+  run:
+    - {{ pin_compatible('mesalib') }} # [not win]
+    - {{ pin_compatible('libcxx') }}

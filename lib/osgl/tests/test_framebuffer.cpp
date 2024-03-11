@@ -1,10 +1,7 @@
-#include <vapor/GLInclude.h>
-#include <vapor/GLContextProvider.h>
-// #include <vapor/GLInclude.h>
+#include <osgl/GLInclude.h>
+#include <osgl/GLContextProvider.h>
 
-
-//#include <GL/osmesa.h>
-
+using namespace OSGL;
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"

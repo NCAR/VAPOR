@@ -1,6 +1,8 @@
 #pragma once
 
-#include <vapor/GLContextProviderCommon.h>
+#include <osgl/GLContextProviderCommon.h>
+
+namespace OSGL {
 
 class OSGL_API Log {
     template<typename... Args> static void print(String fmt, Args... args)
@@ -39,3 +41,5 @@ public:
 #define LogMessage(fmt, ...) _Log(Message, fmt, ##__VA_ARGS__)
 #define LogInfo(fmt, ...)    _Log(Info, fmt, ##__VA_ARGS__)
 #define LogWarning(fmt, ...) _Log(Warning, fmt, ##__VA_ARGS__)
+
+}

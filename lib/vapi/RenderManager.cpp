@@ -8,13 +8,14 @@
 #include <vapor/GLManager.h>
 #include <vapor/Framebuffer.h>
 
-#include <vapor/GLInclude.h>
+#include <osgl/GLInclude.h>
 
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 
 
 using namespace VAPoR;
+using namespace OSGL;
 
 RenderManager::RenderManager(ControlExec *ce) : _controlExec(ce) {}
 

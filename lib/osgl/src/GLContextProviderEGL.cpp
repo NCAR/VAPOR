@@ -1,4 +1,6 @@
-#include <vapor/GLContextProviderEGL.h>
+#include <osgl/GLContextProviderEGL.h>
+
+using namespace OSGL;
 
 #if BUILD_EGL
 
@@ -6,7 +8,7 @@
     #error EGL only supported on linux
 #endif
 
-    #include <vapor/GLAD.h>
+    #include <osgl/GLAD.h>
     #include <glad/egl.h>
 
 GLContextProviderEGL::GLContextEGL::GLContextEGL(void *display, void *surface, void *context) : _display(display), _surface(surface), _context(context) {}
