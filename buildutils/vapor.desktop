@@ -4,4 +4,4 @@ Name=VAPOR
 Comment=Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers
 Exec=bin/vapor
 Icon=VAPOR
-Categories=Science;DataVisualization;
+Categories=Science;Geoscience;DataVisualization;
