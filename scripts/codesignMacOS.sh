@@ -8,6 +8,7 @@ clear
 baseDir="/Applications/vapor.app"
 binDir="${baseDir}/Contents/MacOS"
 libDir="${baseDir}/Contents/Frameworks"
+pluginDir="${baseDir}/Contents/plugins"
 pyDir="${libDir}/python3.9"
 #codesignSignature="sudo codesign --force --verbose=2 --sign DQ4ZFL4KLF --options runtime --timestamp"
 declare codesignSignature="sudo codesign --verbose=2 --sign DQ4ZFL4KLF --options runtime --timestamp"
@@ -114,28 +115,49 @@ done
 
 ###################
 #
+# Plugins
+#
+###################
+
+# Remove all pre-existing code signatures
+for file in $(find $pluginDir -name "*"); do
+    recurseOnRpath $file "remove"
+done
+
+# Codesign all plugins, dependencies first
+for file in $(find $pluginDir -name "*"); do
+    recurseOnRpath $file "add"
+done
+
+# Verify codesignature of all plugins
+for file in $(find $pluginDir -name "*"); do
+    recurseOnRpath $file "verify"
+done
+
+###################
+#
 # Python
 #
 ###################
 
-# Codesign all python .so files
-for file in $(find $pyDir/lib-dynload -name "*.so"); do
-    $removeCodeSignature $file
-    $codesignSignature $file
-done
-
-# Codesign this one too
-$codesignSignature $pyDir/config-3.9-darwin/python.o
-
-# Codesign python site-packages libraries
-for file in $(find $pyDir/site-packages -name "*.so"); do
-    recurseOnLoaderPath $file "add"
-done
-
-# Codesign all .pyc files
-for file in $(find $pyDir -name "*.pyc"); do
-    $codesignSignature $file
-done
+## Codesign all python .so files
+#for file in $(find $pyDir/lib-dynload -name "*.so"); do
+#    $removeCodeSignature $file
+#    $codesignSignature $file
+#done
+#
+## Codesign this one too
+#$codesignSignature $pyDir/config-3.9-darwin/python.o
+#
+## Codesign python site-packages libraries
+#for file in $(find $pyDir/site-packages -name "*.so"); do
+#    recurseOnLoaderPath $file "add"
+#done
+#
+## Codesign all .pyc files
+#for file in $(find $pyDir -name "*.pyc"); do
+#    $codesignSignature $file
+#done
 
 ###################
 #
@@ -156,8 +178,7 @@ $codesignSignature --force $baseDir
 # repackage the .dmg
 version=$($baseDir/Contents/MacOS/vaporversion)
 version=3.9.1
-rm VAPOR3-$version-M1signed.dmg
-hdiutil create -srcFolder $baseDir -o VAPOR3-$version-M1signed.dmg
+hdiutil create -ov -srcFolder $baseDir -o VAPOR3-$version-M1signed.dmg
 
 # app-specific passwords: https://support.apple.com/en-us/102654
 xcrun notarytool store-credentials "notarytool-password" --apple-id pearse@ucar.edu --team-id DQ4ZFL4KLF --password vvnd-oaaz-rxge-ukma
@@ -165,7 +186,12 @@ xcrun notarytool store-credentials "notarytool-password" --apple-id pearse@ucar.
 # notarize
 xcrun -v notarytool submit VAPOR3-3.9.1-M1signed.dmg --keychain-profile "notarytool-password" --wait
 
-
+# Fetch the notorization log
+#xcrun -v notarytool log f34e7964-93ab-4693-941d-c562cf7062a6
+# % xcrun notarytool log CREDENTIALS REQUEST_UUID
+# where:
+# CREDENTIALS is your notary service credentials, the same credentials you used to submit your request
+# REQUEST_UUID is the UUID printed by notarytool when you submitted your request.
 
 
 

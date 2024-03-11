@@ -1,5 +1,7 @@
 if (BUILD_UTL)
-	add_subdirectory (vaporversion)
+	add_subdirectory (testApp)
+	#add_subdirectory (vaporversion)
+	#add_subdirectory (vaporversion2)
 	#add_subdirectory (raw2wasp)
 	#add_subdirectory (wasp2raw)
 	#add_subdirectory (waspcreate)

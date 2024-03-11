@@ -421,32 +421,32 @@ endif (WIN32)
 if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
-		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/libhdf5*.dylib) 
+		#file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/libhdf5*.dylib) 
 		#file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
 		#file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
         #file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
-		install (
-			FILES ${INSTALL_LIBS}
-			DESTINATION ${INSTALL_LIB_DIR}
-			COMPONENT Dependencies
-			)
+		#install (
+		#	FILES ${INSTALL_LIBS}
+		#	DESTINATION ${INSTALL_LIB_DIR}
+		#	COMPONENT Dependencies
+		#	)
 		#install (
 		#	DIRECTORY ${INSTALL_FRAMEWORKS}
 		#	DESTINATION ${INSTALL_LIB_DIR}
 		#	COMPONENT Dependencies
 		#	)
 
-        if (BUILD_OSP)
-            file (GLOB INSTALL_OSP_LIBS ${OSPRAYDIR}/lib/*.dylib) 
-            message (STATUS "OSPRAYDIR ${OSPRAYDIR}")
-		    install (
-		    	FILES ${INSTALL_OSP_LIBS}
-		    	DESTINATION ${INSTALL_LIB_DIR}
-		    	COMPONENT Dependencies
-		    	)
-        endif ()
+        #if (BUILD_OSP)
+        #    file (GLOB INSTALL_OSP_LIBS ${OSPRAYDIR}/lib/*.dylib) 
+        #    message (STATUS "OSPRAYDIR ${OSPRAYDIR}")
+		#    install (
+		#    	FILES ${INSTALL_OSP_LIBS}
+		#    	DESTINATION ${INSTALL_LIB_DIR}
+		#    	COMPONENT Dependencies
+		#    	)
+        #endif ()
 
-        if (NOT BUILD_PYTHON)
+        #if (NOT BUILD_PYTHON)
 		    #install (
 		    #	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
 		    #	DESTINATION ${INSTALL_LIB_DIR}
@@ -464,29 +464,31 @@ if (APPLE)
             #    DESTINATION ${INSTALL_BIN_DIR}/styles
             #    COMPONENT Dependencies
             #    )
-        endif ()
+        #endif ()
 
-        if (USE_OMP)
-            get_filename_component(OMP_PATH ${OpenMP_CXX_LIBRARIES} REALPATH)
-            install (
-                FILES ${OMP_PATH}
-                DESTINATION ${INSTALL_LIB_DIR}
-                COMPONENT Dependencies
-                )
-        endif ()
-        file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
-        message (STATUS "plugins ${HDF5_PLUGINS}")
-		install (
-			FILES ${HDF5_PLUGINS}
-			DESTINATION "${INSTALL_SHARE_DIR}/plugins"
-			COMPONENT Dependencies
-			)
-        file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/*.dylib) 
-        install (
-            FILES ${HDF5_LIBS}
-            DESTINATION ${INSTALL_LIB_DIR}
-            COMPONENT Dependencies
-            )
+        #if (USE_OMP)
+        #    get_filename_component(OMP_PATH ${OpenMP_CXX_LIBRARIES} REALPATH)
+        #    install (
+        #        FILES ${OMP_PATH}
+        #        DESTINATION ${INSTALL_LIB_DIR}
+        #        COMPONENT Dependencies
+        #        )
+        #endif ()
+        #file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
+        #message (STATUS "plugins ${HDF5_PLUGINS}")
+		#install (
+		#	FILES ${HDF5_PLUGINS}
+		#	#DESTINATION "${INSTALL_SHARE_DIR}/plugins"
+		#	DESTINATION "./vapor.app/Contents/PlugIns"
+		#	COMPONENT Dependencies
+		#	)
+
+        #file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/*.dylib) 
+        #install (
+        #    FILES ${HDF5_LIBS}
+        #    DESTINATION ${INSTALL_LIB_DIR}
+        #    COMPONENT Dependencies
+        #    )
 
     endif ()
 
@@ -508,7 +510,7 @@ if (APPLE)
     #)
 
     # Configure our modified codesigning script to run during "make install"
-    set(CPACK_INSTALL_SCRIPTS ${CODESIGN_UPDATED_SCRIPT})
+    #set(CPACK_INSTALL_SCRIPTS ${CODESIGN_UPDATED_SCRIPT})
 
 endif (APPLE)
 

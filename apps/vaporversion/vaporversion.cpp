@@ -58,6 +58,7 @@ const char *ProgName;
 
 int main(int argc, char **argv)
 {
+    std::cout << "vaporversion" << std::endl;
     OptionParser op;
 
     //
