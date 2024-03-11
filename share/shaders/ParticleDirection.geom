@@ -40,7 +40,7 @@ void CylinderVert(const vec3 v, const vec3 d, const float value, const float rad
 
 
 void main()
-{gs
+{
     //fValue = gValue[0];
     //EmitWorld(gl_in[0].gl_Position.xyz);
     //EmitWorld(gl_in[0].gl_Position.xyz + gNorm[0] * dirScale);

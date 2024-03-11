@@ -94,6 +94,7 @@ private:
     int  _generateParticlesLegacy(Grid*& grid, std::vector<Grid*>& vecGrids);
     int  _getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const;
     void _generateTextureData(const Grid* grid, const std::vector<Grid*>& vecGrids);
+    void _computeBaseRadius();
     void _renderParticlesLegacy(const Grid* grid, const std::vector<Grid*>& vecGrids) const;
     int  _renderParticlesHelper();
     void _prepareColormap();

@@ -116,8 +116,10 @@ int ParticleRenderer::_paintGL(bool)
         _renderParticlesLegacy(grid, vecGrids);
     }
     else {
-        if (regenerateParticles)
+        if (regenerateParticles) {
             _generateTextureData(grid, vecGrids);
+            _computeBaseRadius();
+        }
         _renderParticlesHelper();
     }
 
@@ -259,23 +261,7 @@ void ParticleRenderer::_resetColormapCache() {
 int ParticleRenderer::_renderParticlesHelper()
 {
     auto rp = GetActiveParams();
-
     float radiusBase = rp->GetValueDouble(ParticleParams::RenderRadiusBaseTag, -1);
-    if (radiusBase == -1) {
-        CoordType mind, maxd;
-
-        // Need to find a non-empty variable from color mapping or velocity variables.
-        std::string nonEmptyVarName = rp->GetColorMapVariableName();
-        assert(!nonEmptyVarName.empty());
-
-        _dataMgr->GetVariableExtents(_cacheParams.ts, nonEmptyVarName, _cacheParams.rLevel, _cacheParams.cLevel, mind, maxd);
-        glm::vec3  min(mind[0], mind[1], mind[2]);
-        glm::vec3  max(maxd[0], maxd[1], maxd[2]);
-        glm::vec3  lens = max - min;
-        float largestDim = glm::max(lens.x, glm::max(lens.y, lens.z));
-        radiusBase = largestDim / 560.f;
-        rp->SetValueDouble(ParticleParams::RenderRadiusBaseTag, "", radiusBase);
-    }
     float radius = radiusBase * rp->GetValueDouble(ParticleParams::RenderRadiusScalarTag, 1.);
 
     string shaderKey;
@@ -401,7 +387,6 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
     bool      showDir = _cacheParams.direction;
     bool      dynamicSize = !_cacheParams.radiusVarName.empty();
     size_t    stride = max(1L, (long)_cacheParams.stride);
-    float     dirScale = _cacheParams.directionScale;
     auto      node = grid->ConstNodeBegin(_cacheParams.boxMin, _cacheParams.boxMax);
     auto      nodeEnd = grid->ConstNodeEnd();
     CoordType coordsBuf;
@@ -462,6 +447,30 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
         else UploadDataBuffer(pointData);
     }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void ParticleRenderer::_computeBaseRadius() {
+    auto rp = GetActiveParams();
+    CoordType mind, maxd;
+
+    // Need to find a non-empty variable from color mapping or velocity variables.
+    std::string nonEmptyVarName = rp->GetColorMapVariableName();
+    assert(!nonEmptyVarName.empty());
+
+    _dataMgr->GetVariableExtents(_cacheParams.ts, nonEmptyVarName, _cacheParams.rLevel, _cacheParams.cLevel, mind, maxd);
+    glm::vec3  min(mind[0], mind[1], mind[2]);
+    glm::vec3  max(maxd[0], maxd[1], maxd[2]);
+    glm::vec3  lens = max - min;
+    float largestDim = glm::max(lens.x, glm::max(lens.y, lens.z));
+    float radiusBase = largestDim / 560.f;
+
+    if (!_cacheParams.radiusVarName.empty()) {
+        vector<double> dataRange;
+        _dataMgr->GetDataRange(_cacheParams.ts, _cacheParams.radiusVarName, _cacheParams.rLevel, _cacheParams.cLevel, _cacheParams.boxMin, _cacheParams.boxMax, dataRange);
+        radiusBase /= (dataRange[0]+dataRange[1])/2;
+    }
+
+    rp->SetValueDouble(ParticleParams::RenderRadiusBaseTag, "", radiusBase);
 }
 
 void ParticleRenderer::_renderParticlesLegacy(const Grid* grid, const std::vector<Grid*>& vecGrids) const {
