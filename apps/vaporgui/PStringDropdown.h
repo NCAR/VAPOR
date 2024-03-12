@@ -14,6 +14,7 @@ class PStringDropdown : public PLineItem {
     Q_OBJECT
 
     VComboBox *_vComboBox;
+    std::string _customBlankText;
 
 public:
     PStringDropdown(const std::string &tag, const std::vector<std::string> &items, const std::string &label = "");
@@ -22,6 +23,7 @@ public:
 
 protected:
     virtual void updateGUI() const override;
+    void setCustomBlankText(std::string text);
 
 protected slots:
     virtual void dropdownTextChanged(std::string text);
