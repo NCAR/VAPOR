@@ -75,7 +75,8 @@ commands:
             make installer
             for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
-            mv VAPOR3-* /tmp/workspace/installers
+            mv VAPOR3-*.sh /tmp/workspace/installers
+            mv VAPOR-*.AppImage /tmp/workspace/installers || true
             ls /tmp/workspace/installers
           no_output_timeout: 30m
       - store_artifacts:
@@ -683,13 +684,34 @@ jobs:
             DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
             apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
             apt install -y cmake --allow-unauthenticated
-      
+     
+            # for AppImage
+            apt install -y \
+                libxcb-icccm4-dev \
+                libxcb-image0 \
+                libxcb-keysyms1 \
+                libxcb-render-util0 \
+                libxkbcommon-x11-0 \
+                desktop-file-utils
+
+      - run:
+          name: acquire intel hpckit for bundling ospray
+          command: |
+            # For bundling Ospray, which wants Intel's MPI implementation to be bundled
+            apt install -y linux-headers-5.15.0-1053-aws
+            wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+            echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
+            apt update
+            apt install -y intel-hpckit
+
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
           driveID: *ubuntu20LibID
 
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
+          compileArgs: |
+            -DDIST_APPIMAGE=ON \
 
   build_ubuntu22_installer:
     docker:

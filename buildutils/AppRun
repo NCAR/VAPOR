@@ -1,0 +1,51 @@
+#!/bin/bash
+
+executables=(
+    "wrf2vdc"
+    "raw2wasp"
+    "wasp2raw"
+    "wrfvdccreate"
+    "raw2vdc"
+    "vdc2raw"
+    "cfvdccreate"
+    "vapor_check_udunits"
+    "vdcdump"
+    "ncdf2wasp"
+    "tiff2geotiff"
+    "wasp2ncdf"
+    "vapor"
+    "vaporversion"
+    "cf2vdc"
+    "vdccreate"
+    "vaporpychecker"
+    "vdccompare"
+    "waspcreate"
+)
+
+bindir="$(dirname "$0")/bin"
+
+if [ "$#" -eq 0 ]; then
+    # No arguments provided
+    # Launch vapor
+    exec "$bindir/vapor" "$@"
+else 
+    # Check if AppImage was given a valid executable
+    for exe in ${executables[@]}; do
+        if [ "$1" = "$exe" ] ; then
+            # An executable was provided
+            # Launch it with given args
+            exec "$bindir/$1" "${@:2}"
+            exit 0
+        fi  
+    done
+
+    # No executable found
+    echo Invalid argument: $@$'\n'
+    echo If launching vapor with arguments, the vapor executable must be specified
+    echo IE - ./VAPOR-x86_64.Appimage vapor dataFile1 dataFile2 ...
+    echo IE - ./VAPOR-x86_64.Appimage vapor mySession.vs3$'\n'
+    echo Usage: $0 [EXECUTABLE] [ARGS]
+    echo Available executables:
+    printf '\t%s\n' "${executables[@]}"
+    exit 1
+fi
