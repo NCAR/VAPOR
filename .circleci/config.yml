@@ -697,7 +697,7 @@ jobs:
       - run:
           name: acquire intel hpckit for bundling ospray
           command: |
-            # For bundling Ospray, which wants Intel's MPI implementation tobe bundled
+            # For bundling Ospray, which wants Intel's MPI implementation to be bundled
             apt install -y linux-headers-5.15.0-1053-aws
             wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
             echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
