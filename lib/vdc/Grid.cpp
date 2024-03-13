@@ -137,7 +137,7 @@ size_t Grid::GetNumDimensions(DimsType dims)
         VAssert(dims[i] > 0);
         if (dims[i] > 1) nDims++;
     }
-    nDims = std::max(nDims, 1UL); // Otherwise will return 0 dim for single particle
+    nDims = std::max(nDims, (size_t)1); // Otherwise will return 0 dim for single particle
     return (nDims);
 }
 
