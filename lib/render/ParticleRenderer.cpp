@@ -288,7 +288,6 @@ int ParticleRenderer::_renderParticlesHelper()
     shader->SetUniform("MV", _glManager->matrixManager->GetModelViewMatrix());
     shader->SetUniform("aspect", _glManager->matrixManager->GetProjectionAspectRatio());
     shader->SetUniform("radius", radius);
-//    shader->SetUniform("radiusVarStrength", (float)rp->GetValueDouble(ParticleParams::RenderRadiusVariableStrengthTag, 1.));
     shader->SetUniform("dirScale", (float)rp->GetValueDouble(ParticleParams::DirectionScaleTag, 1.));
     shader->SetUniform("lightingEnabled", (bool)rp->GetValueLong(ParticleParams::LightingEnabledTag, true));
     shader->SetUniform("scales", _getScales());
