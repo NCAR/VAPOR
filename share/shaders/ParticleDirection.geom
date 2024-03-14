@@ -24,6 +24,11 @@ out float fValue;
 out vec3 fNormal;
 
 
+#ifdef DYNAMIC_RADIUS
+in float gRadius[];
+#endif
+
+
 uniform mat4 P;
 uniform mat4 MV;
 uniform vec3 scales;
@@ -31,7 +36,7 @@ uniform float radius = 0.05;
 uniform float dirScale = 0.05;
 
 void EmitWorld(const vec3 v);
-void CylinderVert(const vec3 v, const vec3 d, const float value);
+void CylinderVert(const vec3 v, const vec3 d, const float value, const float radius);
 
 
 void main()
@@ -61,6 +66,12 @@ void main()
     XH = normalize(cross(N, up));
     YH = normalize(cross(XH, N));
 
+    #ifdef DYNAMIC_RADIUS
+        float finalRadius = radius * gRadius[0];
+    #else
+        float finalRadius = radius;
+    #endif
+
     vec2 fade = CalculateFade();
 
     //fNormal = vec3(1,0,0); fValue = 1; EmitWorld(gl_in[0].gl_Position.xyz); EmitWorld(gl_in[1].gl_Position.xyz); EndPrimitive(); return;
@@ -70,8 +81,8 @@ void main()
         vec3 D;
         D = XH*cos(t) + YH*sin(t);
 
-        CylinderVert(V[0], D, gValue[0]);
-        CylinderVert(V[1], D, gValue[0]);
+        CylinderVert(V[0], D, gValue[0], finalRadius);
+        CylinderVert(V[1], D, gValue[0], finalRadius);
     }
     EndPrimitive();
 } 
@@ -84,7 +95,7 @@ void EmitWorld(const vec3 v)
 }
 
 
-void CylinderVert(const vec3 v, const vec3 d, const float value)
+void CylinderVert(const vec3 v, const vec3 d, const float value, const float radius)
 {
     fNormal = d;
     fValue = value;

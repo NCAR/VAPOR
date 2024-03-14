@@ -8,6 +8,14 @@ using namespace VAPoR;
 
 static RenderEventRouterRegistrar<ParticleEventRouter> registrar(ParticleEventRouter::GetClassType());
 
+struct PParticleRadiusVariableSelector : public PVariableSelector {
+    PParticleRadiusVariableSelector()
+    : PVariableSelector(ParticleParams::RenderRadiusVariableTag, "Particle Radius Scalar") {
+        AddNullOption();
+        ShowParticleVars();
+    }
+};
+
 ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, BarbParams::GetClassType())
 {
     // clang-format off
@@ -18,6 +26,7 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
             (new PXFieldVariableSelector)->ShowParticleVars(),
             (new PYFieldVariableSelector)->ShowParticleVars(),
             (new PZFieldVariableSelector)->ShowParticleVars(),
+            (new PParticleRadiusVariableSelector()),
         }),
         new PSection("Data Fidelity", {
             (new PIntegerInput(ParticleParams::StrideTag, "Stride"))->SetRange(1, 1000)
@@ -28,6 +37,10 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
         new PTFEditor,
             new PSection("Particles", {
                 (new PDoubleSliderEdit(ParticleParams::RenderRadiusScalarTag, "Radius"))->SetRange(0.5, 25)->AllowUserRange(true)->EnableDynamicUpdate()->EnableBasedOnParam(ParticleParams::RenderLegacyTag, false),
+                (new PParticleRadiusVariableSelector()),
+//                (new PShowIf(ParticleParams::RenderRadiusVariableTag))->Not()->Equals("")->Then({
+//                    (new PDoubleSliderEdit(ParticleParams::RenderRadiusVariableStrengthTag, "Radius Variable Strength"))->SetRange(0.001, 1)->AllowUserRange(true)->EnableDynamicUpdate()
+//                }),
                 new PCheckbox(ParticleParams::ShowDirectionTag, "Show direction"),
                     (new PDoubleSliderEdit(ParticleParams::DirectionScaleTag, "Length scale"))->SetRange(0.0001, 10)->AllowUserRange(true)->EnableDynamicUpdate()->EnableBasedOnParam(ParticleParams::ShowDirectionTag),
                     (new PXFieldVariableSelector)->ShowParticleVars()->EnableBasedOnParam(ParticleParams::ShowDirectionTag),

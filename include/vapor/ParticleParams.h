@@ -36,6 +36,8 @@ public:
 
     //! Scale the rendered particle size
     static const std::string RenderRadiusScalarTag;
+    static const std::string RenderRadiusVariableTag;
+    static const std::string RenderRadiusVariableStrengthTag;
 
     static const std::string RenderRadiusBaseTag;
     static const std::string RenderLegacyTag;

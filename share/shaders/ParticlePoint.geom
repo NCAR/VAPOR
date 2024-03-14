@@ -13,6 +13,11 @@ out float fValue;
 out vec2 fC;
 
 
+#ifdef DYNAMIC_RADIUS
+in float gRadius[];
+#endif
+
+
 uniform mat4 P;
 uniform mat4 MV;
 uniform vec3 cameraPos;
@@ -36,11 +41,17 @@ void main()
 	xh /= scales;
 	yh /= scales;
 
+	#ifdef DYNAMIC_RADIUS
+        float finalRadius = radius * gRadius[0];
+    #else
+        float finalRadius = radius;
+    #endif
+
 	// Billboard
-	fC = vec2(-1.0, -1.0); EmitWorld(o + radius * (-xh + -yh));
-	fC = vec2( 1.0, -1.0); EmitWorld(o + radius * ( xh + -yh));
-	fC = vec2(-1.0,  1.0); EmitWorld(o + radius * (-xh +  yh));
-	fC = vec2( 1.0,  1.0); EmitWorld(o + radius * ( xh +  yh));
+	fC = vec2(-1.0, -1.0); EmitWorld(o + finalRadius * (-xh + -yh));
+	fC = vec2( 1.0, -1.0); EmitWorld(o + finalRadius * ( xh + -yh));
+	fC = vec2(-1.0,  1.0); EmitWorld(o + finalRadius * (-xh +  yh));
+	fC = vec2( 1.0,  1.0); EmitWorld(o + finalRadius * ( xh +  yh));
 	EndPrimitive();
 } 
 
