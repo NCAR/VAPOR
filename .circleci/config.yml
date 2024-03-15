@@ -58,7 +58,7 @@ commands:
     parameters:
       branch:
         type: string
-        default: $CIRCLE_BRANCH
+        default: main
       beforeCompile:
         type: string
         default: ""
@@ -1143,8 +1143,8 @@ workflows:
       #- build_python_api_ubuntu
       #- build_python_api_osx
       #- test_clang_format
-      #- build_win10_installer
-      #- build_macOS_installers
+      - build_win10_installer
+      - build_macOS_installers
       - build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_suse_installer
