@@ -108,7 +108,7 @@ commands:
           command: |
             if [ -z "$(ls -A /smokeTestData)" ]; then
                 mkdir -p /smokeTestData
-                gdown https://drive.google.com/uc?id=1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t
+                wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/
                 tar --no-same-owner -xf /root/project/smokeTestData.tar.gz -C /smokeTestData
                 chown -R root:root /smokeTestData
                 chmod -R 777 /smokeTestData
