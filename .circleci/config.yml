@@ -6,6 +6,10 @@ anchors:
   - &macOSx86LibID    "17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn"
   - &macOSM1LibID     "14610-_oYbF_qbiO3WoOu0FQhNNvzX6p7"
   - &suseLibID        "1pvdYktXqFM5_8kNd8lG1TT5-rI8Mspyf"
+  - &u20libAWS        "2019-Aug-Win64.zip"
+  - &macx86libAWS     "2023-Jun-macOSx86.tar.xz"
+  - &macArm64libAWS   "2023-Sept-M1.tar.xz"
+  - &u20libAWS        "2023-Sept-Ubuntu20.tar.xz"
 
 version: 2.1
 
@@ -22,6 +26,9 @@ references:
 commands:
   get_libraries:
     parameters:
+      useAWS:
+        type: boolean
+        default: true
       fileName:
         type: string
       driveID:
@@ -33,14 +40,19 @@ commands:
       - run:
           name: get third party libraries
           command: |
-              <<parameters.sudo>> mkdir -p /usr/local/VAPOR-Deps
-              <<parameters.sudo>> chmod -R 777 /usr/local/VAPOR-Deps
-              <<parameters.sudo>> chown -R `whoami` /usr/local/VAPOR-Deps
-              id=<<parameters.driveID>>
-              filename=<<parameters.fileName>>
-              #curl -L -s -o "${filename}" "https://drive.google.com/uc?id=${id}&confirm=t"
-              gdown https://drive.google.com/uc?id=${id}
-              tar -xf ${filename} -C /usr/local/VAPOR-Deps
+              # if /usr/local/VAPOR-Deps is empty, acquire libraries 
+              if [ ! -d /usr/local/VAPOR-Deps ]; then
+                <<parameters.sudo>> mkdir -p /usr/local/VAPOR-Deps
+                <<parameters.sudo>> chmod -R 777 /usr/local/VAPOR-Deps
+                <<parameters.sudo>> chown -R `whoami` /usr/local/VAPOR-Deps
+                if <<parameters.useAWS>> ; then
+                  wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/<<parameters.fileName>>
+                else
+                  id=<<parameters.driveID>>
+                  gdown https://drive.google.com/uc?id=${id}
+                fi
+                tar -xf <<parameters.fileName>> -C /usr/local/VAPOR-Deps
+              fi
 
   build_vapor:
     parameters:
@@ -75,8 +87,7 @@ commands:
             make installer
             for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
-            mv VAPOR3-*.sh /tmp/workspace/installers
-            mv VAPOR-*.AppImage /tmp/workspace/installers || true
+            find VAPOR* -maxdepth 1 -type f -exec mv {} /tmp/workspace/installers \;
             ls /tmp/workspace/installers
           no_output_timeout: 30m
       - store_artifacts:
@@ -97,11 +108,8 @@ commands:
           command: |
             if [ -z "$(ls -A /smokeTestData)" ]; then
                 mkdir -p /smokeTestData
-                fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t"
-                filename="/tmp/smokeTestData.tar.gz"
-                curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null
-                curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" -o ${filename}
-                tar --no-same-owner -xf /tmp/smokeTestData.tar.gz -C /smokeTestData
+                gdown https://drive.google.com/uc?id=1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t
+                tar --no-same-owner -xf /root/project/smokeTestData.tar.gz -C /smokeTestData
                 chown -R root:root /smokeTestData
                 chmod -R 777 /smokeTestData
             else
@@ -694,24 +702,46 @@ jobs:
                 libxkbcommon-x11-0 \
                 desktop-file-utils
 
+      - restore_cache:
+          name: restore intel's oneapi
+          keys:
+            - intelOneapi
       - run:
           name: acquire intel hpckit for bundling ospray
           command: |
-            # For bundling Ospray, which wants Intel's MPI implementation to be bundled
-            apt install -y linux-headers-5.15.0-1053-aws
-            wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
-            echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
-            apt update
-            apt install -y intel-hpckit
+            # if not restored from cache, acquire oneapi
+            if [ ! -d /opt/intel/oneapi ]; then
+              # For bundling Ospray, which wants Intel's MPI implementation to be bundled
+              apt install -y linux-headers-5.15.0-1053-aws
+              wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+              echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
+              apt update
+              apt install -y intel-hpckit
+            fi
+      - save_cache:
+          key: intelOneapi
+          paths:
+            - /opt/intel/oneapi
 
+      - restore_cache:
+          name: restore third party libraries
+          keys:
+            - ubuntu-libs-mar2023
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
-          driveID: *ubuntu20LibID
+          driveID: *u20libAWS
+      - save_cache:
+          key: ubuntu-libs-mar2023
+          paths:
+            - /usr/local
 
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
           compileArgs: |
             -DDIST_APPIMAGE=ON \
+            -DBUILD_TEST_APPS=ON \
+  
+      - smoke_tests
 
   build_ubuntu22_installer:
     docker:
@@ -1117,7 +1147,7 @@ workflows:
       #- build_macOS_installers
       - build_ubuntu20_installer
       #- build_ubuntu22_installer
-      - build_suse_installer
+      #- build_suse_installer
       #- suse_smoke_tests:
       #    requires:
       #      - build_suse_installer
