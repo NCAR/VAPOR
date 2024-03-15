@@ -258,7 +258,7 @@ jobs:
 
       - run:
           name: remove old libraries
-          command: rm -rf /usr/local/VAPOR-Deps/*
+          command: rm -rf /usr/local/VAPOR-Deps
 
       - get_libraries:
           fileName: 2023-Jun-macOSx86.tar.xz
