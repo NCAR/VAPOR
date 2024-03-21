@@ -7,11 +7,9 @@
 #
 ###########################################################
 
-import importlib
-vapor_spec = importlib.util.find_spec("vapor")
-found = vapor_spec is not None
-
-if not found:
+try:
+    import vapor
+except ImportError:
     import sys
     sys.path.append('..')
 

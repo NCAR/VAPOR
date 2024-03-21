@@ -39,6 +39,7 @@ requirements:
     - mesalib=21.2.5
     - expat=2.4
     - libcxx=14.0
+    - libxcrypt # [linux]
   run:
     # Run only
     - xarray=2022 #=2022.3.0

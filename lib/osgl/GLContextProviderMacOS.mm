@@ -1,4 +1,5 @@
 #include <vapor/GLContextProviderMacOS.h>
+#include <objc/NSObjCRuntime.h> // This include shouldn't be required but Conda's compiler is sporadically improperly configured.
 #include <AppKit/NSOpenGL.h>
 #include <vapor/GLAD.h>
 #include <OpenGL/CGLContext.h>
