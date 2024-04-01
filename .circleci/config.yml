@@ -229,10 +229,10 @@ jobs:
             # clang
             # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
             # Therefore, skip selfupdate until we know we want a newer version of clang
-            #sudo /opt/local/bin/port -v selfupdate
-            #(sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
-            #sudo /opt/local/bin/port select --set clang mp-clang-17
-            #/opt/local/bin/clang++ -v > clangVersion.txt
+            sudo /opt/local/bin/port -v selfupdate
+            (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
+            sudo /opt/local/bin/port select --set clang mp-clang-17
+            /opt/local/bin/clang++ -v > clangVersion.txt
 
             # CMake
             (sudo yes || true) | sudo /opt/local/bin/port install cmake
@@ -254,6 +254,8 @@ jobs:
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DBUILD_OSP=OFF \
           moveToCommand: ${f/Darwin/DarwinM1}
 
       - run:
@@ -1143,9 +1145,9 @@ workflows:
       #- build_python_api_ubuntu
       #- build_python_api_osx
       #- test_clang_format
-      - build_win10_installer
+      #- build_win10_installer
       - build_macOS_installers
-      - build_ubuntu20_installer
+      #- build_ubuntu20_installer
       #- build_ubuntu22_installer
       #- build_suse_installer
       #- suse_smoke_tests:
