@@ -227,14 +227,16 @@ jobs:
             sudo make install
 
             sudo /opt/local/bin/port -v selfupdate
+
             # CMake
             (sudo yes || true) | sudo /opt/local/bin/port install cmake
+            
             # clang
             # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
             # Therefore, skip selfupdate until we know we want a newer version of clang
-            (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
-            sudo /opt/local/bin/port select --set clang mp-clang-17
-            /opt/local/bin/clang++ -v > clangVersion.txt
+            #(sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
+            #sudo /opt/local/bin/port select --set clang mp-clang-17
+            #/opt/local/bin/clang++ -v > clangVersion.txt
 
           no_output_timeout: 45m
 
@@ -243,9 +245,14 @@ jobs:
           paths:
             - /opt/local
 
+      #- get_libraries:
+      #    fileName: 2023-Sept-M1.tar.xz
+      #    driveID: *macOSM1LibID
+      #    sudo: sudo
+
       - get_libraries:
-          fileName: 2023-Sept-M1.tar.xz
-          driveID: *macOSM1LibID
+          fileName: 2023-Jun-macOSx86.tar.xz
+          driveID: *macOSx86LibID
           sudo: sudo
 
       - build_vapor:
@@ -258,14 +265,14 @@ jobs:
             -DBUILD_OSP=OFF \
           moveToCommand: ${f/Darwin/DarwinM1}
 
-      - run:
-          name: remove old libraries
-          command: sudo rm -rf /usr/local/VAPOR-Deps
+      #- run:
+      #    name: remove old libraries
+      #    command: sudo rm -rf /usr/local/VAPOR-Deps
 
-      - get_libraries:
-          fileName: 2023-Jun-macOSx86.tar.xz
-          driveID: *macOSx86LibID
-          sudo: sudo
+      #- get_libraries:
+      #    fileName: 2023-Jun-macOSx86.tar.xz
+      #    driveID: *macOSx86LibID
+      #    sudo: sudo
 
       - build_vapor:
           beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
