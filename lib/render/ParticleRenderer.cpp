@@ -378,7 +378,7 @@ int ParticleRenderer::_getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const
     return 0;
 }
 
-template<typename T> static void UploadDataBuffer(T buffer) {
+template<typename T> static void UploadDataBuffer(vector<T> buffer) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(T) * buffer.size(), buffer.data(), GL_STATIC_DRAW);
 }
 
