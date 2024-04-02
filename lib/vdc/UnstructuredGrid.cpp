@@ -24,7 +24,8 @@ void UnstructuredGrid::_unstructuredGrid(const DimsType &vertexDims, const DimsT
                                          Location location,    // node,face, edge
                                          size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
 {
-    VAssert(GetNumDimensions(vertexDims) == 1 || GetNumDimensions(vertexDims) == 2);
+    // vertexDims can be 0 in the case of a single-particle dataset since vapor considers length 1 topological data-dimensions as not contributing to the grids topological dimension
+    VAssert(GetNumDimensions(vertexDims) == 0 || GetNumDimensions(vertexDims) == 1 || GetNumDimensions(vertexDims) == 2);
     VAssert(GetNumDimensions(vertexDims) == GetNumDimensions(faceDims));
     VAssert((GetNumDimensions(vertexDims) == GetNumDimensions(edgeDims)) || (GetNumDimensions(edgeDims) == 0));
 
