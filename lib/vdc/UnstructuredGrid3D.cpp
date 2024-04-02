@@ -27,9 +27,10 @@ UnstructuredGrid3D::UnstructuredGrid3D(const DimsType &vertexDims, const DimsTyp
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset), _xug(xug), _yug(yug),
   _zug(zug)
 {
-    VAssert(xug.GetNumDimensions() == 1);
-    VAssert(yug.GetNumDimensions() == 1);
-    VAssert(zug.GetNumDimensions() == 1);
+    // These can be 0 in the case of a single-particle dataset since vapor considers length 1 topological data-dimensions as not contributing to the grids topological dimension
+    // VAssert(xug.GetNumDimensions() == 1);
+    // VAssert(yug.GetNumDimensions() == 1);
+    // VAssert(zug.GetNumDimensions() == 1);
 
     VAssert(location == NODE);
 }
@@ -42,9 +43,10 @@ UnstructuredGrid3D::UnstructuredGrid3D(const std::vector<size_t> &vertexDims, co
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset), _xug(xug), _yug(yug),
   _zug(zug)
 {
-    VAssert(xug.GetNumDimensions() == 1);
-    VAssert(yug.GetNumDimensions() == 1);
-    VAssert(zug.GetNumDimensions() == 1);
+    // These can be 0 in the case of a single-particle dataset since vapor considers length 1 topological data-dimensions as not contributing to the grids topological dimension
+    // VAssert(xug.GetNumDimensions() == 1);
+    // VAssert(yug.GetNumDimensions() == 1);
+    // VAssert(zug.GetNumDimensions() == 1);
 
     VAssert(location == NODE);
 }
