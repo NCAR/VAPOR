@@ -21,7 +21,7 @@ TwoDDataEventRouter::TwoDDataEventRouter(QWidget *parent, ControlExec *ce) : Ren
     }));
     
     AddAppearanceSubtab((new PTFEditor));
-    AddGeometrySubtab(new PGeometrySubtab);
+    AddGeometrySubtab(new PGeometrySubtab(ce));
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on

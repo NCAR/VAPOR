@@ -3,4 +3,4 @@
 #include "PCopyRegionWidget.h"
 #include "PTransformWidget.h"
 
-PGeometrySubtab::PGeometrySubtab() : PGroup({new PRegionSelector, new PCopyRegionWidget, new PRendererTransformSection}) {}
+PGeometrySubtab::PGeometrySubtab(VAPoR::ControlExec* ce) : PGroup({new PRegionSelector(ce), new PCopyRegionWidget, new PRendererTransformSection}) {}

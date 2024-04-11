@@ -29,7 +29,7 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     
     AddGeometrySubtab(new PGroup({
         new PSliceController,
-        new PGeometrySubtab,
+        new PGeometrySubtab(ce),
     }));
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
 

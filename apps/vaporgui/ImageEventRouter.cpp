@@ -29,7 +29,7 @@ ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
         new PTMSLODInput()
     }));
     
-    AddGeometrySubtab(new PGeometrySubtab);
+    AddGeometrySubtab(new PGeometrySubtab(ce));
 
     // clang-format on
 }
