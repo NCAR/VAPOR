@@ -82,13 +82,9 @@ int TwoDRenderer::_initializeGL()
 
 int TwoDRenderer::_paintGL(bool)
 {
-    //float zOffset = GetDefaultZ(_dataMgr, GetActiveParams()->GetCurrentTimestep());
-    //_glManager->matrixManager->Translate(0, 0, zOffset);
-    
     // Get the 2D texture
     //
     _texture = GetTexture(_dataMgr, _texWidth, _texHeight, _texInternalFormat, _texFormat, _texType, _texelSize, _gridAligned);
-    std::cout << "TwoDRenderer " << _texture << " " << _texWidth << " " << _texHeight << " " << _texInternalFormat << " " << _texFormat << " " << _texType << " " << _texelSize << " " << _gridAligned << std::endl;
     if (!_texture) { return (-1); }
     VAssert(_texWidth >= 1);
     VAssert(_texHeight >= 1);
@@ -106,12 +102,10 @@ int TwoDRenderer::_paintGL(bool)
 
         _texCoords = (GLfloat *)_sb_texCoords.Alloc(_meshWidth * _meshHeight * 2 * sizeof(*_texCoords));
         _computeTexCoords(_texCoords, _meshWidth, _meshHeight);
-        std::cout << "unaligned " << _texCoords << " " << _meshWidth << " " << _meshHeight << std::endl;
         _renderMeshUnAligned();
     } else {
         VAssert(_meshWidth == _texWidth);
         VAssert(_meshHeight == _texHeight);
-        //std::cout << "bar" << std::endl;
 
         _renderMeshAligned();
     }
@@ -169,9 +163,6 @@ void TwoDRenderer::_renderMeshUnAligned()
     int W = _meshWidth;
     int H = _meshHeight;
 
-    std::cout << "w/h " << W << " " << H << std::endl;
-    //std::cout << "verts " << _verts.size() << std::endl;
-
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * W * sizeof(GLuint), _indices, GL_DYNAMIC_DRAW);
@@ -211,7 +202,6 @@ void TwoDRenderer::_renderMeshAligned()
     const GLfloat *data = (GLfloat *)_texture;
 
     if (_structuredMesh) {
-        std::cout << "structured?" << std::endl;
         // Draw triangle strips one row at a time
         //
         glBindVertexArray(_VAO);
@@ -228,8 +218,6 @@ void TwoDRenderer::_renderMeshAligned()
         VAssert(_meshWidth >= 3);
         VAssert(_meshHeight == 1);
         VAssert((_nindices % 3) == 0);
-
-        std::cout << "unstructured " << _meshWidth << " " << _meshHeight << " " << _nindices << std::endl;
 
         glBindVertexArray(_VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);

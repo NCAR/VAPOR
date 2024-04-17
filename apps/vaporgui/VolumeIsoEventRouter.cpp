@@ -52,7 +52,7 @@ VolumeIsoEventRouter::VolumeIsoEventRouter(QWidget *parent, ControlExec *ce) : R
         })
     }));
     
-    AddGeometrySubtab(new PGeometrySubtab(ce));
+    AddGeometrySubtab(new PGeometrySubtab);
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
