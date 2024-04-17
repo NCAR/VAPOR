@@ -5,5 +5,5 @@
 
 class PGeometrySubtab : public PGroup {
 public:
-    PGeometrySubtab(VAPoR::ControlExec* ce);
+    PGeometrySubtab(VAPoR::ControlExec* ce = nullptr);
 };
