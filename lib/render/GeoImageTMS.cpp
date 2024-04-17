@@ -129,6 +129,8 @@ unsigned char *GeoImageTMS::GetImage(size_t ts, const double pcsExtentsReq[4], s
     //
     double myGeoExtentsData[4];
     for (int i = 0; i < 4; i++) myGeoExtentsData[i] = pcsExtentsReq[i];
+    //myGeoExtentsData[0]=-2.00325e+07;
+
 
     (void)CornerExtents(myGeoExtentsData, myGeoExtentsData, proj4StringReq);
 
@@ -141,8 +143,17 @@ unsigned char *GeoImageTMS::GetImage(size_t ts, const double pcsExtentsReq[4], s
     double minlon, minlat, maxlon, maxlat;
     _geotile->GetLatLonExtents(minlon, minlat, maxlon, maxlat);
 
-    if (myGeoExtentsData[1] < minlat) myGeoExtentsData[1] = minlat;
-    if (myGeoExtentsData[3] > maxlat) myGeoExtentsData[3] = maxlat;
+    std::cout << "lon " << minlon << " " << maxlon << std::endl;
+    std::cout << "lat " << minlat << " " << maxlat << std::endl;
+
+    std::cout << "geoExts " << myGeoExtentsData[0] << " " << myGeoExtentsData[1] << std::endl;
+    std::cout << "geoExts " << myGeoExtentsData[2] << " " << myGeoExtentsData[3] << std::endl;
+
+    if (myGeoExtentsData[1] < minlat) { std::cout << "budged1" << std::endl; myGeoExtentsData[1] = minlat;}
+    if (myGeoExtentsData[3] > maxlat) { std::cout << "budged2" << std::endl; myGeoExtentsData[3] = maxlat;}
+
+    std::cout << "geoExts " << myGeoExtentsData[0] << " " << myGeoExtentsData[1] << std::endl;
+    std::cout << "geoExts " << myGeoExtentsData[2] << " " << myGeoExtentsData[3] << std::endl;
 
     // Pick a lod that won't allow the resulting image to
     // exceed the max width and height
@@ -161,6 +172,7 @@ unsigned char *GeoImageTMS::GetImage(size_t ts, const double pcsExtentsReq[4], s
     size_t pixelSW[2];
     size_t pixelNE[2];
     size_t nx, ny;
+    //myGeoExtentsData[0] = -178.383;
     _geotile->LatLongRectToPixelRect(myGeoExtentsData, myGeoExtentsData + 2, lod, pixelSW, pixelNE);
 
     int rc = _geotile->MapSize(pixelSW[0], pixelSW[1], pixelNE[0], pixelNE[1], lod, nx, ny);
@@ -174,11 +186,12 @@ unsigned char *GeoImageTMS::GetImage(size_t ts, const double pcsExtentsReq[4], s
         _texture = new unsigned char[size];
         _textureSize = size;
     }
-
+    std::cout << "size " << size << std::endl;
     //
     // Extract the image
     //
     rc = _getMap(pixelSW, pixelNE, lod, _texture);
+    std::cout << "rc " << rc << " " << pixelSW[0] << " " << pixelSW[1] << " " << pixelNE[0] << " " << pixelNE[1] << " " << nx << " " << ny << std::endl;
     if (rc < 0) return (NULL);
 
     //
@@ -186,6 +199,7 @@ unsigned char *GeoImageTMS::GetImage(size_t ts, const double pcsExtentsReq[4], s
     // proj4 string with the correct centering
     //
     if (myGeoExtentsData[0] < -180 || myGeoExtentsData[2] > 180.0) {
+        std::cout << "reprojecting" << std::endl;
         double        lon_0 = (myGeoExtentsData[0] + myGeoExtentsData[2]) / 2.0;
         ostringstream oss;
         oss.precision(12);

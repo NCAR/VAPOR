@@ -143,6 +143,7 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
 
         *indices = (GLuint *)_sb_indices.GetBuf();
         nindices = _nindices;
+        std::cout << "cache not dirty.  using buffer" << std::endl;
         return (0);
     }
     _gridStateClear();
@@ -163,15 +164,19 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
     //
     double defaultZ = GetDefaultZ(dataMgr, myParams->GetCurrentTimestep());
     
+    std::cout << "weird test " << myParams->GetHeightVariableName().empty() << " " << myParams->GetIsGeoRef() << " " << dataMgr->GetMapProjection().empty() << std::endl;
     if (!myParams->GetHeightVariableName().empty() || (myParams->GetIsGeoRef() && !dataMgr->GetMapProjection().empty())) {
+    //if (0) {
         // Get the width and height of the image texture. These
         // will be used to set the width and height of the mesh.
         //
         _getTexture(dataMgr);    // Ugh, this function is more than a get method...
         _vertsWidth = min(_maxResamplingResolution, _texWidth);
         _vertsHeight = min(_maxResamplingResolution, _texHeight);
+        std::cout << "  " << _vertsWidth << " " << _vertsHeight << std::endl;
         rc = _getMeshDisplaced(dataMgr, _vertsWidth, _vertsHeight, minBoxReq, maxBoxReq, defaultZ);
     } else {
+        std::cout << "plain old rectangle" << std::endl;
         _vertsWidth = 2;
         _vertsHeight = 2;
         rc = _getMeshPlane(minBoxReq, maxBoxReq, defaultZ);
@@ -250,7 +255,10 @@ unsigned char *ImageRenderer::_getTexture(DataMgr *dataMgr)
 
         _twoDTex = _getImage(_geoImage, currentTimestep, proj4StringData, _pcsExtentsData, _pcsExtentsImg, geoCornersImg, _proj4StringImg, _texWidth, _texHeight);
 
-        if (!_twoDTex) return (NULL);
+        if (!_twoDTex) {
+            std::cout << "null texture" << std::endl;
+            return (NULL);
+        }
 
         _texStateSet(dataMgr);
 
@@ -449,6 +457,8 @@ unsigned char *ImageRenderer::_getImage(GeoImage *geoimage, size_t ts, string pr
 
     double pcsExtentsData[4];
     for (int i = 0; i < 4; i++) { pcsExtentsData[i] = pcsExtentsDataVec[i]; }
+    //pcsExtentsData[0]=-2.00325e+07;
+    //pcsExtentsData[0]=-1.98575e+07;
 
     size_t         my_width, my_height;
     unsigned char *tex;
@@ -460,8 +470,18 @@ unsigned char *ImageRenderer::_getImage(GeoImage *geoimage, size_t ts, string pr
     } else {
         tex = geoimage->GetImage(ts, pcsExtentsData, proj4StringData, maxWidthReq, maxHeightReq, pcsExtentsImg, geoCornersImg, proj4StringImg, my_width, my_height);
     }
+    if (tex == nullptr) std::cout << "tex = nullptr" << std::endl;
     width = my_width;
     height = my_height;
+    //#define DEBUG
+    #ifdef DEBUG
+    std::cout << "width/height " << width << " " << height << std::endl;
+    std::cout << "pcsExtents   " << pcsExtentsData[0] << " " << pcsExtentsData[1] << " " << pcsExtentsData[2] << " " << pcsExtentsData[3] << std::endl;
+    std::cout << "geoCorners   " << geoCornersImg[0] << " " << geoCornersImg[1] << " " << geoCornersImg[2] << " " << geoCornersImg[3] << std::endl;
+    std::cout << "geoCorners   " << geoCornersImg[4] << " " << geoCornersImg[5] << " " << geoCornersImg[6] << " " << geoCornersImg[7] << std::endl;
+    std::cout << "proj4String  " << proj4StringImg << std::endl;
+    std::cout << "pcsExtentsv  " << pcsExtentsDataVec.size() << std::endl;
+    #endif
     return (tex);
 }
 
@@ -500,8 +520,10 @@ int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei he
     int rc;
     if (myParams->GetIsGeoRef()) {
         rc = _getMeshDisplacedGeo(dataMgr, hgtGrid, width, height, defaultZ);
+        std::cout << "IsGeoRef " << rc << std::endl;
     } else {
         rc = _getMeshDisplacedNoGeo(dataMgr, hgtGrid, width, height, minBox, maxBox, defaultZ);
+        std::cout << "NotGeoRef " << rc << std::endl;
     }
 
     if (hgtGrid) { delete hgtGrid; }
@@ -513,6 +535,7 @@ int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei he
 //
 int ImageRenderer::_getMeshDisplacedGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei width, GLsizei height, double defaultZ)
 {
+    //
     // Set up proj.4:
     //
     string proj4String = dataMgr->GetMapProjection();
@@ -548,6 +571,7 @@ int ImageRenderer::_getMeshDisplacedGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei
     // Now find vertical coordinate
     //
     double mv = hgtGrid ? hgtGrid->GetMissingValue() : 0.0;
+    std::cout << "missingVal/dz " << mv << " " << defaultZ << " " << hgtGrid << std::endl;
     for (int j = 0; j < height; j++) {
         for (int i = 0; i < width; i++) {
             float x = verts[j * width * 3 + i * 3];
@@ -560,6 +584,7 @@ int ImageRenderer::_getMeshDisplacedGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei
             // height variable itself contains missing values.
             //
             float deltaZ = (float)defaultZ;
+            //float deltaZ = 6378000.0;
             if (hgtGrid) {
                 if (deltaZ == mv) deltaZ = defaultZ;
                 else deltaZ = hgtGrid->GetValue(x, y, 0.0) - defaultZ;

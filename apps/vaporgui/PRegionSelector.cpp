@@ -42,7 +42,7 @@ void PRegionSelector1D::updateGUI() const
         VAPoR::CoordType minExts, maxExts;
         ds->GetActiveExtents(pm, ts, minExts, maxExts);
         _slider->SetRange(minExts[_dim], maxExts[_dim]);
-        std::cout << "empty " << minExts[_dim] << " " << maxExts[_dim] << std::endl;
+        //std::cout << "empty " << minExts[_dim] << " " << maxExts[_dim] << std::endl;
         return;
     }
 
