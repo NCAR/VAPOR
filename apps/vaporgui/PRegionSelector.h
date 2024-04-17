@@ -21,7 +21,6 @@ class PRegionSelector1D : public PLineItem {
     const int              _dim;
 
 public:
-    //PRegionSelector1D(int dim, VAPoR::ControlExec* ce);
     PRegionSelector1D(int dim, VAPoR::ControlExec* ce = nullptr);
 
 protected:
@@ -37,7 +36,6 @@ private:
 
 template<int dim> class __PRegionSelector1D : public PRegionSelector1D {
 public:
-    //__PRegionSelector1D(VAPoR::ControlExec* ce) : PRegionSelector1D(dim, ce) {}
     __PRegionSelector1D(VAPoR::ControlExec* ce = nullptr) : PRegionSelector1D(dim, ce) {}
 };
 typedef __PRegionSelector1D<0> PRegionSelectorX;

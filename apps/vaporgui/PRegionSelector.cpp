@@ -30,6 +30,9 @@ void PRegionSelector1D::updateGUI() const
     string         varName = rp->GetFirstVariableName();
 
     Box *box = getBox();
+
+    // In some cases (ImageRenderer), there may be no variable to configure extents with.
+    // Therefore, configure the sliders with the extents of the data domain, acquired from DataStatus 
     if (varName == "") {
         box->GetExtents(min, max);
         _slider->SetValue(min[_dim], max[_dim]);
