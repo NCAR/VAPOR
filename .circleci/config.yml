@@ -256,7 +256,7 @@ jobs:
 
       - build_vapor:
           #beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
-          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
+          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo /opt/local/bin/port select --set clang mp-clang-17
           compileArgs: |
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
@@ -938,7 +938,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "0 12 * * 5" #Time is GMT
+             cron: "0 18 * * 5" #Time is GMT
              filters:
                branches:
                  only: main
