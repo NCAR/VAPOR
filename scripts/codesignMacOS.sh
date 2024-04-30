@@ -8,7 +8,7 @@ clear
 baseDir="/Applications/vapor.app"
 binDir="${baseDir}/Contents/MacOS"
 libDir="${baseDir}/Contents/Frameworks"
-pluginDir="${baseDir}/Contents/plugins"
+pluginDir="${baseDir}/Contents/PlugIns"
 pyDir="${libDir}/python3.9"
 #codesignSignature="sudo codesign --force --verbose=2 --sign DQ4ZFL4KLF --options runtime --timestamp"
 declare codesignSignature="sudo codesign --verbose=2 --sign DQ4ZFL4KLF --options runtime --timestamp"
@@ -72,8 +72,8 @@ recurseOnLoaderPath() {
                 index=$((index-1))
             done
         fi
-        printf "signing d:$depth %*s%s" $((depth * 2)) ' ' "$fileName"
-        echo
+        #printf "signing d:$depth %*s%s" $((depth * 2)) ' ' "$fileName"
+        #echo
         if [ "$command" == "add" ]; then
             echo "$codesignSignature $fileName"
             $codesignSignature $fileName

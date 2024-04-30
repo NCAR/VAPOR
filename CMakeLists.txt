@@ -92,13 +92,14 @@ else ()
 endif ()
 
 option (BUILD_VDC "Build VDC library and utilities" ON)
-option (BUILD_GUI "Build Vapor GUI" ON)
+#option (BUILD_GUI "Build Vapor GUI" ON)
+option (BUILD_GUI "Build Vapor GUI" OFF)
 option (BUILD_PYTHON "Build Vapor Python Library" OFF)
 option (BUILD_OSP "Build OSPRay" ON)
 option (BUILD_UTL "Build conversion and utility applications" ${DEFAULT_BUILD_UTILITIES})
 option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
 option (BUILD_TEST_APPS "Build test applications" OFF)
-option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" OFF)
+option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" ON)
 option (USE_OMP "Use OpenMP on some calculations" OFF)
 option (CONDA_BUILD "Use Conda to build" OFF)
 
@@ -337,7 +338,7 @@ add_subdirectory (lib)
 add_subdirectory (apps)
 add_subdirectory (include)
 add_subdirectory (share)
-add_subdirectory (scripts)
+#add_subdirectory (scripts)
 add_subdirectory (test_apps)
 
 
@@ -422,19 +423,19 @@ if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		#file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/libhdf5*.dylib) 
-		#file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
-		#file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
-        #file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
-		#install (
-		#	FILES ${INSTALL_LIBS}
-		#	DESTINATION ${INSTALL_LIB_DIR}
-		#	COMPONENT Dependencies
-		#	)
-		#install (
-		#	DIRECTORY ${INSTALL_FRAMEWORKS}
-		#	DESTINATION ${INSTALL_LIB_DIR}
-		#	COMPONENT Dependencies
-		#	)
+		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
+		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
+        file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
+		install (
+			FILES ${INSTALL_LIBS}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+		install (
+			DIRECTORY ${INSTALL_FRAMEWORKS}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
 
         #if (BUILD_OSP)
         #    file (GLOB INSTALL_OSP_LIBS ${OSPRAYDIR}/lib/*.dylib) 
@@ -446,7 +447,7 @@ if (APPLE)
 		#    	)
         #endif ()
 
-        #if (NOT BUILD_PYTHON)
+        if (NOT BUILD_PYTHON)
 		    #install (
 		    #	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
 		    #	DESTINATION ${INSTALL_LIB_DIR}
@@ -464,7 +465,7 @@ if (APPLE)
             #    DESTINATION ${INSTALL_BIN_DIR}/styles
             #    COMPONENT Dependencies
             #    )
-        #endif ()
+        endif ()
 
         #if (USE_OMP)
         #    get_filename_component(OMP_PATH ${OpenMP_CXX_LIBRARIES} REALPATH)
@@ -474,21 +475,21 @@ if (APPLE)
         #        COMPONENT Dependencies
         #        )
         #endif ()
-        #file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
-        #message (STATUS "plugins ${HDF5_PLUGINS}")
-		#install (
-		#	FILES ${HDF5_PLUGINS}
-		#	#DESTINATION "${INSTALL_SHARE_DIR}/plugins"
-		#	DESTINATION "./vapor.app/Contents/PlugIns"
-		#	COMPONENT Dependencies
-		#	)
+        file (GLOB_RECURSE HDF5_PLUGINS "${THIRD_PARTY_DIR}/share/plugins/*.so")
+        message (STATUS "plugins ${HDF5_PLUGINS}")
+		install (
+			FILES ${HDF5_PLUGINS}
+			#DESTINATION "${INSTALL_SHARE_DIR}/plugins"
+			DESTINATION "./vapor.app/Contents/PlugIns"
+			COMPONENT Dependencies
+			)
 
-        #file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/*.dylib) 
-        #install (
-        #    FILES ${HDF5_LIBS}
-        #    DESTINATION ${INSTALL_LIB_DIR}
-        #    COMPONENT Dependencies
-        #    )
+        file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/*.dylib) 
+        install (
+            FILES ${HDF5_LIBS}
+            DESTINATION ${INSTALL_LIB_DIR}
+            COMPONENT Dependencies
+            )
 
     endif ()
 
