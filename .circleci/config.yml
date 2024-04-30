@@ -73,12 +73,14 @@ commands:
       libDir:
         type: string
         default: "/usr/local/VAPOR-Deps/"
+      libName:
+        type: string
+        default: 2024-Apr
     steps:
       - run:
           name: build vapor
           command: |
-            libraryDir=`ls <<parameters.libDir>>`
-            ln -s $libraryDir <<parameters.libDir>>/current
+            ln -s <<parameters.libDir>>/<<parameters.libName>> <<parameters.libDir>>/current
             cp site_files/site.NCAR site.local
             mkdir -p build
             cd build
