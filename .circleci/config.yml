@@ -72,10 +72,10 @@ commands:
         type: string
       libDir:
         type: string
-        default: "/usr/local/VAPOR-Deps/"
+        default: "/usr/local/VAPOR-Deps"
       libName:
         type: string
-        default: 2024-Apr
+        default: 2023-Sept
     steps:
       - run:
           name: build vapor
@@ -273,6 +273,7 @@ jobs:
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
             -DBUILD_OSP=OFF \
+          libName: 2023-Jun
           moveToCommand: ${f/Darwin/DarwinM1}
 
       #- run:
@@ -755,6 +756,7 @@ jobs:
       - build_vapor:
           moveToCommand: ${f/Linux/SUSE}
           libDir: /glade/campaign/cisl/vast/vapor/third-party
+          libName: 2024-Apr
 
       - store_artifacts:
           path: |
