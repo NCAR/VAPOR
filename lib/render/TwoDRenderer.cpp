@@ -82,9 +82,6 @@ int TwoDRenderer::_initializeGL()
 
 int TwoDRenderer::_paintGL(bool)
 {
-    float zOffset = GetDefaultZ(_dataMgr, GetActiveParams()->GetCurrentTimestep());
-    _glManager->matrixManager->Translate(0, 0, zOffset);
-    
     // Get the 2D texture
     //
     _texture = GetTexture(_dataMgr, _texWidth, _texHeight, _texInternalFormat, _texFormat, _texType, _texelSize, _gridAligned);
@@ -105,7 +102,6 @@ int TwoDRenderer::_paintGL(bool)
 
         _texCoords = (GLfloat *)_sb_texCoords.Alloc(_meshWidth * _meshHeight * 2 * sizeof(*_texCoords));
         _computeTexCoords(_texCoords, _meshWidth, _meshHeight);
-
         _renderMeshUnAligned();
     } else {
         VAssert(_meshWidth == _texWidth);
