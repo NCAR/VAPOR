@@ -8,14 +8,14 @@
 
 using namespace VAPoR;
 
-PRegionSelector::PRegionSelector(VAPoR::ControlExec* ce, const std::string &label) : PSection(label)
+-PRegionSelector::PRegionSelector(const std::string &label) : PSection(label)
 {
     Add(new PRegionSelectorX(ce));
     Add(new PRegionSelectorY(ce));
     Add(new PRegionSelectorZ(ce));
 }
 
-PRegionSelector1D::PRegionSelector1D(int dim, VAPoR::ControlExec* ce) : PLineItem("", dim == 0 ? "X" : dim == 1 ? "Y" : "Z", _slider = new QRangeSliderTextCombo), _dim(dim), _ce(ce)
+PRegionSelector1D::PRegionSelector1D(int dim) : PLineItem("", dim == 0 ? "X" : dim == 1 ? "Y" : "Z", _slider = new QRangeSliderTextCombo), _dim(dim)
 {
     QObject::connect(_slider, &QRangeSliderTextCombo::ValueChanged, this, &PRegionSelector1D::sliderValueChanged);
     _slider->AllowCustomRange();
