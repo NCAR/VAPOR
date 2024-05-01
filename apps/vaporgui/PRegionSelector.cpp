@@ -8,11 +8,11 @@
 
 using namespace VAPoR;
 
--PRegionSelector::PRegionSelector(const std::string &label) : PSection(label)
+PRegionSelector::PRegionSelector(const std::string &label) : PSection(label)
 {
-    Add(new PRegionSelectorX(ce));
-    Add(new PRegionSelectorY(ce));
-    Add(new PRegionSelectorZ(ce));
+    Add(new PRegionSelectorX);
+    Add(new PRegionSelectorY);
+    Add(new PRegionSelectorZ);
 }
 
 PRegionSelector1D::PRegionSelector1D(int dim) : PLineItem("", dim == 0 ? "X" : dim == 1 ? "Y" : "Z", _slider = new QRangeSliderTextCombo), _dim(dim)
