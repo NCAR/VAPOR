@@ -33,8 +33,8 @@ namespace {
 //
 void conform(GLfloat *verts, int nx, int ny)
 {
-    //VAssert(nx >= 2);
-    //VAssert(ny >= 2);
+    VAssert(nx >= 2);
+    VAssert(ny >= 2);
 
     // x values
     //
@@ -153,8 +153,6 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
     //
     vector<double> minBoxReq, maxBoxReq;
     myParams->GetBox()->GetExtents(minBoxReq, maxBoxReq);
-    //std::cout << "min " << minBoxReq[0] << " " << minBoxReq[1] << std::endl;
-    //std::cout << "max " << maxBoxReq[0] << " " << maxBoxReq[1] << std::endl;
 
     int rc;
 
@@ -205,7 +203,6 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
 
     nindices = _nindices;
     nverts = _nverts;
-    //std::cout << _vertsWidth << " " << _vertsHeight << " " << _nindices << " " << _nverts << std::endl;
 
     return (0);
 }
@@ -234,9 +231,6 @@ unsigned char *ImageRenderer::_getTexture(DataMgr *dataMgr)
     // the data
     //
     vector<double> _pcsExtentsData = _getPCSExtentsData();
-    //std::cout << "min " << _pcsExtentsData[0] << " " << _pcsExtentsData[1] << std::endl;
-    //std::cout << "max " << _pcsExtentsData[2] << " " << _pcsExtentsData[3] << std::endl;
-    //std::cout << _pcsExtentsData.size() << std::endl;
 
     // Get a new texture if any relevant parameters have changed
     //

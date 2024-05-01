@@ -59,7 +59,7 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
             }),
     }));
     
-    AddGeometrySubtab(new PGeometrySubtab(ce));
+    AddGeometrySubtab(new PGeometrySubtab);
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on

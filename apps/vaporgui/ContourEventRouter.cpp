@@ -45,7 +45,7 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
     
     AddGeometrySubtab(new PGroup({
         (new PShowIf(""))->DimensionEquals(3)->Then(new PGroup({ new PSliceController })),
-        new PGeometrySubtab(ce),
+        new PGeometrySubtab,
     }));
     
     AddAnnotationSubtab(new PAnnotationColorbarWidget);

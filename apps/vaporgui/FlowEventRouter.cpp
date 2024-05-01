@@ -80,9 +80,9 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
         }),
         (new PShowIf(FP::_seedGenModeTag))->Not()->Equals((int)FlowSeedMode::LIST)->Then({
             new PSection("Rake Region", {
-                new PFlowRakeRegionSelector1D(0,ce),
-                new PFlowRakeRegionSelector1D(1,ce),
-                new PFlowRakeRegionSelector1D(2,ce),
+                new PFlowRakeRegionSelector1D(0),
+                new PFlowRakeRegionSelector1D(1),
+                new PFlowRakeRegionSelector1D(2),
             }),
             (new PSection("Rake Center", {
                 (_xRakeCenterSlider = new PDoubleSliderEditHLI<FlowParams>("X", &FlowParams::GetXRakeCenter, &FlowParams::SetXRakeCenter))->AllowDynamicUpdate(),
@@ -161,13 +161,13 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             (new PDoubleInput(FP::_integrationScalarTag, "Integration distance scale"))->EnableBasedOnParam(FP::_doIntegrationTag),
         }),
         (new PSection("Integration Region", {
-            new PFlowIntegrationRegionSelector1D(0,ce),
-            new PFlowIntegrationRegionSelector1D(1,ce),
-            new PFlowIntegrationRegionSelector1D(2,ce),
+            new PFlowIntegrationRegionSelector1D(0),
+            new PFlowIntegrationRegionSelector1D(1),
+            new PFlowIntegrationRegionSelector1D(2),
         }))->EnableBasedOnParam(FP::_doIntegrationTag),
     }));
 
-    AddGeometrySubtab(new PGeometrySubtab(ce));
+    AddGeometrySubtab(new PGeometrySubtab);
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
