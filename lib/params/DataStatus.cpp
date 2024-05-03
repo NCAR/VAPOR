@@ -36,6 +36,8 @@
 using namespace VAPoR;
 using namespace Wasp;
 
+//#define DEBUG
+
 namespace {
 void print_extents(string header, const CoordType &minExts, const CoordType &maxExts)
 {

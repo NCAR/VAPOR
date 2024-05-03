@@ -1409,6 +1409,7 @@ int DataMgr::GetVariableExtents(size_t ts, string varname, int level, int lod, C
         for (int i = 0; i < n / 2; i++) {
             min[i] = values[i];
             max[i] = values[i + (n / 2)];
+            //if (i==0) std::cout << "cache " << min[i] << " " << max[i] << std::endl;
         }
         return (0);
     }
@@ -1417,6 +1418,7 @@ int DataMgr::GetVariableExtents(size_t ts, string varname, int level, int lod, C
     if (!rg) return (-1);
 
     rg->GetUserExtents(min, max);
+    //std::cout << "no cache " << min[0] << " " << max[0] << std::endl;
 
     // Cache results
     //

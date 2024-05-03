@@ -229,12 +229,16 @@ void Grid::GetRange(float range[2]) const
       while (*beg == missingVal && beg != end)
         ++beg;
 
+      std::cout << "min" << std::endl;
       if (beg != end) {
         auto min = *beg;
         auto max = *beg;
         for (auto itr  = beg + 1; itr != end; ++itr) {
           if (*itr != missingVal) {
-            min = std::min(*itr, min);      
+            if ((std::min(*itr, min) < min) || (std::max(*itr,max) > max)) {
+                std::cout << "bump," << min << "," << max << std::endl;
+            }
+            min = std::min(*itr, min);
             max = std::max(*itr, max);      
           }
         }

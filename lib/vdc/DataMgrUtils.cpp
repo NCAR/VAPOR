@@ -340,6 +340,9 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<st
             minExts[i] = (tmpMinExts[i]);
             maxExts[i] = (tmpMaxExts[i]);
             axes.push_back(i);
+            //if(i==0) {
+            //    std::cout << minExts[i] << " " << maxExts[i] << std::endl;
+            //}
         }
     }
     return (true);

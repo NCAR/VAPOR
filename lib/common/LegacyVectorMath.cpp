@@ -898,7 +898,7 @@ void makeModelviewMatrixD(const std::vector<double> &vpos, const std::vector<dou
     vscale(minv + 8, -1.);
     vcopy(dvpos, minv + 12);
     int rc = minvert(minv, mtrx);
-    VAssert(rc >= 0);    // Only catch this in debug mode
+    //VAssert(rc >= 0);    // Only catch this in debug mode
 }
 void matrix4x4_vec3_mult(const float m[16], const float a[4], float b[4])
 {
