@@ -97,8 +97,7 @@ int TwoDRenderer::_paintGL(bool)
 
     if (!_gridAligned) {
         VAssert(_structuredMesh);
-        VAssert(_meshWidth >= 2);
-        VAssert(_meshHeight >= 2);
+        if (_meshWidth<2 || _meshHeight<2) return 0; // If mesh with or height is too small for a texture, harmlessly return
 
         _texCoords = (GLfloat *)_sb_texCoords.Alloc(_meshWidth * _meshHeight * 2 * sizeof(*_texCoords));
         _computeTexCoords(_texCoords, _meshWidth, _meshHeight);
@@ -281,8 +280,7 @@ void TwoDRenderer::ComputeNormals(const GLfloat *verts, GLsizei w, GLsizei h, GL
 
 void TwoDRenderer::_computeTexCoords(GLfloat *tcoords, size_t w, size_t h) const
 {
-    VAssert(_meshWidth >= 2);
-    VAssert(_meshHeight >= 2);
+    if (_meshWidth<2 || _meshHeight<2) return;
 
     double deltax = 1.0 / (_meshWidth - 1);
     double deltay = 1.0 / (_meshHeight - 1);
