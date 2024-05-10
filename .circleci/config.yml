@@ -938,7 +938,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "* 19 * * 5" #Time is GMT
+             cron: "30 19 * * 5" #Time is GMT
              filters:
                branches:
                  only: main
