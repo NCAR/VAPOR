@@ -1,6 +1,8 @@
+#include <string>
 #include "PRegionSelector.h"
 #include "QRangeSliderTextCombo.h"
 #include <vapor/RenderParams.h>
+#include <vapor/DataMgrUtils.h>
 #include <assert.h>
 #include "POrientationSelector.h"
 
@@ -29,6 +31,25 @@ void PRegionSelector1D::updateGUI() const
     int            lod = rp->GetCompressionLevel();
     string         varName = rp->GetFirstVariableName();
 
+    Box *box = getBox();
+
+    // In some cases (ImageRenderer), there may be no 2D variable to configure extents with.
+    // Therefore, configure the sliders with the extents of a random 3D variable
+    if (varName == "") {
+        string varName;
+        VAPoR::DataMgrUtils::GetFirstExistingVariable(getDataMgr(), 0, 0, 0, 3, varName);
+        std::vector<int> axes;
+        VAPoR::CoordType minExts, maxExts;
+        vector<string> vvarName = {varName};
+        VAPoR::DataMgrUtils::GetExtents(getDataMgr(), 0, vvarName, 0, 0, minExts, maxExts, axes);
+        
+        box->GetExtents(min, max);
+        _slider->SetValue(min[_dim], max[_dim]);
+        _slider->SetRange(minExts[_dim], maxExts[_dim]);
+
+        return;
+    }
+
     int ret = getDataMgr()->GetVariableExtents(ts, varName, level, lod, min, max);
     if (ret < 0) {
         _slider->SetRange(0, 0);
@@ -38,7 +59,6 @@ void PRegionSelector1D::updateGUI() const
 
     _slider->SetRange(min[_dim], max[_dim]);
 
-    Box *box = getBox();
     box->GetExtents(min, max);
     _slider->SetValue(min[_dim], max[_dim]);
 }
