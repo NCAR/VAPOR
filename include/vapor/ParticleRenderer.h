@@ -87,6 +87,7 @@ private:
 
     void _clearCache() {}
 
+    bool _particleBaseSizeIsDirty() const;
     bool _particleCacheIsDirty() const;
     bool _colormapCacheIsDirty() const;
     void _resetParticleCache();

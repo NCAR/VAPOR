@@ -93,6 +93,11 @@ int ParticleRenderer::_paintGL(bool)
     glEnable(GL_DEPTH_TEST);
 
     bool regenerateParticles = false;
+    bool recomputeBaseRadius = false;
+
+    if (_particleBaseSizeIsDirty())
+        recomputeBaseRadius = true;
+
     if (_particleCacheIsDirty()) {
         _resetParticleCache();
         regenerateParticles = true;
@@ -116,10 +121,10 @@ int ParticleRenderer::_paintGL(bool)
         _renderParticlesLegacy(grid, vecGrids);
     }
     else {
-        if (regenerateParticles) {
+        if (regenerateParticles)
             _generateTextureData(grid, vecGrids);
+        if (recomputeBaseRadius)
             _computeBaseRadius();
-        }
         _renderParticlesHelper();
     }
 
@@ -195,6 +200,18 @@ static void SetupParticleDirectionGL(const int VAO, const int VBO, const bool dy
         glEnableVertexAttribArray(3);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+bool ParticleRenderer::_particleBaseSizeIsDirty() const {
+    auto p = GetActiveParams();
+    if (p->GetValueLong(ParticleParams::RecalculateRadiusBaseRequestTag, false)) {
+        p->SetValueLong(ParticleParams::RecalculateRadiusBaseRequestTag, "", true);
+        return true;
+    }
+    if (_cacheParams.varName != p->GetVariableName()) return true;
+    if (_cacheParams.radiusVarName != p->GetValueString( ParticleParams::RenderRadiusVariableTag, "")) return true;
+    if (_cacheParams.stride    != p->GetValueLong( ParticleParams::StrideTag, 1)) return true;
+    return false;
 }
 
 bool ParticleRenderer::_particleCacheIsDirty() const {

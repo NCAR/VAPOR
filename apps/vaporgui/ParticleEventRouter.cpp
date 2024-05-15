@@ -41,6 +41,7 @@ ParticleEventRouter::ParticleEventRouter(QWidget *parent, ControlExec *ce) : Ren
 //                (new PShowIf(ParticleParams::RenderRadiusVariableTag))->Not()->Equals("")->Then({
 //                    (new PDoubleSliderEdit(ParticleParams::RenderRadiusVariableStrengthTag, "Radius Variable Strength"))->SetRange(0.001, 1)->AllowUserRange(true)->EnableDynamicUpdate()
 //                }),
+                (new PButton("Recalculate Base Radius", [](ParamsBase *p){ p->SetValueLong(ParticleParams::RecalculateRadiusBaseRequestTag, "", true); })),
                 new PCheckbox(ParticleParams::ShowDirectionTag, "Show direction"),
                     (new PDoubleSliderEdit(ParticleParams::DirectionScaleTag, "Length scale"))->SetRange(0.0001, 10)->AllowUserRange(true)->EnableDynamicUpdate()->EnableBasedOnParam(ParticleParams::ShowDirectionTag),
                     (new PXFieldVariableSelector)->ShowParticleVars()->EnableBasedOnParam(ParticleParams::ShowDirectionTag),
