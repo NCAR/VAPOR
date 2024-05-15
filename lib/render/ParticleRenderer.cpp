@@ -205,7 +205,7 @@ static void SetupParticleDirectionGL(const int VAO, const int VBO, const bool dy
 bool ParticleRenderer::_particleBaseSizeIsDirty() const {
     auto p = GetActiveParams();
     if (p->GetValueLong(ParticleParams::RecalculateRadiusBaseRequestTag, false)) {
-        p->SetValueLong(ParticleParams::RecalculateRadiusBaseRequestTag, "", true);
+        p->SetValueLong(ParticleParams::RecalculateRadiusBaseRequestTag, "", false);
         return true;
     }
     if (_cacheParams.varName != p->GetVariableName()) return true;
