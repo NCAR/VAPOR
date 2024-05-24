@@ -210,7 +210,7 @@ jobs:
       - restore_cache:
           name: restore dependencies
           keys:
-            - macos-deps3
+            - macos-deps4
 
       - run:
           name: Get dependencies
@@ -233,14 +233,14 @@ jobs:
             # clang
             # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
             # Therefore, skip selfupdate until we know we want a newer version of clang
-            #(sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
-            #sudo /opt/local/bin/port select --set clang mp-clang-17
-            #/opt/local/bin/clang++ -v > clangVersion.txt
+            (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
+            sudo /opt/local/bin/port select --set clang mp-clang-17
+            /opt/local/bin/clang++ -v > clangVersion.txt
 
           no_output_timeout: 45m
 
       - save_cache:
-          key: macos-deps3
+          key: macos-deps4
           paths:
             - /opt/local
 
@@ -938,7 +938,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "30 19 * * 5" #Time is GMT
+             cron: "30 21 * * 5" #Time is GMT
              filters:
                branches:
                  only: main
