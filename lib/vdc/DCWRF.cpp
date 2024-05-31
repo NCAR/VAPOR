@@ -987,8 +987,8 @@ int DCWRF::_InitHorizontalCoordinates(NetCDFCollection *ncdfc)
     //
     vector<size_t> latlondims = ncdfc->GetDims("XLONG");
     vector<size_t> dummy = ncdfc->GetDims("XLAT");
-    if (latlondims.size() != 3 || dummy != latlondims) {
-        SetErrMsg("Invalid coordinate variable : %s", "XLONG");
+    if (dummy != latlondims) {
+        SetErrMsg("Coordinate variables XLONG and XLAT having different dimensions!\n");
         return (-1);
     }
 
