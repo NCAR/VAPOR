@@ -395,8 +395,9 @@ int ParticleRenderer::_getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const
     return 0;
 }
 
-template<typename T> static void UploadDataBuffer(vector<T> buffer) {
+template<typename T> void ParticleRenderer::UploadDataBuffer(vector<T> buffer) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(T) * buffer.size(), buffer.data(), GL_STATIC_DRAW);
+    _particlesCount = buffer.size();
 }
 
 void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<Grid*>& vecGrids) {
@@ -406,17 +407,11 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
     auto      node = grid->ConstNodeBegin(_cacheParams.boxMin, _cacheParams.boxMax);
     auto      nodeEnd = grid->ConstNodeEnd();
     CoordType coordsBuf;
-    vector<Grid::ConstIterator> dirs;
-
-    if (showDir) for (int i = 0; i < 3; i++) dirs.push_back(vecGrids[i]->cbegin(_cacheParams.boxMin, _cacheParams.boxMax));
-    if (dynamicSize) dirs.push_back(vecGrids[vecGrids.size()-1]);
 
     struct PointDataT {vec3 pos; float val;}; vector<PointDataT> pointData;
     struct DirectionDataT {vec3 pos; vec3 norm; float val;}; vector<DirectionDataT> directionData;
     struct PointDynSizeDataT {vec3 pos; float val; float radius;}; vector<PointDynSizeDataT> pointDynSizeData;
     struct DirectionDynSizeDataT {vec3 pos; vec3 norm; float val; float radius;}; vector<DirectionDynSizeDataT> directionDynSizeData;
-
-    _particlesCount = grid->GetCoordDimensions(1)[0] / stride;
 
     if (showDir) {
         SetupParticleDirectionGL(_VAO, _VBO, dynamicSize);
@@ -436,21 +431,26 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
             const vec3 p = CoordTypeToVec3(coordsBuf);
 
             if (showDir){
-                const glm::vec3 norm(*(dirs[0]), *(dirs[1]), *(dirs[2]));
+                const glm::vec3 norm(
+                    vecGrids[0]->GetValueAtIndex(*node),
+                    vecGrids[1]->GetValueAtIndex(*node),
+                    vecGrids[2]->GetValueAtIndex(*node)
+                );
                 if (dynamicSize)
-                    directionDynSizeData.push_back({p, norm, value, *(dirs[dirs.size()-1])});
+                    directionDynSizeData.push_back({p, norm, value, vecGrids[vecGrids.size()-1]->GetValueAtIndex(*node)});
                 else
                     directionData.push_back({p, norm, value});
             } else {
                 if (dynamicSize)
-                    pointDynSizeData.push_back({p, value, *(dirs[dirs.size()-1])});
+//                    pointDynSizeData.push_back({p, value, *(dirs[dirs.size()-1])});
+                    pointDynSizeData.push_back({p, value, vecGrids[vecGrids.size()-1]->GetValueAtIndex(*node)});
+
                 else
                     pointData.push_back({p, value});
             }
         }
         step:
         ++node, ++i;
-        for (auto &it : dirs) ++it;
     }
 
     glBindVertexArray(_VAO);
