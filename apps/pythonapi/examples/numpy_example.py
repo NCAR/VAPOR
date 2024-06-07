@@ -13,6 +13,7 @@
 import example_utils
 from vapor import session, renderer, dataset, camera
 import numpy as np
+from math import sqrt
 
 ses = session.Session()
 data = ses.CreatePythonDataset()
@@ -21,7 +22,11 @@ data = ses.CreatePythonDataset()
 
 # Create a 2D numpy array and add it to vapor's dataset
 
-np_array = np.arange(64**2).reshape((64,64))
+np_array = example_utils.SampleFunctionOnRegularGrid(
+    lambda x,y: abs(sqrt((x-0.5)**2+(y-0.5)**2)-0.4)<0.02 or y,
+    shape=(64,65)
+)
+
 data.AddNumpyData("variable_name", np_array)
 
 print(np_array)
@@ -30,7 +35,7 @@ print(np_array)
 
 # Create a renderer for the data
 
-ren = data.NewRenderer(renderer.WireFrameRenderer)
+ren = data.NewRenderer(renderer.TwoDDataRenderer)
 ren.SetVariableName("variable_name")
 
 # %%
