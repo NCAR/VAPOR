@@ -85,7 +85,7 @@ class PythonDataset(Dataset, wrap=link.VAPoR.PythonDataMgr):
         # assert arr.dtype == np.float32
         if arr.__array_interface__['strides']:
             arr = arr.copy() # Flatten data
-        self._wrappedInstance.AddRegularData(name, np.float32(arr), arr.shape)
+        self._wrappedInstance.AddRegularData(name, np.float32(arr), tuple(reversed(arr.shape)))
         # TODO: Only clear necessary renderers
         self.ses.ce.ClearAllRenderCaches()
 
@@ -93,9 +93,15 @@ class PythonDataset(Dataset, wrap=link.VAPoR.PythonDataMgr):
     def AddXArrayData(self, varName:str, arr:xr.DataArray):
         """
         Vapor supports grids commonly used in earth science data.
+        It is recommended to import more complex datasets directly using Session.OpenDataset() as this will ensure coordinates and time varying data are handled automatically.
+        Since xarray does not distinguish temporal dimensions your data will be interpeded as len(n.dims) space-dimensional, therefore arr must only contain spacial dimensions.
         Vapor expects data to be in order='C' with X as the fastest varying dimension.
-        You can swap your axes with np.swapaxes(data, 0, -1).
         """
+
+        assert len(arr.coords) == 0 or len(arr.coords) >= len(arr.dims)
+
+        if not arr.coords:
+            return self.AddNumpyData(varName, arr.data)
         
         self.__checkNameValid(varName)
         # assert arr.dtype == np.float32

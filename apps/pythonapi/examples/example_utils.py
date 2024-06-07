@@ -23,7 +23,7 @@ def SampleFunctionOnRegularGrid(f, ext=None, shape=None):
     if not ext: ext = [(0,1)]*len(signature(f).parameters)
     assert len(signature(f).parameters) == len(shape) and len(shape) == len(ext)
     d = []
-    for i in np.ndindex(*reversed(shape)):
+    for i in np.ndindex(*(shape)):
         d.append(f(*[v/s*(t-f)+f for v,s,(f,t) in zip(reversed(i), shape, ext)]))
     return np.asarray(d, dtype=np.float32).reshape(shape)
 
