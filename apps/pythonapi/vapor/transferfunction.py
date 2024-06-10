@@ -60,6 +60,8 @@ class TransferFunction(ParamsWrapper, wrap=link.VAPoR.MapperFunction):
         return list(flatten(l))
 
     def __rgbToHsv(self, rgb):
+        if len(rgb) != 3:
+            raise ValueError("colors must be a list of tuples of length three")
         return [*self._params.rgbToHsv(rgb)]
 
     def SetOpacityNormalizedControlPoints(self, cp: list[tuple[float, float]]):

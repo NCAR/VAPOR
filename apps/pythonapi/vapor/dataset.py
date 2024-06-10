@@ -62,6 +62,14 @@ class Dataset(SmartWrapper, wrap=link.VAPoR.DataMgr):
         self._wrappedInstance.GetDataRange(atTimestep, varname, 0, 0, c_range)
         return list(c_range)
 
+    def DumpMetadata(self):
+        print("Data Variables:")
+        for var in self.GetDataVarNames():
+            print(f"  {var}")
+            print(f"    Time Varying:", bool(self.IsTimeVarying(var)))
+            print(f"    Dimensionality:", self.GetVarGeometryDim(var))
+            print(f"    Coordinates:", self.GetVarCoordVars(var, True))
+            print(f"    Data Range:", self.GetDataRange(var))
 
     @staticmethod
     def GetDatasetTypes():
