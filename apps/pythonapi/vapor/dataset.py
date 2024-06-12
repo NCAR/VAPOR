@@ -69,9 +69,9 @@ class Dataset(SmartWrapper, wrap=link.VAPoR.DataMgr):
         print("Data Variables:")
         for var in self.GetDataVarNames():
             print(f"  {var}")
-            print(f"    Time Varying:", bool(self.IsTimeVarying(var)))
             print(f"    Dimensionality:", self.GetVarGeometryDim(var))
             print(f"    Coordinates:", self.GetVarCoordVars(var, True))
+            print(f"    Num Timesteps:", self.GetNumTimeSteps(var))
             print(f"    Data Range:", self.GetDataRange(var))
 
     @staticmethod
