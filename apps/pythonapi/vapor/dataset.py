@@ -62,7 +62,10 @@ class Dataset(SmartWrapper, wrap=link.VAPoR.DataMgr):
         self._wrappedInstance.GetDataRange(atTimestep, varname, 0, 0, c_range)
         return list(c_range)
 
-    def DumpMetadata(self):
+    def DumpVarMetadata(self):
+        """
+        Prints metadata associated with each variable in dataset
+        """
         print("Data Variables:")
         for var in self.GetDataVarNames():
             print(f"  {var}")
