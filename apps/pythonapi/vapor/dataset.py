@@ -47,9 +47,34 @@ class Dataset(SmartWrapper, wrap=link.VAPoR.DataMgr):
 
     def GetName(self):
         return str(self.id)
+    
+    def __str__(self):
+        output = []
+        # Dataset Name
+        output.append(f"Dataset: {self.GetName()}")
+        # Dimensions
+        output.append("Dimensions:")
+        for dim in self.GetDimensionNames():
+            output.append(f"  {dim}: {self.GetDimensionLength(dim, 0)}")
+        # Coordinates
+        coord_var_names = self.GetCoordVarNames()
+        if len(coord_var_names) > 0:
+            output.append(f"Coordinate Variable Names: {coord_var_names}")
+        # Variables
+        output.append("Data Variables:")
+        for var in self.GetDataVarNames():
+            output.extend([
+                f"  {var}",
+                f"    Dimensionality: {self.GetVarGeometryDim(var)}",
+                f"    Number of Timesteps: {self.GetNumTimeSteps(var)}",
+                f"    Coordinates: {self.GetVarCoordVars(var, True)}",
+                f"    Data Range: {self.GetDataRange(var)}"
+            ])
+
+        return "\n".join(output)
 
     def __repr__(self):
-        return f'Dataset("{self.GetName()}")'
+        return self.__str__()
 
     def GetTransform(self):
         pm = self.ses.ce.GetParamsMgr()
@@ -61,18 +86,6 @@ class Dataset(SmartWrapper, wrap=link.VAPoR.DataMgr):
         c_range = link.std.vector[link.double]()
         self._wrappedInstance.GetDataRange(atTimestep, varname, 0, 0, c_range)
         return list(c_range)
-
-    def DumpVarMetadata(self):
-        """
-        Prints metadata associated with each variable in dataset
-        """
-        print("Data Variables:")
-        for var in self.GetDataVarNames():
-            print(f"  {var}")
-            print(f"    Dimensionality:", self.GetVarGeometryDim(var))
-            print(f"    Coordinates:", self.GetVarCoordVars(var, True))
-            print(f"    Data Range:", self.GetDataRange(var))
-            print(f"    Num Timesteps:", self.GetNumTimeSteps(var))
 
     @staticmethod
     def GetDatasetTypes():
