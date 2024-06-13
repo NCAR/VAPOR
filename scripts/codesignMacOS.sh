@@ -248,9 +248,7 @@ codesign --verify --deep --strict --verbose=2
 codesign --sign "Developer ID Application: University Corporation for Atmospheric Research (DQ4ZFL4KLF)" --force --deep --verbose /Applications/testApp.app/Contents/MacOS/platforms/libqcocoa.dylib \
 && codesign --sign "Developer ID Application: University Corporation for Atmospheric Research (DQ4ZFL4KLF)" --force --deep --verbose /Applications/testApp.app/Contents/MacOS/styles/libqmacstyle.dylib \
 && /usr/local/VAPOR-Deps/current/bin/macdeployqt /Applications/testApp.app -timestamp -sign-for-notarization="Developer ID Application: University Corporation for Atmospheric Research (DQ4ZFL4KLF)" \
-
 && codesign --sign "Developer ID Application: University Corporation for Atmospheric Research (DQ4ZFL4KLF)" --force --deep --verbose --options runtime /Applications/testApp.app/Contents/MacOS/testApp \
-
 && hdiutil create -volname "testApp" -srcfolder /Applications/testApp.app -ov -format UDZO /Applications/testApp.dmg \
 && codesign --force --verify --verbose --sign "Developer ID Application: University Corporation for Atmospheric Research (DQ4ZFL4KLF)" /Applications/testApp.dmg \
 && xcrun -v notarytool submit /Applications/testApp.dmg --keychain-profile "testApp-password" --wait \

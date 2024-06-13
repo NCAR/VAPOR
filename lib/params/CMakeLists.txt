@@ -87,11 +87,16 @@ target_link_libraries (params PUBLIC vdc ${EXPAT})
 
 add_definitions (-DPARAMS_EXPORTS)
 
-OpenMPInstall (
+install (
 	TARGETS params
 	DESTINATION ${INSTALL_LIB_DIR}
 	COMPONENT Libraries
 	)
+#OpenMPInstall (
+#	TARGETS params
+#	DESTINATION ${INSTALL_LIB_DIR}
+#	COMPONENT Libraries
+#	)
 
 install (
 	FILES ${HEADERS}

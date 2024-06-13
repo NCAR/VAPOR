@@ -163,12 +163,16 @@ endif()
 
 add_definitions (-DRENDER_EXPORTS)
 
-OpenMPInstall (
+#OpenMPInstall (
+#	TARGETS render
+#	DESTINATION ${INSTALL_LIB_DIR}
+#	COMPONENT Libraries
+#	)
+install (
 	TARGETS render
 	DESTINATION ${INSTALL_LIB_DIR}
 	COMPONENT Libraries
 	)
-
 install (
 	FILES ${HEADERS}
 	DESTINATION ${INSTALL_INCLUDE_DIR}

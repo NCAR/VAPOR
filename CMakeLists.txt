@@ -108,20 +108,6 @@ set (MAP_IMAGES_PATH )
 include (site_files/site.NCAR OPTIONAL)
 include (site.local           OPTIONAL)
 
-if (CONDA_BUILD)
-    unset (QTDIR)
-    unset (OSPRAYDIR)
-    unset (PYTHONDIR)
-    unset (PYTHONVERSION)
-    unset (PYTHONPATH)
-    unset (NUMPY_INCLUDE_DIR)
-    unset (THIRD_PARTY_DIR)
-    unset (THIRD_PARTY_LIB_DIR)
-    unset (THIRD_PARTY_INC_DIR)
-    if (DEFINED ENV{MAP_IMAGES_PATH})
-        set (MAP_IMAGES_PATH $ENV{MAP_IMAGES_PATH})
-    endif()
-else()
     message("THIRD_PARTY_DIR = ${THIRD_PARTY_DIR}")
     include_directories (SYSTEM ${THIRD_PARTY_INC_DIR})
     include_directories (SYSTEM ${THIRD_PARTY_INC_DIR}/freetype2)
@@ -130,23 +116,18 @@ else()
 
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR})
-    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
+    #list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
+    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/h/lib)
 
     if (APPLE)
         set(CMAKE_MODULE_PATH /opt/local/lib/libomp)
     endif()
-endif()
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories ("${PROJECT_SOURCE_DIR}/lib/osgl/include")
 include_directories ("${PROJECT_SOURCE_DIR}/lib/osgl/glad/include")
 
-if (WIN32)
-	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-endif ()
-if (BUILD_VDC)
-	link_directories (${PYTHONPATH}/lib-dynload)
-endif ()
+	#link_directories (${PYTHONPATH}/lib-dynload)
 
 find_library(NETCDF netcdf)
 find_library(UDUNITS2 udunits2)
@@ -167,6 +148,53 @@ message("Library EXPAT = ${EXPAT}")
 	find_library(ASSIMP assimp)
     find_library(TIFF tiff)
     find_library(PROJ proj)
+
+# PYTHON
+        function(DUMP_FOUND_PYTHON)
+            set(PATHS "")
+            list(APPEND PATHS
+                Python_LIBRARIES
+                Python_INCLUDE_DIRS
+                Python_SITELIB
+                Python_NumPy_INCLUDE_DIRS
+            )
+            message("Python Found ${ARGV0}")
+            message("\tPython_VERSION = '${Python_VERSION}'")
+            message("\tPython_NumPy_VERSION = '${Python_NumPy_VERSION}'")
+            foreach(V ${PATHS})
+                if (EXISTS "${${V}}")
+                    set(VE "OK")
+                else()
+                    set(VE "**NOT FOUND**")
+                endif()
+                message("\t${V} = '${${V}}' ${VE}")
+            endforeach()
+        endfunction()
+
+        message("Using bundled python")
+        set(Python_VERSION "${PYTHONVERSION}")
+        set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
+        unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
+        find_library(
+            Python_LIBRARIES
+            NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
+            PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
+            NO_DEFAULT_PATH
+        )
+        set(Python_SITELIB "${PYTHONPATH}/site-packages")
+        if (NOT DEFINED Python_INCLUDE_DIRS)
+            set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
+        endif()
+        set(Python_VERSION "${Python_VERSION}" PARENT_SCOPE)
+        set(Python_LIBRARIES "${Python_LIBRARIES}" PARENT_SCOPE)
+        set(Python_INCLUDE_DIRS "${Python_INCLUDE_DIRS}" PARENT_SCOPE)
+        set(Python_SITELIB "${Python_SITELIB}" PARENT_SCOPE)
+        set(Python_NumPy_VERSION "UNUSED IN BUNDLED PYTHON" PARENT_SCOPE)
+        set(Python_NumPy_INCLUDE_DIRS "${Python_NumPy_INCLUDE_DIRS}" PARENT_SCOPE)
+        dump_found_python()
+        include_directories ("${Python_INCLUDE_DIRS}")
+        include_directories ("${Python_NumPy_INCLUDE_DIRS}")
+# /PYTHON
 
     #if (DIST_INSTALLER AND NOT BUILD_PYTHON)
 		set (CMAKE_INSTALL_PREFIX /Applications)
