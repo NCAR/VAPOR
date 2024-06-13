@@ -21,3 +21,24 @@ function(configure_apple_deployment_target)
         set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "macOS build architecture" FORCE PARENT_SCOPE)
     endif()
 endfunction()
+
+function(tag_commit_hash)
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
+        message("VERSION_COMMIT ${VERSION_COMMIT}")
+        execute_process (
+            COMMAND git rev-parse --short ${VERSION_COMMIT}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE VERSION_COMMIT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        message("VERSION_COMMIT2 ${VERSION_COMMIT}")
+    endif ()
+    string (TIMESTAMP VERSION_DATE UTC)
+    if (VERSION_RC)
+        set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
+    else ()
+        set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO})
+    endif ()
+    set (VERSION_STRING_FULL ${VERSION_STRING}.${VERSION_COMMIT} PARENT_SCOPE)
+endfunction()
