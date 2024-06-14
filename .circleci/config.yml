@@ -244,35 +244,28 @@ jobs:
           paths:
             - /opt/local
 
-      #- get_libraries:
-      #    fileName: 2023-Sept-M1.tar.xz
-      #    driveID: *macOSM1LibID
-      #    sudo: sudo
+      - get_libraries:
+          fileName: 2023-Sept-M1.tar.xz
+          driveID: *macOSM1LibID
+          sudo: sudo
+
+      - build_vapor:
+          beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          compileArgs: |
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DBUILD_OSP=OFF \
+          moveToCommand: ${f/Darwin/DarwinM1}
+
+      - run:
+          name: remove old libraries
+          command: sudo rm -rf /usr/local/VAPOR-Deps
 
       - get_libraries:
           fileName: 2023-Jun-macOSx86.tar.xz
           driveID: *macOSx86LibID
           sudo: sudo
-
-      - build_vapor:
-          #beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
-          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo /opt/local/bin/port select --set clang mp-clang-17
-          compileArgs: |
-            -DCPACK_BINARY_DRAGNDROP=ON \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
-            -DBUILD_OSP=OFF \
-          moveToCommand: ${f/Darwin/DarwinM1}
-
-      #- run:
-      #    name: remove old libraries
-      #    command: sudo rm -rf /usr/local/VAPOR-Deps
-
-      #- get_libraries:
-      #    fileName: 2023-Jun-macOSx86.tar.xz
-      #    driveID: *macOSx86LibID
-      #    sudo: sudo
 
       - build_vapor:
           beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
