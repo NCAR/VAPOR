@@ -87,12 +87,14 @@ private:
 
     void _clearCache() {}
 
+    bool _particleBaseSizeIsDirty() const;
     bool _particleCacheIsDirty() const;
     bool _colormapCacheIsDirty() const;
     void _resetParticleCache();
     void _resetColormapCache();
     int  _generateParticlesLegacy(Grid*& grid, std::vector<Grid*>& vecGrids);
     int  _getGrids(Grid*& grid, std::vector<Grid*>& vecGrids) const;
+    template<typename T> void UploadDataBuffer(vector<T> buffer);
     void _generateTextureData(const Grid* grid, const std::vector<Grid*>& vecGrids);
     void _computeBaseRadius();
     void _renderParticlesLegacy(const Grid* grid, const std::vector<Grid*>& vecGrids) const;
