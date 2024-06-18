@@ -30,48 +30,11 @@ set (VERSION_MICRO 3)
 set (VERSION_RC )
 message("CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE}")
 
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
-	get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
-    message("VERSION_COMMIT ${VERSION_COMMIT}")
-	execute_process (
-		COMMAND git rev-parse --short ${VERSION_COMMIT}
-		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-		OUTPUT_VARIABLE VERSION_COMMIT 
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-    message("VERSION_COMMIT2 ${VERSION_COMMIT}")
-endif ()
-string (TIMESTAMP VERSION_DATE UTC)
-if (VERSION_RC)
-	set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
-else ()
-	set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO})
-endif ()
-set (VERSION_STRING_FULL ${VERSION_STRING}.${VERSION_COMMIT})
+tag_commit_hash()
+message("VERSION_STRING_FULL=${VERSION_STRING_FULL}")
 
-if (APPLE)
-	add_definitions (-DDarwin)
-elseif (WIN32)
-	add_definitions (-DWIN32 -DNOMINMAX)
-	add_definitions (-DGLAD_API_CALL_EXPORT)
-endif()
-
-# compiler warning flags
-if (NOT WIN32)
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -Wno-overloaded-virtual -Wno-parentheses")
-  SET (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wno-sign-compare")
-else ()
-  # Enable multithread compiling on Visual Studio
-  # This feature is glitchy so you may need to re-run
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-  SET (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} /MP")
-endif()
-
-if (CMAKE_GENERATOR STREQUAL "Xcode")
-	set (DEFAULT_BUILD_UTILITIES OFF)
-else ()
-	set (DEFAULT_BUILD_UTILITIES ON)
-endif ()
+set_compiler_flags()
+message("CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
 
 option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
@@ -137,7 +100,7 @@ if (CONDA_BUILD)
         set (MAP_IMAGES_PATH $ENV{MAP_IMAGES_PATH})
     endif()
 else()
-    message("THIRD_PARTY_DIR = ${THIRD_PARTY_DIR}")
+    message("THIRD_PARTY_DIR  = ${THIRD_PARTY_DIR}")
     include_directories (SYSTEM ${THIRD_PARTY_INC_DIR})
     include_directories (SYSTEM ${THIRD_PARTY_INC_DIR}/freetype2)
     link_directories (${THIRD_PARTY_LIB_DIR})
@@ -176,7 +139,7 @@ message("Library FREETYPE = ${FREETYPE}")
 message("Library GEOTIFF  = ${GEOTIFF}")
 message("Library JPEG     = ${JPEG}")
 message("Library HDF5_LIB = ${HDF5_LIB}")
-message("Library EXPAT = ${EXPAT}")
+message("Library EXPAT    = ${EXPAT}")
 
 # find_package(Python)
 #   Output
@@ -187,58 +150,6 @@ message("Library EXPAT = ${EXPAT}")
 #       ${Python_NumPy_VERSION}
 #       ${Python_NumPy_INCLUDE_DIRS}
 #   https://cmake.org/cmake/help/v3.12/module/FindPython.html
-
-function(FIND_BUNDLED_PYTHON)
-    # FindPython supports Python_ROOT_DIR however vapor's bundled python distribution
-    # does not conform to its requirements so this manually configures the results
-    message("Using bundled python")
-    set(Python_VERSION "${PYTHONVERSION}")
-    set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
-    unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
-    find_library(
-        Python_LIBRARIES
-	NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-	PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
-        NO_DEFAULT_PATH
-    )
-    if (WIN32)
-        set(Python_SITELIB "${PYTHONPATH}/Lib/site-packages")
-    	set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")
-    else()
-        set(Python_SITELIB "${PYTHONPATH}/site-packages")
-        if (NOT DEFINED Python_INCLUDE_DIRS)
-            set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
-        endif()
-    endif()
-
-    set(Python_VERSION "${Python_VERSION}" PARENT_SCOPE)
-    set(Python_LIBRARIES "${Python_LIBRARIES}" PARENT_SCOPE)
-    set(Python_INCLUDE_DIRS "${Python_INCLUDE_DIRS}" PARENT_SCOPE)
-    set(Python_SITELIB "${Python_SITELIB}" PARENT_SCOPE)
-    set(Python_NumPy_VERSION "UNUSED IN BUNDLED PYTHON" PARENT_SCOPE)
-    set(Python_NumPy_INCLUDE_DIRS "${Python_NumPy_INCLUDE_DIRS}" PARENT_SCOPE)
-endfunction()
-
-function(DUMP_FOUND_PYTHON)
-    set(PATHS "")
-    list(APPEND PATHS
-        Python_LIBRARIES
-        Python_INCLUDE_DIRS
-        Python_SITELIB
-        Python_NumPy_INCLUDE_DIRS
-    )
-    message("Python Found ${ARGV0}")
-    message("\tPython_VERSION = '${Python_VERSION}'")
-    message("\tPython_NumPy_VERSION = '${Python_NumPy_VERSION}'")
-    foreach(V ${PATHS})
-        if (EXISTS "${${V}}")
-            set(VE "OK")
-        else()
-            set(VE "**NOT FOUND**")
-        endif()
-        message("\t${V} = '${${V}}' ${VE}")
-    endforeach()
-endfunction()
 
 # TODO
 # - Replace PYTHONVERSION with Python_VERSION
@@ -253,12 +164,6 @@ dump_found_python()
 
 include_directories ("${Python_INCLUDE_DIRS}")
 include_directories ("${Python_NumPy_INCLUDE_DIRS}")
-
-
-# if (BUILD_GUI OR BUILD_PYTHON)
-# 	find_package (OpenGL REQUIRED)
-# 	include_directories (${OPENGL_INCLUDE_DIRS})
-# endif ()
 
 if (WIN32)
 	find_library(ASSIMP assimp-vc140-mt)
@@ -276,36 +181,36 @@ if (WIN32)
 	set (INSTALL_SHARE_DIR share)
 	set (INSTALL_INCLUDE_DIR include/vapor)
 elseif (APPLE)
+    configure_apple_compilation()
+	## if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    #if (DIST_INSTALLER AND NOT BUILD_PYTHON)
+	#	set (CMAKE_INSTALL_PREFIX /Applications)
+	#	set (INSTALL_BIN_DIR ./vapor.app/Contents/MacOS)
+	#	set (INSTALL_SHARE_DIR ./vapor.app/Contents/share)
+	#	#set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
+	#	set (INSTALL_LIB_DIR ./vapor.app/Contents/Frameworks)
+	#	set (INSTALL_INCLUDE_DIR ./vapor.app/Contents/include/vapor)
+	#else ()
+	#	set (INSTALL_BIN_DIR bin)
+	#	set (INSTALL_LIB_DIR lib)
+	#	set (INSTALL_SHARE_DIR share)
+	#	set (INSTALL_INCLUDE_DIR include/vapor)
+	#endif ()
 
-	# if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    if (DIST_INSTALLER AND NOT BUILD_PYTHON)
-		set (CMAKE_INSTALL_PREFIX /Applications)
-		set (INSTALL_BIN_DIR ./vapor.app/Contents/MacOS)
-		set (INSTALL_SHARE_DIR ./vapor.app/Contents/share)
-		#set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
-		set (INSTALL_LIB_DIR ./vapor.app/Contents/Frameworks)
-		set (INSTALL_INCLUDE_DIR ./vapor.app/Contents/include/vapor)
-	else ()
-		set (INSTALL_BIN_DIR bin)
-		set (INSTALL_LIB_DIR lib)
-		set (INSTALL_SHARE_DIR share)
-		set (INSTALL_INCLUDE_DIR include/vapor)
-	endif ()
+    #if (BUILD_PYTHON)
+	#    set (CMAKE_INSTALL_RPATH "@loader_path")
+	#else ()
+	#    #set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
+	#    set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
+    #endif ()
 
-    if (BUILD_PYTHON)
-	    set (CMAKE_INSTALL_RPATH "@loader_path")
-	else ()
-	    #set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
-	    set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
-    endif ()
-
-    if (DIST_INSTALLER AND USE_OMP)
-		message (WARNING "The build mode is set to distributable installer with OpenMP enabled and will not run from source")
-		set (INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-		set (CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-		set (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-		set (CMAKE_SKIP_BUILD_RPATH FALSE)
-	endif()
+    #if (DIST_INSTALLER AND USE_OMP)
+	#	message (WARNING "The build mode is set to distributable installer with OpenMP enabled and will not run from source")
+	#	set (INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+	#	set (CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+	#	set (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+	#	set (CMAKE_SKIP_BUILD_RPATH FALSE)
+	#endif()
 else ()
 	if (DIST_INSTALLER)
 		set (INSTALL_BIN_DIR lib)
