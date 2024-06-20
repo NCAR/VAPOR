@@ -24,7 +24,7 @@ function(configure_apple_deployment_target)
 endfunction()
 
 function(tag_commit_hash)
-    #if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
         get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
         execute_process (
             COMMAND git rev-parse --short ${VERSION_COMMIT}
@@ -32,14 +32,15 @@ function(tag_commit_hash)
             OUTPUT_VARIABLE VERSION_COMMIT
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-    #endif ()
+    endif ()
     string (TIMESTAMP VERSION_DATE UTC)
     if (VERSION_RC)
-        set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
+        set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC} )
     else ()
         set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO})
     endif ()
     set (VERSION_STRING_FULL ${VERSION_STRING}.${VERSION_COMMIT} PARENT_SCOPE)
+    set (VERSION_STRING ${VERSION_STRING} PARENT_SCOPE)
 endfunction()
 
 function(set_compiler_flags)
@@ -65,7 +66,7 @@ endFunction()
 function(find_bundled_python)
     # FindPython supports Python_ROOT_DIR however vapor's bundled python distribution
     # does not conform to its requirements so this manually configures the results
-    message("Using bundled python ${PYTHONVERSION}...")
+    message("Using bundled python ${PYTHONVERSION}")
     set(Python_VERSION "${PYTHONVERSION}")
     set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
     unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
@@ -79,7 +80,7 @@ function(find_bundled_python)
         set(Python_SITELIB "${PYTHONPATH}/Lib/site-packages")
         set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")
     else()
-        set(Python_SITELIB "${PYTHONPATH}/site-packages" PARENT_SCOPE)
+        set(Python_SITELIB "${PYTHONPATH}/site-packages")
         if (NOT DEFINED Python_INCLUDE_DIRS)
             set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
             message("Python_INCLUDE_DIRS ${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
