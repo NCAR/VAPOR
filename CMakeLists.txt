@@ -234,7 +234,12 @@ if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		#file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/libhdf5*.dylib) 
-		#file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
+		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
+		install (
+			FILES ${INSTALL_LIBS}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
 
         # Get the list of libraries linked to MyApp
         get_target_property(linked_libraries testApp LINK_LIBRARIES)
@@ -259,11 +264,6 @@ if (APPLE)
 
 		#file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
         #file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
-		#install (
-		#	FILES ${INSTALL_LIBS}
-		#	DESTINATION ${INSTALL_LIB_DIR}
-		#	COMPONENT Dependencies
-		#	)
 		install (
 			DIRECTORY ${FRAMEWORKS}
 			DESTINATION ${INSTALL_LIB_DIR}
