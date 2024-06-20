@@ -150,50 +150,50 @@ message("Library EXPAT = ${EXPAT}")
     find_library(PROJ proj)
 
 # PYTHON
-        function(DUMP_FOUND_PYTHON)
-            set(PATHS "")
-            list(APPEND PATHS
-                Python_LIBRARIES
-                Python_INCLUDE_DIRS
-                Python_SITELIB
-                Python_NumPy_INCLUDE_DIRS
-            )
-            message("Python Found ${ARGV0}")
-            message("\tPython_VERSION = '${Python_VERSION}'")
-            message("\tPython_NumPy_VERSION = '${Python_NumPy_VERSION}'")
-            foreach(V ${PATHS})
-                if (EXISTS "${${V}}")
-                    set(VE "OK")
-                else()
-                    set(VE "**NOT FOUND**")
-                endif()
-                message("\t${V} = '${${V}}' ${VE}")
-            endforeach()
-        endfunction()
-
-        message("Using bundled python")
-        set(Python_VERSION "${PYTHONVERSION}")
-        set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
-        unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
-        find_library(
-            Python_LIBRARIES
-            NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-            PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
-            NO_DEFAULT_PATH
-        )
-        set(Python_SITELIB "${PYTHONPATH}/site-packages")
-        if (NOT DEFINED Python_INCLUDE_DIRS)
-            set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
-        endif()
-        set(Python_VERSION "${Python_VERSION}" PARENT_SCOPE)
-        set(Python_LIBRARIES "${Python_LIBRARIES}" PARENT_SCOPE)
-        set(Python_INCLUDE_DIRS "${Python_INCLUDE_DIRS}" PARENT_SCOPE)
-        set(Python_SITELIB "${Python_SITELIB}" PARENT_SCOPE)
-        set(Python_NumPy_VERSION "UNUSED IN BUNDLED PYTHON" PARENT_SCOPE)
-        set(Python_NumPy_INCLUDE_DIRS "${Python_NumPy_INCLUDE_DIRS}" PARENT_SCOPE)
-        dump_found_python()
-        include_directories ("${Python_INCLUDE_DIRS}")
-        include_directories ("${Python_NumPy_INCLUDE_DIRS}")
+#        function(DUMP_FOUND_PYTHON)
+#            set(PATHS "")
+#            list(APPEND PATHS
+#                Python_LIBRARIES
+#                Python_INCLUDE_DIRS
+#                Python_SITELIB
+#                Python_NumPy_INCLUDE_DIRS
+#            )
+#            message("Python Found ${ARGV0}")
+#            message("\tPython_VERSION = '${Python_VERSION}'")
+#            message("\tPython_NumPy_VERSION = '${Python_NumPy_VERSION}'")
+#            foreach(V ${PATHS})
+#                if (EXISTS "${${V}}")
+#                    set(VE "OK")
+#                else()
+#                    set(VE "**NOT FOUND**")
+#                endif()
+#                message("\t${V} = '${${V}}' ${VE}")
+#            endforeach()
+#        endfunction()
+#
+#        message("Using bundled python")
+#        set(Python_VERSION "${PYTHONVERSION}")
+#        set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
+#        unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
+#        find_library(
+#            Python_LIBRARIES
+#            NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
+#            PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
+#            NO_DEFAULT_PATH
+#        )
+#        set(Python_SITELIB "${PYTHONPATH}/site-packages")
+#        if (NOT DEFINED Python_INCLUDE_DIRS)
+#            set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
+#        endif()
+#        set(Python_VERSION "${Python_VERSION}" PARENT_SCOPE)
+#        set(Python_LIBRARIES "${Python_LIBRARIES}" PARENT_SCOPE)
+#        set(Python_INCLUDE_DIRS "${Python_INCLUDE_DIRS}" PARENT_SCOPE)
+#        set(Python_SITELIB "${Python_SITELIB}" PARENT_SCOPE)
+#        set(Python_NumPy_VERSION "UNUSED IN BUNDLED PYTHON" PARENT_SCOPE)
+#        set(Python_NumPy_INCLUDE_DIRS "${Python_NumPy_INCLUDE_DIRS}" PARENT_SCOPE)
+#        dump_found_python()
+#        include_directories ("${Python_INCLUDE_DIRS}")
+#        include_directories ("${Python_NumPy_INCLUDE_DIRS}")
 # /PYTHON
 
     #if (DIST_INSTALLER AND NOT BUILD_PYTHON)
@@ -234,12 +234,12 @@ if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		#file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/libhdf5*.dylib) 
-		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
-		install (
-			FILES ${INSTALL_LIBS}
-			DESTINATION ${INSTALL_LIB_DIR}
-			COMPONENT Dependencies
-			)
+		#file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
+		#install (
+		#	FILES ${INSTALL_LIBS}
+		#	DESTINATION ${INSTALL_LIB_DIR}
+		#	COMPONENT Dependencies
+		#	)
 
         # Get the list of libraries linked to MyApp
         get_target_property(linked_libraries testApp LINK_LIBRARIES)

@@ -1,10 +1,11 @@
-add_subdirectory (common)
-add_subdirectory (wasp)
-add_subdirectory (render)
-add_subdirectory (vdc)
-add_subdirectory (params)
-add_subdirectory( flow )
-add_subdirectory(osgl)
+#add_subdirectory (common)
+#add_subdirectory (wasp)
+#add_subdirectory (render)
+#add_subdirectory (vdc)
+#add_subdirectory (params)
+#add_subdirectory( flow )
+#add_subdirectory(osgl)
+
 #export (TARGETS common wasp NAMESPACE VAPOR:: FILE vapor-exports.cmake)
 #
 #if (BUILD_VDC OR BUILD_GUI)
