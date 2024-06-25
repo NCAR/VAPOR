@@ -8,7 +8,7 @@
 #
 # %%
 import example_utils
-from vapor import session, renderer, dataset, camera, utils
+from vapor import session, renderer, dataset, camera
 
 # %%
 ses = session.Session()
