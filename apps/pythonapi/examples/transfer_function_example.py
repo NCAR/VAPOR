@@ -4,7 +4,8 @@
 #
 # %%
 import example_utils
-from vapor import session, renderer, dataset, camera, utils, transferfunction
+from vapor import session, renderer, dataset, camera, transferfunction
+from vapor.utils import histogram
 
 ses = session.Session()
 data = example_utils.OpenExampleDataset(ses)
@@ -20,7 +21,7 @@ ses.Show()
 # Before we adjust the opacity map of the TF, we get a histogram to help us determine what we want to hide.
 #
 # %%
-utils.ShowMatPlotLibHistogram(ses, ren)
+histogram.ShowMatPlotLibHistogram(ses, ren)
 
 # %% [md]
 #
@@ -35,7 +36,7 @@ opacities = [(-0.3, 1), (-0.1, 0), (0.1, 0), (0.3, 1)]
 # We can get the matplotlib histogram plot and add our opacity map to it to compare.
 #
 # %%
-plt = utils.GetMatPlotLibHistogram(ses, ren)
+plt = histogram.GetMatPlotLibHistogram(ses, ren)
 plt.plot(*zip(*opacities))
 plt.show()
 
