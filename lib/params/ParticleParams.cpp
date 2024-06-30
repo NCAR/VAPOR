@@ -15,6 +15,7 @@ const std::string ParticleParams::StrideTag = "StrideTag";
 const std::string ParticleParams::RenderRadiusScalarTag = "RenderRadiusScalarTag";
 PARAMS_IMPL_TAG(ParticleParams, RenderRadiusVariableTag);
 PARAMS_IMPL_TAG(ParticleParams, RenderRadiusVariableStrengthTag);
+PARAMS_IMPL_TAG(ParticleParams, RecalculateRadiusBaseRequestTag);
 const std::string ParticleParams::LightingEnabledTag = "LightingEnabledTag";
 const std::string ParticleParams::RenderRadiusBaseTag = "RenderRadiusBaseTag";
 const std::string ParticleParams::RenderLegacyTag = "RenderLegacyTag";

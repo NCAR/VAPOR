@@ -40,6 +40,7 @@ public:
     static const std::string RenderRadiusVariableStrengthTag;
 
     static const std::string RenderRadiusBaseTag;
+    static const std::string RecalculateRadiusBaseRequestTag;
     static const std::string RenderLegacyTag;
 
     static const std::string LightingEnabledTag;

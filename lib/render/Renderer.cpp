@@ -26,6 +26,7 @@
 
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <vapor/Renderer.h>
+#include <vapor/TwoDDataRenderer.h>
 #include <vapor/DataMgrUtils.h>
 #include "vapor/GLManager.h"
 #include "vapor/FontManager.h"
@@ -120,6 +121,11 @@ int Renderer::paintGL(bool fast)
 
     mm->MatrixModeModelView();
     mm->PushMatrix();
+
+    if (dynamic_cast<TwoDDataRenderer*>(this) != nullptr) {
+        float zOffset = GetDefaultZ(_dataMgr, GetActiveParams()->GetCurrentTimestep());
+        _glManager->matrixManager->Translate(0, 0, zOffset);
+    }
     ApplyTransform(_glManager, GetDatasetTransform(), rParams->GetTransform());
 
     int rc = _paintGL(fast);

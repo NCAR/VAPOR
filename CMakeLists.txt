@@ -301,7 +301,8 @@ elseif (APPLE)
 		set (CMAKE_INSTALL_PREFIX /Applications)
 		set (INSTALL_BIN_DIR ./vapor.app/Contents/MacOS)
 		set (INSTALL_SHARE_DIR ./vapor.app/Contents/share)
-		set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
+		#set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
+		set (INSTALL_LIB_DIR ./vapor.app/Contents/Frameworks)
 		set (INSTALL_INCLUDE_DIR ./vapor.app/Contents/include/vapor)
 	else ()
 		set (INSTALL_BIN_DIR bin)
@@ -313,7 +314,8 @@ elseif (APPLE)
     if (BUILD_PYTHON)
 	    set (CMAKE_INSTALL_RPATH "@loader_path")
 	else ()
-	    set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
+	    #set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
+	    set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
     endif ()
 
     if (DIST_INSTALLER AND USE_OMP)
@@ -426,18 +428,29 @@ if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
-		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
+		#file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
         file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
-		install (
-			DIRECTORY ${INSTALL_FRAMEWORKS}
-			DESTINATION ${INSTALL_LIB_DIR}
-			COMPONENT Dependencies
-			)
+		#install (
+		#	DIRECTORY ${INSTALL_FRAMEWORKS}
+		#	DESTINATION ${INSTALL_LIB_DIR}
+		#	COMPONENT Dependencies
+		#	)
+
+        set (FRAMEWORKS Core OpenGL Widgets Gui DBus Network PrintSupport)
+        foreach(item IN LISTS FRAMEWORKS)
+            list(APPEND FRAMEWORKS "${THIRD_PARTY_LIB_DIR}/Qt${item}.framework")
+            list(REMOVE_ITEM FRAMEWORKS ${item})
+        endforeach(item IN LISTS ${FRAMEWORKS})
+        install (
+            DIRECTORY ${FRAMEWORKS}
+            DESTINATION ${INSTALL_LIB_DIR}
+            COMPONENT Dependencies
+        )
 
         if (BUILD_OSP)
             file (GLOB INSTALL_OSP_LIBS ${OSPRAYDIR}/lib/*.dylib) 

@@ -6,7 +6,8 @@
 #
 # %%
 import example_utils
-from vapor import session, renderer, dataset, camera, utils
+from vapor import session, renderer, dataset, camera
+from vapor.utils import histogram
 
 ses = session.Session()
 data = example_utils.OpenExampleDataset(ses)
@@ -59,14 +60,14 @@ colorbar.SetEnabled(False)
 # ## MatPlotLib Histograms
 #
 # %%
-utils.ShowMatPlotLibHistogram(ses, ren)
+histogram.ShowMatPlotLibHistogram(ses, ren)
 
 # %% [md]
 # ---
 # You can customize the histograms as you would `matplotlib.pyplot.hist`
 #
 # %%
-plt = utils.GetMatPlotLibHistogram(ses, ren, color ="red")
+plt = histogram.GetMatPlotLibHistogram(ses, ren, color ="red")
 plt.xlabel("X-Axis")
 plt.ylabel("Y-Axis")
 plt.title("Title\n", fontweight="bold")
