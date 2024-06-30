@@ -31,8 +31,10 @@ commands:
         default: true
       fileName:
         type: string
+        default: ""
       driveID:
         type: string
+        default: ""
       sudo:
         type: string
         default: ""
@@ -255,8 +257,7 @@ jobs:
             - /opt/local
 
       - get_libraries:
-          fileName: 2023-Sept-M1.tar.xz
-          driveID: *macOSM1LibID
+          fileName: *macArm64libAWS
           sudo: sudo
 
       - build_vapor:
@@ -274,8 +275,7 @@ jobs:
           command: sudo rm -rf /usr/local/VAPOR-Deps
 
       - get_libraries:
-          fileName: 2023-Jun-macOSx86.tar.xz
-          driveID: *macOSx86LibID
+          fileName: &macx86libAWS
           sudo: sudo
 
       - build_vapor:
