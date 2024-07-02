@@ -154,7 +154,7 @@ int           main(int argc, char **argv)
 #ifndef WIN32
     const char *s = getenv("PYTHONHOME");
     string      phome = s ? s : "";
-    if (!phome.empty()) {
+    if (!phome.empty() && !getenv("PYTHONHOME_SET_BY_VAPOR")) {
         string msg("The PYTHONHOME variable is already specified as: \n");
         msg += phome;
         msg += "\n";
@@ -166,10 +166,15 @@ int           main(int argc, char **argv)
         msg += " installation\n";
         msg += "Unset the PYTHONHOME environment to revert to the installed ";
         msg += "VAPOR python" + PYTHON_VERSION + " environment.";
-        QMessageBox::warning(0, "PYTHONHOME warning", msg.c_str());
+        QMessageBox::warning(0, "PYTHONHOME warning", msg.c_str()); // This does not work on Casper
+        printf("========  PYTHONHOME warning  ========\n");
+        printf("%s\n\n", msg.c_str());
     } else {
         phome = GetPythonDir();
         setenv("PYTHONHOME", phome.c_str(), 1);
+        // We shouldnt be setting "PYTHONHOME" here but this is a temporary fix for relaunching vapor without extra warnings
+        setenv("PYTHONHOME_SET_BY_VAPOR", "", 1);
+
     }
     MyBase::SetDiagMsg("PYTHONHOME = %s", phome.c_str());
 #endif

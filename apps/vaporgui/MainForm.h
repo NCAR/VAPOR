@@ -316,6 +316,7 @@ private:
 
     void CheckForUpdates();
     void CheckForNotices();
+    void CheckForCasperVGL();
 
     bool isOpenGLContextActive() const;
 
