@@ -70,6 +70,7 @@ const string SettingsParams::_settingsNeedsWriteTag = "SettingsNeedsWrite";
 const string SettingsParams::UseAllCoresTag = "UseAllCoresTag";
 const string SettingsParams::AutoCheckForUpdatesTag = "AutoCheckForUpdatesTag";
 const string SettingsParams::AutoCheckForNoticesTag = "AutoCheckForNoticesTag";
+const string SettingsParams::CasperVGLCheck = "CasperVGLCheck";
 
 //
 // Register class with object factory!!!
@@ -400,6 +401,8 @@ void SettingsParams::SetAutoCheckForUpdates(bool b) { SetValueLong(AutoCheckForU
 bool SettingsParams::GetAutoCheckForUpdates() const { return GetValueLong(AutoCheckForUpdatesTag, true); }
 void SettingsParams::SetAutoCheckForNotices(bool b) { SetValueLong(AutoCheckForNoticesTag, "", b); }
 bool SettingsParams::GetAutoCheckForNotices() const { return GetValueLong(AutoCheckForNoticesTag, true); }
+void SettingsParams::SetCasperCheckForVGL(bool b) { SetValueLong(CasperVGLCheck, "", b); }
+bool SettingsParams::GetCasperCheckForVGL() const { return GetValueLong(CasperVGLCheck, true); }
 
 bool SettingsParams::LoadFromSettingsFile()
 {
