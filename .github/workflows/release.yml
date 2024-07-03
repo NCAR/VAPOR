@@ -15,5 +15,5 @@ jobs:
         run: |
           curl -X POST -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
           -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/<your-username>/VaporDocumentationWebsite/dispatches \
+          https://api.github.com/repos/ifranda/VaporDocumentationWebsite/dispatches \
           -d '{"event_type":"update-docs"}'
