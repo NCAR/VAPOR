@@ -2,7 +2,7 @@ name: Trigger Documentation Update
 
 on:
   release:
-    types: [created, published]
+    types: [published]
 
 jobs:
   trigger-doc-update:
