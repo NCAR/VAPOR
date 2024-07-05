@@ -2,14 +2,14 @@ name: Trigger Documentation Update
 
 on:
   release:
-    types: [published]
+    types: [created, published]
 
 jobs:
   trigger-doc-update:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout VAPOR repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Trigger documentation update
         run: |
