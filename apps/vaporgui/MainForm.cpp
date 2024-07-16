@@ -645,7 +645,7 @@ void MainForm::CheckForCasperVGL()
     if (!STLUtils::BeginsWith(hostname, "casper")) return;
     if (getenv("VGL_ISACTIVE")) return;
 
-    const char *message = "In order to utilize Casper's GPU fully, Vapor needs to be launched using vglrun";
+    const char *message = "In order to utilize Casper's GPU fully, Vapor needs to be launched using vglrun. The button below will relaunch Vapor with vglrun.";
     printf("WARNING: %s\n", message);
     if (!GetSettingsParams()->GetCasperCheckForVGL()) return;
 
