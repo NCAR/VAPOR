@@ -266,7 +266,6 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
             -DBUILD_OSP=OFF \
-          libName: 2023-Jun
           moveToCommand: ${f/Darwin/DarwinM1}
 
       - run:
@@ -276,6 +275,7 @@ jobs:
       - get_libraries:
           fileName: 2023-Jun-macOSx86.tar.xz
           driveID: *macOSx86LibID
+          libName: 2023-Jun
           sudo: sudo
 
       - build_vapor:
