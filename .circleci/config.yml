@@ -275,7 +275,7 @@ jobs:
       - get_libraries:
           fileName: 2023-Jun-macOSx86.tar.xz
           driveID: *macOSx86LibID
-          libName: 2023-Jun
+          libDir: 2023-Jun
           sudo: sudo
 
       - build_vapor:
