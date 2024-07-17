@@ -34,6 +34,7 @@
 #include <iostream>
 #include <functional>
 #include <cmath>
+#include <unistd.h>
 
 #include <QDesktopWidget>
 #include <QDockWidget>
@@ -489,6 +490,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
 
     if (interactive && GetSettingsParams()->GetAutoCheckForUpdates()) CheckForUpdates();
     if (interactive && GetSettingsParams()->GetAutoCheckForNotices()) CheckForNotices();
+    CheckForCasperVGL();
 
     _controlExec->SetNumThreads(GetSettingsParams()->GetNumThreads());
 }
@@ -631,6 +633,61 @@ void MainForm::CheckForNotices()
             GetSettingsParams()->SaveSettings();
         }
     });
+}
+
+void MainForm::CheckForCasperVGL()
+{
+#ifndef Darwin
+#ifndef WIN32
+    char hostname[1024];
+    hostname[1023] = '\0';
+    gethostname(hostname, 1023);
+    if (!STLUtils::BeginsWith(hostname, "casper")) return;
+    if (getenv("VGL_ISACTIVE")) return;
+
+    const char *message = "In order to utilize Casper's GPU fully, Vapor needs to be launched using vglrun. The button below will relaunch Vapor with vglrun.";
+    printf("WARNING: %s\n", message);
+    if (!GetSettingsParams()->GetCasperCheckForVGL()) return;
+
+    printf("\t Displaying warning popup in GUI\n");
+    QMessageBox *popup = new QMessageBox(
+        QMessageBox::Icon::Warning,
+        "Warning",
+        message
+    );
+    QCheckBox *cb = new QCheckBox("Don't show again");
+    cb->setChecked(false);
+    popup->addButton("Dismiss", QMessageBox::RejectRole);
+    popup->addButton("Relaunch", QMessageBox::AcceptRole);
+    popup->setCheckBox(cb);
+
+    auto finish = [this, popup, cb](int result) {
+        if (cb->isChecked()) {
+            GetSettingsParams()->SetCasperCheckForVGL(false);
+            GetSettingsParams()->SaveSettings();
+        }
+
+        if (result == QMessageBox::Rejected)
+            return;
+
+        auto qtArgs = QApplication::instance()->arguments();
+        vector<const char*> prepend = {"vglrun"};
+        char ** args = new char*[prepend.size() + qtArgs.size() + 1];
+        for (int i = 0; i < prepend.size(); i++)
+            args[i] = strdup(prepend[i]);
+        for (int i = 0; i < qtArgs.size(); i++)
+            args[i+prepend.size()] = strdup(qtArgs[i].toStdString().c_str());
+        args[prepend.size() + qtArgs.size()] = nullptr;
+
+        execvp(args[0], args);
+
+        MSG_WARN("Failed to restart vapor using vglrun");
+    };
+
+    connect(popup, &QMessageBox::finished, this, finish);
+    popup->show();
+#endif
+#endif
 }
 
 void MainForm::_createAnimationToolBar()

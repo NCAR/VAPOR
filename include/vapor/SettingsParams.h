@@ -130,10 +130,13 @@ public:
     bool GetAutoCheckForUpdates() const;
     void SetAutoCheckForNotices(bool b);
     bool GetAutoCheckForNotices() const;
+    void SetCasperCheckForVGL(bool b);
+    bool GetCasperCheckForVGL() const;
 
     static const string UseAllCoresTag;
     static const string AutoCheckForUpdatesTag;
     static const string AutoCheckForNoticesTag;
+    static const string CasperVGLCheck;
 
     bool LoadFromSettingsFile();
 
