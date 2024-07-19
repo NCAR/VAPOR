@@ -388,7 +388,7 @@ void lch2lab(const float lch[3], float lab[3])
     lab[2] = sinf(h) * c;
 }
 
-void clamp(float &v, const float min, const float max)
+template <typename T> void clamp(T &v, const T min, const T max)
 {
     if (v < min) v = min;
     if (v > max) v = max;
@@ -589,6 +589,9 @@ vector<double> ColorMap::GetControlPoints() const
     vector<double> cps = GetValueDoubleVec(_controlPointsTag);
 
     while (cps.size() % 4) cps.push_back(0.0);
+
+    for (int i = 0; i < cps.size(); i += 4)
+        clamp(cps[i], 0.0, 1.0);
 
     return (cps);
 }
