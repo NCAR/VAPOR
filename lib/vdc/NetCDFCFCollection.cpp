@@ -77,20 +77,6 @@ int NetCDFCFCollection::_Initialize(const vector<string> &files)
     int rc = NetCDFCollection::Initialize(files, tv, tv);
     if (rc < 0) return (-1);
 
-    //
-    // To provide a more detailed message in the case described by issue 3626:
-    // https://github.com/NCAR/VAPOR/issues/3626
-    // add a test if there's any 2D or 3D variables detected. If not, we raise an error.
-    //
-    auto vars2d = this->GetDataVariableNames(2, true);
-    if (vars2d.empty()) {
-      auto vars3d = this->GetDataVariableNames(3, true);
-      if (vars3d.empty()) {
-        SetErrMsg("Failed to detect any 2D or 3D variables.\nDid you forget any coordinate files?\n");
-        return -1;
-      }
-    }
-
     return (0);
 }
 

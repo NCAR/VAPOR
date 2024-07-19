@@ -68,13 +68,17 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
 
 int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options, NetCDFCFCollection *ncdfc)
 {
-    if (_ncdfc) delete _ncdfc;
+    if (_ncdfc) {
+      delete _ncdfc;
+      _ncdfc = nullptr;
+    }
     _paths = paths;
     
     // Initialize the NetCDFCFCollection class.
     //
     int rc = ncdfc->Initialize(paths);
     if (rc < 0) {
+        delete ncdfc;
         SetErrMsg("Failed to initialize netCDF data collection for reading");
         return (-1);
     }
@@ -83,8 +87,25 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
     //
     rc = _udunits.Initialize();
     if (rc < 0) {
+        delete ncdfc;
         SetErrMsg("Failed to initialize udunits2 library : %s", _udunits.GetErrMsg().c_str());
         return (-1);
+    }
+
+    //
+    // To provide a more detailed message in the case described by issue 3626:
+    // https://github.com/NCAR/VAPOR/issues/3626
+    // add a test if there's any 2D or 3D variables detected. If not, we raise an error.
+    //
+    auto vars2d = ncdfc->GetDataVariableNames(2, true);
+    if (vars2d.empty()) {
+      auto vars3d = ncdfc->GetDataVariableNames(3, true);
+      if (vars3d.empty()) {
+        delete ncdfc;
+        SetErrMsg("Failed to detect any 2D or 3D variables.\n"
+                  "Did you forget any coordinate files?\n");
+        return (-1);
+      }
     }
 
     _ncdfc = ncdfc;
