@@ -97,7 +97,8 @@ bool XmlNode::IsValidXMLElement(const string &s, int *badIdx)
 
 string XmlNode::SanitizeXMLTag(string s)
 {
-    assert(!s.empty());
+    if(s.empty())
+        return "__empty__";
     int i;
     while (!IsValidXMLElement(s, &i)) {
         s = s.substr(0, i) + "_" + to_string((int)s[i]) + "_" + s.substr(i+1);
