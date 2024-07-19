@@ -77,16 +77,32 @@ string escapeStr(string s)
 }
 };    // namespace
 
-bool XmlNode::IsValidXMLElement(string s)
+bool XmlNode::IsValidXMLElement(const string &s, int *badIdx)
 {
+    int _;
+    badIdx = badIdx?badIdx:&_;
+    *badIdx = 0;
+
     if (s.empty()) return (false);
     if (!(std::isalpha(s[0]) || s[0] == '_')) return (false);
     for (string::const_iterator itr = s.begin(); itr != s.end(); ++itr) {
         if (!(std::isalnum(*itr) || std::isdigit(*itr) || *itr == '-' || *itr == '_' || *itr == '.')) { return (false); }
         if (isspace(*itr)) return (false);
+        ++*badIdx;
     }
 
+    *badIdx = -1;
     return (true);
+}
+
+string XmlNode::SanitizeXMLTag(string s)
+{
+    assert(!s.empty());
+    int i;
+    while (!IsValidXMLElement(s, &i)) {
+        s = s.substr(0, i) + "_" + to_string((int)s[i]) + "_" + s.substr(i+1);
+    }
+    return s;
 }
 
 XmlNode::XmlNode(const string &tag, const map<string, string> &attrs, size_t numChildrenHint)

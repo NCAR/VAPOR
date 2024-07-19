@@ -249,7 +249,7 @@ vector<string> NetCDFCollection::GetVariableNames(int ndims, bool spatial) const
         const TimeVaryingVar &tvvars = p->second;
         int                   myndims = tvvars.GetSpatialDims().size();
         if (!spatial && tvvars.GetTimeVarying()) { myndims++; }
-        if (myndims == ndims) { names.push_back(p->first); }
+        if (myndims == ndims || ndims == -1) { names.push_back(p->first); }
     }
 
     return (names);

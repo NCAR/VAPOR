@@ -43,6 +43,14 @@ NetCDFCFCollection::~NetCDFCFCollection()
 
 }
 
+static bool IsNameCFCompliant(const string &name, bool strict=true) {
+    if (!isalpha(name[0]) || (!strict && name[0] == '_')) return false;
+    for (int i = 1; i < name.size(); i++)
+        if (!(isalnum(name[i]) || name[i] == '_' || (!strict && (name[i] == '_' || name[i] == '.' || name[i] == '-'))))
+            return false;
+    return true;
+}
+
 int NetCDFCFCollection::_Initialize(const vector<string> &files)
 {
     // Look for time coordinate variables. Must be 1D and have same
@@ -76,6 +84,13 @@ int NetCDFCFCollection::_Initialize(const vector<string> &files)
     //
     int rc = NetCDFCollection::Initialize(files, tv, tv);
     if (rc < 0) return (-1);
+
+    for (const auto &v : GetVariableNames(-1, false)) {
+        if (!IsNameCFCompliant(v, false)) {
+            SetErrMsg("Variable name \"%s\" is not compliant with NetCDF-CF", v.c_str());
+            return -1;
+        }
+    }
 
     return (0);
 }
