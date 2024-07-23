@@ -99,7 +99,7 @@ std::string Wasp::GetSharePath(const std::string &name) { return GetResourcePath
 
 #if defined(WIN32)
     #define PYTHON_INSTALLED_PATH ("python" + string(PYTHON_VERSION))
-#elif defined(__APPLE__)
+#elif defined(__aarch64__)
     #define PYTHON_INSTALLED_PATH ("Resources/python")
 #else
     #define PYTHON_INSTALLED_PATH ("lib/python" + string(PYTHON_VERSION))
