@@ -224,7 +224,6 @@ function(FIND_BUNDLED_PYTHON)
     find_library(
         Python_LIBRARIES
 	    NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-	    #PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONDIR}/lib
 	    PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHON_LIB_DIR}
         NO_DEFAULT_PATH
     )
@@ -235,8 +234,11 @@ function(FIND_BUNDLED_PYTHON)
     else()
         set(Python_SITELIB "${PYTHONPATH}/site-packages")
         if (NOT DEFINED Python_INCLUDE_DIRS)
-            #set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
-            set(Python_INCLUDE_DIRS "${PYTHONDIR}/include/python${PYTHONVERSION}")
+            if (APPLE)
+                set(Python_INCLUDE_DIRS "${PYTHONDIR}/include/python${PYTHONVERSION}")
+            else()
+                set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
+            endif()
         endif()
     endif()
 
@@ -324,8 +326,6 @@ elseif (APPLE)
     if (BUILD_PYTHON)
 	    set (CMAKE_INSTALL_RPATH "@loader_path")
 	else ()
-	    #set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
-	    #set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
 	    set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Resources")
     endif ()
 
@@ -439,18 +439,11 @@ if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
-		#list (REMOVE_ITEM INSTALL_LIBS "${THIRD_PARTY_LIB_DIR}/libpython3.9.dylib") 
-		#file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
-		#install (
-		#	DIRECTORY ${INSTALL_FRAMEWORKS}
-		#	DESTINATION ${INSTALL_LIB_DIR}
-		#	COMPONENT Dependencies
-		#	)
 
         set (FRAMEWORKS Core OpenGL Widgets Gui DBus Network PrintSupport)
         foreach(item IN LISTS FRAMEWORKS)
@@ -480,13 +473,7 @@ if (APPLE)
 		    	DESTINATION ${INSTALL_LIB_DIR}/../Resources
 		    	COMPONENT Dependencies
 		    	)
-            #file (GLOB PYDYLIB "${THIRD_PARTY_LIB_DIR}/libpython3.9.dylib")
-	#Python_LIBRARIES = '/usr/local/VAPOR-Deps/current/Resources/python/lib/libpython3.9.dylib' OK
-	#Python_INCLUDE_DIRS = '/usr/local/VAPOR-Deps/current/Resources/python/include/python3.9' OK
-    #PYTHONDIR = /usr/local/VAPOR-Deps/current/Resources/python
-    #PYTHONPATH = /usr/local/VAPOR-Deps/current/Resources/python/lib/python3.9
 		    install (
-		    	#FILES "${THIRD_PARTY_LIB_DIR}/libpython3.9.dylib"
 		    	FILES ${Python_LIBRARIES}
 		    	DESTINATION ${INSTALL_LIB_DIR}/../Resources
 		    	COMPONENT Dependencies
