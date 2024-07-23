@@ -147,6 +147,10 @@ std::string Wasp::GetAppPath(const string &app, const string &resource, const ve
                 path.append("share");
             } else if (myResource.compare("lib") == 0) {
                 path.append("lib");
+            } else if (myResource.compare("Frameworks") == 0) {
+                path.append("Frameworks");
+            } else if (myResource.compare("Resources") == 0) {
+                path.append("Resources");
             } else if (myResource.compare("home") == 0) {
                 path.erase(path.size() - 1, 1);
             } else {    // must be plugins

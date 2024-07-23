@@ -5,7 +5,7 @@
 # libnetcdf-dev,  libudunits2-dev,  libproj-dev
 
 cmake_minimum_required (VERSION 3.17)
-project (VAPOR3)
+project (codesigningVAPOR3)
 
 include (buildutils/UtilityFunctions.cmake)
 include (buildutils/GetGitRevisionDescription.cmake)
@@ -164,7 +164,8 @@ else()
 
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR})
-    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
+    #list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
+    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/h5/lib)
 
     if (APPLE)
         set(CMAKE_MODULE_PATH /opt/local/lib/libomp)
@@ -210,14 +211,20 @@ message("Library EXPAT = ${EXPAT}")
 function(FIND_BUNDLED_PYTHON)
     # FindPython supports Python_ROOT_DIR however vapor's bundled python distribution
     # does not conform to its requirements so this manually configures the results
-    message("Using bundled python")
+    message("Using bundled python ${PYTHONDIR} ${PYTHONPATH}")
     set(Python_VERSION "${PYTHONVERSION}")
     set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
     unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
+    #find_library(
+    #    Python_LIBRARIES
+	#NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
+	#PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
+    #    NO_DEFAULT_PATH
+    #)
     find_library(
         Python_LIBRARIES
-	NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-	PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
+	    NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
+	    PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}/..
         NO_DEFAULT_PATH
     )
     if (WIN32)
@@ -226,7 +233,8 @@ function(FIND_BUNDLED_PYTHON)
     else()
         set(Python_SITELIB "${PYTHONPATH}/site-packages")
         if (NOT DEFINED Python_INCLUDE_DIRS)
-            set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
+            #set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
+            set(Python_INCLUDE_DIRS "${PYTHONDIR}/include/python${PYTHONVERSION}")
         endif()
     endif()
 
@@ -315,7 +323,8 @@ elseif (APPLE)
 	    set (CMAKE_INSTALL_RPATH "@loader_path")
 	else ()
 	    #set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
-	    set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
+	    #set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
+	    set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Resources")
     endif ()
 
     if (DIST_INSTALLER AND USE_OMP)
@@ -428,8 +437,8 @@ if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
+		#list (REMOVE_ITEM INSTALL_LIBS "${THIRD_PARTY_LIB_DIR}/libpython3.9.dylib") 
 		#file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
-        file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
@@ -463,9 +472,21 @@ if (APPLE)
         endif ()
 
         if (NOT BUILD_PYTHON)
+            file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONDIR})
 		    install (
 		    	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
-		    	DESTINATION ${INSTALL_LIB_DIR}
+		    	DESTINATION ${INSTALL_LIB_DIR}/../Resources
+		    	COMPONENT Dependencies
+		    	)
+            #file (GLOB PYDYLIB "${THIRD_PARTY_LIB_DIR}/libpython3.9.dylib")
+	#Python_LIBRARIES = '/usr/local/VAPOR-Deps/current/Resources/python/lib/libpython3.9.dylib' OK
+	#Python_INCLUDE_DIRS = '/usr/local/VAPOR-Deps/current/Resources/python/include/python3.9' OK
+    #PYTHONDIR = /usr/local/VAPOR-Deps/current/Resources/python
+    #PYTHONPATH = /usr/local/VAPOR-Deps/current/Resources/python/lib/python3.9
+		    install (
+		    	#FILES "${THIRD_PARTY_LIB_DIR}/libpython3.9.dylib"
+		    	FILES ${Python_LIBRARIES}
+		    	DESTINATION ${INSTALL_LIB_DIR}/../Resources
 		    	COMPONENT Dependencies
 		    	)
             file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)

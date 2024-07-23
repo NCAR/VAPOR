@@ -143,6 +143,7 @@ int MyPython::Initialize()
     //
     std::string path = Wasp::GetSharePath("python");
     path = "sys.path.append('" + path + "')\n";
+    std::cout << "Appending " << path << std::endl;
     rc = PyRun_SimpleString(path.c_str());
     if (rc < 0) {
         MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
