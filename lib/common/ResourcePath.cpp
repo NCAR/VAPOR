@@ -1,3 +1,4 @@
+#include <iostream>
 #include <climits>
 #include <vapor/ResourcePath.h>
 #include <vapor/CMakeConfig.h>
@@ -85,10 +86,15 @@ std::string Wasp::GetResourcePath(const std::string &name)
 #if FORCE_USE_DEV_LIBS
     TRY_PATH(FileUtils::JoinPaths({SOURCE_DIR, name}));
 #else
+    std::cout << "GetResourcePathFromCallback(name): " << name << std::endl;
     TRY_PATH(GetResourcePathFromCallback(name));
+    std::cout << "JoinPaths({GetInstalledResourceRoot(), name}): " << GetInstalledResourceRoot() << " " << name << std::endl;
     TRY_PATH(FileUtils::JoinPaths({GetInstalledResourceRoot(), name}));
+    std::cout << "JoinPaths({SOURCE_DIR, name}): " << SOURCE_DIR << " " << name << std::endl;
     TRY_PATH(FileUtils::JoinPaths({SOURCE_DIR, name}));
+    std::cout << "JoinPaths({THIRD_PARTY_DIR, name}): " << THIRD_PARTY_DIR << " " << name << std::endl;
     TRY_PATH(FileUtils::JoinPaths({THIRD_PARTY_DIR, name}));
+    std::cout << "CallGetAppPathForResourceName(name): " << name << std::endl;
     TRY_PATH(CallGetAppPathForResourceName(name));
 #endif
 
@@ -100,7 +106,7 @@ std::string Wasp::GetSharePath(const std::string &name) { return GetResourcePath
 #ifdef WIN32
     #define PYTHON_INSTALLED_PATH ("python" + string(PYTHON_VERSION))
 #else
-    #define PYTHON_INSTALLED_PATH ("lib/python" + string(PYTHON_VERSION))
+    #define PYTHON_INSTALLED_PATH ("Resources/python")
 #endif
 
 std::string Wasp::GetPythonVersion() { return std::string(PYTHON_VERSION); }
@@ -119,12 +125,12 @@ std::string Wasp::GetPythonDir()
 #ifdef WIN32
     return GetPythonPath();
 #endif
-
-    string path = GetResourcePath("");
-
-    string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
-
-    if (!FileUtils::Exists(FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH}))) path = string(PYTHON_DIR);
+    string path = string(PYTHON_DIR);  // Try our third-party-library directory first
+    if (!FileUtils::Exists(path)) {
+        path = GetResourcePath("");
+        string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
+        if (!exists.empty()) path = exists; // If the third-party-library directory doesn't exist, use the python installed path.  Otherwise, use the root.
+    }
     return path;
 }
 

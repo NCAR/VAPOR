@@ -49,8 +49,9 @@ int main(int argc, char **argv)
 
 #ifndef WIN32
     std::string phome = GetPythonDir();
+    std::cout << "          PYTHONHOME: " << phome << std::endl;
     setenv("PYTHONHOME", phome.c_str(), 1);
-    setenv("PYTHONPATH", phome.c_str(), 1);
+    //setenv("PYTHONPATH", phome.c_str(), 1);
     std::cout << "          PYTHONHOME: " << phome << std::endl;
 #endif
 
