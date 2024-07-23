@@ -326,9 +326,9 @@ elseif (APPLE)
 	endif ()
 
     if (BUILD_PYTHON)
-	    set (CMAKE_INSTALL_RPATH "@loader_path")
-	elseif ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
-	    set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Resources")
+        set (CMAKE_INSTALL_RPATH "@loader_path")
+    elseif ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+        set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Resources")
     else()
         set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
     endif ()
@@ -479,12 +479,12 @@ if (APPLE)
             endif()
 		    install (
 		    	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
-		    	DESTINATION ${INSTALL_LIB_DIR}
+		    	DESTINATION ${PYTHON_DESTINATION}
 		    	COMPONENT Dependencies
 		    	)
 		    install (
 		    	FILES ${Python_LIBRARIES}
-		    	DESTINATION ${INSTALL_LIB_DIR}
+		    	DESTINATION ${PYTHON_DESTINATION}
 		    	COMPONENT Dependencies
 		    	)
             file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)
