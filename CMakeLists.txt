@@ -5,7 +5,7 @@
 # libnetcdf-dev,  libudunits2-dev,  libproj-dev
 
 cmake_minimum_required (VERSION 3.17)
-project (codesigningVAPOR3)
+project (VAPOR3)
 
 include (buildutils/UtilityFunctions.cmake)
 include (buildutils/GetGitRevisionDescription.cmake)
@@ -164,11 +164,12 @@ else()
 
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR})
-    #list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
-    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/h5/lib)
 
     if (APPLE)
         set(CMAKE_MODULE_PATH /opt/local/lib/libomp)
+        list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/h5/lib)
+    else()
+        list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
     endif()
 endif()
 
@@ -215,18 +216,19 @@ function(FIND_BUNDLED_PYTHON)
     set(Python_VERSION "${PYTHONVERSION}")
     set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
     unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
-    #find_library(
-    #    Python_LIBRARIES
-	#NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-	#PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
-    #    NO_DEFAULT_PATH
-    #)
+    if (APPLE)
+        set(PYTHON_LIB_DIR "${PYTHONDIR}/lib")
+    else()
+        set(PYTHON_LIB_DIR "${PYTHONPATH}")
+    endif()
     find_library(
         Python_LIBRARIES
 	    NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-	    PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}/..
+	    #PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONDIR}/lib
+	    PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHON_LIB_DIR}
         NO_DEFAULT_PATH
     )
+
     if (WIN32)
         set(Python_SITELIB "${PYTHONPATH}/Lib/site-packages")
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")

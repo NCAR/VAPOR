@@ -5,7 +5,6 @@
 #include <vapor/CFuncs.h>
 #include <vapor/FileUtils.h>
 #include <vapor/ResourcePath.h>
-#include <vapor/CMakeConfig.h>
 
 using namespace Wasp;
 
@@ -49,10 +48,7 @@ int main(int argc, char **argv)
 
 #ifndef WIN32
     std::string phome = GetPythonDir();
-    std::cout << "          PYTHONHOME: " << phome << std::endl;
     setenv("PYTHONHOME", phome.c_str(), 1);
-    //setenv("PYTHONPATH", phome.c_str(), 1);
-    std::cout << "          PYTHONHOME: " << phome << std::endl;
 #endif
 
     MyBase::SetErrMsgFilePtr(stderr);
@@ -71,10 +67,6 @@ int main(int argc, char **argv)
         return (1);
     }
 
-    std::cout << "SOURCE_DIR " << string(SOURCE_DIR) << std::endl;
-    std::cout << "PYTHON_DIR " << string(PYTHON_DIR) << std::endl;
-    std::cout << "PYTHON_PATH " << string(PYTHON_PATH) << std::endl;
-    std::cout << "THIRD_PARTY_DIR " << string(THIRD_PARTY_DIR) << std::endl;
     // Use MyPython singleton class to initialize Python interpeter to
     // ensure it only gets initialized once.
     //
@@ -85,8 +77,6 @@ int main(int argc, char **argv)
         return (1);
     }
 
-    std::cout << "PYTHONPATH " << string(Wasp::GetEnvironmentalVariable("PYTHONPATH")) << std::endl;
-    std::cout << "PYTHONHOME " << string(Wasp::GetEnvironmentalVariable("PYTHONHOME")) << std::endl;
 
     cout << endl << "System search path: ";
     std::string printSysPath = "try:\n"

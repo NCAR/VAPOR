@@ -1,4 +1,3 @@
-#include <iostream>
 #include <climits>
 #include <vapor/ResourcePath.h>
 #include <vapor/CMakeConfig.h>
@@ -86,15 +85,10 @@ std::string Wasp::GetResourcePath(const std::string &name)
 #if FORCE_USE_DEV_LIBS
     TRY_PATH(FileUtils::JoinPaths({SOURCE_DIR, name}));
 #else
-    std::cout << "GetResourcePathFromCallback(name): " << name << std::endl;
     TRY_PATH(GetResourcePathFromCallback(name));
-    std::cout << "JoinPaths({GetInstalledResourceRoot(), name}): " << GetInstalledResourceRoot() << " " << name << std::endl;
     TRY_PATH(FileUtils::JoinPaths({GetInstalledResourceRoot(), name}));
-    std::cout << "JoinPaths({SOURCE_DIR, name}): " << SOURCE_DIR << " " << name << std::endl;
     TRY_PATH(FileUtils::JoinPaths({SOURCE_DIR, name}));
-    std::cout << "JoinPaths({THIRD_PARTY_DIR, name}): " << THIRD_PARTY_DIR << " " << name << std::endl;
     TRY_PATH(FileUtils::JoinPaths({THIRD_PARTY_DIR, name}));
-    std::cout << "CallGetAppPathForResourceName(name): " << name << std::endl;
     TRY_PATH(CallGetAppPathForResourceName(name));
 #endif
 
@@ -103,10 +97,12 @@ std::string Wasp::GetResourcePath(const std::string &name)
 
 std::string Wasp::GetSharePath(const std::string &name) { return GetResourcePath("share/" + name); }
 
-#ifdef WIN32
+#if defined(WIN32)
     #define PYTHON_INSTALLED_PATH ("python" + string(PYTHON_VERSION))
-#else
+#elif defined(__APPLE__)
     #define PYTHON_INSTALLED_PATH ("Resources/python")
+#else
+    #define PYTHON_INSTALLED_PATH ("lib/python" + string(PYTHON_VERSION))
 #endif
 
 std::string Wasp::GetPythonVersion() { return std::string(PYTHON_VERSION); }
