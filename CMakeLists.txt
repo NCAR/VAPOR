@@ -164,12 +164,14 @@ else()
 
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR})
-
-    if (APPLE)
-        set(CMAKE_MODULE_PATH /opt/local/lib/libomp)
+    if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
         list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/h5/lib)
     else()
         list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
+    endif()
+
+    if (APPLE)
+        set(CMAKE_MODULE_PATH /opt/local/lib/libomp)
     endif()
 endif()
 
@@ -216,7 +218,7 @@ function(FIND_BUNDLED_PYTHON)
     set(Python_VERSION "${PYTHONVERSION}")
     set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
     unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
-    if (APPLE)
+    if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
         set(PYTHON_LIB_DIR "${PYTHONDIR}/lib")
     else()
         set(PYTHON_LIB_DIR "${PYTHONPATH}")
@@ -234,7 +236,7 @@ function(FIND_BUNDLED_PYTHON)
     else()
         set(Python_SITELIB "${PYTHONPATH}/site-packages")
         if (NOT DEFINED Python_INCLUDE_DIRS)
-            if (APPLE)
+            if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
                 set(Python_INCLUDE_DIRS "${PYTHONDIR}/include/python${PYTHONVERSION}")
             else()
                 set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
@@ -325,8 +327,10 @@ elseif (APPLE)
 
     if (BUILD_PYTHON)
 	    set (CMAKE_INSTALL_RPATH "@loader_path")
-	else ()
+	elseif ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
 	    set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Resources")
+    else()
+        set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
     endif ()
 
     if (DIST_INSTALLER AND USE_OMP)
@@ -468,14 +472,19 @@ if (APPLE)
 
         if (NOT BUILD_PYTHON)
             file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONDIR})
+            if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+                set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}/../Resources")
+            else()
+                set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}")
+            endif()
 		    install (
 		    	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
-		    	DESTINATION ${INSTALL_LIB_DIR}/../Resources
+		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
 		    	)
 		    install (
 		    	FILES ${Python_LIBRARIES}
-		    	DESTINATION ${INSTALL_LIB_DIR}/../Resources
+		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
 		    	)
             file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)
