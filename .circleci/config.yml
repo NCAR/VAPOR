@@ -7,7 +7,7 @@ anchors:
   - &suseLibID        "1pvdYktXqFM5_8kNd8lG1TT5-rI8Mspyf"
   - &u20libAWS        "2019-Aug-Win64.zip"
   - &macx86libAWS     "2023-Jun-macOSx86.tar.xz"
-  - &macArm64libAWS   "2023-Sept-M1.tar.xz"
+  - &macAppleSilicon  "2024-Jul-AppleSilicon.tar.xz"
   - &u20libAWS        "2023-Sept-Ubuntu20.tar.xz"
 
 version: 2.1
@@ -128,24 +128,44 @@ commands:
       - store_artifacts:
           path: ~/project/test_apps/smokeTests/testResults
 
-  suse_prerequisites:
+  get_macos_dependencies:
     steps:
       - run:
-          name: Acquire suse prerequisites
+          name: permit cache restore
+          command: sudo chmod -R 777 /opt
+      - restore_cache:
+          name: restore dependencies
+          keys:
+            - macos-deps4
+      - run:
+          name: Get dependencies
           command: |
-            zypper install -y -t pattern devel_C_C++
-            zypper install -y \
-                gzip \
-                xz \
-                git \
-                gcc7-fortran \
-                cmake \
-                curl \
-                libomp-devel \
-                libicu-devel \
-                freeglut-devel \
-                python3-pip
             pip install gdown
+
+            # MacPorts
+            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
+            tar xf MacPorts-2.8.1.tar.bz2
+            cd MacPorts-2.8.1/
+            ./configure
+            make -j6
+            sudo make install
+
+            sudo /opt/local/bin/port -v selfupdate
+
+            # CMake
+            (sudo yes || true) | sudo /opt/local/bin/port install cmake
+            
+            # clang
+            # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
+            # Therefore, skip selfupdate until we know we want a newer version of clang
+            #(sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
+            sudo /opt/local/bin/port select --set clang mp-clang-17
+            /opt/local/bin/clang++ -v > clangVersion.txt
+          no_output_timeout: 45m
+      - save_cache:
+          key: macos-deps4
+          paths:
+            - /opt/local
 
 jobs:
   build_win10_installer:
@@ -194,6 +214,46 @@ jobs:
           root: C:\Users\circleci\project\tmp\workspace
           paths:
             - installers
+
+  build_macOSx86_installer:
+    macos:
+      xcode: "14.3.1"
+    resource_class: macos.m1.large.gen1
+    steps:
+      - checkout
+      - get_libraries:
+          fileName: 2023-Jun-macOSx86.tar.xz
+          driveID: *macOSx86LibID
+          sudo: sudo
+      - get_macos_dependencies
+      - build_vapor:
+          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
+          compileArgs: |
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+          moveToCommand: ${f/Darwin/Darwinx86}
+
+  build_appleSilicon_installer:
+    macos:
+      xcode: "14.3.1"
+    resource_class: macos.m1.large.gen1
+    steps:
+      - checkout
+      - get_libraries:
+          fileName: 2024-Jul-AppleSilicon.tar.xz
+          driveID: *macAppleSilicon
+          sudo: sudo
+      - get_macos_dependencies
+      - build_vapor:
+          beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          compileArgs: |
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DBUILD_OSP=OFF \
+          moveToCommand: ${f/Darwin/DarwinM1}
 
   build_macOS_installers:
     macos:
@@ -244,23 +304,23 @@ jobs:
           paths:
             - /opt/local
 
-      #- get_libraries:
-      #    fileName: 2023-Sept-M1.tar.xz
-      #    driveID: *macOSM1LibID
-      #    sudo: sudo
+      - get_libraries:
+          fileName: 2023-Sept-M1.tar.xz
+          driveID: *macOSM1LibID
+          sudo: sudo
 
-      #- build_vapor:
-      #    beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
-      #    compileArgs: |
-      #      -DCPACK_BINARY_DRAGNDROP=ON \
-      #      -DCMAKE_CXX_COMPILER=clang++ \
-      #      -DCMAKE_C_COMPILER=clang \
-      #      -DBUILD_OSP=OFF \
-      #    moveToCommand: ${f/Darwin/DarwinM1}
+      - build_vapor:
+          beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          compileArgs: |
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+            -DBUILD_OSP=OFF \
+          moveToCommand: ${f/Darwin/DarwinM1}
 
-      #- run:
-      #    name: remove old libraries
-      #    command: sudo rm -rf /usr/local/VAPOR-Deps
+      - run:
+          name: remove old libraries
+          command: sudo rm -rf /usr/local/VAPOR-Deps
 
       - get_libraries:
           fileName: 2023-Jun-macOSx86.tar.xz
@@ -914,9 +974,11 @@ workflows:
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
       #- build_python_api_osx
-      - build_win10_installer
-      - build_macOS_installers
-      - build_linux_installer
+      #- build_win10_installer
+      #- build_macOS_installers
+      - build_appleSilicon_installer
+      - build_macOSx86_installer
+      #- build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
       #- build_macOSx86_libs
