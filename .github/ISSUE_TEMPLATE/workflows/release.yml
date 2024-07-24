@@ -5,7 +5,7 @@ on:
     types: [published]
   push:
     branches:
-        - Actions
+      - Actions
 
 jobs:
   trigger-doc-update:
