@@ -474,10 +474,11 @@ if (APPLE)
         endif ()
 
         if (NOT BUILD_PYTHON)
-            file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONDIR})
             if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+                file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONDIR})
                 set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}/../Resources")
             else()
+                file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
                 set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}")
             endif()
 		    install (
