@@ -12,7 +12,11 @@ using namespace VOSP;
 #ifdef BUILD_OSPRAY
 static int _initialized = false;
 
+#if defined(__aarch64__)
+void ospErrorCallback(void* userData, OSPError error, const char *msg)
+#else
 void ospErrorCallback(OSPError error, const char *msg)
+#endif
 {
     fprintf(stderr, "OSP error ");
     switch (error) {
