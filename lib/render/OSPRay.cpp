@@ -45,7 +45,7 @@ int VOSP::Initialize(int *argc, char **argv)
     #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     // If this is not set, OSPRay will crash upon shutdown
 #if defined(__aarch64__)
-    //ospDeviceSetErrorFunc(ospGetCurrentDevice(), ospErrorCallback);
+    ospDeviceSetErrorCallback(ospGetCurrentDevice(), ospErrorCallback, nullptr);
 #else
     ospDeviceSetErrorFunc(ospGetCurrentDevice(), ospErrorCallback);
 #endif
