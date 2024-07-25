@@ -250,8 +250,7 @@ jobs:
           compileArgs: |
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_COMPILER=clang \
-            -DBUILD_OSP=OFF \
+            -DCMAKE_C_COMPILER=clang
           moveToCommand: ${f/Darwin/AppleSilicon}
 
   clang-tidy:

@@ -1,4 +1,4 @@
-from .session import *
+from ..session import *
 import matplotlib.pyplot as plt
 import numpy as np
 import functools
