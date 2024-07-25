@@ -788,6 +788,7 @@ jobs:
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
+            -DBUILD_OSP=OFF \
           moveToCommand: ${f/Darwin/AppleSilicon}
 
       - store_artifacts:
