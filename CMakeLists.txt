@@ -164,7 +164,11 @@ else()
 
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR})
-    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
+    if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+        list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/h5/lib)
+    else()
+        list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
+    endif()
 
     if (APPLE)
         set(CMAKE_MODULE_PATH /opt/local/lib/libomp)
@@ -210,23 +214,33 @@ message("Library EXPAT = ${EXPAT}")
 function(FIND_BUNDLED_PYTHON)
     # FindPython supports Python_ROOT_DIR however vapor's bundled python distribution
     # does not conform to its requirements so this manually configures the results
-    message("Using bundled python")
+    message("Using bundled python ${PYTHONDIR} ${PYTHONPATH}")
     set(Python_VERSION "${PYTHONVERSION}")
     set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
     unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
+    if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+        set(PYTHON_LIB_DIR "${PYTHONDIR}/lib")
+    else()
+        set(PYTHON_LIB_DIR "${PYTHONPATH}")
+    endif()
     find_library(
         Python_LIBRARIES
-	NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-	PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHONPATH}
+        NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
+        PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHON_LIB_DIR}
         NO_DEFAULT_PATH
     )
+
     if (WIN32)
         set(Python_SITELIB "${PYTHONPATH}/Lib/site-packages")
     	set(Python_INCLUDE_DIRS "${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include")
     else()
         set(Python_SITELIB "${PYTHONPATH}/site-packages")
         if (NOT DEFINED Python_INCLUDE_DIRS)
-            set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
+            if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+                set(Python_INCLUDE_DIRS "${PYTHONDIR}/include/python${PYTHONVERSION}")
+            else()
+                set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
+            endif()
         endif()
     endif()
 
@@ -301,9 +315,12 @@ elseif (APPLE)
 		set (CMAKE_INSTALL_PREFIX /Applications)
 		set (INSTALL_BIN_DIR ./vapor.app/Contents/MacOS)
 		set (INSTALL_SHARE_DIR ./vapor.app/Contents/share)
-		#set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
-		set (INSTALL_LIB_DIR ./vapor.app/Contents/Frameworks)
 		set (INSTALL_INCLUDE_DIR ./vapor.app/Contents/include/vapor)
+        if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+		    set (INSTALL_LIB_DIR ./vapor.app/Contents/Frameworks)
+        else ()
+            set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
+        endif()
 	else ()
 		set (INSTALL_BIN_DIR bin)
 		set (INSTALL_LIB_DIR lib)
@@ -312,10 +329,11 @@ elseif (APPLE)
 	endif ()
 
     if (BUILD_PYTHON)
-	    set (CMAKE_INSTALL_RPATH "@loader_path")
-	else ()
-	    #set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
-	    set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
+        set (CMAKE_INSTALL_RPATH "@loader_path")
+    elseif ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+        set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Resources")
+    else()
+        set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
     endif ()
 
     if (DIST_INSTALLER AND USE_OMP)
@@ -428,18 +446,11 @@ if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
-		#file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework)
-        file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
-		#install (
-		#	DIRECTORY ${INSTALL_FRAMEWORKS}
-		#	DESTINATION ${INSTALL_LIB_DIR}
-		#	COMPONENT Dependencies
-		#	)
 
         set (FRAMEWORKS Core OpenGL Widgets Gui DBus Network PrintSupport)
         foreach(item IN LISTS FRAMEWORKS)
@@ -463,9 +474,22 @@ if (APPLE)
         endif ()
 
         if (NOT BUILD_PYTHON)
+            if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+                file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONDIR})
+                set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}/../Resources")
+            else()
+                file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
+                set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}")
+            endif()
 		    install (
-		    	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
-		    	DESTINATION ${INSTALL_LIB_DIR}
+                DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
+                DESTINATION ${PYTHON_DESTINATION}
+                COMPONENT Dependencies
+                PATTERN "bin" EXCLUDE
+		    	)
+		    install (
+		    	FILES ${Python_LIBRARIES}
+		    	DESTINATION ${PYTHON_DESTINATION}
 		    	COMPONENT Dependencies
 		    	)
             file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)

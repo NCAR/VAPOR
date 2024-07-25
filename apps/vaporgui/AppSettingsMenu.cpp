@@ -11,6 +11,8 @@
 #include "ErrorReporter.h"
 #include "CheckForUpdate.h"
 #include <QLabel>
+#include <unistd.h>
+#include "vapor/STLUtils.h"
 
 class PUpdateChecker : public PWidget {
     VGroup *     _group;
@@ -94,6 +96,7 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
         if (omp_get_thread_num() == 0) nthreads = omp_get_num_threads();
     }
 
+    PSection *startupSettings;
     _settings = new PGroup({
         new PSection("Automatic Session Recovery",
                      {
@@ -104,18 +107,17 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
                              ->EnableBasedOnParam(SettingsParams::_sessionAutoSaveEnabledTag),
                      }),
 
-        new PSection("Vapor's Startup Settings",
+        startupSettings = new PSection("Vapor's Startup Settings",
                      {
-                         new PCheckboxHLI<SettingsParams>("Check for and show notices on startup", &SettingsParams::GetAutoCheckForNotices, &SettingsParams::SetAutoCheckForNotices),
+                         new PLabel("*Vapor must be restarted for these settings to take effect"),
                          new PCheckboxHLI<SettingsParams>("Automatically stretch domain", &SettingsParams::GetAutoStretchEnabled, &SettingsParams::SetAutoStretchEnabled),
                          new PCheckbox(SettingsParams::UseAllCoresTag, "Use all (" + std::to_string(nthreads) + ") available cores for multithreaded tasks"),
                          new PSubGroup({(new PIntegerInputHLI<SettingsParams>("Limit threads to", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads))
                                             ->SetRange(1, 1024)
                                             ->EnableBasedOnParam(SettingsParams::UseAllCoresTag, false)}),
                          new PIntegerInputHLI<SettingsParams>("Cache size (Megabytes)", &SettingsParams::GetCacheMB, &SettingsParams::SetCacheMB),
-                         new PLabel("*Vapor must be restarted for these settings to take effect"),
+                         new PCheckboxHLI<SettingsParams>("Check for and show notices on startup", &SettingsParams::GetAutoCheckForNotices, &SettingsParams::SetAutoCheckForNotices),
                      }),
-
         new PSection("Default Search Paths", {new PDirectorySelectorHLI<SettingsParams>("Session file path", &SettingsParams::GetSessionDir, &SettingsParams::SetSessionDir),
                                               new PDirectorySelectorHLI<SettingsParams>("Data set path", &SettingsParams::GetMetadataDir, &SettingsParams::SetMetadataDir)}),
 
@@ -129,6 +131,11 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
         new PButton("Restore defaults", [](VAPoR::ParamsBase *p) { dynamic_cast<SettingsParams *>(p)->Init(); }),
     });
 
+    char hostname[1024];
+    hostname[1023] = '\0';
+    gethostname(hostname, 1023);
+    if (STLUtils::BeginsWith(hostname, "casper"))
+        startupSettings->Add(new PCheckboxHLI<SettingsParams>("Check for VGL on Casper", &SettingsParams::GetCasperCheckForVGL, &SettingsParams::SetCasperCheckForVGL));
 
     setLayout(new QVBoxLayout);
     layout()->addWidget(_settings);

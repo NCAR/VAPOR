@@ -10,26 +10,31 @@
 
 set -e
 
-while getopts o:b:i flag
-do
+while getopts "o:b:" flag; do
     case "${flag}" in
-        b) srcDir=${OPTARG};;
-        i) installDir=${OPTARG};;
         o) OS=${OPTARG};;
+        b) baseDir=${OPTARG};;
     esac
 done
 
-#OS="CentOS"
-baseDir='/usr/local/VAPOR-Deps'
+if [ -z "$OS" ]; then
+    echo "Error: -o flag is required to specify the target operating system [suse, maxOSx86, M1, CentOS, Ubuntu]"
+    exit 1
+fi
+
+if [ -z "$baseDir" ]; then
+    echo "No -b (base directory) option given.  Defaulting to /usr/local/VAPOR-Deps"
+    baseDir='/usr/local/VAPOR-Deps'
+fi
+#baseDir='/glade/campaign/cisl/vast/vapor/third-party'
+
 if [ "$OS" != "suse" ]; then
     srcDir="$baseDir/2023-Jun-src"
     archiveName="2023-Jun"
 else
     srcDir="$baseDir/2023-Sept-src"
-    archiveName="2023-Sept"
+    archiveName="2024-Apr"
 fi
-echo srcDir $srcDir
-echo OS ${OS}
 
 installDir="$baseDir/current"
 getMacOSMinVersion() {
@@ -39,6 +44,12 @@ getMacOSMinVersion() {
         echo "12.0.0"
     fi
 }
+
+echo OS ${OS}
+echo baseDir $baseDir
+echo srcDir $srcDir
+echo installDir $installDir
+
 macOSMinVersion=$(getMacOSMinVersion)
 
 shopt -s expand_aliases
@@ -597,6 +608,7 @@ pythonVapor() {
     #LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/lib -I$(brew --prefix openssl)/lib" \
     #CPPFLAGS="-I$installDir/include -I$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
     if [ "$OS" = "macOSx86" ] || [ "$OS" = "M1" ]; then
+        args+=(--libdir=$installDir/Resources)
         args+=(--with-openssl=$(brew --prefix openssl@1.1))
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
         args+=(--with-tcltk-includes="$(pkg-config --cflags tcl tk)")
@@ -757,36 +769,34 @@ elif [ "$OS" == "suse" ]; then
     susePrerequisites
 fi
 
-openssl
-libpng
-jpeg
-tiff
-sqlite
-ssh
-curl
-proj
-geotiff
-
-#    openssl
-#fi
-zlib
+#openssl
+#libpng
+#jpeg
+#tiff
+#sqlite
+#ssh
+#curl
+#proj
+#geotiff
+##fi
+#zlib
 pythonVapor
-assimp
-szip
-hdf5
-netcdf
-expat
-udunits
-freetype
-if [ "$OS" == "Ubuntu" ] ; then
-   xinerama
-fi         
-ospray
-glm
-gte
-images
-qt
+#assimp
+#szip
+#hdf5
+#netcdf
+#expat
+#udunits
+#freetype
+#if [ "$OS" == "Ubuntu" ] ; then
+#   xinerama
+#fi         
+#ospray
+#glm
+#gte
+#images
+#qt
 if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
     add_rpath
 fi         
-renameAndCompress
+#renameAndCompress
