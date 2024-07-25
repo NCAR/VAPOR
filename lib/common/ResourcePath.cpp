@@ -126,7 +126,7 @@ std::string Wasp::GetPythonDir()
         path = GetResourcePath("");
         string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
         if (!exists.empty()) {
-#ifdef defined(__aarch64__)
+#if defined(__aarch64__)
             path = exists; // If the third-party-library directory doesn't exist, use the python installed path.  Otherwise, use the root.
 #endif
         }

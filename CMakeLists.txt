@@ -225,8 +225,8 @@ function(FIND_BUNDLED_PYTHON)
     endif()
     find_library(
         Python_LIBRARIES
-	    NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
-	    PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHON_LIB_DIR}
+        NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
+        PATHS ${THIRD_PARTY_LIB_DIR} ${PYTHON_LIB_DIR}
         NO_DEFAULT_PATH
     )
 
@@ -482,9 +482,9 @@ if (APPLE)
                 set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}")
             endif()
 		    install (
-		    	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
-		    	DESTINATION ${PYTHON_DESTINATION}
-		    	COMPONENT Dependencies
+                DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
+                DESTINATION ${PYTHON_DESTINATION}
+                COMPONENT Dependencies
                 PATTERN "bin" EXCLUDE
 		    	)
 		    install (
