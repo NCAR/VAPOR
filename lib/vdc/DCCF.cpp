@@ -63,22 +63,17 @@ DCCF::~DCCF()
 
 int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
-    return initialize(paths, options, new NetCDFCFCollection());
+    auto ncdf = std::unique_ptr<NetCDFCFCollection>(new NetCDFCFCollection());
+    return initialize_impl(paths, options, std::move(ncdf));
 }
 
-int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options, NetCDFCFCollection *ncdfc)
+int DCCF::initialize_impl(const vector<string> &paths, const std::vector<string> &options,
+                          std::unique_ptr<NetCDFCFCollection> ncdfc)
 {
-    if (_ncdfc) {
-      delete _ncdfc;
-      _ncdfc = nullptr;
-    }
-    _paths = paths;
-    
     // Initialize the NetCDFCFCollection class.
     //
     int rc = ncdfc->Initialize(paths);
     if (rc < 0) {
-        delete ncdfc;
         SetErrMsg("Failed to initialize netCDF data collection for reading");
         return (-1);
     }
@@ -87,7 +82,6 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
     //
     rc = _udunits.Initialize();
     if (rc < 0) {
-        delete ncdfc;
         SetErrMsg("Failed to initialize udunits2 library : %s", _udunits.GetErrMsg().c_str());
         return (-1);
     }
@@ -101,14 +95,17 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
     if (vars2d.empty()) {
       auto vars3d = ncdfc->GetDataVariableNames(3, true);
       if (vars3d.empty()) {
-        delete ncdfc;
         SetErrMsg("Failed to detect any 2D or 3D variables.\n"
                   "Did you forget any coordinate files?\n");
         return (-1);
       }
     }
 
-    _ncdfc = ncdfc;
+    if (_ncdfc) {
+      delete _ncdfc;
+    }
+    _ncdfc = ncdfc.release();
+    _paths = paths;
 
     return BuildCache();
 }
