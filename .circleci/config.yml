@@ -68,7 +68,8 @@ commands:
       - run:
           name: build vapor
           command: |
-            ln -s <<parameters.libDir>>/<<parameters.libName>> <<parameters.libDir>>/current
+            libraryDir=`ls <<parameters.libDir>>`
+            ln -s $libraryDir <<parameters.libDir>>/current
             cp site_files/site.NCAR site.local
             mkdir -p build
             cd build
