@@ -251,7 +251,7 @@ jobs:
           compileArgs: |
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_COMPILER=clang
+            -DCMAKE_C_COMPILER=clang \
           moveToCommand: ${f/Darwin/AppleSilicon}
 
   clang-tidy:
@@ -828,7 +828,7 @@ workflows:
       #- build_python_api_osx
       #- build_win10_installer
       #- build_macOS_installers
-      - build_appleSilicon_installer
+      #- build_appleSilicon_installer
       - build_macOSx86_installer
       #- build_linux_installer
       #- build_suse_installer
