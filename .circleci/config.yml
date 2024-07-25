@@ -726,12 +726,6 @@ jobs:
       xcode: "13.4.1"
     steps:
       - checkout
-      #- run:
-      #    name: get main
-      #    command: |
-      #      git checkout main
-      #      git pull --no-commit && git commit --allow-empty -m "Merge"
-      #      git reset --hard origin/main
       - *attach_workspace
       - run:
           name: publish release
@@ -999,14 +993,18 @@ workflows:
                  only: main
       jobs:
         - build_linux_installer
-        - build_macOS_installers
+        - build_appleSilicon_installer
+        - build_macOSx86_installer
         - build_win10_installer
+        #- build_macOS_installers
         #- build_python_api_ubuntu
         #- build_python_api_osx
         - release_weekly_installers:
             requires:
               - build_linux_installer
-              - build_macOS_installers
+              - build_appleSilicon_installer
+              - build_macOSx86_installer
               - build_win10_installer
+              #- build_macOS_installers
               #- build_python_api_ubuntu
               #- build_python_api_osx

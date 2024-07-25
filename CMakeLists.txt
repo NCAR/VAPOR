@@ -485,6 +485,7 @@ if (APPLE)
 		    	DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
 		    	DESTINATION ${PYTHON_DESTINATION}
 		    	COMPONENT Dependencies
+                PATTERN "bin" EXCLUDE
 		    	)
 		    install (
 		    	FILES ${Python_LIBRARIES}
