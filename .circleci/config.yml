@@ -26,8 +26,6 @@ commands:
         default: true
       fileName:
         type: string
-      driveID:
-        type: string
       sudo:
         type: string
         default: ""
@@ -542,7 +540,6 @@ jobs:
             - ubuntu-libs-mar2023
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
-          driveID: *u20libAWS
       - save_cache:
           key: ubuntu-libs-mar2023
           paths:
@@ -672,7 +669,7 @@ jobs:
 
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
-          driveID: *srcLibID
+          #driveID: *srcLibID
 
       - run:
           name: build libraries
@@ -720,7 +717,7 @@ jobs:
 
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
-          driveID: *srcLibID
+          #driveID: *srcLibID
           sudo: sudo
 
       - run:
@@ -756,7 +753,7 @@ jobs:
 
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
-          driveID: *srcLibID
+          #driveID: *srcLibID
           sudo: sudo
 
       - run:
