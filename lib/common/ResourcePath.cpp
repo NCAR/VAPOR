@@ -97,8 +97,10 @@ std::string Wasp::GetResourcePath(const std::string &name)
 
 std::string Wasp::GetSharePath(const std::string &name) { return GetResourcePath("share/" + name); }
 
-#ifdef WIN32
+#if defined(WIN32)
     #define PYTHON_INSTALLED_PATH ("python" + string(PYTHON_VERSION))
+#elif defined(__aarch64__)
+    #define PYTHON_INSTALLED_PATH ("Resources/python")
 #else
     #define PYTHON_INSTALLED_PATH ("lib/python" + string(PYTHON_VERSION))
 #endif
@@ -119,12 +121,16 @@ std::string Wasp::GetPythonDir()
 #ifdef WIN32
     return GetPythonPath();
 #endif
-
-    string path = GetResourcePath("");
-
-    string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
-
-    if (!FileUtils::Exists(FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH}))) path = string(PYTHON_DIR);
+    string path = string(PYTHON_DIR);  // Try our third-party-library directory first
+    if (!FileUtils::Exists(path)) {
+        path = GetResourcePath("");
+        string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
+        if (!exists.empty()) {
+#if defined(__aarch64__)
+            path = exists; // If the third-party-library directory doesn't exist, use the python installed path.  Otherwise, use the root.
+#endif
+        }
+    }
     return path;
 }
 

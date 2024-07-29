@@ -1,15 +1,10 @@
 anchors:
   - &current3rdParty  "2023-Jun"
   - &srcLibID         "1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a"
-  - &ubuntu20LibID    "12z0l6Nl2OzJZArrXHOc2Zb4Vj3e0v7V5"
-  - &macOSx86LibID    "17w6wUS5NIqUz8_s9zV98jeAjM-muWSfn"
-  - &macOSM1LibID     "14610-_oYbF_qbiO3WoOu0FQhNNvzX6p7"
-  - &suseLibID        "1pvdYktXqFM5_8kNd8lG1TT5-rI8Mspyf"
   - &u20libAWS        "2019-Aug-Win64.zip"
   - &macx86libAWS     "2023-Jun-macOSx86.tar.xz"
-  - &macArm64libAWS   "2023-Sept-M1.tar.xz"
+  - &macAppleSilicon  "2024-Jul-AppleSilicon.tar.xz"
   - &u20libAWS        "2023-Sept-Ubuntu20.tar.xz"
-  - &srcLibAWS        "2023-Sept-src.tar.xz"
 
 version: 2.1
 
@@ -31,8 +26,6 @@ commands:
         default: true
       fileName:
         type: string
-      driveID:
-        type: string
       sudo:
         type: string
         default: ""
@@ -48,12 +41,7 @@ commands:
                 <<parameters.sudo>> mkdir -p <<parameters.dir>>
                 <<parameters.sudo>> chmod -R 777 <<parameters.dir>>
                 <<parameters.sudo>> chown -R `whoami` <<parameters.dir>>
-                if <<parameters.useAWS>> ; then
-                  wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/<<parameters.fileName>>
-                else
-                  id=<<parameters.driveID>>
-                  gdown https://drive.google.com/uc?id=${id}
-                fi
+                wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/<<parameters.fileName>>
                 tar -xf <<parameters.fileName>> -C <<parameters.dir>>
               fi
 
@@ -80,7 +68,8 @@ commands:
       - run:
           name: build vapor
           command: |
-            ln -s <<parameters.libDir>>/<<parameters.libName>> <<parameters.libDir>>/current
+            libraryDir=`ls <<parameters.libDir>>`
+            ln -s $libraryDir <<parameters.libDir>>/current
             cp site_files/site.NCAR site.local
             mkdir -p build
             cd build
@@ -138,24 +127,44 @@ commands:
       - store_artifacts:
           path: ~/project/test_apps/smokeTests/testResults
 
-  suse_prerequisites:
+  get_macos_dependencies:
     steps:
       - run:
-          name: Acquire suse prerequisites
+          name: permit cache restore
+          command: sudo chmod -R 777 /opt
+      - restore_cache:
+          name: restore dependencies
+          keys:
+            - macos-deps4
+      - run:
+          name: Get dependencies
           command: |
-            zypper install -y -t pattern devel_C_C++
-            zypper install -y \
-                gzip \
-                xz \
-                git \
-                gcc7-fortran \
-                cmake \
-                curl \
-                libomp-devel \
-                libicu-devel \
-                freeglut-devel \
-                python3-pip
             pip install gdown
+
+            # MacPorts
+            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
+            tar xf MacPorts-2.8.1.tar.bz2
+            cd MacPorts-2.8.1/
+            ./configure
+            make -j6
+            sudo make install
+
+            sudo /opt/local/bin/port -v selfupdate
+
+            # CMake
+            (sudo yes || true) | sudo /opt/local/bin/port install cmake
+            
+            # clang
+            # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
+            # Therefore, skip selfupdate until we know we want a newer version of clang
+            #(sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
+            sudo /opt/local/bin/port select --set clang mp-clang-17
+            /opt/local/bin/clang++ -v > clangVersion.txt
+          no_output_timeout: 45m
+      - save_cache:
+          key: macos-deps4
+          paths:
+            - /opt/local
 
 jobs:
   build_win10_installer:
@@ -205,78 +214,16 @@ jobs:
           paths:
             - installers
 
-  build_macOS_installers:
+  build_macOSx86_installer:
     macos:
       xcode: "14.3.1"
     resource_class: macos.m1.large.gen1
-
     steps:
       - checkout
-
-      - run:
-          name: permit cache restore
-          command: sudo chmod -R 777 /opt
-
-      - restore_cache:
-          name: restore dependencies
-          keys:
-            - macos-deps4
-
-      - run:
-          name: Get dependencies
-          command: |
-            pip install gdown
-
-            # MacPorts
-            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
-            tar xf MacPorts-2.8.1.tar.bz2
-            cd MacPorts-2.8.1/
-            ./configure
-            make -j6
-            sudo make install
-
-            sudo /opt/local/bin/port -v selfupdate
-
-            # CMake
-            (sudo yes || true) | sudo /opt/local/bin/port install cmake
-            
-            # clang
-            # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
-            # Therefore, skip selfupdate until we know we want a newer version of clang
-            (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
-            sudo /opt/local/bin/port select --set clang mp-clang-17
-            /opt/local/bin/clang++ -v > clangVersion.txt
-
-          no_output_timeout: 45m
-
-      - save_cache:
-          key: macos-deps4
-          paths:
-            - /opt/local
-
-      - get_libraries:
-          fileName: 2023-Sept-M1.tar.xz
-          driveID: *macOSM1LibID
-          sudo: sudo
-
-      - build_vapor:
-          beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
-          compileArgs: |
-            -DCPACK_BINARY_DRAGNDROP=ON \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_COMPILER=clang \
-            -DBUILD_OSP=OFF \
-          moveToCommand: ${f/Darwin/DarwinM1}
-
-      - run:
-          name: remove old libraries
-          command: sudo rm -rf /usr/local/VAPOR-Deps
-
       - get_libraries:
           fileName: 2023-Jun-macOSx86.tar.xz
-          driveID: *macOSx86LibID
           sudo: sudo
-
+      - get_macos_dependencies
       - build_vapor:
           beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
           compileArgs: |
@@ -284,8 +231,25 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
-          libName: 2023-Jun
           moveToCommand: ${f/Darwin/Darwinx86}
+
+  build_appleSilicon_installer:
+    macos:
+      xcode: "14.3.1"
+    resource_class: macos.m1.large.gen1
+    steps:
+      - checkout
+      - get_libraries:
+          fileName: 2024-Jul-AppleSilicon.tar.xz
+          sudo: sudo
+      - get_macos_dependencies
+      - build_vapor:
+          beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          compileArgs: |
+            -DCPACK_BINARY_DRAGNDROP=ON \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_COMPILER=clang \
+          moveToCommand: ${f/Darwin/AppleSilicon}
 
   clang-tidy:
     docker:
@@ -490,24 +454,6 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
 
-  build_suse_installer:
-    docker:
-      - image: opensuse/leap
-    resource_class: large
-    steps:
-      - suse_prerequisites
-      - checkout
-      - get_libraries:
-          fileName: 2023-Sept-SUSE.tar.xz
-          driveID: *suseLibID
-      - build_vapor:
-          moveToCommand: ${f/Linux/SUSE}
-          compileArgs: -DBUILD_TEST_APPS=ON
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
-
   suse_smoke_tests:
     docker:
       - image: opensuse/leap
@@ -595,7 +541,6 @@ jobs:
             - ubuntu-libs-mar2023
       - get_libraries:
           fileName: 2023-Sept-Ubuntu20.tar.xz
-          driveID: *u20libAWS
       - save_cache:
           key: ubuntu-libs-mar2023
           paths:
@@ -677,12 +622,6 @@ jobs:
       xcode: "13.4.1"
     steps:
       - checkout
-      #- run:
-      #    name: get main
-      #    command: |
-      #      git checkout main
-      #      git pull --no-commit && git commit --allow-empty -m "Merge"
-      #      git reset --hard origin/main
       - *attach_workspace
       - run:
           name: publish release
@@ -700,8 +639,8 @@ jobs:
             #os="OSX:       "
             #sha=`shasum -a 256 VAPOR3*Darwin*`
             #osxSha=$os$sha$endl
-            #os="M1:       "
-            #sha=`shasum -a 256 VAPOR3*M1*`
+            #os="AppleSilicon:       "
+            #sha=`shasum -a 256 VAPOR3*AppleSilicon*`
             #osxSha=$os$sha$endl
             #os="Windows:   "
             #sha=`shasum -a 256 VAPOR3*win64*`
@@ -711,52 +650,6 @@ jobs:
             echo $shaMessage > "/tmp/workspace/installers/sha256.txt"
             echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
             ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
-
-  build_suse_libs:
-    docker:
-      - image: opensuse/leap:latest
-
-    resource_class: xlarge
-
-    steps:
-      - checkout
-      - run:
-          name: acquire prerequisites
-          command: |
-            zypper install -y \
-            curl \
-            tar \
-            gzip \
-            xz \
-            zlib-devel \
-            bzip2 \
-            make \
-            which \
-            git \
-            wget
-
-      - get_libraries:
-          fileName: 2023-Sept-src.tar.xz
-          driveID: *srcLibAWS
-          dir: /glade/campaign/cisl/vast/vapor/third-party
-
-      - run:
-          name: build libraries
-          command: |
-            chmod 777 /root/project/scripts/build3rdParty.sh
-            /root/project/scripts/build3rdParty.sh -o suse -b /glade/campaign/cisl/vast/vapor/third-party/
-
-      - build_vapor:
-          moveToCommand: ${f/Linux/SUSE}
-          libDir: /glade/campaign/cisl/vast/vapor/third-party
-          libName: 2024-Apr
-
-      - store_artifacts:
-          path: |
-            /tmp/workspace/installers
-
-      - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Sept-SUSE.tar.xz
 
   build_ubuntu20_libs:
     docker:
@@ -777,7 +670,7 @@ jobs:
 
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
-          driveID: *srcLibID
+          #driveID: *srcLibID
 
       - run:
           name: build libraries
@@ -825,7 +718,7 @@ jobs:
 
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
-          driveID: *srcLibID
+          #driveID: *srcLibID
           sudo: sudo
 
       - run:
@@ -841,7 +734,7 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
             -DMACOS_BUILD_ARM64=OFF \
-          moveToCommand: ${f/Darwin/DarwinM1}
+          moveToCommand: ${f/Darwin/AppleSilicon}
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -849,7 +742,7 @@ jobs:
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/2023-Sept-macOSx86.tar.xz
 
-  build_M1_libs:
+  build_AppleSilicon_libs:
     macos:
       #xcode: "14.2.0"
       xcode: "13.4.1"
@@ -861,7 +754,7 @@ jobs:
 
       - get_libraries:
           fileName: 2023-Sept-src.tar.xz
-          driveID: *srcLibID
+          #driveID: *srcLibID
           sudo: sudo
 
       - run:
@@ -895,7 +788,8 @@ jobs:
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
-          moveToCommand: ${f/Darwin/DarwinM1}
+            -DBUILD_OSP=OFF \
+          moveToCommand: ${f/Darwin/AppleSilicon}
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -931,11 +825,13 @@ workflows:
       #- build_python_api_osx
       #- build_win10_installer
       #- build_macOS_installers
+      #- build_appleSilicon_installer
+      #- build_macOSx86_installer
       - build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
       #- build_macOSx86_libs
-      #- build_M1_libs
+      #- build_AppleSilicon_libs
       #- build_suse_libs
       #- build_windows_libs
       #- release_weekly_installers:
@@ -952,14 +848,18 @@ workflows:
                  only: main
       jobs:
         - build_linux_installer
-        - build_macOS_installers
+        - build_appleSilicon_installer
+        - build_macOSx86_installer
         - build_win10_installer
+        #- build_macOS_installers
         #- build_python_api_ubuntu
         #- build_python_api_osx
         - release_weekly_installers:
             requires:
               - build_linux_installer
-              - build_macOS_installers
+              - build_appleSilicon_installer
+              - build_macOSx86_installer
               - build_win10_installer
+              #- build_macOS_installers
               #- build_python_api_ubuntu
               #- build_python_api_osx
