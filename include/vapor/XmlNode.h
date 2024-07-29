@@ -501,7 +501,8 @@ public:
     // I don't know how to export an operator<< !
     static ostream &streamOut(ostream &os, const XmlNode &node);
 
-    static bool IsValidXMLElement(string s);
+    static bool IsValidXMLElement(const string &s, int *badIdx=nullptr);
+    static string SanitizeXMLTag(string s);
 
 private:
     static vector<long>   _emptyLongVec;    // empty elements
