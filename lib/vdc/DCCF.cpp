@@ -63,14 +63,13 @@ DCCF::~DCCF()
 
 int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options)
 {
-    return initialize(paths, options, new NetCDFCFCollection());
+    auto ncdf = std::unique_ptr<NetCDFCFCollection>(new NetCDFCFCollection());
+    return initialize_impl(paths, options, std::move(ncdf));
 }
 
-int DCCF::initialize(const vector<string> &paths, const std::vector<string> &options, NetCDFCFCollection *ncdfc)
+int DCCF::initialize_impl(const vector<string> &paths, const std::vector<string> &options,
+                          std::unique_ptr<NetCDFCFCollection> ncdfc)
 {
-    if (_ncdfc) delete _ncdfc;
-    _paths = paths;
-    
     // Initialize the NetCDFCFCollection class.
     //
     int rc = ncdfc->Initialize(paths);
@@ -87,7 +86,26 @@ int DCCF::initialize(const vector<string> &paths, const std::vector<string> &opt
         return (-1);
     }
 
-    _ncdfc = ncdfc;
+    //
+    // To provide a more detailed message in the case described by issue 3626:
+    // https://github.com/NCAR/VAPOR/issues/3626
+    // add a test if there's any 2D or 3D variables detected. If not, we raise an error.
+    //
+    auto vars2d = ncdfc->GetDataVariableNames(2, true);
+    if (vars2d.empty()) {
+      auto vars3d = ncdfc->GetDataVariableNames(3, true);
+      if (vars3d.empty()) {
+        SetErrMsg("Failed to detect any 2D or 3D variables.\n"
+                  "Did you forget any coordinate files?\n");
+        return (-1);
+      }
+    }
+
+    if (_ncdfc) {
+      delete _ncdfc;
+    }
+    _ncdfc = ncdfc.release();
+    _paths = paths;
 
     return BuildCache();
 }

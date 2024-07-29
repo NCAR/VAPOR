@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <map>
 #include <iostream>
+#include <memory>
 #include <vapor/MyBase.h>
 #include <vapor/NetCDFCFCollection.h>
 #include <vapor/Proj4API.h>
@@ -58,7 +59,8 @@ protected:
     //! \sa EndDefine();
     //
     virtual int initialize(const vector<string> &paths, const std::vector<string> &options);
-    virtual int initialize(const vector<string> &paths, const std::vector<string> &options, NetCDFCFCollection *ncdfc);
+    virtual int initialize_impl(const vector<string> &paths, const std::vector<string> &options, 
+                                std::unique_ptr<NetCDFCFCollection> ncdfc);
 
     //! \copydoc DC::getDimension()
     //!
