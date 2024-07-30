@@ -11,7 +11,7 @@
 #include "ErrorReporter.h"
 #include "CheckForUpdate.h"
 #include <QLabel>
-#if !defined(OPENSSL_WINDOWS)
+#ifndef _WIN32
 #include <unistd.h>
 #endif
 #include "vapor/STLUtils.h"

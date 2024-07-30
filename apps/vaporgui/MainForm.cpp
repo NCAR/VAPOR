@@ -34,7 +34,7 @@
 #include <iostream>
 #include <functional>
 #include <cmath>
-#if !defined(OPENSSL_WINDOWS)
+#ifndef _WIN32
 #include <unistd.h>
 #endif
 
