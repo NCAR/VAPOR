@@ -49,7 +49,7 @@ commands:
     parameters:
       branch:
         type: string
-        default: main
+        default: codesigning-vapor
       beforeCompile:
         type: string
         default: ""
@@ -823,10 +823,10 @@ workflows:
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
       #- build_python_api_osx
-      - build_win10_installer
+      # - build_win10_installer
       #- build_macOS_installers
       # - build_appleSilicon_installer
-      # - build_macOSx86_installer
+      - build_macOSx86_installer
       # - build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
@@ -845,7 +845,7 @@ workflows:
              cron: "0 16 * * 3" #Time is GMT
              filters:
                branches:
-                 only: main
+                 only: codesigning-vapor
       jobs:
         - build_linux_installer
         - build_appleSilicon_installer
