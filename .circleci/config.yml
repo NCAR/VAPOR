@@ -204,6 +204,10 @@ jobs:
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\project\tmp\workspace\installers
             Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers
+            if (!(Test-Path -Path C:\Users\circleci\project\tmp\workspace\installers\*.exe)) {
+              Write-Error "Build failed: No installers found"
+              exit 1
+            }
           no_output_timeout: 45m
 
       - store_artifacts:
