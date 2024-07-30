@@ -34,7 +34,9 @@
 #include <iostream>
 #include <functional>
 #include <cmath>
+#if !defined(OPENSSL_WINDOWS)
 #include <unistd.h>
+#endif
 
 #include <QDesktopWidget>
 #include <QDockWidget>

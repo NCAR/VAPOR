@@ -11,7 +11,9 @@
 #include "ErrorReporter.h"
 #include "CheckForUpdate.h"
 #include <QLabel>
+#if !defined(OPENSSL_WINDOWS)
 #include <unistd.h>
+#endif
 #include "vapor/STLUtils.h"
 
 class PUpdateChecker : public PWidget {
