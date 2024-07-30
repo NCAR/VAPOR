@@ -34,9 +34,9 @@
 #include <iostream>
 #include <functional>
 #include <cmath>
-#ifndef _WIN32
+
 #include <unistd.h>
-#endif
+
 
 #include <QDesktopWidget>
 #include <QDockWidget>
