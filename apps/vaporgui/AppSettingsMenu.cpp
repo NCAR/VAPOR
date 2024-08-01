@@ -11,7 +11,9 @@
 #include "ErrorReporter.h"
 #include "CheckForUpdate.h"
 #include <QLabel>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include "vapor/STLUtils.h"
 
 class PUpdateChecker : public PWidget {
@@ -131,11 +133,13 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
         new PButton("Restore defaults", [](VAPoR::ParamsBase *p) { dynamic_cast<SettingsParams *>(p)->Init(); }),
     });
 
-    char hostname[1024];
-    hostname[1023] = '\0';
-    gethostname(hostname, 1023);
-    if (STLUtils::BeginsWith(hostname, "casper"))
-        startupSettings->Add(new PCheckboxHLI<SettingsParams>("Check for VGL on Casper", &SettingsParams::GetCasperCheckForVGL, &SettingsParams::SetCasperCheckForVGL));
+    #ifndef _WIN32
+        char hostname[1024];
+        hostname[1023] = '\0';
+        gethostname(hostname, 1023);
+        if (STLUtils::BeginsWith(hostname, "casper"))
+            startupSettings->Add(new PCheckboxHLI<SettingsParams>("Check for VGL on Casper", &SettingsParams::GetCasperCheckForVGL, &SettingsParams::SetCasperCheckForVGL));
+    #endif
 
     setLayout(new QVBoxLayout);
     layout()->addWidget(_settings);
