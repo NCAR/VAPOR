@@ -690,21 +690,14 @@ void MainForm::CheckForCasperVGL()
         args[prepend.size() + qtArgs.size()] = nullptr;
 
 
-        string s = "";
-        for (int i=0; i < prepend.size() + qtArgs.size(); i++)
-            s += string() + args[i] + " ";
+        // string s = "";
+        // for (int i=0; i < prepend.size() + qtArgs.size(); i++)
+        //     s += string() + args[i] + " ";
+        // printf("COMMAND = %s\n", s.c_str());
 
-        printf("COMMAND = %s\n", s.c_str());
-
-        // execvp(args[0], args);
-        // MSG_WARN("Failed to restart vapor using vglrun");
+        execvp(args[0], args);
+        MSG_WARN("Failed to restart vapor using vglrun");
     };
-
-    printf("\n");
-    finish(1000000);
-    printf("\n");
-    printf("exiting test...\n");
-    exit(0);
 
     connect(popup, &QMessageBox::finished, this, finish);
     popup->show();
