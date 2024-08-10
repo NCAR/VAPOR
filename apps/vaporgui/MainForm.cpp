@@ -673,12 +673,18 @@ void MainForm::CheckForCasperVGL()
             return;
 
         auto qtArgs = QApplication::instance()->arguments();
-        auto qtAppPath = QApplication::instance()->applicationFilePath(); // This information is supposed to be in qtArgs but AppImage will overwrite it.
+
+        string appPath; // This information is supposed to be in qtArgs but AppImage will overwrite it.
+        if (getenv("APPIMAGE"))
+            appPath = getenv("APPIMAGE");
+        else
+            appPath = QApplication::instance()->applicationFilePath().toStdString();
+        
         vector<const char*> prepend = {"vglrun"};
         char ** args = new char*[prepend.size() + qtArgs.size() + 1];
         for (int i = 0; i < prepend.size(); i++)
             args[i] = strdup(prepend[i]);
-        args[0+prepend.size()] = strdup(qtAppPath.toStdString().c_str());
+        args[0+prepend.size()] = strdup(appPath.c_str());
         for (int i = 1; i < qtArgs.size(); i++)
             args[i+prepend.size()] = strdup(qtArgs[i].toStdString().c_str());
         args[prepend.size() + qtArgs.size()] = nullptr;
