@@ -673,16 +673,29 @@ void MainForm::CheckForCasperVGL()
             return;
 
         auto qtArgs = QApplication::instance()->arguments();
+
+        string appPath; // This information is supposed to be in qtArgs but AppImage will overwrite it.
+        if (getenv("APPIMAGE"))
+            appPath = getenv("APPIMAGE");
+        else
+            appPath = QApplication::instance()->applicationFilePath().toStdString();
+        
         vector<const char*> prepend = {"vglrun"};
         char ** args = new char*[prepend.size() + qtArgs.size() + 1];
         for (int i = 0; i < prepend.size(); i++)
             args[i] = strdup(prepend[i]);
-        for (int i = 0; i < qtArgs.size(); i++)
+        args[0+prepend.size()] = strdup(appPath.c_str());
+        for (int i = 1; i < qtArgs.size(); i++)
             args[i+prepend.size()] = strdup(qtArgs[i].toStdString().c_str());
         args[prepend.size() + qtArgs.size()] = nullptr;
 
-        execvp(args[0], args);
 
+        // string s = "";
+        // for (int i=0; i < prepend.size() + qtArgs.size(); i++)
+        //     s += string() + args[i] + " ";
+        // printf("COMMAND = %s\n", s.c_str());
+
+        execvp(args[0], args);
         MSG_WARN("Failed to restart vapor using vglrun");
     };
 
