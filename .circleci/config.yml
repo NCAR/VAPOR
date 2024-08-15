@@ -157,7 +157,7 @@ commands:
             # clang
             # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
             # Therefore, skip selfupdate until we know we want a newer version of clang
-             (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
+            #(sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
             sudo /opt/local/bin/port select --set clang mp-clang-17
             /opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 45m
