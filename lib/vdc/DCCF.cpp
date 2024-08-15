@@ -91,15 +91,21 @@ int DCCF::initialize_impl(const vector<string> &paths, const std::vector<string>
     // https://github.com/NCAR/VAPOR/issues/3626
     // add a test if there's any 2D or 3D variables detected. If not, we raise an error.
     //
-    auto vars2d = ncdfc->GetDataVariableNames(2, true);
-    if (vars2d.empty()) {
-      auto vars3d = ncdfc->GetDataVariableNames(3, true);
-      if (vars3d.empty()) {
-        SetErrMsg("Failed to detect any 2D or 3D variables.\n"
-                  "Did you forget any coordinate files?\n");
-        return (-1);
-      }
-    }
+    // Update on 8/15/2024:
+    // It turns out that this error message is also raised with UGRID 2D data sets, when it
+    // shouldn't be raised (see issue 3650). Thus, Sam is commenting out this logic for
+    // release 3.9.3, and will come back to design a more robust method to address both
+    // issues 3626 and 3650.
+    //
+    // auto vars2d = ncdfc->GetDataVariableNames(2, true);
+    // if (vars2d.empty()) {
+    //   auto vars3d = ncdfc->GetDataVariableNames(3, true);
+    //   if (vars3d.empty()) {
+    //     SetErrMsg("Failed to detect any 2D or 3D variables.\n"
+    //               "Did you forget any coordinate files?\n");
+    //     return (-1);
+    //   }
+    // }
 
     if (_ncdfc) {
       delete _ncdfc;
