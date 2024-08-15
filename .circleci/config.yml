@@ -149,7 +149,7 @@ commands:
             make -j6
             sudo make install
 
-            sudo /opt/local/bin/port -v selfupdate
+            #sudo /opt/local/bin/port -v selfupdate
 
             # CMake
             (sudo yes || true) | sudo /opt/local/bin/port install cmake
