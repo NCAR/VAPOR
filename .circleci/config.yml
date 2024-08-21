@@ -149,7 +149,7 @@ commands:
             sudo make install
 
             wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/portClang.tar.xz
-            tar -xf portClang.tar.xz -C /
+            sudo tar -xf portClang.tar.xz -C /
 
             sudo /opt/local/bin/port -v selfupdate
 
@@ -163,10 +163,10 @@ commands:
             sudo /opt/local/bin/port select --set clang mp-clang-17
             /opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 45m
-      - save_cache:
-          key: macos-deps4
-          paths:
-            - /opt/local
+      #- save_cache:
+      #    key: macos-deps4
+      #    paths:
+      #      - /opt/local
 
 jobs:
   build_win10_installer:
