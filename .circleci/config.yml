@@ -1,10 +1,9 @@
 anchors:
-  - &current3rdParty  "2023-Jun"
   - &srcLibID         "1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a"
-  - &u20libAWS        "2019-Aug-Win64.zip"
   - &macx86libAWS     "2023-Jun-macOSx86.tar.xz"
   - &macAppleSilicon  "2024-Jul-AppleSilicon.tar.xz"
   - &u20libAWS        "2023-Sept-Ubuntu20.tar.xz"
+  - &portClangAWS     "portClang.tar.xz"
 
 version: 2.1
 
@@ -132,10 +131,10 @@ commands:
       - run:
           name: permit cache restore
           command: sudo chmod -R 777 /opt
-      - restore_cache:
-          name: restore dependencies
-          keys:
-            - macos-deps4
+      #- restore_cache:
+      #    name: restore dependencies
+      #    keys:
+      #      - macos-deps4
       - run:
           name: Get dependencies
           command: |
@@ -148,6 +147,9 @@ commands:
             ./configure
             make -j6
             sudo make install
+
+            wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/portClang.tar.xz
+            tar -xf portClang.tar.xz -C /
 
             sudo /opt/local/bin/port -v selfupdate
 
@@ -225,7 +227,7 @@ jobs:
     steps:
       - checkout
       - get_libraries:
-          fileName: 2023-Jun-macOSx86.tar.xz
+          fileName: *macx86libAWS
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
@@ -244,7 +246,7 @@ jobs:
     steps:
       - checkout
       - get_libraries:
-          fileName: 2024-Jul-AppleSilicon.tar.xz
+          fileName: *macAppleSilicon
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
@@ -829,9 +831,9 @@ workflows:
       #- build_python_api_osx
       # - build_win10_installer
       #- build_macOS_installers
-      # - build_appleSilicon_installer
+       - build_appleSilicon_installer
       # - build_macOSx86_installer
-      - build_linux_installer
+      #- build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
       # - build_macOSx86_libs
