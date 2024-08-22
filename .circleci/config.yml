@@ -49,7 +49,7 @@ commands:
     parameters:
       branch:
         type: string
-        default: $CIRCLE_BRANCH
+        default: main
       beforeCompile:
         type: string
         default: ""
@@ -142,14 +142,14 @@ commands:
             pip install gdown
 
             # MacPorts
-            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
-            tar xf MacPorts-2.8.1.tar.bz2
-            cd MacPorts-2.8.1/
-            ./configure
-            make -j6
-            sudo make install
+            #curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
+            #tar xf MacPorts-2.8.1.tar.bz2
+            #cd MacPorts-2.8.1/
+            #./configure
+            #make -j6
+            #sudo make install
 
-            sudo /opt/local/bin/port -v selfupdate
+            #sudo /opt/local/bin/port -v selfupdate
 
             # CMake
             (sudo yes || true) | sudo /opt/local/bin/port install cmake
@@ -157,7 +157,7 @@ commands:
             # clang
             # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
             # Therefore, skip selfupdate until we know we want a newer version of clang
-            # (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
+            #(sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
             sudo /opt/local/bin/port select --set clang mp-clang-17
             /opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 45m
@@ -827,7 +827,7 @@ workflows:
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
       #- build_python_api_osx
-      # - build_win10_installer
+      #- build_win10_installer
       #- build_macOS_installers
       - build_appleSilicon_installer
       # - build_macOSx86_installer
