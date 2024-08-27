@@ -63,7 +63,6 @@ ParticleRenderer::ParticleRenderer(const ParamsMgr *pm, string winName, string d
     _cacheParams.cLevel=0;
     _cacheParams.stride=0;
     _cacheParams.radius=8.0;
-    _cacheParams.directionScale=0.;
     _cacheParams.direction=false;
 }
 
@@ -119,6 +118,7 @@ int ParticleRenderer::_paintGL(bool)
     bool renderLegacy = GetActiveParams()->GetValueLong(ParticleParams::RenderLegacyTag, false);
     if (renderLegacy) {
         _renderParticlesLegacy(grid, vecGrids);
+        _cacheParams.varName = "";
     }
     else {
         if (regenerateParticles)
@@ -231,7 +231,6 @@ bool ParticleRenderer::_particleCacheIsDirty() const {
     if (_cacheParams.fieldVars != p->GetFieldVariableNames() ) return true;
     if (_cacheParams.radiusVarName != p->GetValueString( ParticleParams::RenderRadiusVariableTag, "")) return true;
     if (_cacheParams.direction != (bool)p->GetValueLong( ParticleParams::ShowDirectionTag, false)) return true;
-    if (_cacheParams.directionScale != p->GetValueDouble( ParticleParams::DirectionScaleTag, false)) return true;
 
     return false;
 }
@@ -248,7 +247,6 @@ void ParticleRenderer::_resetParticleCache() {
     _cacheParams.boxMax = max;
    
     _cacheParams.direction = (bool)p->GetValueLong(ParticleParams::ShowDirectionTag, false); 
-    _cacheParams.directionScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1.);
     _cacheParams.stride = p->GetValueLong(ParticleParams::StrideTag, 1);
     _cacheParams.varName = p->GetVariableName();
     _cacheParams.fieldVars = p->GetFieldVariableNames();
@@ -513,7 +511,7 @@ void ParticleRenderer::_renderParticlesLegacy(const Grid* grid, const std::vecto
     for (auto g : vecGrids) dirs.push_back(g->cbegin(_cacheParams.boxMin, _cacheParams.boxMax));
 
     size_t stride = max(1L, (long)_cacheParams.stride);
-    float  dirScale = _cacheParams.directionScale;
+    float  dirScale = p->GetValueDouble(ParticleParams::DirectionScaleTag, 1.);
 
     for (size_t i = 0; node != nodeEnd; ++node, ++i) {
         if (i % stride) {
