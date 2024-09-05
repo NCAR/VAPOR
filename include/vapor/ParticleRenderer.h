@@ -61,7 +61,6 @@ private:
         VAPoR::CoordType    boxMin, boxMax;
         float               radius;
         bool                direction;
-        float               directionScale;
         size_t              stride;
         string              varName;
         string              radiusVarName;
