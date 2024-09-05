@@ -27,7 +27,7 @@ fi
 #baseDir='/glade/campaign/cisl/vast/vapor/third-party'
 
 srcDir="$baseDir/2024-Aug-src"
-archiveName="2024-Aug"
+archiveName="2024-Aug-${OS}"
 installDir="$baseDir/current"
 
 echo OS ${OS}
@@ -44,53 +44,50 @@ if [[ "$OS" == "macOSx86" ]]; then
     alias configure='./configure --host=x86_64-apple-darwin'
     alias config='./config darwin64-x86_64-cc'
     alias brew='arch -x86_64 /usr/local/bin/brew'
+    export PATH="/usr/local/bin:$PATH"
     macOSMinVersion="10.15.0"
 elif [[ "$OS" == "appleSilicon" ]]; then
     macOSMinVersion="12.0.0"
+    alias brew='/opt/homebrew/bin/brew'
+    export PATH="/opt/homebrew/bin:$PATH"
 fi
+
+echo "Homebrew alias:"
+alias brew
+echo "PATH ${PATH}"
 
 macOSx86Prerequisites() {
     brew uninstall python@3.9 || true
     export CMAKE_OSX_ARCHITECTURES=x86_64
-
-    # specifying -target breaks proj
-    #export CC="/opt/local/bin/clang -target x86_64-apple-darwin"
-    #export CXX="/opt/local/bin/clang++ -target x86_64-apple-darwin"
-    export CC="/opt/local/bin/clang"
-    export CXX="/opt/local/bin/clang++"
-    export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-    
-    # due to libjpeg not compiling its sample program
-    #export CFLAGS="-isysroot $(xcrun --sdk macosx --show-sdk-path) -arch x86_64-apple-darwin"
-    #export LDFLAGS="-isysroot $(xcrun --sdk macosx --show-sdk-path) -arch x86_64-apple-darwin"
-    export CFLAGS="-isysroot $(xcrun --sdk macosx --show-sdk-path) -arch x86_64"
-    export CXXFLAGS="$CFLAGS"
-    export LDFLAGS="-isysroot $(xcrun --sdk macosx --show-sdk-path) -arch x86_64"
-    export CPPFLAGS="$CFLAGS"
+    export CFLAGS="-arch x86_64"
+    export LDFLAGS="-arch x86_64"
 
     #softwareupdate --install-rosetta --agree-to-license
-
-    # for vaporPython
-    brew install tcl-tk
-    export PKG_CONFIG_PATH="/usr/local/opt/tcl-tk/lib/pkgconfig:$PKG_CONFIG_PATH"
+    #export PKG_CONFIG_PATH="/usr/local/opt/tcl-tk/lib/pkgconfig:$PKG_CONFIG_PATH"
 	
-    #macOSPrerequisites
+    macOSPrerequisites
 }
 
 macOSPrerequisites() {
     export MACOSX_DEPLOYMENT_TARGET=$macOSMinVersion
-    brew install cmake
-    brew install autoconf
-    brew install atool
-    brew install libtool
-    brew install automake
-    #brew install xz zlib openssl
-    brew install xz
-    #brew install python@3.9
-    #brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
-    brew install pkg-config xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
+    export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+
+    export CC="/opt/local/bin/clang"
+    export CXX="/opt/local/bin/clang++"
+    export CFLAGS="$CFLAGS -isysroot $(xcrun --sdk macosx --show-sdk-path)"
+    export LDFLAGS="$LDFLAGS -isysroot $(xcrun --sdk macosx --show-sdk-path)"
+    export CXXFLAGS="$CFLAGS"
+    export CPPFLAGS="$CFLAGS"
+
+    brew doctor
+    brew cleanup
+    brew install cmake autoconf atool libtool automake
+    # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
+    #brew install zstd libxml2 xz
+    brew install libxml2 xz
+    # bzip2 is already provided by macos
+    brew install pkg-config gdbm tcl-tk 
     brew install gettext
-    #brew link gettext --force
     brew uninstall --ignore-dependencies gettext
 
     #port install clang-17 +universal
@@ -256,6 +253,22 @@ szip() {
 hdfVersion='1.12.2'
 hdf5() {
     cd $srcDir
+    if [ "$OS" == "macOSx86" ]; then
+        tar xvf hdf5/hdf5-$hdfVersion-Std-macos11_64-clang.tar.gz && cd hdf
+        ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
+    elif [ "$OS" == "appleSilicon" ]; then
+        tar xvf hdf5/hdf5-$hdfVersion-Std-macos11m1_64-clang.tar.gz && cd hdf
+        ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
+    else
+        tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf
+        ./HDF5-$hdfVersion-Linux.sh --prefix=$installDir --exclude-subdir --skip-license
+    fi
+
+    ln -fs $installDir/HDF_Group/HDF5/$hdfVersion/lib/plugin/ $installDir/share/plugins
+}
+
+hdf5src() {
+    cd $srcDir
     local library="hdf5-${hdfVersion}"
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
@@ -263,12 +276,17 @@ hdf5() {
     export CMAKE_INCLUDE_PATH=/path/to/libsz/include
     export CMAKE_LIBRARY_PATH=/path/to/libsz/lib
 
+    #PLUGIN_SOURCE=$srcDir/CMake-hdf5-1.12.2/hdf5_plugins-1_12_2
+    #cd $srcDir/CMake-hdf5-1.12.2/hdf5-1.12.2/build
+
     args=(
     -DCMAKE_INSTALL_PREFIX=$installDir
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_INSTALL_RPATH=$installDir
     -DCMAKE_PREFIX_PATH=$installDir
     -DZLIB_DIR=$installDir
+    -DUSE_SHARED_LIBS:BOOL=ON
+    -DBUILD_SHARED_LIBS:BOOL=ON
     -DHDF5_ENABLE_RPATH:BOOL=ON
     -DHDF5_BUILD_WITH_INSTALL_NAME:BOOL=ON
     -DHDF5_ENABLE_THREADSAFE:BOOL=ON
@@ -276,15 +294,44 @@ hdf5() {
     -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
     -DHDF5_BUILD_HL_LIB:BOOL=ON
     -DHDF5_BUILD_TOOLS:BOOL=ON
-    -DHDF5_ENABLE_PLUGINS:BOOL=ON
+    #-DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON
     -DALLOW_UNSUPPORTED:BOOL=ON
+    #-DPLUGIN_TGZ_NAME:STRING=$srcDir/CMake-hdf5-1.12.2/hdf5_plugins-1_12_2.tar.gz
+    #-DH5PL_ALLOW_EXTERNAL_SUPPORT:STRING=TGZ
+    #-DTGZPATH:PATH=$PLUGIN_SOURCE/libs
+    #-DPLUGIN_TGZ_NAME:STRING=$srcDir/myhdfstuff/CMake-hdf5-1.12.2/hdf5_plugins-1_12_2.tar.gz
+    #-DHDF5_PLUGIN_INSTALL_DIR=$installDir/plugins
     )
     if [ "$OS" == "macOSx86" ]; then 
         args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
     fi
     cmake "${args[@]}" ..
-    make
-    make install
+#    make
+#    make install
+}
+
+zstd() {
+    cd $srcDir
+    local library='zstd-1.5.6'
+    rm -rf $library || true
+    tar xvf $srcDir/$library.tar
+    mkdir -p $srcDir/$library/build/cmake/build && cd $srcDir/$library/build/cmake/build
+
+    args=(
+        -DCMAKE_INSTALL_PREFIX=$installDir
+    )
+
+    if [ "$OS" == "macOSx86" ]; then 
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
+    fi
+    if [ "$OS" == "appleSilicon" ]; then 
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+        args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+    fi
+
+    cmake "${args[@]}" ..
+    make && make install
 }
 
 netcdf() {
@@ -296,19 +343,27 @@ netcdf() {
 
     args=(
         -DCMAKE_INSTALL_PREFIX=$installDir
-        -DCMAKE_PREFIX_PATH="$installDir/HDF_Group/HDF5/$hdfVersion"
+        -DCMAKE_PREFIX_PATH=$installDir/HDF_Group/HDF5/$hdfVersion
+        -DHDF5_DIR=$installDir/HDF_Group/HDF5/$hdfVersion
+        -DHDF5_ROOT=$installDir/HDF_Group/HDF5/$hdfVersion
         -DCMAKE_INSTALL_LIBDIR=lib
         -DENABLE_BYTERANGE=False
         -DENABLE_DAP=False
         -DCMAKE_BUILD_TYPE=Release
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "appleSilicon" ]; then
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
-    fi
     if [ "$OS" == "macOSx86" ]; then 
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
         args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
     fi
+    if [ "$OS" == "appleSilicon" ]; then 
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+        args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+    fi
 
+    export HDF5_ROOT=$installDir/HDF_Group/HDF5/$hdfVersion
+    export LD_LIBRARY_PATH=$HDF5_ROOT/lib
+    export CPPFLAGS=-I$HDF5_ROOT/include
+    export LDFLAGS=-L$HDF5_ROOT/lib
     cmake "${args[@]}" ..
     make && make install
 }
@@ -359,10 +414,13 @@ freetype() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz
     cd $srcDir/$library
+
     args=(
         --prefix=$installDir
+        --with-brotli=no
+        --with-bzip2=no
     )
-    #CC=$CC CXX=$CXX \
+
     configure "${args[@]}"
     make && make install
 }
@@ -432,8 +490,6 @@ sqlite() {
 }
 
 curl() {
-    echo $LD_LIBRARY_PATH
-    echo $DYLD_LIBRARY_PATH
     cd $srcDir
     local library='curl-8.2.1' # works
     rm -rf $library || true
@@ -469,7 +525,6 @@ ssh() {
     tar xvf $srcDir/$library.tar.xz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     
-#-DPROJ_COMPILER_NAME=$CXX
     args=(
         -DCMAKE_PREFIX_PATH=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
@@ -582,16 +637,15 @@ xinerama() {
 }
 
 openssl() {
-
-    echo CFLAGS="-isysroot $(xcrun --sdk macosx --show-sdk-path) -arch x86_64"
-    echo CXXFLAGS="$CFLAGS"
-    echo LDFLAGS="-isysroot $(xcrun --sdk macosx --show-sdk-path) -arch x86_64"
-    echo CPPFLAGS="$CFLAGS"
-
     cd $srcDir
     local library='openssl-1.1.1w'
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
+
+    echo $CFLAGS
+    echo $CXXFLAGS
+    echo $LDFLAGS
+    echo $CPPFLAGS
 
     args=(
         --prefix=$installDir
@@ -599,6 +653,8 @@ openssl() {
     )
     if [ "$OS" = "macOSx86" ]; then
         args+=(darwin64-x86_64-cc)
+    elif [ "$OS" = "appleSilicon" ]; then
+        args+=(darwin64-arm64-cc)
     fi
     #export CFLAGS="-arch x86_64"
     #export CXXFLAGS="-arch x86_64"
@@ -626,19 +682,23 @@ pythonVapor() {
     if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
         export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"
         #args+=(--libdir=$installDir/Resources)
-        args+=(--with-openssl=$(brew --prefix openssl@1.1))
+        args+=(--prefix=/usr/local/VAPOR-Deps/current/Resources)
+        #args+=(--exec-prefix=$installDir/Resources)
+        #args+=(--with-openssl=$(brew --prefix openssl@1.1))
+        args+=(--with-openssl=$installDir)
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
         args+=(--with-tcltk-includes="$(pkg-config --cflags tcl tk)")
         #args+=(--with-macosx-version-min=$macOSMinVersion)
-        export LDFLAGS="$LDFLAGS -L$installDir/lib -L/usr/local/opt/openssl@1.1/lib"
-        export CPPFLAGS="$CPPFLAGS -I$installDir/include -I/usr/local/opt/openssl@1.1/include"
+        #export LDFLAGS="$LDFLAGS -L$installDir/lib -L/usr/local/opt/openssl@1.1/lib"
+        #export CPPFLAGS="$CPPFLAGS -I$installDir/include -I/usr/local/opt/openssl@1.1/include"
+        export LDFLAGS="$LDFLAGS -L$installDir/lib"
+        export CPPFLAGS="$CPPFLAGS -I$installDir/include"
+        export LLVM_PROFDATA="/opt/local/bin/llvm-profdata-mp-17"
+        export LD_LIBRARY_PATH="$installDir/Resources"
 
     	if [ "$OS" == "macOSx86" ]; then
-		#export CFLAGS="$CFLAGS -isysroot $(xcrun --sdk macosx --show-sdk-path) -arch x86_64 -I/usr/local/include"
-		#export LDFLAGS="$LDFLAGS -isysroot $(xcrun --sdk macosx --show-sdk-path) -arch x86_64 -L/usr/local/lib"
 	    export CFLAGS="$CFLAGS -I/usr/local/include"
 	    export LDFLAGS="$LDFLAGS -L/usr/local/lib"
-            export LLVM_PROFDATA="/opt/local/bin/llvm-profdata-mp-17"
             args+=(--build=x86_64-apple-darwin)
 	fi
         #./configure "${args[@]}"
@@ -654,48 +714,49 @@ pythonVapor() {
 
     make && make install
 
-    $installDir/bin/python3.9.vapor -m pip install --upgrade pip
+    $installDir/Resources/bin/python3.9.vapor -m pip install --upgrade pip
 
     # As of 5/27/2023, numpy's current version (1.24.3) fails to initialize PyEngine's call to import_array1(-1)
-    $installDir/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
+    $installDir/Resources/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
 }
 
 ospray() {
     cd $srcDir
     if [ "$OS" == "appleSilicon" ]; then
-        # 6/2/2023 - CircleCI was having difficulty targeting arm64 for Ospray's build.
-        #            Workaround: compile Ospray locally and add it to the source .tar.xz bundle
-        cd $srcDir/ospray/osprayappleSilicon
-    elif [ "$OS" == "macOSx86" ]; then
-        local library='ospray-2.11.0.x86_64.macosx'
+        local library='ospray-3.2.0.arm64.macosx'
         rm -rf ospray/$library || true
-        unzip $srcDir/ospray/$library && cd $srcDir/$library
+        unzip -o $srcDir/ospray/$library && cd $srcDir/$library
+    elif [ "$OS" == "macOSx86" ]; then
+        local library='ospray-3.2.0.x86_64.macosx'
+        rm -rf ospray/$library || true
+        unzip -o $srcDir/ospray/$library && cd $srcDir/$library
     else
         local library='ospray-2.11.0.x86_64.linux'
         rm -rf ospray/$library || true
         tar xvf $srcDir/ospray/$library.tar.gz && cd $srcDir/$library
     fi
     mkdir -p $installDir/Ospray
-    cp -rP * $installDir/Ospray
+    cp -rfP * $installDir/Ospray
 }
 
 glm() {
     cd $srcDir
     local library='glm-0.9.9.8'
-    unzip -f $srcDir/$library.zip 
+    rm -rf glm || true
+    unzip $srcDir/$library.zip 
     cp -r $srcDir/glm/glm $installDir/include
 }
 
 gte() {
     cd $srcDir
     tar xvf GTE.tar.xz
-    mv GTE $installDir/include
+    rsync -a GTE $installDir/include
 }
 
 images() {
     cd $srcDir
     tar xvf images.tar.xz
-    mv images $installDir/share
+    rsync -a images $installDir/share
 }
 
 qt() {
@@ -729,10 +790,10 @@ qt() {
         args+=(-bundled-xcb-xinput)
     fi
 
-    CPPFLAGS=-I$installDir/include \
-    LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
-    CC=$CC \
-    CXX=$CXX \
+    CPPFLAGS="$CPPFLAGS -I$installDir/include" \
+    LDFLAGS="$LDFLAGS -L$installDir/lib -Wl,-rpath=$installDir/lib" \
+    #CC=$CC \
+    #CXX=$CXX \
     ../configure \
     "${args[@]}" > qtConfig.txt
 
@@ -741,7 +802,7 @@ qt() {
 }
 
 add_rpath() {
-    for lib in $installDir/lib/*.dylib; do
+    for lib in $installDir/lib/*.dylib $installDir/Resources/lib/*.dylib; do
         fileName="$(basename $lib)"
         echo install_name_tool -id @rpath/$fileName $lib
         install_name_tool -id @rpath/$fileName $lib
@@ -757,6 +818,10 @@ add_rpath() {
                 echo install_name_tool -change "$dep" "$newPath" "$installDir/lib/$lib"
                 install_name_tool -change "$dep" "$newPath" "$lib"
             fi
+            if [ "$(dirname "$dep")" == "$installDir/Resources/lib" ]; then
+                echo install_name_tool -change "$dep" "$newPath" "$installDir/Resources/$lib"
+                install_name_tool -change "$dep" "$newPath" "$installDir/Resources/$lib"
+            fi
         done
         codesign --force -s - $lib
     done
@@ -766,7 +831,7 @@ renameAndCompress() {
     pwd
     cd $baseDir
     mv $installDir $archiveName
-    tar cfJ $archiveName-$OS.tar.xz $archiveName
+    tar cfJ $archiveName.tar.xz $archiveName
 }
 
 if [ "$OS" == "macOSx86" ]; then
@@ -797,6 +862,7 @@ assimp
 szip
 hdf5
 
+zstd
 netcdf
 expat
 udunits

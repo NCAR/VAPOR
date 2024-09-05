@@ -52,8 +52,10 @@ if (UNIX)
 	        set (PYTHONVERSION 3.9)
         endif()
     if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
-        set (PYTHONDIR ${THIRD_PARTY_DIR}/Resources/python)
-        set (PYTHONPATH ${PYTHONDIR}/lib/python${PYTHONVERSION})
+        #set (PYTHONDIR ${THIRD_PARTY_DIR}/Resources/python)
+        #set (PYTHONPATH ${PYTHONDIR}/lib/python${PYTHONVERSION})
+        set (PYTHONDIR ${THIRD_PARTY_DIR}/Resources)               # Root?
+        set (PYTHONPATH ${PYTHONDIR}/lib/python${PYTHONVERSION})   # Module path?
     else ()
         set (PYTHONDIR ${THIRD_PARTY_DIR})
         set (PYTHONPATH ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION})
