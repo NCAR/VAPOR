@@ -1,8 +1,8 @@
 anchors:
-  - &srcLibs          "2024-Sept-src.tar.xz"
-  - &macOSx86Libs     "2024-Sept-macOSx86.tar.xz"
-  - &appleSiliconLibs "2024-Sept-appleSilicon.tar.xz"
-  - &u20Libs          "2023-Sept-Ubuntu20.tar.xz"
+  - &srcLibs          "2024-Sept-src"
+  - &macOSx86Libs     "2024-Sept-macOSx86"
+  - &appleSiliconLibs "2024-Sept-appleSilicon"
+  - &u20Libs          "2023-Sept-Ubuntu20"
 
 version: 2.1
 
