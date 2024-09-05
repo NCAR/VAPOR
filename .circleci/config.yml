@@ -1,9 +1,8 @@
 anchors:
-  - &srcLibID         "1iWJtXpRY6kDAq3TyBWXtBIuWTB8oFR6a"
-  - &macx86libAWS     "2023-Jun-macOSx86.tar.xz"
-  - &macAppleSilicon  "2024-Jul-AppleSilicon.tar.xz"
-  - &u20libAWS        "2023-Sept-Ubuntu20.tar.xz"
-  - &portClangAWS     "portClang.tar.xz"
+  - &srcLibs          "2024-Sept-src.tar.xz"
+  - &macOSx86Libs     "2024-Sept-macOSx86.tar.xz"
+  - &appleSiliconLibs "2024-Sept-appleSilicon.tar.xz"
+  - &u20Libs          "2023-Sept-Ubuntu20.tar.xz"
 
 version: 2.1
 
@@ -40,8 +39,8 @@ commands:
                 <<parameters.sudo>> mkdir -p <<parameters.dir>>
                 <<parameters.sudo>> chmod -R 777 <<parameters.dir>>
                 <<parameters.sudo>> chown -R `whoami` <<parameters.dir>>
-                wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/<<parameters.fileName>>
-                tar -xf <<parameters.fileName>> -C <<parameters.dir>>
+                wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/<<parameters.fileName>>.tar.xz
+                tar -xf <<parameters.fileName>>.tar.xz -C <<parameters.dir>>
               fi
 
   build_vapor:
@@ -221,7 +220,7 @@ jobs:
     steps:
       - checkout
       - get_libraries:
-          fileName: *macx86libAWS
+          fileName: *macOSx86Libs
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
@@ -240,7 +239,7 @@ jobs:
     steps:
       - checkout
       - get_libraries:
-          fileName: *macAppleSilicon
+          fileName: *appleSiliconLibs
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
@@ -250,109 +249,6 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
           moveToCommand: ${f/Darwin/AppleSilicon}
-
-  clang-tidy:
-    docker:
-      - image: ubuntu:latest
-
-    steps:
-      - run:
-          name: Install dependencies
-          command: |
-            apt-get update
-            apt upgrade -y
-            apt install -y aptitude
-            aptitude install -y xz-utils pip git curl jq cmake cmake-curses-gui freeglut3-dev libexpat1-dev libglib2.0-0 libdbus-1-3 lsb-release wget software-properties-common clang-tidy
-            pip install gdown
-
-      - run:
-          name: Install llvm
-          command: |
-            add-apt-repository -y universe
-            wget https://apt.llvm.org/llvm.sh
-            chmod +x llvm.sh
-            yes '' | ./llvm.sh 14 || if [[ $? -eq 141 ]]; then true; else exit $?; fi # Feed "yes" to all of the script's questions and igore error 141
-
-      - run: 
-          name: Get third party libraries
-          command: |
-            mkdir -p /usr/local/VAPOR-Deps
-            cd /usr/local/VAPOR-Deps
-            gdown https://drive.google.com/uc?id=1elB8v-UNMzkNmnsJPtxk3cI1zBelJ3Hd
-            tar xf 2019-Aug-Ubuntu.tar.xz
-
-      - run:
-          name: Run clang-tidy
-          command: |
-            git clone https://github.com/NCAR/VAPOR.git /root/VAPOR
-            cd /root/VAPOR
-            git checkout $CIRCLE_BRANCH
-            apt install -y libomp-dev
-            cmake . \
-            -DCMAKE_BUILD_TYPE:String=Release \
-            -DCMAKE_CXX_COMPILER=clang++-14 \
-            -DCMAKE_C_COMPILER=clang-14 \
-            -DBUILD_TEST_APPS=ON \
-            -DUSE_OMP=ON
-            make -j4
-            git diff $(git merge-base --fork-point origin/main HEAD) HEAD | \
-            /usr/bin/clang-tidy-diff-14.py -path /root/VAPOR -p1 -checks=cppcoreguidelines* 2>&1    | \
-            tee /tmp/clangTidyOutput.txt
-
-      - store_artifacts:
-          path: /tmp/clangTidyOutput.txt
-
-      - run:
-          name: Copy artifact link to PR
-          command: |
-            # acquire clang-tidy report artifact
-            artifacts=$(curl \
-            -X GET "https://circleci.com/api/v2/project/github/NCAR/VAPOR/$CIRCLE_BUILD_NUM/artifacts" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -u "$GITHUB_TOKEN:" | jq '.items[0].url')
-            artifacts="${artifacts//\"}"                         # remove quotes from string
-            artifacts=" [clangTidyOutput.txt]($artifacts)"       # make hyperlink 
-
-            # Temporarily remove windows carraige return \r
-            originalBody=$(curl https://api.github.com/repos/NCAR/VAPOR/pulls/${CIRCLE_PULL_REQUEST##*/} | jq '.body')
-            lineArray=(${originalBody//\\r\\n/\\n})
-
-            # Remove leading " at the start of the first element
-            firstElement=${lineArray[0]}
-            if [[ ${firstElement::1} == "\"" ]]
-            then
-                lineArray[0]="${firstElement:1}"
-            fi
-
-            # Remove trailing " at the end of the last element
-            lastElement=${lineArray[-1]}
-            if [[ ${lastElement: -1} == "\"" ]]
-            then
-                lineArray[-1]=${lastElement::-1}
-            fi
-
-            # If clang-tidy has already been reported in this PR, remove that report
-            if [[ "${lineArray[-1]}" == *"clangTidyOutput.txt"* ]]; then
-                echo "  *** Previous clangTidyOutput.txt report found.  Replacing with new version. ***"
-                unset lineArray[-1]  # delete line with commit hash
-                unset lineArray[-1]  # delete line with clangTidyOutput.txt
-            else
-                lineArray+=("\\n\\n")
-            fi
-
-            newBody=""
-            newBody=${lineArray[@]//\\n/\\r\\n}              # Add windows carraige return \r on line endings
-
-            newBody="${newBody}\r\n\r\n${CIRCLE_SHA1}:${artifacts}"
-            json="{\"body\":\"$newBody\"}"                   # Apply our re-written PR body in json format
-
-            # Add linke to PR
-            curl \
-            -X PATCH \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token $CIRCLE_CLANG_TIDY_TOKEN" \
-            https://api.github.com/repos/NCAR/VAPOR/issues/${CIRCLE_PULL_REQUEST##*/} \
-            -d "$json"
 
   build_python_api_ubuntuDebug:
     docker:
@@ -540,7 +436,7 @@ jobs:
           keys:
             - ubuntu-libs-mar2023
       - get_libraries:
-          fileName: 2023-Sept-Ubuntu20.tar.xz
+          fileName: *u20Libs
       - save_cache:
           key: ubuntu-libs-mar2023
           paths:
@@ -553,69 +449,6 @@ jobs:
             -DBUILD_TEST_APPS=ON \
   
       - smoke_tests
-
-  test_clang_format:
-    docker:
-      - image: ubuntu:20.04
-    
-    steps:
-      - run:
-          name: install deps
-          command: |
-            apt-get update
-            apt-get install -y clang-format-11
-            apt-get install -y git
-      - checkout
-
-      - run:
-          name: run clang-format
-          command: |
-            for COMMIT in $(git log --pretty=format:%h main...$BRANCH); do
-                for FILE in $(git diff --name-only origin/main |grep -E "\.h|\.cpp"); do
-                    NUMBERS=""
-                    for NUMBER in $(git blame --line-porcelain "$FILE" | egrep ^$COMMIT | cut -d' ' -f3); do
-                        NUMBERS="$NUMBERS --lines $NUMBER:$NUMBER "
-                    done
-                    if [ "$NUMBERS" != "" ]; then
-                        echo "  Running clang-format on $FILE"
-                        clang-format-11 --dry-run $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
-                    fi
-                done
-            done
-      - store_artifacts:
-          path: /tmp/clang-format.txt
-
-      - run:
-          name: check formatting 
-          command: |
-            if grep -q warning /tmp/clang-format.txt; then
-               cat /tmp/clang-format.txt
-               exit -1
-            else
-               exit 0
-            fi
-
-  check_leaks:
-    docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
-
-    steps:
-      - checkout
-
-      - run:
-          name: cmake and make
-          command: |
-            cd /VAPOR
-            git pull
-            cd build
-            cmake -DCMAKE_BUILD_TYPE:String=Release ..
-            make -j2
-            #valgrind --leak-check=yes bin/vapor > /tmp/output.txt
-            valgrind --leak-check=yes bin/vaporpychecker &> /tmp/vaporpychecker.txt
-            #valgrind --leak-check=yes bin/vapor &> /tmp/vapor.txt
-            #bin/vapor &> /tmp/vapor.txt
-      - store_artifacts:
-          path: /tmp/*.txt
 
   release_weekly_installers:
     macos:
@@ -717,8 +550,7 @@ jobs:
           no_output_timeout: 30m
 
       - get_libraries:
-          fileName: 2023-Sept-src.tar.xz
-          #driveID: *srcLibID
+          fileName: *macOSx86Libs
           sudo: sudo
 
       - run:
@@ -734,13 +566,14 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
             -DMACOS_BUILD_ARM64=OFF \
-          moveToCommand: ${f/Darwin/AppleSilicon}
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+          moveToCommand: ${f/Darwin/macOSx86}
 
       - store_artifacts:
           path: /tmp/workspace/installers
       
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Sept-macOSx86.tar.xz
+          path: /usr/local/VAPOR-Deps
 
   build_AppleSilicon_libs:
     macos:
@@ -780,7 +613,7 @@ jobs:
           name: build libraries
           command: |
             chmod 777 /Users/distiller/project/scripts/build3rdParty.sh
-            /Users/distiller/project/scripts/build3rdParty.sh -o M1
+            /Users/distiller/project/scripts/build3rdParty.sh -o appleSilicon
 
       - build_vapor:
           beforeCompile: export PATH=/opt/local/bin:$PATH
@@ -788,14 +621,13 @@ jobs:
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
-            -DBUILD_OSP=OFF \
           moveToCommand: ${f/Darwin/AppleSilicon}
 
       - store_artifacts:
           path: /tmp/workspace/installers
       
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Sept-M1.tar.xz
+          path: /usr/local/VAPOR-Deps
 
   build_win10_libs:
     executor: win/default
