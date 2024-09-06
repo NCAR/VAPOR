@@ -148,9 +148,15 @@ commands:
 
             # Caching clang would miss every couple of weeks and require ~2 hours of build time.
             # Instead of caching it, we're just going to host it on aws and download it.
-            wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/portClang.tar.xz
-            sudo tar -xf portClang.tar.xz -C /
-            sudo /opt/local/bin/port migrate
+            #wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/portClang.tar.xz
+            #sudo tar -xf portClang.tar.xz -C /
+            #sudo /opt/local/bin/port migrate
+
+            wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.1/clang+llvm-17.0.1-arm64-apple-darwin22.0.tar.xz
+            mkdir clang
+            tar xvf clang+llvm-17.0.1-arm64-apple-darwin22.0.tar.xz --directory clang
+            export PATH="/Users/distiller/project/clang/bin:$PATH"
+            export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"
 
             #sudo /opt/local/bin/port -v selfupdate
 
@@ -228,11 +234,17 @@ jobs:
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
-          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
+          #beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
+          beforeCompile: softwareupdat --install-rosetta --agree-to-license
           compileArgs: |
-            -DCPACK_BINARY_DRAGNDROP=ON \
-            -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DOpenMP_C_FLAGS="-fopenmp" \
+            -DOpenMP_CXX_FLAGS="-fopenmp" \
+            -DOpenMP_C_LIB_NAMES="omp" \
+            -DOpenMP_CXX_LIB_NAMES="omp" \
+            -DOpenMP_omp_LIBRARY="lib/libomp.dylib" \
+            -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
           moveToCommand: ${f/Darwin/Darwinx86}
 
@@ -247,11 +259,16 @@ jobs:
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
-          beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          #beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
           compileArgs: |
-            -DCPACK_BINARY_DRAGNDROP=ON \
-            -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DOpenMP_C_FLAGS="-fopenmp" \
+            -DOpenMP_CXX_FLAGS="-fopenmp" \
+            -DOpenMP_C_LIB_NAMES="omp" \
+            -DOpenMP_CXX_LIB_NAMES="omp" \
+            -DOpenMP_omp_LIBRARY="lib/libomp.dylib" \
+            -DCPACK_BINARY_DRAGNDROP=ON \
           moveToCommand: ${f/Darwin/AppleSilicon}
 
   build_python_api_ubuntuDebug:
