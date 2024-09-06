@@ -240,7 +240,7 @@ jobs:
       - get_macos_dependencies
       - build_vapor:
           #beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
-          beforeCompile: softwareupdat --install-rosetta --agree-to-license
+          beforeCompile: softwareupdate --install-rosetta --agree-to-license
           compileArgs: |
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
