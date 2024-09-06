@@ -51,7 +51,7 @@ if (UNIX)
         if (NOT DEFINED PYTHONVERSION)
 	        set (PYTHONVERSION 3.9)
         endif()
-    if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+    if (APPLE)
         #set (PYTHONDIR ${THIRD_PARTY_DIR}/Resources/python)
         #set (PYTHONPATH ${PYTHONDIR}/lib/python${PYTHONVERSION})
         set (PYTHONDIR ${THIRD_PARTY_DIR}/Resources)               # Root?
