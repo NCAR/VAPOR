@@ -161,8 +161,8 @@ commands:
 
             wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/clang.tar.xz
             tar xvf clang.tar.xz
-            export PATH="/Users/distiller/project/clang/bin:$PATH"
-            export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"
+            #export PATH="/Users/distiller/project/clang/bin:$PATH"
+            #export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"
 
             # CMake
             #(sudo yes || true) | sudo /opt/local/bin/port install cmake
@@ -240,7 +240,7 @@ jobs:
       - get_macos_dependencies
       - build_vapor:
           #beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
-          beforeCompile: softwareupdate --install-rosetta --agree-to-license
+          beforeCompile: export PATH="/Users/distiller/project/clang/bin:$PATH"; export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"; softwareupdate --install-rosetta --agree-to-license
           compileArgs: |
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
@@ -265,6 +265,7 @@ jobs:
       - get_macos_dependencies
       - build_vapor:
           #beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          beforeCompile: export PATH="/Users/distiller/project/clang/bin:$PATH"; export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH";
           compileArgs: |
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
