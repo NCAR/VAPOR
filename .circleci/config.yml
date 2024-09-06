@@ -133,22 +133,22 @@ commands:
       - run:
           name: Get dependencies
           command: |
-            pip install gdown
+            #pip install gdown
 
             # MacPorts
-            curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
-            tar xf MacPorts-2.8.1.tar.bz2
-            cd MacPorts-2.8.1/
-            ./configure
-            make -j6
-            sudo make install
+            #curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
+            #tar xf MacPorts-2.8.1.tar.bz2
+            #cd MacPorts-2.8.1/
+            #./configure
+            #make -j6
+            #sudo make install
 
             # Caching clang would miss every couple of weeks and require ~2 hours of build time.
             # Instead of caching it, we're just going to host it on aws and download it.
             wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/portClang.tar.xz
             sudo tar -xf portClang.tar.xz -C /
 
-            sudo /opt/local/bin/port -v selfupdate
+            #sudo /opt/local/bin/port -v selfupdate
 
             # CMake
             (sudo yes || true) | sudo /opt/local/bin/port install cmake
