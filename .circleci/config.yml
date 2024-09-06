@@ -161,7 +161,8 @@ commands:
             #sudo /opt/local/bin/port -v selfupdate
 
             # CMake
-            (sudo yes || true) | sudo /opt/local/bin/port install cmake
+            #(sudo yes || true) | sudo /opt/local/bin/port install cmake
+            brew install cmake
             
             # clang
             # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
