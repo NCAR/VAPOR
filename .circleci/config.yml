@@ -127,9 +127,9 @@ commands:
 
   get_macos_dependencies:
     steps:
-      - run:
-          name: permit cache restore
-          command: sudo chmod -R 777 /opt
+      #- run:
+      #    name: permit cache restore
+      #    command: sudo chmod -R 777 /opt
       - run:
           name: Get dependencies
           command: |
@@ -151,14 +151,18 @@ commands:
             #wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/portClang.tar.xz
             #sudo tar -xf portClang.tar.xz -C /
             #sudo /opt/local/bin/port migrate
+            #sudo /opt/local/bin/port -v selfupdate
 
-            wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.1/clang+llvm-17.0.1-arm64-apple-darwin22.0.tar.xz
-            mkdir clang
-            tar xvf clang+llvm-17.0.1-arm64-apple-darwin22.0.tar.xz --directory clang
+            #wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.1/clang+llvm-17.0.1-arm64-apple-darwin22.0.tar.xz
+            #mkdir clang
+            #tar xvf clang+llvm-17.0.1-arm64-apple-darwin22.0.tar.xz --directory clang
+            #export PATH="/Users/distiller/project/clang/bin:$PATH"
+            #export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"
+
+            wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/clang.tar.xz
+            tar xvf clang.tar.xz
             export PATH="/Users/distiller/project/clang/bin:$PATH"
             export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"
-
-            #sudo /opt/local/bin/port -v selfupdate
 
             # CMake
             #(sudo yes || true) | sudo /opt/local/bin/port install cmake
