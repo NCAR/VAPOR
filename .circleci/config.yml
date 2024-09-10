@@ -146,10 +146,10 @@ commands:
             #sudo installer -pkg MacPorts-2.8.1-13-Ventura.pkg -target /
 
 
-            # Caching clang would miss every couple of weeks and require ~2 hours of build time.
-            # Instead of caching it, we're just going to host it on aws and download it.
-            #wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/portClang.tar.xz
-            #sudo tar -xf portClang.tar.xz -C /
+             Caching clang would miss every couple of weeks and require ~2 hours of build time.
+             Instead of caching it, we're just going to host it on aws and download it.
+            wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/portClang.tar.xz
+            sudo tar -xf portClang.tar.xz -C /
             #sudo /opt/local/bin/port migrate
             #sudo /opt/local/bin/port -v selfupdate
 
@@ -159,8 +159,8 @@ commands:
             #export PATH="/Users/distiller/project/clang/bin:$PATH"
             #export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"
 
-            wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/clang.tar.xz
-            tar xvf clang.tar.xz
+            #wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/clang.tar.xz
+            #tar xvf clang.tar.xz
             #export PATH="/Users/distiller/project/clang/bin:$PATH"
             #export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"
 
@@ -231,6 +231,7 @@ jobs:
   build_macOSx86_installer:
     macos:
       xcode: "14.3.1"
+      #xcode: "14.2.1"
     resource_class: macos.m1.large.gen1
     steps:
       - checkout
@@ -240,7 +241,7 @@ jobs:
       - get_macos_dependencies
       - build_vapor:
           #beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
-          beforeCompile: export PATH="/Users/distiller/project/clang/bin:$PATH"; export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"; softwareupdate --install-rosetta --agree-to-license
+          #beforeCompile: export PATH="/Users/distiller/project/clang/bin:$PATH"; export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"; softwareupdate --install-rosetta --agree-to-license
           compileArgs: |
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
@@ -264,8 +265,8 @@ jobs:
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
-          #beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
-          beforeCompile: export PATH="/Users/distiller/project/clang/bin:$PATH"; export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH";
+          beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          #beforeCompile: export PATH="/Users/distiller/project/clang/bin:$PATH"; export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH";
           compileArgs: |
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
