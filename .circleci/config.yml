@@ -146,8 +146,8 @@ commands:
             #sudo installer -pkg MacPorts-2.8.1-13-Ventura.pkg -target /
 
 
-             Caching clang would miss every couple of weeks and require ~2 hours of build time.
-             Instead of caching it, we're just going to host it on aws and download it.
+            #Caching clang would miss every couple of weeks and require ~2 hours of build time.
+            #Instead of caching it, we're just going to host it on aws and download it.
             wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/portClang.tar.xz
             sudo tar -xf portClang.tar.xz -C /
             #sudo /opt/local/bin/port migrate
