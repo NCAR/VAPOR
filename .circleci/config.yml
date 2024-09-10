@@ -240,7 +240,8 @@ jobs:
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
-          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
+          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license
+          #beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
           #beforeCompile: export PATH="/Users/distiller/project/clang/bin:$PATH"; export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"; softwareupdate --install-rosetta --agree-to-license
           #cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_OSX_ARCHITECTURES=x86_64  -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/current ..
           compileArgs: |
