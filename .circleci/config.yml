@@ -839,27 +839,27 @@ workflows:
       #      - build_win10_installer
       #      - build_macOS_installers
       #      - build_linux_installer
-  weekly:
-      triggers:
-        - schedule:
-             cron: "0 16 * * 3" #Time is GMT
-             filters:
-               branches:
-                 only: main
-      jobs:
-        - build_linux_installer
-        - build_appleSilicon_installer
-        - build_macOSx86_installer
-        - build_win10_installer
-        #- build_macOS_installers
-        #- build_python_api_ubuntu
-        #- build_python_api_osx
-        - release_weekly_installers:
-            requires:
-              - build_linux_installer
-              - build_appleSilicon_installer
-              - build_macOSx86_installer
-              - build_win10_installer
-              #- build_macOS_installers
-              #- build_python_api_ubuntu
-              #- build_python_api_osx
+  #weekly:
+  #    triggers:
+  #      - schedule:
+  #           cron: "0 16 * * 3" #Time is GMT
+  #           filters:
+  #             branches:
+  #               only: main
+  #    jobs:
+  #      - build_linux_installer
+  #      - build_appleSilicon_installer
+  #      - build_macOSx86_installer
+  #      - build_win10_installer
+  #      #- build_macOS_installers
+  #      #- build_python_api_ubuntu
+  #      #- build_python_api_osx
+  #      - release_weekly_installers:
+  #          requires:
+  #            - build_linux_installer
+  #            - build_appleSilicon_installer
+  #            - build_macOSx86_installer
+  #            - build_win10_installer
+  #            #- build_macOS_installers
+  #            #- build_python_api_ubuntu
+  #            #- build_python_api_osx
