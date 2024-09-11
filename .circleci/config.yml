@@ -252,6 +252,7 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang \
             -DCMAKE_OSX_ARCHITECTURES=x86_64  \
             -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/current \
+          moveToCommand: ${f/Darwin/Darwinx86}
             #-DCMAKE_C_COMPILER=clang \
             #-DCMAKE_CXX_COMPILER=clang++ \
             #-DOpenMP_C_FLAGS="-fopenmp" \
@@ -261,7 +262,6 @@ jobs:
             #-DOpenMP_omp_LIBRARY="lib/libomp.dylib" \
             #-DCPACK_BINARY_DRAGNDROP=ON \
             #-DCMAKE_OSX_ARCHITECTURES=x86_64 \
-          moveToCommand: ${f/Darwin/Darwinx86}
 
   build_appleSilicon_installer:
     macos:
