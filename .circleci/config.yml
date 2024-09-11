@@ -274,7 +274,8 @@ jobs:
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
-          beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
+          beforeCompile: export PATH=/opt/local/bin:$PATH
+          #beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
           #beforeCompile: export PATH="/Users/distiller/project/clang/bin:$PATH"; export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH";
           compileArgs: |
             -DCMAKE_BUILD_TYPE:String=Release \
