@@ -283,7 +283,6 @@ jobs:
             -DUSE_OMP=ON \
             -DCPACK_BINARY_DRAGNDROP=ON \
             -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_OSX_ARCHITECTURES=x86_64  \
             -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/current \
           moveToCommand: ${f/Darwin/AppleSilicon}
 
