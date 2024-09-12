@@ -61,10 +61,6 @@ macOSx86Prerequisites() {
     export CMAKE_OSX_ARCHITECTURES=x86_64
     export CFLAGS="-arch x86_64"
     export LDFLAGS="-arch x86_64"
-
-    #softwareupdate --install-rosetta --agree-to-license
-    #export PKG_CONFIG_PATH="/usr/local/opt/tcl-tk/lib/pkgconfig:$PKG_CONFIG_PATH"
-	
     macOSPrerequisites
 }
 
@@ -82,10 +78,7 @@ macOSPrerequisites() {
     brew doctor
     brew cleanup
     brew install cmake autoconf atool libtool automake
-    # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
-    #brew install zstd libxml2 xz
     brew install libxml2 xz
-    # bzip2 is already provided by macos
     brew install pkg-config gdbm tcl-tk 
     brew install gettext
     brew uninstall --ignore-dependencies gettext
@@ -276,9 +269,6 @@ hdf5src() {
     export CMAKE_INCLUDE_PATH=/path/to/libsz/include
     export CMAKE_LIBRARY_PATH=/path/to/libsz/lib
 
-    #PLUGIN_SOURCE=$srcDir/CMake-hdf5-1.12.2/hdf5_plugins-1_12_2
-    #cd $srcDir/CMake-hdf5-1.12.2/hdf5-1.12.2/build
-
     args=(
     -DCMAKE_INSTALL_PREFIX=$installDir
     -DCMAKE_BUILD_TYPE=Release
@@ -294,20 +284,14 @@ hdf5src() {
     -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
     -DHDF5_BUILD_HL_LIB:BOOL=ON
     -DHDF5_BUILD_TOOLS:BOOL=ON
-    #-DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON
     -DALLOW_UNSUPPORTED:BOOL=ON
-    #-DPLUGIN_TGZ_NAME:STRING=$srcDir/CMake-hdf5-1.12.2/hdf5_plugins-1_12_2.tar.gz
-    #-DH5PL_ALLOW_EXTERNAL_SUPPORT:STRING=TGZ
-    #-DTGZPATH:PATH=$PLUGIN_SOURCE/libs
-    #-DPLUGIN_TGZ_NAME:STRING=$srcDir/myhdfstuff/CMake-hdf5-1.12.2/hdf5_plugins-1_12_2.tar.gz
-    #-DHDF5_PLUGIN_INSTALL_DIR=$installDir/plugins
     )
     if [ "$OS" == "macOSx86" ]; then 
         args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
     fi
     cmake "${args[@]}" ..
-#    make
-#    make install
+    make
+    make install
 }
 
 zstd() {
@@ -437,9 +421,6 @@ jpeg() {
     args=(
         --prefix=$installDir
     )
-    #if [ "$OS" == "macOSx86" ] || [ "$OS" = "appleSilicon" ]; then
-    #    args+=(--host=arm-apple-darwin)
-    #fi
     if [ "$OS" == "macOSx86" ]; then
         args+=(--host=x86_64-apple-darwin)
     fi
@@ -496,8 +477,6 @@ curl() {
     tar xvf $srcDir/$library.tar.xz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     
-    #-DPROJ_COMPILER_NAME=$CXX
-    #-DCMAKE_OSX_ARCHITECTURES=x86_64
     args=(
         -DCMAKE_PREFIX_PATH=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
@@ -519,7 +498,6 @@ curl() {
 
 ssh() {
     cd $srcDir
-    #local library='libssh-0.10.0'
     local library='libssh-0.11.0'
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz
@@ -536,18 +514,10 @@ ssh() {
     if [ "$OS" == "macOSx86" ]; then
         args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
     fi
-    #if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
-    #    args+=(-DCMAKE_C_FLAGS=-Wno-error=strict-prototypes)
-    #    #args+=(-DCMAKE_C_FLAGS="-Wno-error=strict-prototypes")
-    #    #args+=(-DCMAKE_C_FLAGS="-Wno-strict-prototypes")
-    #    #args+=(-DCMAKE_CXX_FLAGS="-Wno-strict-prototypes")
-    #fi
 
     cmake "${args[@]}" ..
-    #CFLAGS="-Wno-strict-prototypes $CFLAGS" cmake "${args[@]}" ..
 
     make && make install
-    #make CFLAGS="$CFLAGS -Wno-strict-prototypes" && make install
 }
 
 proj() {
@@ -612,9 +582,6 @@ geotiff() {
         --with-libtiff=$installDir
     )
 
-    #CPPFLAGS=-I$installDir/include \
-    #CC=$CC \
-    #CXX=$CXX \
     configure "${args[@]}"
 
     make && make install
@@ -656,11 +623,6 @@ openssl() {
     elif [ "$OS" = "appleSilicon" ]; then
         args+=(darwin64-arm64-cc)
     fi
-    #export CFLAGS="-arch x86_64"
-    #export CXXFLAGS="-arch x86_64"
-    #export LDFLAGS="-arch x86_64"
-    #./config darwin64-x86_64-cc shared "${args[@]}"
-    #./Configure darwin64-x86_64-cc shared "${args[@]}"
     ./Configure shared "${args[@]}"
     make && make install
 }
@@ -681,16 +643,10 @@ pythonVapor() {
 
     if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
         export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"
-        #args+=(--libdir=$installDir/Resources)
         args+=(--prefix=/usr/local/VAPOR-Deps/current/Resources)
-        #args+=(--exec-prefix=$installDir/Resources)
-        #args+=(--with-openssl=$(brew --prefix openssl@1.1))
         args+=(--with-openssl=$installDir)
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
         args+=(--with-tcltk-includes="$(pkg-config --cflags tcl tk)")
-        #args+=(--with-macosx-version-min=$macOSMinVersion)
-        #export LDFLAGS="$LDFLAGS -L$installDir/lib -L/usr/local/opt/openssl@1.1/lib"
-        #export CPPFLAGS="$CPPFLAGS -I$installDir/include -I/usr/local/opt/openssl@1.1/include"
         export LDFLAGS="$LDFLAGS -L$installDir/lib"
         export CPPFLAGS="$CPPFLAGS -I$installDir/include"
         export LLVM_PROFDATA="/opt/local/bin/llvm-profdata-mp-17"
@@ -701,7 +657,6 @@ pythonVapor() {
 	    export LDFLAGS="$LDFLAGS -L/usr/local/lib"
             args+=(--build=x86_64-apple-darwin)
 	fi
-        #./configure "${args[@]}"
         configure "${args[@]}"
     else
         args+=(--with-openssl=$installDir)
@@ -792,8 +747,6 @@ qt() {
 
     CPPFLAGS="$CPPFLAGS -I$installDir/include" \
     LDFLAGS="$LDFLAGS -L$installDir/lib -Wl,-rpath=$installDir/lib" \
-    #CC=$CC \
-    #CXX=$CXX \
     ../configure \
     "${args[@]}" > qtConfig.txt
 
@@ -862,7 +815,7 @@ assimp
 szip
 hdf5
 
-zstd
+#zstd
 netcdf
 expat
 udunits

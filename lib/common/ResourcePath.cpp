@@ -1,4 +1,3 @@
-#include <iostream>
 #include <climits>
 #include <vapor/ResourcePath.h>
 #include <vapor/CMakeConfig.h>
@@ -100,7 +99,7 @@ std::string Wasp::GetSharePath(const std::string &name) { return GetResourcePath
 
 #if defined(WIN32)
     #define PYTHON_INSTALLED_PATH ("python" + string(PYTHON_VERSION))
-#elif defined(__aarch64__)
+#elif defined(__APPLE__)
     #define PYTHON_INSTALLED_PATH ("Resources/lib/python" + string(PYTHON_VERSION))
 #else
     #define PYTHON_INSTALLED_PATH ("lib/python" + string(PYTHON_VERSION))
@@ -119,35 +118,11 @@ std::string Wasp::GetPythonPath()
 
 std::string Wasp::GetPythonDir()
 {
-    std::string path2;
     #if defined(__APPLE__)
-        std::cout << "APPLE" << std::endl;
         string path = GetResourcePath("Resources");
     #else
         string path = GetResourcePath("");
     #endif
-    std::cout << "Path 1 " << path << std::endl;
-    //if (!FileUtils::Exists(FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH}))) path = string(PYTHON_DIR);
-//if (!FileUtils::Exists(path)) path2 = string(PYTHON_DIR);
-    path2 = string(PYTHON_DIR);
-    std::cout << "Path 2 " << path2 << std::endl;
-    return path;
-
-/*
-#ifdef WIN32
-    return GetPythonPath();
-#endif
-    string path = string(PYTHON_DIR);  // Try our third-party-library directory first
-    if (!FileUtils::Exists(path)) {
-        path = GetResourcePath("");
-        string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
-        if (!exists.empty()) {
-#if defined(__aarch64__)
-            path = exists; // If the third-party-library directory doesn't exist, use the python installed path.  Otherwise, use the root.
-#endif
-        }
-    }
-*/
     return path;
 }
 

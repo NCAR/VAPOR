@@ -467,14 +467,8 @@ if (APPLE)
         endif ()
 
         if (NOT BUILD_PYTHON)
-            #if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
-            #    file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONDIR})
-            #    set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}/../Resources")
-            #else()
                 file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
-                #set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}")
                 set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}/../Resources/lib")
-            #endif()
 		    install (
                 DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
                 DESTINATION ${PYTHON_DESTINATION}
@@ -486,9 +480,6 @@ if (APPLE)
 		    	DESTINATION ${PYTHON_DESTINATION}
 		    	COMPONENT Dependencies
 		    	)
-            message(STATUS "Python_LIBRARIES ${Python_LIBRARIES} ")
-            message(STATUS "INSTALL_GUI_FRAMEWORKS ${INSTALL_GUI_FRAMEWORKS}")
-            message(STATUS "PYTHON_DESTINATION ${PYTHON_DESTINATION}")
             file (GLOB COCOA_LIBS ${THIRD_PARTY_DIR}/plugins/platforms/libqcocoa.dylib)
 	        install (
                 FILES ${COCOA_LIBS}
@@ -504,7 +495,6 @@ if (APPLE)
         endif ()
 
         if (USE_OMP)
-            message(STATUS "Is this empty? ${OpenMP_CXX_LIBRARIES}")
             get_filename_component(OMP_PATH ${OpenMP_CXX_LIBRARIES} REALPATH)
             install (
                 FILES ${OMP_PATH}

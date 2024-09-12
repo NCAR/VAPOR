@@ -127,53 +127,15 @@ commands:
 
   get_macos_dependencies:
     steps:
-      #- run:
-      #    name: permit cache restore
-      #    command: sudo chmod -R 777 /opt
       - run:
           name: Get dependencies
           command: |
-            #pip install gdown
-
-            # MacPorts
-            #curl -k -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1.tar.bz2
-            #tar xf MacPorts-2.8.1.tar.bz2
-            #cd MacPorts-2.8.1/
-            #./configure
-            #make -j6
-            #sudo make install
-            #curl -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1-13-Ventura.pkg
-            #sudo installer -pkg MacPorts-2.8.1-13-Ventura.pkg -target /
-
-
             #Caching clang would miss every couple of weeks and require ~2 hours of build time.
             #Instead of caching it, we're just going to host it on aws and download it.
             wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/portClang.tar.xz
             sudo tar -xf portClang.tar.xz -C /
-            #sudo /opt/local/bin/port migrate
-            #sudo /opt/local/bin/port -v selfupdate
 
-            #wget https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.1/clang+llvm-17.0.1-arm64-apple-darwin22.0.tar.xz
-            #mkdir clang
-            #tar xvf clang+llvm-17.0.1-arm64-apple-darwin22.0.tar.xz --directory clang
-            #export PATH="/Users/distiller/project/clang/bin:$PATH"
-            #export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"
-
-            #wget https://vaporawsbucket.s3.us-west-2.amazonaws.com/clang.tar.xz
-            #tar xvf clang.tar.xz
-            #export PATH="/Users/distiller/project/clang/bin:$PATH"
-            #export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"
-
-            # CMake
-            #(sudo yes || true) | sudo /opt/local/bin/port install cmake
             brew install cmake
-            
-            # clang
-            # If we run selfupdate on every run, we will update clang on minor revisions, taking 1+ hours to build
-            # Therefore, skip selfupdate until we know we want a newer version of clang
-            # (sudo yes || true) | sudo /opt/local/bin/port install clang-17 +universal
-            #sudo /opt/local/bin/port select --set clang mp-clang-17
-            #/opt/local/bin/clang++ -v > clangVersion.txt
           no_output_timeout: 45m
 
 jobs:
@@ -231,7 +193,6 @@ jobs:
   build_macOSx86_installer:
     macos:
       xcode: "14.3.1"
-      #xcode: "14.2.1"
     resource_class: macos.m1.large.gen1
     steps:
       - checkout
@@ -241,9 +202,6 @@ jobs:
       - get_macos_dependencies
       - build_vapor:
           beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license
-          #beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; sudo port select --set clang mp-clang-17
-          #beforeCompile: export PATH="/Users/distiller/project/clang/bin:$PATH"; export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH"; softwareupdate --install-rosetta --agree-to-license
-          #cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON -DUSE_OMP=ON -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_OSX_ARCHITECTURES=x86_64  -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/current ..
           compileArgs: |
             -DCMAKE_BUILD_TYPE:String=Release \
             -DDIST_INSTALLER:string=ON \
@@ -252,16 +210,7 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang \
             -DCMAKE_OSX_ARCHITECTURES=x86_64  \
             -DTHIRD_PARTY_DIR=/usr/local/VAPOR-Deps/current \
-          moveToCommand: ${f/Darwin/Darwinx86}
-            #-DCMAKE_C_COMPILER=clang \
-            #-DCMAKE_CXX_COMPILER=clang++ \
-            #-DOpenMP_C_FLAGS="-fopenmp" \
-            #-DOpenMP_CXX_FLAGS="-fopenmp" \
-            #-DOpenMP_C_LIB_NAMES="omp" \
-            #-DOpenMP_CXX_LIB_NAMES="omp" \
-            #-DOpenMP_omp_LIBRARY="lib/libomp.dylib" \
-            #-DCPACK_BINARY_DRAGNDROP=ON \
-            #-DCMAKE_OSX_ARCHITECTURES=x86_64 \
+          moveToCommand: ${f/Darwin/macOSx86}
 
   build_appleSilicon_installer:
     macos:
@@ -275,8 +224,6 @@ jobs:
       - get_macos_dependencies
       - build_vapor:
           beforeCompile: export PATH=/opt/local/bin:$PATH
-          #beforeCompile: export PATH=/opt/local/bin:$PATH; sudo port select --set clang mp-clang-17
-          #beforeCompile: export PATH="/Users/distiller/project/clang/bin:$PATH"; export LD_LIBRARY_PATH="/Users/distiller/project/clang/lib:$LD_LIBRARY_PATH";
           compileArgs: |
             -DCMAKE_BUILD_TYPE:String=Release \
             -DDIST_INSTALLER:string=ON \
@@ -506,7 +453,7 @@ jobs:
             sha=`shasum -a 256 VAPOR3*Ubuntu*`
             ubuntuSha=$a$sha$endl
             #os="OSX:       "
-            #sha=`shasum -a 256 VAPOR3*Darwin*`
+            #sha=`shasum -a 256 VAPOR3*macOSx86*`
             #osxSha=$os$sha$endl
             #os="AppleSilicon:       "
             #sha=`shasum -a 256 VAPOR3*AppleSilicon*`
@@ -586,7 +533,7 @@ jobs:
           no_output_timeout: 30m
 
       - get_libraries:
-          fileName: *macOSx86Libs
+          fileName: *srcLibs
           sudo: sudo
 
       - run:
@@ -613,7 +560,6 @@ jobs:
 
   build_AppleSilicon_libs:
     macos:
-      #xcode: "14.2.0"
       xcode: "13.4.1"
 
     resource_class: macos.m1.large.gen1
@@ -622,8 +568,7 @@ jobs:
       - checkout
 
       - get_libraries:
-          fileName: 2023-Sept-src.tar.xz
-          #driveID: *srcLibID
+          driveID: *srcLibs
           sudo: sudo
 
       - run:
@@ -693,8 +638,8 @@ workflows:
       #- build_python_api_osx
       # - build_win10_installer
       #- build_macOS_installers
-      #- build_appleSilicon_installer
-      #- build_macOSx86_installer
+      - build_appleSilicon_installer
+      - build_macOSx86_installer
       - build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
