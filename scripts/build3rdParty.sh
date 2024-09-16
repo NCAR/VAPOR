@@ -678,11 +678,9 @@ pythonVapor() {
 ospray() {
     cd $srcDir
     if [ "$OS" == "appleSilicon" ]; then
-        local library='ospray-3.2.0.arm64.macosx'
-        rm -rf ospray/$library || true
-        unzip -o $srcDir/ospray/$library && cd $srcDir/$library
+        cd $srcDir/ospray/osprayM1
     elif [ "$OS" == "macOSx86" ]; then
-        local library='ospray-3.2.0.x86_64.macosx'
+        local library='ospray-2.11.0.x86_64.macosx'
         rm -rf ospray/$library || true
         unzip -o $srcDir/ospray/$library && cd $srcDir/$library
     else

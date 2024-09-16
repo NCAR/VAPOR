@@ -1,3 +1,4 @@
+#include <iostream>
 #include <climits>
 #include <vapor/ResourcePath.h>
 #include <vapor/CMakeConfig.h>
@@ -98,18 +99,16 @@ std::string Wasp::GetResourcePath(const std::string &name)
 std::string Wasp::GetSharePath(const std::string &name) { return GetResourcePath("share/" + name); }
 
 #if defined(WIN32)
-    #define PYTHON_INSTALLED_PATH ("python" + string(PYTHON_VERSION))
-#elif defined(__APPLE__)
-    #define PYTHON_INSTALLED_PATH ("Resources/lib/python" + string(PYTHON_VERSION))
+    #define PYTHON_MODULE_SUBDIR ("python" + string(PYTHON_VERSION))
 #else
-    #define PYTHON_INSTALLED_PATH ("lib/python" + string(PYTHON_VERSION))
+    #define PYTHON_MODULE_SUBDIR ("lib/python" + string(PYTHON_VERSION))
 #endif
 
 std::string Wasp::GetPythonVersion() { return std::string(PYTHON_VERSION); }
 
 std::string Wasp::GetPythonPath()
 {
-    string path = GetResourcePath(PYTHON_INSTALLED_PATH);
+    string path = GetResourcePath(PYTHON_MODULE_SUBDIR);
 
     if (!FileUtils::Exists(path)) path = string(PYTHON_PATH);
 
@@ -118,11 +117,15 @@ std::string Wasp::GetPythonPath()
 
 std::string Wasp::GetPythonDir()
 {
+    std::string path2;
     #if defined(__APPLE__)
         string path = GetResourcePath("Resources");
     #else
         string path = GetResourcePath("");
     #endif
+    std::cout << path+PYTHON_MODULE_SUBDIR << " " << !FileUtils::Exists(path+PYTHON_MODULE_SUBDIR) << std::endl;
+    std::string modulePath = FileUtils::JoinPaths( {path, PYTHON_MODULE_SUBDIR} );
+    if (!FileUtils::Exists( modulePath )) path = string(PYTHON_DIR);
     return path;
 }
 

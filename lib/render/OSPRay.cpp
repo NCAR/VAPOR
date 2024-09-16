@@ -12,7 +12,7 @@ using namespace VOSP;
 #ifdef BUILD_OSPRAY
 static int _initialized = false;
 
-void ospErrorCallback(void* userData, OSPError error, const char *msg)
+void ospErrorCallback(OSPError error, const char *msg)
 {
     fprintf(stderr, "OSP error ");
     switch (error) {
@@ -44,7 +44,7 @@ int VOSP::Initialize(int *argc, char **argv)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     // If this is not set, OSPRay will crash upon shutdown
-    ospDeviceSetErrorCallback(ospGetCurrentDevice(), ospErrorCallback, nullptr);
+    ospDeviceSetErrorFunc(ospGetCurrentDevice(), ospErrorCallback);
     #pragma GCC diagnostic pop
     _initialized = true;
     return 0;
@@ -184,7 +184,7 @@ OSPGeometricModel Test::LoadTriangle(glm::vec3 scale, const std::string &rendere
 
     ospCommit(mesh);
 
-    OSPMaterial mat = ospNewMaterial(rendererType.c_str());
+    OSPMaterial mat = ospNewMaterial(rendererType.c_str(), "obj");
     ospCommit(mat);
 
     // put the mesh into a model
