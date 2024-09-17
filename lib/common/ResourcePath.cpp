@@ -123,7 +123,6 @@ std::string Wasp::GetPythonDir()
     #else
         string path = GetResourcePath("");
     #endif
-    std::cout << path+PYTHON_MODULE_SUBDIR << " " << !FileUtils::Exists(path+PYTHON_MODULE_SUBDIR) << std::endl;
     std::string modulePath = FileUtils::JoinPaths( {path, PYTHON_MODULE_SUBDIR} );
     if (!FileUtils::Exists( modulePath )) path = string(PYTHON_DIR);
     return path;

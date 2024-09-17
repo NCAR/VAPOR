@@ -4,7 +4,7 @@ installDir="/Applications"
 dmgDir="tmp"
 
 dmgName="VAPOR3-`$installDir/vapor.app/Contents/MacOS/vaporversion -numeric`-"
-if [[ "/Applications/vapor.app/Contents/MacOS/vapor: Mach-O 64-bit executable arm64" == *arm64* ]]; then
+if [[ `file $installDir/vapor.app/Contents/MacOS/vapor` == *arm64* ]]; then
     dmgName="${dmgName}AppleSilicon.dmg"
 else
     dmgName="${dmgName}macOSx86.dmg"

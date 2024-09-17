@@ -52,10 +52,8 @@ if (UNIX)
 	        set (PYTHONVERSION 3.9)
         endif()
     if (APPLE)
-        #set (PYTHONDIR ${THIRD_PARTY_DIR}/Resources/python)
-        #set (PYTHONPATH ${PYTHONDIR}/lib/python${PYTHONVERSION})
-        set (PYTHONDIR ${THIRD_PARTY_DIR}/Resources)               # Root?
-        set (PYTHONPATH ${PYTHONDIR}/lib/python${PYTHONVERSION})   # Module path?
+        set (PYTHONDIR ${THIRD_PARTY_DIR}/Resources)
+        set (PYTHONPATH ${PYTHONDIR}/lib/python${PYTHONVERSION})
     else ()
         set (PYTHONDIR ${THIRD_PARTY_DIR})
         set (PYTHONPATH ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION})
