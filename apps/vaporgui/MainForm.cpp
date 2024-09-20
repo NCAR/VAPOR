@@ -681,6 +681,8 @@ void MainForm::CheckForCasperVGL()
             appPath = QApplication::instance()->applicationFilePath().toStdString();
         
         vector<const char*> prepend = {"vglrun"};
+        char* pluginPath = getenv("HDF5_PLUGIN_PATH");
+        if (existing) prepend.append(existing);
         char ** args = new char*[prepend.size() + qtArgs.size() + 1];
         for (int i = 0; i < prepend.size(); i++)
             args[i] = strdup(prepend[i]);
