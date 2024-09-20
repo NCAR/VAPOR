@@ -682,7 +682,7 @@ void MainForm::CheckForCasperVGL()
         
         vector<const char*> prepend = {"vglrun"};
         char* pluginPath = getenv("HDF5_PLUGIN_PATH");
-        if (pluginPath) prepend.append(existing);
+        if (pluginPath) prepend.push_back(existing);
         char ** args = new char*[prepend.size() + qtArgs.size() + 1];
         for (int i = 0; i < prepend.size(); i++)
             args[i] = strdup(prepend[i]);
