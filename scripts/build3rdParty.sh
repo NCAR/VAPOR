@@ -8,7 +8,7 @@
 #
 #                       xargs rm < install_manifest.txt
 
-set -e
+set -xe
 
 while getopts "o:b:" flag; do
     case "${flag}" in
@@ -18,113 +18,74 @@ while getopts "o:b:" flag; do
 done
 
 if [ -z "$OS" ]; then
-    echo "Error: -o flag is required to specify the target operating system [suse, maxOSx86, M1, CentOS, Ubuntu]"
+    echo "Error: -o flag is required to specify the target operating system [macOSx86, appleSilicon, Ubuntu]"
     exit 1
-fi
-
-if [ -z "$baseDir" ]; then
+elif [ -z "$baseDir" ]; then
     echo "No -b (base directory) option given.  Defaulting to /usr/local/VAPOR-Deps"
     baseDir='/usr/local/VAPOR-Deps'
 fi
 #baseDir='/glade/campaign/cisl/vast/vapor/third-party'
 
-if [ "$OS" != "suse" ]; then
-    srcDir="$baseDir/2023-Jun-src"
-    archiveName="2023-Jun"
-else
-    srcDir="$baseDir/2023-Sept-src"
-    archiveName="2024-Apr"
-fi
-
+srcDir="$baseDir/2024-Aug-src"
+archiveName="2024-Aug-${OS}"
 installDir="$baseDir/current"
-getMacOSMinVersion() {
-    if [ "$OS" == "macOSx86" ]; then
-        echo "10.15.0"
-    elif [ "$OS" = "M1" ]; then
-        echo "12.0.0"
-    fi
-}
 
 echo OS ${OS}
 echo baseDir $baseDir
 echo srcDir $srcDir
 echo installDir $installDir
 
-macOSMinVersion=$(getMacOSMinVersion)
-
+macOSMinVersion=""
 shopt -s expand_aliases
 alias make='make -j8'
-alias
-
-if [ "$OS" == "CentOS" ]; then
-    shopt -s expand_aliases
-    alias cmake=cmake3
-    alias
+alias configure='./configure'
+alias config='./config'
+if [[ "$OS" == "macOSx86" ]]; then
+    alias configure='./configure --host=x86_64-apple-darwin'
+    alias config='./config darwin64-x86_64-cc'
+    alias brew='arch -x86_64 /usr/local/bin/brew'
+    export PATH="/usr/local/bin:$PATH"
+    macOSMinVersion="10.15.0"
+elif [[ "$OS" == "appleSilicon" ]]; then
+    macOSMinVersion="12.0.0"
+    alias brew='/opt/homebrew/bin/brew'
+    export PATH="/opt/homebrew/bin:$PATH"
 fi
 
+echo "Homebrew alias:"
+alias brew
+echo "PATH ${PATH}"
+
 macOSx86Prerequisites() {
-    brew uninstall python@3.9
+    brew uninstall python@3.9 || true
+    export CMAKE_OSX_ARCHITECTURES=x86_64
+    export CFLAGS="-arch x86_64"
+    export LDFLAGS="-arch x86_64"
     macOSPrerequisites
 }
 
 macOSPrerequisites() {
     export MACOSX_DEPLOYMENT_TARGET=$macOSMinVersion
-    CC='clang'
-    CXX='clang++'
-    brew install cmake
-    brew install autoconf
-    brew install atool
-    brew install libtool
-    brew install automake
-    #brew install xz zlib openssl
-    brew install xz
-    #brew install python@3.9
-    #brew install pkg-config openssl@1.1 xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
-    brew install pkg-config xz gdbm tcl-tk # https://devguide.python.org/getting-started/setup-building/index.html#macos-and-os-x
-    #brew install gettext
-    #brew link gettext --force
+    export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+
+    export CC="/opt/local/bin/clang"
+    export CXX="/opt/local/bin/clang++"
+    export CFLAGS="$CFLAGS -isysroot $(xcrun --sdk macosx --show-sdk-path)"
+    export LDFLAGS="$LDFLAGS -isysroot $(xcrun --sdk macosx --show-sdk-path)"
+    export CXXFLAGS="$CFLAGS"
+    export CPPFLAGS="$CFLAGS"
+
+    brew doctor
+    brew cleanup
+    brew install cmake autoconf atool libtool automake
+    brew install libxml2 xz
+    brew install pkg-config gdbm tcl-tk 
+    brew install gettext
     brew uninstall --ignore-dependencies gettext
-}
 
-susePrerequisites() {
-    CC='gcc'
-    CXX='g++'
-    zypper update -y
-
-    zypper install -y cmake
-
-    zypper install -y \
-        libqt5-qtbase-devel \
-        libicu-devel \
-        m4 \
-        libXau-devel \
-        autoconf \
-        libtool \
-        libxcb-xinerama0 \
-        pkg-config \
-        unzip \
-        gcc7-fortran
-    
-    # Qt
-    zypper install -y \
-        libX11-xcb1 \
-        libXinerama-devel \
-        freeglut-devel \
-        libGLU1 \
-        libXrender-devel \
-        libXi-devel \
-        libxkbcommon-devel \
-        libxkbcommon-x11-devel \
-        libSM-devel \
-        libICE-devel
-
-    # Additional suse dependencies https://github.com/bincrafters/community/issues/1229
-    zypper install -y \
-        xcb-util-wm-devel \
-        xcb-util-image-devel \
-        xcb-util-keysyms-devel \
-        libxcb-devel \
-        xcb-util-renderutil-devel
+    #port install clang-17 +universal
+    #sudo port select --set clang mp-clang-17
+    #xcode-select --install
 }
 
 ubuntuPrerequisites() {
@@ -172,20 +133,6 @@ ubuntuPrerequisites() {
         libxkbcommon-x11-dev
 }
 
-fedoraPrerequisites() {
-    yum install -y \
-    libxcb-devel.x86_64 \
-    libX11-xcb.x86_64 \
-    libxcb.x86_64 \
-    freeglut-devel.x86_64 \
-    mesa-libGLU-devel.x86_64 \
-    libXrender-devel.x86_64 \
-    libXi-devel.x86_64 \
-    libxkbcommon-devel.x86_64 \
-    libxkbcommon-x11-devel.x86_64 \
-    
-}
-
 windowsPrerequisites() {
     CC='i686-w64-mingw-gcc'
     CXX='i686-w64-mingw-g++'
@@ -220,8 +167,11 @@ libpng() {
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_INSTALL_LIBDIR=lib
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "appleSilicon" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+    fi
+    if [ "$OS" == "macOSx86" ]; then 
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
     fi
 
     cmake "${args[@]}" ..
@@ -230,11 +180,7 @@ libpng() {
 
 assimp() {
     cd $srcDir
-    if [ "$OS" == "CentOS" ]; then
-        local library='assimp-5.1.6'
-    else
-        local library='assimp-5.2.5' #requires c++17 compiler
-    fi
+    local library='assimp-5.2.5' #requires c++17 compiler
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
@@ -246,8 +192,11 @@ assimp() {
         -DCMAKE_CXX_FLAGS="-O3 -Wno-error=deprecated-declarations"
         -DASSIMP_BUILD_TESTS=OFF
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "appleSilicon" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+    fi
+    if [ "$OS" == "macOSx86" ]; then 
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
     fi
 
     cmake "${args[@]}" ..
@@ -265,9 +214,13 @@ zlib() {
         -DCMAKE_INSTALL_PREFIX=$installDir
         -DCMAKE_BUILD_TYPE=Release 
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "appleSilicon" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
+    if [ "$OS" == "macOSx86" ]; then 
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
+    fi
+
 
     cmake "${args[@]}" ..
     make && make install
@@ -296,7 +249,7 @@ hdf5() {
     if [ "$OS" == "macOSx86" ]; then
         tar xvf hdf5/hdf5-$hdfVersion-Std-macos11_64-clang.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
-    elif [ "$OS" == "M1" ]; then
+    elif [ "$OS" == "appleSilicon" ]; then
         tar xvf hdf5/hdf5-$hdfVersion-Std-macos11m1_64-clang.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
     else
@@ -305,6 +258,64 @@ hdf5() {
     fi
 
     ln -fs $installDir/HDF_Group/HDF5/$hdfVersion/lib/plugin/ $installDir/share/plugins
+}
+
+hdf5src() {
+    cd $srcDir
+    local library="hdf5-${hdfVersion}"
+    rm -rf $library || true
+    tar xvf $srcDir/$library.tar.gz
+    mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
+    export CMAKE_INCLUDE_PATH=/path/to/libsz/include
+    export CMAKE_LIBRARY_PATH=/path/to/libsz/lib
+
+    args=(
+    -DCMAKE_INSTALL_PREFIX=$installDir
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_INSTALL_RPATH=$installDir
+    -DCMAKE_PREFIX_PATH=$installDir
+    -DZLIB_DIR=$installDir
+    -DUSE_SHARED_LIBS:BOOL=ON
+    -DBUILD_SHARED_LIBS:BOOL=ON
+    -DHDF5_ENABLE_RPATH:BOOL=ON
+    -DHDF5_BUILD_WITH_INSTALL_NAME:BOOL=ON
+    -DHDF5_ENABLE_THREADSAFE:BOOL=ON
+    -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON
+    -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
+    -DHDF5_BUILD_HL_LIB:BOOL=ON
+    -DHDF5_BUILD_TOOLS:BOOL=ON
+    -DALLOW_UNSUPPORTED:BOOL=ON
+    )
+    if [ "$OS" == "macOSx86" ]; then 
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
+    fi
+    cmake "${args[@]}" ..
+    make
+    make install
+}
+
+zstd() {
+    cd $srcDir
+    local library='zstd-1.5.6'
+    rm -rf $library || true
+    tar xvf $srcDir/$library.tar
+    mkdir -p $srcDir/$library/build/cmake/build && cd $srcDir/$library/build/cmake/build
+
+    args=(
+        -DCMAKE_INSTALL_PREFIX=$installDir
+    )
+
+    if [ "$OS" == "macOSx86" ]; then 
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
+    fi
+    if [ "$OS" == "appleSilicon" ]; then 
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+        args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+    fi
+
+    cmake "${args[@]}" ..
+    make && make install
 }
 
 netcdf() {
@@ -316,16 +327,27 @@ netcdf() {
 
     args=(
         -DCMAKE_INSTALL_PREFIX=$installDir
-        -DCMAKE_PREFIX_PATH="$installDir/HDF_Group/HDF5/$hdfVersion"
+        -DCMAKE_PREFIX_PATH=$installDir/HDF_Group/HDF5/$hdfVersion
+        -DHDF5_DIR=$installDir/HDF_Group/HDF5/$hdfVersion
+        -DHDF5_ROOT=$installDir/HDF_Group/HDF5/$hdfVersion
         -DCMAKE_INSTALL_LIBDIR=lib
         -DENABLE_BYTERANGE=False
         -DENABLE_DAP=False
         -DCMAKE_BUILD_TYPE=Release
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ]; then 
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
+    fi
+    if [ "$OS" == "appleSilicon" ]; then 
+        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+        args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
     fi
 
+    export HDF5_ROOT=$installDir/HDF_Group/HDF5/$hdfVersion
+    export LD_LIBRARY_PATH=$HDF5_ROOT/lib
+    export CPPFLAGS=-I$HDF5_ROOT/include
+    export LDFLAGS=-L$HDF5_ROOT/lib
     cmake "${args[@]}" ..
     make && make install
 }
@@ -342,9 +364,13 @@ expat() {
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_INSTALL_LIBDIR=lib
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" = "appleSilicon" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     fi
+    if [ "$OS" == "macOSx86" ]; then 
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
+    fi
+
 
     cmake "${args[@]}" ..
     make && make install
@@ -372,11 +398,14 @@ freetype() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz
     cd $srcDir/$library
+
     args=(
         --prefix=$installDir
+        --with-brotli=no
+        --with-bzip2=no
     )
-    CC=$CC CXX=$CXX \
-    ./configure "${args[@]}"
+
+    configure "${args[@]}"
     make && make install
 }
 
@@ -392,8 +421,8 @@ jpeg() {
     args=(
         --prefix=$installDir
     )
-    if [ "$OS" == "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(--host=arm-apple-darwin)
+    if [ "$OS" == "macOSx86" ]; then
+        args+=(--host=x86_64-apple-darwin)
     fi
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
@@ -406,7 +435,7 @@ tiff() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     cd $srcDir/$library
-    if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
         glibtoolize --force
     else
         libtoolize --force
@@ -442,8 +471,6 @@ sqlite() {
 }
 
 curl() {
-    echo $LD_LIBRARY_PATH
-    echo $DYLD_LIBRARY_PATH
     cd $srcDir
     local library='curl-8.2.1' # works
     rm -rf $library || true
@@ -454,11 +481,15 @@ curl() {
         -DCMAKE_PREFIX_PATH=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
         -DCMAKE_INSTALL_PREFIX=$installDir
-        -DPROJ_COMPILER_NAME=$CXX
         -DCMAKE_LIBRARY_PATH=$installDir/lib
         -DCMAKE_INCLUDE_PATH=$installDir/include
         -DCMAKE_INSTALL_RPATH=$installDir/lib
     )
+
+    if [ "$OS" == "macOSx86" ]; then
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
+    fi
+
 
     cmake "${args[@]}" ..
 
@@ -467,7 +498,7 @@ curl() {
 
 ssh() {
     cd $srcDir
-    local library='libssh-0.10.0' # works
+    local library='libssh-0.11.0'
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.xz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
@@ -476,10 +507,13 @@ ssh() {
         -DCMAKE_PREFIX_PATH=$installDir
         -DCMAKE_INSTALL_LIBDIR=lib
         -DCMAKE_INSTALL_PREFIX=$installDir
-        -DPROJ_COMPILER_NAME=$CXX
         -DCMAKE_LIBRARY_PATH=$installDir/lib
         -DCMAKE_INCLUDE_PATH=$installDir/include
     )
+
+    if [ "$OS" == "macOSx86" ]; then
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
+    fi
 
     cmake "${args[@]}" ..
 
@@ -496,11 +530,15 @@ proj() {
     tar xvf proj-datumgrid-1.8.tar.gz -C $library/data
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     
-    if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
+    if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
         local sqliteLib="-DSQLITE3_LIBRARY=$installDir/lib/libsqlite3.dylib"
     else
         local sqliteLib="-DSQLITE3_LIBRARY=$installDir/lib/libsqlite3.so"
     fi
+    if [ "$OS" == "macOSx86" ]; then 
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
+    fi
+
 
     args=(
         -DCMAKE_PREFIX_PATH=$installDir
@@ -513,14 +551,11 @@ proj() {
         -DCMAKE_LIBRARY_PATH=$installDir/lib
         -DCMAKE_INCLUDE_PATH=$installDir/include
     )
-    if [ "$OS" == "M1" ]; then
-        args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+    if [ "$OS" == "appleSilicon" ]; then
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
     elif [ "$OS" == "macOSx86" ]; then
+        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
         args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
-    elif [ "$OS" == "suse" ]; then
-        args+=(-DCURL_INCLUDE_DIR=$installDir/include)
-        args+=(-DCURL_LIBRARY=$installDir/lib/libcurl.so)
     fi
     cmake "${args[@]}" ..
 
@@ -533,6 +568,12 @@ geotiff() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
 
+    echo $CC
+    echo $CXX
+    echo $CFLAGS
+    echo $LDFLAGS
+    echo $SDKROOT
+
     args=(
         --prefix=$installDir
         --with-zlib=yes
@@ -541,15 +582,7 @@ geotiff() {
         --with-libtiff=$installDir
     )
 
-    #if [ "$OS" == "suse" ]; then
-    #    LDFLAGS=-L/usr/lib64 -L$installDir/lib \
-    #else
-    #    LDFLAGS=-L$installDir/lib \
-    #fi
-    CPPFLAGS=-I$installDir/include \
-    CC=$CC \
-    CXX=$CXX \
-    ./configure "${args[@]}"
+    configure "${args[@]}"
 
     make && make install
 }
@@ -572,20 +605,25 @@ xinerama() {
 
 openssl() {
     cd $srcDir
-    if [ "$OS" != "suse" ]; then
-        local library='openssl-1.1.1t'
-    else
-        local library='openssl-1.1.1w'
-    fi
+    local library='openssl-1.1.1w'
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
+
+    echo $CFLAGS
+    echo $CXXFLAGS
+    echo $LDFLAGS
+    echo $CPPFLAGS
 
     args=(
         --prefix=$installDir
         --openssldir=$installDir
     )
-
-    ./config shared "${args[@]}"
+    if [ "$OS" = "macOSx86" ]; then
+        args+=(darwin64-x86_64-cc)
+    elif [ "$OS" = "appleSilicon" ]; then
+        args+=(darwin64-arm64-cc)
+    fi
+    ./Configure shared "${args[@]}"
     make && make install
 }
 
@@ -600,25 +638,26 @@ pythonVapor() {
         --enable-shared
         --with-ensurepip=install
         --with-suffix=.vapor
+        --enable-optimizations
     )
-    if [ "$OS" != "CentOS" ]; then
-        args+=(--enable-optimizations)
-    fi
 
-    #LDFLAGS="-L$installDir/lib -L$(brew --prefix zlib)/lib -I$(brew --prefix openssl)/lib" \
-    #CPPFLAGS="-I$installDir/include -I$(brew --prefix zlib)/include -I$(brew --prefix openssl)/include" \
-    if [ "$OS" = "macOSx86" ] || [ "$OS" = "M1" ]; then
-        args+=(--libdir=$installDir/Resources)
-        args+=(--with-openssl=$(brew --prefix openssl@1.1))
+    if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
+        export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"
+        args+=(--prefix=/usr/local/VAPOR-Deps/current/Resources)
+        args+=(--with-openssl=$installDir)
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
         args+=(--with-tcltk-includes="$(pkg-config --cflags tcl tk)")
-        #args+=(--with-macosx-version-min=$macOSMinVersion)
-        export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"; \
-        CC=$CC \
-        CXX=$CXX \
-        LDFLAGS="-L$installDir/lib" \
-        CPPFLAGS="-I$installDir/include" \
-        ./configure "${args[@]}"
+        export LDFLAGS="$LDFLAGS -L$installDir/lib"
+        export CPPFLAGS="$CPPFLAGS -I$installDir/include"
+        export LLVM_PROFDATA="/opt/local/bin/llvm-profdata-mp-17"
+        export LD_LIBRARY_PATH="$installDir/Resources"
+
+    	if [ "$OS" == "macOSx86" ]; then
+	    export CFLAGS="$CFLAGS -I/usr/local/include"
+	    export LDFLAGS="$LDFLAGS -L/usr/local/lib"
+            args+=(--build=x86_64-apple-darwin)
+	fi
+        configure "${args[@]}"
     else
         args+=(--with-openssl=$installDir)
         CC=$CC \
@@ -630,66 +669,59 @@ pythonVapor() {
 
     make && make install
 
-    $installDir/bin/python3.9.vapor -m pip install --upgrade pip
+    $installDir/Resources/bin/python3.9.vapor -m pip install --upgrade pip
 
     # As of 5/27/2023, numpy's current version (1.24.3) fails to initialize PyEngine's call to import_array1(-1)
-    $installDir/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
+    $installDir/Resources/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
 }
 
 ospray() {
     cd $srcDir
-    if [ "$OS" == "M1" ]; then
-        # 6/2/2023 - CircleCI was having difficulty targeting arm64 for Ospray's build.
-        #            Workaround: compile Ospray locally and add it to the source .tar.xz bundle
+    if [ "$OS" == "appleSilicon" ]; then
         cd $srcDir/ospray/osprayM1
     elif [ "$OS" == "macOSx86" ]; then
         local library='ospray-2.11.0.x86_64.macosx'
         rm -rf ospray/$library || true
-        unzip $srcDir/ospray/$library && cd $srcDir/$library
+        unzip -o $srcDir/ospray/$library && cd $srcDir/$library
     else
         local library='ospray-2.11.0.x86_64.linux'
         rm -rf ospray/$library || true
         tar xvf $srcDir/ospray/$library.tar.gz && cd $srcDir/$library
     fi
     mkdir -p $installDir/Ospray
-    cp -rP * $installDir/Ospray
+    cp -rfP * $installDir/Ospray
 }
 
 glm() {
     cd $srcDir
     local library='glm-0.9.9.8'
-    unzip $srcDir/$library.zip && cp -r $srcDir/glm/glm $installDir/include
+    rm -rf glm || true
+    unzip $srcDir/$library.zip 
+    cp -r $srcDir/glm/glm $installDir/include
 }
 
 gte() {
     cd $srcDir
     tar xvf GTE.tar.xz
-    mv GTE $installDir/include
+    rsync -a GTE $installDir/include
 }
 
 images() {
     cd $srcDir
     tar xvf images.tar.xz
-    mv images $installDir/share
+    rsync -a images $installDir/share
 }
 
 qt() {
     cd $srcDir
-    if [ "$OS" == "CentOS" ]; then
-        local library='qt-everywhere-src-5.13.2'
-        tar xf $srcDir/$library.tar.xz
-        mkdir -p $srcDir/$library/build
-        cd $srcDir/$library/build
-    else 
-        rm -rf qt-everywhere-src-5.15.8 || true
-        tar xf $srcDir/qt-everywhere-opensource-src-5.15.8.tar.xz
-        mkdir -p $srcDir/qt-everywhere-src-5.15.8/build
-        cd $srcDir/qt-everywhere-src-5.15.8/build
-
-        if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
-            brew install gettext
-            brew link gettext --force
-        fi
+    rm -rf qt-everywhere-src-5.15.8 || true
+    tar xf $srcDir/qt-everywhere-opensource-src-5.15.8.tar.xz
+    mkdir -p $srcDir/qt-everywhere-src-5.15.8/build
+    cd $srcDir/qt-everywhere-src-5.15.8/build
+ 
+    if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
+        brew install gettext
+        brew link gettext --force
     fi
 
     args=(
@@ -701,7 +733,7 @@ qt() {
         -nomake examples
         -nomake tests
     )
-    if [ "$OS" == "Ubuntu" ] || [ "$OS" = "suse" ]; then
+    if [ "$OS" == "Ubuntu" ]; then
         args+=(-feature-freetype)
         args+=(-qt-freetype)
         args+=(-opengl desktop)
@@ -711,10 +743,8 @@ qt() {
         args+=(-bundled-xcb-xinput)
     fi
 
-    CPPFLAGS=-I$installDir/include \
-    LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
-    CC=$CC \
-    CXX=$CXX \
+    CPPFLAGS="$CPPFLAGS -I$installDir/include" \
+    LDFLAGS="$LDFLAGS -L$installDir/lib -Wl,-rpath=$installDir/lib" \
     ../configure \
     "${args[@]}" > qtConfig.txt
 
@@ -723,7 +753,7 @@ qt() {
 }
 
 add_rpath() {
-    for lib in $installDir/lib/*.dylib; do
+    for lib in $installDir/lib/*.dylib $installDir/Resources/lib/*.dylib; do
         fileName="$(basename $lib)"
         echo install_name_tool -id @rpath/$fileName $lib
         install_name_tool -id @rpath/$fileName $lib
@@ -739,64 +769,65 @@ add_rpath() {
                 echo install_name_tool -change "$dep" "$newPath" "$installDir/lib/$lib"
                 install_name_tool -change "$dep" "$newPath" "$lib"
             fi
+            if [ "$(dirname "$dep")" == "$installDir/Resources/lib" ]; then
+                echo install_name_tool -change "$dep" "$newPath" "$installDir/Resources/$lib"
+                install_name_tool -change "$dep" "$newPath" "$installDir/Resources/$lib"
+            fi
         done
         codesign --force -s - $lib
     done
 }
 
-#baseDir='/usr/local/VAPOR-Deps'
-#srcDir="$baseDir/2023-Jun-src"
-#installDir="$baseDir/current"
-#archiveName="2023-Jun"
 renameAndCompress() {
     pwd
     cd $baseDir
     mv $installDir $archiveName
-    tar cfJ $archiveName-$OS.tar.xz $archiveName
+    tar cfJ $archiveName.tar.xz $archiveName
 }
 
 if [ "$OS" == "macOSx86" ]; then
     macOSx86Prerequisites
-elif [ "$OS" == "M1" ]; then
+elif [ "$OS" == "appleSilicon" ]; then
     macOSPrerequisites
 elif [ "$OS" == "Ubuntu" ]; then
     ubuntuPrerequisites
-elif [ "$OS" == "CentOS" ]; then
-    centosPrerequisites
 elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
-elif [ "$OS" == "suse" ]; then
-    susePrerequisites
 fi
 
-#openssl
-#libpng
-#jpeg
-#tiff
-#sqlite
-#ssh
+openssl
+zlib
+libpng
+jpeg
+tiff
+sqlite
+ssh
+
+### m1 needs curl for proj?
 #curl
-#proj
-#geotiff
-##fi
-#zlib
+###
+
+proj
+geotiff
+assimp
+szip
+hdf5
+
+#zstd
+netcdf
+expat
+udunits
+freetype
+if [ "$OS" == "Ubuntu" ] ; then
+   xinerama
+fi         
+ospray
+glm
+gte
+images
 pythonVapor
-#assimp
-#szip
-#hdf5
-#netcdf
-#expat
-#udunits
-#freetype
-#if [ "$OS" == "Ubuntu" ] ; then
-#   xinerama
-#fi         
-#ospray
-#glm
-#gte
-#images
-#qt
-if [ "$OS" == "macOSx86" ] || [ "$OS" == "M1" ]; then
+qt
+if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
     add_rpath
 fi         
-#renameAndCompress
+renameAndCompress

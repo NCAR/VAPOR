@@ -1,8 +1,14 @@
 set +e
 
 installDir="/Applications"
-dmgName="VAPOR3-3.9.3-AppleSilicon.dmg"
 dmgDir="tmp"
+
+dmgName="VAPOR3-`$installDir/vapor.app/Contents/MacOS/vaporversion -numeric`-"
+if [[ `file $installDir/vapor.app/Contents/MacOS/vapor` == *arm64* ]]; then
+    dmgName="${dmgName}AppleSilicon.dmg"
+else
+    dmgName="${dmgName}macOSx86.dmg"
+fi
 
 #for file in ${installDir}/vapor.app/Contents/Frameworks/*; do
 #    codesign --sign "Developer ID Application: University Corporation for Atmospheric Research (DQ4ZFL4KLF)" --force --deep --timestamp --verbose $file
@@ -51,7 +57,7 @@ rm -rf "${dmgDir}"
 
 # Sign and notarize the .dmg
 codesign --force --verify --verbose --sign "Developer ID Application: University Corporation for Atmospheric Research (DQ4ZFL4KLF)" ${installDir}/${dmgName}
-xcrun -v notarytool submit ${installDir}/${dmgName} --keychain-profile "testApp-password" --wait
+xcrun -v notarytool submit ${installDir}/${dmgName} --keychain-profile "VAPOR3" --wait
 
 # Staple the notarized .dmg
 xcrun stapler staple ${installDir}/${dmgName}
