@@ -71,7 +71,7 @@ void CopyRegionAnnotationWidget::copyRegion()
         VAssert(aParams);
         int timeStep = aParams->GetCurrentTimestep();
 
-        _scaleWorldCoordsToNormalized(minExtents, maxExtents, timeStep);
+        _scaleWorldCoordsToNormalized(minExtentsVec, maxExtentsVec, timeStep);
 
         aa->SetAxisOrigin(minExtentsVec);
         aa->SetMinTics(minExtentsVec);
@@ -81,18 +81,17 @@ void CopyRegionAnnotationWidget::copyRegion()
     }
 }
 
-void CopyRegionAnnotationWidget::_scaleWorldCoordsToNormalized(CoordType &minExts, CoordType &maxExts, int timeStep)
-{
+void CopyRegionAnnotationWidget::_scaleWorldCoordsToNormalized(std::vector<double> &minCoords, std::vector<double> &maxCoords, int timeStep) {
+    VAssert(minCoords.size() == maxCoords.size());
     VAPoR::CoordType    minDomainExts, maxDomainExts;
     DataStatus *        dataStatus = _controlExec->GetDataStatus();
     dataStatus->GetActiveExtents(_paramsMgr, timeStep, minDomainExts, maxDomainExts);
-    VAssert(minExts.size() == maxExts.size());
 
-    int size = minExts.size();
-    for (int i = 0; i < size; i++) {
-        double point = minExts[i] - minDomainExts[i];
-        minExts[i] = point / (maxDomainExts[i] - minDomainExts[i]);
-        point = maxExts[i] - minDomainExts[i];
-        maxExts[i] = point / (maxDomainExts[i] - minDomainExts[i]);
+    for (int i = 0; i < minCoords.size(); i++) {
+        double minPoint = minCoords[i] - minDomainExts[i];
+        double maxPoint = maxCoords[i] - minDomainExts[i];
+        double magnitude = maxDomainExts[i] - minDomainExts[i];
+        minCoords[i] = minPoint / magnitude;
+        maxCoords[i] = maxPoint / magnitude;
     }
 }
