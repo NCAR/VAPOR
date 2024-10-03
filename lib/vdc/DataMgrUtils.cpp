@@ -371,7 +371,8 @@ double DataMgrUtils::Get2DRendererDefaultZ(DataMgr *dataMgr, size_t ts, int refL
     bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", refLevel, lod, minExts, maxExts);
     if (!status) return (0.0);
 
-    return (minExts[2]);
+    //return (minExts[2]);
+    return (std::abs(minExts[2]) < std::abs(maxExts[2])) ? minExts[2] : maxExts[2];
 }
 
 bool DataMgrUtils::GetFirstExistingVariable(DataMgr *dataMgr, int level, int lod, int ndim, string &varname, size_t &ts)
