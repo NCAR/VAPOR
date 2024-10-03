@@ -452,15 +452,15 @@ jobs:
             a="Ubuntu18:  "
             sha=`shasum -a 256 VAPOR3*Ubuntu*`
             ubuntuSha=$a$sha$endl
-            #os="OSX:       "
-            #sha=`shasum -a 256 VAPOR3*macOSx86*`
-            #osxSha=$os$sha$endl
-            #os="AppleSilicon:       "
-            #sha=`shasum -a 256 VAPOR3*AppleSilicon*`
-            #osxSha=$os$sha$endl
-            #os="Windows:   "
-            #sha=`shasum -a 256 VAPOR3*win64*`
-            #winSha=$os$sha$endl
+            os="OSX:       "
+            sha=`shasum -a 256 VAPOR3*macOSx86*`
+            osxSha=$os$sha$endl
+            os="AppleSilicon:       "
+            sha=`shasum -a 256 VAPOR3*AppleSilicon*`
+            osxSha=$os$sha$endl
+            os="Windows:   "
+            sha=`shasum -a 256 VAPOR3*win64*`
+            winSha=$os$sha$endl
             shaMessage="$title$ubuntuSha$osxSha$m1Sha$winSha"
             date=`date +"%d_%m_%y"`
             echo $shaMessage > "/tmp/workspace/installers/sha256.txt"
@@ -647,11 +647,11 @@ workflows:
       #- build_AppleSilicon_libs
       #- build_suse_libs
       #- build_windows_libs
-      #- release_weekly_installers:
-      #    requires:
+      - release_weekly_installers:
+         requires:
       #      - build_win10_installer
       #      - build_macOS_installers
-      #      - build_linux_installer
+           - build_linux_installer
   #weekly:
   #    triggers:
   #      - schedule:
