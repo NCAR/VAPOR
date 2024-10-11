@@ -169,6 +169,9 @@ void SliceRenderer::_resetColormapCache()
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
     tf->makeLut(_cacheParams.tf_lut);
     _cacheParams.tf_minMax = tf->getMinMaxMapValue();
+    // The slice and contour shaders require that the minimum and maximum data
+    // values have at least some range between them
+    if (_cacheParams.tf_minMax[0] == _cacheParams.tf_minMax[1]) range_f[1]+=.1;
 
     if (_colorMapTextureID != 0) glDeleteTextures(1, &_colorMapTextureID);
 

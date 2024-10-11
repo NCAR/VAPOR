@@ -1478,10 +1478,6 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, CoordTy
 
     float range_f[2];
     sg->GetRange(range_f);
-
-    // The slice and contour shaders require that the minimum and maximum data
-    // values have at least some range between them
-    if (range_f[0] == range_f[1]) range_f[1]+=.1;
     range = {range_f[0], range_f[1]};
 
     delete sg;

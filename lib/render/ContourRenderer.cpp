@@ -282,6 +282,9 @@ int ContourRenderer::_paintGL(bool fast)
 
     RenderParams *  rp = GetActiveParams();
     MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());
+    // The slice and contour shaders require that the minimum and maximum data
+    // values have at least some range between them
+    if (tf->getMinMapValue() == tf->getMaxMapValue()) tf->setMaxMapValue(tf->getMaxMapValue()+.1);
     float           lut[4 * 256];
     tf->makeLut(lut);
     if (rp->UseSingleColor()) {
