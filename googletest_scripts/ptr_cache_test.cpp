@@ -20,7 +20,7 @@ TEST(ptr_cache_query_false, insert_eviction)
 {
   VAPoR::ptr_cache<int, MyObj, 3, false> cache;
   const auto* p = cache.query(1);
-  EXPECT_EQ(p, nullptr);
+  EXPECT_EQ(p, nullptr); // nothing in the cache yet, should get nullptr
 
   cache.insert(1, new MyObj{1, 100});
   cache.insert(2, new MyObj{2, 200});
@@ -47,7 +47,7 @@ TEST(ptr_cache_query_false, insert_eviction)
   p = cache.query(1);
   EXPECT_EQ(p, nullptr);
 
-  // Do a query on "2"
+  // Do a query on "2", but queries don't count as a use.
   p = cache.query(2);
 
   // Insert another object; make sure that "2" is evicted.
