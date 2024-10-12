@@ -102,6 +102,7 @@ option (BUILD_TEST_APPS "Build test applications" OFF)
 option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" OFF)
 option (USE_OMP "Use OpenMP on some calculations" OFF)
 option (CONDA_BUILD "Use Conda to build" OFF)
+option( BUILD_GOOGLE_TEST "Build unit tests using GoogleTest" OFF )
 if (UNIX AND NOT APPLE)
     include (CMakeDependentOption)
     cmake_dependent_option (DIST_APPIMAGE "Generate an AppImage for VAPOR's installation across multiple Linux platforms" OFF "DIST_INSTALLER" ON)
@@ -114,6 +115,34 @@ if( USE_OMP )
     else()
         message(STATUS "OpenMP NOT found! Are you using Apple Clang?")
     endif()
+endif()
+
+#
+# Build Google Test
+#
+if( BUILD_GOOGLE_TEST )
+  # Control internal options of GoogleTest
+  #
+  set( INSTALL_GTEST OFF CACHE INTERNAL "Not install GoogleTest")
+  set( BUILD_GMOCK ON CACHE INTERNAL "Build gmock")
+
+  # Let's use the new mechanism to incorporate GoogleTest
+  #
+  include(FetchContent)
+  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
+    FetchContent_Declare( googletest
+      URL https://github.com/google/googletest/archive/refs/heads/main.zip
+      DOWNLOAD_EXTRACT_TIMESTAMP NEW )
+  endif()
+
+  # Prevent overriding the parent project's compiler/linker settings on Windows
+  #
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(googletest)
+
+  enable_testing() # calling this function before adding subdirectory to enable 
+                   # invoking ctest from the top-level build directory.
+  add_subdirectory( googletest_scripts )
 endif()
 
 set (GENERATE_FULL_INSTALLER ON)
