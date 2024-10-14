@@ -169,9 +169,6 @@ void SliceRenderer::_resetColormapCache()
     MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
     tf->makeLut(_cacheParams.tf_lut);
     _cacheParams.tf_minMax = tf->getMinMaxMapValue();
-    // The slice and contour shaders require that the minimum and maximum data
-    // values have at least some range between them
-    if (_cacheParams.tf_minMax[0] == _cacheParams.tf_minMax[1]) _cacheParams.tf_minMax[1]+=.1;
 
     if (_colorMapTextureID != 0) glDeleteTextures(1, &_colorMapTextureID);
 
@@ -497,8 +494,11 @@ void SliceRenderer::_configureShader()
     VAssert(p);
     float opacity = p->GetConstantOpacity();
     s->SetUniform("constantOpacity", opacity);
-    s->SetUniform("minLUTValue", (float)_cacheParams.tf_minMax[0]);
+    // The slice and contour renderersrequire that the minimum and maximum data
+    // values have at least some range between them
+    if (_cacheParams.tf_minMax[0] == _cacheParams.tf_minMax[1]) _cacheParams.tf_minMax[1]+=FLT_EPSILON;
     s->SetUniform("maxLUTValue", (float)_cacheParams.tf_minMax[1]);
+    s->SetUniform("minLUTValue", (float)_cacheParams.tf_minMax[0]);
 
     // And finally our uniform samplers
     GLint colormapLocation;
