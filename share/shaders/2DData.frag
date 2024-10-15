@@ -12,7 +12,7 @@ out vec4 fragColor;
 
 void main(void)
 {
-	if (minLUTValue >= maxLUTValue) discard;
+	if (minLUTValue > maxLUTValue) discard;
 
 	vec2 texel = vertexData;
 
@@ -20,6 +20,7 @@ void main(void)
 	if (texel.y != 0.0) discard;
 
 	float s = (texel.x - minLUTValue) / (maxLUTValue - minLUTValue);
+    if (maxLUTValue == minLUTValue) s=0.;
 	vec4 color = texture(colormap, s);
     float alpha = color.a * constantOpacity;
     
