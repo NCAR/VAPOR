@@ -27,7 +27,7 @@ protected slots:
     void copyRegion() override;
 
 private:
-    void _scaleWorldCoordsToNormalized(VAPoR::CoordType &minExts, VAPoR::CoordType &maxExts, int timeStep);
+    void _scaleWorldCoordsToNormalized(std::vector<double> &minExts, std::vector<double> &maxExts, int timeStep);
 
     VAPoR::ControlExec *_controlExec;
 };

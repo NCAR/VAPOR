@@ -555,7 +555,7 @@ int ImageRenderer::_getMeshDisplacedGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsizei
             float deltaZ = (float)defaultZ;
             if (hgtGrid) {
                 if (deltaZ == mv) deltaZ = defaultZ;
-                else deltaZ = hgtGrid->GetValue(x, y, 0.0) - defaultZ;
+                else deltaZ = hgtGrid->GetValue(x, y, 0.0);
             }
             z = deltaZ;
 
@@ -603,7 +603,7 @@ int ImageRenderer::_getMeshDisplacedNoGeo(DataMgr *dataMgr, Grid *hgtGrid, GLsiz
             float deltaZ = (float)defaultZ;
             if (hgtGrid) {
                 if (deltaZ == mv) deltaZ = defaultZ;
-                else deltaZ = hgtGrid->GetValue(x, y, 0.0) - defaultZ;
+                else deltaZ = hgtGrid->GetValue(x, y, 0.0);
             }
             z = deltaZ;
 
