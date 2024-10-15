@@ -129,11 +129,9 @@ if( BUILD_GOOGLE_TEST )
   # Let's use the new mechanism to incorporate GoogleTest
   #
   include(FetchContent)
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
-    FetchContent_Declare( googletest
-      URL https://github.com/google/googletest/archive/refs/heads/main.zip
-      DOWNLOAD_EXTRACT_TIMESTAMP NEW )
-  endif()
+  FetchContent_Declare( googletest
+    URL https://github.com/google/googletest/archive/refs/heads/main.zip
+    DOWNLOAD_EXTRACT_TIMESTAMP NEW )
 
   # Prevent overriding the parent project's compiler/linker settings on Windows
   #
