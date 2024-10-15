@@ -236,9 +236,6 @@ int ContourRenderer::_buildCache(bool fast)
                 if (a == nodes.size()) a = 0;
                 float contour = contours[ci];
 
-                // The slice and contour renderers require that the minimum and maximum data
-                // values have at least some range between them
-                if (values[b]==values[a]) values[b]+=FLT_EPSILON;
                 if ((values[a] <= contour && values[b] <= contour) || (values[a] > contour && values[b] > contour)) continue;
 
                 float t = (contour - values[a]) / (values[b] - values[a]);
