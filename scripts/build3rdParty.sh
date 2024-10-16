@@ -26,8 +26,8 @@ elif [ -z "$baseDir" ]; then
 fi
 #baseDir='/glade/campaign/cisl/vast/vapor/third-party'
 
-srcDir="$baseDir/2024-Aug-src"
-archiveName="2024-Aug-${OS}"
+srcDir="$baseDir/2024-Sept-src"
+archiveName="2024-Sept-${OS}"
 installDir="$baseDir/current"
 
 echo OS ${OS}
@@ -52,9 +52,9 @@ elif [[ "$OS" == "appleSilicon" ]]; then
     export PATH="/opt/homebrew/bin:$PATH"
 fi
 
-echo "Homebrew alias:"
-alias brew
-echo "PATH ${PATH}"
+#echo "Homebrew alias:"
+#alias brew
+#echo "PATH ${PATH}"
 
 macOSx86Prerequisites() {
     brew uninstall python@3.9 || true
@@ -91,21 +91,12 @@ macOSPrerequisites() {
 ubuntuPrerequisites() {
     CC='gcc'
     CXX='g++'
+    export DEBIAN_FRONTEND=noninteractive
     apt update -y
     apt upgrade -y
 
-    # all for cmake
-    apt-get update
-    apt-get install -y gpg wget
-    wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-    dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
-    echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
-    DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common
-    apt-add-repository -y 'deb https://apt.kitware.com/ubuntu/ focal main'
-    apt install -y cmake --allow-unauthenticated
-
     apt install -y \
+        cmake \
         build-essential \
         libgl1-mesa-dev \
         qtbase5-dev \
@@ -119,7 +110,7 @@ ubuntuPrerequisites() {
         libxcb-xinerama0-dev \
         pkg-config \
         unzip \
-        libssl-dev
+        libssl-dev \
     
     # Qt
     apt-get install -y \
@@ -131,6 +122,9 @@ ubuntuPrerequisites() {
         libxi-dev \
         libxkbcommon-dev \
         libxkbcommon-x11-dev
+
+    # scipy
+    apt-get install -y libffi-dev
 }
 
 windowsPrerequisites() {
@@ -622,6 +616,9 @@ openssl() {
         args+=(darwin64-x86_64-cc)
     elif [ "$OS" = "appleSilicon" ]; then
         args+=(darwin64-arm64-cc)
+    else
+        args+=(linux-x86_64)
+        #args+=(linux-aarch64)
     fi
     ./Configure shared "${args[@]}"
     make && make install
@@ -641,6 +638,7 @@ pythonVapor() {
         --enable-optimizations
     )
 
+    pyInstallDir=$installDir
     if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
         export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"
         args+=(--prefix=/usr/local/VAPOR-Deps/current/Resources)
@@ -653,11 +651,12 @@ pythonVapor() {
         export LD_LIBRARY_PATH="$installDir/Resources"
 
     	if [ "$OS" == "macOSx86" ]; then
-	    export CFLAGS="$CFLAGS -I/usr/local/include"
-	    export LDFLAGS="$LDFLAGS -L/usr/local/lib"
+            export CFLAGS="$CFLAGS -I/usr/local/include"
+            export LDFLAGS="$LDFLAGS -L/usr/local/lib"
             args+=(--build=x86_64-apple-darwin)
-	fi
+        fi
         configure "${args[@]}"
+        pyInstallDir=$pyInstallDir/Resources
     else
         args+=(--with-openssl=$installDir)
         CC=$CC \
@@ -669,10 +668,10 @@ pythonVapor() {
 
     make && make install
 
-    $installDir/Resources/bin/python3.9.vapor -m pip install --upgrade pip
+    $pyInstallDir/bin/python3.9.vapor -m pip install --upgrade pip
 
     # As of 5/27/2023, numpy's current version (1.24.3) fails to initialize PyEngine's call to import_array1(-1)
-    $installDir/Resources/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
+    $pyInstallDir/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
 }
 
 ospray() {
