@@ -99,7 +99,6 @@ ubuntuPrerequisites() {
 
     apt install -y \
         rsync \
-        cmake \
         build-essential \
         libgl1-mesa-dev \
         qtbase5-dev \
@@ -131,7 +130,7 @@ ubuntuPrerequisites() {
     cd cmake-3.30.5
     ./bootstrap
     make -j$(nproc)
-    sudo make install
+    make install
 
     # scipy
     apt-get install -y libffi-dev
