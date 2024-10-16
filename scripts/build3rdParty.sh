@@ -113,7 +113,7 @@ ubuntuPrerequisites() {
         libxcb-xinerama0-dev \
         pkg-config \
         unzip \
-        libssl-dev \
+        libssl-dev
     
     # Qt
     apt-get install -y \
@@ -125,6 +125,13 @@ ubuntuPrerequisites() {
         libxi-dev \
         libxkbcommon-dev \
         libxkbcommon-x11-dev
+
+    wget https://github.com/Kitware/CMake/releases/download/v3.30.5/cmake-3.30.5.tar.gz
+    tar -xzvf cmake-3.30.5.tar.gz
+    cd cmake-3.30.5
+    ./bootstrap
+    make -j$(nproc)
+    sudo make install
 
     # scipy
     apt-get install -y libffi-dev
