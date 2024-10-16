@@ -805,19 +805,19 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-#openssl
-#zlib
-#libpng
-#jpeg
-#tiff
-#sqlite
-#ssh
-#
-#### m1 needs curl for proj?
-##curl
-####
-#
-#proj
+openssl
+zlib
+libpng
+jpeg
+tiff
+sqlite
+ssh
+
+### m1 needs curl for proj?
+#curl
+###
+
+proj
 geotiff
 assimp
 szip
