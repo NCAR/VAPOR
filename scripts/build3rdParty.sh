@@ -91,6 +91,8 @@ macOSPrerequisites() {
 ubuntuPrerequisites() {
     CC='gcc'
     CXX='g++'
+    LDFLAGS="-L$installDir/lib"
+    CFLAGS="-I$installDir/include"
     export DEBIAN_FRONTEND=noninteractive
     apt update -y
     apt upgrade -y
@@ -568,10 +570,19 @@ geotiff() {
     echo $LDFLAGS
     echo $SDKROOT
 
+  #LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
+  #            nonstandard directory <lib dir>
+  #LIBS        libraries to pass to the linker, e.g. -l<library>
+  #CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
+  #            you have headers in a nonstandard directory <include dir>
+    export LDFLAGS=-L$installDir/lib
+    export LIBS=-lz
+    export CPPFLAGS=-I$installDir/include
+
     args=(
         --prefix=$installDir
-        --with-zlib=yes
-        --with-jpeg=yes
+        --with-zlib=$installDir
+        --with-jpeg=$installDir
         --with-proj=$installDir
         --with-libtiff=$installDir
     )
@@ -794,19 +805,19 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-openssl
-zlib
-libpng
-jpeg
-tiff
-sqlite
-ssh
-
-### m1 needs curl for proj?
-#curl
-###
-
-proj
+#openssl
+#zlib
+#libpng
+#jpeg
+#tiff
+#sqlite
+#ssh
+#
+#### m1 needs curl for proj?
+##curl
+####
+#
+#proj
 geotiff
 assimp
 szip
