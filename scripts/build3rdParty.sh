@@ -98,6 +98,7 @@ ubuntuPrerequisites() {
     apt upgrade -y
 
     apt install -y \
+        rsync \
         cmake \
         build-essential \
         libgl1-mesa-dev \
