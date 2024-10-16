@@ -66,7 +66,7 @@ commands:
       - run:
           name: build vapor
           command: |
-            libraryDir=`ls <<parameters.libDir>>`
+            libraryDir=`ls -t <<parameters.libDir>> | grep -v '\.tar\.xz$' | head -n 1`
             ln -s $libraryDir <<parameters.libDir>>/current
             cp site_files/site.NCAR site.local
             mkdir -p build
