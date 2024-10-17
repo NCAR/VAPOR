@@ -449,9 +449,9 @@ jobs:
             brew install ghr
             endl=$'\n'
             title="sha 256"$endl
-            a="Ubuntu18:  "
-            sha=`shasum -a 256 VAPOR3*Ubuntu*`
-            ubuntuSha=$a$sha$endl
+            # a="Ubuntu18:  "
+            # sha=`shasum -a 256 VAPOR3*Ubuntu*`
+            # ubuntuSha=$a$sha$endl
             # os="OSX:       "
             # sha=`shasum -a 256 VAPOR3*macOSx86*`
             #osxSha=$os$sha$endl
