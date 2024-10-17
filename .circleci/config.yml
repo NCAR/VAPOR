@@ -467,6 +467,7 @@ jobs:
             # echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
             # ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
 
+
   build_ubuntu20_libs:
     docker:
       - image: ubuntu:20.04
