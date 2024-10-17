@@ -138,6 +138,21 @@ commands:
             brew install cmake
           no_output_timeout: 45m
 
+  cleanup_library_path: 
+    parameters:
+      srcLibs:
+        type: string
+        default: *srcLibs
+      osLibs:
+        type: string
+    steps:
+      - run:
+          name: cleanup for artifact storage
+          command: |
+            cd /usr/local/VAPOR-Deps
+            rm -rf <<parameters.srcLibs>>
+            rm -rf <<parameters.osLibs>>
+
 jobs:
   build_win10_installer:
     executor: win/default
@@ -500,13 +515,9 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
 
-      - run:
-          name: cleanup for artifact storage
-          command: |
-            cd /usr/local/VAPOR-Deps
-            rm -rf *srcLibs
-            rm -rf *u20Libs
-
+      - cleanup_library_path:
+          osLibs: *u20Libs
+ 
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/
 
@@ -561,13 +572,9 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
       
-      - run:
-          name: cleanup for artifact storage
-          command: |
-            cd /usr/local/VAPOR-Deps
-            rm -rf *srcLibs
-            rm -rf *macOSx86Libs
-
+      - cleanup_library_path:
+          osLibs: *macOSx86Libs
+ 
       - store_artifacts:
           path: /usr/local/VAPOR-Deps
 
@@ -619,7 +626,10 @@ jobs:
 
       - store_artifacts:
           path: /tmp/workspace/installers
-      
+     
+      - cleanup_library_path:
+          osLibs: *appleSiliconLibs
+ 
       - run:
           name: cleanup for artifact storage
           command: |
