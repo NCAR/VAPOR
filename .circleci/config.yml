@@ -2,7 +2,7 @@ anchors:
   - &srcLibs          "2024-Sept-src"
   - &macOSx86Libs     "2024-Sept-macOSx86"
   - &appleSiliconLibs "2024-Sept-appleSilicon"
-  - &u20Libs          "2023-Sept-Ubuntu20"
+  - &u20Libs          "2024-Oct-Ubuntu20"
 
 version: 2.1
 
@@ -499,9 +499,10 @@ jobs:
 
       - store_artifacts:
           path: /tmp/workspace/installers
-      
+
       - store_artifacts:
-          path: /usr/local/VAPOR-Deps/2023-Sept-Ubuntu.tar.xz
+          path: /usr/local/VAPOR-Deps/
+          destination: *u20Libs
 
   build_macOSx86_libs:
     macos:
