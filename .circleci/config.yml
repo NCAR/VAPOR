@@ -500,9 +500,15 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
 
+      - run:
+          name: cleanup for artifact storage
+          command: |
+            cd /usr/local/VAPOR-Deps
+            rm -rf *srcLibs
+            rm -rf *u20Libs
+
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/
-          destination: *u20Libs
 
   build_macOSx86_libs:
     macos:
@@ -555,6 +561,13 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
       
+      - run:
+          name: cleanup for artifact storage
+          command: |
+            cd /usr/local/VAPOR-Deps
+            rm -rf *srcLibs
+            rm -rf *macOSx86Libs
+
       - store_artifacts:
           path: /usr/local/VAPOR-Deps
 
@@ -607,6 +620,13 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
       
+      - run:
+          name: cleanup for artifact storage
+          command: |
+            cd /usr/local/VAPOR-Deps
+            rm -rf *srcLibs
+            rm -rf *appleSiliconLibs
+
       - store_artifacts:
           path: /usr/local/VAPOR-Deps
 

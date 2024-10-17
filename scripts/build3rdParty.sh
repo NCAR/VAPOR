@@ -27,7 +27,9 @@ fi
 #baseDir='/glade/campaign/cisl/vast/vapor/third-party'
 
 srcDir="$baseDir/2024-Sept-src"
-archiveName="2024-Sept-${OS}"
+month=`date | cut -d ' ' -f 2`
+year=`date | cut -d ' ' -f 6`
+archiveName="$month-$year-${OS}"
 installDir="$baseDir/current"
 
 echo OS ${OS}
