@@ -652,7 +652,8 @@ workflows:
       - release_weekly_installers:
          requires:
            - build_win10_installer
-           - build_macOS_installers
+           - build_appleSilicon_installer
+           - build_macOSx86_installer
            - build_linux_installer
   #weekly:
   #    triggers:
