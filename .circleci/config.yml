@@ -445,7 +445,7 @@ jobs:
             cd /Users/distiller/project
             hash=`git rev-parse HEAD`
             tag="Weekly"
-            cd /tmp/workspace/installers
+            # cd /tmp/workspace/installers
             brew install ghr
             brew install gh
             ### Change file names ###
