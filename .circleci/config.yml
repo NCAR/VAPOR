@@ -449,6 +449,7 @@ jobs:
             brew install ghr
             brew install gh
             ### Change file names ###
+            current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
             release_date=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/NCAR/VAPOR/releases/latest --jq ".published_at")
             weeks_since_release=$(( ($(date -d "$current_date" +%s) - $(date -d "$latest_release_date" +%s)) / 604800 ))
             echo $weeks_since_release
