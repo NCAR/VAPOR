@@ -447,26 +447,32 @@ jobs:
             tag="Weekly"
             cd /tmp/workspace/installers
             brew install ghr
-            endl=$'\n'
-            title="sha 256"$endl
-            a="AppImage:  "
-            sha=`shasum -a 256 VAPOR*AppImage`
-            linuxSha=$a$sha$endl
-            # os="OSX:       "
-            # sha=`shasum -a 256 VAPOR*x86.dmg`
-            # osxSha=$os$sha$endl
-            # os="AppleSilicon:       "
-            # sha=`shasum -a 256 VAPOR*AppleSilicon*`
-            # osxSha=$os$sha$endl
-            os="Windows:   "
-            sha=`shasum -a 256 VAPOR3*win64*`
-            winSha=$os$sha$endl
-            shaMessage="$title$linuxSha$osxSha$m1Sha$winSha"
-            date=`date +"%d_%m_%y"`
-            echo $shaMessage
-            echo $shaMessage > "/tmp/workspace/installers/sha256.txt"
-            # echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
-            # ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
+            brew install gh
+            ### Change file names ###
+            release_date=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/NCAR/VAPOR/releases/latest --jq ".published_at")
+            weeks_since_release=$(( ($(date -d "$current_date" +%s) - $(date -d "$latest_release_date" +%s)) / 604800 ))
+            echo $weeks_since_release
+            
+            # endl=$'\n'
+            # title="sha 256"$endl
+            # a="AppImage:  "
+            # sha=`shasum -a 256 VAPOR*.AppImage`
+            # linuxSha=$a$sha$endl
+            # # os="OSX:       "
+            # # sha=`shasum -a 256 VAPOR*x86.dmg`
+            # # osxSha=$os$sha$endl
+            # # os="AppleSilicon:       "
+            # # sha=`shasum -a 256 VAPOR*AppleSilicon*`
+            # # osxSha=$os$sha$endl
+            # os="Windows:   "
+            # sha=`shasum -a 256 VAPOR*win64.exe*`
+            # winSha=$os$sha$endl
+            # shaMessage="$title$linuxSha$osxSha$m1Sha$winSha"
+            # date=`date +"%d_%m_%y"`
+            # echo $shaMessage
+            # echo $shaMessage > "/tmp/workspace/installers/sha256.txt"
+            # # echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
+            # # ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
 
 
   build_ubuntu20_libs:
@@ -638,23 +644,23 @@ workflows:
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
       #- build_python_api_osx
-      - build_win10_installer
+      # - build_win10_installer
       # - build_macOS_installers
       # - build_appleSilicon_installer
       # - build_macOSx86_installer
-      - build_linux_installer
+      # - build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
       # - build_macOSx86_libs
       #- build_AppleSilicon_libs
       #- build_suse_libs
-      #- build_windows_libs
-      - release_weekly_installers:
-         requires:
-           - build_win10_installer
+      - build_windows_libs
+      # - release_weekly_installers:
+      #    requires:
+          #  - build_win10_installer
           #  - build_appleSilicon_installer
           #  - build_macOSx86_installer
-           - build_linux_installer
+          #  - build_linux_installer
   #weekly:
   #    triggers:
   #      - schedule:
