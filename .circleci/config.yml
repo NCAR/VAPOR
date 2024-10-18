@@ -656,7 +656,8 @@ workflows:
       #- build_AppleSilicon_libs
       #- build_suse_libs
       # - build_windows_libs
-      - release_weekly_installers:
+      - release_weekly_installers
+      # - release_weekly_installers:
       #    requires:
           #  - build_win10_installer
           #  - build_appleSilicon_installer
