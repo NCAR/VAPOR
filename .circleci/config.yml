@@ -446,7 +446,7 @@ jobs:
             hash=`git rev-parse HEAD`
             tag="Weekly"
             cd /tmp/workspace/installers
-            ls /tmp/workspace/installers
+            ls .
             # brew install ghr
             # endl=$'\n'
             # title="sha 256"$endl
