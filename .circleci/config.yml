@@ -454,7 +454,8 @@ jobs:
 
             # Correct the variable name here from latest_release_date to release_date
             weeks_since_release=$(( ($(date -d "$current_date" +%s) - $(date -d "$release_date" +%s)) / 604800 ))
-            
+            echo $current_date
+            echo $release_date
             echo "Weeks since release: $weeks_since_release"
             
             # endl=$'\n'
