@@ -149,9 +149,10 @@ commands:
       - run:
           name: cleanup for artifact storage
           command: |
-            cd /usr/local/VAPOR-Deps
-            rm -rf <<parameters.srcLibs>>
-            rm -rf <<parameters.osLibs>>
+            find /usr/local/VAPOR-Deps -type f ! -name "*.tar.xz" -delete
+            #cd /usr/local/VAPOR-Deps
+            #rm -rf <<parameters.srcLibs>>
+            #rm -rf <<parameters.osLibs>>
 
 jobs:
   build_win10_installer:
@@ -516,7 +517,6 @@ jobs:
           path: /tmp/workspace/installers
 
       - cleanup_library_path:
-          osLibs: *u20Libs
  
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/
