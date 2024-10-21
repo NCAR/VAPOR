@@ -143,8 +143,9 @@ commands:
       - run:
           name: cleanup for artifact storage
           command: |
-            #find /usr/local/VAPOR-Deps ! -name "*.tar.xz" -delete
-            find /usr/local/VAPOR-Deps -mindepth 1 -type d ! -name "*.tar.xz" -exec rm -rf {} +
+            ##find /usr/local/VAPOR-Deps ! -name "*.tar.xz" -delete
+            #find /usr/local/VAPOR-Deps -mindepth 1 -type d ! -name "*.tar.xz" -exec rm -rf {} +
+            echo "foo"
 
 
 jobs:
