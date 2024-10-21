@@ -656,7 +656,7 @@ workflows:
       #- build_python_api_osx
       # - build_win10_installer
       # - build_macOS_installers
-      # - build_appleSilicon_installer
+      - build_appleSilicon_installer
       # - build_macOSx86_installer
       # - build_linux_installer
       #- build_suse_installer
@@ -665,7 +665,7 @@ workflows:
       #- build_AppleSilicon_libs
       #- build_suse_libs
       # - build_windows_libs
-      - release_weekly_installers
+      # - release_weekly_installers
       # - release_weekly_installers:
       #    requires:
           #  - build_win10_installer
