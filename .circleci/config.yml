@@ -145,6 +145,7 @@ commands:
         default: *srcLibs
       osLibs:
         type: string
+        default: ""
     steps:
       - run:
           name: cleanup for artifact storage
@@ -516,7 +517,7 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
 
-      - cleanup_library_path:
+      - cleanup_library_path
  
       - store_artifacts:
           path: /usr/local/VAPOR-Deps/
