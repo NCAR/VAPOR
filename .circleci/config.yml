@@ -503,8 +503,8 @@ jobs:
             /root/project/scripts/build3rdParty.sh -o Ubuntu
           no_output_timeout: 60m
 
-      - build_vapor:
-          moveToCommand: ${f/Linux/Ubuntu20}
+      #- build_vapor:
+      #    moveToCommand: ${f/Linux/Ubuntu20}
 
       - store_artifacts:
           path: /tmp/workspace/installers
@@ -659,7 +659,7 @@ workflows:
       #- build_python_api_osx
       #- build_win10_installer
       #- build_macOS_installers
-      #- build_appleSilicon_installer
+      - build_appleSilicon_installer
       #- build_macOSx86_installer
       #- build_linux_installer
       #- build_suse_installer
