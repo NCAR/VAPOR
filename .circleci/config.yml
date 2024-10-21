@@ -139,21 +139,11 @@ commands:
           no_output_timeout: 45m
 
   cleanup_library_path: 
-    parameters:
-      srcLibs:
-        type: string
-        default: *srcLibs
-      osLibs:
-        type: string
-        default: ""
     steps:
       - run:
           name: cleanup for artifact storage
           command: |
-            find /usr/local/VAPOR-Deps -type f ! -name "*.tar.xz" -delete
-            #cd /usr/local/VAPOR-Deps
-            #rm -rf <<parameters.srcLibs>>
-            #rm -rf <<parameters.osLibs>>
+            find /path/to/directory ! -name "*.tar.xz" -delete
 
 jobs:
   build_win10_installer:
@@ -573,8 +563,7 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
       
-      - cleanup_library_path:
-          osLibs: *macOSx86Libs
+      - cleanup_library_path
  
       - store_artifacts:
           path: /usr/local/VAPOR-Deps
@@ -628,8 +617,7 @@ jobs:
       - store_artifacts:
           path: /tmp/workspace/installers
      
-      - cleanup_library_path:
-          osLibs: *appleSiliconLibs
+      - cleanup_library_path
  
       - run:
           name: cleanup for artifact storage
