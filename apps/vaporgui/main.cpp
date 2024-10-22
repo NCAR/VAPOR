@@ -200,7 +200,7 @@ int           main(int argc, char **argv)
     const char *useFont = std::getenv("USE_SYSTEM_FONT");
     if (!useFont) { mw->setFont(f); }
 
-    string title = "VAPOR " + Version::GetFullVersionString();
+    string title = "VAPOR " + Version::GetVersionString() + " (" + Version::GetBuildHash() + ")";
     mw->setWindowTitle(title.c_str());
     mw->show();
     // Disable banner in debug build
