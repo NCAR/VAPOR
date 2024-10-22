@@ -504,8 +504,8 @@ jobs:
             /root/project/scripts/build3rdParty.sh -o Ubuntu
           no_output_timeout: 60m
 
-      - build_vapor:
-          moveToCommand: ${f/Linux/Ubuntu20}
+      #- build_vapor:
+      #    moveToCommand: ${f/Linux/Ubuntu20}
 
       - store_artifacts:
           path: /tmp/workspace/installers
