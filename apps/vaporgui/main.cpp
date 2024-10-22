@@ -26,7 +26,6 @@
 #include <QMessageBox>
 #include <QFontDatabase>
 #include "BannerGUI.h"
-#include <vapor/Version.h>
 #include <vapor/CMakeConfig.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/OptionParser.h>
@@ -200,10 +199,7 @@ int           main(int argc, char **argv)
     const char *useFont = std::getenv("USE_SYSTEM_FONT");
     if (!useFont) { mw->setFont(f); }
 
-    string title = "VAPOR" + Version::GetFullVersionString();
-    //mw->setWindowTitle("VAPOR" + Version::GetFullVersionString().c_str());
-    mw->setWindowTitle(title.c_str());
-    //mw->setWindowTitle("VAPOR User Interface");
+    mw->setWindowTitle("VAPOR User Interface");
     mw->show();
     // Disable banner in debug build
 #ifdef NDEBUG
