@@ -467,6 +467,7 @@ jobs:
             ls .
 
             for installer in VAPOR*; do
+              echo "Renaming $installer"
               extension="${installer##*.}"
               new_name="${installer%.*}-w$weeks_since_release.$extension"
               mv "$installer" "$new_name"
@@ -670,20 +671,20 @@ workflows:
       # - build_macOS_installers
       # - build_appleSilicon_installer
       # - build_macOSx86_installer
-      # - build_linux_installer
+      - build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
       # - build_macOSx86_libs
       #- build_AppleSilicon_libs
       #- build_suse_libs
       # - build_windows_libs
-      - release_weekly_installers
-      # - release_weekly_installers:
-      #    requires:
+      # - release_weekly_installers
+      - release_weekly_installers:
+         requires:
           #  - build_win10_installer
           #  - build_appleSilicon_installer
           #  - build_macOSx86_installer
-          #  - build_linux_installer
+           - build_linux_installer
   #weekly:
   #    triggers:
   #      - schedule:
