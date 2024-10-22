@@ -462,6 +462,9 @@ jobs:
             echo $current_date
             echo $release_date
             echo "Weeks since release: $weeks_since_release"
+            echo $weeks_since_release > VAPOR_date.txt
+
+            ls .
 
             for installer in VAPOR*; do
               extension="${installer##*.}"
@@ -667,20 +670,20 @@ workflows:
       # - build_macOS_installers
       # - build_appleSilicon_installer
       # - build_macOSx86_installer
-      - build_linux_installer
+      # - build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
       # - build_macOSx86_libs
       #- build_AppleSilicon_libs
       #- build_suse_libs
       # - build_windows_libs
-      # - release_weekly_installers
-      - release_weekly_installers:
-         requires:
+      - release_weekly_installers
+      # - release_weekly_installers:
+      #    requires:
           #  - build_win10_installer
           #  - build_appleSilicon_installer
           #  - build_macOSx86_installer
-           - build_linux_installer
+          #  - build_linux_installer
   #weekly:
   #    triggers:
   #      - schedule:
