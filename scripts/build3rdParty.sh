@@ -815,38 +815,38 @@ elif [ "$OS" == "Windows" ]; then
 fi
 
 openssl
-#zlib
-#libpng
-#jpeg
-#tiff
-#sqlite
-#ssh
-#
-#### m1 needs curl for proj?
-##curl
-####
-#
-#proj
-#geotiff
-#assimp
-#szip
-#hdf5
-#
-##zstd
-#netcdf
-#expat
-#udunits
-#freetype
-#if [ "$OS" == "Ubuntu" ] ; then
-#   xinerama
-#fi         
-#ospray
-#glm
-#gte
-#images
-#pythonVapor
-#qt
-#if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
-#    add_rpath
-#fi         
+zlib
+libpng
+jpeg
+tiff
+sqlite
+ssh
+
+### m1 needs curl for proj?
+#curl
+###
+
+proj
+geotiff
+assimp
+szip
+hdf5
+
+#zstd
+netcdf
+expat
+udunits
+freetype
+if [ "$OS" == "Ubuntu" ] ; then
+   xinerama
+fi         
+ospray
+glm
+gte
+images
+pythonVapor
+qt
+if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
+    add_rpath
+fi         
 renameAndCompress
