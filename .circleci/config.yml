@@ -462,7 +462,6 @@ jobs:
             echo $current_date
             echo $release_date
             echo "Weeks since release: $weeks_since_release"
-            echo $weeks_since_release > VAPOR_date.txt
 
             ls .
 
@@ -482,13 +481,13 @@ jobs:
             sha=`shasum -a 256 VAPOR*.AppImage`
             linuxSha=$a$sha$endl
             os="OSX:       "
-            sha=`shasum -a 256 VAPOR*x86.dmg`
+            sha=`shasum -a 256 VAPOR*x86*.dmg`
             osxSha=$os$sha$endl
             os="AppleSilicon:       "
-            sha=`shasum -a 256 VAPOR*AppleSilicon*`
+            sha=`shasum -a 256 VAPOR*AppleSilicon*.dmg`
             osxSha=$os$sha$endl
             os="Windows:   "
-            sha=`shasum -a 256 VAPOR*win64.exe*`
+            sha=`shasum -a 256 VAPOR*.exe`
             winSha=$os$sha$endl
             shaMessage="$title$linuxSha$osxSha$m1Sha$winSha"
             date=`date +"%d_%m_%y"`
