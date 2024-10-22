@@ -143,7 +143,7 @@ commands:
       - run:
           name: cleanup for artifact storage
           command: |
-            find /usr/local/VAPOR-Deps -mindepth 1 -type d ! -name "*.tar.xz" -exec rm -rf {} + | true
+            find /usr/local/VAPOR-Deps -mindepth 1 -type d ! -name "*.tar.xz" -exec rm -rf {} + || true
 
 
 jobs:
