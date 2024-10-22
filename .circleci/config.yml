@@ -446,7 +446,7 @@ jobs:
             hash=`git rev-parse HEAD`
             tag="Weekly"
             cd /tmp/workspace/installers
-            # brew install ghr
+            brew install ghr
             brew install gh
             ### Change file names ###
             current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -476,24 +476,24 @@ jobs:
             
             ls .
 
-            # endl=$'\n'
-            # title="sha 256"$endl
-            # a="AppImage:  "
-            # sha=`shasum -a 256 VAPOR*.AppImage`
-            # linuxSha=$a$sha$endl
-            # os="OSX:       "
-            # sha=`shasum -a 256 VAPOR*x86.dmg`
-            # osxSha=$os$sha$endl
-            # os="AppleSilicon:       "
-            # sha=`shasum -a 256 VAPOR*AppleSilicon*`
-            # osxSha=$os$sha$endl
-            # os="Windows:   "
-            # sha=`shasum -a 256 VAPOR*win64.exe*`
-            # winSha=$os$sha$endl
-            # shaMessage="$title$linuxSha$osxSha$m1Sha$winSha"
-            # date=`date +"%d_%m_%y"`
-            # echo $shaMessage
-            # echo $shaMessage > "/tmp/workspace/installers/sha256.txt" 
+            endl=$'\n'
+            title="sha 256"$endl
+            a="AppImage:  "
+            sha=`shasum -a 256 VAPOR*.AppImage`
+            linuxSha=$a$sha$endl
+            os="OSX:       "
+            sha=`shasum -a 256 VAPOR*x86.dmg`
+            osxSha=$os$sha$endl
+            os="AppleSilicon:       "
+            sha=`shasum -a 256 VAPOR*AppleSilicon*`
+            osxSha=$os$sha$endl
+            os="Windows:   "
+            sha=`shasum -a 256 VAPOR*win64.exe*`
+            winSha=$os$sha$endl
+            shaMessage="$title$linuxSha$osxSha$m1Sha$winSha"
+            date=`date +"%d_%m_%y"`
+            echo $shaMessage
+            echo $shaMessage > "/tmp/workspace/installers/sha256.txt" 
             # # echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
             # # ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
 
@@ -667,10 +667,10 @@ workflows:
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
       #- build_python_api_osx
-      # - build_win10_installer
+      - build_win10_installer
       # - build_macOS_installers
-      # - build_appleSilicon_installer
-      # - build_macOSx86_installer
+      - build_appleSilicon_installer
+      - build_macOSx86_installer
       - build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
@@ -681,9 +681,9 @@ workflows:
       # - release_weekly_installers
       - release_weekly_installers:
          requires:
-          #  - build_win10_installer
-          #  - build_appleSilicon_installer
-          #  - build_macOSx86_installer
+           - build_win10_installer
+           - build_appleSilicon_installer
+           - build_macOSx86_installer
            - build_linux_installer
   #weekly:
   #    triggers:
