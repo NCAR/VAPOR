@@ -448,32 +448,17 @@ jobs:
             cd /tmp/workspace/installers
             brew install ghr
             brew install gh
-            ### Change file names ###
+
             current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
             release_date=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/NCAR/VAPOR/releases/latest --jq ".published_at")
-
-            # Convert both dates to seconds since epoch (macOS version)
             current_date_sec=$(date -jf "%Y-%m-%dT%H:%M:%SZ" "$current_date" +"%s")
             release_date_sec=$(date -jf "%Y-%m-%dT%H:%M:%SZ" "$release_date" +"%s")
-
-            # Calculate the weeks since release
             weeks_since_release=$(( ($current_date_sec - $release_date_sec) / 604800 ))
-
-            echo $current_date
-            echo $release_date
-            echo "Weeks since release: $weeks_since_release"
-
-            ls .
-
-            for installer in VAPOR*; do
-              echo "Renaming $installer"
+            for installer in VAPOR*3*; do
               extension="${installer##*.}"
               new_name="${installer%.*}-w$weeks_since_release.$extension"
               mv "$installer" "$new_name"
-              echo "Renamed $installer to $new_name"
             done
-            
-            ls .
 
             endl=$'\n'
             title="sha 256"$endl
@@ -493,8 +478,8 @@ jobs:
             date=`date +"%d_%m_%y"`
             echo $shaMessage
             echo $shaMessage > "/tmp/workspace/installers/sha256.txt" 
-            # # echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
-            # # ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
+            echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
+            ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
 
 
   build_ubuntu20_libs:
@@ -666,10 +651,10 @@ workflows:
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
       #- build_python_api_osx
-      - build_win10_installer
+      # - build_win10_installer
       # - build_macOS_installers
-      - build_appleSilicon_installer
-      - build_macOSx86_installer
+      # - build_appleSilicon_installer
+      # - build_macOSx86_installer
       - build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
@@ -678,12 +663,12 @@ workflows:
       #- build_suse_libs
       # - build_windows_libs
       # - release_weekly_installers
-      - release_weekly_installers:
-         requires:
-           - build_win10_installer
-           - build_appleSilicon_installer
-           - build_macOSx86_installer
-           - build_linux_installer
+      # - release_weekly_installers:
+      #    requires:
+      #      - build_win10_installer
+      #      - build_appleSilicon_installer
+      #      - build_macOSx86_installer
+      #      - build_linux_installer
   #weekly:
   #    triggers:
   #      - schedule:
