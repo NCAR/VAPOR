@@ -29,7 +29,7 @@ fi
 srcDir="$baseDir/2024-Sept-src"
 month=`date | cut -d ' ' -f 2`
 year=`date | cut -d ' ' -f 6`
-archiveName="$month-$year-${OS}"
+archiveName="$year-$month-${OS}"
 installDir="$baseDir/current"
 
 echo OS ${OS}
