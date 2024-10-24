@@ -258,7 +258,7 @@ hdf5() {
         tar xvf hdf5/hdf5-$hdfVersion-Std-macos11m1_64-clang.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Darwin.sh --prefix=$installDir --exclude-subdir --skip-license
     else
-        tar xvf hdf5/hdf5-$hdfVersion-Std-centos7_64-7.2.0.tar.gz && cd hdf
+        tar xvf hdf5/hdf5-$hdfVersion-Std-ubuntu2004_64.tar.gz && cd hdf
         ./HDF5-$hdfVersion-Linux.sh --prefix=$installDir --exclude-subdir --skip-license
     fi
 
