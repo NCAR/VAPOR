@@ -418,6 +418,10 @@ jobs:
           key: intelOneapi
           paths:
             - /opt/intel/oneapi
+      - restore_cache:
+          name: restore third party libraries
+          keys:
+            - ubuntu-libs-mar2023
       - get_libraries:
           fileName: *u20Libs
       - save_cache:
