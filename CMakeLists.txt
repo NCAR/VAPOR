@@ -618,7 +618,7 @@ if (UNIX AND NOT APPLE)
                 DESTINATION "${INSTALL_SHARE_DIR}/plugins"
                 COMPONENT Dependencies
             )
-            file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/*.dylib)
+            file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/*.so*)
             install (
                 FILES ${HDF5_LIBS}
                 DESTINATION ${INSTALL_LIB_DIR}
