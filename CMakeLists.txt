@@ -618,6 +618,12 @@ if (UNIX AND NOT APPLE)
                 DESTINATION "${INSTALL_SHARE_DIR}/plugins"
                 COMPONENT Dependencies
             )
+            file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/*.dylib)
+            install (
+                FILES ${HDF5_LIBS}
+                DESTINATION ${INSTALL_LIB_DIR}
+                COMPONENT Dependencies
+            )
         endif (NOT BUILD_PYTHON)
 	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 endif (UNIX AND NOT APPLE)
