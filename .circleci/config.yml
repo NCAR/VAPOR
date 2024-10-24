@@ -418,16 +418,8 @@ jobs:
           key: intelOneapi
           paths:
             - /opt/intel/oneapi
-      - restore_cache:
-          name: restore third party libraries
-          keys:
-            - ubuntu-libs-mar2023
       - get_libraries:
           fileName: *u20Libs
-      - save_cache:
-          key: ubuntu-libs-mar2023
-          paths:
-            - /usr/local
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
           compileArgs: |
@@ -654,9 +646,9 @@ workflows:
       #- build_macOS_installers
       #- build_appleSilicon_installer
       #- build_macOSx86_installer
-      #- build_linux_installer
+      - build_linux_installer
       #- build_suse_installer
-      - build_ubuntu20_libs
+      #- build_ubuntu20_libs
       # - build_macOSx86_libs
       #- build_AppleSilicon_libs
       #- build_suse_libs
