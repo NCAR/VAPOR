@@ -470,11 +470,11 @@ jobs:
             osxSha=$os$sha$endl
             os="AppleSilicon:       "
             sha=`shasum -a 256 VAPOR*AppleSilicon*.dmg`
-            osxSha=$os$sha$endl
+            siliconSha=$os$sha$endl
             os="Windows:   "
             sha=`shasum -a 256 VAPOR*.exe`
             winSha=$os$sha$endl
-            shaMessage="$title$linuxSha$osxSha$m1Sha$winSha"
+            shaMessage="$title$linuxSha$osxSha$siliconSha$winSha"
             date=`date +"%d_%m_%y"`
             echo $shaMessage
             echo $shaMessage > "/tmp/workspace/installers/sha256.txt" 
