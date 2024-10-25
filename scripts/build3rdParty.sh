@@ -692,6 +692,23 @@ pythonVapor() {
 
     # As of 5/27/2023, numpy's current version (1.24.3) fails to initialize PyEngine's call to import_array1(-1)
     $pyInstallDir/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
+
+    if [ "$OS" == "Ubuntu" ]; then
+        pillowLibDir=$pyInstallDir/lib/python3.9/site-packages/pillow.libs
+
+        # Find all files (or binaries) in the directory and run ldd on each
+        find "$pillowLibDir" -type f | while read file; do
+            # Run ldd on the file, suppress errors (>/dev/null), and check for missing libraries
+            if ldd "$file" 2>/dev/null | grep -q "not found"; then
+                echo "In file: $file"
+                # Print only the lines with "not found"
+                ldd "$file" 2>/dev/null | grep "not found"
+                patchelf --set-rpath $pillowLibDir $file
+                echo
+            fi
+        done
+    fi
+
 }
 
 ospray() {
@@ -816,37 +833,37 @@ fi
 
 openssl
 zlib
-libpng
-jpeg
-tiff
-sqlite
-ssh
-
-### m1 needs curl for proj?
-#curl
-###
-
-proj
-geotiff
-assimp
-szip
-hdf5
-
-#zstd
-netcdf
-expat
-udunits
-freetype
-if [ "$OS" == "Ubuntu" ] ; then
-   xinerama
-fi         
-ospray
-glm
-gte
-images
+#libpng
+#jpeg
+#tiff
+#sqlite
+#ssh
+#
+#### m1 needs curl for proj?
+##curl
+####
+#
+#proj
+#geotiff
+#assimp
+#szip
+#hdf5
+#
+##zstd
+#netcdf
+#expat
+#udunits
+#freetype
+#if [ "$OS" == "Ubuntu" ] ; then
+#   xinerama
+#fi         
+#ospray
+#glm
+#gte
+#images
 pythonVapor
-qt
-if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
-    add_rpath
-fi         
-renameAndCompress
+#qt
+#if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
+#    add_rpath
+#fi         
+#renameAndCompress
