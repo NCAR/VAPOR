@@ -3,9 +3,7 @@ name: Trigger Documentation Update
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - Actions
+  workflow_dispatch:
 
 jobs:
   trigger-doc-update:
