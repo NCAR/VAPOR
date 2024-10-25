@@ -806,7 +806,7 @@ add_rpath_linux() {
         "$installDir/lib/python3.9/site-packages/scipy.libs"
         "$installDir/lib/python3.9/site-packages/numpy.libs"
     )
-    for dir in "${dirs{@]}"; do
+    for dir in "${dirs[@]}"; do
         # Find all files (or binaries) in the directory and run ldd on each
         find "$dir" -type f | while read file; do
             # Run ldd on the file, suppress errors (>/dev/null), and check for missing libraries
