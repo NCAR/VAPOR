@@ -693,9 +693,10 @@ pythonVapor() {
     # As of 5/27/2023, numpy's current version (1.24.3) fails to initialize PyEngine's call to import_array1(-1)
     $pyInstallDir/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
 
+    # Pillow libraries are not built with rpath, so add rpath to them so they can find eachother
     if [ "$OS" == "Ubuntu" ]; then
+        apt install patchelf
         pillowLibDir=$pyInstallDir/lib/python3.9/site-packages/pillow.libs
-
         # Find all files (or binaries) in the directory and run ldd on each
         find "$pillowLibDir" -type f | while read file; do
             # Run ldd on the file, suppress errors (>/dev/null), and check for missing libraries
