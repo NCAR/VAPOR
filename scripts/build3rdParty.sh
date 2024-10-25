@@ -693,23 +693,6 @@ pythonVapor() {
     # As of 5/27/2023, numpy's current version (1.24.3) fails to initialize PyEngine's call to import_array1(-1)
     $pyInstallDir/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
 
-    # Pillow libraries are not built with rpath, so add rpath to them so they can find eachother
-    if [ "$OS" == "Ubuntu" ]; then
-        apt install patchelf
-        pillowLibDir=$pyInstallDir/lib/python3.9/site-packages/pillow.libs
-        # Find all files (or binaries) in the directory and run ldd on each
-        find "$pillowLibDir" -type f | while read file; do
-            # Run ldd on the file, suppress errors (>/dev/null), and check for missing libraries
-            if ldd "$file" 2>/dev/null | grep -q "not found"; then
-                echo "In file: $file"
-                # Print only the lines with "not found"
-                ldd "$file" 2>/dev/null | grep "not found"
-                patchelf --set-rpath $pillowLibDir $file
-                echo
-            fi
-        done
-    fi
-
 }
 
 ospray() {
@@ -789,7 +772,7 @@ qt() {
     make install > qtInstall.txt
 }
 
-add_rpath() {
+add_rpath_macOS() {
     for lib in $installDir/lib/*.dylib $installDir/Resources/lib/*.dylib; do
         fileName="$(basename $lib)"
         echo install_name_tool -id @rpath/$fileName $lib
@@ -812,6 +795,29 @@ add_rpath() {
             fi
         done
         codesign --force -s - $lib
+    done
+}
+
+add_rpath_linux() {
+    apt install patchelf
+    dirs=(
+        "$installDir/lib"  
+        "$installDir/lib/python3.9/site-packages/pillow.libs"
+        "$installDir/lib/python3.9/site-packages/scipy.libs"
+        "$installDir/lib/python3.9/site-packages/numpy.libs"
+    )
+    for dir in "${dirs{@]}"; do
+        # Find all files (or binaries) in the directory and run ldd on each
+        find "$dir" -type f | while read file; do
+            # Run ldd on the file, suppress errors (>/dev/null), and check for missing libraries
+            if ldd "$file" 2>/dev/null | grep -q "not found"; then
+                echo "In file: $file"
+                # Print only the lines with "not found"
+                ldd "$file" 2>/dev/null | grep "not found"
+                patchelf --set-rpath $dir $file
+                echo
+            fi
+        done
     done
 }
 
@@ -865,6 +871,8 @@ images
 pythonVapor
 qt
 if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
-    add_rpath
+    add_rpath_macOS
+else
+    add_rpath_linux
 fi         
 renameAndCompress
