@@ -562,6 +562,12 @@ if (UNIX AND NOT APPLE)
 		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
 		    )
+            #file (GLOB PILLOW_SITE_PACKAGES ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}/site-packages/pillow.libs/*.so*)
+            #install (
+            #    FILES ${PILLOW_SITE_PACKAGES}
+            #    DESTINATION ${INSTALL_LIB_DIR}/python${PYTHONVERSION}/site-packages/PIL/../pillow.libs
+            #    COMPONENT Dependencies
+            #)
 
             # Include libxcb-xinerama for Ubuntu 20/22 by reading /etc/issue
             if (EXISTS /etc/issue)
