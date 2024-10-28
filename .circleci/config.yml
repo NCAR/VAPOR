@@ -364,6 +364,7 @@ jobs:
             export DEBIAN_FRONTEND=noninteractive
             apt update
             apt install -y curl
+            apt install -y libgfortran5
             apt install -y xz-utils
             apt install -y git
             apt install -y g++
@@ -646,9 +647,9 @@ workflows:
       #- build_macOS_installers
       #- build_appleSilicon_installer
       #- build_macOSx86_installer
-      #- build_linux_installer
+      - build_linux_installer
       #- build_suse_installer
-      - build_linux_libs
+      #- build_linux_libs
       # - build_macOSx86_libs
       #- build_AppleSilicon_libs
       #- build_suse_libs
