@@ -491,13 +491,13 @@ jobs:
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
 
-      - store_artifacts:
-          path: /tmp/workspace/installers
+      #- store_artifacts:
+      #    path: /tmp/workspace/installers
 
-      - cleanup_library_path
+      #- cleanup_library_path
  
-      - store_artifacts:
-          path: /usr/local/VAPOR-Deps/
+      #- store_artifacts:
+      #    path: /usr/local/VAPOR-Deps/
 
   build_macOSx86_libs:
     macos:
