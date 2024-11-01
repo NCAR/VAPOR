@@ -27,8 +27,13 @@ fi
 #baseDir='/glade/campaign/cisl/vast/vapor/third-party'
 
 srcDir="$baseDir/2024-Sept-src"
-month=`date | cut -d ' ' -f 2`
-year=`date | cut -d ' ' -f 6`
+if [ "$OS" == "Ubuntu" ]; then
+    month=`date | cut -d ' ' -f 3`
+    year=`date | cut -d ' ' -f 4`
+else
+    month=`date | cut -d ' ' -f 2`
+    year=`date | cut -d ' ' -f 6`
+fi
 archiveName="$year-$month-${OS}"
 installDir="$baseDir/current"
 
@@ -36,6 +41,7 @@ echo OS ${OS}
 echo baseDir $baseDir
 echo srcDir $srcDir
 echo installDir $installDir
+echo archiveName $archiveName
 
 macOSMinVersion=""
 shopt -s expand_aliases
@@ -91,10 +97,10 @@ macOSPrerequisites() {
 }
 
 ubuntuPrerequisites() {
-    CC='gcc'
-    CXX='g++'
-    LDFLAGS="-L$installDir/lib"
-    CFLAGS="-I$installDir/include"
+    export CC='gcc'
+    export CXX='g++'
+    export LDFLAGS="-L$installDir/lib"
+    export CFLAGS="-I$installDir/include"
     export DEBIAN_FRONTEND=noninteractive
     apt update -y
     apt upgrade -y
@@ -271,25 +277,31 @@ hdf5src() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
-    export CMAKE_INCLUDE_PATH=/path/to/libsz/include
-    export CMAKE_LIBRARY_PATH=/path/to/libsz/lib
+    export CMAKE_INCLUDE_PATH=$installDir/include
+    export CMAKE_LIBRARY_PATH=$installDir/lib
+    export LDFLAGS="$LDFLAGS -L$installDir/lib -Wl,-rpath=$installDir/lib" \
 
     args=(
     -DCMAKE_INSTALL_PREFIX=$installDir
     -DCMAKE_BUILD_TYPE=Release
-    -DCMAKE_INSTALL_RPATH=$installDir
     -DCMAKE_PREFIX_PATH=$installDir
+    -DCMAKE_INSTALL_RPATH=$installDir/lib
+    -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON
+    -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
+    #-DSZIP_ROOT=$installDir
+    #-DZLIB_ROOT=$installDir
+    -DSZIP_DIR=$installDir
     -DZLIB_DIR=$installDir
-    -DUSE_SHARED_LIBS:BOOL=ON
-    -DBUILD_SHARED_LIBS:BOOL=ON
-    -DHDF5_ENABLE_RPATH:BOOL=ON
-    -DHDF5_BUILD_WITH_INSTALL_NAME:BOOL=ON
-    -DHDF5_ENABLE_THREADSAFE:BOOL=ON
-    -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON
-    -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
-    -DHDF5_BUILD_HL_LIB:BOOL=ON
-    -DHDF5_BUILD_TOOLS:BOOL=ON
-    -DALLOW_UNSUPPORTED:BOOL=ON
+    -DBUILD_SHARED_LIBS=ON
+    #-DUSE_SHARED_LIBS:BOOL=ON
+    #-DHDF5_ENABLE_RPATH:BOOL=ON
+    #-DHDF5_BUILD_WITH_INSTALL_NAME:BOOL=ON
+    -DHDF5_ENABLE_THREADSAFE=ON
+    -DHDF5_ENABLE_SZIP_SUPPORT=ON
+    -DHDF5_ENABLE_Z_LIB_SUPPORT=ON
+    -DHDF5_BUILD_HL_LIB=ON
+    -DHDF5_BUILD_TOOLS=ON
+    -DALLOW_UNSUPPORTED=ON
     )
     if [ "$OS" == "macOSx86" ]; then 
         args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
@@ -332,24 +344,30 @@ netcdf() {
 
     args=(
         -DCMAKE_INSTALL_PREFIX=$installDir
-        -DCMAKE_PREFIX_PATH=$installDir/HDF_Group/HDF5/$hdfVersion
-        -DHDF5_DIR=$installDir/HDF_Group/HDF5/$hdfVersion
-        -DHDF5_ROOT=$installDir/HDF_Group/HDF5/$hdfVersion
         -DCMAKE_INSTALL_LIBDIR=lib
         -DENABLE_BYTERANGE=False
         -DENABLE_DAP=False
         -DCMAKE_BUILD_TYPE=Release
     )
-    if [ "$OS" == "macOSx86" ]; then 
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
-        args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
-    fi
-    if [ "$OS" == "appleSilicon" ]; then 
-        args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
-        args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+    if [ "$OS" == "appleSilicon" || "$OS" == "macOSx86" ]; then
+        if [ "$OS" == "macOSx86" ]; then 
+            args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+            args+=(-DCMAKE_OSX_ARCHITECTURES=x86_64)
+        elif [ "$OS" == "appleSilicon" ]; then 
+            args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET=$macOSMinVersion)
+            args+=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+        fi
+        args+=(-DCMAKE_PREFIX_PATH=$installDir/HDF_Group/HDF5/$hdfVersion)
+        args+=(-DHDF5_DIR=$installDir/HDF_Group/HDF5/$hdfVersion)
+        args+=(-DHDF5_ROOT=$installDir/HDF_Group/HDF5/$hdfVersion)
+        export HDF5_ROOT=$installDir/HDF_Group/HDF5/$hdfVersion
+    else
+        args+=(-DCMAKE_PREFIX_PATH=$installDir)
+        args+=(-DHDF5_DIR=$installDir)
+        args+=(-DHDF5_ROOT=$installDir)
+        export HDF5_ROOT=$installDir
     fi
 
-    export HDF5_ROOT=$installDir/HDF_Group/HDF5/$hdfVersion
     export LD_LIBRARY_PATH=$HDF5_ROOT/lib
     export CPPFLAGS=-I$HDF5_ROOT/include
     export LDFLAGS=-L$HDF5_ROOT/lib
@@ -679,6 +697,7 @@ pythonVapor() {
         pyInstallDir=$pyInstallDir/Resources
     else
         args+=(--with-openssl=$installDir)
+        args+=(--with-system-expat)
         CC=$CC \
         CXX=$CXX \
         CPPFLAGS=-I$installDir/include \
@@ -800,8 +819,8 @@ add_rpath_macOS() {
 
 add_rpath_linux() {
     apt install patchelf
+        #"$installDir/lib"  
     dirs=(
-        "$installDir/lib"  
         "$installDir/lib/python3.9/site-packages/pillow.libs"
         "$installDir/lib/python3.9/site-packages/scipy.libs"
         "$installDir/lib/python3.9/site-packages/numpy.libs"
@@ -838,25 +857,28 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-openssl
-zlib
-libpng
-jpeg
-tiff
-sqlite
-ssh
+#openssl
+#zlib
+#libpng
+#jpeg
+#tiff
+#sqlite
+#ssh
+#
+#### m1 needs curl for proj?
+##curl
+####
+#
+#proj
+#geotiff
+#assimp
+#szip
+#if [ "$OS" == "Ubuntu" ]; then
+#    hdf5src
+#else
+#    hdf5
+#fi
 
-### m1 needs curl for proj?
-#curl
-###
-
-proj
-geotiff
-assimp
-szip
-hdf5
-
-#zstd
 netcdf
 expat
 udunits

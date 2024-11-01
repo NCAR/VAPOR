@@ -2,7 +2,7 @@ anchors:
   - &srcLibs          "2024-Sept-src"
   - &macOSx86Libs     "2024-Sept-macOSx86"
   - &appleSiliconLibs "2024-Sept-appleSilicon"
-  - &u20Libs          "2024-Oct-Ubuntu"
+  - &u20Libs          "2024-Nov-Ubuntu"
 
 version: 2.1
 
