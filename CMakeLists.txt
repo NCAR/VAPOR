@@ -164,12 +164,10 @@ else()
 
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR})
+    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
 
     if (APPLE)
-        list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
         set(CMAKE_MODULE_PATH /opt/local/lib/libomp)
-    else()
-        list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/lib)
     endif()
 endif()
 
@@ -564,12 +562,6 @@ if (UNIX AND NOT APPLE)
 		    	DESTINATION ${INSTALL_LIB_DIR}
 		    	COMPONENT Dependencies
 		    )
-            #file (GLOB PILLOW_SITE_PACKAGES ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}/site-packages/pillow.libs/*.so*)
-            #install (
-            #    FILES ${PILLOW_SITE_PACKAGES}
-            #    DESTINATION ${INSTALL_LIB_DIR}/python${PYTHONVERSION}/site-packages/PIL/../pillow.libs
-            #    COMPONENT Dependencies
-            #)
 
             # Include libxcb-xinerama for Ubuntu 20/22 by reading /etc/issue
             if (EXISTS /etc/issue)
@@ -620,17 +612,10 @@ if (UNIX AND NOT APPLE)
                     )
             endif (BUILD_OSP)
 
-            #file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
-            #file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/lib/plugin/*.so")
-            #install (
-            #    FILES ${HDF5_PLUGINS}
-            #    DESTINATION "${INSTALL_SHARE_DIR}/plugins"
-            #    COMPONENT Dependencies
-            #)
-            file (GLOB HDF5_LIBS ${THIRD_PARTY_DIR}/lib/libhdf5*.so*)
+            file (GLOB HDF5_PLUGINS "${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib/plugin/*.so")
             install (
-                FILES ${HDF5_LIBS}
-                DESTINATION ${INSTALL_LIB_DIR}
+                FILES ${HDF5_PLUGINS}
+                DESTINATION "${INSTALL_SHARE_DIR}/plugins"
                 COMPONENT Dependencies
             )
         endif (NOT BUILD_PYTHON)

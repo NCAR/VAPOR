@@ -120,7 +120,8 @@ ubuntuPrerequisites() {
         libxcb-xinerama0-dev \
         pkg-config \
         unzip \
-        libssl-dev
+        libssl-dev \
+        curl
     
     # Qt
     apt-get install -y \
@@ -279,7 +280,8 @@ hdf5src() {
     mkdir -p $srcDir/$library/build && cd $srcDir/$library/build
     export CMAKE_INCLUDE_PATH=$installDir/include
     export CMAKE_LIBRARY_PATH=$installDir/lib
-    export LDFLAGS="$LDFLAGS -L$installDir/lib -Wl,-rpath=$installDir/lib" \
+    #export LDFLAGS="$LDFLAGS -L$installDir/lib -Wl,-rpath=$installDir/lib" \
+    LDFLAGS="$LDFLAGS -L$installDir/lib -Wl,-rpath=$installDir/lib" \
 
     args=(
     -DCMAKE_INSTALL_PREFIX=$installDir
@@ -368,9 +370,9 @@ netcdf() {
         export HDF5_ROOT=$installDir
     fi
 
-    export LD_LIBRARY_PATH=$HDF5_ROOT/lib
-    export CPPFLAGS=-I$HDF5_ROOT/include
-    export LDFLAGS=-L$HDF5_ROOT/lib
+    LD_LIBRARY_PATH="$LD_LIBRARY_PATH $HDF5_ROOT/lib"
+    CPPFLAGS="$CPPFLAGS -I$HDF5_ROOT/include"
+    LDFLAGS="$LDFLAGS -L$HDF5_ROOT/lib"
     cmake "${args[@]}" ..
     make && make install
 }
@@ -408,8 +410,8 @@ udunits() {
     args=(
         --prefix=$installDir
     )
-    LDFLAGS=-L$installDir/lib/ \
-    CPPFLAGS=-I$installDir/include/ \
+    #LDFLAGS=-L$installDir/lib/ \
+    #CPPFLAGS=-I$installDir/include/ \
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
     make && make install
@@ -471,8 +473,8 @@ tiff() {
         --prefix=$installDir
         --disable-dap
     )
-    LDFLAGS=-L$installDir/lib \
-    CPPFLAGS=-I$installDir/include \
+    #LDFLAGS=-L$installDir/lib \
+    #CPPFLAGS=-I$installDir/include \
     CC=$CC CXX=$CXX \
     ./configure "${args[@]}"
     make && make install
@@ -591,20 +593,9 @@ geotiff() {
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
 
-    echo $CC
-    echo $CXX
-    echo $CFLAGS
-    echo $LDFLAGS
-    echo $SDKROOT
-
-  #LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
-  #            nonstandard directory <lib dir>
-  #LIBS        libraries to pass to the linker, e.g. -l<library>
-  #CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
-  #            you have headers in a nonstandard directory <include dir>
-    export LDFLAGS=-L$installDir/lib
+    #export LDFLAGS=-L$installDir/lib
     export LIBS=-lz
-    export CPPFLAGS=-I$installDir/include
+    #export CPPFLAGS=-I$installDir/include
 
     args=(
         --prefix=$installDir
@@ -640,11 +631,6 @@ openssl() {
     local library='openssl-1.1.1w'
     rm -rf $library || true
     tar xvf $srcDir/$library.tar.gz && cd $srcDir/$library
-
-    echo $CFLAGS
-    echo $CXXFLAGS
-    echo $LDFLAGS
-    echo $CPPFLAGS
 
     args=(
         --prefix=$installDir
@@ -683,8 +669,8 @@ pythonVapor() {
         args+=(--with-openssl=$installDir)
         args+=(--with-tcltk-libs="$(pkg-config --libs tcl tk)")
         args+=(--with-tcltk-includes="$(pkg-config --cflags tcl tk)")
-        export LDFLAGS="$LDFLAGS -L$installDir/lib"
-        export CPPFLAGS="$CPPFLAGS -I$installDir/include"
+        #export LDFLAGS="$LDFLAGS -L$installDir/lib"
+        #export CPPFLAGS="$CPPFLAGS -I$installDir/include"
         export LLVM_PROFDATA="/opt/local/bin/llvm-profdata-mp-17"
         export LD_LIBRARY_PATH="$installDir/Resources"
 
@@ -696,12 +682,13 @@ pythonVapor() {
         configure "${args[@]}"
         pyInstallDir=$pyInstallDir/Resources
     else
+        #CPPFLAGS=-I$installDir/include \
+        #LDFLAGS="$installDir/lib -Wl,-rpath=$installDir/lib" \
         args+=(--with-openssl=$installDir)
         args+=(--with-system-expat)
         CC=$CC \
         CXX=$CXX \
-        CPPFLAGS=-I$installDir/include \
-        LDFLAGS="-L$installDir/lib -Wl,-rpath=$installDir/lib" \
+        LDFLAGS="$LDFLAGS -Wl,-rpath=$installDir/lib" \
         ./configure "${args[@]}"
     fi
 
@@ -782,7 +769,7 @@ qt() {
         args+=(-bundled-xcb-xinput)
     fi
 
-    CPPFLAGS="$CPPFLAGS -I$installDir/include" \
+    #CPPFLAGS="$CPPFLAGS -I$installDir/include" \
     LDFLAGS="$LDFLAGS -L$installDir/lib -Wl,-rpath=$installDir/lib" \
     ../configure \
     "${args[@]}" > qtConfig.txt
@@ -857,27 +844,27 @@ elif [ "$OS" == "Windows" ]; then
     windowsPrerequisites
 fi
 
-#openssl
-#zlib
-#libpng
-#jpeg
-#tiff
-#sqlite
-#ssh
-#
-#### m1 needs curl for proj?
-##curl
-####
-#
-#proj
-#geotiff
-#assimp
-#szip
-#if [ "$OS" == "Ubuntu" ]; then
-#    hdf5src
-#else
-#    hdf5
-#fi
+openssl
+zlib
+libpng
+jpeg
+tiff
+sqlite
+ssh
+
+### m1 needs curl for proj?
+#curl
+###
+
+proj
+geotiff
+assimp
+szip
+if [ "$OS" == "Ubuntu" ]; then
+    hdf5src
+else
+    hdf5
+fi
 
 netcdf
 expat
