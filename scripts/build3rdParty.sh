@@ -27,13 +27,9 @@ fi
 #baseDir='/glade/campaign/cisl/vast/vapor/third-party'
 
 srcDir="$baseDir/2024-Sept-src"
-if [ "$OS" == "Ubuntu" ]; then
-    month=`date | cut -d ' ' -f 3`
-    year=`date | cut -d ' ' -f 4`
-else
-    month=`date | cut -d ' ' -f 2`
-    year=`date | cut -d ' ' -f 6`
-fi
+month=`LC_TIME="POSIX" date | cut -d ' ' -f 2`
+year=`LC_TIME="POSIX" date | cut -d ' ' -f 7`
+
 archiveName="$year-$month-${OS}"
 installDir="$baseDir/current"
 
@@ -134,12 +130,15 @@ ubuntuPrerequisites() {
         libxkbcommon-dev \
         libxkbcommon-x11-dev
 
-    wget https://github.com/Kitware/CMake/releases/download/v3.30.5/cmake-3.30.5.tar.gz
-    tar -xzvf cmake-3.30.5.tar.gz
-    cd cmake-3.30.5
-    ./bootstrap
-    make -j$(nproc)
-    make install
+    if ! command -v cmake &> /dev/null; then
+        cmakeVersion="3.30.5"
+        wget https://github.com/Kitware/CMake/releases/download/v$cmakeVersion/cmake-$cmakeVersion.tar.gz
+        tar -xzvf cmake-$cmakeVersion.tar.gz
+        cd cmake-$cmakeVersion
+        ./bootstrap
+        make -j$(nproc)
+        make install
+    fi
 
     # scipy
     apt-get install -y libffi-dev
@@ -682,6 +681,7 @@ pythonVapor() {
         configure "${args[@]}"
         pyInstallDir=$pyInstallDir/Resources
     else
+        #export LD_LIBRARY_PATH="$installDir/Resources"
         #CPPFLAGS=-I$installDir/include \
         #LDFLAGS="$installDir/lib -Wl,-rpath=$installDir/lib" \
         args+=(--with-openssl=$installDir)
@@ -697,7 +697,10 @@ pythonVapor() {
     $pyInstallDir/bin/python3.9.vapor -m pip install --upgrade pip
 
     # As of 5/27/2023, numpy's current version (1.24.3) fails to initialize PyEngine's call to import_array1(-1)
-    $pyInstallDir/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
+    #$pyInstallDir/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
+    #$pyInstallDir/bin/python3.9.vapor -m pip install numpy==1.21.4 matplotlib scipy
+    $pyInstallDir/bin/python3.9.vapor -m pip install Pillow==8.2.0 numpy==1.21.4 scipy matplotlib
+    #$pyInstallDir/bin/python3.9.vapor -m pip install pillow
 
 }
 
@@ -805,10 +808,13 @@ add_rpath_macOS() {
 }
 
 add_rpath_linux() {
+    set +x
     apt install patchelf
         #"$installDir/lib"  
+
     dirs=(
-        "$installDir/lib/python3.9/site-packages/pillow.libs"
+        #"$installDir/lib/python3.9/site-packages/pillow.libs"
+        "$installDir/lib/python3.9/site-packages/Pillow.libs"
         "$installDir/lib/python3.9/site-packages/scipy.libs"
         "$installDir/lib/python3.9/site-packages/numpy.libs"
     )
@@ -819,12 +825,13 @@ add_rpath_linux() {
             if ldd "$file" 2>/dev/null | grep -q "not found"; then
                 echo "In file: $file"
                 # Print only the lines with "not found"
-                ldd "$file" 2>/dev/null | grep "not found"
+                ldd "$file" 2>/dev/null | grep "not found, setting RPATH to $dir"
                 patchelf --set-rpath $dir $file
                 echo
             fi
         done
     done
+    set -x
 }
 
 renameAndCompress() {
@@ -834,17 +841,17 @@ renameAndCompress() {
     tar cfJ $archiveName.tar.xz $archiveName
 }
 
-if [ "$OS" == "macOSx86" ]; then
-    macOSx86Prerequisites
-elif [ "$OS" == "appleSilicon" ]; then
-    macOSPrerequisites
-elif [ "$OS" == "Ubuntu" ]; then
+#if [ "$OS" == "macOSx86" ]; then
+#    macOSx86Prerequisites
+#elif [ "$OS" == "appleSilicon" ]; then
+#    macOSPrerequisites
+#elif [ "$OS" == "Ubuntu" ]; then
     ubuntuPrerequisites
-elif [ "$OS" == "Windows" ]; then
-    windowsPrerequisites
-fi
+#elif [ "$OS" == "Windows" ]; then
+#    windowsPrerequisites
+#fi
 
-openssl
+openssl >> openssl.txt
 zlib
 libpng
 jpeg
@@ -863,7 +870,7 @@ szip
 if [ "$OS" == "Ubuntu" ]; then
     hdf5src
 else
-    hdf5
+   hdf5
 fi
 
 netcdf
@@ -879,9 +886,9 @@ gte
 images
 pythonVapor
 qt
-if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
-    add_rpath_macOS
-else
-    add_rpath_linux
-fi         
+#if [ "$OS" == "macOSx86" ] || [ "$OS" == "appleSilicon" ]; then
+#    add_rpath_macOS
+#else
+#    add_rpath_linux
+#fi         
 renameAndCompress
