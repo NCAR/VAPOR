@@ -90,8 +90,7 @@ void PMetadataSection::updateGUI() const {
 }
 
 VMetadataTree::VMetadataTree()
-: VSectionGroup(""),
-  Updateable(),
+: VSectionGroup(""), ParamsUpdatable(),
   _tree(new QTreeWidget),
   _dm(nullptr),
   _ts(-1),

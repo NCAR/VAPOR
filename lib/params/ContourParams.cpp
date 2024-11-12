@@ -73,7 +73,10 @@ vector<double> ContourParams::GetContourValues(const string &varName)
 {
     Contours *c = (Contours *)_contours->GetParams(varName);
     if (c == NULL) {
+        bool wasEnabled = _ssave->GetEnabled();
+        _ssave->SetEnabled(false);
         MakeNewContours(varName);
+        _ssave->SetEnabled(wasEnabled);
         c = (Contours *)_contours->GetParams(varName);
     }
     return c->GetContourValues();

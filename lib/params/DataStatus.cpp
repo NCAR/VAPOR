@@ -409,7 +409,7 @@ void DataStatus::reset_time_helper()
         int year, month, day, hour, minute, second;
 
         udunits.DecodeTime(_timeCoords[i], &year, &month, &day, &hour, &minute, &second);
-        sprintf(buf, "%4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d", year, month, day, hour, minute, second);
+        snprintf(buf, 80, "%4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d", year, month, day, hour, minute, second);
 
         _timeCoordsFormatted[i] = string(buf);
     }
@@ -433,7 +433,8 @@ void DataStatus::reset_time()
     }
 
     sort(_timeCoords.begin(), _timeCoords.end());
-    unique(_timeCoords.begin(), _timeCoords.end());
+    // This is a NOP as it is used incorrectly and has been since 2017 so disabling for now
+    // unique(_timeCoords.begin(), _timeCoords.end());
 
     for (itr = _dataMgrs.begin(); itr != _dataMgrs.end(); ++itr) {
         string   dataSetName = itr->first;

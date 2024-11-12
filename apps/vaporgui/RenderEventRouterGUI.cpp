@@ -2,13 +2,15 @@
 #include "UWidget.h"
 #include <QScrollArea>
 #include "VContainer.h"
+#include <vapor/ControlExecutive.h>
 
 const std::string RenderEventRouterGUI::VariablesTabName = "Variables";
 const std::string RenderEventRouterGUI::AppearanceTabName = "Appearance";
 const std::string RenderEventRouterGUI::GeometryTabName = "Geometry";
 const std::string RenderEventRouterGUI::AnnotationTabName = "Annotation";
 
-RenderEventRouterGUI::RenderEventRouterGUI(VAPoR::ControlExec *ce, string paramsType) : RenderEventRouter(ce, paramsType)
+RenderEventRouterGUI::RenderEventRouterGUI(VAPoR::ControlExec *ce, string paramsType)
+: RenderEventRouter(ce)
 {
     connect(this, &QTabWidget::currentChanged, this, &RenderEventRouterGUI::tabChanged);
 }
@@ -31,7 +33,7 @@ QWidget *RenderEventRouterGUI::AddSubtab(string title, UWidget *subtab)
     return scrollArea;
 }
 
-void RenderEventRouterGUI::_updateTab()
+void RenderEventRouterGUI::Update()
 {
     auto *params = GetActiveParams();
     auto *paramsMgr = _controlExec->GetParamsMgr();
@@ -50,7 +52,7 @@ void RenderEventRouterGUI::_updateTab()
     }
     if (!hasTab) { setTab(0); }
 
-    for (Updateable *subtab : _subtabs) subtab->Update(params, paramsMgr, dataMgr);
+    for (ParamsUpdatable *subtab : _subtabs) subtab->Update(params, paramsMgr, dataMgr);
 }
 
 void RenderEventRouterGUI::setTab(int i)
@@ -58,14 +60,11 @@ void RenderEventRouterGUI::setTab(int i)
     blockSignals(true);
     setCurrentIndex(i);
     blockSignals(false);
-
-    auto pm = _controlExec->GetParamsMgr();
-    bool undoEnabled = pm->GetSaveStateUndoEnabled();
-    pm->SetSaveStateUndoEnabled(false);
-    getGUIStateParams()->SetActiveTab(tabText(i).toStdString());
-    pm->SetSaveStateUndoEnabled(undoEnabled);
 }
 
-void RenderEventRouterGUI::tabChanged(int i) { setTab(i); }
+void RenderEventRouterGUI::tabChanged(int i)
+{
+    getGUIStateParams()->SetActiveTab(tabText(i).toStdString());
+}
 
 GUIStateParams *RenderEventRouterGUI::getGUIStateParams() const { return (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()); }

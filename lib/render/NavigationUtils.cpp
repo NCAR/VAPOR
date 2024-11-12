@@ -19,6 +19,8 @@ void NavigationUtils::SetHomeViewpoint(ControlExec *ce)
     ParamsMgr *      paramsMgr = ce->GetParamsMgr();
     ViewpointParams *vpParams = GetActiveViewpointParams(ce);
     GUIStateParams * guiParams = GetGUIStateParams(ce);
+    assert(vpParams);
+    assert(guiParams);
 
     // Get the current model view matrix and it home
     //

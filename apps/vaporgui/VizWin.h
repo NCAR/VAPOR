@@ -73,18 +73,9 @@ public:
     // If \p fast is true try to render the scene quickly
     //
     void Render(bool fast);
+    bool paintOnResize = true;
 
 signals:
-    // Sent prior to closing window - after receiving Qt closeEvent()
-    //
-    void Closing(const string &winName);
-
-    // Sent when window gains focus - after receiving Qt focusInEvent()
-    //
-    void HasFocus(const string &winName);
-
-    // Sent when window ends navigation
-    //
     void EndNavigation(const string &winName);
 
 public slots:
@@ -115,12 +106,13 @@ private:
     virtual void _mouseReleaseEventManip(QMouseEvent *);
     virtual void _mouseMoveEventManip(QMouseEvent *);
 
-    virtual void focusInEvent(QFocusEvent *e);
-    virtual void closeEvent(QCloseEvent *);
-
     // QGLWidget reimplementations
     virtual void resizeGL(int width, int height);
+    void _resizeGL(int width, int height);
     virtual void initializeGL();
+    virtual void paintGL();
+
+    void safeSwapBuffers();
 
     string              _winName;
     VAPoR::ControlExec *_controlExec;
@@ -135,6 +127,7 @@ private:
     bool       _manipFlowSeedFlag = false;
     bool       _manipFlowIntegrationFlag = false;
     Trackball *_trackBall;
+    bool _navigationPendingChanges;
 
     std::vector<double> _getScreenCoords(QMouseEvent *e) const;
     string              _getCurrentMouseMode() const;
@@ -154,6 +147,7 @@ private:
     VAPoR::TranslateStretchManip *_manip;
 
     bool _openGLInitFlag;
+    bool _swapBufferQueued = false;
 
     friend class VizWinMgr;
 };

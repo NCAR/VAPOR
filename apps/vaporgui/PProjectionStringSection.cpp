@@ -97,5 +97,4 @@ void PProjectionStringSection::applyClicked()
     if (proj == p->GetProjectionString()) return;
 
     p->SetProjectionString(proj);
-    emit Proj4StringChanged(proj);
 }

@@ -25,6 +25,7 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/regionparams.h>
+#include <vapor/STLUtils.h>
 
 using namespace VAPoR;
 //----------------------------------------------------------------------------
@@ -109,10 +110,15 @@ void ParamsMgr::_destroy()
     if (_rootSeparator) delete _rootSeparator;
 }
 
-ParamsMgr::~ParamsMgr() { _destroy(); }
+ParamsMgr::~ParamsMgr()
+{
+    _destroy();
+}
 
 void ParamsMgr::LoadState()
 {
+    // Don't know if this is necessary but previous code would always wrap call
+    BeginSaveStateGroup("Load state");
     _destroy();
 
     _init(_appParamNames, NULL);
@@ -120,6 +126,7 @@ void ParamsMgr::LoadState()
     // If data loaded set up data dependent parameters from default state.
     //
     if (_dataMgrMap.size()) { addDataMgrNew(); }
+    EndSaveStateGroup();
 }
 
 void ParamsMgr::LoadState(const XmlNode *node)
@@ -276,7 +283,7 @@ void ParamsMgr::RemoveVisualizer(string winName)
 
     if (!windowsSep.HasChild(winName)) return;
 
-    _ssave.BeginGroup("CreateVisualizer");
+    _ssave.BeginGroup("ParamsMgr::RemoveVisualizer");
 
     delete_ren_containers(winName);
 
@@ -331,17 +338,50 @@ vector<string> ParamsMgr::GetDataMgrNames() const
     return (dataMgrNames);
 }
 
-ViewpointParams *ParamsMgr::CreateVisualizerParamsInstance(string winName)
+// Legacy moved from VizWinMgr
+static string make_viz_name(vector<string> currentNames)
 {
+    int    index = 0;
+    bool   found = false;
+    string name;
+    while (!found) {
+        std::stringstream out;
+        out << index;
+        name = "Visualizer_No._" + out.str();
+
+        found = true;
+        for (int i = 0; i < currentNames.size(); i++) {
+            if (currentNames[i] == name) found = false;
+        }
+        index++;
+    }
+    return (name);
+}
+
+string ParamsMgr::CreateVisualizerParamsInstance(string winName)
+{
+    const auto previousVisualizerNames = GetVisualizerNames();
+    if (winName == "__AUTO__")
+        winName = make_viz_name(previousVisualizerNames);
+
     _ssave.BeginGroup("CreateVisualizerParamsInstance");
 
     ViewpointParams *vpParams = get_vp_params(winName);
     if (!vpParams) { vpParams = make_vp_params(winName); }
     VAssert(vpParams != NULL);
 
+    // TODO initialize viewpoint params
+    // This shouldn't be done here but this was previously accomplished by spaghetti
+    // involving the qt event system and there currently isn't a good place to put it.
+    if (previousVisualizerNames.size() >= 1) {
+        auto pvp = get_vp_params(previousVisualizerNames[0]);
+        vpParams->SetModelViewMatrix(pvp->GetModelViewMatrix());
+        vpParams->SetRotationCenter(pvp->GetRotationCenter());
+    }
+
     _ssave.EndGroup();
 
-    return (vpParams);
+    return winName;
 }
 
 void ParamsMgr::RemoveVisualizerParamsInstance(string winName)
@@ -387,7 +427,10 @@ RenParamsContainer *ParamsMgr::createRenderParamsHelper(string winName, string d
     // Create ViewpointParams if we don't have one
     //
     ViewpointParams *vpParams = get_vp_params(winName);
-    if (!vpParams) { vpParams = CreateVisualizerParamsInstance(winName); }
+    if (!vpParams) {
+        CreateVisualizerParamsInstance(winName);
+        vpParams = get_vp_params(winName);
+    }
     VAssert(vpParams != NULL);
 
     RenParamsContainer *container = get_ren_container(winName, dataSetName, className);
@@ -585,6 +628,23 @@ void ParamsMgr::GetRenderParamNames(vector<string> &instNames) const
     instNames.erase(unique(instNames.begin(), instNames.end()), instNames.end());
 }
 
+vector<string> ParamsMgr::GetRenderParamNames() const
+{
+    vector<string> ret;
+    GetRenderParamNames(ret);
+    return ret;
+}
+
+vector<string> ParamsMgr::GetRenderParamNamesForDataset(string datasetName) const
+{
+    vector<string> names, t;
+    for (const auto &viz : GetVisualizerNames()) {
+        GetRenderParamNames(viz, datasetName, t);
+        STLUtils::AppendTo(names, t);
+    }
+    return names;
+}
+
 bool ParamsMgr::RenderParamsLookup(string instName, string &winName, string &dataSetName, string &className) const
 {
     winName.clear();
@@ -614,6 +674,37 @@ bool ParamsMgr::RenderParamsLookup(string instName, string &winName, string &dat
     }
     return (false);
 }
+
+bool ParamsMgr::RenderParamsLookup(RenderParams *inst, string &instName, string &winName, string &dataSetName, string &className) const
+{
+    winName.clear();
+    dataSetName.clear();
+    className.clear();
+
+    map<string, map<string, map<string, RenParamsContainer *>>>::const_iterator itr1;
+    for (itr1 = _renderParamsMap.begin(); itr1 != _renderParamsMap.end(); ++itr1) {
+        map<string, map<string, RenParamsContainer *>>::const_iterator itr2;
+        for (itr2 = itr1->second.begin(); itr2 != itr1->second.end(); ++itr2) {
+            map<string, RenParamsContainer *>::const_iterator itr3;
+            for (itr3 = itr2->second.begin(); itr3 != itr2->second.end(); ++itr3) {
+                const RenParamsContainer &ref = *(itr3->second);
+                vector<string>            instNames = ref.GetNames();
+
+                for (const auto & name : instNames) {
+                    if (ref.GetParams(name) == inst) {
+                        instName = name;
+                        winName = itr1->first;
+                        dataSetName = itr2->first;
+                        className = itr3->first;
+                        return (true);
+                    }
+                }
+            }
+        }
+    }
+    return (false);
+}
+
 
 vector<string> ParamsMgr::GetVisualizerNames() const
 {
@@ -1121,6 +1212,11 @@ void ParamsMgr::UndoRedoClear()
     RebaseStateSave();
 }
 
+void ParamsMgr::ManuallyAddCurrentStateToUndoStack(const string &note)
+{
+    _ssave.ManuallyAddCurrentStateToUndoStack(note);
+}
+
 string ParamsMgr::GetTopUndoDesc() const
 {
     string s;
@@ -1185,7 +1281,9 @@ void ParamsMgr::PMgrStateSave::Save(const XmlNode *node, string description)
 
     // It not inside a group push this element onto the stack
     //
-    if (GetUndoEnabled()) _undoStack.push_back(make_pair(description, new XmlNode(*_rootNode)));
+    if (GetUndoEnabled()) {
+        _undoStack.push_back(make_pair(description, new XmlNode(*_rootNode)));
+    }
 
 //#define DEBUG
 #ifdef DEBUG
@@ -1196,7 +1294,7 @@ void ParamsMgr::PMgrStateSave::Save(const XmlNode *node, string description)
     //
     cleanStack(0, _redoStack);
 
-    emitStateChange();
+    emitStateChange(description);
 }
 
 void ParamsMgr::PMgrStateSave::BeginGroup(string description)
@@ -1214,6 +1312,7 @@ void ParamsMgr::PMgrStateSave::EndGroup()
 
     if (!GetEnabled()) return;
 
+    assert(_groups.size());
     if (!_groups.size()) return;    // BeginGroup() not called
 
     string desc = _groups.top();
@@ -1248,12 +1347,28 @@ void ParamsMgr::PMgrStateSave::EndGroup()
     //
     cleanStack(0, _redoStack);
 
-    _undoStack.push_back(make_pair(desc, new XmlNode(*_rootNode)));
+    if (GetUndoEnabled())
+        _undoStack.push_back(make_pair(desc, new XmlNode(*_rootNode)));
 
-    emitStateChange();
+    emitStateChange(desc);
+}
+
+void ParamsMgr::PMgrStateSave::TriggerManualStateChangeEvent(const string &reason, const bool overrideEnabled)
+{
+    if (!GetEnabled() && !overrideEnabled) return;
+    emitStateChange("Manually triggered" + (reason.empty() ? "" : (": " + reason)));
 }
 
 void ParamsMgr::PMgrStateSave::IntermediateChange() { emitIntermediateStateChange(); }
+
+
+void ParamsMgr::PMgrStateSave::SetUndoEnabled(bool b)
+{
+    if (!_groups.empty()) {
+        return;    // Can't change inside group
+    }
+    _addToUndoEnabled = b;
+}
 
 const XmlNode *ParamsMgr::PMgrStateSave::GetTopUndo(string &description) const
 {
@@ -1297,7 +1412,8 @@ bool ParamsMgr::PMgrStateSave::Undo()
 
     _undoStack.pop_back();
 
-    emitStateChange();
+    if (GetEnabled())
+        emitStateChange("Undo " + p1.first);
 
     return (true);
 }
@@ -1318,7 +1434,8 @@ bool ParamsMgr::PMgrStateSave::Redo()
 
     _redoStack.pop_back();
 
-    emitStateChange();
+    if (GetEnabled())
+        emitStateChange("Redo " + p1.first);
 
     return (true);
 }
@@ -1329,8 +1446,21 @@ void ParamsMgr::PMgrStateSave::Clear()
 
     cleanStack(0, _undoStack);
     cleanStack(0, _redoStack);
-    while (_groups.size()) _groups.pop();
+//    while (_groups.size()) _groups.pop();
 }
+
+void ParamsMgr::PMgrStateSave::ManuallyAddCurrentStateToUndoStack(const string &note)
+{
+    // Delete oldest elements if needed
+    cleanStack(_stackSize, _undoStack);
+
+    // Clear redo stack
+    cleanStack(0, _redoStack);
+
+    assert(GetUndoEnabled());
+    _undoStack.push_back(make_pair(note, new XmlNode(*_rootNode)));
+}
+
 
 void ParamsMgr::PMgrStateSave::cleanStack(int maxN, std::deque<std::pair<string, XmlNode *>> &s)
 {
@@ -1345,15 +1475,17 @@ void ParamsMgr::PMgrStateSave::cleanStack(int maxN, std::deque<std::pair<string,
     }
 }
 
-void ParamsMgr::PMgrStateSave::emitStateChange()
+void ParamsMgr::PMgrStateSave::emitStateChange(const string &reason)
 {
+    _stateChangeReasonDescription = reason;
     // Trigger state change flags and CBs
     //
     for (int i = 0; i < _stateChangeFlags.size(); i++) { *(_stateChangeFlags[i]) = true; }
     for (int i = 0; i < _stateChangeCBs.size(); i++) { _stateChangeCBs[i](); }
 }
 
-void ParamsMgr::PMgrStateSave::emitIntermediateStateChange()
+void ParamsMgr::PMgrStateSave::emitIntermediateStateChange(const string &reason)
 {
+    _stateChangeReasonDescription = reason;
     for (auto func : _intermediateStateChangeCBs) func();
 }

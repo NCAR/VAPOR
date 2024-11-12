@@ -132,7 +132,7 @@ public:
 protected:
     void          paramsUpdate() override;
     TFInfoWidget *createInfoWidget() override;
-    void          paintEvent(QPainter &p) override;
+    void          _paintEvent(QPainter &p) override;
     void          mousePressEvent(QMouseEvent *event) override;
     void          mouseReleaseEvent(QMouseEvent *event) override;
     void          mouseMoveEvent(QMouseEvent *event) override;

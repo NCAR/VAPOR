@@ -173,9 +173,9 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     // clang-format on
 }
 
-void FlowEventRouter::_updateTab()
+void FlowEventRouter::Update()
 {
-    RenderEventRouterGUI::_updateTab();
+    RenderEventRouterGUI::Update();
 
     int numTS = GetActiveDataMgr()->GetNumTimeSteps();
     _pathlineLengthSlider->SetRange(0, std::max(1, numTS - 1));

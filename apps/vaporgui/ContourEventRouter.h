@@ -17,9 +17,9 @@ public:
     bool          Supports3DVariables() const { return true; }
     static string GetClassType() { return VAPoR::ContourRenderer::GetClassType(); }
     string        GetType() const { return GetClassType(); }
+    void Update();
 
 protected:
-    virtual void   _updateTab();
     virtual string _getDescription() const;
     string         _getSmallIconImagePath() const { return "Contours_small.png"; }
     string         _getIconImagePath() const { return "Contours.png"; }

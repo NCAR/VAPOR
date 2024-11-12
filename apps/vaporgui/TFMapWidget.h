@@ -4,6 +4,8 @@
 #include <QMenu>
 #include <glm/glm.hpp>
 #include <vector>
+#include <string>
+#include <vapor/ParamsBase.h>
 
 namespace VAPoR {
 class DataMgr;
@@ -31,6 +33,8 @@ class TFMap : public QObject {
     int               _height = 0;
     bool              _insideSaveStateGroup = false;
     bool              _hidden = false;
+
+    std::string _variableName;
 
     VAPoR::DataMgr *     _dataMgr = nullptr;
     VAPoR::ParamsMgr *   _paramsMgr = nullptr;
@@ -60,7 +64,7 @@ public:
     const QFont getFont() const;
 
     //! These map to the QWidget counterparts
-    virtual void paintEvent(QPainter &p) = 0;
+    void paintEvent(QPainter &p);
     virtual void mousePressEvent(QMouseEvent *event);
     virtual void mouseReleaseEvent(QMouseEvent *event);
     virtual void mouseMoveEvent(QMouseEvent *event);
@@ -75,6 +79,7 @@ public slots:
     void hide();
 
 protected:
+    virtual void _paintEvent(QPainter &p) = 0;
     virtual void paramsUpdate() = 0;
 
     VAPoR::DataMgr *       getDataMgr() const { return _dataMgr; }

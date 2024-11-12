@@ -16,6 +16,7 @@ namespace VAPoR {
 class CalcEngineMgr;
 class Visualizer;
 class DataStatus;
+class VisualizerGLContextManager;
 
 //! \class ControlExec
 //! \ingroup Public
@@ -33,7 +34,7 @@ public:
     //!
     //! \sa ParamsMgr();
     //
-    ControlExec(std::vector<string> appParamsNames = std::vector<string>(), std::vector<string> appRenderParamsNames = std::vector<string>(), size_t cacheSize = 1000, int nThreads = 0);
+    ControlExec(ParamsMgr *pm, size_t cacheSize = 1000, int nThreads = 0);
     virtual ~ControlExec();
 
     //! Set the ControlExec to a default state:
@@ -126,9 +127,9 @@ public:
     //
     int NewVisualizer(string name);
 
-    //! Return tag pushed to the undo stack when NewVisualizer() is called
-    //
-    string GetNewVisualizerUndoTag() const { return ("NewVisualizer"); }
+    void SyncWithParams();
+    void EnforceDefaultAppState();
+
 
     //! Delete an existing visualizer
     //!
@@ -147,9 +148,8 @@ public:
     //
     void RemoveVisualizer(string name, bool hasOpenGLContext = false);
 
-    //! Return tag pushed to the undo stack when RemoveVisualizer() is called
-    //
-    string GetRemoveVisualizerUndoTag() const { return ("RemoveVisualizer"); }
+    //! Removes objects associated with visualizer params.
+    void CleanupVisualizer(string winName, bool hasOpenGLContext);
 
     //! Perform OpenGL initialization of specified visualizer
     //!
@@ -234,12 +234,6 @@ public:
     //
     int ActivateRender(string winName, string dataSetName, string renderType, string renderName, bool on);
 
-    int ActivateRender(string winName, string dataSetName, const RenderParams *rp, string renderName, bool on);
-
-    //! Return tag pushed to the undo stack when ActivateRender() is called
-    //
-    string GetActivateRendererUndoTag() const { return ("ActivateRenderer"); }
-
     //! Remove (destroy) the indicated renderer
     //!
     //! \param[in] hasOpenGLContext If true it is the callers job to ensure that the
@@ -249,10 +243,6 @@ public:
     //!
     void RemoveRenderer(string winName, string dataSetName, string renderType, string renderName, bool hasOpenGLContext);
 
-    //! Return tag pushed to the undo stack when RemoveRenderer() is called
-    //
-    string GetRemoveRendererUndoTag() const { return ("RemoveRenderer"); }
-
     //! Remove (destroy) all renderers on this window
     //!
     //! \param[in] hasOpenGLContext If true it is the callers job to ensure that the
@@ -260,7 +250,7 @@ public:
     //! is destroyed immediately. If false the renderer is queue'd for later destruction
     //! when \p winName has an active OpenGL context.
     //!
-    void RemoveAllRenderers(string winName, bool hasOpenGLContext = false);
+    void RemoveAllRenderers(string winName, bool hasOpenGLContext = false, bool removeFromParamsFlag=true);
 
     //! Obtain the ParamsMgr, for use in accessing the Params instances.
     //! \return ParamsMgr*
@@ -332,7 +322,7 @@ public:
     //! DataStatus methods into
     //! the DataMgr class, rather than keeping them separate.
     //
-    int OpenData(const std::vector<string> &files, const std::vector<string> &options, string dataSetName, string type = "vdc");
+    int OpenData(const std::vector<string> &files, string dataSetName, string type = "vdc");
 
     //! Unloads the specified data set
     //!
@@ -391,93 +381,6 @@ public:
     bool RenderLookup(string instName, string &winName, string &dataSetName, string &rendererType) const;
 
     string MakeRendererNameUnique(string name) const;
-    
-    //! Draw 2D text on the screen
-    //!
-    //! This method provides a simple interface for rendering text on
-    //! the screen. No text will actually be rendered until after Paint()
-    //! is called. Text rendering will occur after all active renderers
-    //! associated with \p viz have completed rendering.
-    //!
-    //! \param[in] winName A visualizer handle returned by NewVisualizer()
-    //! \param[in] text The text to render
-    //! \param[in] x X coordinate in pixels coordinates of lower left
-    //! corner of rectangle bounding the text.
-    //! \param[in] y Y coordinate in pixels coordinates of lower left
-    //! corner of rectangle bounding the text.
-    //! \params[in] size Font size to be used
-    //! \params[in] color Three tuple describing rgj values for the billboard
-    //
-    int DrawText(string winName, string text, int x, int y, int size, float color[3], int type = 0);
-    int DrawTextNormalizedCoords(string winName, string text, float x, float y, int size, float color[3], int type = 0);
-
-    //! Draw 2D text to all visualizers
-    //!
-    //! This method provides a simple interface for rendering text on
-    //! all Visualizers. No text will actually be rendered until after Paint()
-    //! is called. Text rendering will occur after all active renderers
-    //! associated with \p viz have completed rendering.
-    //!
-    //! \param[in] text The text to render
-    //! \param[in] x X coordinate in pixels coordinates of lower left
-    //! corner of rectangle bounding the text.
-    //! \param[in] y Y coordinate in pixels coordinates of lower left
-    //! corner of rectangle bounding the text.
-    //! \params[in] size Font size to be used
-    //! \params[in] color Three tuple describing rgj values for the billboard
-    //
-    int DrawText(string text, int x, int y, int size, float color[3], int type = 0);
-    int DrawTextNormalizedCoords(string text, float x, float y, int size, float color[3], int type = 0);
-
-    int ClearText();
-    int ClearText(string winName);
-
-    //! Undo the last session state change
-    //! Restores the state of the session to what it was prior to the
-    //! last change made via a Params object, or prior to the last call
-    //! to Undo() or Redo(), whichever happened last. I.e. Undo() can
-    //! be called repeatedly to undo multiple state changes.
-    //!
-    //! State changes do not trigger rendering. It is the UI's responsibility
-    //! to call Paint() after Undo(), and to make any UI internal changes
-    //! necessary to reflect the new state.
-    //!
-    //! \return status A boolean indicating whether state was succefully
-    //! restored to previous state.
-    //!
-    //! \sa Redo()
-    //!
-    bool Undo();
-
-    //! Redo the next session state change
-    //! Restores the state of the session to what it was before the
-    //! last change made via Undo,Redo() can
-    //! be called repeatedly to undo multiple state changes.
-    //!
-    //! State changes do not trigger rendering. It is the UI's responsibility
-    //! to call Paint() after Redo(), and to make any UI internal changes
-    //! necessary to reflect the new state.
-    //!
-    //! \return status A boolean indicating whether state was succefully
-    //! restored to previous state.
-    //!
-    //! \sa UnDo()
-    //
-    bool Redo();
-
-    //! Clear history from the Undo & Redo stack
-    //!
-    void UndoRedoClear();
-
-    //! Return number of elements in Undo history
-    //! \sa Undo()
-    //!
-    size_t UndoSize() const { return (_paramsMgr->UndoSize()); }
-
-    //! Return number of elements in Redo history
-    //! \sa Redo()
-    //!
-    size_t RedoSize() const { return (_paramsMgr->RedoSize()); }
 
     //! Enable or disable state saving
     //!
@@ -669,13 +572,27 @@ public:
     //!
     std::vector<string> GetFunctionNames(string scriptType, string dataSetName) const;
 
-    void CreateRenderers() { openDataHelper(true); }
+    void SetVisualizerGLContextManager(VisualizerGLContextManager *mgr) { _vizGLMgr = mgr; }
+
+    template <class T> T* GetParams() const
+    {
+        return (T*)GetParamsMgr()->GetParams(T::GetClassType());
+    }
+
+    // "was" allows other components synced after CE to act accordingly
+    bool WasDataCacheDirty() const;
+    void SetDataCacheDirty(const string &dataset="", const string &variable="") {
+        _dataStatus->SetCacheDirty(dataset, variable);
+    }
 
 private:
     ParamsMgr *                    _paramsMgr;
     DataStatus *                   _dataStatus;
     CalcEngineMgr *                _calcEngineMgr;
+    VisualizerGLContextManager *   _vizGLMgr = nullptr;
     std::map<string, Visualizer *> _visualizers;
+    
+    string _dataCachedProjStr;
 
     GLManager::Vendor _cachedVendor = GLManager::Vendor::Unknown;
 
@@ -691,13 +608,10 @@ private:
         return it->second;
     }
 
-    int  openDataHelper(bool reportErrs);
-    bool _undoRedoRenderer(bool undoFlag);
-    bool _undoRedoVisualizer(bool undoFlag);
+    void syncVisualizersWithParams();
+    void syncDatasetsWithParams();
 
-    int activateClassRenderers(string vizName, string dataSetName, string pClassName, vector<string> instNames, bool reportErrs);
-
-    void _removeRendererHelper(string winName, string dataSetName, string paramsType, string renderName, bool removeFromParamsFlag, bool hasOpenGLContext);
+    void _removeRendererHelper(string winName, string dataSetName, string paramsType, string renderName, bool hasOpenGLContext);
 
     void _autoStretchExtents(string dataSetName);
 

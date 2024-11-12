@@ -421,6 +421,29 @@ bool SettingsParams::LoadFromSettingsFile()
     return status;
 }
 
+void SettingsParams::FindDefaultSettingsPath()
+{
+    string prefPath;
+    string preffile =
+#ifdef WIN32
+        "\\.vapor3_prefs";
+#else
+        "/.vapor3_prefs";
+#endif
+    char *pPath = getenv("VAPOR3_PREFS_DIR");
+    if (!pPath) pPath = getenv("HOME");
+    if (!pPath) {
+        vector<string> tpath;
+        tpath.push_back("examples");
+        tpath.push_back(preffile);
+        prefPath = GetSharePath("examples/" + preffile);
+    } else {
+        prefPath = string(pPath) + preffile;
+    }
+
+    SetCurrentPrefsPath(prefPath);
+}
+
 int SettingsParams::SaveSettings() const
 {
     ofstream fileout;

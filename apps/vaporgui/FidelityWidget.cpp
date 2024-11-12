@@ -97,7 +97,6 @@ void FidelityWidget::SetFidelityDefault()
 {
 #ifdef VAPOR3_0_0_ALPHA
     // Check current values of LOD and refinement and their combos.
-    _renderEV->confirmText();
     _dataStatus->setFidelityDefault(rParams);
     StartupParams *sParams = (StartupParams *)_paramsMgr->GetDefaultParams(StartupParams::_startupParamsTag);
     _controlExec->SavePreferences(sParams->GetCurrentPrefsPath());

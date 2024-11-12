@@ -68,7 +68,7 @@ protected:
 //! Abstract base class for VWidgets that wrap QTreeWidgets.
 //! Only updates QTreeWidgets when the user's selected DataMgr,
 //! timestep, or variable list change.
-class VMetadataTree : public VSectionGroup, public Updateable {
+class VMetadataTree : public VSectionGroup, public ParamsUpdatable {
     Q_OBJECT
 
 public:

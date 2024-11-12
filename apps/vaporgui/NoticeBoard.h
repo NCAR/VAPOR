@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include "common.h"
 
 struct Notice;
 class QTextBrowser;
@@ -19,4 +20,6 @@ class NoticeBoard : public QDialog {
 public:
     NoticeBoard(const std::vector<Notice> &notices);
     bool WasDisableCheckingRequested() const { return _wasDisableCheckingRequested; }
+
+    static void CheckForAndShowNotices(ControlExec *ce);
 };

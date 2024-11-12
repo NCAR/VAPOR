@@ -162,8 +162,11 @@ void ViewpointParams::_init()
 Transform *ViewpointParams::GetTransform(string dataSetName)
 {
     if (_transforms->GetParams(dataSetName) == NULL) {
+        bool enabled = _ssave->GetEnabled();
+        _ssave->SetEnabled(false);
         Transform newTransform(_ssave);
         _transforms->Insert(&newTransform, dataSetName);
+        _ssave->SetEnabled(enabled);
     }
     return (Transform *)_transforms->GetParams(dataSetName);
 }

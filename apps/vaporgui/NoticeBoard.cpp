@@ -79,3 +79,27 @@ void NoticeBoard::showNotice(int i)
     _numberDisplay->setText(QString("%1/%2").arg(i + 1).arg(_notices.size()));
     _displayedNotice = i;
 }
+
+
+#include <vapor/ControlExecutive.h>
+#include <vapor/SettingsParams.h>
+
+
+void NoticeBoard::CheckForAndShowNotices(ControlExec *ce)
+{
+#ifndef NDEBUG
+    return;    // Don't check for notices in debug builds
+#endif
+
+    CheckForGHNotices([ce](const std::vector<Notice> &notices) {
+        if (notices.empty()) return;
+
+        NoticeBoard board(notices);
+        board.exec();
+
+        if (board.WasDisableCheckingRequested()) {
+            ce->GetParams<SettingsParams>()->SetAutoCheckForNotices(false);
+            ce->GetParams<SettingsParams>()->SaveSettings();
+        }
+    });
+}

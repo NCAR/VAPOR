@@ -6,6 +6,7 @@
 #include "ui_PythonVariablesGUI.h"
 #include "PythonVariablesParams.h"
 #include "VaporTable.h"
+#include "Updatable.h"
 
 #include <QThread>
 #include <QDialog>
@@ -23,13 +24,13 @@ class OpenAndDeleteDialog;
 static const string _scriptType = "Python";
 }    // namespace PythonVariables_
 
-class PythonVariables : public QDialog, Ui_PythonVariablesGUI {
+class PythonVariables : public QDialog, public Updatable, Ui_PythonVariablesGUI {
     Q_OBJECT
 
 public:
     PythonVariables(QWidget *parent);
     ~PythonVariables();
-    void Update(bool internal = false);
+    void Update();
     void InitControlExec(VAPoR::ControlExec *ce);
     void ShowMe();
 

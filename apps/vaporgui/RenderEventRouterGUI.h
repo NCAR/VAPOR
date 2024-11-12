@@ -1,9 +1,10 @@
 #pragma once
 
 #include "RenderEventRouter.h"
+#include <vapor/GUIStateParams.h>
 #include <QTabWidget>
 
-class Updateable;
+class ParamsUpdatable;
 class UWidget;
 
 //! \class RenderEventRouterGUI
@@ -11,8 +12,10 @@ class UWidget;
 //! \brief Tab manager for renderer subtabs
 //! \author Stas Jaroszynski
 
-class RenderEventRouterGUI : public RenderEventRouter, public QTabWidget {
-    vector<Updateable *> _subtabs;
+class RenderEventRouterGUI : public QTabWidget, public RenderEventRouter {
+    Q_OBJECT
+
+    vector<ParamsUpdatable *> _subtabs;
 
 public:
     static const std::string VariablesTabName;
@@ -29,7 +32,7 @@ public:
 
 
 protected:
-    virtual void _updateTab() override;
+    void Update() override;
 
 private:
     void            setTab(int i);

@@ -77,7 +77,6 @@ private:
 
 class ErrorReporter {
 public:
-    ErrorReporter(QWidget *parent);
     enum Type { Diagnostic = 0, Info = 1, Warning = 2, Error = 3, Fatal = 4 };
 
     struct Message {
@@ -90,7 +89,7 @@ public:
 
     //! Returns the singleton instance of this class with lazy initialization
     //! \retval ErrorReporter instance
-    static ErrorReporter *GetInstance() { return (_instance); };
+    static ErrorReporter *GetInstance();
 
     //! Displays the current log of errors with the default message ERRORREPORTER_DEFAULT_MESSAGE
     static void ShowErrors();
@@ -110,6 +109,7 @@ public:
     static int OpenLogFile(std::string path);
 
 protected:
+    ErrorReporter(QWidget *parent);
     ~ErrorReporter();
 
 private:

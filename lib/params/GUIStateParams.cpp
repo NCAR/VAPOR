@@ -150,7 +150,12 @@ string GUIStateParams::GetActiveVizName() const
     return (GetValueString(m_activeVisualizer, defaultv));
 }
 
-void GUIStateParams::SetActiveVizName(string vizWin) { SetValueString(m_activeVisualizer, "Set active visualizer window", vizWin); }
+void GUIStateParams::SetActiveVizName(string vizWin) {
+    bool e = _ssave->GetUndoEnabled();
+    _ssave->SetUndoEnabled(false);
+    SetValueString(m_activeVisualizer, "Set active visualizer window", vizWin);
+    _ssave->SetUndoEnabled(e);
+}
 
 //! Get active renderer class and instance name for a visualizer
 //
@@ -166,10 +171,13 @@ string GUIStateParams::GetActiveRendererInst() const
 //! Set active renderer class and instance name for a visualizer
 //
 void GUIStateParams::SetActiveRenderer(string vizWin, string renderType, string renderInst) {
+    bool e = _ssave->GetUndoEnabled();
+    _ssave->SetUndoEnabled(false);
     BeginGroup("Set active");
     SetValueString("Active_Dataset", "", "");
     m_activeRenderer->SetActiveRenderer(vizWin, renderType, renderInst);
     EndGroup();
+    _ssave->SetUndoEnabled(e);
 }
 
 string GUIStateParams::GetActiveDataset() const
@@ -183,10 +191,13 @@ string GUIStateParams::GetActiveDataset() const
 void GUIStateParams::SetActiveDataset(std::string name)
 {
     assert(STLUtils::Contains(GetOpenDataSetNames(), name));
-    BeginGroup("Set active");
+    bool e = _ssave->GetUndoEnabled();
+    _ssave->SetUndoEnabled(false);
+    BeginGroup("Set active dataset");
     SetActiveRenderer(GetActiveVizName(), "", "");
     SetValueString("Active_Dataset", "", name);
     EndGroup();
+    _ssave->SetUndoEnabled(e);
 }
 
 string GUIStateParams::GetCurrentSessionFile() const { return (GetValueString(m_sessionFileTag, "")); }
@@ -336,7 +347,11 @@ void GUIStateParams::ActiveRenderer::SetActiveRenderer(string vizWin, string ren
     std::vector<string> v;
     v.push_back(renderType);
     v.push_back(renderInst);
+
+    bool e = _ssave->GetUndoEnabled();
+    _ssave->SetUndoEnabled(false);
     SetValueStringVec(vizWin, "Set active render type and instance", v);
+    _ssave->SetUndoEnabled(e);
 }
 
 void GUIStateParams::ActiveRenderer::GetActiveRenderer(string vizWin, string &renderType, string &renderInst) const
@@ -356,7 +371,12 @@ std::string GUIStateParams::GetPlotDatasetName() const { return GetValueString(m
 void GUIStateParams::SetPlotDatasetName(std::string &name) { SetValueString(m_plotDatasetNameTag, "Name of the active data set in Plot", name); }
 
 string GUIStateParams::ActiveTab() const { return GetValueString("ActiveTabTag", ""); }
-void   GUIStateParams::SetActiveTab(const string &t) { SetValueString("ActiveTabTag", "", t); }
+void   GUIStateParams::SetActiveTab(const string &t) {
+    bool e = _ssave->GetUndoEnabled();
+    _ssave->SetUndoEnabled(false);
+    SetValueString("ActiveTabTag", "", t);
+    _ssave->SetUndoEnabled(e);
+}
 
 int GUIStateParams::GetFlowDimensionality() const { return GetValueLong(_flowDimensionalityTag, -1); }
 

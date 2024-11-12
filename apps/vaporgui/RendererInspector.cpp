@@ -1,6 +1,8 @@
 #include "RendererInspector.h"
 #include "RenderEventRouter.h"
 #include <QDebug>
+#include <vapor/GUIStateParams.h>
+#include <vapor/ControlExecutive.h>
 
 using namespace VAPoR;
 using std::vector;
@@ -26,17 +28,17 @@ void RendererInspector::Update()
     ParamsMgr *paramsMgr = _ce->GetParamsMgr();
     GUIStateParams *guiParams = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
     string currentViz = guiParams->GetActiveVizName();
-    string renClass, renInst;
+    string renClass, renInst, _;
     guiParams->GetActiveRenderer(currentViz, renClass, renInst);
 
-    if (renInst.empty() || _classToInspectorMap.count(renClass) == 0) {
+    if (renInst.empty() || _classToInspectorMap.count(renClass) == 0 || !paramsMgr->RenderParamsLookup(renInst, _, _, _)) {
         Show(nullptr);
         return;
     }
 
     Show(_classToInspectorMap[renClass].second);
     _classToInspectorMap[renClass].first->SetActive(renInst);
-    _classToInspectorMap[renClass].first->updateTab();
+    _classToInspectorMap[renClass].first->Update();
 }
 
 std::vector<RenderEventRouter *> RendererInspector::GetRenderEventRouters() const

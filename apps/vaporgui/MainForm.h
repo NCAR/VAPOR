@@ -1,28 +1,4 @@
-//************************************************************************
-//									*
-//			 Copyright (C)  2004				*
-//	 University Corporation for Atmospheric Research			*
-//			 All Rights Reserved				*
-//									*
-//************************************************************************/
-//
-//	File:		MainForm.h
-//
-//	Author:		Alan Norton
-//			National Center for Atmospheric Research
-//			PO 3000, Boulder, Colorado
-//
-//	Date:		July 2004
-//
-//	Description:  Definition of MainForm class
-//		This QT Main Window class supports all main window functionality
-//		including menus, tab dialog, docking, visualizer window,
-//		and some of the communication between these classes.
-//		There is only one of these, it is created by the main program.
-//		Other classes can use getInstance() to obtain it
-//
-#ifndef MAINFORM_H
-#define MAINFORM_H
+#pragma once
 
 #include "vapor/VAssert.h"
 #include <qvariant.h>
@@ -36,31 +12,30 @@
 #include <QLineEdit>
 #include <QWidgetAction>
 #include <chrono>
+#include <set>
 #include <vapor/ControlExecutive.h>
 #include <vapor/GUIStateParams.h>
 #include <vapor/SettingsParams.h>
 #include <vapor/AnimationParams.h>
 #include "AnimationController.h"
-//#include "MiscParams.h"
-#include "TabManager.h"
+#include "PWidgetsFwd.h"
+#include "QEnableable.h"
 
 class QApplication;
 class QSpacerItem;
 class QMenu;
 class QToolBar;
 class QWidget;
-class QDesktopWidget;
 class QMdiArea;
-class QDockWindow;
 class QLabel;
 class QSpinBox;
 class ProgressStatusBar;
 class QTimer;
 class QDialog;
 
-class VizWindow;
 class VizWinMgr;
-class VizSelectCombo;
+class Updatable;
+class ParamsUpdatable;
 
 class BannerGUI;
 class Statistics;
@@ -70,9 +45,8 @@ class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
 
-namespace VAPoR {
-class XmlNode;
-};
+using namespace VAPoR;
+using std::optional;
 
 class MainForm : public QMainWindow {
     Q_OBJECT
@@ -82,105 +56,41 @@ public:
     ~MainForm();
 
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
+    static QWidget* Instance() { assert(_instance); return _instance; }
 
 protected:
+    void Render(bool fast=false);
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
     static const QEvent::Type ParamsChangeEvent;
     static const QEvent::Type ParamsIntermediateChangeEvent;
-    static const std::string  _documentationURL;
 
-    QMdiArea *    _mdiArea;
     QApplication *_App;
+    static MainForm *_instance;
 
-    // Animation actions
-    //
     QAction *_playForwardAction;
     QAction *_playBackwardAction;
     QAction *_pauseAction;
 
-    // Undo/redo actions
-    //
-    QAction *      _editUndoAction;
-    QAction *      _editRedoAction;
-    QAction *      _appSettingsAction;
-    QLineEdit *    _timeStepEdit;
-    QIntValidator *_timeStepEditValidator;
+    QAction * _editUndoAction;
+    QAction * _editRedoAction;
+    PWidget * _timeStepEdit;
 
-    QComboBox *_alignViewCombo;
-    QMenuBar * _main_Menubar;
-    QMenu *    _File;
-    QMenu *    _Edit;
-    QMenu *    _Tools;
     QMenu *    _captureMenu;
-    QMenu *    _helpMenu;
     QMenu *    _developerMenu;
 
-    QToolBar *_vizToolBar;
     QToolBar *_animationToolBar;
 
-    // Submenus under the File menu:
-    //
-    QMenu *_dataMenu;
-    QMenu *_closeVDCMenu;
-    QMenu *_importMenu;
-    QMenu *_sessionMenu;
-
-    // File menu:
-    //
-    QAction *_fileOpenAction;
-    QAction *_fileSaveAction;
-    QAction *_fileSaveAsAction;
-    QAction *_fileExitAction;
-
-    // Help menu
-    //
-    QAction *_helpAboutAction;
-    QAction *_whatsThisAction;
-    QAction *_installCLIToolsAction;
-    QAction *_webDocumentationAction;
-
-    // Data menu
-    //
-    QAction *_dataLoad_MetafileAction;
-    QAction *_dataClose_MetafileAction;
-    QAction *_fileNew_SessionAction;
-    QAction *_plotAction;
-    QAction *_statsAction;
-    QAction *_pythonAction;
-
-    // Capture menu
-    //
     QMenu *  _singleImageMenu;
-    QAction *_captureSingleJpegAction;
-    QAction *_captureSinglePngAction;
-    QAction *_captureSingleTiffAction;
-
     QMenu *  _imageSequenceMenu;
-    QAction *_captureJpegSequenceAction;
-    QAction *_capturePngSequenceAction;
-    QAction *_captureTiffSequenceAction;
-
     QAction *_captureEndImageAction;
-
-    // Toolbars:
-    //
-    QAction *    _tileAction;
-    QAction *    _cascadeAction;
-    QAction *    _homeAction;
-    QAction *    _sethomeAction;
-    QAction *    _viewAllAction;
-    QAction *    _viewRegionAction;
-    QAction *    _stepForwardAction;
-    QAction *    _stepBackAction;
-    QSpinBox *   _interactiveRefinementSpin;
-    QDockWidget *_tabDockWindow;
+    QAction *_stepForwardAction;
+    QAction *_stepBackAction;
 
     bool     _animationCapture = false;
     int      _progressSavedFB = -1;
     bool     _progressEnabled = false;
-    bool     _needToReenableProgressAfterAnimation = false;
     QAction *_progressEnabledMenuItem = nullptr;
 
     ProgressStatusBar *                                _status = nullptr;
@@ -188,57 +98,37 @@ private:
     const QObject *                                    _disableUserInputForAllExcept = nullptr;
     bool                                               _insideMessedUpQtEventLoop = false;
 
-    Statistics *        _stats;
-    Plot *              _plot;
-    PythonVariables *   _pythonVariables;
-    AppSettingsMenu *   _appSettingsMenu;
-    BannerGUI *         _banner;
-    VizSelectCombo *    _windowSelector;
+    Statistics *        _stats = nullptr;
+    Plot *              _plot = nullptr;
+    PythonVariables *   _pythonVariables = nullptr;
+    AppSettingsMenu *   _appSettingsMenu = nullptr;
+    BannerGUI *         _banner = nullptr;
+    std::set<Updatable *> _updatableElements;
+    std::set<ParamsUpdatable *> _guiStateParamsUpdatableElements;
+    std::set<std::unique_ptr<QEnableableI>> _dependOnLoadedData;
+    template<typename T> void _dependOnLoadedData_insert(T *o) { _dependOnLoadedData.insert(std::make_unique<QEnableable<T>>(o)); }
+
     VAPoR::ControlExec *_controlExec;
     VAPoR::ParamsMgr *  _paramsMgr;
-    TabManager *        _tabMgr;
     AnimationController *_animationController;
     VizWinMgr *         _vizWinMgr;
     string              _capturingAnimationVizName;
 
-    bool _stateChangeFlag;
-    bool _sessionNewFlag;
-    bool _begForCitation;
-    int  _eventsSinceLastSave;
-    bool _buttonPressed;
+    bool _stateChangeFlag = false;
+    bool _sessionNewFlag = false;
+    bool _begForCitation = false;
+    int  _eventsSinceLastSave = 0;
     bool _paramsEventQueued = false;
-
-    ErrorReporter *_errRep;
+    bool _widgetsEnabled;
 
     ParamsWidgetDemo *_paramsWidgetDemo = nullptr;
-
-    QMenu *_loadBookmarkMenu;
-    QMenu *_deleteBookmarkMenu;
-
-    void createBookmark();
-    void populateBookmarkList();
-    void loadBookmark(int i);
-    void deleteBookmark(int i);
-
-    // Zero out all member variables
-    //
-    void _initMembers();
 
     void _performSessionAutoSave();
     void _stateChangeCB();
     void _intermediateStateChangedCB();
 
-    QMdiArea *getMDIArea() { return _mdiArea; }
-
     QApplication *getApp() { return _App; }
 
-    void            setInteractiveRefinementSpin(int);
-    void            enableKeyframing(bool onoff);
-    VizSelectCombo *getWindowSelector() { return _windowSelector; }
-
-    // Set the animation buttons in pause state,
-    // don't trigger an event:
-    //
     void setPause()
     {
         _playForwardAction->setChecked(false);
@@ -253,47 +143,23 @@ private:
         if (vizName == _capturingAnimationVizName) endAnimCapture();
     }
 
-    GUIStateParams *GetStateParams() const
-    {
-        VAssert(_paramsMgr != NULL);
-        return ((GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType()));
-    }
+    GUIStateParams *GetStateParams() const { return ((GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType())); }
+    SettingsParams *GetSettingsParams() const { return ((SettingsParams *)_paramsMgr->GetParams(SettingsParams::GetClassType())); }
+    AnimationParams *GetAnimationParams() const { return ((AnimationParams *)_paramsMgr->GetParams(AnimationParams::GetClassType())); }
 
-    SettingsParams *GetSettingsParams() const
-    {
-        VAssert(_paramsMgr != NULL);
-        return ((SettingsParams *)_paramsMgr->GetParams(SettingsParams::GetClassType()));
-    }
-
-    AnimationParams *GetAnimationParams() const
-    {
-        VAssert(_paramsMgr != NULL);
-        return ((AnimationParams *)_paramsMgr->GetParams(AnimationParams::GetClassType()));
-    }
-
-    /*MiscParams *GetMiscParams() const {
-    VAssert(_paramsMgr != NULL);
-    return ((MiscParams *)
-        _paramsMgr->GetParams(MiscParams::GetClassType())
-    );
- }*/
-
-    // Set the various widgets in the main window consistent with latest
-    // params settings:
-    //
     void                updateMenus();
-    void                update();
-    virtual void        undoRedoHelper(bool undo);
+    void                updateUI();
     static bool         doesQStringContainNonASCIICharacter(const QString &s);
     static int          checkQStringContainsNonASCIICharacter(const QString &s);
-    std::vector<string> myGetOpenFileNames(string prompt, string dir, string filter, bool multi);
-
-    void closeDataHelper(string dataSetName);
-
-    bool openDataHelper(string dataSetName, string format, const vector<string> &files, const vector<string> &options = vector<string>());
+    std::vector<string> getUserFileSelection(string prompt, string dir, string filter, bool multi);
 
     enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
-    void         loadDataHelper(string dataSetName, const std::vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction = Prompt);
+    void importDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
+    void showImportDatasetGUI(string format);
+    void openSession(const string &path, bool loadData=true);
+    void showOpenSessionGUI();
+    optional<ControlExec::LoadStateRelAndAbsPathsExistAction> showSelectRelVAbsDataLoadGUI(const ControlExec::RelAndAbsPathsExistException &e);
+    void checkSessionDatasetsExist();
     void         _createCaptureMenu();
     void         _createToolsMenu();
     void         _createEditMenu();
@@ -301,75 +167,35 @@ private:
     void         _createHelpMenu();
     void         _createDeveloperMenu();
     void         createMenus();
-    void         hookupSignals();
     void         _createAnimationToolBar();
-    void         _createVizToolBar();
     void         createToolBars();
     void         _createProgressWidget();
     void         _disableProgressWidget();
-    virtual void sessionOpenHelper(string fileName, bool loadDatasets = true);
     void         closeAllParamsDatasets();
-    void         loadAllParamsDatasets();
 
     template<class T> bool isDatasetValidFormat(const std::vector<std::string> &paths) const;
     bool                   determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;
 
-    void CheckForUpdates();
-    void CheckForNotices();
-    void CheckForCasperVGL();
-
     bool isOpenGLContextActive() const;
-
-    // Enable/Disable all the widgets that require data to be present
-    //
-    void enableWidgets(bool onOff);
-
     void enableAnimationWidgets(bool onOff);
-
-    void _fileSaveHelper(string path);
-
+    void SaveSession();
+    void SaveSession(string path);
+    void SaveSessionAs();
     string _getDataSetName(string file, DatasetExistsAction existsAction = Prompt);
 
 private slots:
     void _plotClosed();
     void _statsClosed();
-    void sessionOpen(QString qfileName = "", bool loadDatasets = true);
-    void fileSave();
-    void fileSaveAs();
-    void fileExit();
-    void undo();
-    void redo();
     void helpAbout();
-    void loadData(string fileName = "");
-    void closeData(string fileName = "");
     void sessionNew();
-    void captureJpegSequence();
     void captureTiffSequence();
     void capturePngSequence();
     void selectAnimCatureOutput(string filter, string defaultSuffix);
     void startAnimCapture(string baseFile, string defaultSuffix = "tiff");
     void endAnimCapture();
     void captureSingleImage(string filter, string defaultSuffix);
-    void captureSingleJpeg();
-    void captureSinglePng();
-    void captureSingleTiff();
-    void installCLITools();
     void launchStats();
     void launchPlotUtility();
     void launchPythonVariables();
-
-    // animation toolbar:
-    void _setTimeStep();
-
-    void launchWebDocs() const;
-    void setInteractiveRefLevel(int);
-    void loadStartingPrefs();
-
-    void setActiveEventRouter(string type);
-
-    void _setProj4String(string proj4String);
-
     void _setAnimationOnOff(bool onOff);
-    void _setAnimationDraw();
 };
-#endif    // MAINFORM_H

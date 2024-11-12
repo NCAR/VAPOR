@@ -3,6 +3,7 @@
 #include <vapor/DataStatus.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/PyEngine.h>
+#include <vapor/STLUtils.h>
 using namespace Wasp;
 using namespace VAPoR;
 
@@ -23,26 +24,7 @@ int CalcEngineMgr::AddFunction(string scriptType, string dataSetName, string scr
         return (-1);
     }
 
-    _sync();
-
-    PyEngine *                                   pyEngine = NULL;
-    std::map<string, PyEngine *>::const_iterator itr;
-    itr = _pyScripts.find(dataSetName);
-    if (itr == _pyScripts.cend()) {
-        pyEngine = new PyEngine(dataMgr);
-
-        int rc = pyEngine->Initialize();
-        if (rc < 0) {
-            delete pyEngine;
-            return (rc);
-        }
-
-        _pyScripts[dataSetName] = pyEngine;
-    } else {
-        pyEngine = itr->second;
-    }
-
-    int rc = pyEngine->AddFunction(scriptName, script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag);
+    int rc = _pyScripts[dataSetName]->AddFunction(scriptName, script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag);
     if (rc < 0) return (-1);
 
     // If the output variable had a previous definition we need to purge
@@ -63,36 +45,18 @@ void CalcEngineMgr::RemoveFunction(string scriptType, string dataSetName, string
 {
     if (scriptType != "Python") return;
 
-    _sync();
-
-    // Destroy the PyEngine class
-    //
-    std::map<string, PyEngine *>::const_iterator itr;
-    itr = _pyScripts.find(dataSetName);
-    if (itr != _pyScripts.cend()) {
-        PyEngine *pyEngine = itr->second;
-        if (pyEngine) delete pyEngine;
-        _pyScripts.erase(itr);
-    }
-
-    // And remove from the params database
-    //
+    string script;
+    vector<string> inputVarNames, outputVarNames, inputVarMeshes;
+    bool coordFlag;
+    _paramsMgr->GetDatasetsParams()->GetScript(dataSetName, scriptName, script, inputVarNames, outputVarNames, inputVarMeshes, coordFlag);
     _paramsMgr->GetDatasetsParams()->RemoveScript(dataSetName, scriptName);
+    SetCacheDirty();
 }
 
 vector<string> CalcEngineMgr::GetFunctionNames(string scriptType, string dataSetName)
 {
     if (scriptType != "Python") return (vector<string>());
-
-    _sync();
-
-    std::map<string, PyEngine *>::const_iterator itr;
-    itr = _pyScripts.find(dataSetName);
-    if (itr == _pyScripts.cend()) return (vector<string>());
-
-    PyEngine *pyEngine = itr->second;
-
-    return (pyEngine->GetFunctionNames());
+    return _paramsMgr->GetDatasetsParams()->GetScriptNames(dataSetName);
 }
 
 bool CalcEngineMgr::GetFunctionScript(string scriptType, string dataSetName, string scriptName, string &script, vector<string> &inputVarNames, vector<string> &outputVarNames,
@@ -105,15 +69,7 @@ bool CalcEngineMgr::GetFunctionScript(string scriptType, string dataSetName, str
 
     if (scriptType != "Python") return (false);
 
-    _sync();
-
-    std::map<string, PyEngine *>::const_iterator itr;
-    itr = _pyScripts.find(dataSetName);
-    if (itr == _pyScripts.cend()) return (false);
-
-    PyEngine *pyEngine = itr->second;
-
-    return (pyEngine->GetFunctionScript(scriptName, script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag));
+    return _paramsMgr->GetDatasetsParams()->GetScript(dataSetName, scriptName, script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag);
 }
 
 string CalcEngineMgr::GetFunctionStdout(string scriptType, string dataSetName, string scriptName)
@@ -142,45 +98,60 @@ void CalcEngineMgr::_clean()
     }
 }
 
-void CalcEngineMgr::_sync()
+void CalcEngineMgr::ReinitFromState()
 {
-    // Remove PyEngine instances
-    //
     _clean();
+    SyncWithParams();
+    SetCacheDirty();
+}
 
-    // Reubild PyEngine instances from database
-    //
+void CalcEngineMgr::SyncWithParams()
+{
+    const vector<string> datasetNames = _dataStatus->GetDataMgrNames();
+    DatasetsParams *datasetsParams = _paramsMgr->GetDatasetsParams();
 
-    vector<string>  dataSetNames = _dataStatus->GetDataMgrNames();
-    DatasetsParams *dParams = _paramsMgr->GetDatasetsParams();
-    VAssert(dParams);
+    for (const auto &name : STLUtils::SyncToRemove(datasetNames, STLUtils::MapKeys(_pyScripts))) {
+        delete _pyScripts[name];
+        _pyScripts.erase(name);
+    }
 
-    for (int i = 0; i < dataSetNames.size(); i++) {
-        PyEngine *pyEngine = new PyEngine(_dataStatus->GetDataMgr(dataSetNames[i]));
-        int       rc = pyEngine->Initialize();
-        VAssert(rc >= 0);
+    for (const auto &name : STLUtils::SyncToAdd(datasetNames, STLUtils::MapKeys(_pyScripts))) {
+        _pyScripts[name] = new PyEngine(_dataStatus->GetDataMgr(name));
+        _pyScripts[name]->Initialize();
+    }
 
-        _pyScripts[dataSetNames[i]] = pyEngine;
+    for (const auto &dataset : datasetNames) {
+        const auto funcNames = datasetsParams->GetScriptNames(dataset);
+        auto engine = _pyScripts[dataset];
 
-        vector<string> scriptNames = dParams->GetScriptNames(dataSetNames[i]);
+        for (const auto &name : STLUtils::SyncToRemove(funcNames, engine->GetFunctionNames())) {
+            engine->RemoveFunction(name);
+            SetCacheDirty();
+        }
 
-        for (int j = 0; j < scriptNames.size(); j++) {
-            string         script;
-            vector<string> inputVarNames;
-            vector<string> outputVarNames;
-            vector<string> outputVarMeshes;
-            bool           coordFlag;
+        for (const auto &name : engine->GetFunctionNames()) {
+            string script, p_script;
+            vector<string> inputVarNames, outputVarNames, outputMeshNames, p_inputVarNames, p_outputVarNames, p_outputMeshNames;
+            bool coordFlag, p_coordFlag;
+            engine->GetFunctionScript(name, script, inputVarNames, outputVarNames, outputMeshNames, coordFlag);
+            datasetsParams->GetScript(dataset, name, p_script, p_inputVarNames, p_outputVarNames, p_outputMeshNames, p_coordFlag);
+#define T(v) (v != p_##v)
+            if (T(script) || T(inputVarNames) || T(outputVarNames) || T(outputMeshNames) || T(coordFlag)) {
+                engine->RemoveFunction(name);
+                engine->AddFunction(name, p_script, p_inputVarNames, p_outputVarNames, p_outputMeshNames, p_coordFlag);
+                SetCacheDirty();
+            }
+        }
 
-            dParams->GetScript(dataSetNames[i], scriptNames[j], script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag);
-
-            // Disable error reporting
-            //
-            bool errEnabled = MyBase::GetEnableErrMsg();
-            EnableErrMsg(false);
-
-            (void)pyEngine->AddFunction(scriptNames[j], script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag);
-
-            EnableErrMsg(errEnabled);
+        for (const auto &name : STLUtils::SyncToAdd(funcNames, engine->GetFunctionNames())) {
+            string p_script;
+            vector<string> p_inputVarNames, p_outputVarNames, p_outputMeshNames;
+            bool p_coordFlag;
+            datasetsParams->GetScript(dataset, name, p_script, p_inputVarNames, p_outputVarNames, p_outputMeshNames, p_coordFlag);
+            engine->AddFunction(name, p_script, p_inputVarNames, p_outputVarNames, p_outputMeshNames, p_coordFlag);
         }
     }
+
+    _wasCacheDirty = _isDataCacheDirty;
+    _isDataCacheDirty = false;
 }

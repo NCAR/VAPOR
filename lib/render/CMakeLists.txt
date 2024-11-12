@@ -122,6 +122,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/TrackBall.h
 	${PROJECT_SOURCE_DIR}/include/vapor/NavigationUtils.h
     ${PROJECT_SOURCE_DIR}/include/vapor/Histo.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/VisualizerGLContextManager.h
 )
 
 if(BUILD_OSP)

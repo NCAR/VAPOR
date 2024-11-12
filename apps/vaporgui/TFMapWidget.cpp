@@ -27,11 +27,16 @@ void TFMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::
     _dataMgr = dataMgr;
     _paramsMgr = paramsMgr;
     _renderParams = rParams;
+    _variableName = _renderParams->GetValueString(_variableNameTag, "");
 
-    if (HasValidParams()) paramsUpdate();
+    if (!_dataMgr->VariableExists(_renderParams->GetCurrentTimestep(), getVariableName()))
+        _renderParams = nullptr;
+
+    if (HasValidParams())
+        paramsUpdate();
 }
 
-bool TFMap::HasValidParams() const { return _dataMgr && _paramsMgr && _renderParams && _dataMgr->VariableExists(_renderParams->GetCurrentTimestep(), getVariableName()); }
+bool TFMap::HasValidParams() const { return _dataMgr && _paramsMgr && _renderParams; }
 
 bool TFMap::IsShown() const { return !_hidden; }
 
@@ -47,6 +52,16 @@ bool TFMap::isLargeEnoughToPaint() const
     if (_width - (p.left() + p.right()) <= 0) return false;
     if (_height - (p.top() + p.bottom()) <= 0) return false;
     return true;
+}
+
+void TFMap::paintEvent(QPainter &p)
+{
+    // _renderParams can be invalid during a paintEvent if params are changed and then Qt refreshes the GUI
+    // prior to the change event being handled.
+    const auto savedParams = _renderParams;
+    _renderParams = nullptr;
+    _paintEvent(p);
+    _renderParams = savedParams;
 }
 
 void TFMap::mousePressEvent(QMouseEvent *event) { event->ignore(); }
@@ -73,7 +88,7 @@ void TFMap::hide()
 
 VAPoR::MapperFunction *TFMap::getMapperFunction() const { return _renderParams->GetMapperFunc(getVariableName()); }
 
-std::string TFMap::getVariableName() const { return _renderParams->GetValueString(_variableNameTag, ""); }
+std::string TFMap::getVariableName() const { return _variableName; }
 
 const std::string &TFMap::getVariableNameTag() const { return _variableNameTag; }
 

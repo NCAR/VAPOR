@@ -46,6 +46,7 @@
 #include "vapor/Version.h"
 
 #include "ErrorReporter.h"
+#include "MainForm.h"
 
 using std::string;
 using std::vector;
@@ -237,6 +238,13 @@ int ErrorReporter::OpenLogFile(std::string path)
         return -1;
     }
     return 0;
+}
+
+ErrorReporter *ErrorReporter::GetInstance()
+{
+    if (!_instance)
+        _instance = new ErrorReporter(MainForm::Instance());
+    return _instance;
 }
 
 ErrorReporter::ErrorReporter(QWidget *parent)
