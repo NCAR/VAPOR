@@ -3,7 +3,6 @@
 #include <string>
 #include <algorithm>
 #include <cfloat>
-#include <ranges>
 
 #include <vapor/STLUtils.h>
 #include <vapor/FileUtils.h>

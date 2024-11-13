@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
-#include <ranges>
 
 namespace STLUtils {
 
