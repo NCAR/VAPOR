@@ -2,7 +2,7 @@
 #include <QTabWidget>
 #include "Updatable.h"
 #include "VaporFwd.h"
-#include "common.h"
+#include <common.h>
 
 class LeftPanel : public QTabWidget, public Updatable {
     Q_OBJECT

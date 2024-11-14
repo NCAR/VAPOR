@@ -13,6 +13,7 @@
 #include <QWidgetAction>
 #include <chrono>
 #include <set>
+#include <optional>
 #include <vapor/ControlExecutive.h>
 #include <vapor/GUIStateParams.h>
 #include <vapor/SettingsParams.h>

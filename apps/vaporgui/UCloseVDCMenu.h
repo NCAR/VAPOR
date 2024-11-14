@@ -1,7 +1,7 @@
 #pragma once
 #include <QMenu>
 #include "Updatable.h"
-#include "common.h"
+#include <common.h>
 
 class UCloseVDCMenu : public QMenu, public Updatable{
     Q_OBJECT

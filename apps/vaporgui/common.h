@@ -1,3 +1,4 @@
+#pragma once
 #include <vapor/common.h>
 #include <QObject>
 #include "PWidgetsFwd.h"

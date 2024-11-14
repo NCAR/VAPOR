@@ -4,7 +4,7 @@
 #include <functional>
 #include "UWidget.h"
 #include <vapor/VAssert.h>
-#include "common.h"
+#include <common.h>
 
 //! \class PWidget
 //! A Qt Widget that is automatically synced with the Params database.

@@ -1,6 +1,6 @@
 #include "CLIToolInstaller.h"
 #include <QMessageBox>
-#include "common.h"
+#include <common.h>
 #include <vapor/ResourcePath.h>
 
 using namespace Wasp;

@@ -155,7 +155,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _status = new ProgressStatusBar;
     _status->hide();
 
-    sideDockWidgetArea->setWidget(new VGroup {leftPanel, _status});
+    sideDockWidgetArea->setWidget(new VGroup({leftPanel, _status}));
 
     createMenus();
     createToolBars();
@@ -576,7 +576,7 @@ retryLoad:
             _controlExec->LoadState();
             return;
         }
-    } catch(ControlExec::RelAndAbsPathsExistException e) {
+    } catch(ControlExec::RelAndAbsPathsExistException const &e) {
         auto a = showSelectRelVAbsDataLoadGUI(e);
         if (!a) {
             sessionNew();

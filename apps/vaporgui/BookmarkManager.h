@@ -1,6 +1,6 @@
 #pragma once
 #include "Updatable.h"
-#include "common.h"
+#include <common.h>
 
 class QMenu;
 class VizWinMgr;

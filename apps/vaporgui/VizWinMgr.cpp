@@ -46,7 +46,7 @@
 #include "VizWin.h"
 #include "VizWinMgr.h"
 #include "ErrorReporter.h"
-#include "common.h"
+#include <common.h>
 
 using namespace VAPoR;
 

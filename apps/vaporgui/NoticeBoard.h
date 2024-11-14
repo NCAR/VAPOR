@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include "common.h"
+#include <common.h>
 
 struct Notice;
 class QTextBrowser;

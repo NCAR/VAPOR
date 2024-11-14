@@ -1,6 +1,6 @@
 #pragma once
 #include <QToolBar>
-#include "common.h"
+#include <common.h>
 #include "Updatable.h"
 
 class VizWinMgr;

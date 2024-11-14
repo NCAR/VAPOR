@@ -2,7 +2,7 @@
 
 #include "VaporFwd.h"
 #include "Updatable.h"
-#include "common.h"
+#include <common.h>
 #include <functional>
 #include <QObject>
 
