@@ -1,64 +1,18 @@
-//************************************************************************
-//															*
-//			 Copyright (C)  2015										*
-//	 University Corporation for Atmospheric Research					*
-//			 All Rights Reserved										*
-//															*
-//************************************************************************/
-//
-//	File:		AnnotationEventRouter.cpp
-//
-//	Author:	Scott Pearse
-//			Alan Norton
-//			National Center for Atmospheric Research
-//			PO 3000, Boulder, Colorado
-//
-//	Date:		May 2006
-//
-//	Description:	Implements the AnnotationEventRouter class.
-//		This class supports routing messages from the gui to the params
-//		This is derived from the vizfeature Widget
-//
-#ifdef WIN32
-    // Annoying unreferenced formal parameter warning
-    #pragma warning(disable : 4100 4996)
-#endif
-#include <qdesktopwidget.h>
-#include <qrect.h>
-#include <qmessagebox.h>
-#include <qlineedit.h>
-#include <vapor/AnnotationParams.h>
-#include <vapor/DataStatus.h>
-#include <vapor/DataMgrUtils.h>
-
-#include "qcolordialog.h"
-#include <qlabel.h>
-
-#include <vector>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-
-#include "ErrorReporter.h"
 #include "AnnotationEventRouter.h"
-#include "vapor/ControlExecutive.h"
-#include "EventRouter.h"
+#include <vapor/AnnotationParams.h>
+#include <vapor/ControlExecutive.h>
 #include "VSection.h"
 #include "PWidgets.h"
 #include "PEnumDropdownHLI.h"
 #include "PSliderEditHLI.h"
-#include "VComboBox.h"
 #include "VPushButton.h"
-#include "Updateable.h"
 #include "PCopyRegionAnnotationWidget.h"
 #include "PAxisAnnotationWidget.h"
 
 using namespace VAPoR;
 
-AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) : QWidget(parent), EventRouter(ce, AnnotationParams::GetClassType())
+AnnotationEventRouter::AnnotationEventRouter(ControlExec *ce) : _controlExec(ce)
 {
-    // clang-format off
     setLayout(new QVBoxLayout);
 
     VSection *axisAnnotationTab = new VSection("Axis Annotations");
@@ -116,19 +70,13 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
                                      })});
     layout()->addWidget(ThreeDGeometryGroup);
     _groups.push_back(ThreeDGeometryGroup);
-    // clang-format on
 }
 
-AnnotationEventRouter::~AnnotationEventRouter() {}
-
-void AnnotationEventRouter::_updateTab()
+void AnnotationEventRouter::Update()
 {
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
+    AnnotationParams *aParams = (AnnotationParams *)_controlExec->GetParamsMgr()->GetParams(AnnotationParams::GetClassType());
     AxisAnnotation *  aa = aParams->GetAxisAnnotation();
-    AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
 
-    for (PGroup *group : _groups) group->Update(vParams);
+    for (PGroup *group : _groups) group->Update(aParams);
     for (PGroup *group : _axisGroups) group->Update(aa, _controlExec->GetParamsMgr());
-
-    return;
 }

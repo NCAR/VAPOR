@@ -122,7 +122,7 @@ RENDER_API bool FrameBufferReady();
     #endif
     #include <signal.h>
     #define GL_ERR_BREAK() \
-        if (CheckGLError()) ::raise(SIGTERM)
+        if (CheckGLError()) ::raise(SIGINT)
 #else
     #define GL_LEGACY(x)
     #define GL_ERR_BREAK()

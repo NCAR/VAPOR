@@ -28,7 +28,6 @@
 #include <vapor/ParamsMgr.h>
 #include "qdialog.h"
 #include "ui_NewRendererDialog.h"
-#include "VizSelectCombo.h"
 #include "ErrorReporter.h"
 #include "RenderHolder.h"
 #include "QPushButtonWithDoubleClick.h"
@@ -253,7 +252,7 @@ void RenderHolder::_newRendererDialogAccepted(ControlExec *_controlExec, NewRend
     rendererName = _controlExec->MakeRendererNameUnique(rendererName);
     qname = QString(rendererName.c_str());
 
-    paramsMgr->BeginSaveStateGroup(_controlExec->GetActivateRendererUndoTag());
+    paramsMgr->BeginSaveStateGroup("Activate Renderer");
 
     int rc = _controlExec->ActivateRender(activeViz, dataSetName, rendererType, rendererName, false);
     if (rc < 0) {

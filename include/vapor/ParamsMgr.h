@@ -133,13 +133,12 @@ public:
     //! \param [in] winName Window name to associate the new RenderParams
     //! object with.
     //!
-    //! \retval ptr Returns a pointer to the newly created object on success,
-    //! and NULL on failure.
+    //! \retval ptr Returns the name of the newly created object.
     //!
     //! \sa RenParamsRegistrar, RenParamsFactory
     //! GetRenderParams()
     //
-    ViewpointParams *CreateVisualizerParamsInstance(string winName);
+    string CreateVisualizerParamsInstance(string winName = "__AUTO__");
 
     //! Remove a previously created ViewpointParams instance
     //!
@@ -251,6 +250,9 @@ public:
     void GetRenderParamNames(string winName, vector<string> &instNames) const;
 
     void GetRenderParamNames(vector<string> &instNames) const;
+    vector<string> GetRenderParamNames() const;
+
+    vector<string> GetRenderParamNamesForDataset(string datasetName) const;
 
     //! Lookup window, data set, and class name from a render instance name
     //!
@@ -264,6 +266,7 @@ public:
     //! \sa CreateRenderParamsInstance
     //
     bool RenderParamsLookup(string instName, string &winName, string &dataSetName, string &className) const;
+    bool RenderParamsLookup(RenderParams* inst, string &instName, string &winName, string &dataSetName, string &className) const;
 
     //! Returns all defined window (aka visualizer names).
     //!
@@ -368,7 +371,13 @@ public:
     //!
     //! \sa ParamsMgr()
     //
-    ParamsBase *GetParams(string classType) { return (_otherParams->GetParams(classType)); }
+    ParamsBase *GetParams(string classType) const { return (_otherParams->GetParams(classType)); }
+
+    // template <std::derived_from<ParamsBase> T> T* GetParams() const
+    template <class T> T* GetParams() const
+    {
+        return (T*)GetParams(T::GetClassType());
+    }
 
     //! Optain any render paramers registered by the application
     //!
@@ -446,6 +455,9 @@ public:
 
     bool GetSaveStateEnabled() const { return (_ssave.GetEnabled()); }
 
+    void PushSaveStateEnabled(bool enabled) { _saveStateEnabledStack.push(GetSaveStateEnabled()); SetSaveStateEnabled(enabled); }
+    void PopSaveStateEnabled() { SetSaveStateEnabled(_saveStateEnabledStack.top()); _saveStateEnabledStack.pop(); }
+
     //! Enable/Disable adding params changes to the undo list.
     //! When enabled, behaves as normal.
     //! When disabled, params are saved as normal, however the undo list is not updated.
@@ -471,6 +483,8 @@ public:
 
     void UndoRedoClear();
 
+    void ManuallyAddCurrentStateToUndoStack(const string &note="");
+
     //! Return description string for event at top of undo stack
     //
     string GetTopUndoDesc() const;
@@ -478,6 +492,8 @@ public:
     //! Return description string for event at top of redo stack
     //
     string GetTopRedoDesc() const;
+
+    string GetStateChangeReasonDescription() const { return _ssave.GetStateChangeReasonDescription(); }
 
     //! Return number states saved that can be undone with Undo()
     //!
@@ -530,6 +546,11 @@ public:
         return (true);
     }
 
+    void TriggerManualStateChangeEvent(const string &reason="", const bool overrideEnabled=false)
+    {
+        _ssave.TriggerManualStateChangeEvent(reason, overrideEnabled);
+    }
+
 private:
     class PMgrStateSave : public ParamsBase::StateSave {
     public:
@@ -539,7 +560,8 @@ private:
         void Reinit(const XmlNode *rootNode)
         {
             _rootNode = rootNode;
-            emitStateChange();
+            // Memory leak as this is called before initializing containers in ParamsMgr::_init
+            // emitStateChange();
         }
 
         void Rebase()
@@ -550,6 +572,7 @@ private:
         void Save(const XmlNode *node, string description);
         void BeginGroup(string descripion);
         void EndGroup();
+        void TriggerManualStateChangeEvent(const string & reason="", const bool overrideEnabled=false);
         void IntermediateChange();
 
         void SetEnabled(bool onOff)
@@ -560,20 +583,18 @@ private:
 
         bool GetEnabled() const { return (_enabled); }
 
-        void SetUndoEnabled(bool b)
-        {
-            if (!_groups.empty()) return;    // Can't change inside group
-            _addToUndoEnabled = b;
-        }
+        void SetUndoEnabled(bool b);
         bool GetUndoEnabled() const { return _addToUndoEnabled; }
 
         const XmlNode *GetTopUndo(string &description) const;
         const XmlNode *GetTopRedo(string &description) const;
         const XmlNode *GetBase() const { return (_state0); }
+        string GetStateChangeReasonDescription() const {return _stateChangeReasonDescription; }
 
         bool Undo();
         bool Redo();
         void Clear();
+        void ManuallyAddCurrentStateToUndoStack(const string &note="");
 
         size_t UndoSize() const { return (_undoStack.size()); }
 
@@ -597,10 +618,11 @@ private:
         std::vector<bool *>                _stateChangeFlags;
         std::vector<std::function<void()>> _stateChangeCBs;
         std::vector<std::function<void()>> _intermediateStateChangeCBs;
+        std::string                        _stateChangeReasonDescription;
 
         void cleanStack(int maxN, std::deque<std::pair<string, XmlNode *>> &s);
-        void emitStateChange();
-        void emitIntermediateStateChange();
+        void emitStateChange(const string &reason);
+        void emitIntermediateStateChange(const string &reason = "Intermediate change");
     };
 
     map<string, DataMgr *> _dataMgrMap;
@@ -622,6 +644,7 @@ private:
     std::map<string, RenParamsContainer *> _otherRenParams;
 
     PMgrStateSave _ssave;
+    std::stack<bool> _saveStateEnabledStack;
 
     static const string _rootTag;
     static const string _globalTag;

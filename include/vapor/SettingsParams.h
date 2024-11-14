@@ -139,6 +139,7 @@ public:
     static const string CasperVGLCheck;
 
     bool LoadFromSettingsFile();
+    void FindDefaultSettingsPath();
 
 private:
     static const string _classType;

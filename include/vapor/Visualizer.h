@@ -64,8 +64,10 @@ public:
     //! \param[in] glManager A pointer to a GLManager
     int InitializeGL(GLManager *glManager);
 
+    void syncWithParams();
+
     //! Set/clear a flag indicating that the trackball has changed the viewpoint.
-    //! all the OpenGL rendering is performed in the paintEvent method.  It must be invoked from
+    //! all the OpenGL rendering is performed in the _paintEvent method.  It must be invoked from
     //! a current OpenGL context.
     //! \return zero if successful.
     int paintEvent(bool fast);
@@ -117,7 +119,7 @@ public:
     //! at the center of the scene.
     double getPixelSize() const;
 
-    //! Turn on or off the image capture enablement.  If on, the next paintEvent will result in capture
+    //! Turn on or off the image capture enablement.  If on, the next _paintEvent will result in capture
     //! Also saves the capture file name
     int SetImageCaptureEnabled(bool onOff, string filename)
     {
@@ -174,7 +176,7 @@ private:
     void _renderColorbars(int timeStep);
 
     //! Capture a single image to a file.  Filename must be *.tif or *.jpg
-    //! Must be called during paintEvent when captureEnabled has been called.
+    //! Must be called during _paintEvent when captureEnabled has been called.
     //! Will turn off the captureEnabled switch.
     //! \param[in] filename
     //! \return zero if successful

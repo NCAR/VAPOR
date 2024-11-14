@@ -53,7 +53,7 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
     // clang-format on
 }
 
-void ContourEventRouter::_updateTab()
+void ContourEventRouter::Update()
 {
     RenderParams *rp = GetActiveParams();
     string        varname = rp->GetVariableName();
@@ -71,7 +71,7 @@ void ContourEventRouter::_updateTab()
     _spacingSlider->SetRange(0, dataExts[1] - dataExts[0]);
     _minValueSlider->SetRange(dataExts[0], dataExts[1]);
 
-    RenderEventRouterGUI::_updateTab();
+    RenderEventRouterGUI::Update();
 }
 
 string ContourEventRouter::_getDescription() const

@@ -23,7 +23,7 @@ public:
 protected:
     void          paramsUpdate();
     TFInfoWidget *createInfoWidget();
-    void          paintEvent(QPainter &p);
+    void          _paintEvent(QPainter &p);
     void          mousePressEvent(QMouseEvent *event);
     void          mouseReleaseEvent(QMouseEvent *event);
     void          mouseMoveEvent(QMouseEvent *event);
@@ -33,6 +33,8 @@ private:
     Histo                   _histo;
     ParamsDropdownMenuItem *_scalingMenu;
     bool                    _dynamicScaling = true;
+
+    vector<double> _mapRange;
 
     ScalingType _getScalingType() const;
 

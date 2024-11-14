@@ -64,7 +64,7 @@ TFInfoWidget *TFIsoValueMap::createInfoWidget()
     return info;
 }
 
-void TFIsoValueMap::paintEvent(QPainter &p)
+void TFIsoValueMap::_paintEvent(QPainter &p)
 {
     p.fillRect(rect(), Qt::lightGray);
 

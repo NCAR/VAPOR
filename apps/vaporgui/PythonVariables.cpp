@@ -105,7 +105,7 @@ PythonVariables::~PythonVariables()
     }
 }
 
-void PythonVariables::Update(bool internalUpdate)
+void PythonVariables::Update()
 {
     VAPoR::DataStatus * dataStatus = _controlExec->GetDataStatus();
     std::vector<string> dataMgrNames = dataStatus->GetDataMgrNames();
@@ -240,7 +240,7 @@ void PythonVariables::_newScript()
         _3DVarsEnabled.resize(_3DVars.size());
         std::fill(_3DVarsEnabled.begin(), _3DVarsEnabled.end(), false);
 
-        Update(true);
+        Update();
     }
 }
 
@@ -327,7 +327,7 @@ void PythonVariables::_openScript()
         _inputGrids.clear();
         _otherGrids.clear();
 
-        Update(true);
+        Update();
     }
 }
 
@@ -349,7 +349,7 @@ void PythonVariables::_deleteScript()
 
     if (scriptName == _scriptName) _reset();
 
-    Update(true);
+    Update();
 }
 
 bool PythonVariables::_getFilePath(QString &filePath, bool operation)
@@ -406,7 +406,7 @@ void PythonVariables::_importScript()
         }
     }
 
-    Update(true);
+    Update();
 }
 
 void PythonVariables::_exportScript()
@@ -508,7 +508,7 @@ void PythonVariables::_coordInputVarChanged(int row, int col)
     else
         _coordVarsEnabled[row] = false;
 
-    Update(true);
+    Update();
 }
 
 void PythonVariables::_2DInputVarChanged(int row, int col)
@@ -521,7 +521,7 @@ void PythonVariables::_2DInputVarChanged(int row, int col)
     else
         _2DVarsEnabled[row] = false;
 
-    Update(true);
+    Update();
 }
 
 void PythonVariables::_3DInputVarChanged(int row, int col)
@@ -534,7 +534,7 @@ void PythonVariables::_3DInputVarChanged(int row, int col)
     else
         _3DVarsEnabled[row] = false;
 
-    Update(true);
+    Update();
 }
 
 void PythonVariables::_coordinatesCheckboxClicked(int state)
@@ -548,7 +548,7 @@ void PythonVariables::_coordinatesCheckboxClicked(int state)
         _includeCoordVars = true;
         _variableTabs->insertTab(0, _coordTab, "Coordinates");
     }
-    Update(true);
+    Update();
 }
 
 void PythonVariables::_findEnabledCoordinateVariables(const std::vector<string> vars, const std::vector<bool> varsEnabled)
@@ -614,7 +614,7 @@ void PythonVariables::_createNewVariable()
     string outputGrid = _newItemDialog->GetOptionName();
     _outputGrids.push_back(outputGrid);
 
-    Update(true);
+    Update();
 }
 
 std::vector<string> PythonVariables::_makeDialogOptions(std::vector<string> grids)
@@ -685,7 +685,7 @@ void PythonVariables::_deleteVariable()
 
     _outputVars.erase(_outputVars.begin() + index);
     _outputGrids.erase(_outputGrids.begin() + index);
-    Update(true);
+    Update();
 }
 
 void PythonVariables::_scriptChanged() { _script = _scriptEdit->toPlainText().toStdString(); }
@@ -758,7 +758,7 @@ void PythonVariables::InitControlExec(VAPoR::ControlExec *ce)
 
 void PythonVariables::ShowMe()
 {
-    Update(true);
+    Update();
     open();
 }
 

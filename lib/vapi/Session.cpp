@@ -21,7 +21,7 @@ Session::Session()
     myParams.push_back(AnimationParams::GetClassType());
     myParams.push_back(SettingsParams::GetClassType());
     vector<string> myRenParams;
-    _controlExec = new ControlExec(myParams, myRenParams);
+    _controlExec = new ControlExec(new ParamsMgr(myParams, myRenParams));
 
     Reset();
 }
@@ -32,11 +32,9 @@ Session::~Session()
     delete _controlExec;
 }
 
-void Session::CloseDataset(String name)
+void Session::CloseDataset(String datasetName)
 {
-    getGUIStateParams()->RemoveOpenDateSet(name);
-    _controlExec->CloseData(name);
-    _controlExec->UndoRedoClear();
+    _controlExec->CloseData(datasetName);
 }
 
 void Session::CloseAllDatasets()
@@ -47,8 +45,10 @@ void Session::CloseAllDatasets()
 
 int Session::OpenDataset(String name, String format, const vector<String> &files, const vector<String> &options)
 {
-    int rc = _controlExec->OpenData(files, options, name, format);
+    _controlExec->GetParamsMgr()->BeginSaveStateGroup("Import Dataset");
+    int rc = _controlExec->OpenData(files, name, format);
     if (rc < 0) {
+        _controlExec->GetParamsMgr()->EndSaveStateGroup();
         LogWarning("Failed to load data '%s'", files.empty() ? name.c_str() : files[0].c_str());
         return rc;
     }
@@ -56,12 +56,16 @@ int Session::OpenDataset(String name, String format, const vector<String> &files
     GUIStateParams *p = getGUIStateParams();
     DataStatus *    ds = _controlExec->GetDataStatus();
     bool            isFirstDataset = p->GetOpenDataSetNames().empty();
-    p->SetProjectionString(ds->GetMapProjection());
     p->InsertOpenDateSet(name, format, files);
+    getAnimationParams()->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
 
-    if (isFirstDataset) { NavigationUtils::ViewAll(_controlExec); }
+    if (isFirstDataset) {
+        NavigationUtils::ViewAll(_controlExec);
+        NavigationUtils::SetHomeViewpoint(_controlExec);
+        p->SetProjectionString(ds->GetMapProjection());
+    }
 
-    _controlExec->UndoRedoClear();
+    _controlExec->GetParamsMgr()->EndSaveStateGroup();
     return 0;
 }
 
@@ -110,7 +114,7 @@ int Session::Load(String path)
     
     getGUIStateParams()->SetActiveVizName(getWinName());
 
-    _controlExec->UndoRedoClear();
+    _controlExec->GetParamsMgr()->UndoRedoClear();
     return 0;
 }
 
@@ -146,7 +150,7 @@ void Session::Reset()
     if (_renderManager) delete _renderManager;
     _renderManager = new RenderManager(_controlExec);
     
-    _controlExec->UndoRedoClear();
+    _controlExec->GetParamsMgr()->UndoRedoClear();
 }
 
 int Session::Render(String imagePath, bool fast)
@@ -197,7 +201,7 @@ String Session::NewRenderer(String type, String dataset)
     
     String rendererName = _controlExec->MakeRendererNameUnique(type);
 
-    _controlExec->GetParamsMgr()->BeginSaveStateGroup(_controlExec->GetActivateRendererUndoTag());
+    _controlExec->GetParamsMgr()->BeginSaveStateGroup("New Renderer");
 
     int rc = _controlExec->ActivateRender(getWinName(), dataset, type, rendererName, false);
     if (rc < 0) {
@@ -268,7 +272,5 @@ SettingsParams *Session::getSettingsParams() const { return ((SettingsParams *)_
 
 String Session::getWinName() const
 {
-//    assert(not _controlExec->GetVisualizerNames().empty());
-//    return _controlExec->GetVisualizerNames()[0];
     return _renderManager->GetWinName();
 }

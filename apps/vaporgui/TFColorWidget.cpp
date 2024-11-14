@@ -16,7 +16,8 @@ using std::vector;
 
 static vec2 qvec2(const QPoint &qp) { return vec2(qp.x(), qp.y()); }
 
-TFColorMap::TFColorMap(const std::string &variableNameTag, TFMapWidget *parent) : TFMap(variableNameTag, parent)
+TFColorMap::TFColorMap(const std::string &variableNameTag, TFMapWidget *parent)
+: TFMap(variableNameTag, parent)
 {
     _colorInterpolationMenu = new ParamsDropdownMenuItem(
         this, VAPoR::ColorMap::_interpTypeTag, {"Linear HSV", "Linear RGB", "Linear LAB", "Linear LCH", "Discrete", "Diverging"},
@@ -80,12 +81,36 @@ void TFColorMap::populateBuiltinColormapMenu(QMenu *menu, const std::string &bui
 
 void TFColorMap::paramsUpdate()
 {
-    _colorInterpolationMenu->Update(getColormap());
-    _colorInterpolationWhitepointAction->Update(getColormap());
-    _colorInterpolationWhitepointAction->setEnabled(getColormap()->GetInterpType() == TFInterpolator::diverging);
+    const auto cm = getColormap();
+    _colorInterpolationMenu->Update(cm);
+    _colorInterpolationWhitepointAction->Update(cm);
+    _colorInterpolationWhitepointAction->setEnabled(cm->GetInterpType() == TFInterpolator::diverging);
+    updateImage();
+    _paramsNormalizedControlPoints.resize(cm->numControlPoints());
+    for (int i = 0; i < _paramsNormalizedControlPoints.size(); i++)
+        _paramsNormalizedControlPoints[i] = cm->controlPointValueNormalized(i);
     update();
 
     if (_selectedId > -1) UpdateInfo(getColormap()->controlPointValueNormalized(_selectedId), VColorToQColor(getColormap()->controlPointColor(_selectedId)));
+}
+
+void TFColorMap::updateImage()
+{
+    if (width() <= 0) return;
+    ColorMap *cm = getRenderParams()->GetMapperFunc(getVariableName())->GetColorMap();
+
+    QMargins       padding = GetPadding();
+    int            nSamples = width() - (padding.left() + padding.right());
+    nSamples = std::max(nSamples, 256);
+    _imageData.resize(nSamples * 3);
+    float          rgb[3];
+    for (int i = 0; i < nSamples; i++) {
+        cm->colorNormalized(i / (float)nSamples).toRGB(rgb);
+        _imageData[i * 3 + 0] = rgb[0] * 255;
+        _imageData[i * 3 + 1] = rgb[1] * 255;
+        _imageData[i * 3 + 2] = rgb[2] * 255;
+    }
+    _image = QImage(_imageData.data(), nSamples, 1, QImage::Format::Format_RGB888);
 }
 
 TFInfoWidget *TFColorMap::createInfoWidget()
@@ -102,32 +127,15 @@ TFInfoWidget *TFColorMap::createInfoWidget()
 #define CONTROL_POINT_RADIUS (4.0f)
 #define PADDING              (CONTROL_POINT_RADIUS + 1.0f)
 
-void TFColorMap::paintEvent(QPainter &p)
+void TFColorMap::_paintEvent(QPainter &p)
 {
     //     243 245 249
     p.fillRect(rect(), Qt::lightGray);
     QPaintUtils::BoxDropShadow(p, paddedRect(), 10, QColor(0, 0, 0, 120));
 
-    RenderParams *rp = getRenderParams();
+    p.drawImage(paddedRect(), _image);
 
-    ColorMap *cm = rp->GetMapperFunc(getVariableName())->GetColorMap();
-
-    QMargins       padding = GetPadding();
-    int            nSamples = width() - (padding.left() + padding.right());
-    unsigned char *buf = new unsigned char[nSamples * 3];
-    float          rgb[3];
-    for (int i = 0; i < nSamples; i++) {
-        cm->colorNormalized(i / (float)nSamples).toRGB(rgb);
-        buf[i * 3 + 0] = rgb[0] * 255;
-        buf[i * 3 + 1] = rgb[1] * 255;
-        buf[i * 3 + 2] = rgb[2] * 255;
-    }
-    QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
-
-    p.drawImage(paddedRect(), image);
-
-    for (int i = 0; i < cm->numControlPoints(); i++) { drawControl(p, controlQPositionForValue(cm->controlPointValueNormalized(i)), i == _selectedId); }
-    delete[] buf;
+    for (int i = 0; i < _paramsNormalizedControlPoints.size(); i++) { drawControl(p, controlQPositionForValue(_paramsNormalizedControlPoints[i]), i == _selectedId); }
 }
 
 void TFColorMap::mousePressEvent(QMouseEvent *event)
@@ -172,7 +180,8 @@ void TFColorMap::mouseMoveEvent(QMouseEvent *event)
 
         moveControlPoint(&_draggingControlID, newVal);
         selectControlPoint(_draggingControlID);
-        update();
+        updateImage();
+        paramsUpdate();
         getParamsMgr()->IntermediateChange();
     } else {
         event->ignore();

@@ -193,6 +193,8 @@ void RenderManager::setUpModelViewMatrix()
 
 int RenderManager::Render(String imagePath, bool fast)
 {
+    _controlExec->SyncWithParams();
+
     //    GL_ERR_BREAK();
     if (!_glManager) {
         _glManager = new GLManager;
@@ -256,9 +258,9 @@ vector<int> RenderManager::GetResolution() const
 
 String RenderManager::GetWinName() const
 {
-    assert(not _controlExec->GetVisualizerNames().empty());
-    String winName = _controlExec->GetVisualizerNames()[0];
-    return winName;
+    const auto names = _controlExec->GetParamsMgr()->GetVisualizerNames();
+    assert(not names.empty());
+    return names[0];
 }
 
 VAPoR::ViewpointParams *RenderManager::getViewpointParams() const { return _controlExec->GetParamsMgr()->GetViewpointParams(GetWinName()); }

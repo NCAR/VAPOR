@@ -96,7 +96,7 @@ TFInfoWidget *TFOpacityMap::createInfoWidget()
     return info;
 }
 
-void TFOpacityMap::paintEvent(QPainter &p)
+void TFOpacityMap::_paintEvent(QPainter &p)
 {
     //    p.setViewport(10, 10, 30, 30);
     //    p.setWindow(10, 10, 30, 30);

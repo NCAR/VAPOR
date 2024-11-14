@@ -27,7 +27,7 @@ private:
 protected:
     void          paramsUpdate() override;
     TFInfoWidget *createInfoWidget() override;
-    void          paintEvent(QPainter &p) override;
+    void          _paintEvent(QPainter &p) override;
     void          mousePressEvent(QMouseEvent *event) override;
     void          mouseReleaseEvent(QMouseEvent *event) override;
     void          mouseMoveEvent(QMouseEvent *event) override;
@@ -41,6 +41,12 @@ private:
     int                     _selectedId = -1;
     glm::vec2               _dragOffset;
     glm::vec2               m;
+
+    QImage _image;
+    vector<unsigned char> _imageData;
+    std::vector<float> _paramsNormalizedControlPoints;
+
+    void updateImage();
 
     bool controlPointContainsPixel(const glm::vec2 &cp, const glm::vec2 &pixel) const;
 

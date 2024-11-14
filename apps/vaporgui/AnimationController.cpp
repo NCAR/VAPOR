@@ -136,6 +136,7 @@ void AnimationController::setPlay(int direction)
         // Done animating. Disable timer and send notification
         //
         disconnect(_myTimer, 0, 0, 0);
+        _controlExec->GetParamsMgr()->ManuallyAddCurrentStateToUndoStack("End animation playback");
 
         emit AnimationOnOffSignal(false);
     }
@@ -167,7 +168,10 @@ void AnimationController::playNextFrame()
     if (currentFrame < startFrame) currentFrame = endFrame;
     if (currentFrame > endFrame) currentFrame = startFrame;
 
+    bool undoEnabled = _controlExec->GetParamsMgr()->GetSaveStateUndoEnabled();
+    _controlExec->GetParamsMgr()->SetSaveStateUndoEnabled(false);
     setCurrentTimestep(currentFrame);
+    _controlExec->GetParamsMgr()->SetSaveStateUndoEnabled(undoEnabled);
 
     // playNextFrame() is called via a timer and bypasses main event
     // loop. So we need to call updateTab ourselves
