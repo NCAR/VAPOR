@@ -1,10 +1,10 @@
+# TODO REMOVE
+add_definitions (-DNEW_GUI)
 set (SRCS
-	EventRouter.cpp
 	RenderEventRouter.cpp
 	RenderHolder.cpp
 	GLWidget.cpp
 	ErrorReporter.cpp
-	VizSelectCombo.cpp
 	AnnotationEventRouter.cpp
 	ViewpointTab.cpp
 	ViewpointTab.h
@@ -25,7 +25,6 @@ set (SRCS
 	MainForm_isOpenGLContextActive.cpp
     VizWin.cpp
 	VizWinMgr.cpp
-	TabManager.cpp
 	ImageEventRouter.cpp
 	ImageEventRouter.h
 	ContourEventRouter.cpp
@@ -34,7 +33,6 @@ set (SRCS
     SliceEventRouter.h
 	PlotParams.cpp
 	StatisticsParams.cpp
-	TransformTable.cpp
 	VaporTable.cpp
 	FidelityWidget.cpp
 	QSliderEdit.cpp
@@ -145,8 +143,8 @@ set (SRCS
 	V3DIntInput.h
 	VGroup.cpp
 	VGroup.h
-	Updateable.cpp
-	Updateable.h
+        ParamsUpdatable.cpp
+        ParamsUpdatable.h
 	POrientationSelector.cpp
 	POrientationSelector.h
 	PWidget.cpp
@@ -300,12 +298,33 @@ set (SRCS
     VScrollGroup.h
     NewRendererDialogManager.cpp
     NewRendererDialogManager.h
+    PVisualizerSelector.cpp
+    PVisualizerSelector.h
+    QtVizWinGLContextManager.cpp
+    QtVizWinGLContextManager.h
+    common.cpp
+    common.h
+    Updatable.h
+    ProgressStatusBar.h
+    LeftPanel.cpp
+    LeftPanel.h
+    CLIToolInstaller.cpp
+    CLIToolInstaller.h
+    BookmarkManager.cpp
+    BookmarkManager.h
+    UCloseVDCMenu.cpp
+    UCloseVDCMenu.h
+    NcarCasperUtils.cpp
+    NcarCasperUtils.h
+    ViewpointToolbar.cpp
+    ViewpointToolbar.h
+    CheckForUpdateUI.cpp
+    CheckForUpdateUI.h
 
 	# Need to include all files that request .ui files
 	Statistics.h
 	Plot.h
     PythonVariables.h
-    TransformTable.h
     VaporTable.h 
 	FidelityWidget.h
 	QSliderEdit.h
@@ -316,7 +335,6 @@ set (SRCS
 	VizWinMgr.h
 	windowsUtils.h
 	ErrorReporter.h
-	EventRouter.h
 	GLWidget.h
 	VizWin.h
 	Core3_2_context.h
@@ -335,16 +353,15 @@ set (SRCS
 	RenderEventRouter.h
 	RenderHolder.h
 	StatisticsParams.h
-	TabManager.h
-	VizSelectCombo.h
 	WireFrameEventRouter.h
 	Flags.h
 	QMontereySlider.h
+    CitationReminder.h
+    QCustomIconSizeProxyStyle.h
 )
 
 set (UIS 
 	NewRendererDialog.ui
-	TransformTableGUI.ui
 	statsWindow.ui
 	plotWindow.ui
     PythonVariablesGUI.ui

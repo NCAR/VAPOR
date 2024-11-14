@@ -1557,7 +1557,7 @@ void qconj(float quat[4], float conj[4])
 void doubleToString(const double d, string &s, int digits)
 {
     char buf[30];
-    sprintf(buf, "%-.*G", digits, d);
+    snprintf(buf, 30, "%-.*G", digits, d);
     string ss(buf);
     s = ss;
 }

@@ -4,11 +4,13 @@
 #include "PTimestepInput.h"
 #include "PTotalTimestepsDisplay.h"
 #include "PTimestepSliderEdit.h"
+#include <vapor/NavigationUtils.h>
+#include <vapor/AnimationParams.h>
 
 using namespace VAPoR;
 
 
-AnimationTab::AnimationTab(QWidget *parent, ControlExec *ce) : QWidget(parent), EventRouter(ce, AnimationParams::GetClassType())
+AnimationTab::AnimationTab(ControlExec *ce) : _controlExec(ce)
 {
     _g = new PGroup({
         new PSection("Timestep",
@@ -34,11 +36,11 @@ AnimationTab::AnimationTab(QWidget *parent, ControlExec *ce) : QWidget(parent), 
 }
 
 
-void AnimationTab::_updateTab()
+void AnimationTab::Update()
 {
     if (!isEnabled()) return;
 
-    _g->Update(GetAnimationParams());
+    _g->Update(NavigationUtils::GetAnimationParams(_controlExec));
 
     size_t totalTs = _controlExec->GetDataStatus()->GetTimeCoordinates().size();
     _startTS->SetRange(0, totalTs);

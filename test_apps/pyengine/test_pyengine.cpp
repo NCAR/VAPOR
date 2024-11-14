@@ -179,7 +179,7 @@ void test_controlexec_copy(vector<string> files)
     ControlExec ce;
 
     const string dataSetName = "test_data";
-    int          rc = ce.OpenData(files, vector<string>(), dataSetName, opt.ftype);
+    int          rc = ce.OpenData(files, dataSetName, opt.ftype);
 
     DataStatus *dataStatus = ce.GetDataStatus();
 
@@ -245,7 +245,7 @@ void test_controlexec_coord(vector<string> files)
     ControlExec ce;
 
     const string dataSetName = "test_data";
-    int          rc = ce.OpenData(files, vector<string>(), dataSetName, opt.ftype);
+    int          rc = ce.OpenData(files, dataSetName, opt.ftype);
 
     DataStatus *dataStatus = ce.GetDataStatus();
 
@@ -323,7 +323,7 @@ void test_controlexec_add(vector<string> files)
     ControlExec ce;
 
     const string dataSetName = "test_data";
-    int          rc = ce.OpenData(files, vector<string>(), dataSetName, opt.ftype);
+    int          rc = ce.OpenData(files, dataSetName, opt.ftype);
 
     DataStatus *dataStatus = ce.GetDataStatus();
 

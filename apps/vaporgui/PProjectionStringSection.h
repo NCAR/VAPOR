@@ -26,9 +26,6 @@ class PProjectionStringSection : public PWidget {
 public:
     PProjectionStringSection(ControlExec *ce);
 
-signals:
-    void Proj4StringChanged(std::string s);
-
 protected:
     void updateGUI() const override;
     void datasetDropdownChanged(std::string value);

@@ -8,7 +8,6 @@ class ControlExec;
 class RenderEventRouter;
 
 class RendererInspector : public VRouter {
-    VRouter *_router;
     VAPoR::ControlExec *_ce;
     std::map<std::string, std::pair<RenderEventRouter*, QWidget*>> _classToInspectorMap;
 

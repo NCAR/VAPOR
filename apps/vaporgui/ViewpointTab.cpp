@@ -1,9 +1,9 @@
 #include "ViewpointTab.h"
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
+#include <vapor/GUIStateParams.h>
 #include <QHBoxLayout>
 #include "PWidgets.h"
-#include "PDatasetTransformWidget.h"
 #include "PProjectionStringSection.h"
 #include "PCameraControlsSection.h"
 #include "PFramebufferSettingsSection.h"
@@ -31,7 +31,7 @@ protected:
 };
 
 
-ViewpointTab::ViewpointTab(ControlExec *ce) : EventRouter(ce, ViewpointParams::GetClassType())
+ViewpointTab::ViewpointTab(ControlExec *ce) : _controlExec(ce)
 {
     PProjectionStringSection *proj;
     _pg = new PGroup({
@@ -41,8 +41,6 @@ ViewpointTab::ViewpointTab(ControlExec *ce) : EventRouter(ce, ViewpointParams::G
         proj = new PProjectionStringSection(_controlExec),
     });
 
-    connect(proj, &PProjectionStringSection::Proj4StringChanged, this, &ViewpointTab::Proj4StringChanged);
-
     QVBoxLayout *l = new QVBoxLayout;
     l->setContentsMargins(0, 0, 0, 0);
     setLayout(l);
@@ -50,11 +48,11 @@ ViewpointTab::ViewpointTab(ControlExec *ce) : EventRouter(ce, ViewpointParams::G
     l->addStretch();
 }
 
-void ViewpointTab::_updateTab()
+void ViewpointTab::Update()
 {
     auto vp = NavigationUtils::GetActiveViewpointParams(_controlExec);
     if (!(isEnabled() && vp))
         return;
 
-    if (_pg) _pg->Update(GetStateParams());
+    if (_pg) _pg->Update(vp);
 }

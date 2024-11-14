@@ -52,7 +52,7 @@ public:
     void Update();
     string getCurrentViz();
     string getClassName(string instName);
-    void currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
+    void itemSelectionChanged();
     void inspectRenderer(RendererItem *item);
     void inspectDataset(DatasetItem *item);
     void showContextMenu(const QPoint& localPos);

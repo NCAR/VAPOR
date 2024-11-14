@@ -38,6 +38,7 @@
 #include <vapor/DataStatus.h>
 #include <vapor/Visualizer.h>
 #include <vapor/FileUtils.h>
+#include <vapor/STLUtils.h>
 
 #include <vapor/common.h>
 #include "vapor/GLManager.h"
@@ -129,6 +130,38 @@ void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r)
     Renderer::ApplyDatasetTransform(_glManager, t);
 }
 
+void Visualizer::syncWithParams()
+{
+    _deleteFlaggedRenderers();
+
+    vector<Renderer*> toRemove;
+    for (const auto &r : _renderers)
+        if (r->GetActiveParams() == nullptr)
+            toRemove.push_back(r);
+
+    if (_dataStatus->WasCacheDirty())
+        toRemove = _renderers;
+
+    for (const auto &r : toRemove) {
+        _renderers.erase(std::find(_renderers.begin(), _renderers.end(), r));
+        delete r;
+    }
+
+    vector<RenderParams*> populatedRenderParams;
+    for (const auto &r : _renderers)
+        populatedRenderParams.push_back(r->GetActiveParams());
+
+    vector<RenderParams*> rendererParams;
+    _paramsMgr->GetRenderParams(_winName, rendererParams);
+    for (const auto &rp : rendererParams) {
+        if (!STLUtils::Contains(populatedRenderParams, rp)) {
+            string win, dataset, Class, name;
+            _paramsMgr->RenderParamsLookup(rp, name, win, dataset, Class);
+            CreateRenderer(dataset, RendererFactory::Instance()->GetRenderClassFromParamsClass(Class), name);
+        }
+    }
+}
+
 int Visualizer::paintEvent(bool fast)
 {
     _insideGLContext = true;
@@ -139,6 +172,9 @@ int Visualizer::paintEvent(bool fast)
 
     // Do not proceed if there is no DataMgr
     if (!_paramsMgr->GetDataMgrNames().size()) return (0);
+
+    syncWithParams();
+    if (_initializeNewRenderers() < 0) return -1;
 
     // Do not proceed with invalid viewport
     // This can occur sometimes on Qt startup
@@ -181,9 +217,6 @@ int Visualizer::paintEvent(bool fast)
     // Draw the domain frame and other in-scene features
     _vizFeatures->InScenePaint(_getCurrentTimestep());
     GL_ERR_BREAK();
-
-    _deleteFlaggedRenderers();
-    if (_initializeNewRenderers() < 0) return -1;
 
     int rc = 0;
     for (int i = 0; i < _renderers.size(); i++) {
@@ -716,7 +749,7 @@ void Visualizer::_incrementPath(string &s)
     char result[100];
     char c = '0' + len;
     format[2] = c;
-    sprintf(result, format, val + 1);
+    snprintf(result, 100, format, val + 1);
     string sval = string(result);
     string newbody = s.substr(0, lastpos + 1);
     s = newbody + sval + s_end;

@@ -27,6 +27,7 @@
 #include <QMouseEvent>
 #include <QCloseEvent>
 #include <QApplication>
+#include <QWindow>
 #include <QDesktopWidget>
 #include <QIcon>
 #include <vapor/ControlExecutive.h>
@@ -89,40 +90,16 @@ VizWin::VizWin(const QGLFormat &format, QWidget *parent, const QString &name, st
     setMouseTracking(false);    // Only track mouse when button clicked/held
 }
 
-/*
- *  Destroys the object and frees any allocated resources
- */
+
 VizWin::~VizWin()
 {
+    // Sometimes when closing the application this will crash as the OpenGL context is
+    // destroyed prior to the destructor being called.
+    // Qt specifically states you are supposed to call ::makeCurrent() in the destructor.
+    // https://doc.qt.io/qt-6/qopenglwidget.html#resource-initialization-and-cleanup
+    // TODO Migrate to QOpenGLWidget
     this->makeCurrent();
     delete _glManager;
-}
-
-void VizWin::closeEvent(QCloseEvent *e)
-{
-    if (_controlExec->GetNumVisualizers() == 1) {
-        e->ignore();
-        return;
-    }
-
-    // Remove the visualizer. This must be done inside of VizWin so that
-    // the OpenGL context can be made current because removing a visualizer
-    // triggers OpenGL calls in the renderer destructors
-    //
-    makeCurrent();
-
-    emit Closing(_winName);
-
-    QWidget::closeEvent(e);
-}
-
-/******************************************************
- * React when focus is on window:
- ******************************************************/
-void VizWin::focusInEvent(QFocusEvent *e)
-{
-    // Test for hidden here, since a vanishing window can get this event.
-    if (e->gotFocus() && !isHidden()) { emit HasFocus(_winName); }
 }
 
 // First project all 8 box corners to the center line of the camera
@@ -300,6 +277,13 @@ void VizWin::_setUpModelViewMatrix()
 //
 void VizWin::resizeGL(int width, int height)
 {
+    _resizeGL(width, height);
+    if (paintOnResize)
+        Render(true);
+}
+
+void VizWin::_resizeGL(int width, int height)
+{
     if (!_openGLInitFlag || !FrameBufferReady()) { return; }
 
     int rc = CheckGLErrorMsg("GLVizWindowResizeEvent");
@@ -319,8 +303,6 @@ void VizWin::resizeGL(int width, int height)
     _controlExec->SetSaveStateEnabled(false);
     vParams->SetWindowSize(width, height);
     _controlExec->SetSaveStateEnabled(enabled);
-
-    Render(true);
 }
 
 void VizWin::initializeGL()
@@ -359,6 +341,22 @@ void VizWin::initializeGL()
     _openGLInitFlag = true;
 }
 
+void VizWin::paintGL()
+{
+    if (_swapBufferQueued) {
+        swapBuffers();
+        _swapBufferQueued = false;
+    }
+}
+
+void VizWin::safeSwapBuffers()
+{
+    if (windowHandle()->isExposed())
+        swapBuffers();
+    else
+        _swapBufferQueued = true;
+}
+
 void VizWin::_mousePressEventManip(QMouseEvent *e)
 {
     makeCurrent();
@@ -388,27 +386,16 @@ void VizWin::_mousePressEventNavigate(QMouseEvent *e)
     bool   status = vParams->ReconstructCamera(m, posvec, upvec, dirvec);
     VAssert(status);
 
-    // Set trackball from current ViewpointParams matrix;
-    //
     _trackBall->setFromFrame(posvec, dirvec, upvec, center, true);
-    // _trackBall->TrackballSetMatrix();	// needed?
 
     int trackballButtonNumber = _buttonNum;
     if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic && _buttonNum == 1) trackballButtonNumber = 2;
 
-    // Let trackball handle mouse events for navigation
-    //
     _trackBall->MouseOnTrackball(0, trackballButtonNumber, e->x(), e->y(), width(), height());
 
-    // Create a state saving group.
-    // Only save camera parameters after user release mouse
-    //
-    paramsMgr->BeginSaveStateGroup("Navigate scene");
+    _navigationPendingChanges = false;
 }
 
-// If the user presses the mouse on the active viz window,
-// We record the position of the click.
-//
 void VizWin::mousePressEvent(QMouseEvent *e)
 {
     if (_mouseClicked) return;
@@ -422,7 +409,7 @@ void VizWin::mousePressEvent(QMouseEvent *e)
         _buttonNum = 1;
     else if (e->button() == Qt::RightButton)
         _buttonNum = 3;
-    else if (e->button() == Qt::MidButton)
+    else if (e->button() == Qt::MiddleButton)
         _buttonNum = 2;
 
     // ControlModifier means [command], not [control] apparently
@@ -473,16 +460,14 @@ void VizWin::_mouseReleaseEventNavigate(QMouseEvent *e)
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
-    // Set modelview matrix in ViewpointParams. The Visualizer
-    // will use download this to OpenGL
-    //
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
-    vParams->SetModelViewMatrix(m);
 
-    paramsMgr->EndSaveStateGroup();
-
-    emit EndNavigation(_winName);
-
+    if (_navigationPendingChanges) {
+        vParams->SetModelViewMatrix(m);
+        paramsMgr->EndSaveStateGroup();
+        emit EndNavigation(_winName);
+    }
+    _navigationPendingChanges = false;
     _navigateFlag = false;
 }
 
@@ -540,6 +525,10 @@ void VizWin::_mouseMoveEventNavigate(QMouseEvent *e)
     // Set modelview matrix in ViewpointParams
     //
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
+    if (!_navigationPendingChanges)
+        paramsMgr->BeginSaveStateGroup("Navigate");
+    _navigationPendingChanges = true;
+
     vParams->SetModelViewMatrix(m);
     Render(true);
 }
@@ -645,7 +634,7 @@ void VizWin::Render(bool fast)
     _insideRender = false;
 
     HideSTDERR();
-    swapBuffers();
+    safeSwapBuffers();
     RestoreSTDERR();
 }
 

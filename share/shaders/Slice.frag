@@ -12,7 +12,7 @@ out vec4 fragColor;
 
 void main(void)
 {
-	if (minLUTValue >= maxLUTValue) discard;
+	if (minLUTValue > maxLUTValue) discard;
 
     float missing = texture(dataValues, fTexCoord).g;
     if (missing != 0.f) discard; 
@@ -21,6 +21,7 @@ void main(void)
     //if (isnan(value)) discard;
 
     float normalized = (value - minLUTValue) / (maxLUTValue - minLUTValue);
+    if (maxLUTValue == minLUTValue) normalized=0.;
 
     vec4  color = texture(colormap, normalized);
     fragColor = vec4(color.rgb, color.a*constantOpacity);

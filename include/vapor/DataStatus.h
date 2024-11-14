@@ -169,6 +169,14 @@ public:
 
     //! Determine the maximum refinement level present for a variable at a timestep
 
+    bool WasCacheDirty() const { return _wasCacheDirty; }
+    void SetCacheDirty(const string &dataset="", const string &variable="") {
+        (void)dataset;
+        (void)variable;
+        _isDataCacheDirty = true;
+        _wasCacheDirty = true;
+    }
+
 private:
     typedef struct {
         std::vector<string> varnames;
@@ -191,8 +199,12 @@ private:
     map<string, vector<size_t>> _timeMap;
     vector<double>              _timeCoords;
     vector<string>              _timeCoordsFormatted;
+    bool                        _isDataCacheDirty;
+    bool                        _wasCacheDirty;
 
 #endif    // DOXYGEN_SKIP_THIS
+
+    friend class ControlExec;
 };
 
 };        // namespace VAPoR

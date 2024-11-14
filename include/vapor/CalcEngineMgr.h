@@ -8,6 +8,7 @@ namespace VAPoR {
 class DataStatus;
 class ParamsMgr;
 class PyEngine;
+class ControlExec;
 
 //! \class CalcEngineMgr
 //! \brief A class for managing CalcEngine class instances
@@ -48,21 +49,30 @@ public:
     //! When invoked this method rebuilds internal state using the ParamsMgr
     //! \p paramsMgr passed in to the constructor
     //
-    void ReinitFromState() { _sync(); }
+    void ReinitFromState();
 
     //! Remove all functions added with AddFunction()
     //!
     //! \sa AddFunction()
     void Clean() { _clean(); }
 
+    void SyncWithParams();
+
 private:
     const DataStatus *_dataStatus;
     const ParamsMgr * _paramsMgr;
 
     CalcEngineMgr() {}
-    void _sync();
     void _clean();
+    void SetCacheDirty() {
+        _isDataCacheDirty = true;
+        _wasCacheDirty = true;
+    }
 
     std::map<string, PyEngine *> _pyScripts;
+
+    bool _isDataCacheDirty;
+    bool _wasCacheDirty;
+    friend class ControlExec;
 };
 };    // namespace VAPoR

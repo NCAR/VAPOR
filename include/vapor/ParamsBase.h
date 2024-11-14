@@ -73,6 +73,8 @@ public:
         virtual void IntermediateChange() {}
         virtual void SetEnabled(bool onOff) {}
         virtual bool GetEnabled() const { return (false); }
+        virtual void SetUndoEnabled(bool b) {}
+        virtual bool GetUndoEnabled() const { return false; }
     };
 
     // NO DEFAULT CONSTRUCTOR

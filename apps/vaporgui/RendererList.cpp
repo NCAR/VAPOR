@@ -7,6 +7,7 @@
 #include <QInputDialog>
 #include <vapor/STLUtils.h>
 #include <vapor/DataStatus.h>
+#include <vapor/Renderer.h>
 #include "VGroup.h"
 #include "VVisibilityCheckbox.h"
 #include "RenderEventRouter.h"
@@ -39,9 +40,11 @@ protected:
 };
 
 class DisableDragFilter: public QObject {
-    QListWidget *_w;
+//    QListWidget *_w;
 public:
-    DisableDragFilter(QListWidget *w) : _w(w) {}
+    DisableDragFilter(QListWidget *w)
+//    : _w(w)
+    {}
 protected:
     bool eventFilter(QObject* object, QEvent* event)
     {
@@ -61,7 +64,8 @@ protected:
 RendererList::RendererList(ControlExec *ce) : VContainer(_lw = new QListWidget), _ce(ce)
 {
     installEventFilter(new DisableDragFilter(_lw));
-    connect(_lw, &QListWidget::currentItemChanged, this, &RendererList::currentItemChanged);
+    // itemSelectionChanged signal specifically needs to be used. currentItemChanged is slightly different from selectedItem.
+    connect(_lw, &QListWidget::itemSelectionChanged, this, &RendererList::itemSelectionChanged);
     _lw->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(_lw, &QListWidget::customContextMenuRequested, this, &RendererList::showContextMenu);
     
@@ -203,8 +207,12 @@ string RendererList::getClassName(string instName)
     return "";
 }
 
-void RendererList::currentItemChanged(QListWidgetItem *item, QListWidgetItem *previous)
+void RendererList::itemSelectionChanged()
 {
+    if (_lw->selectedItems().empty())  // This will trigger with nothing semi-randomly if
+        return Update();               // empty space between multiple loaded datasets clicked
+
+    QListWidgetItem *item = _lw->selectedItems()[0];
     if (item->type() == RendererType) {
         RendererItem *rItem = dynamic_cast<RendererItem*>(item);
         inspectRenderer(rItem);
@@ -251,9 +259,9 @@ void RendererList::showContextMenu(const QPoint& localPos)
             duplicateMenu->addAction(QString::fromStdString(viz), [=](){
                 auto newName = _ce->MakeRendererNameUnique(id);
                 _ce->GetParamsMgr()->BeginSaveStateGroup("Duplicate Ren");
-                auto newParams = _ce->GetRenderParams(currentViz, dataset, Class, id);
-                _ce->ActivateRender(viz, dataset, newParams, newName, false);
-                auto p = _ce->GetRenderParams(currentViz, dataset, Class, newName);
+//                auto newParams = _ce->GetRenderParams(currentViz, dataset, Class, id);
+                _ce->ActivateRender(viz, dataset, Class, newName, false);
+                auto p = _ce->GetRenderParams(viz, dataset, Class, newName);
                 if (!p->GetValueString(p->UserNameTag, "").empty())
                     p->SetValueString(p->UserNameTag, "", p->GetValueString(p->UserNameTag, "") + " (copy)");
                 _ce->GetParamsMgr()->EndSaveStateGroup();
@@ -278,6 +286,8 @@ void RendererList::showContextMenu(const QPoint& localPos)
         for (const auto &rendererType : eventRouterNames) {
             QAction *action = datasetMenu->addAction(QString::fromStdString(rendererType), [=](){
                 _ce->ActivateRender(currentViz, dataset, rendererType, _ce->MakeRendererNameUnique(rendererType), false);
+                // TODO renderer creation using params
+                // _ce->GetParamsMgr()->CreateRenderParamsInstance(currentViz, dataset, RendererFactory::Instance()->GetParamsClassFromRenderClass(rendererType), _ce->MakeRendererNameUnique(rendererType));
             });
             const auto &meta = _rendererMetadata[rendererType];
             if (!((has2D && meta.supports2D) || (has3D && meta.supports3D) || (hasParticle && meta.supportsParticle))) {
@@ -297,7 +307,7 @@ void RendererList::deleteRenderer(std::string id)
 
     ParamsMgr *paramsMgr = _ce->GetParamsMgr();
     GUIStateParams *guiParams = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    paramsMgr->BeginSaveStateGroup(_ce->GetRemoveRendererUndoTag());
+    paramsMgr->BeginSaveStateGroup("Remove Renderer");
     _ce->RemoveRenderer(rWin, rDataset, rClass, id, false);
     guiParams->SetActiveRenderer(getCurrentViz(), "", "");
 

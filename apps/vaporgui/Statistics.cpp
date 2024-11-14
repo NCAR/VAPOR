@@ -71,20 +71,20 @@ Statistics::~Statistics()
 {
 }
 
-bool Statistics::Update()
+void Statistics::Update()
 {
     // Initialize pointers
     VAPoR::DataStatus *      dataStatus = _controlExec->GetDataStatus();
     std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();
     if (dmNames.empty()) {
         this->close();
-        return false;
+        return;
     }
     GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     std::string     currentDatasetName = guiParams->GetStatsDatasetName();
     if (currentDatasetName == "" || currentDatasetName == "NULL") {
         this->close();
-        return false;
+        return;
     }
 
     int currentIdx = -1;
@@ -223,8 +223,6 @@ bool Statistics::Update()
     _controlExec->GetParamsMgr()->EndSaveStateGroup();
 
     for (auto p : _pw) p->Update(statsParams, _controlExec->GetParamsMgr(), currentDmgr);
-
-    return true;
 }
 
 void Statistics::_updateStatsTable()

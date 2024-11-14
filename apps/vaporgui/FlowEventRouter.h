@@ -28,9 +28,9 @@ public:
     string        GetType() const { return GetClassType(); }
     bool          Supports2DVariables() const { return true; }
     bool          Supports3DVariables() const { return true; }
+    void          Update();
 
 protected:
-    void   _updateTab();
     string _getDescription() const;
     string _getSmallIconImagePath() const { return "Flow_small.png"; }
     string _getIconImagePath() const { return "Flow.png"; }

@@ -173,7 +173,7 @@ private:
     /*! \param[out] strHandleMid specified 3D coordinates of handle middle in
      * stretched coordinates.
      */
-    virtual void _captureMouseDown(int handleNum, int buttonNum, const double strHandleMid[3]);
+    void _captureMouseDown(int handleNum, int buttonNum, const double strHandleMid[3]);
 
     //! Method invoked when manip handle drag begins, invoked from VizWin.
     //! \param[in] mouseCoords coordinates where mouse is pressed.

@@ -32,13 +32,14 @@
     #include <RangeCombos.h>
     #include <StatisticsParams.h>
     #include "PWidgets.h"
+    #include "Updatable.h"
 
 namespace VAPoR {
 class ParamsMgr;
 class DataMgr;
 }    // namespace VAPoR
 
-class Statistics : public QDialog, public Ui_StatsWindow {
+class Statistics : public QDialog, public Ui_StatsWindow, public Updatable {
     Q_OBJECT
 
 public:
@@ -46,7 +47,7 @@ public:
     ~Statistics();
     int  initControlExec(VAPoR::ControlExec *ce);
     void showMe();
-    bool Update();
+    void Update();
 
 protected:
     // Keeps the current variables shown and their statistical values.

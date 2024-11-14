@@ -34,7 +34,9 @@ ParamsCheckboxMenuItem::ParamsCheckboxMenuItem(QObject *parent, const std::strin
 void ParamsCheckboxMenuItem::Update(VAPoR::ParamsBase *p)
 {
     _params = p;
+    blockSignals(true);
     setChecked(p->GetValueLong(_tag, 0));
+    blockSignals(false);
 }
 
 void ParamsCheckboxMenuItem::wasToggled(bool b)

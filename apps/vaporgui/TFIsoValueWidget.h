@@ -29,7 +29,7 @@ public:
 protected:
     void          paramsUpdate() override;
     TFInfoWidget *createInfoWidget() override;
-    void          paintEvent(QPainter &p) override;
+    void          _paintEvent(QPainter &p) override;
     void          drawControl(QPainter &p, const QPointF &pos, bool selected = false, bool invalid = false) const;
     float         GetControlPointTriangleHeight() const;
     float         GetControlPointSquareHeight() const;

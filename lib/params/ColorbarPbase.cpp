@@ -87,8 +87,10 @@ void ColorbarPbase::SetCornerPosition(vector<double> posn)
         if (posn[i] > 1.0) posn[i] = 1.0;
     }
 
+    BeginGroup("Colorbar_Position");
     SetValueDouble(_colorbarPositionXTag, "", posn[0]);
     SetValueDouble(_colorbarPositionYTag, "", posn[1]);
+    EndGroup();
 }
 
 //! Get the X,Y size

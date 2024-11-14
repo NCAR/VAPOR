@@ -11,7 +11,7 @@ include (buildutils/UtilityFunctions.cmake)
 include (buildutils/GetGitRevisionDescription.cmake)
 include (buildutils/OpenMPInstaller.cmake)
 
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -164,11 +164,7 @@ else()
 
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
     list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR})
-    if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
-        list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/h5/lib)
-    else()
-        list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
-    endif()
+    list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_DIR}/HDF_Group/HDF5/1.12.2/lib)
 
     if (APPLE)
         set(CMAKE_MODULE_PATH /opt/local/lib/libomp)
@@ -214,15 +210,18 @@ message("Library EXPAT = ${EXPAT}")
 function(FIND_BUNDLED_PYTHON)
     # FindPython supports Python_ROOT_DIR however vapor's bundled python distribution
     # does not conform to its requirements so this manually configures the results
-    message("Using bundled python ${PYTHONDIR} ${PYTHONPATH}")
+    message("Using bundled python")
+    message("    PYTHONDIR ${PYTHONDIR}")
+    message("    PYTHONPATH ${PYTHONPATH}")
     set(Python_VERSION "${PYTHONVERSION}")
     set(Python_NumPy_INCLUDE_DIRS "${NUMPY_INCLUDE_DIR}")
     unset(Python_LIBRARIES) # This is required for find_library to work in certain cases
-    if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+    if (APPLE)
         set(PYTHON_LIB_DIR "${PYTHONDIR}/lib")
     else()
         set(PYTHON_LIB_DIR "${PYTHONPATH}")
     endif()
+    message("    PYTHON_LIB_DIR ${PYTHON_LIB_DIR}")
     find_library(
         Python_LIBRARIES
         NAMES python${PYTHONVERSION} python${PYTHONVERSION}m
@@ -236,7 +235,7 @@ function(FIND_BUNDLED_PYTHON)
     else()
         set(Python_SITELIB "${PYTHONPATH}/site-packages")
         if (NOT DEFINED Python_INCLUDE_DIRS)
-            if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
+            if (APPLE)
                 set(Python_INCLUDE_DIRS "${PYTHONDIR}/include/python${PYTHONVERSION}")
             else()
                 set(Python_INCLUDE_DIRS "${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}")
@@ -316,11 +315,7 @@ elseif (APPLE)
 		set (INSTALL_BIN_DIR ./vapor.app/Contents/MacOS)
 		set (INSTALL_SHARE_DIR ./vapor.app/Contents/share)
 		set (INSTALL_INCLUDE_DIR ./vapor.app/Contents/include/vapor)
-        if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
-		    set (INSTALL_LIB_DIR ./vapor.app/Contents/Frameworks)
-        else ()
-            set (INSTALL_LIB_DIR ./vapor.app/Contents/lib)
-        endif()
+		set (INSTALL_LIB_DIR ./vapor.app/Contents/Frameworks)
 	else ()
 		set (INSTALL_BIN_DIR bin)
 		set (INSTALL_LIB_DIR lib)
@@ -330,10 +325,8 @@ elseif (APPLE)
 
     if (BUILD_PYTHON)
         set (CMAKE_INSTALL_RPATH "@loader_path")
-    elseif ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
-        set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Resources")
     else()
-        set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
+        set (CMAKE_INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../Resources/lib")
     endif ()
 
     if (DIST_INSTALLER AND USE_OMP)
@@ -474,20 +467,15 @@ if (APPLE)
         endif ()
 
         if (NOT BUILD_PYTHON)
-            if ("${CMAKE_OSX_ARCHITECTURES}" STREQUAL "arm64")
-                file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONDIR})
-                set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}/../Resources")
-            else()
                 file (GLOB INSTALL_GUI_FRAMEWORKS ${PYTHONPATH})
-                set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}")
-            endif()
+                set (PYTHON_DESTINATION "${INSTALL_LIB_DIR}/../Resources/lib")
 		    install (
                 DIRECTORY ${INSTALL_GUI_FRAMEWORKS}
                 DESTINATION ${PYTHON_DESTINATION}
                 COMPONENT Dependencies
                 PATTERN "bin" EXCLUDE
 		    	)
-		    install (
+            install (
 		    	FILES ${Python_LIBRARIES}
 		    	DESTINATION ${PYTHON_DESTINATION}
 		    	COMPONENT Dependencies

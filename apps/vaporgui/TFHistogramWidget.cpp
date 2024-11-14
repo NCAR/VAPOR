@@ -56,6 +56,7 @@ void TFHistogramMap::paramsUpdate()
     }
 
     _scalingMenu->Update(getRenderParams());
+    _mapRange = getRenderParams()->GetMapperFunc(getVariableName())->getMinMaxMapValue();
     update();
 }
 
@@ -69,7 +70,7 @@ TFInfoWidget *TFHistogramMap::createInfoWidget()
     return info;
 }
 
-void TFHistogramMap::paintEvent(QPainter &p)
+void TFHistogramMap::_paintEvent(QPainter &p)
 {
     if (width() == 0) return;
 
@@ -78,17 +79,15 @@ void TFHistogramMap::paintEvent(QPainter &p)
     QPolygonF graph;
     graph.push_back(NDCToQPixel(0, 0));
 
-    vector<double> mapRange = getRenderParams()->GetMapperFunc(getVariableName())->getMinMaxMapValue();
-
-    int      startBin = _histo.getBinIndexForValue(mapRange[0]);
-    int      endBin = _histo.getBinIndexForValue(mapRange[1]);
+    int      startBin = _histo.getBinIndexForValue(_mapRange[0]);
+    int      endBin = _histo.getBinIndexForValue(_mapRange[1]);
     int      stride = 1;
     QMargins padding = GetPadding();
     while ((endBin - startBin) / stride >= 2 * (width() - (padding.left() + padding.right()))) stride *= 2;
     startBin -= startBin % stride;
 
     // Prevents an edge case where the current range is very far from the computed one
-    if (_histo.getRange() < FLT_EPSILON || (mapRange[1] - mapRange[0]) / _histo.getRange() > 10000) return;
+    if (_histo.getRange() < FLT_EPSILON || (_mapRange[1] - _mapRange[0]) / _histo.getRange() > 10000) return;
 
     float maxBin;
     if (_dynamicScaling)

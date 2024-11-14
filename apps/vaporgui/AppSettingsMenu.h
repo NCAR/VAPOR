@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include "PWidget.h"
-#include "Updateable.h"
+#include "ParamsUpdatable.h"
 #include "PFileSelectorHLI.h"
 #include "VFileSelector.h"
 
@@ -17,7 +17,7 @@ class SettingsParams;
 //! \brief Menu for global application preferences
 //! \author Scott Pearse
 
-class AppSettingsMenu : public QDialog, public Updateable {
+class AppSettingsMenu : public QDialog, public ParamsUpdatable {
     Q_OBJECT
 
 public:

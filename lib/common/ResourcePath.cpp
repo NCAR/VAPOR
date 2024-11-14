@@ -1,3 +1,4 @@
+#include <iostream>
 #include <climits>
 #include <vapor/ResourcePath.h>
 #include <vapor/CMakeConfig.h>
@@ -68,7 +69,7 @@ string GetInstalledResourceRoot()
 
 #define TRY_PATH(p) {                                 \
     string path = Wasp::FileUtils::POSIXPathToCurrentOS(p); \
-    if (Wasp::FileUtils::Exists(path)) return path;         \
+    if (Wasp::FileUtils::Exists(path)) {return path;}         \
 }
 
 std::string (*resourceFinderCB)(const std::string &) = nullptr;
@@ -98,18 +99,16 @@ std::string Wasp::GetResourcePath(const std::string &name)
 std::string Wasp::GetSharePath(const std::string &name) { return GetResourcePath("share/" + name); }
 
 #if defined(WIN32)
-    #define PYTHON_INSTALLED_PATH ("python" + string(PYTHON_VERSION))
-#elif defined(__aarch64__)
-    #define PYTHON_INSTALLED_PATH ("Resources/python")
+    #define PYTHON_MODULE_SUBDIR ("python" + string(PYTHON_VERSION))
 #else
-    #define PYTHON_INSTALLED_PATH ("lib/python" + string(PYTHON_VERSION))
+    #define PYTHON_MODULE_SUBDIR ("lib/python" + string(PYTHON_VERSION))
 #endif
 
 std::string Wasp::GetPythonVersion() { return std::string(PYTHON_VERSION); }
 
 std::string Wasp::GetPythonPath()
 {
-    string path = GetResourcePath(PYTHON_INSTALLED_PATH);
+    string path = GetResourcePath(PYTHON_MODULE_SUBDIR);
 
     if (!FileUtils::Exists(path)) path = string(PYTHON_PATH);
 
@@ -118,19 +117,14 @@ std::string Wasp::GetPythonPath()
 
 std::string Wasp::GetPythonDir()
 {
-#ifdef WIN32
-    return GetPythonPath();
-#endif
-    string path = string(PYTHON_DIR);  // Try our third-party-library directory first
-    if (!FileUtils::Exists(path)) {
-        path = GetResourcePath("");
-        string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
-        if (!exists.empty()) {
-#if defined(__aarch64__)
-            path = exists; // If the third-party-library directory doesn't exist, use the python installed path.  Otherwise, use the root.
-#endif
-        }
-    }
+    std::string path2;
+    #if defined(__APPLE__)
+        string path = GetResourcePath("Resources");
+    #else
+        string path = GetResourcePath("");
+    #endif
+    std::string modulePath = FileUtils::JoinPaths( {path, PYTHON_MODULE_SUBDIR} );
+    if (!FileUtils::Exists( modulePath )) path = string(PYTHON_DIR);
     return path;
 }
 

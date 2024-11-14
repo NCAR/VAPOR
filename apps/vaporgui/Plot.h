@@ -22,8 +22,9 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/DataStatus.h>
 #include "PlotParams.h"
+#include "Updatable.h"
 
-class Plot : public QDialog, public Ui_PlotWindow {
+class Plot : public QDialog, public Ui_PlotWindow, public Updatable {
     Q_OBJECT
 
 public:

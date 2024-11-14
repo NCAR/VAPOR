@@ -1,28 +1,18 @@
 #pragma once
 
-#include "EventRouter.h"
+#include "VaporFwd.h"
 #include "PWidgetsFwd.h"
+#include <QWidget>
+#include "Updatable.h"
 
-namespace VAPoR {
-class ControlExec;
-}
-
-class ViewpointTab : public QWidget, public EventRouter {
+class ViewpointTab : public QWidget, public Updatable {
     Q_OBJECT
 
+    ControlExec *_controlExec;
     PWidget *_pg = nullptr;
     PWidget *_movingDomainSection = nullptr;
 
 public:
     ViewpointTab(VAPoR::ControlExec *ce);
-    virtual ~ViewpointTab() {}
-
-    static string GetClassType() { return ("Viewpoint"); }
-    string        GetType() const { return GetClassType(); }
-
-    virtual void updateTab() { _updateTab(); }
-    virtual void _updateTab();
-
-signals:
-    void Proj4StringChanged(string proj4String);
+    void Update() override;
 };

@@ -4,16 +4,7 @@
 #include <functional>
 #include "UWidget.h"
 #include <vapor/VAssert.h>
-
-namespace VAPoR {
-class ParamsBase;
-class ParamsMgr;
-class DataMgr;
-}    // namespace VAPoR
-
-class PDynamicMixin;
-class SettingsParams;
-template<class, typename> class PWidgetHLIBase;
+#include <common.h>
 
 //! \class PWidget
 //! A Qt Widget that is automatically synced with the Params database.
