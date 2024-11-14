@@ -35,6 +35,7 @@ public:
     //! \sa ParamsMgr();
     //
     ControlExec(ParamsMgr *pm, size_t cacheSize = 1000, int nThreads = 0);
+    ControlExec() : ControlExec(new ParamsMgr) {}
     virtual ~ControlExec();
 
     //! Set the ControlExec to a default state:
