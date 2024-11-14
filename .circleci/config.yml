@@ -152,7 +152,7 @@ jobs:
             choco install cmake -y
             choco install nsis -y
             python -m pip install gdown
-            setx /M PATH "%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
+            setx /M PATH "%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin;C:\Program Files\Git\bin"
             msbuild -version
             pwd
             ls
