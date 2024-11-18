@@ -3,6 +3,11 @@
 #include <common.h>
 #include <vapor/ResourcePath.h>
 
+#ifdef WIN32
+    #include <windows.h>
+#endif
+
+using namespace std;
 using namespace Wasp;
 
 void CLIToolInstaller::Install()
