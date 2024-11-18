@@ -71,8 +71,9 @@ set (VERSION_STRING_FULL ${VERSION_STRING}.${VERSION_COMMIT})
 if (APPLE)
 	add_definitions (-DDarwin)
 elseif (WIN32)
-	add_definitions (-DWIN32 -DNOMINMAX)
-	add_definitions (-DGLAD_API_CALL_EXPORT)
+    add_definitions (-DWIN32 -DNOMINMAX)
+    add_definitions (-DGLAD_API_CALL_EXPORT)
+    add_compile_definitions(_HAS_STD_BYTE=0)
 endif()
 
 # compiler warning flags
