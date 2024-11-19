@@ -4,6 +4,7 @@
 
     #include <Windows.h>
 
+    #define WIN32_LEAN_AND_MEAN
     #define WINDOWS_SUCCESS              ERROR_SUCCESS
     #define WINDOWS_ERROR_FILE_NOT_FOUND ERROR_FILE_NOT_FOUND
     #define WINDOWS_HKEY_CLASSES_ROOT    HKEY_CLASSES_ROOT

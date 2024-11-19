@@ -4,7 +4,7 @@
 #include <vapor/ResourcePath.h>
 
 #ifdef WIN32
-    #include <windows.h>
+    #include "windowsUtils.h"
 #endif
 
 using namespace std;
@@ -54,7 +54,7 @@ void CLIToolInstaller::Install()
     bool   pathWasModified = false;
     string home = GetResourcePath("");
 
-    error = Windows_OpenRegistry(WINDOWS_HKEY_CURRENT_USER, "Environment", key);
+    error = Windows_OpenRegistry(HKEY_CURRENT_USER, "Environment", key);
     if (error == WINDOWS_SUCCESS) {
         string path;
         error = Windows_GetRegistryString(key, "Path", path, "");
