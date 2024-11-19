@@ -651,7 +651,7 @@ workflows:
       #- build_python_api_ubuntuDebug
       #- build_python_api_ubuntu
       #- build_python_api_osx
-       #- build_win10_installer
+      - build_win10_installer
       # - build_macOS_installers
       # - build_appleSilicon_installer
       # - build_macOSx86_installer
