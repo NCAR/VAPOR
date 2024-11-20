@@ -3,6 +3,8 @@ set +e
 installDir="/Applications"
 dmgDir="tmp"
 
+xattr -dr com.apple.quarantine $installDir/vapor.app
+
 dmgName="VAPOR3-`$installDir/vapor.app/Contents/MacOS/vaporversion -numeric`-"
 if [[ `file $installDir/vapor.app/Contents/MacOS/vapor` == *arm64* ]]; then
     dmgName="${dmgName}AppleSilicon.dmg"
