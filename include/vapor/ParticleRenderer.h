@@ -72,7 +72,7 @@ private:
         float      value;
     };
 
-    size_t _particlesCount;
+    size_t _particlesCount = 0;
 
     unsigned int _VAO = 0;
     unsigned int _VBO = 0;
