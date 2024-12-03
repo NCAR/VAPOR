@@ -413,10 +413,10 @@ void ParticleRenderer::_generateTextureData(const Grid* grid, const std::vector<
 
     if (showDir) {
         SetupParticleDirectionGL(_VAO, _VBO, dynamicSize);
-        directionData.reserve(_particlesCount);
+        directionData.reserve(grid->GetDimensions()[0]/stride+1);
     } else {
         SetupParticlePointGL(_VAO, _VBO, dynamicSize);
-        pointData.reserve(_particlesCount);
+        pointData.reserve(grid->GetDimensions()[0]/stride+1);
     }
     assert(glIsVertexArray(_VAO) == GL_TRUE);
     assert(glIsBuffer(_VBO) == GL_TRUE);
