@@ -6,6 +6,7 @@ link.include('vapor/ControlExecutive.h')
 link.include("vapor/NavigationUtils.h")
 
 NavigationUtils = link.NavigationUtils
+ViewpointParams = link.ViewpointParams
 
 class Camera():
 
@@ -20,6 +21,14 @@ class Camera():
 
     def __init__(self, ce):
         self.ce: link.VAPoR.ControlExec = ce
+
+    def LoadFromFile(self, path:str):
+        """Save camera settings to file"""
+        ViewpointParams.SetCameraFromFile(NavigationUtils.GetActiveViewpointParams(self.ce), path)
+    
+    def SaveToFile(self, path:str):
+        """Load camera settings from file"""
+        ViewpointParams.SaveCameraToFile(NavigationUtils.GetActiveViewpointParams(self.ce), path)
 
     def AlignView(self, axis:str):
         """
