@@ -6,6 +6,7 @@
 #include <string>
 
 #include <QToolButton>
+#include <QLabel>
 
 //! \class VSection
 //! Represents a section/group to be used in the sidebar.
@@ -19,11 +20,15 @@ class VSection : public QTabWidget {
     Q_OBJECT
 
     class SettingsMenuButton;
+    class ExpandSectionButton;
+    class ExpandedSection;
 
 public:
     VSection(const std::string &title);
     QVBoxLayout *layout() const;
     void         setMenu(QMenu *menu);
+    void         setExpandSection(QWidget* expanded);
+    //void         setExpandSection();
 
     void     setLayout(QLayout *layout) = delete;
     int      addTab(QWidget *page, const QString &label) = delete;
@@ -34,6 +39,13 @@ public:
 private:
     QWidget *_tab() const;
     QString  _createStylesheet() const;
+    //ExpandedSection* _expandedSection = nullptr;
+    ExpandedSection* _expandedSection = nullptr;
+    QWidget* _expandedWidget = nullptr;
+
+private slots:
+    void showExpandedSection();
+    void clearExpandedSection();
 };
 
 #include "AbstractWidgetGroup.h"
@@ -60,4 +72,21 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *event);
+};
+
+class VSection::ExpandSectionButton: public QToolButton {
+    Q_OBJECT
+
+public:
+    ExpandSectionButton();
+
+protected:
+    void paintEvent(QPaintEvent *event);
+};
+
+class VSection::ExpandedSection : public QWidget {
+    Q_OBJECT
+
+public:
+    ExpandedSection(QWidget* expanded = nullptr);
 };
