@@ -24,6 +24,7 @@ TFColorMap::TFColorMap(const std::string &variableNameTag, TFMapWidget *parent)
         {TFInterpolator::linear, TFInterpolator::linearRGB, TFInterpolator::linearLAB, TFInterpolator::linearLCH, TFInterpolator::discrete, TFInterpolator::diverging}, "Color Interpolation");
     _colorInterpolationWhitepointAction = new ParamsCheckboxMenuItem(this, ColorMap::_useWhitespaceTag, "Add Whitespace");
     _colorInterpolationMenu->menu()->addAction(_colorInterpolationWhitepointAction);
+    //setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 }
 
 QSize TFColorMap::minimumSizeHint() const { return QSize(100, 30); }

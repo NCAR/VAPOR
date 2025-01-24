@@ -66,6 +66,10 @@ public:
     std::vector<string> GetOpenDataSetPaths(string dataSetName) const;
     std::vector<string> GetOpenDataSetRelativePaths(string dataSetName) const;
 
+    void SetExpandedPTFEditor(const string &editor);
+    void RemoveExpandedPTFEditor(const string &editor);
+    vector<string> GetExpandedPTFEditors();
+
     string GetOpenDataSetFormat(string dataSetName) const;
 
     void RemoveOpenDateSet(string dataSetName) { m_openDataSets->Remove(dataSetName); }
@@ -218,12 +222,14 @@ public:
     static const string BookmarksTag;
     static const string MovingDomainTrackCameraTag;
     static const string MovingDomainTrackRenderRegionsTag;
+    static const string ExpandedPTFEditorsTag;
 
 private:
     MouseModeParams *m_mouseModeParams;
 
     VAPoR::ParamsContainer *m_openDataSets;
     VAPoR::ParamsContainer *_bookmarks;
+    VAPoR::ParamsContainer *_expandedPTFEditors;
 
     void _init();
 };

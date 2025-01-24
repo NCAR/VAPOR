@@ -1,5 +1,7 @@
 #include "PTFEditor.h"
 #include <vapor/RenderParams.h>
+#include <vapor/ControlExecutive.h>
+#include <vapor/GUIStateParams.h>
 #include "TFColorWidget.h"
 #include "TFOpacityWidget.h"
 #include "TFHistogramWidget.h"
@@ -26,8 +28,10 @@ template class PTFMapWidget<TFOpacityWidget>;
 template class PTFMapWidget<TFHistogramWidget>;
 template class PTFMapWidget<TFIsoValueWidget>;
 
-PTFEditor::PTFEditor() : PTFEditor(RenderParams::_variableNameTag) {}
+//PTFEditor::PTFEditor() : PTFEditor(RenderParams::_variableNameTag) {}
+PTFEditor::PTFEditor(VAPoR::ControlExec* ce) : PTFEditor(RenderParams::_variableNameTag) {}
 
+//PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PWidget(tag, _section = new VSection(label.empty() ? tag : label))
 PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PWidget(tag, _section = new VSection(label.empty() ? tag : label))
 {
     _maps = new TFMapGroupWidget;
@@ -41,9 +45,9 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
     _maps->Add(_isoMap);
     _maps->Add(_colorMap);
 
-    _section->layout()->addWidget(_maps);
+    _section->layout()->addWidget(_maps, 1);
     _section->layout()->addWidget(_mapsInfo = _maps->CreateInfoGroup());
-    _section->layout()->addWidget(_range);
+    _section->layout()->addWidget(_range, 0);
     connect(_range, SIGNAL(ValueChangedIntermediate(float, float)), _histogram, SLOT(update()));
 
     int    start = 0;
@@ -63,23 +67,16 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
     _histogram->PopulateSettingsMenu(menu);
     for (int i = start; i < menu->actions().size(); i++) _histogramActions.push_back(menu->actions()[i]);
 
-    //_section->setExpandSection();
-    //_section->setExpandSection(nullptr);
-    if (expandable==true) {
-        //_section->setExpandSection(new PTFEditor(tag, elements, label, false));
+    if (expandable) {
+        //std::cout << "creating new _PTFEditor" << std::endl;
         _expandedPTFEditor = new PTFEditor(tag, elements, label, false);
+        //_expandedPTFEditor->Update(rp, pm, dm);
+        //_expandedPTFEditor->updateGUI();
+        _expandedPTFEditor->hide();
         _section->setExpandSection(_expandedPTFEditor);
     }
 
-    //if (expandable==true) _section->setExpandSection(new QLabel("hi"));
     _section->setMenu(menu);
-    //_section->setExpandSection(nullptr);
-
-    //if (expandable) {
-    //    //PTFEditor* expandedEditor = new PTFEditor(tag, elements, label, false);
-    //    //_section->setExpandSection(expandedEditor);
-    //    _section->setExpandSection(nullptr);
-    //}
 
     _histogram->hide();
     _opacityMap->hide();
@@ -102,6 +99,7 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
         _colorMap->show();
         _isoMap->show();
     }
+
 }
 
 PTFEditor *PTFEditor::ShowOpacityBasedOnParam(const std::string &tag, int value)
@@ -130,13 +128,11 @@ void PTFEditor::updateGUI() const
     _maps->Update(dm, pm, rp);
     _mapsInfo->Update(rp);
     _range->Update(dm, pm, rp);
-    if (_expandedPTFEditor != nullptr) {
-        //std::cout << "vptr of _expandedPTFEditor: " << *reinterpret_cast<void**>(_expandedPTFEditor) << std::endl;
-        //void* vtable_entry = reinterpret_cast<void**>(*reinterpret_cast<void**>(_expandedPTFEditor))[0]; // Adjust index as needed
-        //std::cout << "vtable entry for Update: " << vtable_entry << std::endl;
-
+    if (_expandedPTFEditor != nullptr && _expandedPTFEditor->isVisible()) {
+        GUIStateParams * guiParams = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
         _expandedPTFEditor->Update(rp, pm, dm);
     }
+    //if (_expandedPTFEditor != nullptr) _expandedPTFEditor->Update(rp, pm, dm);
 
     if (_showOpacityBasedOnParam) {
         if (rp->GetValueLong(_showOpacityBasedOnParamTag, 0) == _showOpacityBasedOnParamValue)

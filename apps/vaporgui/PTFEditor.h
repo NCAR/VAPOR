@@ -56,7 +56,8 @@ class PTFEditor : public PWidget {
     TFColorMap *            _colorMap;
     TFIsoValueMap *         _isoMap;
     TFMappingRangeSelector *_range;
-    PTFEditor*              _expandedPTFEditor;
+    PTFEditor*              _expandedPTFEditor = nullptr;
+    ControlExec*            _ce;
 
     std::vector<QAction *> _colorMapActions;
     std::vector<QAction *> _opacityMapActions;
@@ -72,7 +73,7 @@ class PTFEditor : public PWidget {
 public:
     enum Element { Opacity, Histogram, Colormap, IsoValues, RegularIsoArray, Default };
 
-    PTFEditor();
+    PTFEditor(ControlExec* ce = nullptr);
     PTFEditor(const std::string &tag, const std::set<Element> elements = {Default}, const std::string &label = "Transfer Function", bool expandable = true);
     //! Behaves the same as PWidget::ShowBasedOnParam except shows/hides the opacity controls.
     //! @copydoc PWidget::ShowBasedOnParam

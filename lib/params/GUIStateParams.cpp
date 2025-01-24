@@ -44,6 +44,7 @@ const string GUIStateParams::m_proj4StringTag = "Proj4StringTag";
 const string GUIStateParams::m_openDataSetsTag = "OpenDataSetsTag";
 const string GUIStateParams::_flowDimensionalityTag = "_flowDimensionalityTag";
 const string GUIStateParams::BookmarksTag = "BookmarksTag";
+const string GUIStateParams::ExpandedPTFEditorsTag= "ExpandedPTFEditorsTag";
 const string GUIStateParams::MovingDomainTrackCameraTag = "MovingDomainTrackCameraTag";
 const string GUIStateParams::MovingDomainTrackRenderRegionsTag = "MovingDomainTrackRenderRegionsTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
@@ -76,6 +77,9 @@ GUIStateParams::GUIStateParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave,
 
     _bookmarks = new ParamsContainer(ssave, BookmarksTag);
     _bookmarks->SetParent(this);
+
+    _expandedPTFEditors = new ParamsContainer(ssave, ExpandedPTFEditorsTag);
+    _expandedPTFEditors->SetParent(this);
 }
 
 GUIStateParams::GUIStateParams(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node)
@@ -117,6 +121,13 @@ GUIStateParams::GUIStateParams(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
         _bookmarks = new ParamsContainer(ssave, BookmarksTag);
         _bookmarks->SetParent(this);
     }
+
+    if (node->HasChild(ExpandedPTFEditorsTag)) {
+        _expandedPTFEditors= new ParamsContainer(ssave, node->GetChild(ExpandedPTFEditorsTag));
+    } else {
+        _expandedPTFEditors = new ParamsContainer(ssave, ExpandedPTFEditorsTag);
+        _expandedPTFEditors->SetParent(this);
+    }
 }
 
 GUIStateParams::GUIStateParams(const GUIStateParams &rhs) : ParamsBase(rhs)
@@ -124,6 +135,7 @@ GUIStateParams::GUIStateParams(const GUIStateParams &rhs) : ParamsBase(rhs)
     m_mouseModeParams = new MouseModeParams(*(rhs.m_mouseModeParams));
     m_activeRenderer = new ActiveRenderer(*(rhs.m_activeRenderer));
     _bookmarks = new ParamsContainer(*(rhs._bookmarks));
+    _expandedPTFEditors= new ParamsContainer(*(rhs._expandedPTFEditors));
 }
 
 GUIStateParams &GUIStateParams::operator=(const GUIStateParams &rhs)
@@ -131,6 +143,7 @@ GUIStateParams &GUIStateParams::operator=(const GUIStateParams &rhs)
     m_mouseModeParams = new MouseModeParams(*(rhs.m_mouseModeParams));
     m_activeRenderer = new ActiveRenderer(*(rhs.m_activeRenderer));
     _bookmarks = new ParamsContainer(*(rhs._bookmarks));
+    _expandedPTFEditors= new ParamsContainer(*(rhs._expandedPTFEditors));
 
     return (*this);
 }
@@ -198,6 +211,21 @@ void GUIStateParams::SetActiveDataset(std::string name)
     SetValueString("Active_Dataset", "", name);
     EndGroup();
     _ssave->SetUndoEnabled(e);
+}
+
+void GUIStateParams::SetExpandedPTFEditor(const string &editor)
+{
+    std::cout << "SetExpandedPTFEditor" << std::endl;
+}
+
+vector<string> GUIStateParams::GetExpandedPTFEditors()
+{
+    std::cout << "GetExpandedPTFEditors" << std::endl;
+}
+
+void GUIStateParams::RemoveExpandedPTFEditor(const string &editor)
+{
+    std::cout << "RemoveExpandedPTFEditor" << std::endl;
 }
 
 string GUIStateParams::GetCurrentSessionFile() const { return (GetValueString(m_sessionFileTag, "")); }
