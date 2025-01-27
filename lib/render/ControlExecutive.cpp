@@ -631,6 +631,7 @@ string ControlExec::MakeRendererNameUnique(string name) const
         }
         if (!match) break;
     }
+    std::cout << "MakeRendererNameUnique " << newname << std::endl;
     return newname;
 }
 

@@ -15,11 +15,31 @@
 class PWidget : public UWidget {
     Q_OBJECT
 
-    VAPoR::ParamsBase *_params = nullptr;
-    VAPoR::ParamsMgr * _paramsMgr = nullptr;
-    VAPoR::DataMgr *   _dataMgr = nullptr;
-    const std::string  _tag;
+    //VAPoR::ParamsBase *_params = nullptr;
+    //VAPoR::ParamsMgr * _paramsMgr = nullptr;
+    //VAPoR::DataMgr *   _dataMgr = nullptr;
+    //const std::string  _tag;
 
+    //bool        _showBasedOnParam = false;
+    //std::string _showBasedOnParamTag = "";
+    //int         _showBasedOnParamValue;
+
+    //bool        _enableBasedOnParam = false;
+    //std::string _enableBasedOnParamTag = "";
+    //int         _enableBasedOnParamValue;
+
+    //bool _dynamicUpdateIsOn = false;
+    //bool _dynamicUpdateInsideGroup = false;
+
+    bool                                             _usingHLI = false;
+    std::function<void(void *, long)>                _setterLong;
+    std::function<long(void *)>                      _getterLong;
+    std::function<void(void *, double)>              _setterDouble;
+    std::function<double(void *)>                    _getterDouble;
+    std::function<void(void *, const std::string &)> _setterString;
+    std::function<std::string(void *)>               _getterString;
+
+public:
     bool        _showBasedOnParam = false;
     std::string _showBasedOnParamTag = "";
     int         _showBasedOnParamValue;
@@ -31,18 +51,14 @@ class PWidget : public UWidget {
     bool _dynamicUpdateIsOn = false;
     bool _dynamicUpdateInsideGroup = false;
 
-    bool                                             _usingHLI = false;
-    std::function<void(void *, long)>                _setterLong;
-    std::function<long(void *)>                      _getterLong;
-    std::function<void(void *, double)>              _setterDouble;
-    std::function<double(void *)>                    _getterDouble;
-    std::function<void(void *, const std::string &)> _setterString;
-    std::function<std::string(void *)>               _getterString;
+    VAPoR::ParamsBase *_params = nullptr;
+    VAPoR::ParamsMgr * _paramsMgr = nullptr;
+    VAPoR::DataMgr *   _dataMgr = nullptr;
+    const std::string  _tag;
 
-public:
     PWidget(const std::string &tag, QWidget *widget);
     //! Follows the Vapor GUI update function convention. Update the element.
-    void Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr) override;
+    virtual void Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr) override;
 
     //! tag must be a key referencing a long value in the Params Database. If the associated value is equal
     //! to whenEqualTo, the current widget will be shown/enabled, and hidden/disabled otherwise.

@@ -44,7 +44,7 @@ const string GUIStateParams::m_proj4StringTag = "Proj4StringTag";
 const string GUIStateParams::m_openDataSetsTag = "OpenDataSetsTag";
 const string GUIStateParams::_flowDimensionalityTag = "_flowDimensionalityTag";
 const string GUIStateParams::BookmarksTag = "BookmarksTag";
-const string GUIStateParams::ExpandedPTFEditorsTag= "ExpandedPTFEditorsTag";
+const string GUIStateParams::ExpandedPTFEditorsTag = "ExpandedPTFEditorsTag";
 const string GUIStateParams::MovingDomainTrackCameraTag = "MovingDomainTrackCameraTag";
 const string GUIStateParams::MovingDomainTrackRenderRegionsTag = "MovingDomainTrackRenderRegionsTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
@@ -215,17 +215,26 @@ void GUIStateParams::SetActiveDataset(std::string name)
 
 void GUIStateParams::SetExpandedPTFEditor(const string &editor)
 {
-    std::cout << "SetExpandedPTFEditor" << std::endl;
+    std::vector<string> editors = GetExpandedPTFEditors();
+    
+    bool containsEditor = std::find(editors.begin(), editors.end(), editor) != editors.end();
+    //std::cout << "SetExpandedPTFEditor " << containsEditor << editor << std::endl;
+    if (containsEditor) return;
+    else {
+        editors.push_back(editor);
+        SetValueStringVec(ExpandedPTFEditorsTag, "Expanded PTFEditors", editors);
+    }
 }
 
 vector<string> GUIStateParams::GetExpandedPTFEditors()
 {
-    std::cout << "GetExpandedPTFEditors" << std::endl;
+    //std::cout << "GetExpandedPTFEditors" << std::endl;
+    return GetValueStringVec(ExpandedPTFEditorsTag, vector<string>());
 }
 
 void GUIStateParams::RemoveExpandedPTFEditor(const string &editor)
 {
-    std::cout << "RemoveExpandedPTFEditor" << std::endl;
+    //std::cout << "RemoveExpandedPTFEditor" << std::endl;
 }
 
 string GUIStateParams::GetCurrentSessionFile() const { return (GetValueString(m_sessionFileTag, "")); }

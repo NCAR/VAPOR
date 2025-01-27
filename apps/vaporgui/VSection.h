@@ -46,6 +46,9 @@ private:
 private slots:
     void showExpandedSection();
     void clearExpandedSection();
+
+signals:
+    void expandButtonClicked();
 };
 
 #include "AbstractWidgetGroup.h"
