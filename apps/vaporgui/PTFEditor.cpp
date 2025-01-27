@@ -70,31 +70,8 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
     for (int i = start; i < menu->actions().size(); i++) _histogramActions.push_back(menu->actions()[i]);
 
     if (expandable) {
-        // 1/27/2025
-        //connect(_expandedPTFEditor, SIGNAL(shown()), this, SLOT(showExpandedPTFEditor()));
-        //connect(_expandedPTFEditor, SIGNAL(closed()), this, SLOT(closeExpandedPTFEditor()));
-        //_expandedPTFEditor = new PTFEditor(tag, elements, label, false);
-        //
-        //_expandedPTFEditor->setAttribute(Qt::WA_ShowWithoutActivating);
-        //_expandedPTFEditor->setAttribute(Qt::WA_DeleteOnClose);
-        //std::cout << "creating new _PTFEditor" << std::endl;
-
-
-        //_expandedPTFEditor->setWindowFlags(_expandedPTFEditor->windowFlags() | Qt::WindowStaysOnBottomHint);
-
-        //_expandedPTFEditor->Update(rp, pm, dm);
-        //_expandedPTFEditor->updateGUI();
-        //_expandedPTFEditor->hide();
-        //connect(this, SIGNAL(show()), _expandedPTFEditor, SLOT(showExpandedPTFEditor()));
-        //connect(_expandedPTFEditor, &PTFEditor::shown, this, SLOT(showExpandedPTFEditor()));
-        //connect(_expandedPTFEditor, &PTFEditor::shown, SLOT(showExpandedPTFEditor()));
-        //connect(_expandedPTFEditor, PTFEditor::shown(), this, SLOT(showExpandedPTFEditor()));
-
-
-        //connect(_expandedPTFEditor, SIGNAL(closed()), this, SLOT(closeEvent()));
-        //connect(this, SIGNAL(shown()), _expandedPTFEditor, SLOT(dynamic_cast<GUIStateParams *>_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType())->SetExpandedPTFEditor("foo")));
-
-        _section->setExpandSection(_expandedPTFEditor);
+        //_section->setExpandSection(_expandedPTFEditor);
+        _section->setExpandedSection();
         //connect(_section, SIGNAL(expandButtonClicked()), this, SLOT(showExpandedPTFEditor));
         //connect(_section, &VSection::expandButtonClicked, this, SLOT(showExpandedPTFEditor));
         connect(_section, &VSection::expandButtonClicked, this, &PTFEditor::showExpandedPTFEditor);
@@ -123,7 +100,6 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
         _colorMap->show();
         _isoMap->show();
     }
-
 }
 
 PTFEditor *PTFEditor::ShowOpacityBasedOnParam(const std::string &tag, int value)
@@ -144,6 +120,7 @@ PTFEditor *PTFEditor::ShowColormapBasedOnParam(const std::string &tag, int value
 
 void PTFEditor::updateGUI() const
 {
+    std::cout << this << std::endl;
     VAPoR::DataMgr *     dm = getDataMgr();
     VAPoR::ParamsMgr *   pm = getParamsMgr();
     VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams *>(getParams());
@@ -152,13 +129,13 @@ void PTFEditor::updateGUI() const
     _maps->Update(dm, pm, rp);
     _mapsInfo->Update(rp);
     _range->Update(dm, pm, rp);
-    //std::cout << "updatin? " << (_expandedPTFEditor != nullptr) << " " << _expandedPTFEditor->isVisible() << std::endl;
-    //if (_expandedPTFEditor != nullptr && _expandedPTFEditor->isVisible()) {
-    std::cout << "is null " << (_expandedPTFEditor==nullptr) << std::endl;
+
+
+    std::cout << "      rp pm dm " << rp << " " << pm << " " << dm << std::endl;
     if (_expandedPTFEditor != nullptr ) {
-        GUIStateParams * guiParams = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+        //GUIStateParams * guiParams = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+        //std::cout << "tfes " << guiParams->GetExpandedPTFEditors()[0] << std::endl;
         _expandedPTFEditor->Update(rp, pm, dm);
-        //if (_showExpandedPTFEditorBasedOnParam) _expandedPTFEditor->Update(rp, pm, dm);
     }
 
     if (_showOpacityBasedOnParam) {
@@ -214,7 +191,6 @@ void PTFEditor::updateGUI() const
 //    updateGUI();
 //}
 
-//void PTFEditor::showExpandedPTFEditor() {
 void PTFEditor::showExpandedPTFEditor() {
 
     std::cout << "showin?" << std::endl;
@@ -225,35 +201,41 @@ void PTFEditor::showExpandedPTFEditor() {
 
         _expandedPTFEditor->setAttribute(Qt::WA_ShowWithoutActivating);
         _expandedPTFEditor->setAttribute(Qt::WA_DeleteOnClose);
+
+        GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+        std::string name;
+        string inst = p->GetActiveRendererInst();
+        p->GetActiveRenderer(p->GetActiveVizName(), inst, name);
+        p->SetExpandedPTFEditor(name);
+        //p->SetExpandedPTFEditor("foo");
     }
 
     VAPoR::DataMgr *     dm = getDataMgr();
     VAPoR::ParamsMgr *   pm = getParamsMgr();
     VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams *>(getParams());
+    _expandedPTFEditor->raise();
     _expandedPTFEditor->Update(rp, pm, dm);
         
     //std::string name =  
-    GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    p->SetExpandedPTFEditor("foo");
-
-    std::vector<string> names;
-    getParamsMgr()->GetRenderParamNames(p->GetActiveVizName(), p->GetActiveDataset(), names);
+    //std::vector<string> names;
+    //getParamsMgr()->GetRenderParamNames(p->GetActiveVizName(), p->GetActiveDataset(), names);
     //std::cout << names.size() << std::endl;
     //for (auto name : names) std::cout << "Name: " << name << std::endl;
 }
 
 void PTFEditor::closeExpandedPTFEditor() {
     std::cout << "closin?" << std::endl;
+
+    GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    std::string name;
+    string inst = p->GetActiveRendererInst();
+    p->GetActiveRenderer(p->GetActiveVizName(), inst, name);
+    //p->GetActiveRenderer(p->GetActiveVizName(), p->GetActiveRendererInst(), name);
+    p->RemoveExpandedPTFEditor(name);
+    //p->RemoveExpandedPTFEditor("foo");
+
     _expandedPTFEditor->close();
     _expandedPTFEditor=nullptr;
-    //std::string name =  
-    //GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    //p->SetExpandedPTFEditor("foo");
-
-    //std::vector<string> names;
-    //getParamsMgr()->GetRenderParamNames(p->GetActiveVizName(), p->GetActiveDataset(), names);
-    //std::cout << names.size() << std::endl;
-    //for (auto name : names) std::cout << "Name: " << name << std::endl;
 }
 
 void PTFEditor::closeEvent(QCloseEvent* event) {

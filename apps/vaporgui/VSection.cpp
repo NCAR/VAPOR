@@ -27,7 +27,7 @@ void VSection::setMenu(QMenu *menu)
     menuButton->setMenu(menu);
 }
 
-void VSection::setExpandSection(QWidget* expanded)
+void VSection::setExpandedSection()
 {
     //_expandedWidget = expanded;
 

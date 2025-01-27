@@ -27,8 +27,8 @@ public:
     VSection(const std::string &title);
     QVBoxLayout *layout() const;
     void         setMenu(QMenu *menu);
-    void         setExpandSection(QWidget* expanded);
-    //void         setExpandSection();
+    //void         setExpandSection(QWidget* expanded);
+    void         setExpandedSection();
 
     void     setLayout(QLayout *layout) = delete;
     int      addTab(QWidget *page, const QString &label) = delete;

@@ -217,24 +217,36 @@ void GUIStateParams::SetExpandedPTFEditor(const string &editor)
 {
     std::vector<string> editors = GetExpandedPTFEditors();
     
-    bool containsEditor = std::find(editors.begin(), editors.end(), editor) != editors.end();
+    //bool containsEditor = std::find(editors.begin(), editors.end(), editor) != editors.end();
+    auto it = std::find(editors.begin(), editors.end(), editor);
     //std::cout << "SetExpandedPTFEditor " << containsEditor << editor << std::endl;
-    if (containsEditor) return;
+    std::cout << "SetExpandedPTFEditor " << editor << std::endl;
+    //if (containsEditor) {
+    if(it != editors.end()) {
+        std::cout << "already contains editor" << std::endl;
+        return;
+    }
     else {
         editors.push_back(editor);
         SetValueStringVec(ExpandedPTFEditorsTag, "Expanded PTFEditors", editors);
+        //std::vector<string> bar = GetValueStringVec(ExpandedPTFEditorsTag, bar)[0] << std::endl;
+        std::cout << "set tfeditors " << GetValueStringVec(ExpandedPTFEditorsTag)[0] << std::endl;
+        //std::cout << "set tfeditors " << GetValueStringVec(ExpandedPTFEditorsTag, vector<string>())[0] << std::endl;
     }
 }
 
 vector<string> GUIStateParams::GetExpandedPTFEditors()
 {
-    //std::cout << "GetExpandedPTFEditors" << std::endl;
-    return GetValueStringVec(ExpandedPTFEditorsTag, vector<string>());
+    return GetValueStringVec(ExpandedPTFEditorsTag);
 }
 
 void GUIStateParams::RemoveExpandedPTFEditor(const string &editor)
 {
-    //std::cout << "RemoveExpandedPTFEditor" << std::endl;
+    vector<string> tfes = GetExpandedPTFEditors();
+    std::cout << "      before " << tfes[0] << " " << tfes.size() << std::endl;;
+    tfes.erase(std::remove(tfes.begin(), tfes.end(), editor), tfes.end());
+    SetValueStringVec(ExpandedPTFEditorsTag, "Expanded PTFEditors", tfes);
+    std::cout << "      after " << tfes[0] << " " << tfes.size() << std::endl;;
 }
 
 string GUIStateParams::GetCurrentSessionFile() const { return (GetValueString(m_sessionFileTag, "")); }
