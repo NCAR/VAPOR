@@ -243,6 +243,10 @@ vector<string> GUIStateParams::GetExpandedPTFEditors()
 void GUIStateParams::RemoveExpandedPTFEditor(const string &editor)
 {
     vector<string> tfes = GetExpandedPTFEditors();
+
+    for (const auto& i : tfes) std::cout << i << " ";
+    std::cout << endl;
+    std::cout << "      editor " << editor << std::endl;;
     std::cout << "      before " << tfes[0] << " " << tfes.size() << std::endl;;
     tfes.erase(std::remove(tfes.begin(), tfes.end(), editor), tfes.end());
     SetValueStringVec(ExpandedPTFEditorsTag, "Expanded PTFEditors", tfes);

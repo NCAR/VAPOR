@@ -57,7 +57,6 @@ class PTFEditor : public PWidget {
     TFIsoValueMap *         _isoMap;
     TFMappingRangeSelector *_range;
     PTFEditor*              _expandedPTFEditor = nullptr;
-    ControlExec*            _ce;
 
     std::vector<QAction *> _colorMapActions;
     std::vector<QAction *> _opacityMapActions;
@@ -86,9 +85,11 @@ public:
     PTFEditor *ShowColormapBasedOnParam(const std::string &tag, int value);
 
 protected:
+    ControlExec* _ce;
+    std::string _expandedWindowName;
     void updateGUI() const override;
     void showEvent(QShowEvent* event) override;
-    //void Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::DataMgr* dm) override;
+    void Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::DataMgr* dm) override;
 
 signals:
     void shown();
@@ -102,5 +103,5 @@ private slots:
 
 class PColormapTFEditor : public PTFEditor {
 public:
-    PColormapTFEditor();
+    PColormapTFEditor(VAPoR::ControlExec* ce = nullptr);
 };

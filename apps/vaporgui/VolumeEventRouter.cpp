@@ -24,7 +24,7 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce) : RenderE
     }));
     
     AddAppearanceSubtab(new PGroup({
-        (new PTFEditor)->ShowColormapBasedOnParam(VP::UseColormapVariableTag, false),
+        (new PTFEditor(ce))->ShowColormapBasedOnParam(VP::UseColormapVariableTag, false),
         new PSection("Rendering Method", {
             new PStringDropdownHLI<VP>("Raytracing Algorithm", VP::GetAlgorithmNames(VP::Type::DVR), &VP::GetAlgorithm, &VP::SetAlgorithmByUser),
         }),
@@ -39,7 +39,7 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce) : RenderE
                 (new PDoubleSliderEdit(VP::VolumeDensityTag, "Volume Density"))->EnableDynamicUpdate()->SetTooltip("Changes the overall density or 'opacity' of the volume allowing for finer tuning of the transfer function."),
                 new PCheckbox(VP::UseColormapVariableTag, "Color by other variable"),
             }),
-            (new PColormapTFEditor)->ShowBasedOnParam(VolumeParams::UseColormapVariableTag),
+            (new PColormapTFEditor(ce))->ShowBasedOnParam(VolumeParams::UseColormapVariableTag),
             new PSection("Lighting", {
                 new PCheckbox(VolumeParams::LightingEnabledTag, "Enabled"),
                 (new PDoubleSliderEdit(VP::PhongAmbientTag,   "Ambient"  ))->EnableDynamicUpdate(),
