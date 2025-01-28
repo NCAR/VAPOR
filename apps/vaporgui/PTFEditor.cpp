@@ -79,8 +79,8 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
         connect(_section, &VSection::expandButtonClicked, this, &PTFEditor::showExpandedPTFEditor);
         //GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
         //vector<string> editors = p->GetExpandedPTFEditors();
-        //auto it = std::find(editors.begin(), editors.end(), _expandedWindowName); 
-        //std::cout << "_expandedWindowName " << _expandedWindowName << std::endl;
+        //auto it = std::find(editors.begin(), editors.end(), _expandedPTFEditorName); 
+        //std::cout << "_expandedPTFEditorName " << _expandedPTFEditorName << std::endl;
         //if (p->GetExpandedPTFEditors()
         //})
     }
@@ -146,10 +146,10 @@ void PTFEditor::updateGUI() const
         _expandedPTFEditor->Update(rp, pm, dm);
         //GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
         //vector<string> editors = p->GetExpandedPTFEditors();
-        //auto it = std::find(editors.begin(), editors.end(), _expandedWindowName); 
+        //auto it = std::find(editors.begin(), editors.end(), _expandedPTFEditorName); 
         //if(it != editors.end()) showExpandedPTFEditor();
-        //else std::cout << "Not showing " << _expandedWindowName << std::endl;
-        //std::cout << "_expandedWindowName " 
+        //else std::cout << "Not showing " << _expandedPTFEditorName << std::endl;
+        //std::cout << "_expandedPTFEditorName " 
     }
 
     if (_showOpacityBasedOnParam) {
@@ -174,67 +174,58 @@ void PTFEditor::updateGUI() const
 void PTFEditor::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr)
 {
     PWidget::Update(params, paramsMgr, dataMgr);
-        GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    if (_ce != nullptr) {
+        //GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+        GUIStateParams* p = dynamic_cast<GUIStateParams *>(paramsMgr->GetParams(GUIStateParams::GetClassType()));
         vector<string> editors = p->GetExpandedPTFEditors();
-        auto it = std::find(editors.begin(), editors.end(), _expandedWindowName); 
+        std::cout << "TFES ";
+
+        for (const auto& i : editors) std::cout << i << " ";
+        std::cout << endl;
+        //auto it = std::find(editors.begin(), editors.end(), _expandedPTFEditorName); 
+        auto it = std::find(editors.begin(), editors.end(), getExpandedPTFEditorName(paramsMgr)); 
         if(it != editors.end()) showExpandedPTFEditor();
-        else std::cout << "Not showing " << _expandedWindowName << std::endl;
+        else std::cout << "Not showing " << getExpandedPTFEditorName(paramsMgr) << std::endl;
+    }
 }
-//void PTFEditor::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr)
-//{
-//    std::cout << "MyUpdate!" << std::endl;
-//    _params = params;
-//    _paramsMgr = paramsMgr;
-//    _dataMgr = dataMgr;
-//
-//    if (_dynamicUpdateInsideGroup) return;
-//
-//    if (params == nullptr) {
-//        this->setDisabled(true);
-//        return;
-//    }
-//    if (requireDataMgr() && !dataMgr) VAssert(!"Data manager required but missing");
-//    if (requireParamsMgr() && !paramsMgr) VAssert(!"Params manager required but missing");
-//
-//    bool paramsVisible = isShown();
-//    if (paramsVisible && _showBasedOnParam) paramsVisible = _showBasedOnParamValue == params->GetValueLong(_showBasedOnParamTag, 0);
-//    if (paramsVisible) {
-//        setVisible(true);
-//        //setVisible(true);
-//    } else {
-//        setVisible(false);
-//        return;
-//    }
-//
-//    bool enabled = isEnabled();
-//    if (enabled && _enableBasedOnParam)
-//        enabled = params->GetValueLong(_enableBasedOnParamTag, 0) == _enableBasedOnParamValue;
-//    setEnabled(enabled);
-//
-//    updateGUI();
-//}
+
+string PTFEditor::getExpandedPTFEditorName(ParamsMgr* pm) {
+    //VAPoR::ParamsMgr* pm = _ce->GetParamsMgr();
+    //GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    GUIStateParams* p = dynamic_cast<GUIStateParams *>(pm->GetParams(GUIStateParams::GetClassType()));
+    std::cout << "Got params mgr " << pm << std::endl;
+    std::string name;
+    string inst = p->GetActiveRendererInst();
+    p->GetActiveRenderer(p->GetActiveVizName(), inst, name);
+    if (dynamic_cast<PColormapTFEditor*>(this)) name+="_Colormap";
+    return name;
+}
 
 void PTFEditor::showExpandedPTFEditor() {
 
     std::cout << "showin?" << std::endl;
+    std::string name = getExpandedPTFEditorName(_ce->GetParamsMgr());
     if (_expandedPTFEditor==nullptr){
         std::cout << "    creating new" << std::endl;
         _expandedPTFEditor = new PTFEditor(_tag, _elements, _label, false);
         connect(_expandedPTFEditor, SIGNAL(closed()), this, SLOT(closeExpandedPTFEditor()));
 
         GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-        std::string name;
-        string inst = p->GetActiveRendererInst();
-        p->GetActiveRenderer(p->GetActiveVizName(), inst, name);
-        if (dynamic_cast<PColormapTFEditor*>(this)) name+="_Colormap";
-        _expandedWindowName = name;
+        //std::string name;
+        //string inst = p->GetActiveRendererInst();
+        //p->GetActiveRenderer(p->GetActiveVizName(), inst, name);
+        //if (dynamic_cast<PColormapTFEditor*>(this)) name+="_Colormap";
+        //_expandedPTFEditorName = name;
+        //p->SetExpandedPTFEditor(name);
+        //p->SetExpandedPTFEditor(_expandedPTFEditorName);
+        std::cout << "name " << name << std::endl;
         p->SetExpandedPTFEditor(name);
 
-        _expandedPTFEditor->setWindowTitle(QString::fromStdString(name));
         _expandedPTFEditor->setAttribute(Qt::WA_ShowWithoutActivating);
         _expandedPTFEditor->setAttribute(Qt::WA_DeleteOnClose);
     }
 
+    _expandedPTFEditor->setWindowTitle(QString::fromStdString(name));
     VAPoR::DataMgr *     dm = getDataMgr();
     VAPoR::ParamsMgr *   pm = getParamsMgr();
     VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams *>(getParams());

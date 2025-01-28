@@ -83,6 +83,7 @@ public:
     //! Behaves the same as PWidget::ShowBasedOnParam except shows/hides the colormap controls.
     //! @copydoc PWidget::ShowBasedOnParam
     PTFEditor *ShowColormapBasedOnParam(const std::string &tag, int value);
+    std::string getExpandedPTFEditorName(ParamsMgr* pm);
 
 protected:
     ControlExec* _ce;
