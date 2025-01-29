@@ -29,14 +29,11 @@ void VSection::setMenu(QMenu *menu)
 
 void VSection::setExpandedSection()
 {
-    //_expandedWidget = expanded;
-
     ExpandSectionButton *expandSectionButton = (ExpandSectionButton *)QTabWidget::cornerWidget();
     if (!expandSectionButton) {
         expandSectionButton = new ExpandSectionButton;
         QTabWidget::setCornerWidget(expandSectionButton, Qt::TopLeftCorner);
     }
-    //connect(expandSectionButton, &QToolButton::clicked, this, &VSection::showExpandedSection);
     connect(expandSectionButton, &QToolButton::clicked, this, [this](){ emit this->expandButtonClicked(); });
 }
 
@@ -129,39 +126,39 @@ void VSection::ExpandSectionButton::paintEvent(QPaintEvent *event)
     p.drawComplexControl(QStyle::CC_ToolButton, option);
 }
 
-VSection::ExpandedSection::ExpandedSection(QWidget* expanded) : QWidget() {
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    if(expanded != nullptr) {
-        layout->addWidget(expanded);
-    }
-    setLayout(layout);
-}
-
-void VSection::showExpandedSection() {
-    emit showExpandedSection();
-    //std::cout << "showExpandedSection" << std::endl;
-    //if (_expandedSection!=nullptr) {
-        //std::cout << "  creating new" << std::endl;
-    //    _expandedWidget->show();
-    //    _expandedWidget->raise();
-        //_expandedSection = new ExpandedSection(_expandedWidget);
-        //_expandedSection->setAttribute(Qt::WA_DeleteOnClose);
-        //connect(_expandedSection, &QWidget::destroyed, this, &VSection::clearExpandedSection);  // Reset pointer when window closes
-        //_expandedSection->show();
-    //}
-    //} else {
-    //    _expandedSection->raise();  // Bring the window to the front
-    //    _expandedSection->activateWindow();  // Set focus to the window
-    //}
-}
-
-//void VSection::showExpandedSection() {
-//        _expandedSection->raise();
-//        _expandedSection->activateWindow();
+//VSection::ExpandedSection::ExpandedSection(QWidget* expanded) : QWidget() {
+//    QVBoxLayout *layout = new QVBoxLayout(this);
+//    if(expanded != nullptr) {
+//        layout->addWidget(expanded);
+//    }
+//    setLayout(layout);
 //}
 
-void VSection::clearExpandedSection() {
-    std::cout << "clearing expandedSection to nullptr" << std::endl;
-    //delete _expandedSection; // don't double delete while Qt::WA_DeleteOnClose is attributed
-    _expandedSection = nullptr;  // Reset the pointer when the window is destroyed
-}
+//void VSection::showExpandedSection() {
+//    emit showExpandedSection();
+//    //std::cout << "showExpandedSection" << std::endl;
+//    //if (_expandedSection!=nullptr) {
+//        //std::cout << "  creating new" << std::endl;
+//    //    _expandedWidget->show();
+//    //    _expandedWidget->raise();
+//        //_expandedSection = new ExpandedSection(_expandedWidget);
+//        //_expandedSection->setAttribute(Qt::WA_DeleteOnClose);
+//        //connect(_expandedSection, &QWidget::destroyed, this, &VSection::clearExpandedSection);  // Reset pointer when window closes
+//        //_expandedSection->show();
+//    //}
+//    //} else {
+//    //    _expandedSection->raise();  // Bring the window to the front
+//    //    _expandedSection->activateWindow();  // Set focus to the window
+//    //}
+//}
+//
+////void VSection::showExpandedSection() {
+////        _expandedSection->raise();
+////        _expandedSection->activateWindow();
+////}
+//
+//void VSection::clearExpandedSection() {
+//    std::cout << "clearing expandedSection to nullptr" << std::endl;
+//    //delete _expandedSection; // don't double delete while Qt::WA_DeleteOnClose is attributed
+//    _expandedSection = nullptr;  // Reset the pointer when the window is destroyed
+//}

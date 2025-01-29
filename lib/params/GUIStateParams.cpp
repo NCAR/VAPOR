@@ -216,22 +216,11 @@ void GUIStateParams::SetActiveDataset(std::string name)
 void GUIStateParams::SetExpandedPTFEditor(const string &editor)
 {
     std::vector<string> editors = GetExpandedPTFEditors();
-    
-    //bool containsEditor = std::find(editors.begin(), editors.end(), editor) != editors.end();
     auto it = std::find(editors.begin(), editors.end(), editor);
-    //std::cout << "SetExpandedPTFEditor " << containsEditor << editor << std::endl;
-    std::cout << "SetExpandedPTFEditor " << editor << std::endl;
-    //if (containsEditor) {
-    if(it != editors.end()) {
-        std::cout << "already contains editor" << std::endl;
-        return;
-    }
+    if(it != editors.end()) return;
     else {
         editors.push_back(editor);
         SetValueStringVec(ExpandedPTFEditorsTag, "Expanded PTFEditors", editors);
-        //std::vector<string> bar = GetValueStringVec(ExpandedPTFEditorsTag, bar)[0] << std::endl;
-        std::cout << "set tfeditors " << GetValueStringVec(ExpandedPTFEditorsTag)[0] << std::endl;
-        //std::cout << "set tfeditors " << GetValueStringVec(ExpandedPTFEditorsTag, vector<string>())[0] << std::endl;
     }
 }
 
@@ -243,14 +232,8 @@ vector<string> GUIStateParams::GetExpandedPTFEditors()
 void GUIStateParams::RemoveExpandedPTFEditor(const string &editor)
 {
     vector<string> tfes = GetExpandedPTFEditors();
-
-    for (const auto& i : tfes) std::cout << i << " ";
-    std::cout << endl;
-    std::cout << "      editor " << editor << std::endl;;
-    std::cout << "      before " << tfes[0] << " " << tfes.size() << std::endl;;
     tfes.erase(std::remove(tfes.begin(), tfes.end(), editor), tfes.end());
     SetValueStringVec(ExpandedPTFEditorsTag, "Expanded PTFEditors", tfes);
-    std::cout << "      after " << tfes[0] << " " << tfes.size() << std::endl;;
 }
 
 string GUIStateParams::GetCurrentSessionFile() const { return (GetValueString(m_sessionFileTag, "")); }

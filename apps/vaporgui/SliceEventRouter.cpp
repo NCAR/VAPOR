@@ -21,7 +21,7 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     }));
     
     AddAppearanceSubtab(new PGroup({
-        new PTFEditor(ce),
+        new PTFEditor,
         new PSection("Slice", {
             (new PDoubleSliderEdit(RenderParams::SampleRateTag, "N Samples"))->SetRange(32, 2000)
         })

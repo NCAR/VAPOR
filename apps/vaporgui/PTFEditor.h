@@ -2,6 +2,8 @@
 
 #include "PWidget.h"
 #include <set>
+#include <optional>
+#include <functional>
 
 class TFMap;
 class TFColorMap;
@@ -57,6 +59,7 @@ class PTFEditor : public PWidget {
     TFIsoValueMap *         _isoMap;
     TFMappingRangeSelector *_range;
     PTFEditor*              _expandedPTFEditor = nullptr;
+    bool                    _expandable;
 
     std::vector<QAction *> _colorMapActions;
     std::vector<QAction *> _opacityMapActions;
@@ -75,7 +78,7 @@ public:
     std::set<Element> _elements;
     std::string _label;
 
-    PTFEditor(ControlExec* ce = nullptr);
+    PTFEditor();
     PTFEditor(const std::string &tag, const std::set<Element> elements = {Default}, const std::string &label = "Transfer Function", bool expandable = true);
     //! Behaves the same as PWidget::ShowBasedOnParam except shows/hides the opacity controls.
     //! @copydoc PWidget::ShowBasedOnParam
@@ -83,17 +86,18 @@ public:
     //! Behaves the same as PWidget::ShowBasedOnParam except shows/hides the colormap controls.
     //! @copydoc PWidget::ShowBasedOnParam
     PTFEditor *ShowColormapBasedOnParam(const std::string &tag, int value);
-    std::string getExpandedPTFEditorName(ParamsMgr* pm);
+    //std::string getExpandedPTFEditorName(std::optional<std::reference_wrapper<std::string>> instance = std::string());
+    //std::string getExpandedPTFEditorName(std::string &instance = std::string());
+    //std::pair<std::string, std::string> getExpandedPTFEditorName();
+    void getExpandedPTFEditorInfo(std::string &name, std::string &type);
 
 protected:
-    ControlExec* _ce;
     std::string _expandedWindowName;
     void updateGUI() const override;
-    void showEvent(QShowEvent* event) override;
     void Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::DataMgr* dm) override;
 
 signals:
-    void shown();
+    //void shown();
     void closed();
 
 private slots:

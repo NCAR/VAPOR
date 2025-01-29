@@ -27,7 +27,6 @@ public:
     VSection(const std::string &title);
     QVBoxLayout *layout() const;
     void         setMenu(QMenu *menu);
-    //void         setExpandSection(QWidget* expanded);
     void         setExpandedSection();
 
     void     setLayout(QLayout *layout) = delete;
@@ -39,13 +38,6 @@ public:
 private:
     QWidget *_tab() const;
     QString  _createStylesheet() const;
-    //ExpandedSection* _expandedSection = nullptr;
-    ExpandedSection* _expandedSection = nullptr;
-    QWidget* _expandedWidget = nullptr;
-
-private slots:
-    void showExpandedSection();
-    void clearExpandedSection();
 
 signals:
     void expandButtonClicked();

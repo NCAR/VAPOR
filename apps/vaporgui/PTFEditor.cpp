@@ -1,4 +1,5 @@
 #include "PTFEditor.h"
+#include <vapor/MyBase.h>
 #include <vapor/RenderParams.h>
 #include <vapor/ControlExecutive.h>
 #include <vapor/GUIStateParams.h>
@@ -29,11 +30,9 @@ template class PTFMapWidget<TFOpacityWidget>;
 template class PTFMapWidget<TFHistogramWidget>;
 template class PTFMapWidget<TFIsoValueWidget>;
 
-//PTFEditor::PTFEditor() : PTFEditor(RenderParams::_variableNameTag) {}
-PTFEditor::PTFEditor(VAPoR::ControlExec* ce) : PTFEditor(RenderParams::_variableNameTag) {_ce = ce;}
+PTFEditor::PTFEditor() : PTFEditor(RenderParams::_variableNameTag) {}
 
-//PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PWidget(tag, _section = new VSection(label.empty() ? tag : label))
-PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PWidget(tag, _section = new VSection(label.empty() ? tag : label))
+PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PWidget(tag, _section = new VSection(label.empty() ? tag : label)), _expandable(expandable)
 {
     _maps = new TFMapGroupWidget;
     _histogram = new TFHistogramMap(tag);
@@ -70,19 +69,9 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
     _histogram->PopulateSettingsMenu(menu);
     for (int i = start; i < menu->actions().size(); i++) _histogramActions.push_back(menu->actions()[i]);
 
-    if (expandable) {
-        //if (_ce != nullptr) {
-        //_section->setExpandSection(_expandedPTFEditor);
+    if (_expandable) {
         _section->setExpandedSection();
-        //connect(_section, SIGNAL(expandButtonClicked()), this, SLOT(showExpandedPTFEditor));
-        //connect(_section, &VSection::expandButtonClicked, this, SLOT(showExpandedPTFEditor));
         connect(_section, &VSection::expandButtonClicked, this, &PTFEditor::showExpandedPTFEditor);
-        //GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-        //vector<string> editors = p->GetExpandedPTFEditors();
-        //auto it = std::find(editors.begin(), editors.end(), _expandedPTFEditorName); 
-        //std::cout << "_expandedPTFEditorName " << _expandedPTFEditorName << std::endl;
-        //if (p->GetExpandedPTFEditors()
-        //})
     }
 
     _section->setMenu(menu);
@@ -128,7 +117,6 @@ PTFEditor *PTFEditor::ShowColormapBasedOnParam(const std::string &tag, int value
 
 void PTFEditor::updateGUI() const
 {
-    std::cout << this << std::endl;
     VAPoR::DataMgr *     dm = getDataMgr();
     VAPoR::ParamsMgr *   pm = getParamsMgr();
     VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams *>(getParams());
@@ -138,18 +126,8 @@ void PTFEditor::updateGUI() const
     _mapsInfo->Update(rp);
     _range->Update(dm, pm, rp);
 
-
-    std::cout << "      rp pm dm " << rp << " " << pm << " " << dm << std::endl;
     if (_expandedPTFEditor != nullptr ) {
-        //GUIStateParams * guiParams = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-        //std::cout << "tfes " << guiParams->GetExpandedPTFEditors()[0] << std::endl;
         _expandedPTFEditor->Update(rp, pm, dm);
-        //GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-        //vector<string> editors = p->GetExpandedPTFEditors();
-        //auto it = std::find(editors.begin(), editors.end(), _expandedPTFEditorName); 
-        //if(it != editors.end()) showExpandedPTFEditor();
-        //else std::cout << "Not showing " << _expandedPTFEditorName << std::endl;
-        //std::cout << "_expandedPTFEditorName " 
     }
 
     if (_showOpacityBasedOnParam) {
@@ -171,84 +149,86 @@ void PTFEditor::updateGUI() const
     for (auto a : _histogramActions) a->setEnabled(_histogram->IsShown());
 }
 
-void PTFEditor::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr)
-{
+void PTFEditor::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr) {
     PWidget::Update(params, paramsMgr, dataMgr);
-    if (_ce != nullptr) {
-        //GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+    if (_expandable==true) {
         GUIStateParams* p = dynamic_cast<GUIStateParams *>(paramsMgr->GetParams(GUIStateParams::GetClassType()));
         vector<string> editors = p->GetExpandedPTFEditors();
-        std::cout << "TFES ";
+        std::string name, inst;
+        getExpandedPTFEditorInfo(name, inst);
 
-        for (const auto& i : editors) std::cout << i << " ";
-        std::cout << endl;
-        //auto it = std::find(editors.begin(), editors.end(), _expandedPTFEditorName); 
-        auto it = std::find(editors.begin(), editors.end(), getExpandedPTFEditorName(paramsMgr)); 
-        if(it != editors.end()) showExpandedPTFEditor();
-        else std::cout << "Not showing " << getExpandedPTFEditorName(paramsMgr) << std::endl;
+        // If an expanded editor exists in the GUIStateParams, create and show a new expanded PTFEditor
+        if (_expandedPTFEditor==nullptr) {
+            auto it = std::find(editors.begin(), editors.end(), name); 
+            if(it != editors.end()) showExpandedPTFEditor();
+            else std::cout << "Not showing " << name << std::endl;
+        }
+
+        // Once the expanded PTFEditor is created, set GUIStateParams to record it as belonging to the
+        // currently active render instance, then Update it with the currently active params
+        if (_expandedPTFEditor!=nullptr) {
+            //std::string type = dynamic_cast<VAPoR::RenderParams *>(params)->GetClassType();
+            //std::string type = params->GetClassType();
+            // Hack to get the renderer class type.  Is there a better way to do this?  GetClassType() requires
+            // that we know the RenderParams derived class which we don't know.  IE - SliceParams::GetClassType()
+            //std::vector<std::string> splitName;
+            //Wasp::SplitString(name, '_', splitName);
+            //for (size_t i=0; i<splitName.size(); i++) std::cout << "    " << splitName[i] << std::endl;
+            //std::string type = splitName[0];
+
+            //std::string foo = dynamic_cast<RenderParams*>(params)->GetClassType();
+            //std::cout << "GetClassType() " << foo << std::endl;
+
+            //auto it = std::find_if(editors.begin(), editors.end(), [&type](const std::string& str) {return str.find(type) != std::string::npos;});
+            //if (it != editors.end()) {
+            //    paramsMgr->BeginSaveStateGroup("Replace current expanded PTFEditor with currently active renderer instance");
+            //    std::cout << "Replacing " << *it << " with " << name << std::endl;
+            //    p->RemoveExpandedPTFEditor(*it);
+            //    p->SetExpandedPTFEditor(name);
+            //    paramsMgr->EndSaveStateGroup();
+            //}
+            _expandedPTFEditor->setWindowTitle(QString::fromStdString(name));
+            _expandedPTFEditor->Update(params, paramsMgr, dataMgr);
+        }
     }
 }
 
-string PTFEditor::getExpandedPTFEditorName(ParamsMgr* pm) {
-    //VAPoR::ParamsMgr* pm = _ce->GetParamsMgr();
-    //GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+void PTFEditor::getExpandedPTFEditorInfo(std::string &name, std::string& type) {
+    ParamsMgr* pm = getParamsMgr();
     GUIStateParams* p = dynamic_cast<GUIStateParams *>(pm->GetParams(GUIStateParams::GetClassType()));
-    std::cout << "Got params mgr " << pm << std::endl;
-    std::string name;
-    string inst = p->GetActiveRendererInst();
-    p->GetActiveRenderer(p->GetActiveVizName(), inst, name);
-    if (dynamic_cast<PColormapTFEditor*>(this)) name+="_Colormap";
-    return name;
+    type = p->GetActiveRendererInst();
+    p->GetActiveRenderer(p->GetActiveVizName(), type, name);
+    if (dynamic_cast<PColormapTFEditor*>(this)) {
+        name+="_Colormap";
+        type+="_Colormap";
+    }
 }
 
 void PTFEditor::showExpandedPTFEditor() {
-
-    std::cout << "showin?" << std::endl;
-    std::string name = getExpandedPTFEditorName(_ce->GetParamsMgr());
-    if (_expandedPTFEditor==nullptr){
-        std::cout << "    creating new" << std::endl;
+    //std::string name = getExpandedPTFEditorName()[0];
+    if (_expandedPTFEditor==nullptr) {
         _expandedPTFEditor = new PTFEditor(_tag, _elements, _label, false);
         connect(_expandedPTFEditor, SIGNAL(closed()), this, SLOT(closeExpandedPTFEditor()));
 
-        GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-        //std::string name;
-        //string inst = p->GetActiveRendererInst();
-        //p->GetActiveRenderer(p->GetActiveVizName(), inst, name);
-        //if (dynamic_cast<PColormapTFEditor*>(this)) name+="_Colormap";
-        //_expandedPTFEditorName = name;
+        if (_showColormapBasedOnParam==true) _expandedPTFEditor->ShowColormapBasedOnParam(_showColormapBasedOnParamTag, _showColormapBasedOnParamValue);
+        if (_showOpacityBasedOnParam==true) _expandedPTFEditor->ShowOpacityBasedOnParam(_showOpacityBasedOnParamTag, _showOpacityBasedOnParamValue);
+
+        //VAPoR::ParamsMgr* pm = getParamsMgr();
+        //GUIStateParams*    p = dynamic_cast<GUIStateParams *>(pm->GetParams(GUIStateParams::GetClassType()));
         //p->SetExpandedPTFEditor(name);
-        //p->SetExpandedPTFEditor(_expandedPTFEditorName);
-        std::cout << "name " << name << std::endl;
-        p->SetExpandedPTFEditor(name);
 
         _expandedPTFEditor->setAttribute(Qt::WA_ShowWithoutActivating);
         _expandedPTFEditor->setAttribute(Qt::WA_DeleteOnClose);
     }
-
-    _expandedPTFEditor->setWindowTitle(QString::fromStdString(name));
-    VAPoR::DataMgr *     dm = getDataMgr();
-    VAPoR::ParamsMgr *   pm = getParamsMgr();
-    VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams *>(getParams());
     _expandedPTFEditor->raise();
-    _expandedPTFEditor->Update(rp, pm, dm);
-        
-    //std::string name =  
-    //std::vector<string> names;
-    //getParamsMgr()->GetRenderParamNames(p->GetActiveVizName(), p->GetActiveDataset(), names);
-    //std::cout << names.size() << std::endl;
-    //for (auto name : names) std::cout << "Name: " << name << std::endl;
 }
 
 void PTFEditor::closeExpandedPTFEditor() {
-    std::cout << "closin?" << std::endl;
-
-    GUIStateParams* p = dynamic_cast<GUIStateParams *>(_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    std::string name;
-    string inst = p->GetActiveRendererInst();
-    p->GetActiveRenderer(p->GetActiveVizName(), inst, name);
-    //p->GetActiveRenderer(p->GetActiveVizName(), p->GetActiveRendererInst(), name);
-    p->RemoveExpandedPTFEditor(name);
-    //p->RemoveExpandedPTFEditor("foo");
+    VAPoR::ParamsMgr *   pm = getParamsMgr();
+    GUIStateParams* p = dynamic_cast<GUIStateParams *>(pm->GetParams(GUIStateParams::GetClassType()));
+    std::string name, type;
+    getExpandedPTFEditorInfo(name, type);
+    p->RemoveExpandedPTFEditor(type);
 
     _expandedPTFEditor->close();
     _expandedPTFEditor=nullptr;
@@ -259,9 +239,4 @@ void PTFEditor::closeEvent(QCloseEvent* event) {
     close();
 }
 
-void PTFEditor::showEvent(QShowEvent* event) {
-    emit shown();
-    QWidget::showEvent(event);
-}
-
-PColormapTFEditor::PColormapTFEditor(VAPoR::ControlExec* ce) : PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function") { _ce=ce; }
+PColormapTFEditor::PColormapTFEditor(VAPoR::ControlExec* ce) : PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function") {}

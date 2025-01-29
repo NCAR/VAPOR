@@ -42,6 +42,7 @@ namespace VAPoR {
 //!
 class PARAMS_API RenderParams : public ParamsBase {
 public:
+    static std::string const GetClassType();
     //! Standard RenderParams constructor.
     //! \param[in] name  std::string name, can be the tag
     RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &classname, int maxdim = 3);
