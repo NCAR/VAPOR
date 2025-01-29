@@ -25,7 +25,6 @@ TFMapInfoGroupWidget *TFMapGroupWidget::CreateInfoGroup()
     return infos;
 }
 
-#include "TFColorWidget.h"
 void TFMapGroupWidget::Add(TFMapWidget *mapWidget)
 {
     _maps.push_back(mapWidget);
@@ -35,7 +34,7 @@ void TFMapGroupWidget::Add(TFMapWidget *mapWidget)
 
 void TFMapGroupWidget::Add(TFMap *map) { 
     TFMapWidget* newMapWidget = new TFMapWidget(map);
-    if (dynamic_cast<TFColorMap*>(map)) newMapWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    newMapWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
     Add(newMapWidget);
 }
 

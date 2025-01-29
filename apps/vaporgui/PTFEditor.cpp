@@ -123,6 +123,8 @@ void PTFEditor::updateGUI() const
     _mapsInfo->Update(rp);
     _range->Update(dm, pm, rp);
 
+    //if (_expandedPTFEditor != nullptr) _expandedPTFEditor->Update(rp, pm, dm);
+
     if (_showOpacityBasedOnParam) {
         if (rp->GetValueLong(_showOpacityBasedOnParamTag, 0) == _showOpacityBasedOnParamValue)
             _opacityMap->show();
@@ -152,9 +154,8 @@ void PTFEditor::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, V
 
         // If an expanded editor exists in the GUIStateParams, create and show a new expanded PTFEditor
         if (_expandedPTFEditor==nullptr) {
-            auto it = std::find(editors.begin(), editors.end(), name); 
+            auto it = std::find(editors.begin(), editors.end(), name);
             if(it != editors.end()) showExpandedPTFEditor();
-            else std::cout << "Not showing " << name << std::endl;
         }
 
         // Once the expanded PTFEditor is created, set GUIStateParams to record it as belonging to the
@@ -184,6 +185,11 @@ void PTFEditor::showExpandedPTFEditor() {
 
         if (_showColormapBasedOnParam==true) _expandedPTFEditor->ShowColormapBasedOnParam(_showColormapBasedOnParamTag, _showColormapBasedOnParamValue);
         if (_showOpacityBasedOnParam==true) _expandedPTFEditor->ShowOpacityBasedOnParam(_showOpacityBasedOnParamTag, _showOpacityBasedOnParamValue);
+
+        GUIStateParams* p = dynamic_cast<GUIStateParams *>(getParamsMgr()->GetParams(GUIStateParams::GetClassType()));
+        std::string name, type;
+        getExpandedPTFEditorInfo(name, type);
+        p->SetExpandedPTFEditor(type);
 
         _expandedPTFEditor->setAttribute(Qt::WA_ShowWithoutActivating);
         _expandedPTFEditor->setAttribute(Qt::WA_DeleteOnClose);

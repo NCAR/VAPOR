@@ -83,5 +83,5 @@ private slots:
 
 class TFIsoValueWidget : public TFMapWidget {
 public:
-    TFIsoValueWidget(const std::string &variableNameTag) : TFMapWidget(new TFIsoValueMap(variableNameTag, this)) {}
+    TFIsoValueWidget(const std::string &variableNameTag) : TFMapWidget(new TFIsoValueMap(variableNameTag, this)) { setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum); }
 };
