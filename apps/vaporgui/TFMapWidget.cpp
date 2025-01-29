@@ -1,4 +1,6 @@
 #include "TFMapWidget.h"
+#include "TFColorWidget.h"
+#include "TFIsoValueWidget.h"
 #include <QPainter>
 #include <QResizeEvent>
 #include <QMenu>
@@ -134,11 +136,7 @@ void TFMap::drawControl(QPainter &p, const QPointF &pos, bool selected) const
 QRect TFMap::paddedRect() const
 {
     const QMargins p = GetPadding();
-    QRect stuff = QRect(p.left(), p.top(), width() - (p.left() + p.right()), height() - (p.top() + p.bottom()));
-    //QRect stuff = QRect(p.left(), p.top(), width() - (p.left() + p.right()), height() - 30);
-    //QRect stuff = QRect(p.left(), p.top(), width() - (p.left() + p.right()), 30);
-    //std::cout << "QRect " << stuff.height() << std::endl;
-    return stuff;
+    return QRect(p.left(), p.top(), width() - (p.left() + p.right()), height() - (p.top() + p.bottom()));
 }
 
 QRect TFMap::rect() const { return QRect(0, 0, width(), height()); }
@@ -203,7 +201,9 @@ TFMapWidget::TFMapWidget(TFMap *map)
     AddMap(map);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(_showContextMenu(const QPoint &)));
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    if (dynamic_cast<TFColorMap*>(map)) setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    else if (dynamic_cast<TFIsoValueWidget*>(map)) setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    else setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 }
 
 TFMapWidget::~TFMapWidget()
