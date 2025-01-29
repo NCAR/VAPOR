@@ -19,6 +19,14 @@ class PWidget : public UWidget {
     VAPoR::ParamsMgr * _paramsMgr = nullptr;
     VAPoR::DataMgr *   _dataMgr = nullptr;
 
+    bool        _showBasedOnParam = false;
+    std::string _showBasedOnParamTag = "";
+    int         _showBasedOnParamValue;
+
+    bool        _enableBasedOnParam = false;
+    std::string _enableBasedOnParamTag = "";
+    int         _enableBasedOnParamValue;
+
     bool _dynamicUpdateIsOn = false;
     bool _dynamicUpdateInsideGroup = false;
 
@@ -47,14 +55,6 @@ public:
 
 protected:
     const std::string  _tag;
-
-    bool        _showBasedOnParam = false;
-    std::string _showBasedOnParamTag = "";
-    int         _showBasedOnParamValue;
-
-    bool        _enableBasedOnParam = false;
-    std::string _enableBasedOnParamTag = "";
-    int         _enableBasedOnParamValue;
 
     virtual void updateGUI() const = 0;
     virtual bool requireParamsMgr() const { return false; }

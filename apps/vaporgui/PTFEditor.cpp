@@ -123,8 +123,6 @@ void PTFEditor::updateGUI() const
     _mapsInfo->Update(rp);
     _range->Update(dm, pm, rp);
 
-    //if (_expandedPTFEditor != nullptr) _expandedPTFEditor->Update(rp, pm, dm);
-
     if (_showOpacityBasedOnParam) {
         if (rp->GetValueLong(_showOpacityBasedOnParamTag, 0) == _showOpacityBasedOnParamValue)
             _opacityMap->show();
