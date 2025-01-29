@@ -201,8 +201,9 @@ TFMapWidget::TFMapWidget(TFMap *map)
     AddMap(map);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(_showContextMenu(const QPoint &)));
+
     if (dynamic_cast<TFColorMap*>(map)) setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-    else if (dynamic_cast<TFIsoValueWidget*>(map)) setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    else if (dynamic_cast<TFIsoValueMap*>(map)) setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
     else setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 }
 
