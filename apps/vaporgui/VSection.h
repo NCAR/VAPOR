@@ -6,7 +6,6 @@
 #include <string>
 
 #include <QToolButton>
-#include <QLabel>
 
 //! \class VSection
 //! Represents a section/group to be used in the sidebar.

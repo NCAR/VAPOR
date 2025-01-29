@@ -202,6 +202,7 @@ TFMapWidget::TFMapWidget(TFMap *map)
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(_showContextMenu(const QPoint &)));
 
+    // Is there a better way or place to set the sizePolicy of this object?
     if (dynamic_cast<TFColorMap*>(map)) setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
     else if (dynamic_cast<TFIsoValueMap*>(map)) setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
     else setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);

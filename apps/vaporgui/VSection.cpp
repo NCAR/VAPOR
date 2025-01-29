@@ -1,8 +1,6 @@
-#include <iostream>
 #include "VSection.h"
 #include <QStylePainter>
 #include <QStyleOption>
-#include <QWindow>
 #include <vapor/ResourcePath.h>
 
 VSection::VSection(const std::string &title)

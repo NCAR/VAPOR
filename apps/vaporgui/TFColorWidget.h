@@ -86,7 +86,7 @@ private slots:
 class TFColorWidget : public TFMapWidget {
     Q_OBJECT
 public:
-    TFColorWidget(const std::string &variableNameTag) : TFMapWidget(new TFColorMap(variableNameTag, this)) { setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum); }
+    TFColorWidget(const std::string &variableNameTag) : TFMapWidget(new TFColorMap(variableNameTag, this)) {}
 };
 
 #include <QWidgetAction>
