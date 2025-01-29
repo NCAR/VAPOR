@@ -25,6 +25,7 @@ TFMapInfoGroupWidget *TFMapGroupWidget::CreateInfoGroup()
     return infos;
 }
 
+#include "TFColorWidget.h"
 void TFMapGroupWidget::Add(TFMapWidget *mapWidget)
 {
     _maps.push_back(mapWidget);
@@ -32,7 +33,11 @@ void TFMapGroupWidget::Add(TFMapWidget *mapWidget)
     connect(mapWidget, SIGNAL(Activated(TFMapWidget *)), this, SLOT(mapActivated(TFMapWidget *)));
 }
 
-void TFMapGroupWidget::Add(TFMap *map) { Add(new TFMapWidget(map)); }
+void TFMapGroupWidget::Add(TFMap *map) { 
+    TFMapWidget* newMapWidget = new TFMapWidget(map);
+    if (dynamic_cast<TFColorMap*>(map)) newMapWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    Add(newMapWidget);
+}
 
 void TFMapGroupWidget::Add(const std::initializer_list<TFMap *> &layeredMaps)
 {

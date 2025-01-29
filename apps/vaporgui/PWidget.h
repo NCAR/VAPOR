@@ -18,15 +18,6 @@ class PWidget : public UWidget {
     VAPoR::ParamsBase *_params = nullptr;
     VAPoR::ParamsMgr * _paramsMgr = nullptr;
     VAPoR::DataMgr *   _dataMgr = nullptr;
-    const std::string  _tag;
-
-    bool        _showBasedOnParam = false;
-    std::string _showBasedOnParamTag = "";
-    int         _showBasedOnParamValue;
-
-    bool        _enableBasedOnParam = false;
-    std::string _enableBasedOnParamTag = "";
-    int         _enableBasedOnParamValue;
 
     bool _dynamicUpdateIsOn = false;
     bool _dynamicUpdateInsideGroup = false;
@@ -55,6 +46,16 @@ public:
     void     setToolTip(const QString &) = delete;
 
 protected:
+    const std::string  _tag;
+
+    bool        _showBasedOnParam = false;
+    std::string _showBasedOnParamTag = "";
+    int         _showBasedOnParamValue;
+
+    bool        _enableBasedOnParam = false;
+    std::string _enableBasedOnParamTag = "";
+    int         _enableBasedOnParamValue;
+
     virtual void updateGUI() const = 0;
     virtual bool requireParamsMgr() const { return false; }
     virtual bool requireDataMgr() const { return false; }

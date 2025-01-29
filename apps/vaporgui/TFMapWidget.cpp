@@ -134,7 +134,11 @@ void TFMap::drawControl(QPainter &p, const QPointF &pos, bool selected) const
 QRect TFMap::paddedRect() const
 {
     const QMargins p = GetPadding();
-    return QRect(p.left(), p.top(), width() - (p.left() + p.right()), height() - (p.top() + p.bottom()));
+    QRect stuff = QRect(p.left(), p.top(), width() - (p.left() + p.right()), height() - (p.top() + p.bottom()));
+    //QRect stuff = QRect(p.left(), p.top(), width() - (p.left() + p.right()), height() - 30);
+    //QRect stuff = QRect(p.left(), p.top(), width() - (p.left() + p.right()), 30);
+    //std::cout << "QRect " << stuff.height() << std::endl;
+    return stuff;
 }
 
 QRect TFMap::rect() const { return QRect(0, 0, width(), height()); }
@@ -199,6 +203,7 @@ TFMapWidget::TFMapWidget(TFMap *map)
     AddMap(map);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(_showContextMenu(const QPoint &)));
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 }
 
 TFMapWidget::~TFMapWidget()

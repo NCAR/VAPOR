@@ -1,6 +1,8 @@
+#include <iostream>
 #include "VSection.h"
 #include <QStylePainter>
 #include <QStyleOption>
+#include <QWindow>
 #include <vapor/ResourcePath.h>
 
 VSection::VSection(const std::string &title)
@@ -25,6 +27,16 @@ void VSection::setMenu(QMenu *menu)
     menuButton->setMenu(menu);
 }
 
+void VSection::setExpandedSection()
+{
+    ExpandSectionButton *expandSectionButton = (ExpandSectionButton *)QTabWidget::cornerWidget();
+    if (!expandSectionButton) {
+        expandSectionButton = new ExpandSectionButton;
+        QTabWidget::setCornerWidget(expandSectionButton, Qt::TopLeftCorner);
+    }
+    connect(expandSectionButton, &QToolButton::clicked, this, [this](){ emit this->expandButtonClicked(); });
+}
+
 QWidget *VSection::_tab() const { return QTabWidget::widget(0); }
 
 QString VSection::_createStylesheet() const
@@ -39,10 +51,24 @@ QString VSection::_createStylesheet() const
     right: 3px;
     }
     )";
+    stylesheet +=
+        R"(
+    QTabWidget::left-corner {
+    top: 24px;
+    left: 3px;
+    }
+    )";
 #else
     stylesheet +=
         R"(
     QTabWidget::right-corner {
+    top: -3px;
+    right: 5px;
+    }
+    )";
+    stylesheet +=
+        R"(
+    QTabWidget::left-corner {
     top: -3px;
     right: 5px;
     }
@@ -75,3 +101,28 @@ void VSection::SettingsMenuButton::paintEvent(QPaintEvent *event)
     option.features = QStyleOptionToolButton::None;
     p.drawComplexControl(QStyle::CC_ToolButton, option);
 }
+
+VSection::ExpandSectionButton::ExpandSectionButton()
+{
+    setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/expandSection.png"))));
+    setIconSize(QSize(18, 18));
+    setCursor(QCursor(Qt::PointingHandCursor));
+    setPopupMode(QToolButton::InstantPopup);
+
+    setStyleSheet("border: none;"
+                  "background-color: none;"
+                  "padding: 0px;");
+}
+
+void VSection::ExpandSectionButton::paintEvent(QPaintEvent *event)
+{
+    // This function is overridden to prevent Qt from drawing its own dropdown arrow
+    QStylePainter p(this);
+
+    QStyleOptionToolButton option;
+    initStyleOption(&option);
+    option.subControls = QStyle::SC_ToolButton;
+    option.features = QStyleOptionToolButton::None;
+    p.drawComplexControl(QStyle::CC_ToolButton, option);
+}
+
