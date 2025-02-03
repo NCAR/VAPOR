@@ -62,6 +62,7 @@
 #include "PTimestepInput.h"
 #include "NcarCasperUtils.h"
 #include "ViewpointToolbar.h"
+#include "DatasetTypeLookup.h"
 
 #include <QStyle>
 #include <vapor/Progress.h>
@@ -786,18 +787,9 @@ void MainForm::importDataset(const std::vector<string> &files, string format, Da
     _paramsMgr->EndSaveStateGroup();
 }
 
-
 void MainForm::showImportDatasetGUI(string format)
 {
-    static map<string, string> prompts = {
-        {"vdc", "Vapor Data Collection"},
-        {"wrf", "WRF-ARW files"},
-        {"cf", "NetCDF Climate Forecast (CF) convention files"},
-        {"mpas", "MPAS files"},
-        {"bov", "BOV files"},
-        {"dcp", "DCP files"},
-        {"ugrid", "UGRID files"},
-    };
+    static map<string, string> prompts = GetDatasets();
 
     string defaultPath;
     auto openDatasets = GetStateParams()->GetOpenDataSetNames();

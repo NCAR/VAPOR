@@ -142,6 +142,9 @@ public:
         return (GetValueString(m_proj4StringTag, defaultv));
     }
 
+    std::string GetCurrentImportDataType() const;
+    void SetCurrentImportDataType(std::string& type);
+
     class DataSetParam : public ParamsBase {
     public:
         DataSetParam(VAPoR::ParamsBase::StateSave *ssave) : ParamsBase(ssave, DataSetParam::GetClassType()) {}
@@ -218,6 +221,7 @@ public:
     static const string BookmarksTag;
     static const string MovingDomainTrackCameraTag;
     static const string MovingDomainTrackRenderRegionsTag;
+    static const string SelectedImportDataTypeTag;
 
 private:
     MouseModeParams *m_mouseModeParams;

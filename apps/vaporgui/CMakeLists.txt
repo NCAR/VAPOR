@@ -320,6 +320,16 @@ set (SRCS
     ViewpointToolbar.h
     CheckForUpdateUI.cpp
     CheckForUpdateUI.h
+    #VRadioButtons.h
+    #VRadioButtons.cpp
+    #PDatasetImportTypeSelector.h
+    #PDatasetImportTypeSelector.cpp
+    PImportData.h
+    PImportData.cpp
+    ImportPanel.h
+    ImportPanel.cpp
+    DatasetTypeLookup.h
+    DatasetTypeLookup.cpp
 
 	# Need to include all files that request .ui files
 	Statistics.h

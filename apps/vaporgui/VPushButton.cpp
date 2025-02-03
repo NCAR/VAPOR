@@ -5,6 +5,8 @@ VPushButton::VPushButton(const std::string &buttonText) : VHBoxWidget()
     _pushButton = new QPushButton(QString::fromStdString(buttonText));
     _pushButton->setFocusPolicy(Qt::NoFocus);
     layout()->addWidget(_pushButton);
+    layout()->setAlignment(Qt::AlignRight);
+    //layout()->addWidget(_pushButton, 0, Qt::AlignRight);
 
     // We need to use SIGNAL/SLOT macros here because the arguments
     // of the signal and slot do not match

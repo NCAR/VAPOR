@@ -1,5 +1,6 @@
 #include "LeftPanel.h"
 #include "RenderersPanel.h"
+#include "ImportPanel.h"
 #include "AnnotationEventRouter.h"
 #include "AnimationTab.h"
 #include "ViewpointTab.h"
@@ -16,6 +17,7 @@ LeftPanel::LeftPanel(ControlExec *ce)
         addTab(scrollArea, t);
         _uTabs.push_back(w);
     };
+    add(new ImportPanel(ce), "Import");
     add(new RenderersPanel(ce), "Renderers");
     add(new AnnotationEventRouter(ce), "Annotation");
     add(new AnimationTab(ce), "Animation");

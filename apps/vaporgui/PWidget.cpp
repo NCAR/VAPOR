@@ -36,6 +36,7 @@ void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAP
     if (enabled && _enableBasedOnParam)
         enabled = params->GetValueLong(_enableBasedOnParamTag, 0) == _enableBasedOnParamValue;
     setEnabled(enabled);
+    setEnabled(true);
 
     updateGUI();
 }
