@@ -35,8 +35,11 @@ void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAP
     bool enabled = isEnabled();
     if (enabled && _enableBasedOnParam)
         enabled = params->GetValueLong(_enableBasedOnParamTag, 0) == _enableBasedOnParamValue;
-    setEnabled(enabled);
-    setEnabled(true);
+    else if (_alwaysEnabled) {
+        //std::cout << "Always enabled " << this << std::endl;
+        setEnabled(true);
+    }
+    //setEnabled(true);
 
     updateGUI();
 }
@@ -56,6 +59,11 @@ PWidget *PWidget::EnableBasedOnParam(const std::string &tag, int whenEqualTo)
     _enableBasedOnParam = true;
     _enableBasedOnParamTag = tag;
     _enableBasedOnParamValue = whenEqualTo;
+    return this;
+}
+
+PWidget *PWidget::AlwaysEnable() {
+    _alwaysEnabled = true;
     return this;
 }
 

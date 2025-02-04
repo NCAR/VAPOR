@@ -25,11 +25,24 @@ class ImportPanel : public VContainer, public Updatable {
     VRouter *_inspectorRouter;
 
     //PDatasetImportTypeSelector *_importer;
-    PImportDataSection *_importer;
+    //PImportDataSection *_importer;
+    PImportData *_importer;
     RendererInspector *_renInspector;
     DatasetInspector *_dataInspector;
 
 public:
     ImportPanel(VAPoR::ControlExec *ce);
+    void Update();
+};
+
+class PCheckBox;
+class TestPanel : public VContainer, public Updatable {
+    Q_OBJECT
+    PCheckbox* _cb;
+    VAPoR::ControlExec* _ce;
+    QSplitter* _splitter;
+
+public:
+    TestPanel(VAPoR::ControlExec* ce);
     void Update();
 };

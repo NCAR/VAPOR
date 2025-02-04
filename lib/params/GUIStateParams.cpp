@@ -46,7 +46,9 @@ const string GUIStateParams::_flowDimensionalityTag = "_flowDimensionalityTag";
 const string GUIStateParams::BookmarksTag = "BookmarksTag";
 const string GUIStateParams::MovingDomainTrackCameraTag = "MovingDomainTrackCameraTag";
 const string GUIStateParams::MovingDomainTrackRenderRegionsTag = "MovingDomainTrackRenderRegionsTag";
-const string GUIStateParams::SelectedImportDataTypeTag = "SelectedImportDataType";
+const string GUIStateParams::SelectedImportDataTypeTag = "SelectedImportDataTypeTag";
+const string GUIStateParams::SelectedImportDataFilesTag = "SelectedImportDataFilesTag";
+const string GUIStateParams::trashTag= "trashTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetRelativePathsTag = "DataSetRelativePathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";
@@ -279,7 +281,7 @@ string GUIStateParams::GetOpenDataSetFormat(string dataSetName) const
     return (dsParams->GetFormat());
 }
 
-void GUIStateParams::InsertOpenDateSet(string dataSetName, string format, const vector<string> &paths, const vector<string> &relPaths)
+void GUIStateParams::InsertOpenDataSet(string dataSetName, string format, const vector<string> &paths, const vector<string> &relPaths)
 {
     m_openDataSets->Remove(dataSetName);
 
@@ -389,12 +391,4 @@ void GUIStateParams::SetFlowDimensionality(int nDims)
         nDims = 2;
 
     SetValueLong(_flowDimensionalityTag, _flowDimensionalityTag, nDims);
-}
-
-std::string GUIStateParams::GetCurrentImportDataType() const {
-    return GetValueString(SelectedImportDataTypeTag, "wrf");
-}
-
-void GUIStateParams::SetCurrentImportDataType(std::string& type) {
-    SetValueString(SelectedImportDataTypeTag, "User selected datatype to import", type);
 }

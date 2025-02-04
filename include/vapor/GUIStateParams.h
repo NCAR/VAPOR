@@ -68,9 +68,9 @@ public:
 
     string GetOpenDataSetFormat(string dataSetName) const;
 
-    void RemoveOpenDateSet(string dataSetName) { m_openDataSets->Remove(dataSetName); }
+    void RemoveOpenDataSet(string dataSetName) { m_openDataSets->Remove(dataSetName); }
 
-    void InsertOpenDateSet(string dataSetName, string format, const std::vector<string> &paths, const std::vector<string> &relPaths={});
+    void InsertOpenDataSet(string dataSetName, string format, const std::vector<string> &paths, const std::vector<string> &relPaths={});
 
     //! method sets the current session path
     //! \param[in] path string
@@ -141,9 +141,6 @@ public:
         string defaultv;
         return (GetValueString(m_proj4StringTag, defaultv));
     }
-
-    std::string GetCurrentImportDataType() const;
-    void SetCurrentImportDataType(std::string& type);
 
     class DataSetParam : public ParamsBase {
     public:
@@ -222,6 +219,8 @@ public:
     static const string MovingDomainTrackCameraTag;
     static const string MovingDomainTrackRenderRegionsTag;
     static const string SelectedImportDataTypeTag;
+    static const string SelectedImportDataFilesTag;
+    static const string trashTag;
 
 private:
     MouseModeParams *m_mouseModeParams;

@@ -324,6 +324,10 @@ set (SRCS
     #VRadioButtons.cpp
     #PDatasetImportTypeSelector.h
     #PDatasetImportTypeSelector.cpp
+    VRadioButton.h
+    VRadioButton.cpp
+    PRadioButton.h
+    PRadioButton.cpp
     PImportData.h
     PImportData.cpp
     ImportPanel.h

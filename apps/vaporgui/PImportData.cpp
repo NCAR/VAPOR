@@ -4,84 +4,98 @@
 #include <vapor/ParamsBase.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/GUIStateParams.h>
+#include <vapor/AnimationParams.h>
 #include <QRadioButton>
 #include "VLineItem.h"
 #include "VPushButton.h"
 #include "DatasetTypeLookup.h"
 #include "PButton.h"
 #include "PFileSelector.h"
+#include "PRadioButton.h"
+#include "PGroup.h"
+#include "vapor/ControlExecutive.h"
+#include "vapor/FileUtils.h"
 
-PImportData::PImportData() : PWidget("", _group = new VGroup()) {
+//PImportData::PImportData() : PWidget("", _group = new PGroup()) {
+//PImportData::PImportData() : PGroup() {
+//PImportData::PImportData(VAPoR::ControlExec* ce) : PSection("Import Files"), _ce(ce) {
+PImportData::PImportData(VAPoR::ControlExec* ce) : PWidget("", _group = new PGroup()), _ce(ce) {
+    AlwaysEnable();
+    _group->AlwaysEnable();
     std::vector<std::string> types = GetDatasetTypeDescriptions();
     for (auto type : types) {
-        QRadioButton* rb = new QRadioButton(QString::fromStdString(type), this);
-        rb->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-        _group->Add(new VLineItem("", rb));
-        connect(rb, &QRadioButton::toggled, this, [this, rb](bool checked) {if (checked) radioButtonChecked(rb);});
+        PRadioButton* rb = new PRadioButton(GUIStateParams::SelectedImportDataTypeTag, type);
+        _group->Add(rb);
+        auto gsp = _ce->GetParams<GUIStateParams>();
+        std::cout << "Format " << gsp->GetValueString(GUIStateParams::SelectedImportDataTypeTag, "NetCDF-CF") << std::endl;
+        rb->AlwaysEnable();
+        //rb->setEnabled(true);
+        //rb->Update(gsp);
     }
     
-    //QHBoxWidget* importer = new QHBoxWidget();
-    //VHBoxWidget* importer = new VHBoxWidget();
-    //_group->Add(importer);
-
-    _group->Add(new PButton("PImport Files", [](VAPoR::ParamsBase *p){} ));
-    _selector = new PFileOpenSelector("", "Import Files" );
+    _selector = new PFilesOpenSelector(GUIStateParams::SelectedImportDataFilesTag, "Import Files" );
+    //_selector->setEnabled(true);
+    _selector->AlwaysEnable();
+    connect(_selector, &PFilesOpenSelector::filesSelected, this, &PImportData::importDataset);
     _group->Add(_selector);
 
-    VPushButton* pb = new VPushButton("Import Files");
-    pb->layout()->setAlignment(Qt::AlignRight);
-    _group->Add(pb);
+    ParamsMgr* pm = _ce->GetParamsMgr();
+    if (pm == nullptr) std::cout << "pm is null" << std::endl;
+    else std::cout << "pm is not null" << std::endl;
+    auto gsp = _ce->GetParams<GUIStateParams>();
+    //std::cout << "Format " << gsp->GetValueString(GUIStateParams::SelectedImportDataTypeTag, "NetCDF-CF") << std::endl;
+    std::cout << "Enabled1 " << isEnabled() << std::endl;
+    Update(gsp);
+    std::cout << "Enabled2 " << isEnabled() << std::endl;
 }
 
-// Need a universal way to import data from both here as well as MainForm.
-//void PImportData::importDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction, string name)
-//{
-//    _paramsMgr->BeginSaveStateGroup("Import Dataset");
-//    if (name.empty()) name = _getDataSetName(files[0], existsAction);
-//    int rc = _controlExec->OpenData(files, name, format);
-//    if (rc < 0) {
-//        _paramsMgr->EndSaveStateGroup();
-//        MSG_ERR("Failed to load data");
-//        return;
-//    }
-//
-//    auto gsp = _controlExec->GetParams<GUIStateParams>();
-//    DataStatus *ds = _controlExec->GetDataStatus();
-//
-//    gsp->InsertOpenDateSet(name, format, files);
-//    GetAnimationParams()->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
-//
-//    if (_sessionNewFlag) {
-//        NavigationUtils::ViewAll(_controlExec);
-//        NavigationUtils::SetHomeViewpoint(_controlExec);
-//        gsp->SetProjectionString(ds->GetMapProjection());
-//    }
-//
-//    _sessionNewFlag = false;
-//    _paramsMgr->EndSaveStateGroup();
+//void PImportData::Update() {
+//    _selector->Update(getParams(), getParamsMgr(), getDataMgr);    
 //}
 
-void PImportData::updateGUI() const {
-    _selector->Update(getParams());
-    std::string type = dynamic_cast<GUIStateParams*>(getParams())->GetCurrentImportDataType();
-    QList<QRadioButton*> rbs = _group->findChildren<QRadioButton*>();
-    for (auto rb : rbs) {
-        std::cout << "foo " << rb->text().toStdString() << std::endl;
-        if (rb->text().toStdString() == type) rb->setChecked(true);
-        else rb->setChecked(false);
+// This is a wart.  We need a better/universal way to import data from both here as well as MainForm.
+void PImportData::importDataset() {
+    ParamsMgr* pm = _ce->GetParamsMgr();
+    pm->BeginSaveStateGroup("Import Dataset");
+    //if (name.empty()) name = _getDataSetName(files[0], existsAction);
+    std::vector<std::string> files = getParams()->GetValueStringVec(GUIStateParams::SelectedImportDataFilesTag);
+    std::string name = FileUtils::Basename(files[0]);
+    std::string format = getParams()->GetValueString(GUIStateParams::SelectedImportDataTypeTag, "");
+    format = DatasetTypeShortName(format);
+    std::cout << "Open data " << files[0] << " " << name << " " << format << std::endl;
+    int rc = _ce->OpenData(files, name, format);
+    if (rc < 0) {
+        pm->EndSaveStateGroup();
+        //MSG_ERR("Failed to load data");
+        std::cout << "Failed to load data" << std::endl;
+        return;
     }
+
+    auto gsp = _ce->GetParams<GUIStateParams>();
+    DataStatus *ds = _ce->GetDataStatus();
+
+    gsp->InsertOpenDataSet(name, format, files);
+    //GetAnimationParams()->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
+    //pm->GetParams(AnimationParams::GetClassType())->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
+    auto ap = _ce->GetParams<AnimationParams>();
+    ap->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
+
+    //if (_sessionNewFlag) {
+    //    NavigationUtils::ViewAll(_controlExec);
+    //    NavigationUtils::SetHomeViewpoint(_controlExec);
+    //    gsp->SetProjectionString(ds->GetMapProjection());
+    //}
+
+    //_sessionNewFlag = false;
+    pm->EndSaveStateGroup();
 }
 
-//void PImportData::radioButtonClicked(std::string& type) { 
-void PImportData::radioButtonChecked(QRadioButton* rb) { 
-    //std::cout << "type " << type << std::endl;
-    //GUIStateParams* p = dynamic_cast<GUIStateParams *>(getParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-    std::string type = rb->text().toStdString();
-    std::cout << type << std::endl;
-    GUIStateParams* p = dynamic_cast<GUIStateParams *>(getParams());
-    p->SetCurrentImportDataType(type);
+void PImportData::updateGUI() const {
+    //_selector->setEnabled(true);
+    _group->Update(getParams());
+    _selector->Update(getParams());
 }
 
 #include "PSection.h"
 
-PImportDataSection::PImportDataSection() : PWidgetWrapper(new PSection("Data", {new PImportData})) {}
+//PImportDataSection::PImportDataSection() : PWidgetWrapper(new PSection("Data", {new PImportData})) {}

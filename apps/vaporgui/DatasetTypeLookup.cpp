@@ -1,4 +1,5 @@
 #include "DatasetTypeLookup.h"
+#include "vapor/ParamsBase.h"
 
 //const std::unordered_map<std::string, std::string> datasets =
 namespace {
@@ -15,6 +16,7 @@ namespace {
 }
 
 const std::map<std::string, std::string>& GetDatasets() {
+    for (auto d : datasets) std::cout << "GetDatasets " << d.first << " " << d.second << std::endl;
     return datasets;
 }
 
@@ -28,7 +30,8 @@ std::string DatasetTypeDescriptiveName(const std::string& type) {
     //if (datasets.find(type) != datasets.end()) return datasets[type];
     //else return type;
     auto it = datasets.find(type);
-    return (it != datasets.end()) ? it->second : type;
+    //return (it != datasets.end()) ? it->second : type;
+    return (it != datasets.end()) ? it->second : "No description for "+type;
 }
 
 std::string DatasetTypeShortName(const std::string& descriptiveName) {

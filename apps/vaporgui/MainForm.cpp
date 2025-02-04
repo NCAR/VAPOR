@@ -146,12 +146,15 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _animationController = new AnimationController(_controlExec);
     connect(_animationController, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
 
-    auto leftPanel = new LeftPanel(_controlExec);
+    leftPanel = new LeftPanel(_controlExec);
     const int dpi = qApp->desktop()->logicalDpiX();
     leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     leftPanel->setMinimumHeight(500);
+    //leftPanel->setEnabled(true);
     _dependOnLoadedData_insert(leftPanel);
     _updatableElements.insert(leftPanel);
+    //_guiStateParamsUpdatableElements.insert(leftPanel);
+    //_guiStateParamsUpdatableElements.insert(_timeStepEdit);
 
     _status = new ProgressStatusBar;
     _status->hide();
@@ -593,7 +596,7 @@ retryLoad:
     if (loadData)
         checkSessionDatasetsExist();
     else
-        for (auto name : gsp->GetOpenDataSetNames()) gsp->RemoveOpenDateSet(name);
+        for (auto name : gsp->GetOpenDataSetNames()) gsp->RemoveOpenDataSet(name);
     _paramsMgr->UndoRedoClear();
     _sessionNewFlag = false;
     _stateChangeFlag = false;
@@ -647,7 +650,7 @@ void MainForm::checkSessionDatasetsExist()
     for (const auto & dataset : sp->GetOpenDataSetNames()) {
         vector<string> paths = sp->GetOpenDataSetPaths(dataset);
         if (!std::all_of(paths.begin(), paths.end(), [](string path) { return FileUtils::Exists(path); })) {
-            sp->RemoveOpenDateSet(dataset);
+            sp->RemoveOpenDataSet(dataset);
 
             string err = "This session links to the dataset " + dataset + " which was not found. Please open this dataset if it is in a different location";
             string details;
@@ -774,7 +777,7 @@ void MainForm::importDataset(const std::vector<string> &files, string format, Da
     auto gsp = _controlExec->GetParams<GUIStateParams>();
     DataStatus *ds = _controlExec->GetDataStatus();
 
-    gsp->InsertOpenDateSet(name, format, files);
+    gsp->InsertOpenDataSet(name, format, files);
     GetAnimationParams()->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
 
     if (_sessionNewFlag) {
@@ -1019,15 +1022,23 @@ void MainForm::updateUI()
 {
     VAssert(_controlExec);
 
+    //leftPanel->setEnabled(true);
+    leftPanel->Update();
     _widgetsEnabled = !GetStateParams()->GetOpenDataSetNames().empty();
-    for (auto &e : _dependOnLoadedData) e->setEnabled(_widgetsEnabled);
+    //for (auto &e : _dependOnLoadedData) e->setEnabled(_widgetsEnabled);
 
     for (const auto &e : _updatableElements)
         e->Update();
 
+
     auto sp= _widgetsEnabled ? GetStateParams() : nullptr;
-    for (const auto &e : _guiStateParamsUpdatableElements)
+    for (const auto &e : _guiStateParamsUpdatableElements) {
+        std::cout << "updateUI() " << e << std::endl;
         e->Update(sp, _paramsMgr);
+    }
+
+    leftPanel->UpdateImportPanel();
+    //leftPanel->Update();
 
     _timeStepEdit->Update(GetStateParams()); // TODO this needs special handling for animation playback
     updateMenus();

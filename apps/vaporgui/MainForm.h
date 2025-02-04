@@ -46,6 +46,8 @@ class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
 
+class LeftPanel;
+
 using namespace VAPoR;
 using std::optional;
 
@@ -88,6 +90,8 @@ private:
     QAction *_captureEndImageAction;
     QAction *_stepForwardAction;
     QAction *_stepBackAction;
+
+    LeftPanel* leftPanel;
 
     bool     _animationCapture = false;
     int      _progressSavedFB = -1;

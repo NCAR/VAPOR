@@ -55,6 +55,33 @@ void PFileSelector::buttonClicked()
 
 bool PFileSelector::requireParamsMgr() const { return _syncWithSettings; }
 
+void PFilesOpenSelector::buttonClicked() {
+    string defaultPath;
+    string selectedFile = getParamsString();
+
+    if (_syncWithSettings) {
+        // Too hardcoded in settings params to bother
+    } else {
+        if (Wasp::FileUtils::Exists(selectedFile))
+            defaultPath = Wasp::FileUtils::Dirname(selectedFile);
+        else
+            defaultPath = Wasp::FileUtils::HomeDir();
+    }
+
+    QStringList qSelectedPaths = selectPaths(defaultPath);
+    if (qSelectedPaths.isEmpty()) return;
+
+    std::vector<std::string> paths;
+    paths.reserve(qSelectedPaths.size());
+    for (const QString& qPath : qSelectedPaths) paths.push_back(qPath.toStdString());
+    getParams()->SetValueStringVec(getTag(), "", paths);
+    emit filesSelected();
+    //setParamsStringVec(paths);
+}
+
+QStringList PFilesOpenSelector::selectPaths(const std::string &defaultPath) const { return QFileDialog::getOpenFileNames(nullptr, "Select a file", QString::fromStdString(defaultPath), _fileTypeFilter); }
+QString PFilesOpenSelector::selectPath(const std::string &defaultPath) const { return QFileDialog::getOpenFileName(nullptr, "Select a file", QString::fromStdString(defaultPath), _fileTypeFilter); }
+
 QString PFileOpenSelector::selectPath(const std::string &defaultPath) const { return QFileDialog::getOpenFileName(nullptr, "Select a file", QString::fromStdString(defaultPath), _fileTypeFilter); }
 
 QString PFileSaveSelector::selectPath(const std::string &defaultPath) const { return QFileDialog::getSaveFileName(nullptr, "Select save file", QString::fromStdString(defaultPath), _fileTypeFilter); }
