@@ -151,7 +151,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     leftPanel->setMinimumHeight(500);
     //leftPanel->setEnabled(true);
-    _dependOnLoadedData_insert(leftPanel);
+    //_dependOnLoadedData_insert(leftPanel);
     _updatableElements.insert(leftPanel);
     //_guiStateParamsUpdatableElements.insert(leftPanel);
     //_guiStateParamsUpdatableElements.insert(_timeStepEdit);
@@ -1022,23 +1022,13 @@ void MainForm::updateUI()
 {
     VAssert(_controlExec);
 
-    //leftPanel->setEnabled(true);
-    leftPanel->Update();
     _widgetsEnabled = !GetStateParams()->GetOpenDataSetNames().empty();
-    //for (auto &e : _dependOnLoadedData) e->setEnabled(_widgetsEnabled);
+    for (auto &e : _dependOnLoadedData) e->setEnabled(_widgetsEnabled);
 
-    for (const auto &e : _updatableElements)
-        e->Update();
-
+    for (const auto &e : _updatableElements) e->Update();
 
     auto sp= _widgetsEnabled ? GetStateParams() : nullptr;
-    for (const auto &e : _guiStateParamsUpdatableElements) {
-        std::cout << "updateUI() " << e << std::endl;
-        e->Update(sp, _paramsMgr);
-    }
-
-    leftPanel->UpdateImportPanel();
-    //leftPanel->Update();
+    for (const auto &e : _guiStateParamsUpdatableElements) e->Update(sp, _paramsMgr);
 
     _timeStepEdit->Update(GetStateParams()); // TODO this needs special handling for animation playback
     updateMenus();

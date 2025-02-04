@@ -27,14 +27,10 @@ PImportData::PImportData(VAPoR::ControlExec* ce) : PWidget("", _group = new PGro
         PRadioButton* rb = new PRadioButton(GUIStateParams::SelectedImportDataTypeTag, type);
         _group->Add(rb);
         auto gsp = _ce->GetParams<GUIStateParams>();
-        std::cout << "Format " << gsp->GetValueString(GUIStateParams::SelectedImportDataTypeTag, "NetCDF-CF") << std::endl;
         rb->AlwaysEnable();
-        //rb->setEnabled(true);
-        //rb->Update(gsp);
     }
     
     _selector = new PFilesOpenSelector(GUIStateParams::SelectedImportDataFilesTag, "Import Files" );
-    //_selector->setEnabled(true);
     _selector->AlwaysEnable();
     connect(_selector, &PFilesOpenSelector::filesSelected, this, &PImportData::importDataset);
     _group->Add(_selector);
@@ -43,7 +39,6 @@ PImportData::PImportData(VAPoR::ControlExec* ce) : PWidget("", _group = new PGro
     if (pm == nullptr) std::cout << "pm is null" << std::endl;
     else std::cout << "pm is not null" << std::endl;
     auto gsp = _ce->GetParams<GUIStateParams>();
-    //std::cout << "Format " << gsp->GetValueString(GUIStateParams::SelectedImportDataTypeTag, "NetCDF-CF") << std::endl;
     std::cout << "Enabled1 " << isEnabled() << std::endl;
     Update(gsp);
     std::cout << "Enabled2 " << isEnabled() << std::endl;
@@ -91,7 +86,6 @@ void PImportData::importDataset() {
 }
 
 void PImportData::updateGUI() const {
-    //_selector->setEnabled(true);
     _group->Update(getParams());
     _selector->Update(getParams());
 }

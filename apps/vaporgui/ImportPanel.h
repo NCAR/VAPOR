@@ -34,15 +34,3 @@ public:
     ImportPanel(VAPoR::ControlExec *ce);
     void Update();
 };
-
-class PCheckBox;
-class TestPanel : public VContainer, public Updatable {
-    Q_OBJECT
-    PCheckbox* _cb;
-    VAPoR::ControlExec* _ce;
-    QSplitter* _splitter;
-
-public:
-    TestPanel(VAPoR::ControlExec* ce);
-    void Update();
-};

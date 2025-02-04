@@ -17,7 +17,6 @@ class LeftPanel : public QTabWidget, public Updatable {
 public:
     LeftPanel(ControlExec *ce);
     void Update() override;
-    void UpdateImportPanel();
 
 private:
     void tabChanged(int i);

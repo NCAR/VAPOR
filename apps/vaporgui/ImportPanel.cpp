@@ -16,11 +16,8 @@ ImportPanel::ImportPanel(VAPoR::ControlExec *ce)
   _ce(ce)
 {
     _importer = new PImportData(_ce);
-    //_splitter->addWidget(_importer = new PImportData(_ce));
     _splitter->addWidget(_importer);
     _splitter->setEnabled(true);
-    //_importer->setEnabled(true); nothing
-    //setEnabled(true); nothing
 
     _splitter->addWidget(_renList = new RendererList(_ce));
     _splitter->addWidget(_inspectorRouter = new VRouter);
@@ -35,7 +32,6 @@ void ImportPanel::Update()
     GUIStateParams *guiParams = (GUIStateParams *)_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
 
     _importer->Update(guiParams);
-    // _importer->setEnabled(true); nothing
 
     _renList->Update();
 
@@ -46,16 +42,4 @@ void ImportPanel::Update()
         _inspectorRouter->Show(_renInspector);
         _renInspector->Update();
     }
-}
-
-#include "PCheckbox.h"
-TestPanel::TestPanel(VAPoR::ControlExec* ce) : VContainer(_splitter = new QSplitter(Qt::Orientation::Vertical)), _ce(ce) {
-    _cb = new PCheckbox(GUIStateParams::trashTag, "trash");
-    _splitter->addWidget(_cb);
-}
-
-void TestPanel::Update() {
-    GUIStateParams *guiParams = (GUIStateParams *)_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
-    bool onoff = guiParams->GetValueLong(GUIStateParams::trashTag, false);
-    std::cout << "Updating TestPanel " << onoff << std::endl;
 }
