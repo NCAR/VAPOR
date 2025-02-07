@@ -23,10 +23,11 @@ class PImportData : public PWidget {
 //class PImportData : public PSection {
     Q_OBJECT
 
-    PGroup* _group;
+    PGroup*             _group;
+    VSection*           _section;
     PFilesOpenSelector* _selector;
-    void importDataset();
     VAPoR::ControlExec* _ce;
+    void importDataset();
 
 public:
     PImportData(VAPoR::ControlExec* ce);

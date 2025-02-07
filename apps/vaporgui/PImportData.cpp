@@ -35,13 +35,9 @@ PImportData::PImportData(VAPoR::ControlExec* ce) : PWidget("", _group = new PGro
     connect(_selector, &PFilesOpenSelector::filesSelected, this, &PImportData::importDataset);
     _group->Add(_selector);
 
-    ParamsMgr* pm = _ce->GetParamsMgr();
-    if (pm == nullptr) std::cout << "pm is null" << std::endl;
-    else std::cout << "pm is not null" << std::endl;
-    auto gsp = _ce->GetParams<GUIStateParams>();
-    std::cout << "Enabled1 " << isEnabled() << std::endl;
-    Update(gsp);
-    std::cout << "Enabled2 " << isEnabled() << std::endl;
+    //ParamsMgr* pm = _ce->GetParamsMgr();
+    //auto gsp = _ce->GetParams<GUIStateParams>();
+    //Update(gsp);
 }
 
 //void PImportData::Update() {
