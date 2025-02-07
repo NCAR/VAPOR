@@ -145,19 +145,9 @@ void PTFEditor::updateGUI() const
 void PTFEditor::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr) {
     PWidget::Update(params, paramsMgr, dataMgr);
     if (_expandable==true) {
-        GUIStateParams* p = dynamic_cast<GUIStateParams *>(paramsMgr->GetParams(GUIStateParams::GetClassType()));
-        vector<string> editors = p->GetExpandedPTFEditors();
         std::string name, inst;
         getExpandedPTFEditorInfo(name, inst);
 
-        // If an expanded editor exists in the GUIStateParams, create and show a new expanded PTFEditor
-        if (_expandedPTFEditor==nullptr) {
-            auto it = std::find(editors.begin(), editors.end(), name);
-            if(it != editors.end()) showExpandedPTFEditor();
-        }
-
-        // Once the expanded PTFEditor is created, set GUIStateParams to record it as belonging to the
-        // currently active render instance, then Update it with the currently active params
         if (_expandedPTFEditor!=nullptr) {
             _expandedPTFEditor->setWindowTitle(QString::fromStdString(name));
             _expandedPTFEditor->Update(params, paramsMgr, dataMgr);
@@ -184,24 +174,18 @@ void PTFEditor::showExpandedPTFEditor() {
         if (_showColormapBasedOnParam==true) _expandedPTFEditor->ShowColormapBasedOnParam(_showColormapBasedOnParamTag, _showColormapBasedOnParamValue);
         if (_showOpacityBasedOnParam==true) _expandedPTFEditor->ShowOpacityBasedOnParam(_showOpacityBasedOnParamTag, _showOpacityBasedOnParamValue);
 
-        GUIStateParams* p = dynamic_cast<GUIStateParams *>(getParamsMgr()->GetParams(GUIStateParams::GetClassType()));
-        std::string name, type;
-        getExpandedPTFEditorInfo(name, type);
-        p->SetExpandedPTFEditor(type);
-
         _expandedPTFEditor->setAttribute(Qt::WA_ShowWithoutActivating);
         _expandedPTFEditor->setAttribute(Qt::WA_DeleteOnClose);
     }
     _expandedPTFEditor->raise();
+
+    // It was originally thought to store the open expanded PTFEditors in GUIStateParams.
+    // This lead to problems and the team agreed that it's not important to restore them if
+    // they were expanded in a session, so we manually call Update here.
+    Update(getParams(), getParamsMgr(), getDataMgr());
 }
 
 void PTFEditor::closeExpandedPTFEditor() {
-    VAPoR::ParamsMgr *   pm = getParamsMgr();
-    GUIStateParams* p = dynamic_cast<GUIStateParams *>(pm->GetParams(GUIStateParams::GetClassType()));
-    std::string name, type;
-    getExpandedPTFEditorInfo(name, type);
-    p->RemoveExpandedPTFEditor(type);
-
     _expandedPTFEditor->close();
     _expandedPTFEditor=nullptr;
 }
