@@ -14,12 +14,23 @@ class VRouter;
 class QSplitter;
 //class PDatasetImportTypeSelector;
 class PImportData;
+class PGroup;
+class VGroup;
+class PSection;
+class VSection;
+class VSectionGroup;
 
-class ImportPanel : public VContainer, public Updatable {
+//class ImportPanel : public VContainer, public Updatable {
+class ImportPanel : public QWidget, public Updatable {
     Q_OBJECT
     QSplitter *_splitter;
 
     VAPoR::ControlExec *_ce;
+
+    //PGroup* _group;
+    VGroup* _group;
+    //VSection* _section;
+    VSectionGroup* _section;
 
     RendererList *_renList;
     VRouter *_inspectorRouter;
@@ -32,5 +43,5 @@ class ImportPanel : public VContainer, public Updatable {
 
 public:
     ImportPanel(VAPoR::ControlExec *ce);
-    void Update();
+    void Update() override;
 };

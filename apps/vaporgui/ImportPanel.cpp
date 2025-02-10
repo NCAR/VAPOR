@@ -8,38 +8,53 @@
 #include "PDatasetImportTypeSelector.h"
 #include "VRouter.h"
 #include "PImportData.h"
+#include "PGroup.h"
+#include "PSection.h"
 
 using namespace VAPoR;
 
-ImportPanel::ImportPanel(VAPoR::ControlExec *ce)
-: VContainer(_splitter = new QSplitter(Qt::Orientation::Vertical)),
-  _ce(ce)
+ImportPanel::ImportPanel(VAPoR::ControlExec *ce) : _ce(ce)
+//: VContainer(_splitter = new QSplitter(Qt::Orientation::Vertical)), _ce(ce)
 {
-    _importer = new PImportData(_ce);
-    _splitter->addWidget(_importer);
-    _splitter->setEnabled(true);
+    //_section = new PSection("Import Data", {_importer = new PImportData(_ce)});
+    //_section->AlwaysEnable();
+    _section = new VSectionGroup("Import Data", {_importer = new PImportData(_ce)});
+    //_section->layout()->add(_importer = new PImportData(_ce));
 
-    _splitter->addWidget(_renList = new RendererList(_ce));
-    _splitter->addWidget(_inspectorRouter = new VRouter);
-    _splitter->setChildrenCollapsible(false);
+    QVBoxLayout *l = new QVBoxLayout;
+    l->setContentsMargins(0, 0, 0, 0);
+    setLayout(l);
+    layout()->addWidget(_section);
+    l->addStretch();
 
-    _inspectorRouter->Add(_renInspector = new RendererInspector(_ce));
-    _inspectorRouter->Add(_dataInspector = new DatasetInspector(_ce));
+    //_importer = new PImportData(_ce);
+    //_splitter->addWidget(_importer);
+    //_splitter->setEnabled(true);
+
+    //_splitter->addWidget(_renList = new RendererList(_ce));
+    //_splitter->addWidget(_inspectorRouter = new VRouter);
+    //_splitter->setChildrenCollapsible(false);
+
+    //_inspectorRouter->Add(_renInspector = new RendererInspector(_ce));
+    //_inspectorRouter->Add(_dataInspector = new DatasetInspector(_ce));
 }
 
 void ImportPanel::Update()
 {
     GUIStateParams *guiParams = (GUIStateParams *)_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
-
     _importer->Update(guiParams);
+    
+    //GUIStateParams *guiParams = (GUIStateParams *)_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
 
-    _renList->Update();
+    //_importer->Update(guiParams);
 
-    if (!guiParams->GetActiveDataset().empty() && guiParams->GetActiveRendererInst().empty()) {
-        _inspectorRouter->Show(_dataInspector);
-        _dataInspector->Update();
-    } else {
-        _inspectorRouter->Show(_renInspector);
-        _renInspector->Update();
-    }
+    //_renList->Update();
+
+    //if (!guiParams->GetActiveDataset().empty() && guiParams->GetActiveRendererInst().empty()) {
+    //    _inspectorRouter->Show(_dataInspector);
+    //    _dataInspector->Update();
+    //} else {
+    //    _inspectorRouter->Show(_renInspector);
+    //    _renInspector->Update();
+    //}
 }
