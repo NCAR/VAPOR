@@ -320,10 +320,6 @@ set (SRCS
     ViewpointToolbar.h
     CheckForUpdateUI.cpp
     CheckForUpdateUI.h
-    #VRadioButtons.h
-    #VRadioButtons.cpp
-    #PDatasetImportTypeSelector.h
-    #PDatasetImportTypeSelector.cpp
     VRadioButton.h
     VRadioButton.cpp
     PRadioButton.h

@@ -37,10 +37,10 @@ LeftPanel::LeftPanel(ControlExec *ce) : _ce(ce)
 
 void LeftPanel::Update()
 {
-    bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
-    if (noDatasetLoaded && currentIndex()!=0) {
-        return;
-    }
+    //bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
+    //if (noDatasetLoaded && currentIndex()!=0) {
+    //    return;
+    //}
     std::cout << "Updating " << currentIndex() << std::endl;
     _uTabs[currentIndex()]->Update();
 }
@@ -54,10 +54,10 @@ void LeftPanel::UpdateImportMenu() {
 
 void LeftPanel::tabChanged(int i)
 {
-    bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
-    if (noDatasetLoaded && currentIndex()!=0) {
-        return;
-    }
+    //bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
+    //if (noDatasetLoaded && currentIndex()!=0) {
+    //    return;
+    //}
     std::cout << "Updating " << currentIndex() << std::endl;
     _uTabs[i]->Update();
 }
