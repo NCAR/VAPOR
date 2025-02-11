@@ -32,9 +32,9 @@ ses.Show()
 # Hover over the visualizer to see the full controls.
 #
 # %%
-from jupyter_vapor_widget import *
+from vapor import widget
 
-viz = VaporVisualizerWidget(ses)
+viz = widget.VaporVisualizerWidget(ses)
 viz
 
 # %% [md]
@@ -42,6 +42,8 @@ viz
 # ## Add an interactive iso value slider using **ipywidgets**
 #
 # %%
+import ipywidgets
+
 tf = ren.GetPrimaryTransferFunction()
 dataRange = tf.GetMinMaxMapValue()
 
@@ -49,10 +51,10 @@ def sliderChanged(change):
     ren.SetIsoValues([change.new])
     viz.Render(fast=True)
 
-slider = widgets.FloatSlider(value=ren.GetIsoValues()[0], min=dataRange[0], max=dataRange[1], step=(dataRange[1]-dataRange[0])/100)
+slider = ipywidgets.FloatSlider(value=ren.GetIsoValues()[0], min=dataRange[0], max=dataRange[1], step=(dataRange[1]-dataRange[0])/100)
 slider.observe(sliderChanged, names='value')
 
-widgets.VBox([
+ipywidgets.VBox([
     viz,
-    widgets.HBox([widgets.Label("Iso value:"), slider])
+    ipywidgets.HBox([ipywidgets.Label("Iso value:"), slider])
 ])

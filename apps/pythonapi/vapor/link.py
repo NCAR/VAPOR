@@ -1,4 +1,10 @@
-import cppyy
+import wurlitzer, re
+with wurlitzer.pipes() as (out, err):
+    import cppyy
+print(out.read(), end="")
+print("".join(l for l in err.read().splitlines() if "(ignoring for now)" not in l), end="")
+
+
 from . import config
 
 for path in config.GetIncludeDirs():
