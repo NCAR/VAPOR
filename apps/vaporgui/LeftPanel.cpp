@@ -1,6 +1,6 @@
 #include "LeftPanel.h"
 #include "RenderersPanel.h"
-#include "ImportPanel.h"
+#include "ImportTab.h"
 #include "AnnotationEventRouter.h"
 #include "AnimationTab.h"
 #include "ViewpointTab.h"
@@ -17,47 +17,45 @@ LeftPanel::LeftPanel(ControlExec *ce) : _ce(ce)
         scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         scrollArea->setWidget(w);
         scrollArea->setWidgetResizable(true);
+        //scrollArea->setEnabled(false);
         addTab(scrollArea, t);
         _uTabs.push_back(w);
     };
    
-    _importPanel = new ImportPanel(ce); 
-    add(_importPanel, "Import");
-    //add(new ImportPanel(ce), "Import");
-    //RenderersPanel* rp = new RenderersPanel(ce);
-    //rp->setEnabled(false);
-    //add(rp, "Renderers2");
+    _importTab = new ImportTab(ce); 
+    connect(_importTab, &ImportTab::dataImported, this, &LeftPanel::_goToRendererTab);
+    add(_importTab, "Import");
     add(new RenderersPanel(ce), "Renderers");
     add(new AnnotationEventRouter(ce), "Annotation");
     add(new AnimationTab(ce), "Animation");
     add(new ViewpointTab(ce), "Viewpoint");
+
+    for (int i=1 ; i<count(); ++i) setTabEnabled(i, false);
+    setTabEnabled(0,true);
+    setCurrentIndex(0);
 
     connect(this, &QTabWidget::currentChanged, this, &LeftPanel::tabChanged);
 }
 
 void LeftPanel::Update()
 {
-    //bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
-    //if (noDatasetLoaded && currentIndex()!=0) {
-    //    return;
-    //}
-    std::cout << "Updating " << currentIndex() << std::endl;
+    bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
+    if (noDatasetLoaded) return;
+    for (int i = 0; i < count(); ++i) setTabEnabled(i, true);
+    setTabEnabled(currentIndex(),true);
     _uTabs[currentIndex()]->Update();
 }
 
 void LeftPanel::UpdateImportMenu() {
-    //_uTabs[0]->Update();
     setEnabled(true);
-    _importPanel->setEnabled(true);
-    _importPanel->Update();
+    _importTab->setEnabled(true);
+    _importTab->Update();
+    setCurrentIndex(0);
 }
 
 void LeftPanel::tabChanged(int i)
 {
-    //bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
-    //if (noDatasetLoaded && currentIndex()!=0) {
-    //    return;
-    //}
-    std::cout << "Updating " << currentIndex() << std::endl;
     _uTabs[i]->Update();
 }
+
+void LeftPanel::_goToRendererTab() { setCurrentIndex(1); }

@@ -4,15 +4,14 @@
 #include "VaporFwd.h"
 #include <common.h>
 
-class ImportPanel;
+class ImportTab;
 class TestPanel;
 
 class LeftPanel : public QTabWidget, public Updatable {
     Q_OBJECT
     ControlExec *_ce;
     std::vector<Updatable *> _uTabs;
-    ImportPanel* _importPanel;
-    TestPanel* _testPanel;
+    ImportTab* _importTab;
 
 public:
     LeftPanel(ControlExec *ce);
@@ -21,4 +20,5 @@ public:
 
 private:
     void tabChanged(int i);
+    void _goToRendererTab();
 };

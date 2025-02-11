@@ -1,5 +1,4 @@
 #include "PImportData.h"
-//#include "VRadioButtons.h"
 #include "VGroup.h"
 #include <vapor/ParamsBase.h>
 #include <vapor/ParamsMgr.h>
@@ -17,18 +16,13 @@
 #include "vapor/FileUtils.h"
 #include "vapor/NavigationUtils.h"
 
-//PImportData::PImportData() : PWidget("", _group = new PGroup()) {
-//PImportData::PImportData() : PGroup() {
-//PImportData::PImportData(VAPoR::ControlExec* ce) : PSection("Import Files"), _ce(ce) {
 PImportData::PImportData(VAPoR::ControlExec* ce) : PWidget("", _group = new PGroup()), _ce(ce) {
     AlwaysEnable();
     _group->AlwaysEnable();
     std::vector<std::string> types = GetDatasetTypeDescriptions();
     for (auto type : types) {
-        std::cout << "Adding type " << type << std::endl;
         PRadioButton* rb = new PRadioButton(GUIStateParams::SelectedImportDataTypeTag, type);
         _group->Add(rb);
-        auto gsp = _ce->GetParams<GUIStateParams>();
         rb->AlwaysEnable();
     }
     
@@ -41,10 +35,6 @@ PImportData::PImportData(VAPoR::ControlExec* ce) : PWidget("", _group = new PGro
     //auto gsp = _ce->GetParams<GUIStateParams>();
     //Update(gsp);
 }
-
-//void PImportData::Update() {
-//    _selector->Update(getParams(), getParamsMgr(), getDataMgr);    
-//}
 
 // This is a wart.  We need a better/universal way to import data from both here as well as MainForm.
 void PImportData::importDataset() {
@@ -79,6 +69,7 @@ void PImportData::importDataset() {
     //}
 
     //_sessionNewFlag = false;
+    emit dataImported();
     pm->EndSaveStateGroup();
 }
 

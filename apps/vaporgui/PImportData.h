@@ -36,6 +36,9 @@ public:
 protected:
     void updateGUI() const override;
 
+signals:
+    void dataImported();
+
 //private slots:
 //    void radioButtonChecked(QRadioButton* rb);
 };

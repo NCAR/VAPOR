@@ -5,14 +5,19 @@
 
 class PImportData;
 
-class ImportPanel : public QWidget, public Updatable {
+class ImportTab : public QWidget, public Updatable {
     Q_OBJECT
 
     VAPoR::ControlExec *_ce;
-
     PImportData *_importer;
 
 public:
-    ImportPanel(VAPoR::ControlExec *ce);
+    ImportTab(VAPoR::ControlExec *ce);
     void Update() override;
+
+public slots:
+    void DataImported();
+
+signals:
+    void dataImported();
 };

@@ -326,8 +326,8 @@ set (SRCS
     PRadioButton.cpp
     PImportData.h
     PImportData.cpp
-    ImportPanel.h
-    ImportPanel.cpp
+    ImportTab.h
+    ImportTab.cpp
     DatasetTypeLookup.h
     DatasetTypeLookup.cpp
 
