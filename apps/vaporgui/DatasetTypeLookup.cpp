@@ -2,8 +2,6 @@
 #include "vapor/ParamsBase.h"
 
 namespace {
-    //const std::map<std::string, std::string> datasets =
-    //const std::unordered_map<std::string, std::string> datasets =
     const std::vector<std::pair<std::string, std::string>> datasets =
     {
         { "wrf"   , "WRF-ARW" },
@@ -16,10 +14,7 @@ namespace {
     };
 }
 
-//const std::map<std::string, std::string>& GetDatasets() {
-//const std::unordered_map<std::string, std::string>& GetDatasets() {
 const std::vector<std::pair<std::string, std::string>>& GetDatasets() {
-    for (auto d : datasets) std::cout << "GetDatasets " << d.first << " " << d.second << std::endl;
     return datasets;
 }
 
@@ -33,21 +28,12 @@ std::string DatasetTypeDescriptiveName(const std::string& type) {
     auto it = std::find_if(datasets.begin(), datasets.end(), [&type](const auto& pair) {
         return pair.first==type;
     });
-    return (it != datasets.end()) ? it->second : "No description for type";
-    //if (datasets.find(type) != datasets.end()) return datasets[type];
-    //else return type;
-    //auto it = datasets.find(type);
-    //return (it != datasets.end()) ? it->second : type;
-    //return (it != datasets.end()) ? it->second : "No description for "+type;
+    return (it != datasets.end()) ? it->second : "No description for given data type " + type ;
 }
 
 std::string DatasetTypeShortName(const std::string& descriptiveName) {
-    static std::unordered_map<std::string, std::string> descriptiveToShort;
-    //static std::map<std::string, std::string> descriptiveToShort;
-    for (const auto& pair : datasets) {
-        descriptiveToShort[pair.second] = pair.first;
-    }
-
-    if (descriptiveToShort.find(descriptiveName) != descriptiveToShort.end()) return descriptiveToShort[descriptiveName];
-    else return descriptiveName;
+    auto it = std::find_if(datasets.begin(), datasets.end(), [&descriptiveName](const auto& pair) {
+        return pair.second==descriptiveName;
+    });
+    return (it != datasets.end()) ? it->first : "No shortName for given description " + descriptiveName;
 }

@@ -151,7 +151,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     leftPanel->setMinimumHeight(500);
     _dependOnLoadedData_insert(leftPanel);
-    //_updatableElements.insert(leftPanel);
+    _updatableElements.insert(leftPanel);
 
     _status = new ProgressStatusBar;
     _status->hide();
@@ -1030,7 +1030,7 @@ void MainForm::updateUI()
         e->Update();
 
     auto sp= _widgetsEnabled ? GetStateParams() : nullptr;
-    for (const auto &e : _guiStateParamsUpdatableElements) 
+    for (const auto &e : _guiStateParamsUpdatableElements)
         e->Update(sp, _paramsMgr);
 
     _timeStepEdit->Update(GetStateParams()); // TODO this needs special handling for animation playback

@@ -23,6 +23,7 @@ RenderersPanel::RenderersPanel(VAPoR::ControlExec *ce)
 
 void RenderersPanel::Update()
 {
+    setEnabled(true);
     GUIStateParams *guiParams = (GUIStateParams *)_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
 
     _renList->Update();

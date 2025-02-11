@@ -131,10 +131,6 @@ void RendererList::Update()
     _lw->clear();
 
     auto datasets = guiParams->GetOpenDataSetNames();
-    if (!datasets.size()) {
-        setEnabled(false);
-        return;
-    }
     for (int i = 0; i < datasets.size(); i++) {
         auto dataset = datasets[i];
         if (i != 0) {

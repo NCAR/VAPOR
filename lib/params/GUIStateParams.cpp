@@ -48,7 +48,6 @@ const string GUIStateParams::MovingDomainTrackCameraTag = "MovingDomainTrackCame
 const string GUIStateParams::MovingDomainTrackRenderRegionsTag = "MovingDomainTrackRenderRegionsTag";
 const string GUIStateParams::SelectedImportDataTypeTag = "SelectedImportDataTypeTag";
 const string GUIStateParams::SelectedImportDataFilesTag = "SelectedImportDataFilesTag";
-const string GUIStateParams::trashTag= "trashTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetRelativePathsTag = "DataSetRelativePathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";

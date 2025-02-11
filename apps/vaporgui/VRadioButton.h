@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <QWidget>
+//#include <QWidget>
 #include <QRadioButton>
 
 #include "VHBoxWidget.h"
