@@ -14,7 +14,8 @@ ImportPanel::ImportPanel(VAPoR::ControlExec *ce) : _ce(ce)
     QVBoxLayout *l = new QVBoxLayout;
     l->setContentsMargins(0, 0, 0, 0);
 
-    //l->addWidget(new VSectionGroup("Tips", {
+    l->addWidget(new VSectionGroup("Import Data", {_importer = new PImportData(_ce)}));
+
     VSectionGroup *sg = new VSectionGroup("Tips", {
         new VHyperlink(
             "How to convert Non-Compliant NetCDF Files?",
@@ -33,13 +34,9 @@ ImportPanel::ImportPanel(VAPoR::ControlExec *ce) : _ce(ce)
             "https://vapor.discourse.group/"
         ),
     });
-    //sg->setCurrentIndex(0);
     sg->setEnabled(true);
     l->addWidget(sg);
 
-    l->addWidget(new VSectionGroup("Import Data", {_importer = new PImportData(_ce)}));
-
-    l->addWidget(new VSectionGroup("Tips", { new VLabel("foo")}));
     l->addStretch(1);
     setLayout(l);
 }

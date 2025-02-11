@@ -4,11 +4,13 @@
 #include "AnnotationEventRouter.h"
 #include "AnimationTab.h"
 #include "ViewpointTab.h"
+#include "vapor/ControlExecutive.h"
+#include "vapor/GUIStateParams.h"
 
 #include <QScrollArea>
 #include <iostream>
 
-LeftPanel::LeftPanel(ControlExec *ce)
+LeftPanel::LeftPanel(ControlExec *ce) : _ce(ce)
 {
     auto add = [this](auto &&w, auto &&t) constexpr {
         QScrollArea *scrollArea = new QScrollArea;
@@ -18,8 +20,13 @@ LeftPanel::LeftPanel(ControlExec *ce)
         addTab(scrollArea, t);
         _uTabs.push_back(w);
     };
-    
-    add(new ImportPanel(ce), "Import");
+   
+    _importPanel = new ImportPanel(ce); 
+    add(_importPanel, "Import");
+    //add(new ImportPanel(ce), "Import");
+    RenderersPanel* rp = new RenderersPanel(ce);
+    rp->setEnabled(false);
+    add(rp, "Renderers2");
     add(new RenderersPanel(ce), "Renderers");
     add(new AnnotationEventRouter(ce), "Annotation");
     add(new AnimationTab(ce), "Animation");
@@ -30,10 +37,25 @@ LeftPanel::LeftPanel(ControlExec *ce)
 
 void LeftPanel::Update()
 {
+    bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
+    if (noDatasetLoaded && currentIndex()!=0) {
+        return;
+    }
     _uTabs[currentIndex()]->Update();
+}
+
+void LeftPanel::UpdateImportMenu() {
+    //_uTabs[0]->Update();
+    setEnabled(true);
+    _importPanel->setEnabled(true);
+    _importPanel->Update();
 }
 
 void LeftPanel::tabChanged(int i)
 {
+    bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
+    if (noDatasetLoaded && currentIndex()!=0) {
+        return;
+    }
     _uTabs[i]->Update();
 }

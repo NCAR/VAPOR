@@ -150,11 +150,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     const int dpi = qApp->desktop()->logicalDpiX();
     leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     leftPanel->setMinimumHeight(500);
-    //leftPanel->setEnabled(true);
-    //_dependOnLoadedData_insert(leftPanel);
-    _updatableElements.insert(leftPanel);
-    //_guiStateParamsUpdatableElements.insert(leftPanel);
-    //_guiStateParamsUpdatableElements.insert(_timeStepEdit);
+    _dependOnLoadedData_insert(leftPanel);
+    //_updatableElements.insert(leftPanel);
 
     _status = new ProgressStatusBar;
     _status->hide();
@@ -792,7 +789,9 @@ void MainForm::importDataset(const std::vector<string> &files, string format, Da
 
 void MainForm::showImportDatasetGUI(string format)
 {
-    static map<string, string> prompts = GetDatasets();
+    //static map<string, string> prompts = GetDatasets();
+    //static unordered_map<string, string> prompts = GetDatasets();
+    static vector<pair<string, string>> prompts = GetDatasets();
 
     string defaultPath;
     auto openDatasets = GetStateParams()->GetOpenDataSetNames();
@@ -801,7 +800,7 @@ void MainForm::showImportDatasetGUI(string format)
     else
         defaultPath = GetSettingsParams()->GetMetadataDir();
 
-    auto files = getUserFileSelection(prompts[format], defaultPath, "", format!="vdc");
+    auto files = getUserFileSelection(DatasetTypeDescriptiveName(format), defaultPath, "", format!="vdc");
     if (files.empty()) return;
 
     importDataset(files, format, DatasetExistsAction::Prompt);
@@ -1025,10 +1024,14 @@ void MainForm::updateUI()
     _widgetsEnabled = !GetStateParams()->GetOpenDataSetNames().empty();
     for (auto &e : _dependOnLoadedData) e->setEnabled(_widgetsEnabled);
 
-    for (const auto &e : _updatableElements) e->Update();
+    leftPanel->UpdateImportMenu();
+
+    for (const auto &e : _updatableElements) 
+        e->Update();
 
     auto sp= _widgetsEnabled ? GetStateParams() : nullptr;
-    for (const auto &e : _guiStateParamsUpdatableElements) e->Update(sp, _paramsMgr);
+    for (const auto &e : _guiStateParamsUpdatableElements) 
+        e->Update(sp, _paramsMgr);
 
     _timeStepEdit->Update(GetStateParams()); // TODO this needs special handling for animation playback
     updateMenus();

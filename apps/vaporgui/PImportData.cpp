@@ -15,6 +15,7 @@
 #include "PGroup.h"
 #include "vapor/ControlExecutive.h"
 #include "vapor/FileUtils.h"
+#include "vapor/NavigationUtils.h"
 
 //PImportData::PImportData() : PWidget("", _group = new PGroup()) {
 //PImportData::PImportData() : PGroup() {
@@ -24,6 +25,7 @@ PImportData::PImportData(VAPoR::ControlExec* ce) : PWidget("", _group = new PGro
     _group->AlwaysEnable();
     std::vector<std::string> types = GetDatasetTypeDescriptions();
     for (auto type : types) {
+        std::cout << "Adding type " << type << std::endl;
         PRadioButton* rb = new PRadioButton(GUIStateParams::SelectedImportDataTypeTag, type);
         _group->Add(rb);
         auto gsp = _ce->GetParams<GUIStateParams>();
@@ -66,15 +68,14 @@ void PImportData::importDataset() {
     DataStatus *ds = _ce->GetDataStatus();
 
     gsp->InsertOpenDataSet(name, format, files);
-    //GetAnimationParams()->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
-    //pm->GetParams(AnimationParams::GetClassType())->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
+    //AnimationParams ap = ((AnimationParams *)_paramsMgr->GetParams(AnimationParams::GetClassType()));
     auto ap = _ce->GetParams<AnimationParams>();
     ap->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
 
     //if (_sessionNewFlag) {
-    //    NavigationUtils::ViewAll(_controlExec);
-    //    NavigationUtils::SetHomeViewpoint(_controlExec);
-    //    gsp->SetProjectionString(ds->GetMapProjection());
+        NavigationUtils::ViewAll(_ce);
+        NavigationUtils::SetHomeViewpoint(_ce);
+        gsp->SetProjectionString(ds->GetMapProjection());
     //}
 
     //_sessionNewFlag = false;

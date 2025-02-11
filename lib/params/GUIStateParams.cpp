@@ -343,6 +343,7 @@ void GUIStateParams::_init() {
     SetActiveVizName("");
     SetValueLong(MovingDomainTrackCameraTag, "", true);
     SetValueLong(MovingDomainTrackRenderRegionsTag, "", true);
+    SetValueString(SelectedImportDataTypeTag, "Default dataset to import", "WRF-ARW") ;
 }
 
 void GUIStateParams::ActiveRenderer::SetActiveRenderer(string vizWin, string renderType, string renderInst)
