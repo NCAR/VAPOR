@@ -21,6 +21,5 @@ protected:
     void updateGUI() const override;
 
 private slots:
-    //void radioButtonStateChanged(std::string input);
     void radioButtonStateChanged();
 };

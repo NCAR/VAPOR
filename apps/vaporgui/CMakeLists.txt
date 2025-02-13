@@ -8,6 +8,8 @@ set (SRCS
 	AnnotationEventRouter.cpp
 	ViewpointTab.cpp
 	ViewpointTab.h
+	ExportTab.cpp
+	ExportTab.h
 	TwoDDataEventRouter.cpp
 	TwoDDataEventRouter.h
 	WireFrameEventRouter.cpp
@@ -259,8 +261,8 @@ set (SRCS
     PCameraControlsSection.h
     PProjectionStringSection.cpp
     PProjectionStringSection.h
-    PFramebufferSettingsSection.cpp
-    PFramebufferSettingsSection.h
+    POutputResolutionSection.cpp
+    POutputResolutionSection.h
     VLabel.cpp
     VLabel.h
     PTimestepInput.cpp
@@ -326,6 +328,18 @@ set (SRCS
     PRadioButton.cpp
     PImportData.h
     PImportData.cpp
+    #PCaptureSection.h
+    #PCaptureSection.cpp
+    #CaptureTab.h
+    #CaptureTab.cpp
+	#QRangeSliderTextCombo2.cpp
+	#QRangeSliderTextCombo2.h
+    PTimeRangeSelector.cpp
+    PTimeRangeSelector.h
+    #TimeRangeSelector.h
+    #TimeRangeSelector.cpp
+    PCaptureWidget.h
+    PCaptureWidget.cpp
     ImportTab.h
     ImportTab.cpp
     DatasetTypeLookup.h

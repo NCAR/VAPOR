@@ -4,15 +4,13 @@
 //#include "PGroup.h"
 #include "PSection.h"
 
+namespace VAPoR {
+    class ControlExec;
+}
 class VGroup;
 class PGroup;
 class QRadioButton;
 class PFilesOpenSelector;
-//class VAPoR::ControlExecutive;
-//class ControlExecutive;
-namespace VAPoR {
-    class ControlExec;
-}
 
 //! \class PImportData
 //! Creates VRadioButtons synced with the paramsdatabase using the PWidget interface.

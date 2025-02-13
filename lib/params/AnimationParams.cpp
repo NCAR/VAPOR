@@ -37,6 +37,7 @@ const string AnimationParams::_startTimestepTag = "StartTimestep";
 const string AnimationParams::_endTimestepTag = "EndTimestep";
 const string AnimationParams::_currentTimestepTag = "CurrentTimestep";
 const string AnimationParams::_playBackwardsTag = "PlayBackwards";
+const string AnimationParams::CaptureModeTag= "CaptureModeTag";
 
 //
 // Register class with object factory!!!
@@ -76,4 +77,5 @@ void AnimationParams::_init()
     SetEndTimestep(10000000);
     SetCurrentTimestep(0);
     SetMaxFrameRate(10);
+    SetValueString(AnimationParams::CaptureModeTag, "Set default value for image capture mode", "Current Frame");
 }

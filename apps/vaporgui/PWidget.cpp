@@ -59,11 +59,6 @@ PWidget *PWidget::EnableBasedOnParam(const std::string &tag, int whenEqualTo)
     return this;
 }
 
-PWidget *PWidget::AlwaysEnable() {
-    _alwaysEnabled = true;
-    return this;
-}
-
 PWidget *PWidget::SetTooltip(const std::string &text)
 {
     QWidget::setToolTip(QString::fromStdString(text));

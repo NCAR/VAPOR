@@ -6,6 +6,7 @@ namespace VAPoR {
 class ControlExec;
 }
 class PTransformWidget;
+class PProjectionStringSection;
 class VLabel;
 class QTreeWidget;
 class VMetadataTree;
@@ -16,6 +17,7 @@ class DatasetInspector : public QTabWidget {
     VAPoR::ControlExec *_ce;
     QWidget *_dataTab, *_metaTab;
     PTransformWidget *_tw;
+    PProjectionStringSection* _projectionSection;
     VLabel *_name, *_type, *_path;
     VMetadataTree *_metaAttrs, *_metaDims, *_metaVars, *_metaCoords;
 

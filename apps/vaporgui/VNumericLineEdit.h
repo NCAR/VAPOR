@@ -23,6 +23,7 @@ class VNumericLineEdit : public VStringLineEdit {
 
 protected:
     explicit VNumericLineEdit(int decimals = 5);
+    //explicit VNumericLineEdit(int decimals = 0);
 
 public:
     //! If the line edit is numeric, get the number of digits of the number being displayed

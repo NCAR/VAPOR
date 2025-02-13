@@ -1,7 +1,7 @@
 #include "RenderersPanel.h"
 #include <QSplitter>
-#include <vapor/GUIStateParams.h>
-#include <vapor/ControlExecutive.h>
+#include "vapor/GUIStateParams.h"
+#include "vapor/ControlExecutive.h"
 #include "RendererList.h"
 #include "RendererInspector.h"
 #include "DatasetInspector.h"

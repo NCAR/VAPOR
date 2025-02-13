@@ -6,7 +6,7 @@
 #include "PWidgets.h"
 #include "PProjectionStringSection.h"
 #include "PCameraControlsSection.h"
-#include "PFramebufferSettingsSection.h"
+#include "POutputResolutionSection.h"
 
 using namespace VAPoR;
 
@@ -37,7 +37,7 @@ ViewpointTab::ViewpointTab(ControlExec *ce) : _controlExec(ce)
     _pg = new PGroup({
         new PCameraControlsSection(_controlExec),
         _movingDomainSection = new PMovingDomainSettings(ce),
-        new PFramebufferSettingsSection(_controlExec),
+        new POutputResolutionSection(_controlExec),
         proj = new PProjectionStringSection(_controlExec),
     });
 

@@ -18,7 +18,7 @@ class PWidget : public UWidget {
     VAPoR::ParamsBase *_params = nullptr;
     VAPoR::ParamsMgr * _paramsMgr = nullptr;
     VAPoR::DataMgr *   _dataMgr = nullptr;
-    //const std::string  _tag;
+    const std::string  _tag;
 
     bool        _showBasedOnParam = false;
     std::string _showBasedOnParamTag = "";
@@ -27,8 +27,6 @@ class PWidget : public UWidget {
     bool        _enableBasedOnParam = false;
     std::string _enableBasedOnParamTag = "";
     int         _enableBasedOnParamValue;
-
-    bool        _alwaysEnabled = false;
 
     bool _dynamicUpdateIsOn = false;
     bool _dynamicUpdateInsideGroup = false;
@@ -42,7 +40,6 @@ class PWidget : public UWidget {
     std::function<std::string(void *)>               _getterString;
 
 public:
-    const std::string  _tag;
     PWidget(const std::string &tag, QWidget *widget);
     //! Follows the Vapor GUI update function convention. Update the element.
     void Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr) override;
@@ -50,10 +47,10 @@ public:
     //! tag must be a key referencing a long value in the Params Database. If the associated value is equal
     //! to whenEqualTo, the current widget will be shown/enabled, and hidden/disabled otherwise.
     PWidget *ShowBasedOnParam(const std::string &tag, int whenEqualTo = true);
+    //PWidget *ShowBasedOnParam(const std::string &tag, std::string &whenEqualTo);
     //! @copydoc PWidget::ShowBasedOnParam()
     PWidget *EnableBasedOnParam(const std::string &tag, int whenEqualTo = true);
-    //! Always enable this PWidget regardless of application state
-    PWidget *AlwaysEnable();
+    //PWidget *EnableBasedOnParam(const std::string &tag, std::string &whenEqualTo);
     //! Wrapping QWidget::setToolTip in case we want to add additional functionality such as automatic tool-tips
     //! without having to refactor.
     PWidget *SetTooltip(const std::string &text);
