@@ -21,6 +21,7 @@ requirements:
     - unzip=6.0
     - jupytext=1.13.8 # Generate notebooks
     - doxygen=1.9.1
+    - esbuild
     # Both
     # (Needs to be specified manually in both rather than just in host because otherwise conda will install multiple versions of some packages and break the install)
     # ==========================================
@@ -51,6 +52,7 @@ requirements:
     - cppyy=2.2 #=2.2.0 If this is in build conda will load an old clang compiler which fails to compile macOS headers
     - jupyter-vapor-widget=1.0 # [not os.environ.get('DEBUG_BUILD', '1').lower() in ('true', '1', '')]
     - vapor-maps=1.0 # [not os.environ.get('DEBUG_BUILD', '1').lower() in ('true', '1', '')]
+    - wurlitzer
     # Both
     - python=3.9 # pin_compatible('python') selects python 3.10 which is not compatible
     - {{ pin_compatible('numpy') }}

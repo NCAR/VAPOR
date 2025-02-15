@@ -400,8 +400,11 @@ void ControlExec::SetCacheSize(size_t sizeMB) { _dataStatus->SetCacheSize(sizeMB
 
 int ControlExec::OpenData(const std::vector<string> &files, string dataSetName, string typ)
 {
+    _paramsMgr->BeginSaveStateGroup("Open Dataset");
+
     vector<string> options = {"-project_to_pcs", "-vertical_xform"};
     if (GetParams<SettingsParams>()->GetAutoStretchEnabled()) options.push_back("-auto_stretch_z");
+    // This is a minor bug if the first dataset has an empty proj string however this has been a bug for as long as I can tell and it is not worth fixing at the moment
     if (!GetParams<GUIStateParams>()->GetProjectionString().empty()) STLUtils::AppendTo(options, {"-proj4", GetParams<GUIStateParams>()->GetProjectionString()});
 
     SetDataCacheDirty(dataSetName);
@@ -409,6 +412,7 @@ int ControlExec::OpenData(const std::vector<string> &files, string dataSetName, 
     int rc = _dataStatus->Open(files, options, dataSetName, typ);
     if (rc < 0) {
         SetErrMsg("Failure to open data set of type \"%s\"", typ.c_str());
+        _paramsMgr->EndSaveStateGroup();
         return -1;
     }
 
@@ -425,6 +429,7 @@ int ControlExec::OpenData(const std::vector<string> &files, string dataSetName, 
             _dataStatus->Close(dataSetName);
             _paramsMgr->RemoveDataMgr(dataSetName);
             SetErrMsg("Failure to initialize application renderer \"%s\"", appRenderParams[i]->GetName().c_str());
+            _paramsMgr->EndSaveStateGroup();
             return -1;
         }
     }
@@ -433,6 +438,12 @@ int ControlExec::OpenData(const std::vector<string> &files, string dataSetName, 
 
     if (STLUtils::Contains(options, string("-auto_stretch_z"))) _autoStretchExtents(dataSetName);
 
+    // vvvv NOPs if existing used
+    _dataCachedProjStr = _dataStatus->GetMapProjection();
+    GetParams<GUIStateParams>()->SetProjectionString(_dataCachedProjStr);
+    // ^^^^
+
+    _paramsMgr->EndSaveStateGroup();
     return rc;
 }
 
