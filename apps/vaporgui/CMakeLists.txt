@@ -50,8 +50,6 @@ set (SRCS
 	VolumeIsoEventRouter.h
 	ParamsMenuItems.cpp
 	ParamsMenuItems.h
-	TFEditor.cpp
-	TFEditor.h
 	TFOpacityWidget.cpp
 	TFOpacityWidget.h
 	TFColorWidget.cpp
