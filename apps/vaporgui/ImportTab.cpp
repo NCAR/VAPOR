@@ -2,19 +2,21 @@
 #include "VLabel.h"
 #include "VSection.h"
 #include "PImportData.h"
+#include "MainForm.h"
 #include <vapor/GUIStateParams.h>
 #include <vapor/ControlExecutive.h>
 #include <QVBoxLayout>
 
 using namespace VAPoR;
 
-ImportTab::ImportTab(VAPoR::ControlExec *ce) : _ce(ce)
+//ImportTab::ImportTab(VAPoR::ControlExec *ce) : _ce(ce)
+ImportTab::ImportTab(VAPoR::ControlExec *ce, MainForm *mf) : _ce(ce)
 {
 
     QVBoxLayout *l = new QVBoxLayout;
     l->setContentsMargins(0, 0, 0, 0);
 
-    l->addWidget(new VSectionGroup("Import Data", {_importer = new PImportData(_ce)}));
+    l->addWidget(new VSectionGroup("Import Data", {_importer = new PImportData(_ce, mf)}));
     connect(_importer, &PImportData::dataImported, this, &ImportTab::DataImported);
 
     VSectionGroup *sg = new VSectionGroup("Tips", {

@@ -7,11 +7,12 @@
 #include "ExportTab.h"
 #include "vapor/ControlExecutive.h"
 #include "vapor/GUIStateParams.h"
+#include "MainForm.h"
 
 #include <QScrollArea>
 #include <iostream>
 
-LeftPanel::LeftPanel(ControlExec *ce) : _ce(ce)
+LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce), _mf(mf)
 {
     auto add = [this](auto &&w, auto &&t) constexpr {
         QScrollArea *scrollArea = new QScrollArea;
@@ -23,7 +24,7 @@ LeftPanel::LeftPanel(ControlExec *ce) : _ce(ce)
         _uTabs.push_back(w);
     };
    
-    _importTab = new ImportTab(ce); 
+    _importTab = new ImportTab(_ce, _mf); 
     connect(_importTab, &ImportTab::dataImported, this, &LeftPanel::_goToRendererTab);
     add(_importTab, "Import");
     add(new RenderersPanel(ce), "Render");

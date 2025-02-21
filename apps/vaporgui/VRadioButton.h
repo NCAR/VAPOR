@@ -18,12 +18,9 @@ class VRadioButton : public VHBoxWidget {
     Q_OBJECT
 
 public:
-    VRadioButton(bool value = false);
-
+    VRadioButton(const std::string &label, bool value = false);
     void SetValue(bool value);
-
     bool GetValue() const;
-
     std::string GetText() const;
 
 private:

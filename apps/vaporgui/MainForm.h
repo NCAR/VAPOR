@@ -60,6 +60,8 @@ public:
 
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
     static QWidget* Instance() { assert(_instance); return _instance; }
+    friend class PImportData;
+    friend class PCaptureWidget;
 
 protected:
     void Render(bool fast=false);

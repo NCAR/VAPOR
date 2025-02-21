@@ -324,8 +324,8 @@ set (SRCS
     CheckForUpdateUI.h
     VRadioButton.h
     VRadioButton.cpp
-    PRadioButton.h
-    PRadioButton.cpp
+    PRadioButtons.h
+    PRadioButtons.cpp
     PImportData.h
     PImportData.cpp
     #PCaptureSection.h

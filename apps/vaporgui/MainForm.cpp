@@ -146,7 +146,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _animationController = new AnimationController(_controlExec);
     connect(_animationController, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
 
-    leftPanel = new LeftPanel(_controlExec);
+    leftPanel = new LeftPanel(_controlExec, this);
     const int dpi = qApp->desktop()->logicalDpiX();
     leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     leftPanel->setMinimumHeight(500);

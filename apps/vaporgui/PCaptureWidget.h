@@ -7,17 +7,20 @@ class ControlExec;
 }
 
 class VSection;
-class PRadioButton;
+class PRadioButtons;
 //class TimeRangeSelector;
 class PTimeRangeSelector;
 class QLabel;
 class VLabel;
 
 class PCaptureWidget : public PWidget {
+    Q_OBJECT
+
     ControlExec *_ce;
     VSection *_section;
-    PRadioButton *_currentFrameButton, *_rangeButton;
-    PTimeRangeSelector *_slider;
+    //PRadioButton *_currentFrameButton, *_rangeButton;
+    PRadioButtons *_radioButtons;
+    PTimeRangeSelector *_timeSelector;
     VLabel *_startTime, *_endTime;
 
 public:
@@ -26,4 +29,7 @@ public:
 
 protected:
     virtual void updateGUI() const;
+
+private slots:
+    void _capture();
 };

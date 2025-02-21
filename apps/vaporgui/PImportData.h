@@ -11,6 +11,7 @@ class VGroup;
 class PGroup;
 class QRadioButton;
 class PFilesOpenSelector;
+class MainForm;
 
 //! \class PImportData
 //! Creates VRadioButtons synced with the paramsdatabase using the PWidget interface.
@@ -25,10 +26,11 @@ class PImportData : public PWidget {
     VSection*           _section;
     PFilesOpenSelector* _selector;
     VAPoR::ControlExec* _ce;
+    MainForm* _mf;
     void importDataset();
 
 public:
-    PImportData(VAPoR::ControlExec* ce);
+    PImportData(VAPoR::ControlExec* ce, MainForm *mf);
     //void Update() override;
 
 protected:

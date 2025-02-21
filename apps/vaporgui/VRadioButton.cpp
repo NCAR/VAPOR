@@ -1,9 +1,9 @@
 #include "VRadioButton.h"
 #include <QRadioButton>
 
-VRadioButton::VRadioButton(bool checked) : VHBoxWidget()
+VRadioButton::VRadioButton(const std::string &label, bool checked) : VHBoxWidget()
 {
-    _radioButton = new QRadioButton;
+    _radioButton = new QRadioButton(QString::fromStdString(label), nullptr);
     SetValue(checked);
     layout()->addWidget(_radioButton);
 
@@ -18,5 +18,7 @@ void VRadioButton::SetValue(bool checked)
 }
 
 bool VRadioButton::GetValue() const { return _radioButton->isChecked(); }
+
+std::string VRadioButton::GetText() const { return _radioButton->text().toStdString(); }
 
 void VRadioButton::emitRadioButtonChanged(bool checked) { emit ValueChanged(checked); }
