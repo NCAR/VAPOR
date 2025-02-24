@@ -68,23 +68,21 @@ void TFIsoValueMap::_paintEvent(QPainter &p)
 {
     p.fillRect(rect(), Qt::lightGray);
 
-    if (getRenderParams()) {
-        for (int i = 0; i < _isoValues.size(); i++) {
-            float v = _isoValues[i];
-            bool  invalid = false;
-            if (v < 0 || v > 1) {
-                v = glm::clamp(v, 0.f, 1.f);
-                invalid = true;
-            }
-            drawControl(p, controlQPositionForValue(v), i == _selectedId, invalid);
+    for (int i = 0; i < _isoValues.size(); i++) {
+        float v = _isoValues[i];
+        bool  invalid = false;
+        if (v < 0 || v > 1) {
+            v = glm::clamp(v, 0.f, 1.f);
+            invalid = true;
         }
+        drawControl(p, controlQPositionForValue(v), i == _selectedId, invalid);
+    }
 
-        if (_isoValues.size() == 0) {
-            QFont font = getFont();
-            font.setPixelSize(rect().height());
-            p.setFont(font);
-            p.drawText(rect(), Qt::AlignCenter, "doubleclick to add isovalues");
-        }
+    if (_isoValues.size() == 0) {
+        QFont font = getFont();
+        font.setPixelSize(rect().height());
+        p.setFont(font);
+        p.drawText(rect(), Qt::AlignCenter, "doubleclick to add isovalues");
     }
 }
 
