@@ -68,6 +68,7 @@ void TFMappingRangeSelector::_rangeChangedBegin()
     if (!_rParams || !_paramsMgr) return;
 
     _paramsMgr->BeginSaveStateGroup("Change tf mapping range");
+    _insideIntermediateChangeGroup = true;
 }
 
 void TFMappingRangeSelector::_rangeChangedIntermediate(float left, float right)
@@ -86,7 +87,9 @@ void TFMappingRangeSelector::_rangeChanged(float left, float right)
     if (!_rParams || !_paramsMgr) return;
 
     _rParams->GetMapperFunc(_getVariableName())->setMinMaxMapValue(left, right);
-    _paramsMgr->EndSaveStateGroup();
+    if (_insideIntermediateChangeGroup)
+        _paramsMgr->EndSaveStateGroup();
+    _insideIntermediateChangeGroup = false;
 }
 
 void TFMappingRangeSelector::_sliderRangeChanged(float left, float right)
