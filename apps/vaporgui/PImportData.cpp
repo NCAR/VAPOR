@@ -38,44 +38,8 @@ void PImportData::importDataset() {
     std::string              format = getParams()->GetValueString(GUIStateParams::SelectedImportDataTypeTag, "");
     format = DatasetTypeShortName(format);
     _mf->importDataset(files, format);
+    emit dataImported();
     return;
-    //ParamsMgr* pm = _ce->GetParamsMgr();
-    //pm->BeginSaveStateGroup("Import Dataset");
-    //
-    //std::vector<std::string> files = getParams()->GetValueStringVec(GUIStateParams::SelectedImportDataFilesTag);
-    //
-    //std::string name = FileUtils::Basename(files[0]);
-    //std::cout << "old name " << name << std::endl;
-    //name = ControlExec::MakeStringConformant(FileUtils::Basename(name));
-    //std::cout << "new name " << name << std::endl;
-    //
-    //std::string format = getParams()->GetValueString(GUIStateParams::SelectedImportDataTypeTag, "");
-    //format = DatasetTypeShortName(format);
-
-    //int rc = _ce->OpenData(files, name, format);
-    //if (rc < 0) {
-    //    pm->EndSaveStateGroup();
-    //    //MSG_ERR("Failed to load data");
-    //    std::cout << "Failed to load data" << std::endl;
-    //    return;
-    //}
-
-    //auto gsp = _ce->GetParams<GUIStateParams>();
-    //DataStatus *ds = _ce->GetDataStatus();
-
-    //gsp->InsertOpenDataSet(name, format, files);
-    //AnimationParams* ap = _ce->GetParams<AnimationParams>();
-    //ap->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
-
-    ////if (_sessionNewFlag) {
-    //    NavigationUtils::ViewAll(_ce);
-    //    NavigationUtils::SetHomeViewpoint(_ce);
-    //    gsp->SetProjectionString(ds->GetMapProjection());
-    ////}
-
-    ////_sessionNewFlag = false;
-    //emit dataImported();
-    //pm->EndSaveStateGroup();
 }
 
 void PImportData::updateGUI() const {

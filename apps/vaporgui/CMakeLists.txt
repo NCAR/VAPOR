@@ -340,6 +340,8 @@ set (SRCS
     #TimeRangeSelector.cpp
     PCaptureWidget.h
     PCaptureWidget.cpp
+    #PCaptureLabel.h
+    #PCaptureLabel.cpp
     ImportTab.h
     ImportTab.cpp
     DatasetTypeLookup.h

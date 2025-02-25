@@ -25,6 +25,7 @@ void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAP
 
     bool paramsVisible = isShown();
     if (paramsVisible && _showBasedOnParam) paramsVisible = _showBasedOnParamValue == params->GetValueLong(_showBasedOnParamTag, 0);
+    if (!paramsVisible) paramsVisible = params->GetValueString(_showBasedOnParamTag, "") == _showBasedOnParamString;
     if (paramsVisible) {
         setVisible(true);
     } else {
@@ -35,7 +36,7 @@ void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAP
     bool enabled = isEnabled();
     if (enabled && _enableBasedOnParam)
         enabled = params->GetValueLong(_enableBasedOnParamTag, 0) == _enableBasedOnParamValue;
-    //if (enabled || _alwaysEnabled) setEnabled(true); 
+        if (!enabled) enabled = params->GetValueString(_enableBasedOnParamTag, "") == _enableBasedOnParamString; 
     setEnabled(enabled); 
 
     updateGUI();
@@ -51,11 +52,27 @@ PWidget *PWidget::ShowBasedOnParam(const std::string &tag, int whenEqualTo)
     return this;
 }
 
+PWidget *PWidget::ShowBasedOnParam(const std::string &tag, const std::string &whenEqualTo)
+{
+    _showBasedOnParam = true;
+    _showBasedOnParamTag = tag;
+    _showBasedOnParamString = whenEqualTo;
+    return this;
+}
+
 PWidget *PWidget::EnableBasedOnParam(const std::string &tag, int whenEqualTo)
 {
     _enableBasedOnParam = true;
     _enableBasedOnParamTag = tag;
     _enableBasedOnParamValue = whenEqualTo;
+    return this;
+}
+
+PWidget *PWidget::EnableBasedOnParam(const std::string &tag, const std::string &whenEqualTo)
+{
+    _enableBasedOnParam = true;
+    _enableBasedOnParamTag = tag;
+    _enableBasedOnParamString = whenEqualTo;
     return this;
 }
 

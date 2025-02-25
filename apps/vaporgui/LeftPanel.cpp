@@ -31,7 +31,7 @@ LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce), _mf(mf)
     add(new AnnotationEventRouter(ce), "Annotate");
     add(new AnimationTab(ce), "Animation");
     add(new ViewpointTab(ce), "Viewpoint");
-    add(new ExportTab(ce), "Export");
+    add(new ExportTab(ce, mf), "Export");
 
     for (int i=1 ; i<count(); ++i) setTabEnabled(i, false);
     setTabEnabled(0,true);

@@ -62,6 +62,7 @@ public:
     static QWidget* Instance() { assert(_instance); return _instance; }
     friend class PImportData;
     friend class PCaptureWidget;
+    friend class PCaptureToolbar;
 
 protected:
     void Render(bool fast=false);

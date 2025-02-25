@@ -25,6 +25,13 @@ protected:
     void updateGUI() const override;
 };
 
+class PHGroup : public PGroup {
+    Q_OBJECT
+
+public:
+    PHGroup();
+};
+
 //! \class PSubGroup
 //! Groups together PWidgets in a subgroup.
 //! \copydoc PGroup

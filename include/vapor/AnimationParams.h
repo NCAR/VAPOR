@@ -134,6 +134,10 @@ public:
     static const string _playBackwardsTag;
     static const string _currentTimestepTag;
     static const string CaptureModeTag;
+    static const string CaptureFileTypeTag;
+    static const string CaptureFileNameTag;
+    static const string CaptureFilePathTag;
+
 
 private:
     //! Put a params instance into default state with no data.

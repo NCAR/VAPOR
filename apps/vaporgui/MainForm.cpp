@@ -1061,6 +1061,7 @@ void MainForm::captureSingleImage(string filter, string defaultSuffix)
 {
     showCitationReminder();
     auto imageDir = QDir::homePath();
+    auto ap = GetAnimationParams();
 
     QFileDialog fileDialog(this, "Specify single image capture file name", imageDir, QString::fromStdString(filter));
 
@@ -1074,6 +1075,7 @@ void MainForm::captureSingleImage(string filter, string defaultSuffix)
     QStringList files = fileDialog.selectedFiles();
     if (files.isEmpty()) return;
     QString fn = files[0];
+    ap->SetValueString(AnimationParams::CaptureFileNameTag, "Capture file name", fn.toStdString());
 
     QFileInfo fileInfo(fn);
     QString   suffix = fileInfo.suffix();

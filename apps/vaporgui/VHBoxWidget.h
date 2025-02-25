@@ -19,7 +19,7 @@ class VHBoxWidget : public QFrame {
 public:
     //    virtual QSize sizeHint() const;
 
-protected:
+//protected:
     VHBoxWidget();
 
 private:
