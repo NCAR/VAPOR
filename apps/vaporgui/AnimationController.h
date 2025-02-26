@@ -43,6 +43,9 @@ signals:
     //
     void AnimationDrawSignal();
 
+    // 
+    void TimeseriesAnimationComplete();
+
 private:
     void             setCurrentTimestep(size_t ts) const;
     void             setPlay(int direction);

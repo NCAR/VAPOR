@@ -24,11 +24,12 @@ PTimeRangeSelector::PTimeRangeSelector(ControlExec* ce)
 }
 
 void PTimeRangeSelector::updateGUI() const {
+    _slider->SetRange(0, _ce->GetDataStatus()->GetTimeCoordinates().size()-1);
+
     AnimationParams* ap = dynamic_cast<AnimationParams*>(getParams());
     size_t start = ap->GetStartTimestep();
     size_t end = ap->GetEndTimestep();
     _slider->SetValue(start, end);
-    _slider->SetRange(0, _ce->GetDataStatus()->GetTimeCoordinates().size()-1);
 
     std::vector<std::string> timeCoords = _ce->GetDataStatus()->GetTimeCoordsFormatted();
     _timeStampPair->SetLabelText(timeCoords[start]);

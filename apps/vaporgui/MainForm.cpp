@@ -145,6 +145,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
 
     _animationController = new AnimationController(_controlExec);
     connect(_animationController, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
+    connect(_animationController, SIGNAL(TimeseriesAnimationComplete()), this, SLOT(endAnimCapture()));
 
     leftPanel = new LeftPanel(_controlExec, this);
     const int dpi = qApp->desktop()->logicalDpiX();
@@ -898,6 +899,7 @@ void MainForm::_setAnimationOnOff(bool on)
         _playBackwardAction->setChecked(false);
         enableAnimationWidgets(true);
 //        _App->installEventFilter(this);
+        //endAnimCapture();
     }
 }
 
@@ -921,6 +923,7 @@ void MainForm::Render(bool fast)
     _vizWinMgr->Update(fast);
     _progressEnabled = wasProgressEnabled;
     menuBar()->setEnabled(wasMenuBarEnabled);
+    std::cout << "animationCapture " << _animationCapture << std::endl;
 }
 
 bool MainForm::eventFilter(QObject *obj, QEvent *event)
@@ -1146,20 +1149,20 @@ void MainForm::capturePngSequence()
 {
     string filter = "PNG (*.png)";
     string defaultSuffix = "png";
-    selectAnimCatureOutput(filter, defaultSuffix);
+    selectAnimCaptureOutput(filter, defaultSuffix);
 }
 
 void MainForm::captureTiffSequence()
 {
     string filter = "TIFF (*.tif *.tiff)";
     string defaultSuffix = "tiff";
-    selectAnimCatureOutput(filter, defaultSuffix);
+    selectAnimCaptureOutput(filter, defaultSuffix);
 }
 
 // Begin capturing animation images.
 // Launch a file save dialog to specify the names
 // Then start file saving mode.
-void MainForm::selectAnimCatureOutput(string filter, string defaultSuffix)
+void MainForm::selectAnimCaptureOutput(string filter, string defaultSuffix)
 {
     showCitationReminder();
     auto imageDir = QDir::homePath();
@@ -1252,6 +1255,7 @@ void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
 
 void MainForm::endAnimCapture()
 {
+    std::cout << "endAnimCapture()" << std::endl;
     // Turn off capture mode for the current active visualizer (if it is on!)
     if (_capturingAnimationVizName.empty()) return;
     GUIStateParams *p = GetStateParams();

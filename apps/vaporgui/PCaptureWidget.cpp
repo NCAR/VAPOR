@@ -32,64 +32,83 @@ const std::string CaptureModes::ALL     = "All renderings";
 const std::string CaptureFileTypes::TIFF = "TIFF";
 const std::string CaptureFileTypes::PNG  = "PNG";
 
-//PCaptureLabel::PCaptureLabel() : PWidget("", _label = new VLabel("")) {}
 PCaptureLabel::PCaptureLabel() : PWidget("", _label = new QLabel("")) {
     _label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 }
 
 void PCaptureLabel::updateGUI() const {
     AnimationParams *ap = dynamic_cast<AnimationParams*>(getParams());
-    std::string capturePath = ap->GetValueString(AnimationParams::CaptureFilePathTag,"");
-    std::string captureFileName = ap->GetValueString(AnimationParams::CaptureFileNameTag,"");
-    std::string captureFileType = ap->GetValueString(AnimationParams::CaptureFileTypeTag,"");
-    //_label->SetText(capturePath + " " + captureFileName + " " + captureFileType);
-    _label->setText(QString::fromStdString(captureFileName));
-    std::cout << capturePath + " : " + captureFileName + " : " + captureFileType << std::endl;
+    std::string captureFileText = "Saved: " + ap->GetValueString(AnimationParams::CaptureFileNameTag,"");
+    std::cout << "text " << captureFileText << std::endl;
+    _label->setText(QString::fromStdString(captureFileText));
 }
 
 PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
     : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _mf(mf)
 {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    //_pGroup = new PHGroup;
-    //_hBox->layout()->addWidget(_pGroup);
-    //_pGroup->Add(new PStringDropdown(AnimationParams::CaptureFileTypeTag, {CaptureFileTypes::TIFF, CaptureFileTypes::PNG}," "));
-    //_pGroup->Add(new PCaptureLabel());
-    //_pGroup->Add(new PButton("Capture", [this](VAPoR::ParamsBase*){_captureSingleImage();}));
 
     _typeCombo = new VComboBox({CaptureFileTypes::TIFF, CaptureFileTypes::PNG});
-    VComboBox* typeCombo2 = new VComboBox({CaptureFileTypes::TIFF, CaptureFileTypes::PNG});
     _fileLabel = new VLabel("");
-    //_fileLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    //_fileLabel->setMaximumWidth(QWIDGETSIZE_MAX);
-    _captureButton = new PButton("Capture", [this](VAPoR::ParamsBase*){_captureSingleImage();});
+
+    _captureButton = new PButton("Capture\nCurrent Frame", [this](VAPoR::ParamsBase*){_captureSingleImage();});
+    // PWidget is setting _enableBasedOnParamsValue to 0, so we need to set it to a non-zero value.
+    // The default value is not being set and should be garbage.  Why/how is it being initialized to 0?
+    _captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, -1);
+    _captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::CURRENT);
+
+    _captureTimeseriesButton = new PButton("Capture\nTimeseries", [this](VAPoR::ParamsBase*){_captureTimeseries();});
+    // Need to set ShowBasedOnParam for a numeric value.  See previous comment.
+    _captureTimeseriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, -1);
+    _captureTimeseriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::RANGE);
+    
 
     QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(_hBox->layout());
     layout->addWidget(_typeCombo,1);
-    //layout->addItem((QLayoutItem*)new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
     layout->addWidget(_fileLabel,3);
     layout->addWidget(_captureButton,1);
+    layout->addWidget(_captureTimeseriesButton,1);
 }
 
 void PCaptureToolbar::updateGUI() const {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-    //_pGroup->Update(ap);
-
-    std::string type = ap->GetValueString(AnimationParams::CaptureFileTypeTag, CaptureFileTypes::TIFF);
-    _typeCombo->SetValue(type);
-    std::string file = ap->GetValueString(AnimationParams::CaptureFileNameTag, "");
-    _fileLabel->SetText(file);
+    _typeCombo->SetValue(ap->GetValueString(AnimationParams::CaptureFileTypeTag, CaptureFileTypes::TIFF));
+    _fileLabel->SetText("Saved: " + ap->GetValueString(AnimationParams::CaptureFileNameTag, ""));
     _captureButton->Update(ap);
+    _captureTimeseriesButton->Update(ap);
 }
 
 void PCaptureToolbar::_captureSingleImage() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
     string fileType = ap->GetValueString(AnimationParams::CaptureFileTypeTag, "");
-    if (fileType == "PNG") _mf->captureSingleImage("PNG (*.png)", ".png");
+    if (fileType == CaptureFileTypes::PNG) _mf->captureSingleImage("PNG (*.png)", ".png");
     else _mf->captureSingleImage("TIFF (*.tif *.tiff)", ".tiff");
 }
 
-//PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce)
+void PCaptureToolbar::_captureTimeseries() {
+    AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
+    string fileType = ap->GetValueString(AnimationParams::CaptureFileTypeTag, "");
+
+
+    std::cout << "fileType " << fileType << std::endl;
+    if (fileType == CaptureFileTypes::TIFF) _mf->captureTiffSequence();
+    else _mf->capturePngSequence();
+    _mf->_animationController->AnimationPlayForward();
+    // AnimationPlayForward returns before the animation is done playing,
+    // so we cannot call endAnimCapture() here.
+    //_mf->endAnimCapture();
+
+    // Manually setting the timestep in this way does not capture the image, nor does it apply
+    // the various changes to MainForm during AnimationPlayForward.
+    //auto start = ap->GetValueLong(AnimationParams::_startTimestepTag, 0);
+    //auto end = ap->GetValueLong(AnimationParams::_endTimestepTag, 1);
+    //for (auto i=start; i<end; i++) _mf->_animationController->SetTimeStep(i);
+
+    // The only other option I can think of to end the animation capture sequence is to
+    // call MainForm::endAnimCapture() in MainForm::_setAnimationOnOff().  Otherwise the
+    // user needs to manually click "End image capture" to end it.
+}
+
 PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, MainForm *mf)
     : PWidget("", _section = new PSection("Image(s)")), _ce(ce), _mf(mf)
 {
@@ -97,50 +116,17 @@ PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, MainForm *mf)
     _section->Add(new PRadioButtons(AnimationParams::CaptureModeTag, {CaptureModes::CURRENT, CaptureModes::RANGE}));
 
     PTimeRangeSelector *t = new PTimeRangeSelector(_ce);
-    // PWidget is setting _enableBasedOnParamsValue to 0, so we need to set it to a non-zero value.
-    // The default value is not being set and should be garbage.  Why/how is it being initialized to 0?
+    // Need to set ShowBasedOnParam for a numeric value.  See previous comment.
     t->EnableBasedOnParam(AnimationParams::CaptureModeTag, -1);
-    //t->EnableBasedOnParam(AnimationParams::CaptureModeTag, "Range");
     t->EnableBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::RANGE);
     _section->Add(t);
 
-    
-    //_section->Add(new PStringDropdown(AnimationParams::CaptureFileTypeTag, {CaptureFileTypes::TIFF, CaptureFileTypes::PNG}, "Capture file type"));
-
-    //PButton *b = new PButton("Capture", [this](VAPoR::ParamsBase*){_captureSingleImage();});
-    // DisableUndo causes segfault
-    // b->DisableUndo();
-    // Need to set ShowBasedOnParam for a numeric value.  See previous comment.
-    //b->ShowBasedOnParam(AnimationParams::CaptureModeTag, -1);
-    //b->ShowBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::CURRENT);
-    //_section->Add(b);
-    //_section->Add(new PLineItem("","",selectedFile,b));
-
     _section->Add(new PCaptureToolbar(ce, mf));
-
-    //PLineItem *line = new PLineItem("","",new PStringInput(AnimationParams::b);
-    //_section->layout()->addWidget(_currentFrameButton);
-    //_section->layout()->addWidget(_rangeButton);
 }
 
 void PCaptureWidget::updateGUI() const {    
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
     _section->Update(ap);
-}
-
-void PCaptureWidget::_captureSingleImage() {
-    AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-    string fileType = ap->GetValueString(AnimationParams::CaptureFileTypeTag, "");
-    if (fileType == "PNG") _mf->captureSingleImage("PNG (*.png)", ".png");
-    else _mf->captureSingleImage("TIFF (*.tif *.tiff)", ".tiff");
-}
-
-void PCaptureWidget::_captureTimeseries() {
-    AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-    string fileType = ap->GetValueString(AnimationParams::CaptureFileTypeTag, "");
-    if (fileType == CaptureFileTypes::TIFF) _mf->captureTiffSequence();
-    else _mf->capturePngSequence();
-    _mf->_animationController->AnimationPlayForward();
 }
 
 // private
