@@ -31,6 +31,16 @@ struct CaptureFileTypes{
     static const std::string PNG;
 };
 
+struct FileFilters{ 
+    static const std::string TIFF;
+    static const std::string PNG;
+};
+
+struct FileSuffixes{ 
+    static const std::string TIFF;
+    static const std::string PNG;
+};
+
 class PCaptureLabel : public PWidget {
     //VLabel *_label;
     QLabel *_label;

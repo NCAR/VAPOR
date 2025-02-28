@@ -145,7 +145,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
 
     _animationController = new AnimationController(_controlExec);
     connect(_animationController, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
-    connect(_animationController, SIGNAL(TimeseriesAnimationComplete()), this, SLOT(endAnimCapture()));
+    //connect(_animationController, SIGNAL(TimeseriesAnimationComplete()), this, SLOT(endAnimCapture()));
 
     leftPanel = new LeftPanel(_controlExec, this);
     const int dpi = qApp->desktop()->logicalDpiX();
@@ -923,7 +923,12 @@ void MainForm::Render(bool fast)
     _vizWinMgr->Update(fast);
     _progressEnabled = wasProgressEnabled;
     menuBar()->setEnabled(wasMenuBarEnabled);
-    std::cout << "animationCapture " << _animationCapture << std::endl;
+
+    auto ap = GetAnimationParams();
+    if (_animationCapture == true && ap->GetCurrentTimestep() == ap->GetEndTimestep() && !ap->GetPlayBackwards()) {
+        std::cout << "ending my animation" << std::endl;
+        endAnimCapture();
+    }
 }
 
 bool MainForm::eventFilter(QObject *obj, QEvent *event)
@@ -1176,10 +1181,13 @@ void MainForm::selectAnimCaptureOutput(string filter, string defaultSuffix)
     if (qsl.isEmpty()) return;
     QString fileName = qsl[0];
 
+    auto ap = GetAnimationParams();
+    ap->SetValueString(AnimationParams::CaptureTimeseriesFileNameTag, "Capture animation file name", fileName.toStdString());
+
     startAnimCapture(fileName.toStdString(), defaultSuffix);
 }
 
-void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
+bool MainForm::startAnimCapture(string baseFile, string defaultSuffix)
 {
     QString   fileName = QString::fromStdString(baseFile);
     QFileInfo fileInfo = QFileInfo(fileName);
@@ -1238,7 +1246,7 @@ void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
         msgBox.setText(msg);
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
-        if (msgBox.exec() == QMessageBox::No) { return; }
+        if (msgBox.exec() == QMessageBox::No) { return false; }
     }
 
     // Turn on "image capture mode" in the current active visualizer
@@ -1251,11 +1259,11 @@ void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
     _captureEndImageAction->setEnabled(true);
     _imageSequenceMenu->setEnabled(false);
     _singleImageMenu->setEnabled(false);
+    return true;
 }
 
 void MainForm::endAnimCapture()
 {
-    std::cout << "endAnimCapture()" << std::endl;
     // Turn off capture mode for the current active visualizer (if it is on!)
     if (_capturingAnimationVizName.empty()) return;
     GUIStateParams *p = GetStateParams();

@@ -5,43 +5,30 @@
 #include "PTimeRangeSelector.h"
 #include "VSection.h"
 #include "PSection.h"
-#include "QLabel.h"
 #include "VComboBox.h"
 #include "VLabel.h"
 #include "VHBoxWidget.h"
-#include "VPushButton.h"
-#include "VLineItem.h"
-#include "PStringDropdown.h"
-//#include "PCaptureLabel.h"
 
-#include "vapor/GUIStateParams.h"
 #include "vapor/AnimationParams.h"
-#include "vapor/ViewpointParams.h"
 #include "vapor/ControlExecutive.h"
-#include "vapor/NavigationUtils.h"
+#include "vapor/STLUtils.h"
+#include "vapor/FileUtils.h"
 
+#include <QFileDialog>
 #include <QHBoxLayout>
-#include <QLabel>
-
-typedef VAPoR::ViewpointParams VP;
 
 const std::string CaptureModes::CURRENT = "Current frame";
 const std::string CaptureModes::RANGE   = "Timeseries range";
-const std::string CaptureModes::ALL     = "All renderings";
 
 const std::string CaptureFileTypes::TIFF = "TIFF";
 const std::string CaptureFileTypes::PNG  = "PNG";
 
-PCaptureLabel::PCaptureLabel() : PWidget("", _label = new QLabel("")) {
-    _label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-}
+const std::string FileFilters::TIFF  = "TIFF (*.tif)";
+const std::string FileFilters::PNG  = "PNG (*.png)";
 
-void PCaptureLabel::updateGUI() const {
-    AnimationParams *ap = dynamic_cast<AnimationParams*>(getParams());
-    std::string captureFileText = "Saved: " + ap->GetValueString(AnimationParams::CaptureFileNameTag,"");
-    std::cout << "text " << captureFileText << std::endl;
-    _label->setText(QString::fromStdString(captureFileText));
-}
+const std::string FileSuffixes::TIFF  = "tif";
+const std::string FileSuffixes::PNG  = "png";
+
 
 PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
     : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _mf(mf)
@@ -72,41 +59,64 @@ PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
 
 void PCaptureToolbar::updateGUI() const {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-    _typeCombo->SetValue(ap->GetValueString(AnimationParams::CaptureFileTypeTag, CaptureFileTypes::TIFF));
-    _fileLabel->SetText("Saved: " + ap->GetValueString(AnimationParams::CaptureFileNameTag, ""));
+    _typeCombo->SetValue(ap->GetValueString(AnimationParams::CaptureTypeTag, CaptureFileTypes::TIFF));
+
+    // Format the label for the saved file
+    std::string file = "";
+    std::string time = "";
+    if (ap->GetValueString(AnimationParams::CaptureModeTag, "") == CaptureModes::CURRENT) {
+        file = ap->GetValueString(AnimationParams::CaptureFileNameTag, "");
+        time = ap->GetValueString(AnimationParams::CaptureFileTimeTag, "");
+    }
+    else {
+        file = ap->GetValueString(AnimationParams::CaptureTimeseriesFileNameTag, "");
+        size_t lastSlash = file.find_last_of("/\\");
+        size_t lastDot = file.find_last_of(".");
+
+        // Indicates that multiple animation files are or have been captured
+        bool valid = lastDot != std::string::npos && (lastSlash == std::string::npos || lastDot > lastSlash);
+        if (valid) file = file.substr(0, lastDot) + "_####" + file.substr(lastDot);
+
+        time = ap->GetValueString(AnimationParams::CaptureTimeseriesTimeTag, "");
+    }
+    if (!file.empty()) file = "Saved: " + file + "\nAt: " + time;
+    _fileLabel->SetText(file);
+
     _captureButton->Update(ap);
     _captureTimeseriesButton->Update(ap);
 }
 
 void PCaptureToolbar::_captureSingleImage() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-    string fileType = ap->GetValueString(AnimationParams::CaptureFileTypeTag, "");
-    if (fileType == CaptureFileTypes::PNG) _mf->captureSingleImage("PNG (*.png)", ".png");
-    else _mf->captureSingleImage("TIFF (*.tif *.tiff)", ".tiff");
+    string fileType = ap->GetValueString(AnimationParams::CaptureTypeTag, "");
+    if (fileType == CaptureFileTypes::PNG) _mf->captureSingleImage(FileFilters::PNG, ".png");
+    else _mf->captureSingleImage(FileFilters::TIFF, ".tiff");
+
+    ap->SetValueString(AnimationParams::CaptureFileTimeTag, "Capture file time", STLUtils::GetUserTime());
 }
 
 void PCaptureToolbar::_captureTimeseries() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-    string fileType = ap->GetValueString(AnimationParams::CaptureFileTypeTag, "");
+   
+    std::string filter, defaultSuffix;
+    if (ap->GetValueString(AnimationParams::CaptureTypeTag, "") == CaptureFileTypes::TIFF) {
+         filter = FileFilters::TIFF;
+         defaultSuffix =  FileSuffixes::TIFF;
+    }
+    else {
+         filter = FileFilters::PNG;
+         defaultSuffix =  FileSuffixes::PNG;
+    }
 
+    std::string fileName = QFileDialog::getSaveFileName(this, "Select Filename Prefix", QString::fromStdString(FileUtils::HomeDir()), QString::fromStdString(filter)).toStdString();
+    if (fileName.empty()) return;
 
-    std::cout << "fileType " << fileType << std::endl;
-    if (fileType == CaptureFileTypes::TIFF) _mf->captureTiffSequence();
-    else _mf->capturePngSequence();
-    _mf->_animationController->AnimationPlayForward();
-    // AnimationPlayForward returns before the animation is done playing,
-    // so we cannot call endAnimCapture() here.
-    //_mf->endAnimCapture();
+    ap->SetValueString(AnimationParams::CaptureTimeseriesFileNameTag, "Capture animation file name", fileName);
+    ap->SetValueString(AnimationParams::CaptureTimeseriesTimeTag, "Capture file time", STLUtils::GetUserTime());
 
-    // Manually setting the timestep in this way does not capture the image, nor does it apply
-    // the various changes to MainForm during AnimationPlayForward.
-    //auto start = ap->GetValueLong(AnimationParams::_startTimestepTag, 0);
-    //auto end = ap->GetValueLong(AnimationParams::_endTimestepTag, 1);
-    //for (auto i=start; i<end; i++) _mf->_animationController->SetTimeStep(i);
-
-    // The only other option I can think of to end the animation capture sequence is to
-    // call MainForm::endAnimCapture() in MainForm::_setAnimationOnOff().  Otherwise the
-    // user needs to manually click "End image capture" to end it.
+    _mf->_animationController->SetTimeStep(ap->GetStartTimestep());
+    bool rc = _mf->startAnimCapture(fileName, defaultSuffix);  // User may cancel to prevent file overwrite, so capture return code
+    if (rc) _mf->_animationController->AnimationPlayForward();
 }
 
 PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, MainForm *mf)
@@ -128,16 +138,3 @@ void PCaptureWidget::updateGUI() const {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
     _section->Update(ap);
 }
-
-// private
-//_mf->stopAnimCapture(string vizName);
-//_mf->endAnimCapture(string vizName);
-//_mf->setAnimationOnOFF(bool onOff);
-
-// slots
-//_mf->captureTiffSequence();
-//_mf->capturePngSequence();
-//_mf->selectAnimCaptureOutput(string filter, string defaultSuffix);
-//startAnimCapture(string baseFile, string defaultSuffix = "tiff")
-//captureSingleImage(stirng filter, string defaultSuffix);
-//_setAnimationOnOff // Enable/disable VCR controllers

@@ -1,3 +1,4 @@
+#include <chrono>
 #include <vapor/STLUtils.h>
 
 using std::string;
@@ -48,4 +49,13 @@ std::string STLUtils::ReplaceAll(std::string source, const std::string &oldSegme
         start = index + newSegment.length();
     }
     return source;
+}
+
+std::string STLUtils::GetUserTime()
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+    std::string timeString = std::ctime(&now_c);
+    timeString.pop_back(); // Remove trailing endline
+    return timeString;
 }

@@ -199,7 +199,7 @@ private slots:
     void captureTiffSequence();
     void capturePngSequence();
     void selectAnimCaptureOutput(string filter, string defaultSuffix);
-    void startAnimCapture(string baseFile, string defaultSuffix = "tiff");
+    bool startAnimCapture(string baseFile, string defaultSuffix = "tiff");
     void endAnimCapture();
     void captureSingleImage(string filter, string defaultSuffix);
     void launchStats();

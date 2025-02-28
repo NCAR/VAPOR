@@ -43,7 +43,8 @@ signals:
     //
     void AnimationDrawSignal();
 
-    // 
+    // Emitted during a timeseries animation capture is finished, when
+    // the animation is issued from the Export->Images(s) tab
     void TimeseriesAnimationComplete();
 
 private:

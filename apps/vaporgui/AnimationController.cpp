@@ -178,10 +178,7 @@ void AnimationController::playNextFrame()
     //
     _updateTab();
 
-    if (currentFrame == endFrame) {
-        std::cout << "Emitting TimeseriesAnimationComplete" << std::endl;
-        emit TimeseriesAnimationComplete();
-    }
+    if (currentFrame==endFrame && !loop && _direction==1) emit TimeseriesAnimationComplete();
 }
 
 AnimationParams *AnimationController::GetActiveParams() const { return NavigationUtils::GetAnimationParams(_controlExec); }
