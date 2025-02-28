@@ -41,6 +41,18 @@ struct FileSuffixes{
     static const std::string PNG;
 };
 
+struct TiffStrings {
+    static const std::string CaptureFileType;
+    static const std::string FileFilter;
+    static const std::string FileSuffix;
+};
+
+struct PngStrings {
+    static const std::string CaptureFileType;
+    static const std::string FileFilter;
+    static const std::string FileSuffix;
+};
+
 class PCaptureLabel : public PWidget {
     //VLabel *_label;
     QLabel *_label;

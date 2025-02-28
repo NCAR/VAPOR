@@ -20,14 +20,22 @@
 const std::string CaptureModes::CURRENT = "Current frame";
 const std::string CaptureModes::RANGE   = "Timeseries range";
 
-const std::string CaptureFileTypes::TIFF = "TIFF";
-const std::string CaptureFileTypes::PNG  = "PNG";
+const std::string TiffStrings::CaptureFileType = "TIFF";
+const std::string TiffStrings::FileFilter = "TIFF (*.tif)";
+const std::string TiffStrings::FileSuffix = "tif";
 
-const std::string FileFilters::TIFF  = "TIFF (*.tif)";
-const std::string FileFilters::PNG  = "PNG (*.png)";
+const std::string PngStrings::CaptureFileType = "PNG";
+const std::string PngStrings::FileFilter = "PNG (*.png)";
+const std::string PngStrings::FileSuffix = "png";
 
-const std::string FileSuffixes::TIFF  = "tif";
-const std::string FileSuffixes::PNG  = "png";
+//const std::string TiffStrings::CaptureFileType = "TIFF";
+//const std::string PngStrings::FileFilter  = "PNG";
+//
+//const std::string TiffStrings::FileFilter  = "TIFF (*.tif)";
+//const std::string PngStrings::FileFilter  = "PNG (*.png)";
+//
+//const std::string TiffStrings::FileSuffix  = "tif";
+//const std::string PngStrings::FileSuffix  = "png";
 
 
 PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
@@ -35,7 +43,7 @@ PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
 {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    _typeCombo = new VComboBox({CaptureFileTypes::TIFF, CaptureFileTypes::PNG});
+    _typeCombo = new VComboBox({TiffStrings::CaptureFileType, PngStrings::FileFilter});
     _fileLabel = new VLabel("");
 
     _captureButton = new PButton("Capture\nCurrent Frame", [this](VAPoR::ParamsBase*){_captureSingleImage();});
@@ -59,7 +67,7 @@ PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
 
 void PCaptureToolbar::updateGUI() const {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-    _typeCombo->SetValue(ap->GetValueString(AnimationParams::CaptureTypeTag, CaptureFileTypes::TIFF));
+    _typeCombo->SetValue(ap->GetValueString(AnimationParams::CaptureTypeTag, TiffStrings::CaptureFileType));
 
     // Format the label for the saved file
     std::string file = "";
@@ -89,8 +97,8 @@ void PCaptureToolbar::updateGUI() const {
 void PCaptureToolbar::_captureSingleImage() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
     string fileType = ap->GetValueString(AnimationParams::CaptureTypeTag, "");
-    if (fileType == CaptureFileTypes::PNG) _mf->captureSingleImage(FileFilters::PNG, ".png");
-    else _mf->captureSingleImage(FileFilters::TIFF, ".tiff");
+    if (fileType == PngStrings::FileFilter) _mf->captureSingleImage(PngStrings::FileFilter, ".png");
+    else _mf->captureSingleImage(TiffStrings::FileFilter, ".tiff");
 
     ap->SetValueString(AnimationParams::CaptureFileTimeTag, "Capture file time", STLUtils::GetUserTime());
 }
@@ -99,13 +107,13 @@ void PCaptureToolbar::_captureTimeseries() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
    
     std::string filter, defaultSuffix;
-    if (ap->GetValueString(AnimationParams::CaptureTypeTag, "") == CaptureFileTypes::TIFF) {
-         filter = FileFilters::TIFF;
-         defaultSuffix =  FileSuffixes::TIFF;
+    if (ap->GetValueString(AnimationParams::CaptureTypeTag, "") == TiffStrings::CaptureFileType) {
+         filter = TiffStrings::FileFilter;
+         defaultSuffix =  TiffStrings::FileSuffix;
     }
     else {
-         filter = FileFilters::PNG;
-         defaultSuffix =  FileSuffixes::PNG;
+         filter = PngStrings::FileFilter;
+         defaultSuffix =  PngStrings::FileSuffix;
     }
 
     std::string fileName = QFileDialog::getSaveFileName(this, "Select Filename Prefix", QString::fromStdString(FileUtils::HomeDir()), QString::fromStdString(filter)).toStdString();
