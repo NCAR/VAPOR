@@ -1312,7 +1312,8 @@ void ParamsMgr::PMgrStateSave::EndGroup()
 
     if (!GetEnabled()) return;
 
-    assert(_groups.size());
+    // If we are going to return in the next statement, why also assert for the same condition?
+    //assert(_groups.size());
     if (!_groups.size()) return;    // BeginGroup() not called
 
     string desc = _groups.top();
