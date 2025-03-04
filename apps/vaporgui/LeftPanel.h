@@ -5,13 +5,11 @@
 #include <common.h>
 
 class ImportTab;
-class TestPanel;
 class MainForm;
 
 class LeftPanel : public QTabWidget, public Updatable {
     Q_OBJECT
     ControlExec *_ce;
-    MainForm *_mf;
     std::vector<Updatable *> _uTabs;
     ImportTab* _importTab;
 

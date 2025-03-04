@@ -328,20 +328,10 @@ set (SRCS
     PRadioButtons.cpp
     PImportData.h
     PImportData.cpp
-    #PCaptureSection.h
-    #PCaptureSection.cpp
-    #CaptureTab.h
-    #CaptureTab.cpp
-	#QRangeSliderTextCombo2.cpp
-	#QRangeSliderTextCombo2.h
     PTimeRangeSelector.cpp
     PTimeRangeSelector.h
-    #TimeRangeSelector.h
-    #TimeRangeSelector.cpp
     PCaptureWidget.h
     PCaptureWidget.cpp
-    #PCaptureLabel.h
-    #PCaptureLabel.cpp
     ImportTab.h
     ImportTab.cpp
     DatasetTypeLookup.h

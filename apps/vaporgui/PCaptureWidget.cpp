@@ -1,9 +1,8 @@
-#include "PCaptureWidget.h"
 #include "MainForm.h"
+#include "PCaptureWidget.h"
+#include "PTimeRangeSelector.h"
 #include "PRadioButtons.h"
 #include "PButton.h"
-#include "PTimeRangeSelector.h"
-#include "VSection.h"
 #include "PSection.h"
 #include "VComboBox.h"
 #include "VLabel.h"
@@ -27,16 +26,6 @@ const std::string TiffStrings::FileSuffix = "tif";
 const std::string PngStrings::CaptureFileType = "PNG";
 const std::string PngStrings::FileFilter = "PNG (*.png)";
 const std::string PngStrings::FileSuffix = "png";
-
-//const std::string TiffStrings::CaptureFileType = "TIFF";
-//const std::string PngStrings::FileFilter  = "PNG";
-//
-//const std::string TiffStrings::FileFilter  = "TIFF (*.tif)";
-//const std::string PngStrings::FileFilter  = "PNG (*.png)";
-//
-//const std::string TiffStrings::FileSuffix  = "tif";
-//const std::string PngStrings::FileSuffix  = "png";
-
 
 PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
     : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _mf(mf)
@@ -97,8 +86,8 @@ void PCaptureToolbar::updateGUI() const {
 void PCaptureToolbar::_captureSingleImage() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
     string fileType = ap->GetValueString(AnimationParams::CaptureTypeTag, "");
-    if (fileType == PngStrings::FileFilter) _mf->captureSingleImage(PngStrings::FileFilter, ".png");
-    else _mf->captureSingleImage(TiffStrings::FileFilter, ".tiff");
+    if (fileType == PngStrings::FileFilter) _mf->CaptureSingleImage(PngStrings::FileFilter, ".png");
+    else _mf->CaptureSingleImage(TiffStrings::FileFilter, ".tiff");
 
     ap->SetValueString(AnimationParams::CaptureFileTimeTag, "Capture file time", STLUtils::GetUserTime());
 }
@@ -122,9 +111,9 @@ void PCaptureToolbar::_captureTimeseries() {
     ap->SetValueString(AnimationParams::CaptureTimeseriesFileNameTag, "Capture animation file name", fileName);
     ap->SetValueString(AnimationParams::CaptureTimeseriesTimeTag, "Capture file time", STLUtils::GetUserTime());
 
-    _mf->_animationController->SetTimeStep(ap->GetStartTimestep());
-    bool rc = _mf->startAnimCapture(fileName, defaultSuffix);  // User may cancel to prevent file overwrite, so capture return code
-    if (rc) _mf->_animationController->AnimationPlayForward();
+    _mf->SetTimeStep(ap->GetStartTimestep());
+    bool rc = _mf->StartAnimCapture(fileName, defaultSuffix);  // User may cancel to prevent file overwrite, so capture return code
+    if (rc) _mf->AnimationPlayForward();
 }
 
 PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, MainForm *mf)

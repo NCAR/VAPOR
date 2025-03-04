@@ -31,6 +31,7 @@ protected:
     void            updateGUI() const override;
     bool            requireParamsMgr() const override;
     virtual QString selectPath(const std::string &defaultPath) const = 0;
+    std::string     getDefaultPath() const;
 
 protected slots:
     virtual void buttonClicked();

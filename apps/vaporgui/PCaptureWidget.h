@@ -6,12 +6,7 @@ namespace VAPoR {
 class ControlExec;
 }
 
-class VSection;
 class PSection;
-class PRadioButtons;
-//class TimeRangeSelector;
-class PTimeRangeSelector;
-class QLabel;
 class VLabel;
 class PHGroup;
 class MainForm;
@@ -23,22 +18,6 @@ class VLabel;
 struct CaptureModes { 
     static const std::string CURRENT;
     static const std::string RANGE;
-    static const std::string ALL;
-};
-
-struct CaptureFileTypes{ 
-    static const std::string TIFF;
-    static const std::string PNG;
-};
-
-struct FileFilters{ 
-    static const std::string TIFF;
-    static const std::string PNG;
-};
-
-struct FileSuffixes{ 
-    static const std::string TIFF;
-    static const std::string PNG;
 };
 
 struct TiffStrings {
@@ -53,21 +32,11 @@ struct PngStrings {
     static const std::string FileSuffix;
 };
 
-class PCaptureLabel : public PWidget {
-    //VLabel *_label;
-    QLabel *_label;
-
-public:
-    PCaptureLabel();
-    void updateGUI() const override;
-};
-
 class PCaptureToolbar : public PWidget {
     Q_OBJECT;
 
     ControlExec *_ce;
     MainForm *_mf;
-    //PGroup *_pGroup;
     PHGroup *_pGroup;
     VHBoxWidget *_hBox;
     PStringDropdown *_fileTypeSelector;

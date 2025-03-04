@@ -9,7 +9,6 @@
 
 using namespace VAPoR;
 
-//ImportTab::ImportTab(VAPoR::ControlExec *ce) : _ce(ce)
 ImportTab::ImportTab(VAPoR::ControlExec *ce, MainForm *mf) : _ce(ce)
 {
 
