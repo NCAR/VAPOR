@@ -62,14 +62,14 @@ copy(examples ${PYTHON_API_DIR} EXCLUDE CMakeLists.txt)
 add_subdirectory (examples)
 
 add_custom_command(
-    OUTPUT "${PYTHON_API_DIR}/widget.js"
+    OUTPUT "${PYTHON_API_DIR}/vapor/widget.js"
     COMMAND esbuild --log-level=warning --format=esm "${CMAKE_CURRENT_SOURCE_DIR}/vapor/widget.js" --bundle --outfile="${PYTHON_API_DIR}/vapor/widget.js"
     MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/vapor/widget.js"
 )
 add_custom_target(
     widget_js
     ALL
-    DEPENDS "${PYTHON_API_DIR}/widget.js"
+    DEPENDS "${PYTHON_API_DIR}/vapor/widget.js"
 )
 
 # copy(bld.bat ${PYTHON_API_DIR})
