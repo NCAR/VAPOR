@@ -175,7 +175,7 @@ string GUIStateParams::GetActiveRendererInst() const
 void GUIStateParams::SetActiveRenderer(string vizWin, string renderType, string renderInst) {
     bool e = _ssave->GetUndoEnabled();
     _ssave->SetUndoEnabled(false);
-    BeginGroup("Set active");
+    BeginGroup("Set active " + renderInst);
     SetValueString("Active_Dataset", "", "");
     m_activeRenderer->SetActiveRenderer(vizWin, renderType, renderInst);
     EndGroup();

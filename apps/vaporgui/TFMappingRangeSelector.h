@@ -21,6 +21,7 @@ private:
     VAPoR::RenderParams *_rParams = nullptr;
     VAPoR::ParamsMgr *   _paramsMgr = nullptr;
     const std::string &  _variableNameTag;
+    bool                 _insideIntermediateChangeGroup = false;
 
     void                   _getDefaultRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;
     void                   _getDataRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;

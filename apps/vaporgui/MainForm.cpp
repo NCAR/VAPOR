@@ -670,7 +670,11 @@ void MainForm::closeAllParamsDatasets()
 
 void MainForm::SaveSession()
 {
-    SaveSession(GetStateParams()->GetCurrentSessionFile());
+    const auto currentSessionPath = GetStateParams()->GetCurrentSessionFile();
+    if (currentSessionPath.empty())
+        SaveSessionAs();
+    else
+        SaveSession(currentSessionPath);
 }
 
 

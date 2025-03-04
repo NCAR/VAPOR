@@ -1,0 +1,16 @@
+.counter-button {
+  background-image: linear-gradient(to right, #a1c4fd, #c2e9fb);
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 50px;
+  color: white;
+}
+
+.vapor-jupyter-widget {
+    position: relative;
+}
+.vapor-jupyter-widget > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
