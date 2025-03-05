@@ -323,8 +323,6 @@ void VizWinMgr::Update(bool fast)
 
 int VizWinMgr::EnableImageCapture(string filename, string winName)
 {
-    AnimationParams *ap = _controlExec->GetParams<AnimationParams>();
-    //ap->SetValueString(AnimationParams::CaptureFileNameTag, filename);
     _vizWindow[winName]->makeCurrent();
     _vizWindow[winName]->_preRender();
     return _controlExec->EnableImageCapture(filename, winName);

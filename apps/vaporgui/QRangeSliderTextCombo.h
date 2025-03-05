@@ -57,6 +57,3 @@ signals:
     void RangeChanged(float min, float max);
     void RangeDefaultRequested();
 };
-
-//class QFloatRangeSliderTextCombo : public QWidget {
-//class QIntRangeSliderTextCombo : public QWidget {

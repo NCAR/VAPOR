@@ -7,6 +7,7 @@
 #include "PMetadataClasses.h"
 #include "PProjectionStringSection.h"
 #include "VScrollGroup.h"
+#include "DatasetTypeLookup.h"
 
 using namespace VAPoR;
 

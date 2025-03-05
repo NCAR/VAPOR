@@ -1,10 +1,7 @@
 #pragma once
 
 #include <string>
-
-//#include <QWidget>
 #include <QRadioButton>
-
 #include "VHBoxWidget.h"
 
 class QRadioButton;

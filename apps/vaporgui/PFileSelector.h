@@ -47,7 +47,6 @@ public:
     using PFileSelector::PFileSelector;
 
 protected:
-    //virtual QStringList selectPath(const std::string &defaultPath) const override;
     QStringList selectPaths(const std::string &defaultPath) const;
     virtual QString selectPath(const std::string &defaultPath) const override;
 

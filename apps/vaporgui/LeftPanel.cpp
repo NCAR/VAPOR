@@ -2,15 +2,12 @@
 #include "MainForm.h"
 #include "RenderersPanel.h"
 #include "ImportTab.h"
-#include "AnimationTab.h"
-#include "ViewpointTab.h"
 #include "ExportTab.h"
 #include "vapor/ControlExecutive.h"
 #include "AnnotationEventRouter.h"
 #include "vapor/GUIStateParams.h"
 
 #include <QScrollArea>
-#include <iostream>
 
 LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
 {
@@ -28,8 +25,6 @@ LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
     add(_importTab, "Import");
     add(new RenderersPanel(ce), "Render");
     add(new AnnotationEventRouter(ce), "Annotate");
-    add(new AnimationTab(ce), "Animation");
-    add(new ViewpointTab(ce), "Viewpoint");
     add(new ExportTab(ce, mf), "Export");
 
     for (int i=1 ; i<count(); ++i) setTabEnabled(i, false);

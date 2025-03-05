@@ -261,8 +261,6 @@ int Visualizer::paintEvent(bool fast)
         return -1;
     }
 
-    std::cout << "captured file " << _captureImageFile << " " << _imageCaptureEnabled << std::endl;
-
     GL_ERR_BREAK();
     if (CheckGLError()) return -1;
 

@@ -1031,7 +1031,6 @@ void MainForm::updateUI()
     _widgetsEnabled = !GetStateParams()->GetOpenDataSetNames().empty();
     for (auto &e : _dependOnLoadedData) e->setEnabled(_widgetsEnabled);
 
-    // Needs comment on why this cannot belong in _updatableElements
     leftPanel->UpdateImportMenu();
 
     for (const auto &e : _updatableElements) 

@@ -220,7 +220,6 @@ public:
     static const string MovingDomainTrackRenderRegionsTag;
     static const string SelectedImportDataTypeTag;
     static const string SelectedImportDataFilesTag;
-    static const string trashTag;
 
 private:
     MouseModeParams *m_mouseModeParams;

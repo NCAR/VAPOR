@@ -1,7 +1,5 @@
 #pragma once
 
-//#include "PWidget.h"
-//#include "PGroup.h"
 #include "PSection.h"
 
 namespace VAPoR {
@@ -15,11 +13,10 @@ class MainForm;
 
 //! \class PImportData
 //! Creates VRadioButtons synced with the paramsdatabase using the PWidget interface.
+//! Allows user to select a set of files to import.
 //! \copydoc PWidget
 
 class PImportData : public PWidget {
-//class PImportData : public PGroup {
-//class PImportData : public PSection {
     Q_OBJECT
 
     PGroup*             _group;
@@ -31,7 +28,6 @@ class PImportData : public PWidget {
 
 public:
     PImportData(VAPoR::ControlExec* ce, MainForm *mf);
-    //void Update() override;
 
 protected:
     void updateGUI() const override;
@@ -39,12 +35,4 @@ protected:
 signals:
     void dataImported();
 
-//private slots:
-//    void radioButtonChecked(QRadioButton* rb);
 };
-
-//#include "PWidgetWrapper.h"
-//class PImportDataSection : public PWidgetWrapper {
-//public:
-//    PImportDataSection();
-//};

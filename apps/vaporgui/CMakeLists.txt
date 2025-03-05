@@ -6,8 +6,6 @@ set (SRCS
 	GLWidget.cpp
 	ErrorReporter.cpp
 	AnnotationEventRouter.cpp
-	ViewpointTab.cpp
-	ViewpointTab.h
 	ExportTab.cpp
 	ExportTab.h
 	TwoDDataEventRouter.cpp
@@ -271,8 +269,6 @@ set (SRCS
     PTotalTimestepsDisplay.h
     AnimationController.cpp
     AnimationController.h
-    AnimationTab.cpp
-    AnimationTab.h
     CheckForNotices.cpp
     CheckForNotices.h
     NoticeBoard.cpp

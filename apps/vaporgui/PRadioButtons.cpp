@@ -1,7 +1,6 @@
 #include "PRadioButtons.h"
 #include "VRadioButton.h"
 #include "VGroup.h"
-#include <iostream>
 
 PRadioButtons::PRadioButtons(const std::string &tag, const std::vector<std::string> labels) : PWidget(tag, _vg = new VGroup())
 {
