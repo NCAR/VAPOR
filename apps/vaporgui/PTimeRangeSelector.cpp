@@ -1,11 +1,10 @@
 #include "PTimeRangeSelector.h"
-#include "QRangeSliderTextCombo.h"
-#include "VLineItem.h"
-#include "QLabel.h"
-
 #include "vapor/ControlExecutive.h"
 #include "vapor/AnimationParams.h"
+#include "QRangeSliderTextCombo.h"
+#include "VLineItem.h"
 
+#include <QLabel>
 #include <cmath>
 
 PTimeRangeSelector::PTimeRangeSelector(ControlExec* ce) 
