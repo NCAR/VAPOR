@@ -6,8 +6,8 @@ set (SRCS
 	GLWidget.cpp
 	ErrorReporter.cpp
 	AnnotationEventRouter.cpp
-	ViewpointTab.cpp
-	ViewpointTab.h
+	ExportTab.cpp
+	ExportTab.h
 	TwoDDataEventRouter.cpp
 	TwoDDataEventRouter.h
 	WireFrameEventRouter.cpp
@@ -259,8 +259,8 @@ set (SRCS
     PCameraControlsSection.h
     PProjectionStringSection.cpp
     PProjectionStringSection.h
-    PFramebufferSettingsSection.cpp
-    PFramebufferSettingsSection.h
+    POutputResolutionSection.cpp
+    POutputResolutionSection.h
     VLabel.cpp
     VLabel.h
     PTimestepInput.cpp
@@ -269,8 +269,6 @@ set (SRCS
     PTotalTimestepsDisplay.h
     AnimationController.cpp
     AnimationController.h
-    AnimationTab.cpp
-    AnimationTab.h
     CheckForNotices.cpp
     CheckForNotices.h
     NoticeBoard.cpp
@@ -320,6 +318,20 @@ set (SRCS
     ViewpointToolbar.h
     CheckForUpdateUI.cpp
     CheckForUpdateUI.h
+    VRadioButton.h
+    VRadioButton.cpp
+    PRadioButtons.h
+    PRadioButtons.cpp
+    PImportData.h
+    PImportData.cpp
+    PTimeRangeSelector.cpp
+    PTimeRangeSelector.h
+    PCaptureWidget.h
+    PCaptureWidget.cpp
+    ImportTab.h
+    ImportTab.cpp
+    DatasetTypeLookup.h
+    DatasetTypeLookup.cpp
 
 	# Need to include all files that request .ui files
 	Statistics.h

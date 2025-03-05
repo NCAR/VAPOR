@@ -1,12 +1,16 @@
-#include "ViewpointTab.h"
+#include "ExportTab.h"
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 #include <vapor/GUIStateParams.h>
+#include <vapor/AnimationParams.h>
 #include <QHBoxLayout>
 #include "PWidgets.h"
 #include "PProjectionStringSection.h"
 #include "PCameraControlsSection.h"
-#include "PFramebufferSettingsSection.h"
+#include "POutputResolutionSection.h"
+#include "PTimestepSliderEdit.h"
+#include "PTotalTimestepsDisplay.h"
+#include "PCaptureWidget.h"
 
 using namespace VAPoR;
 
@@ -31,14 +35,22 @@ protected:
 };
 
 
-ViewpointTab::ViewpointTab(ControlExec *ce) : _controlExec(ce)
+ExportTab::ExportTab(ControlExec *ce, MainForm *mf) : _ce(ce)
 {
-    PProjectionStringSection *proj;
     _pg = new PGroup({
-        new PCameraControlsSection(_controlExec),
-        _movingDomainSection = new PMovingDomainSettings(ce),
-        new PFramebufferSettingsSection(_controlExec),
-        proj = new PProjectionStringSection(_controlExec),
+        new PCaptureWidget(_ce, mf),
+        new POutputResolutionSection(_ce),
+        new PCameraControlsSection(_ce),
+        _movingDomainSection = new PMovingDomainSettings(_ce),
+        new PGroup({
+            new PSection("Animation", {
+                new PTimestepSliderEdit(_ce),
+                new PTotalTimestepsDisplay(_ce),
+                new PCheckbox(AnimationParams::_repeatTag, "Loop Animation Playback"),
+                (new PIntegerInput(AnimationParams::_stepSizeTag, "Animation Play Step Size"))->SetRange(1, 10),
+                (new PDoubleSliderEdit(AnimationParams::_maxRateTag, "Max Animation Frames Per Second"))->SetRange(1, 60),
+            })
+        })
     });
 
     QVBoxLayout *l = new QVBoxLayout;
@@ -48,11 +60,12 @@ ViewpointTab::ViewpointTab(ControlExec *ce) : _controlExec(ce)
     l->addStretch();
 }
 
-void ViewpointTab::Update()
+void ExportTab::Update()
 {
-    auto vp = NavigationUtils::GetActiveViewpointParams(_controlExec);
-    if (!(isEnabled() && vp))
-        return;
+    //auto vp = NavigationUtils::GetActiveViewpointParams(_controlExec);
+    //if (!(isEnabled() && vp))
+    //    return;
 
-    if (_pg) _pg->Update(vp);
+    if (_pg) _pg->Update(_ce->GetParams<AnimationParams>());
+    //if (_pg) _pg->Update();
 }

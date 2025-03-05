@@ -26,3 +26,4 @@ class PStringInput;
 class PTFEditor;
 class PVariableWidgets;
 class PShowIf;
+class PImportData;
