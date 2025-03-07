@@ -31,6 +31,7 @@ PTFEditor::PTFEditor() : PTFEditor(RenderParams::_variableNameTag) {}
 
 PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PWidget(tag, _section = new VSection(label.empty() ? tag : label)), _expandable(expandable)
 {
+    setMaximumSize(1000,500);
     _maps = new TFMapGroupWidget;
     _histogram = new TFHistogramMap(tag);
     _opacityMap = new TFOpacityMap(tag);
@@ -38,7 +39,6 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
     _isoMap = new TFIsoValueMap(tag);
     _range = new TFMappingRangeSelector(tag);
     _elements = elements;
-    _label = label;
 
     _maps->Add({_opacityMap, _histogram});
     _maps->Add(_isoMap);
@@ -117,6 +117,7 @@ void PTFEditor::updateGUI() const
     VAPoR::DataMgr *     dm = getDataMgr();
     VAPoR::ParamsMgr *   pm = getParamsMgr();
     VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams *>(getParams());
+    //std::cout << "rp1 " << rp << std::endl;
     VAssert(rp);
 
     _maps->Update(dm, pm, rp);
@@ -143,6 +144,9 @@ void PTFEditor::updateGUI() const
 }
 
 void PTFEditor::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr) {
+    if (getParams() != params) {
+        closeExpandedPTFEditor();
+    }
     PWidget::Update(params, paramsMgr, dataMgr);
     if (_expandable==true) {
         std::string name, inst;
@@ -168,7 +172,7 @@ void PTFEditor::getExpandedPTFEditorInfo(std::string &name, std::string& type) {
 
 void PTFEditor::showExpandedPTFEditor() {
     if (_expandedPTFEditor==nullptr) {
-        _expandedPTFEditor = new PTFEditor(_tag, _elements, _label, false);
+        _expandedPTFEditor = new PTFEditor(getTag(), _elements, _section->getTitle(), false);
         connect(_expandedPTFEditor, SIGNAL(closed()), this, SLOT(closeExpandedPTFEditor()));
 
         if (_showColormapBasedOnParam==true) _expandedPTFEditor->ShowColormapBasedOnParam(_showColormapBasedOnParamTag, _showColormapBasedOnParamValue);
@@ -186,13 +190,24 @@ void PTFEditor::showExpandedPTFEditor() {
 }
 
 void PTFEditor::closeExpandedPTFEditor() {
-    _expandedPTFEditor->close();
-    _expandedPTFEditor=nullptr;
+    if (_expandedPTFEditor != nullptr) {
+        _expandedPTFEditor->close();
+        _expandedPTFEditor=nullptr;
+    }
+}
+
+void PTFEditor::hideEvent(QHideEvent* event) {
+    closeExpandedPTFEditor();
 }
 
 void PTFEditor::closeEvent(QCloseEvent* event) {
     emit closed();
     close();
+}
+
+void PTFEditor::hide() {
+    std::cout << "hiding PTFEditor" << std::endl;
+    QWidget::hide();
 }
 
 PColormapTFEditor::PColormapTFEditor() : PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function") {}

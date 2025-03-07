@@ -35,6 +35,10 @@ void VSection::setExpandedSection()
     connect(expandSectionButton, &QToolButton::clicked, this, [this](){ emit this->expandButtonClicked(); });
 }
 
+std::string VSection::getTitle() const {
+    return QTabWidget::tabText(0).toStdString();
+}
+
 QWidget *VSection::_tab() const { return QTabWidget::widget(0); }
 
 QString VSection::_createStylesheet() const

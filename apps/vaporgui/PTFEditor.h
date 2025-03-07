@@ -45,6 +45,7 @@ class PStringDisplay;
 //! PWidget wrapper for TFEditor
 //! \copydoc TFEditor
 
+#include <iostream>
 class PTFEditor : public PWidget {
     Q_OBJECT;
 
@@ -86,6 +87,7 @@ protected:
     std::set<Element> _elements;
     std::string _label;
 
+    void hideEvent(QHideEvent *event) override;
     void updateGUI() const override;
     void Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::DataMgr* dm) override;
     void getExpandedPTFEditorInfo(std::string &name, std::string &type);
@@ -97,6 +99,7 @@ private slots:
     void showExpandedPTFEditor();
     void closeExpandedPTFEditor();
     void closeEvent(QCloseEvent* event) override;
+    void hide();
 };
 
 class PColormapTFEditor : public PTFEditor {
