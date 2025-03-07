@@ -1323,14 +1323,16 @@ void ParamsMgr::PMgrStateSave::EndGroup()
     //
     if (_groups.size()) return;
 
-    const XmlNode *topNode = NULL;
-    string         s;
-    topNode = GetTopUndo(s);
+    if (GetUndoEnabled()) {
+        const XmlNode *topNode = NULL;
+        string         s;
+        topNode = GetTopUndo(s);
 
-    if (topNode && (*topNode == *_rootNode)) {
-        // Don't save tree if no changes
-        //
-        return;
+        if (topNode && (*topNode == *_rootNode)) {
+            // Don't save tree if no changes
+            //
+            return;
+        }
     }
 
     if (!_state0) { _state0 = new XmlNode(*_rootNode); }
