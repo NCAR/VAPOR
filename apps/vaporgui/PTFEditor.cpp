@@ -117,7 +117,6 @@ void PTFEditor::updateGUI() const
     VAPoR::DataMgr *     dm = getDataMgr();
     VAPoR::ParamsMgr *   pm = getParamsMgr();
     VAPoR::RenderParams *rp = dynamic_cast<VAPoR::RenderParams *>(getParams());
-    //std::cout << "rp1 " << rp << std::endl;
     VAssert(rp);
 
     _maps->Update(dm, pm, rp);
@@ -183,9 +182,6 @@ void PTFEditor::showExpandedPTFEditor() {
     }
     _expandedPTFEditor->raise();
 
-    // It was originally thought to store the open expanded PTFEditors in GUIStateParams.
-    // This lead to problems and the team agreed that it's not important to restore them if
-    // they were expanded in a session, so we manually call Update here.
     Update(getParams(), getParamsMgr(), getDataMgr());
 }
 
@@ -203,11 +199,6 @@ void PTFEditor::hideEvent(QHideEvent* event) {
 void PTFEditor::closeEvent(QCloseEvent* event) {
     emit closed();
     close();
-}
-
-void PTFEditor::hide() {
-    std::cout << "hiding PTFEditor" << std::endl;
-    QWidget::hide();
 }
 
 PColormapTFEditor::PColormapTFEditor() : PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function") {}

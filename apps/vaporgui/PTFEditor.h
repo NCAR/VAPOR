@@ -45,7 +45,6 @@ class PStringDisplay;
 //! PWidget wrapper for TFEditor
 //! \copydoc TFEditor
 
-#include <iostream>
 class PTFEditor : public PWidget {
     Q_OBJECT;
 
@@ -99,7 +98,6 @@ private slots:
     void showExpandedPTFEditor();
     void closeExpandedPTFEditor();
     void closeEvent(QCloseEvent* event) override;
-    void hide();
 };
 
 class PColormapTFEditor : public PTFEditor {

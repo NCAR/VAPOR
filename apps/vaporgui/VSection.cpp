@@ -86,7 +86,6 @@ VSection::SettingsMenuButton::SettingsMenuButton() : AbstractButton()
     configureButton();
 }
 
-//void VSection::SettingsMenuButton::paintEvent(QPaintEvent *event)
 void VSection::AbstractButton::paintEvent(QPaintEvent *event)
 {
     // This function is overridden to prevent Qt from drawing its own dropdown arrow
