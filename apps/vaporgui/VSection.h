@@ -20,6 +20,7 @@ class VSection : public QTabWidget {
 
     class SettingsMenuButton;
     class ExpandSectionButton;
+    class AbstractButton;
 
 public:
     VSection(const std::string &title);
@@ -58,22 +59,33 @@ public:
     }
 };
 
-class VSection::SettingsMenuButton : public QToolButton {
+class VSection::AbstractButton : public QToolButton {
+    Q_OBJECT
+
+protected:
+    AbstractButton() {};
+    void paintEvent(QPaintEvent *event);
+    void configureButton();
+};
+
+//class VSection::SettingsMenuButton : public QToolButton {
+class VSection::SettingsMenuButton : public AbstractButton {
     Q_OBJECT
 
 public:
     SettingsMenuButton();
 
-protected:
-    void paintEvent(QPaintEvent *event);
+//protected:
+//    void paintEvent(QPaintEvent *event);
 };
 
-class VSection::ExpandSectionButton: public QToolButton {
+//class VSection::ExpandSectionButton: public QToolButton {
+class VSection::ExpandSectionButton: public AbstractButton {
     Q_OBJECT
 
 public:
     ExpandSectionButton();
 
-protected:
-    void paintEvent(QPaintEvent *event);
+//protected:
+//    void paintEvent(QPaintEvent *event);
 };

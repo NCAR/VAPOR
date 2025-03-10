@@ -31,7 +31,7 @@ PTFEditor::PTFEditor() : PTFEditor(RenderParams::_variableNameTag) {}
 
 PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PWidget(tag, _section = new VSection(label.empty() ? tag : label)), _expandable(expandable)
 {
-    setMaximumSize(1000,500);
+    setMaximumSize(1200,720);
     _maps = new TFMapGroupWidget;
     _histogram = new TFHistogramMap(tag);
     _opacityMap = new TFOpacityMap(tag);
