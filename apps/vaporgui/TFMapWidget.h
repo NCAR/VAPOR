@@ -49,6 +49,7 @@ public:
     bool          IsShown() const;
     virtual void  LostFocus() = 0;
     virtual QSize minimumSizeHint() const = 0;
+    virtual QSizePolicy GetSizePolicy() const;
     //! (Right-click menu)
     virtual void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) {}
     virtual void PopulateSettingsMenu(QMenu *menu) const {}

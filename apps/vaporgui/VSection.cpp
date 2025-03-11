@@ -25,7 +25,7 @@ void VSection::setMenu(QMenu *menu)
     menuButton->setMenu(menu);
 }
 
-void VSection::setExpandedSection()
+void VSection::enableExpandedSection()
 {
     ExpandSectionButton *expandSectionButton = (ExpandSectionButton *)QTabWidget::cornerWidget();
     if (!expandSectionButton) {
@@ -86,10 +86,23 @@ VSection::SettingsMenuButton::SettingsMenuButton() : AbstractButton()
     configureButton();
 }
 
+void VSection::SettingsMenuButton::setIconDark(bool darkMode) {
+    if (darkMode) setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/gear-dropdown1_darkMode.png"))));
+    else setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/gear-dropdown1.png"))));
+}
+
+void VSection::AbstractButton::setDarkOrLight() {
+    QColor textColor = this->palette().color(QPalette::WindowText);
+    if (textColor.lightness() > 128) setIconDark();
+    else setIconDark(false);
+}
+
 void VSection::AbstractButton::paintEvent(QPaintEvent *event)
 {
     // This function is overridden to prevent Qt from drawing its own dropdown arrow
     QStylePainter p(this);
+
+    setDarkOrLight();
 
     QStyleOptionToolButton option;
     initStyleOption(&option);
@@ -113,3 +126,7 @@ VSection::ExpandSectionButton::ExpandSectionButton() : AbstractButton()
     configureButton();
 }
 
+void VSection::ExpandSectionButton::setIconDark(bool darkMode) {
+    if (darkMode) setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/expandSection_darkMode.png"))));
+    else setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/expandSection.png"))));
+}

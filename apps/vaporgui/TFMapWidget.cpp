@@ -90,6 +90,8 @@ void TFMap::hide()
 
 VAPoR::MapperFunction *TFMap::getMapperFunction() const { return _renderParams->GetMapperFunc(getVariableName()); }
 
+QSizePolicy TFMap::GetSizePolicy() const { return QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding); }
+
 std::string TFMap::getVariableName() const { return _variableName; }
 
 const std::string &TFMap::getVariableNameTag() const { return _variableNameTag; }
@@ -201,11 +203,7 @@ TFMapWidget::TFMapWidget(TFMap *map)
     AddMap(map);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(_showContextMenu(const QPoint &)));
-
-    // Is there a better way or place to set the sizePolicy of this object?
-    if (dynamic_cast<TFColorMap*>(map)) setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-    else if (dynamic_cast<TFIsoValueMap*>(map)) setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-    else setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    setSizePolicy(map->GetSizePolicy());
 }
 
 TFMapWidget::~TFMapWidget()

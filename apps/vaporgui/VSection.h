@@ -26,7 +26,7 @@ public:
     VSection(const std::string &title);
     QVBoxLayout *layout() const;
     void         setMenu(QMenu *menu);
-    void         setExpandedSection();
+    void         enableExpandedSection();
     std::string getTitle() const;
 
     void     setLayout(QLayout *layout) = delete;
@@ -66,26 +66,24 @@ protected:
     AbstractButton() {};
     void paintEvent(QPaintEvent *event);
     void configureButton();
+    void setDarkOrLight();
+    virtual void setIconDark(bool darkMode = true) = 0;
 };
 
-//class VSection::SettingsMenuButton : public QToolButton {
 class VSection::SettingsMenuButton : public AbstractButton {
     Q_OBJECT
 
+    void setIconDark(bool darkMode) override;
+
 public:
     SettingsMenuButton();
-
-//protected:
-//    void paintEvent(QPaintEvent *event);
 };
 
-//class VSection::ExpandSectionButton: public QToolButton {
 class VSection::ExpandSectionButton: public AbstractButton {
     Q_OBJECT
 
+    void setIconDark(bool darkMode) override;
+
 public:
     ExpandSectionButton();
-
-//protected:
-//    void paintEvent(QPaintEvent *event);
 };

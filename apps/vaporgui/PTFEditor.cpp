@@ -67,7 +67,7 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
     for (int i = start; i < menu->actions().size(); i++) _histogramActions.push_back(menu->actions()[i]);
 
     if (_expandable) {
-        _section->setExpandedSection();
+        _section->enableExpandedSection();
         connect(_section, &VSection::expandButtonClicked, this, &PTFEditor::showExpandedPTFEditor);
     }
 
