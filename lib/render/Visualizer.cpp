@@ -48,6 +48,8 @@
 #include "vapor/ImageWriter.h"
 #include "vapor/GeoTIFWriter.h"
 
+#include "vapor/ImageRenderer.h"
+
 using namespace VAPoR;
 
 Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string winName)
@@ -218,8 +220,23 @@ int Visualizer::paintEvent(bool fast)
     _vizFeatures->InScenePaint(_getCurrentTimestep());
     GL_ERR_BREAK();
 
+
+    std::vector<Renderer*> topRenderers;
     int rc = 0;
     for (int i = 0; i < _renderers.size(); i++) {
+        //RenderParams *GetRenderParams(string winName, string dataSetName, string classType, string instName)
+        RenderParams* rp = _paramsMgr->GetRenderParams(_winName, _renderers[i]->GetMyDatasetName(), _renderers[i]->GetMyParamsType(), _renderers[i]->GetMyName());
+        //RenderParams* rp = _paramsMgr->GetRenderParams(_winName, _renderers[i]->GetMyDatasetName(), _renderers[i]->GetMyName(), _renderers[i]->GetMyType());
+        //std::cout << "      " << _winName << " " << _renderers[i]->GetMyDatasetName() << " " << _renderers[i]->GetMyType() << " " << _renderers[i]->GetMyName() << std::endl;
+        if (rp==nullptr) std::cout << _renderers[i]->GetMyType() << " had nullptr params" << std::endl;
+        if (rp==nullptr) std::cout << _renderers[i]->GetMyName() << " had nullptr params" << std::endl;
+        if (rp != nullptr && rp->GetDrawOnTop()) {
+            std::cout << "got top renderer" << std::endl;
+            topRenderers.push_back(_renderers[i]);
+            continue;
+        }
+        std::cout << "normal draw of " << _renderers[i]->GetMyType() << std::endl;
+
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PushMatrix();
 
@@ -227,6 +244,8 @@ int Visualizer::paintEvent(bool fast)
             _applyDatasetTransformsForRenderer(_renderers[i]);
 
             //            void *t = _glManager->BeginTimer();
+
+
             int myrc = _renderers[i]->paintGL(fast);
             //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
             GL_ERR_BREAK();
@@ -237,6 +256,32 @@ int Visualizer::paintEvent(bool fast)
         int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
         if (myrc < 0) rc = -1;
     }
+
+    //glDepthMask(GL_FALSE);
+    glDepthFunc(GL_ALWAYS);
+    glDisable(GL_DEPTH_TEST);
+    for (int i=0; i<topRenderers.size(); i++) {
+        _glManager->matrixManager->MatrixModeModelView();
+        _glManager->matrixManager->PushMatrix();
+
+        if (topRenderers[i]->IsGLInitialized()) {
+            _applyDatasetTransformsForRenderer(topRenderers[i]);
+
+            //            void *t = _glManager->BeginTimer();
+            std::cout << "Drawing top renderer" << std::endl;
+            int myrc = topRenderers[i]->paintGL(fast);
+            //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
+            GL_ERR_BREAK();
+            if (myrc < 0) rc = -1;
+        }
+        mm->MatrixModeModelView();
+        mm->PopMatrix();
+        int myrc = CheckGLErrorMsg(topRenderers[i]->GetMyName().c_str());
+        if (myrc < 0) rc = -1;
+    }
+    //glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glDepthMask(GL_TRUE);
 
     _vizFeatures->DrawText();
     GL_ERR_BREAK();

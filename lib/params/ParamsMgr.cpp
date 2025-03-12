@@ -499,8 +499,12 @@ void ParamsMgr::RemoveRenderParamsInstance(string winName, string dataSetName, s
 RenderParams *ParamsMgr::GetRenderParams(string winName, string dataSetName, string className, string instName) const
 {
     RenParamsContainer *container = get_ren_container(winName, dataSetName, className);
-    if (!container) { return (NULL); }
+    //RenParamsContainer *container = get_ren_container(winName, dataSetName, instName); breaks
+    if (!container) { 
+        std::cout << "null " << winName << " " << dataSetName << " " << className << " " << instName << std::endl;
+        return (NULL); }
 
+    std::cout << "not null " << winName << " " << dataSetName << " " << className << " " << instName << std::endl;
     return (container->GetParams(instName));
 }
 
@@ -922,6 +926,7 @@ RenParamsContainer *ParamsMgr::get_ren_container(string winName, string dataSetN
     //
 
     const map<string, RenParamsContainer *> *m1Ptr;
+    //std::cout << "get_ren_container winName:" << winName << " dataSetName:" << dataSetName << " renName:" << renderName << std::endl;
     m1Ptr = getWinMap3(_renderParamsMap, winName, dataSetName);
     if (!m1Ptr) return (NULL);
 
