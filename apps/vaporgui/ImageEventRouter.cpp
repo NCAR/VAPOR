@@ -22,6 +22,7 @@ ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     }));
     
     AddAppearanceSubtab(new PSection("Image", {
+        new PCheckbox(IP::DrawOnTopTag, "Draw renderer on top"),
         new PCheckbox(IP::_isGeoRefTag, "Geo Reference"),
         new PCheckbox(IP::_ignoreTransparencyTag, "Ignore Transparency"),
         (new PDoubleSliderEdit(IP::_constantOpacityTag, "Opacity"))->EnableDynamicUpdate(),

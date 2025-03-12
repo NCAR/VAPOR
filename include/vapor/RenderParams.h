@@ -447,6 +447,12 @@ public:
     //! \retval A std::vector<CoordType> of size 4, containing the locations of four vertices.
     std::vector<CoordType> GetSlicePlaneQuad() const { return _slicePlaneQuad; }
 
+    //! Sets whether the renderer is drawn without depth testing (drawn on top of other renderers)
+    void SetDrawOnTop(bool);
+
+    //! Return whether the renderer is drawn without depth testing (drawn on top of other renderers)
+    bool GetDrawOnTop() const;
+
 protected:
     DataMgr *_dataMgr;
     int      _maxDim;
@@ -498,6 +504,7 @@ public:
     static const string CustomHistogramRangeTag;
     static const string LightingEnabledTag;
     static const string UserNameTag;
+    static const string DrawOnTopTag;
 
     //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
     //! this tag identifies the parameter for the origin's

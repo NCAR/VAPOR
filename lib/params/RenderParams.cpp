@@ -68,6 +68,7 @@ const string RenderParams::SlicePlaneNormalZTag = "SlicePlaneNormalZTag";
 const string RenderParams::SlicePlaneOrientationModeTag = "SlicePlaneOrientationModeTag";
 const string RenderParams::LightingEnabledTag = "LightingEnabled";
 const string RenderParams::UserNameTag = "UserNameTag";
+const string RenderParams::DrawOnTopTag = "DrawOnTop";
 
 #define REQUIRED_SAMPLE_SIZE 1000000
 
@@ -146,6 +147,7 @@ void RenderParams::_init()
     float rgb[] = {1.0, 1.0, 1.0};
     SetConstantColor(rgb);
     SetConstantOpacity(1.0);
+    SetDrawOnTop(false);
 }
 
 int RenderParams::Initialize()
@@ -977,6 +979,14 @@ double RenderParams::GetZSlicePlaneOrigin() const
     GetBox()->GetExtents(min, max);
     double defaultVal = (min[2] + max[2]) / 2.;
     return GetValueDouble(ZSlicePlaneOriginTag, defaultVal);
+}
+
+void RenderParams::SetDrawOnTop(bool drawOnTop) {
+    return SetValueLong(DrawOnTopTag, "Set renderer whether to draw on top (no depth testing)", drawOnTop);
+}
+
+bool RenderParams::GetDrawOnTop() const {
+    return GetValueLong(DrawOnTopTag, 0);
 }
 
 bool RenderParams::InitBoxFromVariable(size_t ts, string varName)
