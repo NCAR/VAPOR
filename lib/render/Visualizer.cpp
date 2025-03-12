@@ -224,18 +224,11 @@ int Visualizer::paintEvent(bool fast)
     std::vector<Renderer*> topRenderers;
     int rc = 0;
     for (int i = 0; i < _renderers.size(); i++) {
-        //RenderParams *GetRenderParams(string winName, string dataSetName, string classType, string instName)
         RenderParams* rp = _paramsMgr->GetRenderParams(_winName, _renderers[i]->GetMyDatasetName(), _renderers[i]->GetMyParamsType(), _renderers[i]->GetMyName());
-        //RenderParams* rp = _paramsMgr->GetRenderParams(_winName, _renderers[i]->GetMyDatasetName(), _renderers[i]->GetMyName(), _renderers[i]->GetMyType());
-        //std::cout << "      " << _winName << " " << _renderers[i]->GetMyDatasetName() << " " << _renderers[i]->GetMyType() << " " << _renderers[i]->GetMyName() << std::endl;
-        if (rp==nullptr) std::cout << _renderers[i]->GetMyType() << " had nullptr params" << std::endl;
-        if (rp==nullptr) std::cout << _renderers[i]->GetMyName() << " had nullptr params" << std::endl;
-        if (rp != nullptr && rp->GetDrawOnTop()) {
-            std::cout << "got top renderer" << std::endl;
+        if (rp != nullptr && rp->GetDrawInFront()) {
             topRenderers.push_back(_renderers[i]);
             continue;
         }
-        std::cout << "normal draw of " << _renderers[i]->GetMyType() << std::endl;
 
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PushMatrix();
@@ -268,7 +261,6 @@ int Visualizer::paintEvent(bool fast)
             _applyDatasetTransformsForRenderer(topRenderers[i]);
 
             //            void *t = _glManager->BeginTimer();
-            std::cout << "Drawing top renderer" << std::endl;
             int myrc = topRenderers[i]->paintGL(fast);
             //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
             GL_ERR_BREAK();

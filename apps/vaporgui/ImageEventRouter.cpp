@@ -22,12 +22,12 @@ ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     }));
     
     AddAppearanceSubtab(new PSection("Image", {
-        new PCheckbox(IP::DrawOnTopTag, "Draw renderer on top"),
         new PCheckbox(IP::_isGeoRefTag, "Geo Reference"),
         new PCheckbox(IP::_ignoreTransparencyTag, "Ignore Transparency"),
         (new PDoubleSliderEdit(IP::_constantOpacityTag, "Opacity"))->EnableDynamicUpdate(),
         (new PFileOpenSelector(IP::_fileNameTag, "Image File"))->SetFileTypeFilter("TIFF files, tiled images (*.tiff *.tif *.gtif *.tms)"),
-        new PTMSLODInput()
+        new PTMSLODInput(),
+        new PCheckbox(IP::DrawInFrontTag, "Draw renderer in front")
     }));
     
     AddGeometrySubtab(new PGeometrySubtab);
