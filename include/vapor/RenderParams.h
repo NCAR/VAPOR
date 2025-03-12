@@ -448,10 +448,10 @@ public:
     std::vector<CoordType> GetSlicePlaneQuad() const { return _slicePlaneQuad; }
 
     //! Sets whether the renderer is drawn without depth testing (drawn on top of other renderers)
-    void SetDrawOnTop(bool);
+    void SetDrawInFront(bool);
 
     //! Return whether the renderer is drawn without depth testing (drawn on top of other renderers)
-    bool GetDrawOnTop() const;
+    bool GetDrawInFront() const;
 
 protected:
     DataMgr *_dataMgr;
@@ -504,7 +504,7 @@ public:
     static const string CustomHistogramRangeTag;
     static const string LightingEnabledTag;
     static const string UserNameTag;
-    static const string DrawOnTopTag;
+    static const string DrawInFrontTag;
 
     //! If a renderer supports rotation about a point of origin (IE - Slice and Contour),
     //! this tag identifies the parameter for the origin's
