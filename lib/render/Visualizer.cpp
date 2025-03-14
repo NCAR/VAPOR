@@ -164,6 +164,27 @@ void Visualizer::syncWithParams()
     }
 }
 
+int Visualizer::renderRenderer(Renderer* renderer, bool fast) {
+    _glManager->matrixManager->MatrixModeModelView();
+    _glManager->matrixManager->PushMatrix();
+
+    if (renderer->IsGLInitialized()) {
+        _applyDatasetTransformsForRenderer(renderer);
+
+        //            void *t = _glManager->BeginTimer();
+        int myrc = renderer->paintGL(fast);
+        //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
+        GL_ERR_BREAK();
+        if (myrc < 0) myrc = -1;
+    }
+    MatrixManager *mm = _glManager->matrixManager;
+    mm->MatrixModeModelView();
+    mm->PopMatrix();
+    int myrc = CheckGLErrorMsg(renderer->GetMyName().c_str());
+    if (myrc < 0) myrc = -1;
+    return myrc;
+}
+
 int Visualizer::paintEvent(bool fast)
 {
     _insideGLContext = true;
@@ -230,46 +251,48 @@ int Visualizer::paintEvent(bool fast)
             continue;
         }
 
-        _glManager->matrixManager->MatrixModeModelView();
-        _glManager->matrixManager->PushMatrix();
+        rc = renderRenderer(_renderers[i], fast);
+        //_glManager->matrixManager->MatrixModeModelView();
+        //_glManager->matrixManager->PushMatrix();
 
-        if (_renderers[i]->IsGLInitialized()) {
-            _applyDatasetTransformsForRenderer(_renderers[i]);
+        //if (_renderers[i]->IsGLInitialized()) {
+        //    _applyDatasetTransformsForRenderer(_renderers[i]);
 
-            //            void *t = _glManager->BeginTimer();
+        //    //            void *t = _glManager->BeginTimer();
 
 
-            int myrc = _renderers[i]->paintGL(fast);
-            //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
-            GL_ERR_BREAK();
-            if (myrc < 0) rc = -1;
-        }
-        mm->MatrixModeModelView();
-        mm->PopMatrix();
-        int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
-        if (myrc < 0) rc = -1;
+        //    int myrc = _renderers[i]->paintGL(fast);
+        //    //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
+        //    GL_ERR_BREAK();
+        //    if (myrc < 0) rc = -1;
+        //}
+        //mm->MatrixModeModelView();
+        //mm->PopMatrix();
+        //int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
+        //if (myrc < 0) rc = -1;
     }
 
     //glDepthMask(GL_FALSE);
     glDepthFunc(GL_ALWAYS);
     glDisable(GL_DEPTH_TEST);
     for (int i=0; i<topRenderers.size(); i++) {
-        _glManager->matrixManager->MatrixModeModelView();
-        _glManager->matrixManager->PushMatrix();
+        renderRenderer(topRenderers[i], fast);
+        //_glManager->matrixManager->MatrixModeModelView();
+        //_glManager->matrixManager->PushMatrix();
 
-        if (topRenderers[i]->IsGLInitialized()) {
-            _applyDatasetTransformsForRenderer(topRenderers[i]);
+        //if (topRenderers[i]->IsGLInitialized()) {
+        //    _applyDatasetTransformsForRenderer(topRenderers[i]);
 
-            //            void *t = _glManager->BeginTimer();
-            int myrc = topRenderers[i]->paintGL(fast);
-            //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
-            GL_ERR_BREAK();
-            if (myrc < 0) rc = -1;
-        }
-        mm->MatrixModeModelView();
-        mm->PopMatrix();
-        int myrc = CheckGLErrorMsg(topRenderers[i]->GetMyName().c_str());
-        if (myrc < 0) rc = -1;
+        //    //            void *t = _glManager->BeginTimer();
+        //    int myrc = topRenderers[i]->paintGL(fast);
+        //    //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
+        //    GL_ERR_BREAK();
+        //    if (myrc < 0) rc = -1;
+        //}
+        //mm->MatrixModeModelView();
+        //mm->PopMatrix();
+        //int myrc = CheckGLErrorMsg(topRenderers[i]->GetMyName().c_str());
+        //if (myrc < 0) rc = -1;
     }
     //glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
