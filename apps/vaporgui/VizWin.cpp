@@ -503,7 +503,7 @@ void VizWin::_mouseMoveEventManip(QMouseEvent *e)
     screenCoords[1] *= QApplication::desktop()->devicePixelRatioF();
 
     (void)_manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
-    Render(true);
+    _controlExec->GetParamsMgr()->IntermediateChange();
 }
 
 void VizWin::_mouseMoveEventNavigate(QMouseEvent *e)
@@ -530,7 +530,7 @@ void VizWin::_mouseMoveEventNavigate(QMouseEvent *e)
     _navigationPendingChanges = true;
 
     vParams->SetModelViewMatrix(m);
-    Render(true);
+    paramsMgr->IntermediateChange();
 }
 
 std::vector<double> VizWin::_getScreenCoords(QMouseEvent *e) const

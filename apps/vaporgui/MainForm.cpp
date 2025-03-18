@@ -986,6 +986,10 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
 #endif
 
+        setUpdatesEnabled(false);
+        _controlExec->SyncWithParams();
+        setUpdatesEnabled(true);
+
         Render(true);
 
         return true;
