@@ -249,7 +249,8 @@ float MapperFunction::getOpacityValueData(float value) const
     for (int i = 0; i < getNumOpacityMaps(); i++) {
         OpacityMap *omap = GetOpacityMap(i);
 
-        if (omap->IsEnabled() && omap->inDataBounds(value)) {
+        // if (omap->IsEnabled() && omap->inDataBounds(value)) {
+        if (omap->IsEnabled()) { // Bounds handling was buggy and bounded opacity maps are no longer used
             if (getOpacityComposition() == ADDITION) {
                 opacity += omap->opacityData(value);
             } else    // _compType == MULTIPLICATION
