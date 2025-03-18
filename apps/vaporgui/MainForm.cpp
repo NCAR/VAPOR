@@ -209,6 +209,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _controlExec->SetSaveStateEnabled(true);
     _controlExec->RebaseStateSave();
     _paramsMgr->TriggerManualStateChangeEvent("Init");
+    _stateChangeFlag = false;
 
     if (interactive && GetSettingsParams()->GetAutoCheckForUpdates()) CheckForAndShowUpdate(_controlExec);
     if (interactive && GetSettingsParams()->GetAutoCheckForNotices()) NoticeBoard::CheckForAndShowNotices(_controlExec);
