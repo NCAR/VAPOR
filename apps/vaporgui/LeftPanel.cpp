@@ -26,6 +26,7 @@ LeftPanel::LeftPanel(ControlExec *ce)
 
 void LeftPanel::Update()
 {
+    if (_uTabs.empty()) return;
     _uTabs[currentIndex()]->Update();
 }
 
