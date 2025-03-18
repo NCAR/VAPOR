@@ -31,6 +31,8 @@ public:
     //! Allows the user to input values outside of the range and allows them to change the range.
     void AllowCustomRange();
 
+    void SetNumDigits(int digits);
+
 private:
     void  setTextboxes(float left, float right);
     float getRange() const;

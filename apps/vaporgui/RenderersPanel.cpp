@@ -1,7 +1,7 @@
 #include "RenderersPanel.h"
 #include <QSplitter>
-#include <vapor/GUIStateParams.h>
-#include <vapor/ControlExecutive.h>
+#include "vapor/GUIStateParams.h"
+#include "vapor/ControlExecutive.h"
 #include "RendererList.h"
 #include "RendererInspector.h"
 #include "DatasetInspector.h"
@@ -18,10 +18,12 @@ RenderersPanel::RenderersPanel(VAPoR::ControlExec *ce)
     _splitter->setChildrenCollapsible(false);
     _inspectorRouter->Add(_renInspector = new RendererInspector(_ce));
     _inspectorRouter->Add(_dataInspector = new DatasetInspector(_ce));
+    setEnabled(false);
 }
 
 void RenderersPanel::Update()
 {
+    setEnabled(true);
     GUIStateParams *guiParams = (GUIStateParams *)_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
 
     _renList->Update();

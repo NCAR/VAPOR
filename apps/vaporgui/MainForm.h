@@ -46,6 +46,8 @@ class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
 
+class LeftPanel;
+
 using namespace VAPoR;
 using std::optional;
 
@@ -58,6 +60,18 @@ public:
 
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
     static QWidget* Instance() { assert(_instance); return _instance; }
+
+    // Needed for Import/Data widget
+    enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
+    void ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
+
+    // Needed for Export/Capture widget
+    bool StartAnimCapture(string baseFile, string defaultSuffix = "tiff");
+    void SetTimeStep(int ts) const;
+    void AnimationPlayForward() const;
+
+public slots:
+    void CaptureSingleImage(string filter, string defaultSuffix);
 
 protected:
     void Render(bool fast=false);
@@ -88,6 +102,9 @@ private:
     QAction *_captureEndImageAction;
     QAction *_stepForwardAction;
     QAction *_stepBackAction;
+
+    // Need member variable for leftPanel->UpdateImportMenu() in MainForm::updateUI()
+    LeftPanel* leftPanel;
 
     bool     _animationCapture = false;
     int      _progressSavedFB = -1;
@@ -154,8 +171,6 @@ private:
     static int          checkQStringContainsNonASCIICharacter(const QString &s);
     std::vector<string> getUserFileSelection(string prompt, string dir, string filter, bool multi);
 
-    enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
-    void importDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
     void showImportDatasetGUI(string format);
     void openSession(const string &path, bool loadData=true);
     void showOpenSessionGUI();
@@ -191,10 +206,8 @@ private slots:
     void sessionNew();
     void captureTiffSequence();
     void capturePngSequence();
-    void selectAnimCatureOutput(string filter, string defaultSuffix);
-    void startAnimCapture(string baseFile, string defaultSuffix = "tiff");
+    void selectAnimCaptureOutput(string filter, string defaultSuffix);
     void endAnimCapture();
-    void captureSingleImage(string filter, string defaultSuffix);
     void launchStats();
     void launchPlotUtility();
     void launchPythonVariables();
