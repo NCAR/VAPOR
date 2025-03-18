@@ -103,14 +103,23 @@ QPushButton *NewRendererDialog::_createButton(QIcon icon, QString name, int inde
     return button;
 }
 
-void NewRendererDialog::InitializeDataSources(VAPoR::DataStatus *dataStatus)
+void NewRendererDialog::InitializeDataSources(VAPoR::ControlExec *ce)
 {
+    VAPoR::DataStatus *dataStatus = ce->GetDataStatus();
     _dataStatus = dataStatus;
     const vector<string> datasets = dataStatus->GetDataMgrNames();
+
+    const auto gsp = ce->GetParams<GUIStateParams>();
+    string activeDataset = gsp->GetActiveDataset();
+    if (activeDataset.empty()) {
+        string _1, _2;
+        ce->RenderLookup(gsp->GetActiveRendererInst(), _1, activeDataset, _2);
+    }
 
     dataMgrCombo->blockSignals(true);
     dataMgrCombo->clear();
     for (int i = 0; i < datasets.size(); i++) { dataMgrCombo->addItem(QString::fromStdString(datasets[i])); }
+    dataMgrCombo->setCurrentText(QString::fromStdString(activeDataset));
     dataMgrCombo->blockSignals(false);
 
     _showRelevantRenderers();
