@@ -2,10 +2,10 @@
 #include <vapor/STLUtils.h>
 #include <QStandardItemModel>
 #include <cassert>
+#include "VHBoxWidget.h"
 
-VComboBox::VComboBox(const std::vector<std::string> &values) : VHBoxWidget()
+VComboBox::VComboBox(const std::vector<std::string> &values) : VContainer(_combo = new QComboBox)
 {
-    _combo = new QComboBox;
     _combo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
     // Disable scroll wheel
@@ -13,7 +13,6 @@ VComboBox::VComboBox(const std::vector<std::string> &values) : VHBoxWidget()
     _combo->setFocusPolicy(Qt::StrongFocus);
     _combo->installEventFilter(new MouseWheelWidgetAdjustmentGuard(_combo));
 
-    layout()->addWidget(_combo);
     SetOptions(values);
 
     // We are forced to used SIGNAL/SLOT macros here because there are two

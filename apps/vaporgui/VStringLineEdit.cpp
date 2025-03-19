@@ -10,6 +10,7 @@
 VStringLineEdit::VStringLineEdit(std::string value) : VHBoxWidget(), _lineEdit(new QLineEdit), _strValue(value)
 {
     layout()->addWidget(_lineEdit);
+    _lineEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     connect(_lineEdit, SIGNAL(editingFinished()), this, SLOT(_valueChanged()));
 
     _lineEdit->setContextMenuPolicy(Qt::DefaultContextMenu);

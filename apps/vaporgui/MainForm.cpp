@@ -156,6 +156,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _status->hide();
 
     sideDockWidgetArea->setWidget(new VGroup({leftPanel, _status}));
+    // Only this specific resize method works for dock widgets, all other resize methods are noops
+    resizeDocks({sideDockWidgetArea}, {leftPanel->minimumWidth()}, Qt::Horizontal);
 
     createMenus();
     createToolBars();
@@ -768,6 +770,7 @@ void MainForm::importDataset(const std::vector<string> &files, string format, Da
 {
     _paramsMgr->BeginSaveStateGroup("Import Dataset");
     if (name.empty()) name = _getDataSetName(files[0], existsAction);
+    if (name.empty()) return;
     int rc = _controlExec->OpenData(files, name, format);
     if (rc < 0) {
         _paramsMgr->EndSaveStateGroup();
