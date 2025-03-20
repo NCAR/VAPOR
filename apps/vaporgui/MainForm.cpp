@@ -146,17 +146,17 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _animationController = new AnimationController(_controlExec);
     connect(_animationController, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
 
-    leftPanel = new LeftPanel(_controlExec, this);
+    _leftPanel = new LeftPanel(_controlExec, this);
     const int dpi = qApp->desktop()->logicalDpiX();
-    leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
-    leftPanel->setMinimumHeight(500);
-    _dependOnLoadedData_insert(leftPanel);
-    _updatableElements.insert(leftPanel);
+    _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
+    _leftPanel->setMinimumHeight(500);
+    _dependOnLoadedData_insert(_leftPanel);
+    _updatableElements.insert(_leftPanel);
 
     _status = new ProgressStatusBar;
     _status->hide();
 
-    sideDockWidgetArea->setWidget(new VGroup({leftPanel, _status}));
+    sideDockWidgetArea->setWidget(new VGroup({_leftPanel, _status}));
 
     createMenus();
     createToolBars();
@@ -594,10 +594,13 @@ retryLoad:
         checkSessionDatasetsExist();
     else
         for (auto name : gsp->GetOpenDataSetNames()) gsp->RemoveOpenDataSet(name);
+
     _paramsMgr->UndoRedoClear();
     _sessionNewFlag = false;
     _stateChangeFlag = false;
     _paramsMgr->TriggerManualStateChangeEvent("Session Opened");
+
+    _leftPanel->GoToRendererTab();
 }
 
 
@@ -776,9 +779,10 @@ void MainForm::ImportDataset(const std::vector<string> &files, string format, Da
     }
 
     auto gsp = _controlExec->GetParams<GUIStateParams>();
-    DataStatus *ds = _controlExec->GetDataStatus();
-
+    gsp->SetValueStringVec(GUIStateParams::ImportDataFilesTag, "Most recently imported data files", {});
     gsp->InsertOpenDataSet(name, format, files);
+
+    DataStatus *ds = _controlExec->GetDataStatus();
     GetAnimationParams()->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
 
     if (_sessionNewFlag) {
@@ -789,6 +793,7 @@ void MainForm::ImportDataset(const std::vector<string> &files, string format, Da
 
     _sessionNewFlag = false;
     _paramsMgr->EndSaveStateGroup();
+    _leftPanel->GoToRendererTab();
 }
 
 void MainForm::showImportDatasetGUI(string format)
@@ -1031,8 +1036,6 @@ void MainForm::updateUI()
     _widgetsEnabled = !GetStateParams()->GetOpenDataSetNames().empty();
     for (auto &e : _dependOnLoadedData) e->setEnabled(_widgetsEnabled);
 
-    leftPanel->UpdateImportMenu();
-
     for (const auto &e : _updatableElements) 
         e->Update();
 
@@ -1082,7 +1085,8 @@ void MainForm::CaptureSingleImage(string filter, string defaultSuffix)
     if (files.isEmpty()) return;
     QString fn = files[0];
     auto ap = GetAnimationParams();
-    ap->SetValueString(AnimationParams::CaptureFileNameTag, "Capture file name", fn.toStdString());
+    ap->SetValueString(AnimationParams::CaptureFileNameTag, "Capture file name", FileUtils::Basename(fn.toStdString()));
+    ap->SetValueString(AnimationParams::CaptureFileDirTag, "Capture file directory", FileUtils::Dirname(fn.toStdString()));
 
     QFileInfo fileInfo(fn);
     QString   suffix = fileInfo.suffix();

@@ -11,12 +11,13 @@ using namespace VAPoR;
 
 ImportTab::ImportTab(VAPoR::ControlExec *ce, MainForm *mf) : _ce(ce)
 {
-
     QVBoxLayout *l = new QVBoxLayout;
     l->setContentsMargins(0, 0, 0, 0);
 
     l->addWidget(new VSectionGroup("Import Data", {_importer = new PImportData(_ce, mf)}));
     connect(_importer, &PImportData::dataImported, this, &ImportTab::DataImported);
+
+    //l->addWidget(new PImportData2("Import Data2");
 
     VSectionGroup *sg = new VSectionGroup("Tips", {
         new VHyperlink(

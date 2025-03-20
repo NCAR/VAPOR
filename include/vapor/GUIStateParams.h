@@ -218,8 +218,9 @@ public:
     static const string BookmarksTag;
     static const string MovingDomainTrackCameraTag;
     static const string MovingDomainTrackRenderRegionsTag;
-    static const string SelectedImportDataTypeTag;
-    static const string SelectedImportDataFilesTag;
+    static const string ImportDataDirTag;
+    static const string ImportDataTypeTag;
+    static const string ImportDataFilesTag;
 
 private:
     MouseModeParams *m_mouseModeParams;

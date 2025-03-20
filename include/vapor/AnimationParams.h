@@ -136,9 +136,11 @@ public:
     static const string CaptureModeTag;
     static const string CaptureTypeTag;
     static const string CaptureFileNameTag;
+    static const string CaptureFileDirTag;
     static const string CaptureFileTimeTag;
-    static const string CaptureTimeseriesFileNameTag;
-    static const string CaptureTimeseriesTimeTag;
+    static const string CaptureTimeSeriesFileDirTag;
+    static const string CaptureTimeSeriesFileNameTag;
+    static const string CaptureTimeSeriesTimeTag;
 
 private:
     //! Put a params instance into default state with no data.

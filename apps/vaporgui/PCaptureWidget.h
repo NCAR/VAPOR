@@ -44,7 +44,7 @@ class PCaptureToolbar : public PWidget {
     VComboBox *_typeCombo;
     VLabel *_fileLabel;
     PButton *_captureButton;
-    PButton *_captureTimeseriesButton;
+    PButton *_captureTimeSeriesButton;
 
 public:
     PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf);
@@ -54,7 +54,7 @@ protected:
 
 private slots:
     void _captureSingleImage();
-    void _captureTimeseries();
+    void _captureTimeSeries();
 };
     
 class PCaptureWidget : public PWidget {

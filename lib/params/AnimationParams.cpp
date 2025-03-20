@@ -40,9 +40,11 @@ const string AnimationParams::_playBackwardsTag = "PlayBackwards";
 const string AnimationParams::CaptureModeTag = "CaptureModeTag";
 const string AnimationParams::CaptureTypeTag = "CaptureTypeTag";
 const string AnimationParams::CaptureFileNameTag = "CaptureFileNameTag";
+const string AnimationParams::CaptureFileDirTag = "CaptureFileDirTag";
 const string AnimationParams::CaptureFileTimeTag = "CaptureFileTimeTag";
-const string AnimationParams::CaptureTimeseriesFileNameTag = "CaptureTimeseriesFileNameTag";
-const string AnimationParams::CaptureTimeseriesTimeTag = "CaptureTimeseriesTimeTag";
+const string AnimationParams::CaptureTimeSeriesFileDirTag = "CaptureTimeSeriesFileDirTag";
+const string AnimationParams::CaptureTimeSeriesFileNameTag = "CaptureTimeSeriesFileNameTag";
+const string AnimationParams::CaptureTimeSeriesTimeTag = "CaptureTimeSeriesTimeTag";
 
 //
 // Register class with object factory!!!

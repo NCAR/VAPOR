@@ -17,7 +17,7 @@
 #include <QHBoxLayout>
 
 const std::string CaptureModes::CURRENT = "Current frame";
-const std::string CaptureModes::RANGE   = "Timeseries range";
+const std::string CaptureModes::RANGE   = "Time series range";
 
 const std::string TiffStrings::CaptureFileType = "TIFF";
 const std::string TiffStrings::FileFilter = "TIFF (*.tif)";
@@ -34,6 +34,7 @@ PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
 
     _typeCombo = new VComboBox({TiffStrings::CaptureFileType, PngStrings::FileFilter});
     _fileLabel = new VLabel("");
+    _fileLabel->MakeSelectable();
 
     _captureButton = new PButton("Capture\nCurrent Frame", [this](VAPoR::ParamsBase*){_captureSingleImage();});
     // PWidget is setting _enableBasedOnParamsValue to 0, so we need to set it to a non-zero value.
@@ -41,17 +42,17 @@ PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
     _captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, -1);
     _captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::CURRENT);
 
-    _captureTimeseriesButton = new PButton("Capture\nTimeseries", [this](VAPoR::ParamsBase*){_captureTimeseries();});
+    _captureTimeSeriesButton = new PButton("Capture\nTime Series", [this](VAPoR::ParamsBase*){_captureTimeSeries();});
     // Need to set ShowBasedOnParam for a numeric value.  See previous comment.
-    _captureTimeseriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, -1);
-    _captureTimeseriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::RANGE);
+    _captureTimeSeriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, -1);
+    _captureTimeSeriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::RANGE);
     
 
     QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(_hBox->layout());
     layout->addWidget(_typeCombo,1);
     layout->addWidget(_fileLabel,3);
     layout->addWidget(_captureButton,1);
-    layout->addWidget(_captureTimeseriesButton,1);
+    layout->addWidget(_captureTimeSeriesButton,1);
 }
 
 void PCaptureToolbar::updateGUI() const {
@@ -59,14 +60,15 @@ void PCaptureToolbar::updateGUI() const {
     _typeCombo->SetValue(ap->GetValueString(AnimationParams::CaptureTypeTag, TiffStrings::CaptureFileType));
 
     // Format the label for the saved file
-    std::string file = "";
-    std::string time = "";
+    std::string dir, file, time;
     if (ap->GetValueString(AnimationParams::CaptureModeTag, "") == CaptureModes::CURRENT) {
+        dir = ap->GetValueString(AnimationParams::CaptureFileDirTag, "");
         file = ap->GetValueString(AnimationParams::CaptureFileNameTag, "");
         time = ap->GetValueString(AnimationParams::CaptureFileTimeTag, "");
     }
     else {
-        file = ap->GetValueString(AnimationParams::CaptureTimeseriesFileNameTag, "");
+        dir = ap->GetValueString(AnimationParams::CaptureTimeSeriesFileDirTag, "");
+        file = ap->GetValueString(AnimationParams::CaptureTimeSeriesFileNameTag, "");
         size_t lastSlash = file.find_last_of("/\\");
         size_t lastDot = file.find_last_of(".");
 
@@ -74,13 +76,13 @@ void PCaptureToolbar::updateGUI() const {
         bool valid = lastDot != std::string::npos && (lastSlash == std::string::npos || lastDot > lastSlash);
         if (valid) file = file.substr(0, lastDot) + "_####" + file.substr(lastDot);
 
-        time = ap->GetValueString(AnimationParams::CaptureTimeseriesTimeTag, "");
+        time = ap->GetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "");
     }
-    if (!file.empty()) file = "Saved: " + file + "\nAt: " + time;
+    if (!file.empty()) file = "Saved: " + file + "\nDir: " + dir + "\nOn: " + time;
     _fileLabel->SetText(file);
 
     _captureButton->Update(ap);
-    _captureTimeseriesButton->Update(ap);
+    _captureTimeSeriesButton->Update(ap);
 }
 
 void PCaptureToolbar::_captureSingleImage() {
@@ -92,7 +94,7 @@ void PCaptureToolbar::_captureSingleImage() {
     ap->SetValueString(AnimationParams::CaptureFileTimeTag, "Capture file time", STLUtils::GetUserTime());
 }
 
-void PCaptureToolbar::_captureTimeseries() {
+void PCaptureToolbar::_captureTimeSeries() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
    
     std::string filter, defaultSuffix;
@@ -105,11 +107,12 @@ void PCaptureToolbar::_captureTimeseries() {
          defaultSuffix =  PngStrings::FileSuffix;
     }
 
-    std::string fileName = QFileDialog::getSaveFileName(this, "Select Filename Prefix", QString::fromStdString(FileUtils::HomeDir()), QString::fromStdString(filter)).toStdString();
+    std::string defaultPath = ap->GetValueString(AnimationParams::CaptureTimeSeriesFileDirTag, FileUtils::HomeDir());
+    std::string fileName = QFileDialog::getSaveFileName(this, "Select Filename Prefix", QString::fromStdString(defaultPath), QString::fromStdString(filter)).toStdString();
     if (fileName.empty()) return;
 
-    ap->SetValueString(AnimationParams::CaptureTimeseriesFileNameTag, "Capture animation file name", fileName);
-    ap->SetValueString(AnimationParams::CaptureTimeseriesTimeTag, "Capture file time", STLUtils::GetUserTime());
+    ap->SetValueString(AnimationParams::CaptureTimeSeriesFileNameTag, "Capture animation file name", fileName);
+    ap->SetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "Capture file time", STLUtils::GetUserTime());
 
     _mf->SetTimeStep(ap->GetStartTimestep());
     bool rc = _mf->StartAnimCapture(fileName, defaultSuffix);  // User may cancel to prevent file overwrite, so capture return code

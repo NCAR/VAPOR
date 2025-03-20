@@ -21,7 +21,7 @@ LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
     };
    
     _importTab = new ImportTab(_ce, mf); 
-    connect(_importTab, &ImportTab::dataImported, this, &LeftPanel::_goToRendererTab);
+    connect(_importTab, &ImportTab::dataImported, this, &LeftPanel::GoToRendererTab);
     add(_importTab, "Import");
     add(new RenderersPanel(ce), "Render");
     add(new AnnotationEventRouter(ce), "Annotate");
@@ -35,17 +35,21 @@ LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
 
 void LeftPanel::Update()
 {
+    // Enable the only import panel when no data is loaded
     bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
-    if (noDatasetLoaded) return;
+    if (noDatasetLoaded) { 
+        setEnabled(true);
+        _importTab->setEnabled(true);
+        _importTab->Update();
+        setCurrentIndex(0);
+        for (int tabNum=1; tabNum < count(); tabNum++) setTabEnabled(tabNum, false);
+        return;
+    }
+
+    // Otherwise enable and update all tabs
     for (int i = 0; i < count(); ++i) setTabEnabled(i, true);
     setTabEnabled(currentIndex(),true);
     _uTabs[currentIndex()]->Update();
-}
-
-void LeftPanel::UpdateImportMenu() {
-    setEnabled(true);
-    _importTab->setEnabled(true);
-    _importTab->Update();
 }
 
 void LeftPanel::tabChanged(int i)
@@ -53,4 +57,6 @@ void LeftPanel::tabChanged(int i)
     _uTabs[i]->Update();
 }
 
-void LeftPanel::_goToRendererTab() { setCurrentIndex(1); }
+void LeftPanel::GoToRendererTab() { 
+    setCurrentIndex(1); 
+}

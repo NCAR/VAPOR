@@ -104,7 +104,7 @@ private:
     QAction *_stepBackAction;
 
     // Need member variable for leftPanel->UpdateImportMenu() in MainForm::updateUI()
-    LeftPanel* leftPanel;
+    LeftPanel* _leftPanel;
 
     bool     _animationCapture = false;
     int      _progressSavedFB = -1;

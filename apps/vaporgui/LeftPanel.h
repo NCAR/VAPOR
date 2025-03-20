@@ -17,8 +17,8 @@ public:
     LeftPanel(ControlExec *ce, MainForm* mf);
     void Update() override;
     void UpdateImportMenu();
+    void GoToRendererTab();
 
 private:
     void tabChanged(int i);
-    void _goToRendererTab();
 };

@@ -46,8 +46,9 @@ const string GUIStateParams::_flowDimensionalityTag = "_flowDimensionalityTag";
 const string GUIStateParams::BookmarksTag = "BookmarksTag";
 const string GUIStateParams::MovingDomainTrackCameraTag = "MovingDomainTrackCameraTag";
 const string GUIStateParams::MovingDomainTrackRenderRegionsTag = "MovingDomainTrackRenderRegionsTag";
-const string GUIStateParams::SelectedImportDataTypeTag = "SelectedImportDataTypeTag";
-const string GUIStateParams::SelectedImportDataFilesTag = "SelectedImportDataFilesTag";
+const string GUIStateParams::ImportDataDirTag = "ImportDataDirTag";
+const string GUIStateParams::ImportDataTypeTag = "ImportDataTypeTag";
+const string GUIStateParams::ImportDataFilesTag = "ImportDataFilesTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetRelativePathsTag = "DataSetRelativePathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";
@@ -342,7 +343,7 @@ void GUIStateParams::_init() {
     SetActiveVizName("");
     SetValueLong(MovingDomainTrackCameraTag, "", true);
     SetValueLong(MovingDomainTrackRenderRegionsTag, "", true);
-    SetValueString(SelectedImportDataTypeTag, "Default dataset to import", "WRF-ARW") ;
+    SetValueString(ImportDataTypeTag, "Default dataset to import", "WRF-ARW") ;
 }
 
 void GUIStateParams::ActiveRenderer::SetActiveRenderer(string vizWin, string renderType, string renderInst)
