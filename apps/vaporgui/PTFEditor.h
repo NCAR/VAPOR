@@ -91,16 +91,30 @@ protected:
     void Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::DataMgr* dm) override;
     void getExpandedPTFEditorInfo(std::string &name, std::string &type);
 
-signals:
-    void closed();
-
 private slots:
     void showExpandedPTFEditor();
     void closeExpandedPTFEditor();
-    void closeEvent(QCloseEvent* event) override;
 };
 
 class PColormapTFEditor : public PTFEditor {
 public:
     PColormapTFEditor();
 };
+
+//! \class Expanded PTFEditor
+//! A sublcass of PTFEditor that emits a signal when closed
+//! \copydoc PTFEditor
+
+class ExpandedPTFEditor : public PTFEditor {
+    Q_OBJECT
+
+public:
+    using PTFEditor::PTFEditor;
+
+signals:
+    void closed();
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
+};
+

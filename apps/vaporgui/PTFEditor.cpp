@@ -171,7 +171,7 @@ void PTFEditor::getExpandedPTFEditorInfo(std::string &name, std::string& type) {
 
 void PTFEditor::showExpandedPTFEditor() {
     if (_expandedPTFEditor==nullptr) {
-        _expandedPTFEditor = new PTFEditor(getTag(), _elements, _section->getTitle(), false);
+        _expandedPTFEditor = new ExpandedPTFEditor(getTag(), _elements, _section->getTitle(), false);
         connect(_expandedPTFEditor, SIGNAL(closed()), this, SLOT(closeExpandedPTFEditor()));
 
         if (_showColormapBasedOnParam==true) _expandedPTFEditor->ShowColormapBasedOnParam(_showColormapBasedOnParamTag, _showColormapBasedOnParamValue);
@@ -196,9 +196,9 @@ void PTFEditor::hideEvent(QHideEvent* event) {
     closeExpandedPTFEditor();
 }
 
-void PTFEditor::closeEvent(QCloseEvent* event) {
-    emit closed();
-    close();
-}
-
 PColormapTFEditor::PColormapTFEditor() : PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function") {}
+
+void ExpandedPTFEditor::closeEvent(QCloseEvent *event) {
+    emit closed();
+    QWidget::closeEvent(event);
+}
