@@ -37,30 +37,6 @@ protected slots:
     virtual void buttonClicked();
 };
 
-//! \class PFilesOpenSelector
-//! A PFileSelector that provides an Open File dialog for multiple files
-//! \copydoc PFileSelector
-
-//class PFilesOpenSelector : public PFileSelector {
-//    Q_OBJECT
-//public:
-//    using PFileSelector::PFileSelector;
-//
-//protected:
-//    QStringList selectPaths(const std::string &defaultPath) const;
-//    virtual QString selectPath(const std::string &defaultPath) const override;
-//
-//protected slots:
-//    virtual void buttonClicked() override;
-//
-//signals:
-//    void filesSelected();
-//};
-
-//! \class PFileOpenSelector
-//! A PFileSelector that provides an Open File dialog
-//! \copydoc PFileSelector
-
 class PFileOpenSelector : public PFileSelector {
     Q_OBJECT
 public:

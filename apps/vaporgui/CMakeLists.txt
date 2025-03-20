@@ -322,8 +322,10 @@ set (SRCS
     VRadioButton.cpp
     PRadioButtons.h
     PRadioButtons.cpp
-    PImportData.h
-    PImportData.cpp
+    PImportDataWidget.h
+    PImportDataWidget.cpp
+    PImportDataLineItem.h
+    PImportDataLineItem.cpp
     PTimeRangeSelector.cpp
     PTimeRangeSelector.h
     PCaptureWidget.h
