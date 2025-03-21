@@ -1,5 +1,6 @@
 #include "PTFEditor.h"
 #include <vapor/RenderParams.h>
+#include <vapor/GUIStateParams.h>
 #include "TFColorWidget.h"
 #include "TFOpacityWidget.h"
 #include "TFHistogramWidget.h"
@@ -28,22 +29,24 @@ template class PTFMapWidget<TFIsoValueWidget>;
 
 PTFEditor::PTFEditor() : PTFEditor(RenderParams::_variableNameTag) {}
 
-PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label) : PWidget(tag, _section = new VSection(label.empty() ? tag : label))
+PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PWidget(tag, _section = new VSection(label.empty() ? tag : label)), _expandable(expandable)
 {
+    setMaximumSize(1200,720);
     _maps = new TFMapGroupWidget;
     _histogram = new TFHistogramMap(tag);
     _opacityMap = new TFOpacityMap(tag);
     _colorMap = new TFColorMap(tag);
     _isoMap = new TFIsoValueMap(tag);
     _range = new TFMappingRangeSelector(tag);
+    _elements = elements;
 
     _maps->Add({_opacityMap, _histogram});
     _maps->Add(_isoMap);
     _maps->Add(_colorMap);
 
-    _section->layout()->addWidget(_maps);
+    _section->layout()->addWidget(_maps, 1);
     _section->layout()->addWidget(_mapsInfo = _maps->CreateInfoGroup());
-    _section->layout()->addWidget(_range);
+    _section->layout()->addWidget(_range, 0);
     connect(_range, SIGNAL(ValueChangedIntermediate(float, float)), _histogram, SLOT(update()));
 
     int    start = 0;
@@ -62,6 +65,11 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
     start = menu->actions().size();
     _histogram->PopulateSettingsMenu(menu);
     for (int i = start; i < menu->actions().size(); i++) _histogramActions.push_back(menu->actions()[i]);
+
+    if (_expandable) {
+        _section->enableExpandedSection();
+        connect(_section, &VSection::expandButtonClicked, this, &PTFEditor::showExpandedPTFEditor);
+    }
 
     _section->setMenu(menu);
 
@@ -134,4 +142,63 @@ void PTFEditor::updateGUI() const
     for (auto a : _histogramActions) a->setEnabled(_histogram->IsShown());
 }
 
+void PTFEditor::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr) {
+    if (getParams() != params) {
+        closeExpandedPTFEditor();
+    }
+    PWidget::Update(params, paramsMgr, dataMgr);
+    if (_expandable==true) {
+        std::string name, inst;
+        getExpandedPTFEditorInfo(name, inst);
+
+        if (_expandedPTFEditor!=nullptr) {
+            _expandedPTFEditor->setWindowTitle(QString::fromStdString(name));
+            _expandedPTFEditor->Update(params, paramsMgr, dataMgr);
+        }
+    }
+}
+
+void PTFEditor::getExpandedPTFEditorInfo(std::string &name, std::string& type) {
+    ParamsMgr* pm = getParamsMgr();
+    GUIStateParams* p = dynamic_cast<GUIStateParams *>(pm->GetParams(GUIStateParams::GetClassType()));
+    type = p->GetActiveRendererInst();
+    p->GetActiveRenderer(p->GetActiveVizName(), type, name);
+    if (dynamic_cast<PColormapTFEditor*>(this)) {
+        name+="_Colormap";
+        type+="_Colormap";
+    }
+}
+
+void PTFEditor::showExpandedPTFEditor() {
+    if (_expandedPTFEditor==nullptr) {
+        _expandedPTFEditor = new ExpandedPTFEditor(getTag(), _elements, _section->getTitle(), false);
+        connect(_expandedPTFEditor, SIGNAL(closed()), this, SLOT(closeExpandedPTFEditor()));
+
+        if (_showColormapBasedOnParam==true) _expandedPTFEditor->ShowColormapBasedOnParam(_showColormapBasedOnParamTag, _showColormapBasedOnParamValue);
+        if (_showOpacityBasedOnParam==true) _expandedPTFEditor->ShowOpacityBasedOnParam(_showOpacityBasedOnParamTag, _showOpacityBasedOnParamValue);
+
+        _expandedPTFEditor->setAttribute(Qt::WA_ShowWithoutActivating);
+        _expandedPTFEditor->setAttribute(Qt::WA_DeleteOnClose);
+    }
+    _expandedPTFEditor->raise();
+
+    Update(getParams(), getParamsMgr(), getDataMgr());
+}
+
+void PTFEditor::closeExpandedPTFEditor() {
+    if (_expandedPTFEditor != nullptr) {
+        _expandedPTFEditor->close();
+        _expandedPTFEditor=nullptr;
+    }
+}
+
+void PTFEditor::hideEvent(QHideEvent* event) {
+    closeExpandedPTFEditor();
+}
+
 PColormapTFEditor::PColormapTFEditor() : PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function") {}
+
+void ExpandedPTFEditor::closeEvent(QCloseEvent *event) {
+    emit closed();
+    QWidget::closeEvent(event);
+}
