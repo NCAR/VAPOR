@@ -40,6 +40,7 @@ class PCaptureHBox : public PWidget {
     PHGroup *_pGroup;
     VHBoxWidget *_hBox;
     PStringDropdown *_fileTypeSelector;
+    const std::vector<long> _enumMap;
 
     VComboBox *_typeCombo;
     VLabel *_fileLabel;
@@ -53,6 +54,7 @@ protected:
     virtual void updateGUI() const;
 
 private slots:
+    void _dropdownIndexChanged(int index);
     void _captureSingleImage();
     void _captureTimeSeries();
 };

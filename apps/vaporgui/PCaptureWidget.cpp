@@ -34,7 +34,8 @@ PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, MainForm *mf)
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     _typeCombo = new VComboBox({TiffStrings::CaptureFileType, PngStrings::CaptureFileType});
-    _typeCombo2 = new PEnumDropdown(AnimationParams::CaptureTypeTag, {TiffStrings::CaptureFileType, PngStrings::CaptureFileType}, {0, 1}, "");
+    connect(_typeCombo, &VComboBox::IndexChanged, this, &PCaptureHBox::_dropdownIndexChanged);
+
     _fileLabel = new VLabel("");
     _fileLabel->MakeSelectable();
 
@@ -52,10 +53,20 @@ PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, MainForm *mf)
 
     QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(_hBox->layout());
     layout->addWidget(_typeCombo,1);
-    layout->addWidget(_typeCombo2,1);
     layout->addWidget(_fileLabel,3);
     layout->addWidget(_captureButton,1);
     layout->addWidget(_captureTimeSeriesButton,1);
+}
+
+void PCaptureHBox::_dropdownIndexChanged(int index) {
+    int value;
+    if (_enumMap.empty()) {
+        value = index;
+    } else {
+        VAssert(index >= 0 && index < _enumMap.size());
+        value = _enumMap[index];
+    }
+    setParamsLong(value);
 }
 
 void PCaptureHBox::updateGUI() const {
