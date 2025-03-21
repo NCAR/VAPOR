@@ -10,7 +10,7 @@ class VHBoxWidget;
 class VLabel;
 class PButton;
 
-class PImportDataLineItem : public PLineItem {
+class PImportDataButton : public PWidget {
     Q_OBJECT
 
     VAPoR::ControlExec *_ce;
@@ -22,7 +22,7 @@ class PImportDataLineItem : public PLineItem {
     void _importDataset();
 
 public:
-    PImportDataLineItem(VAPoR::ControlExec* ce, MainForm *mf);
+    PImportDataButton(VAPoR::ControlExec* ce, MainForm *mf);
 
 protected:
     void updateGUI() const override;

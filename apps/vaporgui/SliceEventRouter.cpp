@@ -31,7 +31,7 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
         new PSliceController,
         new PGeometrySubtab,
     }));
-    AddAnnotationSubtab(new PAnnotationColorbarWidget);
+    AddColorbarSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }

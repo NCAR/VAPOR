@@ -1,7 +1,7 @@
 #include "DatasetTypeLookup.h"
 #include "MainForm.h"
 #include "PImportDataWidget.h"
-#include "PImportDataLineItem.h"
+#include "PImportDataButton.h"
 #include "PRadioButtons.h"
 #include "PGroup.h"
 
@@ -13,7 +13,7 @@ PImportDataWidget::PImportDataWidget(VAPoR::ControlExec* ce, MainForm* mf) : PWi
     PRadioButtons* prb = new PRadioButtons(GUIStateParams::ImportDataTypeTag, types);
     _group->Add(prb);
     
-    _group->Add(new PImportDataLineItem(ce, mf));
+    _group->Add(new PImportDataButton(ce, mf));
 }
 
 void PImportDataWidget::updateGUI() const {

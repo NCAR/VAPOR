@@ -1,4 +1,4 @@
-#include "PImportDataLineItem.h"
+#include "PImportDataButton.h"
 #include "MainForm.h"
 #include "VHBoxWidget.h"
 #include "VLabel.h"
@@ -10,17 +10,17 @@
 
 #include <QFileDialog>
 
-PImportDataLineItem::PImportDataLineItem(VAPoR::ControlExec* ce, MainForm *mf) : PLineItem("", "Import", _hBox = new VHBoxWidget()), _ce(ce), _mf(mf) {
+PImportDataButton::PImportDataButton(VAPoR::ControlExec* ce, MainForm *mf) : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _mf(mf) {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(_hBox->layout());
-    layout->addWidget(_fileLabel = new VLabel(""),3);
     layout->addWidget(_importButton = new PButton("Select File(s)", [this](VAPoR::ParamsBase*){_importDataset();}),1);
+    layout->addWidget(_fileLabel = new VLabel(""),3);
 
     _fileLabel->MakeSelectable();
 }
 
-void PImportDataLineItem::_importDataset() {
+void PImportDataButton::_importDataset() {
     std::vector<std::string> fileNames;
     std::string defaultPath = getParams()->GetValueString(GUIStateParams::ImportDataDirTag, FileUtils::HomeDir());
     QStringList qfileNames = QFileDialog::getOpenFileNames(this, "Select Filename Prefix", QString::fromStdString(defaultPath));
@@ -34,7 +34,7 @@ void PImportDataLineItem::_importDataset() {
     if (true) getParams()->SetValueStringVec(GUIStateParams::ImportDataFilesTag, "", fileNames);
 }
 
-void PImportDataLineItem::updateGUI() const {
+void PImportDataButton::updateGUI() const {
     std::vector<string> files = getParams()->GetValueStringVec(GUIStateParams::ImportDataFilesTag);
     int count = files.size();
     if (count > 0) {

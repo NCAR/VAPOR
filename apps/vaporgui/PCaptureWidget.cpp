@@ -4,6 +4,7 @@
 #include "PRadioButtons.h"
 #include "PButton.h"
 #include "PSection.h"
+#include "PEnumDropdown.h"
 #include "VComboBox.h"
 #include "VLabel.h"
 #include "VHBoxWidget.h"
@@ -27,12 +28,13 @@ const std::string PngStrings::CaptureFileType = "PNG";
 const std::string PngStrings::FileFilter = "PNG (*.png)";
 const std::string PngStrings::FileSuffix = "png";
 
-PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
+PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, MainForm *mf)
     : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _mf(mf)
 {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    _typeCombo = new VComboBox({TiffStrings::CaptureFileType, PngStrings::FileFilter});
+    _typeCombo = new VComboBox({TiffStrings::CaptureFileType, PngStrings::CaptureFileType});
+    _typeCombo2 = new PEnumDropdown(AnimationParams::CaptureTypeTag, {TiffStrings::CaptureFileType, PngStrings::CaptureFileType}, {0, 1}, "");
     _fileLabel = new VLabel("");
     _fileLabel->MakeSelectable();
 
@@ -50,12 +52,13 @@ PCaptureToolbar::PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf)
 
     QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(_hBox->layout());
     layout->addWidget(_typeCombo,1);
+    layout->addWidget(_typeCombo2,1);
     layout->addWidget(_fileLabel,3);
     layout->addWidget(_captureButton,1);
     layout->addWidget(_captureTimeSeriesButton,1);
 }
 
-void PCaptureToolbar::updateGUI() const {
+void PCaptureHBox::updateGUI() const {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
     _typeCombo->SetValue(ap->GetValueString(AnimationParams::CaptureTypeTag, TiffStrings::CaptureFileType));
 
@@ -85,7 +88,7 @@ void PCaptureToolbar::updateGUI() const {
     _captureTimeSeriesButton->Update(ap);
 }
 
-void PCaptureToolbar::_captureSingleImage() {
+void PCaptureHBox::_captureSingleImage() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
     string fileType = ap->GetValueString(AnimationParams::CaptureTypeTag, "");
     if (fileType == PngStrings::FileFilter) _mf->CaptureSingleImage(PngStrings::FileFilter, ".png");
@@ -94,7 +97,7 @@ void PCaptureToolbar::_captureSingleImage() {
     ap->SetValueString(AnimationParams::CaptureFileTimeTag, "Capture file time", STLUtils::GetUserTime());
 }
 
-void PCaptureToolbar::_captureTimeSeries() {
+void PCaptureHBox::_captureTimeSeries() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
    
     std::string filter, defaultSuffix;
@@ -106,11 +109,12 @@ void PCaptureToolbar::_captureTimeSeries() {
          filter = PngStrings::FileFilter;
          defaultSuffix =  PngStrings::FileSuffix;
     }
-
+    std::cout << filter << " " << defaultSuffix << " " << ap->GetValueString(AnimationParams::CaptureTypeTag, "") << std::endl;
     std::string defaultPath = ap->GetValueString(AnimationParams::CaptureTimeSeriesFileDirTag, FileUtils::HomeDir());
     std::string fileName = QFileDialog::getSaveFileName(this, "Select Filename Prefix", QString::fromStdString(defaultPath), QString::fromStdString(filter)).toStdString();
     if (fileName.empty()) return;
 
+    ap->SetValueString(AnimationParams::CaptureTimeSeriesFileDirTag, "Capture animation file directory", FileUtils::Dirname(fileName));
     ap->SetValueString(AnimationParams::CaptureTimeSeriesFileNameTag, "Capture animation file name", fileName);
     ap->SetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "Capture file time", STLUtils::GetUserTime());
 
@@ -131,7 +135,7 @@ PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, MainForm *mf)
     t->EnableBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::RANGE);
     _section->Add(t);
 
-    _section->Add(new PCaptureToolbar(ce, mf));
+    _section->Add(new PCaptureHBox(ce, mf));
 }
 
 void PCaptureWidget::updateGUI() const {    

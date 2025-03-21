@@ -32,7 +32,7 @@ struct PngStrings {
     static const std::string FileSuffix;
 };
 
-class PCaptureToolbar : public PWidget {
+class PCaptureHBox : public PWidget {
     Q_OBJECT;
 
     ControlExec *_ce;
@@ -47,7 +47,7 @@ class PCaptureToolbar : public PWidget {
     PButton *_captureTimeSeriesButton;
 
 public:
-    PCaptureToolbar(VAPoR::ControlExec *ce, MainForm *mf);
+    PCaptureHBox(VAPoR::ControlExec *ce, MainForm *mf);
 
 protected:
     virtual void updateGUI() const;

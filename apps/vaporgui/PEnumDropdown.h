@@ -6,6 +6,8 @@
 
 class VComboBox;
 
+//class PEnumDropdownStandalone(const std::string& tag, const std::vector<std::string> &items, const std::vector<long> &itemValues = {}) : public PWidget(""
+
 //! \class PEnumDropdown
 //! Creates a Qt dropdown for selecting enum values synced with the paramsdatabase using the PWidget interface.
 //! \copydoc PWidget
