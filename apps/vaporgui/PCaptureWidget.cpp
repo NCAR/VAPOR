@@ -33,22 +33,16 @@ PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, MainForm *mf)
 {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    _typeCombo = new VComboBox({TiffStrings::CaptureFileType, PngStrings::CaptureFileType});
-    connect(_typeCombo, &VComboBox::IndexChanged, this, &PCaptureHBox::_dropdownIndexChanged);
+    _typeCombo = new PEnumDropdownStandalone(AnimationParams::CaptureTypeTag, {TiffStrings::CaptureFileType, PngStrings::CaptureFileType}, {0, 1});
 
     _fileLabel = new VLabel("");
     _fileLabel->MakeSelectable();
 
     _captureButton = new PButton("Capture\nCurrent Frame", [this](VAPoR::ParamsBase*){_captureSingleImage();});
-    // PWidget is setting _enableBasedOnParamsValue to 0, so we need to set it to a non-zero value.
-    // The default value is not being set and should be garbage.  Why/how is it being initialized to 0?
-    _captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, -1);
-    _captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::CURRENT);
+    //_captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, 0);
 
     _captureTimeSeriesButton = new PButton("Capture\nTime Series", [this](VAPoR::ParamsBase*){_captureTimeSeries();});
-    // Need to set ShowBasedOnParam for a numeric value.  See previous comment.
-    _captureTimeSeriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, -1);
-    _captureTimeSeriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::RANGE);
+    //_captureTimeSeriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, 1);
     
 
     QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(_hBox->layout());
@@ -71,7 +65,7 @@ void PCaptureHBox::_dropdownIndexChanged(int index) {
 
 void PCaptureHBox::updateGUI() const {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-    _typeCombo->SetValue(ap->GetValueString(AnimationParams::CaptureTypeTag, TiffStrings::CaptureFileType));
+    _typeCombo->Update(ap);
 
     // Format the label for the saved file
     std::string dir, file, time;
@@ -141,9 +135,7 @@ PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, MainForm *mf)
     _section->Add(new PRadioButtons(AnimationParams::CaptureModeTag, {CaptureModes::CURRENT, CaptureModes::RANGE}));
 
     PTimeRangeSelector *t = new PTimeRangeSelector(_ce);
-    // Need to set ShowBasedOnParam for a numeric value.  See previous comment.
-    t->EnableBasedOnParam(AnimationParams::CaptureModeTag, -1);
-    t->EnableBasedOnParam(AnimationParams::CaptureModeTag, CaptureModes::RANGE);
+    t->EnableBasedOnParam(AnimationParams::CaptureModeTag, 1);
     _section->Add(t);
 
     _section->Add(new PCaptureHBox(ce, mf));

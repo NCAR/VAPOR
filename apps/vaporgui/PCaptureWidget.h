@@ -7,6 +7,7 @@ class ControlExec;
 }
 
 class PSection;
+class PEnumDropdownStandalone;
 class VLabel;
 class PHGroup;
 class MainForm;
@@ -42,7 +43,7 @@ class PCaptureHBox : public PWidget {
     PStringDropdown *_fileTypeSelector;
     const std::vector<long> _enumMap;
 
-    VComboBox *_typeCombo;
+    PEnumDropdownStandalone *_typeCombo;
     VLabel *_fileLabel;
     PButton *_captureButton;
     PButton *_captureTimeSeriesButton;

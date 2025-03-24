@@ -29,6 +29,7 @@ VLineItem::VLineItem(const std::string &label)
     layout()->setContentsMargins(_LEFT_MARGIN, _TOP_MARGIN, _RIGHT_MARGIN, _BOTTOM_MARGIN);
 
     _qLabel = new QLabel(label.c_str());
+    _qLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     layout()->addWidget(_qLabel);
 }
 
