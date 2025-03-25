@@ -35,8 +35,9 @@ LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
 
 void LeftPanel::Update()
 {
+    GUIStateParams *gsp = _ce->GetParams<GUIStateParams>();
     // Enable the only import panel when no data is loaded
-    bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
+    bool noDatasetLoaded = gsp->GetOpenDataSetNames().empty();
     if (noDatasetLoaded) { 
         setEnabled(true);
         _importTab->setEnabled(true);
@@ -50,6 +51,11 @@ void LeftPanel::Update()
     for (int i = 0; i < count(); ++i) setTabEnabled(i, true);
     setTabEnabled(currentIndex(),true);
     _uTabs[currentIndex()]->Update();
+
+    if (gsp->GetValueLong(GUIStateParams::DataJustLoadedTag, 0) != 0) {
+        GoToRendererTab();
+        gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Unsetting data just loaded tag", 0);
+    }
 }
 
 void LeftPanel::tabChanged(int i)

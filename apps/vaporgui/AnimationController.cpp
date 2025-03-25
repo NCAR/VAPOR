@@ -170,6 +170,7 @@ void AnimationController::playNextFrame()
 
     bool undoEnabled = _controlExec->GetParamsMgr()->GetSaveStateUndoEnabled();
     _controlExec->GetParamsMgr()->SetSaveStateUndoEnabled(false);
+    std::cout << "currentFrame " << currentFrame << " " << startFrame << " " << endFrame << " " << frameStepSize << std::endl;
     setCurrentTimestep(currentFrame);
     _controlExec->GetParamsMgr()->SetSaveStateUndoEnabled(undoEnabled);
 

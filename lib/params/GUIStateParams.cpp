@@ -52,6 +52,7 @@ const string GUIStateParams::ImportDataFilesTag = "ImportDataFilesTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetRelativePathsTag = "DataSetRelativePathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";
+const string GUIStateParams::DataJustLoadedTag = "DataJustLoadedTag";
 
 //
 // Register class with object factory!!!

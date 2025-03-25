@@ -27,7 +27,6 @@ void PImportDataButton::_importDataset() {
     for (const QString &qStr : qfileNames) fileNames.push_back(qStr.toStdString());
     if (fileNames.empty()) return;
 
-    //std::string format = DatasetTypeShortName( getParams()->GetValueString(GUIStateParams::ImportDataTypeTag,"") );
     std::string format = GetDatasets()[getParams()->GetValueLong(GUIStateParams::ImportDataTypeTag, 0)].first;
     _mf->ImportDataset(fileNames, format);
 

@@ -221,6 +221,7 @@ public:
     static const string ImportDataDirTag;
     static const string ImportDataTypeTag;
     static const string ImportDataFilesTag;
+    static const string DataJustLoadedTag;
 
 private:
     MouseModeParams *m_mouseModeParams;

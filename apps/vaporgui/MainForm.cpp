@@ -779,6 +779,7 @@ void MainForm::ImportDataset(const std::vector<string> &files, string format, Da
     }
 
     auto gsp = _controlExec->GetParams<GUIStateParams>();
+    gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Data has just been loaded", 1);
     gsp->SetValueStringVec(GUIStateParams::ImportDataFilesTag, "Most recently imported data files", {});
     gsp->InsertOpenDataSet(name, format, files);
 
@@ -1070,9 +1071,11 @@ void MainForm::enableAnimationWidgets(bool on)
 void MainForm::CaptureSingleImage(string filter, string defaultSuffix)
 {
     showCitationReminder();
-    auto imageDir = QDir::homePath();
 
-    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir, QString::fromStdString(filter));
+    std::string imageDir = GetAnimationParams()->GetValueString(AnimationParams::CaptureFileDirTag, "");
+    if (imageDir.empty()) imageDir = QDir::homePath().toStdString();
+
+    QFileDialog fileDialog(this, "Specify single image capture file name", QString::fromStdString(imageDir), QString::fromStdString(filter));
 
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
@@ -1173,11 +1176,16 @@ void MainForm::captureTiffSequence()
 void MainForm::selectAnimCaptureOutput(string filter, string defaultSuffix)
 {
     showCitationReminder();
+
+    //std::string imageDir = GetAnimationParams()->GetValueString(AnimationParams::CaptureTimeSeriesFileDirTag, "");
+    //if (imageDir.empty) imageDir = QDir::homePath();
     auto imageDir = QDir::homePath();
 
     QFileDialog fileDialog(this, "Specify image sequence file name", imageDir, QString::fromStdString(filter));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec() != QDialog::Accepted) return;
+
+    GetAnimationParams()->SetValueString(AnimationParams::CaptureFileDirTag, "Capture file directory", FileUtils::Dirname(fileDialog.selectedFiles()[0].toStdString()));
 
     // Extract the path, and the root name, from the returned string.
     QStringList qsl = fileDialog.selectedFiles();
@@ -1198,6 +1206,7 @@ void MainForm::AnimationPlayForward() const {
 
 bool MainForm::StartAnimCapture(string baseFile, string defaultSuffix)
 {
+    std::cout << "baseFile " << baseFile << std::endl;
     QString   fileName = QString::fromStdString(baseFile);
     QFileInfo fileInfo = QFileInfo(fileName);
 
