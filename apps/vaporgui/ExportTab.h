@@ -2,12 +2,12 @@
 
 #include "VaporFwd.h"
 #include "PWidgetsFwd.h"
-#include <QWidget>
 #include "Updatable.h"
+#include "VGroup.h"
 
 class MainForm;
 
-class ExportTab : public QWidget, public Updatable {
+class ExportTab : public VGroup, public Updatable {
     Q_OBJECT
 
     ControlExec *_ce;

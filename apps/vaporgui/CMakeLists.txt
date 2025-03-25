@@ -199,6 +199,8 @@ set (SRCS
     PAxisAnnotationWidget.cpp
     PAxisAnnotationWidget.h
     PTMSLODInput.h
+    PMovingDomainSettings.cpp
+    PMovingDomainSettings.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
 	VDoubleValidator.cpp
