@@ -21,7 +21,6 @@ LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
     };
    
     _importTab = new ImportTab(_ce, mf); 
-    connect(_importTab, &ImportTab::dataImported, this, &LeftPanel::GoToRendererTab);
     add(_importTab, "Import");
     add(new RenderersPanel(ce), "Render");
     add(new AnnotationEventRouter(ce), "Annotate");
@@ -53,7 +52,7 @@ void LeftPanel::Update()
     _uTabs[currentIndex()]->Update();
 
     if (gsp->GetValueLong(GUIStateParams::DataJustLoadedTag, 0) != 0) {
-        GoToRendererTab();
+        setCurrentIndex(1); // go to Renderer tab
         gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Unsetting data just loaded tag", 0);
     }
 }
@@ -61,8 +60,4 @@ void LeftPanel::Update()
 void LeftPanel::tabChanged(int i)
 {
     _uTabs[i]->Update();
-}
-
-void LeftPanel::GoToRendererTab() { 
-    setCurrentIndex(1); 
 }

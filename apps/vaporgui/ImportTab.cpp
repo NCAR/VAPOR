@@ -1,5 +1,6 @@
 #include "ImportTab.h"
 #include "PImportDataWidget.h"
+#include "PProjectionStringSection.h"
 #include "VLabel.h"
 #include "VSection.h"
 #include "MainForm.h"
@@ -16,9 +17,6 @@ ImportTab::ImportTab(VAPoR::ControlExec *ce, MainForm *mf) : _ce(ce)
     l->setContentsMargins(0, 0, 0, 0);
 
     l->addWidget(new VSectionGroup("Import Data", {_importer = new PImportDataWidget(_ce, mf)}));
-    connect(_importer, &PImportDataWidget::dataImported, this, &ImportTab::DataImported);
-
-    //l->addWidget(new PImportData2("Import Data2");
 
     VSectionGroup *sg = new VSectionGroup("Tips", {
         new VHyperlink(
@@ -45,6 +43,8 @@ ImportTab::ImportTab(VAPoR::ControlExec *ce, MainForm *mf) : _ce(ce)
     sg->setEnabled(true);
     l->addWidget(sg);
 
+    l->addWidget(_projectionSection = new PProjectionStringSection(_ce));
+
     l->addStretch(1);
     setLayout(l);
 }
@@ -53,6 +53,8 @@ void ImportTab::Update()
 {
     GUIStateParams *guiParams = (GUIStateParams *)_ce->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
     _importer->Update(guiParams);
-}
 
-void ImportTab::DataImported() { emit dataImported(); }
+    bool noDatasetLoaded = guiParams->GetOpenDataSetNames().empty();
+    if (noDatasetLoaded) _projectionSection->hide();
+    else _projectionSection->Update(guiParams);
+}

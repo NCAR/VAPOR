@@ -5,7 +5,6 @@
 #include "VLabel.h"
 #include <QTreeWidget>
 #include "PMetadataClasses.h"
-#include "PProjectionStringSection.h"
 #include "VScrollGroup.h"
 #include "DatasetTypeLookup.h"
 
@@ -28,8 +27,6 @@ DatasetInspector::DatasetInspector(VAPoR::ControlExec *ce)
                _metaVars = new VVariableMetadataTree,
                _metaCoords = new VCoordinateVariableMetadataTree,
            }), "Metadata");
-    g->Add(_projectionSection = new PProjectionStringSection(_ce));
-
     connect(this, &QTabWidget::currentChanged, this, &DatasetInspector::Update);
 }
 
@@ -48,7 +45,6 @@ void DatasetInspector::Update()
         _path->SetText("Path: " + guiParams->GetOpenDataSetPaths(dataset)[0]);
         Transform *transform = vp->GetTransform(dataset);
         _tw->Update(transform);
-        _projectionSection->Update(guiParams);
     }
     else if (currentWidget() == _metaTab) {
         auto dataMgr = dataStatus->GetDataMgr(dataset);

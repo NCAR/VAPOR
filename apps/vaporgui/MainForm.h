@@ -42,6 +42,7 @@ class BannerGUI;
 class Statistics;
 class Plot;
 class PythonVariables;
+class PProjectionStringSection;
 class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
@@ -103,9 +104,6 @@ private:
     QAction *_stepForwardAction;
     QAction *_stepBackAction;
 
-    // Need member variable for leftPanel->UpdateImportMenu() in MainForm::updateUI()
-    LeftPanel* _leftPanel;
-
     bool     _animationCapture = false;
     int      _progressSavedFB = -1;
     bool     _progressEnabled = false;
@@ -119,6 +117,7 @@ private:
     Statistics *        _stats = nullptr;
     Plot *              _plot = nullptr;
     PythonVariables *   _pythonVariables = nullptr;
+    PProjectionStringSection* _projectionSection = nullptr;
     AppSettingsMenu *   _appSettingsMenu = nullptr;
     BannerGUI *         _banner = nullptr;
     std::set<Updatable *> _updatableElements;
@@ -211,5 +210,6 @@ private slots:
     void launchStats();
     void launchPlotUtility();
     void launchPythonVariables();
+    void launchProjectionDialog();
     void _setAnimationOnOff(bool onOff);
 };

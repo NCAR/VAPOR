@@ -22,9 +22,9 @@ ExportTab::ExportTab(ControlExec *ce, MainForm *mf) : _ce(ce)
             new PSection("Animation", {
                 new PTimestepSliderEdit(_ce),
                 new PTotalTimestepsDisplay(_ce),
-                new PCheckbox(AnimationParams::_repeatTag, "Loop Animation Playback"),
-                (new PIntegerInput(AnimationParams::_stepSizeTag, "Animation Play Step Size"))->SetRange(1, 10),
-                (new PDoubleSliderEdit(AnimationParams::_maxRateTag, "Max Animation Frames Per Second"))->SetRange(1, 60),
+                //new PCheckbox(AnimationParams::_repeatTag, "Loop Animation Playback"),
+                //(new PIntegerInput(AnimationParams::_stepSizeTag, "Animation Play Step Size"))->SetRange(1, 10),
+                //(new PDoubleSliderEdit(AnimationParams::_maxRateTag, "Max Animation Frames Per Second"))->SetRange(1, 60),
             })
         })
     });

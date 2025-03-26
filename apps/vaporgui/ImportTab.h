@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class PImportDataWidget;
+class PProjectionStringSection;
 class MainForm;
 
 class ImportTab : public QWidget, public Updatable {
@@ -11,14 +12,9 @@ class ImportTab : public QWidget, public Updatable {
 
     VAPoR::ControlExec *_ce;
     PImportDataWidget *_importer;
+    PProjectionStringSection *_projectionSection;
 
 public:
     ImportTab(VAPoR::ControlExec *ce, MainForm *mf);
     void Update() override;
-
-public slots:
-    void DataImported();
-
-signals:
-    void dataImported();
 };

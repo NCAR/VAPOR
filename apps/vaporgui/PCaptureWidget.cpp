@@ -17,9 +17,6 @@
 #include <QFileDialog>
 #include <QHBoxLayout>
 
-const std::string CaptureModes::CURRENT = "Current frame";
-const std::string CaptureModes::RANGE   = "Time series range";
-
 const std::string TiffStrings::CaptureFileType = "TIFF";
 const std::string TiffStrings::FileFilter = "TIFF (*.tif)";
 const std::string TiffStrings::FileSuffix = "tif";
@@ -67,23 +64,20 @@ void PCaptureHBox::updateGUI() const {
     _typeCombo->Update(ap);
 
     // Format the label for the saved file
-    std::string dir, file, time;
+    std::string file, time;
+    std::string dir = ap->GetValueString(AnimationParams::CaptureFileDirTag, "");
     if (ap->GetValueLong(AnimationParams::CaptureModeTag, 0) == 0) { // Capture signle frame
-        dir = ap->GetValueString(AnimationParams::CaptureFileDirTag, "");
         file = ap->GetValueString(AnimationParams::CaptureFileNameTag, "");
         time = ap->GetValueString(AnimationParams::CaptureFileTimeTag, "");
     }
     else { // Capture timeseries
-        dir = ap->GetValueString(AnimationParams::CaptureTimeSeriesFileDirTag, "");
         file = ap->GetValueString(AnimationParams::CaptureTimeSeriesFileNameTag, "");
-        size_t lastSlash = file.find_last_of("/\\");
-        size_t lastDot = file.find_last_of(".");
-
-        // Indicates that multiple animation files are or have been captured
-        bool valid = lastDot != std::string::npos && (lastSlash == std::string::npos || lastDot > lastSlash);
-        if (valid) file = file.substr(0, lastDot) + "####" + file.substr(lastDot);
-
-        time = ap->GetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "");
+        if (file != "") {
+            file = FileUtils::Basename(ap->GetValueString(AnimationParams::CaptureTimeSeriesFileNameTag, ""));
+            size_t lastDot = file.find_last_of(".");
+            file = file.substr(0, lastDot) + "####" + file.substr(lastDot);
+            time = ap->GetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "");
+        }
     }
     if (!file.empty()) file = "Saved: " + file + "\nDir: " + dir + "\nOn: " + time;
     _fileLabel->SetText(file);
@@ -94,7 +88,7 @@ void PCaptureHBox::updateGUI() const {
 
 void PCaptureHBox::_captureSingleImage() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-    std::string defaultPath = ap->GetValueString(AnimationParams::CaptureTimeSeriesFileDirTag, FileUtils::HomeDir());
+    std::string defaultPath = ap->GetValueString(AnimationParams::CaptureFileDirTag, FileUtils::HomeDir());
 
     if (ap->GetValueLong(AnimationParams::CaptureTypeTag, 0) == 0)
         _mf->CaptureSingleImage(TiffStrings::FileFilter, "."+TiffStrings::FileSuffix);
@@ -112,16 +106,16 @@ void PCaptureHBox::_captureTimeSeries() {
          filter = TiffStrings::FileFilter;
          defaultSuffix =  TiffStrings::FileSuffix;
     }
-    else { // .png
+    else {                                                          // .png
          filter = PngStrings::FileFilter;
          defaultSuffix =  PngStrings::FileSuffix;
     }
-    std::cout << filter << " " << defaultSuffix << " " << ap->GetValueString(AnimationParams::CaptureTypeTag, "") << std::endl;
-    std::string defaultPath = ap->GetValueString(AnimationParams::CaptureTimeSeriesFileDirTag, FileUtils::HomeDir());
+
+    std::string defaultPath = ap->GetValueString(AnimationParams::CaptureFileDirTag, FileUtils::HomeDir());
     std::string fileName = QFileDialog::getSaveFileName(this, "Select Filename Prefix", QString::fromStdString(defaultPath), QString::fromStdString(filter)).toStdString();
     if (fileName.empty()) return;
 
-    ap->SetValueString(AnimationParams::CaptureTimeSeriesFileDirTag, "Capture animation file directory", FileUtils::Dirname(fileName));
+    ap->SetValueString(AnimationParams::CaptureFileDirTag, "Capture animation file directory", FileUtils::Dirname(fileName));
     ap->SetValueString(AnimationParams::CaptureTimeSeriesFileNameTag, "Capture animation file name", FileUtils::Basename(fileName));
     ap->SetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "Capture file time", STLUtils::GetUserTime());
 

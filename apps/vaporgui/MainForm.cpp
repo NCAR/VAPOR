@@ -42,6 +42,7 @@
 #include "BannerGUI.h"
 #include "Statistics.h"
 #include "PythonVariables.h"
+#include "PProjectionStringSection.h"
 #include "Plot.h"
 #include "ErrorReporter.h"
 #include "MainForm.h"
@@ -146,17 +147,17 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _animationController = new AnimationController(_controlExec);
     connect(_animationController, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
 
-    _leftPanel = new LeftPanel(_controlExec, this);
+    LeftPanel* leftPanel = new LeftPanel(_controlExec, this);
     const int dpi = qApp->desktop()->logicalDpiX();
-    _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
-    _leftPanel->setMinimumHeight(500);
-    _dependOnLoadedData_insert(_leftPanel);
-    _updatableElements.insert(_leftPanel);
+    leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
+    leftPanel->setMinimumHeight(500);
+    _dependOnLoadedData_insert(leftPanel);
+    _updatableElements.insert(leftPanel);
 
     _status = new ProgressStatusBar;
     _status->hide();
 
-    sideDockWidgetArea->setWidget(new VGroup({_leftPanel, _status}));
+    sideDockWidgetArea->setWidget(new VGroup({leftPanel, _status}));
 
     createMenus();
     createToolBars();
@@ -453,6 +454,7 @@ void MainForm::_createToolsMenu()
     _dependOnLoadedData_insert(toolMenu->addAction("Plot Utility", this, SLOT(launchPlotUtility())));
     _dependOnLoadedData_insert(toolMenu->addAction("Data Statistics", this, SLOT(launchStats())));
     _dependOnLoadedData_insert(toolMenu->addAction("Python Variables", this, SLOT(launchPythonVariables())));
+    _dependOnLoadedData_insert(toolMenu->addAction("Dataset Projection", this, SLOT(launchProjectionDialog())));
 
 #ifdef WIN32
     #define ADD_INSTALL_CLI_TOOLS_ACTION 1
@@ -595,12 +597,12 @@ retryLoad:
     else
         for (auto name : gsp->GetOpenDataSetNames()) gsp->RemoveOpenDataSet(name);
 
+    gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Data has just been loaded with a session", 1);
+
     _paramsMgr->UndoRedoClear();
     _sessionNewFlag = false;
     _stateChangeFlag = false;
     _paramsMgr->TriggerManualStateChangeEvent("Session Opened");
-
-    _leftPanel->GoToRendererTab();
 }
 
 
@@ -794,7 +796,6 @@ void MainForm::ImportDataset(const std::vector<string> &files, string format, Da
 
     _sessionNewFlag = false;
     _paramsMgr->EndSaveStateGroup();
-    _leftPanel->GoToRendererTab();
 }
 
 void MainForm::showImportDatasetGUI(string format)
@@ -1156,6 +1157,17 @@ void MainForm::launchPythonVariables()
     _pythonVariables->ShowMe();
 }
 
+void MainForm::launchProjectionDialog()
+{
+    if (_projectionSection == nullptr){
+        _projectionSection = new PProjectionStringSection(_controlExec);
+        _projectionSection->adjustSize();
+        _guiStateParamsUpdatableElements.insert(_projectionSection);
+    }
+    _projectionSection->Update(GetStateParams());
+    _projectionSection->show();
+}
+
 void MainForm::capturePngSequence()
 {
     string filter = "PNG (*.png)";
@@ -1177,8 +1189,6 @@ void MainForm::selectAnimCaptureOutput(string filter, string defaultSuffix)
 {
     showCitationReminder();
 
-    //std::string imageDir = GetAnimationParams()->GetValueString(AnimationParams::CaptureTimeSeriesFileDirTag, "");
-    //if (imageDir.empty) imageDir = QDir::homePath();
     auto imageDir = QDir::homePath();
 
     QFileDialog fileDialog(this, "Specify image sequence file name", imageDir, QString::fromStdString(filter));
@@ -1206,7 +1216,6 @@ void MainForm::AnimationPlayForward() const {
 
 bool MainForm::StartAnimCapture(string baseFile, string defaultSuffix)
 {
-    std::cout << "baseFile " << baseFile << std::endl;
     QString   fileName = QString::fromStdString(baseFile);
     QFileInfo fileInfo = QFileInfo(fileName);
 

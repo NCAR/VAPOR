@@ -30,9 +30,7 @@
 #include <vapor/AnimationParams.h>
 
 using namespace VAPoR;
-const string AnimationParams::_repeatTag = "RepeatPlay";
 const string AnimationParams::_maxRateTag = "MaxFrameRate";
-const string AnimationParams::_stepSizeTag = "FrameStepSize";
 const string AnimationParams::_startTimestepTag = "StartTimestep";
 const string AnimationParams::_endTimestepTag = "EndTimestep";
 const string AnimationParams::_currentTimestepTag = "CurrentTimestep";
@@ -42,7 +40,6 @@ const string AnimationParams::CaptureTypeTag = "CaptureTypeTag";
 const string AnimationParams::CaptureFileNameTag = "CaptureFileNameTag";
 const string AnimationParams::CaptureFileDirTag = "CaptureFileDirTag";
 const string AnimationParams::CaptureFileTimeTag = "CaptureFileTimeTag";
-const string AnimationParams::CaptureTimeSeriesFileDirTag = "CaptureTimeSeriesFileDirTag";
 const string AnimationParams::CaptureTimeSeriesFileNameTag = "CaptureTimeSeriesFileNameTag";
 const string AnimationParams::CaptureTimeSeriesTimeTag = "CaptureTimeSeriesTimeTag";
 
@@ -78,8 +75,6 @@ void AnimationParams::_init()
 {
     // set everything to default state:
     SetPlayBackwards(false);
-    SetRepeating(false);
-    SetFrameStepSize(1);
     SetStartTimestep(0);
     SetEndTimestep(10000000);
     SetCurrentTimestep(0);
