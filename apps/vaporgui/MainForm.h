@@ -64,7 +64,7 @@ public:
 
     // Needed for Import/Data widget
     enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
-    void ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
+    int ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
 
     // Needed for Export/Capture widget
     bool StartAnimCapture(string baseFile, string defaultSuffix = "tiff");

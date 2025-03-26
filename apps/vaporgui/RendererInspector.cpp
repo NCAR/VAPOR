@@ -27,8 +27,6 @@ void RendererInspector::Update()
 {
     ParamsMgr *paramsMgr = _ce->GetParamsMgr();
     GUIStateParams *guiParams = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    bool noDatasetLoaded = _ce->GetParams<GUIStateParams>()->GetOpenDataSetNames().empty();
-    if (noDatasetLoaded) return;
     
     string currentViz = guiParams->GetActiveVizName();
     string renClass, renInst, _;

@@ -18,8 +18,6 @@ void PGroup::updateGUI() const
     for (PWidget *child : _children) child->Update(params, paramsMgr, dataMgr);
 }
 
-PHGroup::PHGroup() : PGroup(new VHGroup()) {}
-
 PSubGroup::PSubGroup() : PGroup(new VSubGroup()) {}
 
 PSubGroup::PSubGroup(const List &widgets) : PSubGroup() { AddM(widgets); }

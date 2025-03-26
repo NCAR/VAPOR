@@ -6,6 +6,7 @@
 class QLabel;
 
 class VLabel : public VContainer {
+
 protected:
     QLabel *_ql;
 

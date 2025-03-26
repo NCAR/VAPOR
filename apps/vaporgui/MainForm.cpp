@@ -769,7 +769,7 @@ void MainForm::helpAbout()
 }
 
 
-void MainForm::ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction, string name)
+int MainForm::ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction, string name)
 {
     _paramsMgr->BeginSaveStateGroup("Import Dataset");
     if (name.empty()) name = _getDataSetName(files[0], existsAction);
@@ -777,10 +777,11 @@ void MainForm::ImportDataset(const std::vector<string> &files, string format, Da
     if (rc < 0) {
         _paramsMgr->EndSaveStateGroup();
         MSG_ERR("Failed to load data");
-        return;
+        return -1;
     }
 
     auto gsp = _controlExec->GetParams<GUIStateParams>();
+    gsp->SetValueString(GUIStateParams::ImportDataDirTag, "", FileUtils::Dirname(files[0]));
     gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Data has just been loaded", 1);
     gsp->SetValueStringVec(GUIStateParams::ImportDataFilesTag, "Most recently imported data files", {});
     gsp->InsertOpenDataSet(name, format, files);
@@ -796,6 +797,7 @@ void MainForm::ImportDataset(const std::vector<string> &files, string format, Da
 
     _sessionNewFlag = false;
     _paramsMgr->EndSaveStateGroup();
+    return 0;
 }
 
 void MainForm::showImportDatasetGUI(string format)

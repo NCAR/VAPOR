@@ -28,10 +28,14 @@ void PImportDataButton::_importDataset() {
     if (fileNames.empty()) return;
 
     std::string format = GetDatasets()[getParams()->GetValueLong(GUIStateParams::ImportDataTypeTag, 0)].first;
-    _mf->ImportDataset(fileNames, format);
+    int rc = _mf->ImportDataset(fileNames, format);
 
-    // Need return code from control exec here
-    if (true) getParams()->SetValueStringVec(GUIStateParams::ImportDataFilesTag, "", fileNames);
+    // Needs to be done here (or somewhere adjacent) instead of in MainForm when refactoring complete
+    if (rc == 0) {
+    //    getParams()->SetValueString(GUIStateParams::ImportDataDirTag, "", FileUtils::Dirname(fileNames[0]));
+    //    getParams()->SetValueStringVec(GUIStateParams::ImportDataFilesTag, "", fileNames);
+    //    getParams()->SetValueLong(GUIStateParams::DataJustLoadedTag, "Data has just been loaded", 1);
+    }
 }
 
 void PImportDataButton::updateGUI() const {

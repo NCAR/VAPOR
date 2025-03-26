@@ -28,11 +28,6 @@ VLineItem::VLineItem(const std::string &label)
     setLayout(new QHBoxLayout);
     layout()->setContentsMargins(_LEFT_MARGIN, _TOP_MARGIN, _RIGHT_MARGIN, _BOTTOM_MARGIN);
 
-    _qLabel = new QLabel(label.c_str());
-    _qLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    layout()->addWidget(_qLabel);
-}
-
-void VLineItem::SetLabelText(const std::string &text) {
-    _qLabel->setText(QString::fromStdString(text));
+    QLabel *qLabel = new QLabel(label.c_str());
+    layout()->addWidget(qLabel);
 }

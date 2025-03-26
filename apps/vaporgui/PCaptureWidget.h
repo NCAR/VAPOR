@@ -9,7 +9,6 @@ class ControlExec;
 class PSection;
 class PEnumDropdownStandalone;
 class VLabel;
-class PHGroup;
 class MainForm;
 class PButton;
 class VHBoxWidget;
@@ -38,7 +37,6 @@ class PCaptureHBox : public PWidget {
 
     ControlExec *_ce;
     MainForm *_mf;
-    PHGroup *_pGroup;
     VHBoxWidget *_hBox;
     PStringDropdown *_fileTypeSelector;
     const std::vector<long> _enumMap;
