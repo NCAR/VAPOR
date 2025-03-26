@@ -10,12 +10,3 @@ VLabel::VLabel(const std::string &text) : VContainer(_ql = new QLabel)
 void VLabel::SetText(const std::string &text) { _ql->setText(QString::fromStdString(text)); }
 
 void VLabel::MakeSelectable() { _ql->setTextInteractionFlags(_ql->textInteractionFlags() | Qt::TextSelectableByMouse); }
-
-VHyperlink::VHyperlink(const std::string &text, const std::string &url, bool bullet) : VLabel() {
-    std::string link = "<a href=\"" + url + "\">" + text + "</a>";
-    if (bullet == true) link.insert(0, "• ");
-    _ql->setText(QString::fromStdString(link));
-    _ql->setTextFormat(Qt::RichText);
-    _ql->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    _ql->setOpenExternalLinks(true); 
-}

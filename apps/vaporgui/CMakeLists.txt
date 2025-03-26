@@ -265,6 +265,10 @@ set (SRCS
     POutputResolutionSection.h
     VLabel.cpp
     VLabel.h
+    VLabelPair.cpp
+    VLabelPair.h
+    VHyperlink.cpp
+    VHyperlink.h
     PTimestepInput.cpp
     PTimestepInput.h
     PTotalTimestepsDisplay.cpp

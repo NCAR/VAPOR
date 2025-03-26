@@ -1,7 +1,7 @@
 #include "ImportTab.h"
 #include "PImportDataWidget.h"
 #include "PProjectionStringSection.h"
-#include "VLabel.h"
+#include "VHyperlink.h"
 #include "VSection.h"
 #include "MainForm.h"
 

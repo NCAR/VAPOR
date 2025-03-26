@@ -17,11 +17,9 @@
 #include <QFileDialog>
 #include <QHBoxLayout>
 
-const std::string TiffStrings::CaptureFileType = "TIFF";
 const std::string TiffStrings::FileFilter = "TIFF (*.tif)";
 const std::string TiffStrings::FileSuffix = "tif";
 
-const std::string PngStrings::CaptureFileType = "PNG";
 const std::string PngStrings::FileFilter = "PNG (*.png)";
 const std::string PngStrings::FileSuffix = "png";
 
@@ -30,7 +28,7 @@ PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, MainForm *mf)
 {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    _typeCombo = new PEnumDropdownStandalone(AnimationParams::CaptureTypeTag, {TiffStrings::CaptureFileType, PngStrings::CaptureFileType}, {0, 1});
+    _typeCombo = new PEnumDropdownStandalone(AnimationParams::CaptureTypeTag, {"TIFF", "PNG"}, {0, 1});
 
     _fileLabel = new VLabel("");
     _fileLabel->MakeSelectable();

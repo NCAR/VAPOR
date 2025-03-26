@@ -14,8 +14,3 @@ public:
     void SetText(const std::string &text);
     void MakeSelectable();
 };
-
-class VHyperlink : public VLabel {
-public:
-    VHyperlink(const std::string &text = "", const std::string &url = "", bool bullet=false);
-};

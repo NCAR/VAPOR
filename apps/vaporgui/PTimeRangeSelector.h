@@ -1,16 +1,16 @@
 #pragma once
 
-//#include "PWidget.h"
 #include "PGroup.h"
 #include "VContainer.h"
 #include "ParamsUpdatable.h"
+#include "VHBoxWidget.h"
 
 namespace VAPoR {
     class ControlExec;
 }
 class QRangeSliderTextCombo;
+class VLabelPair;
 class VLineItem;
-class QLabel;
 
 //! \class PTimeRangeSelector
 //! \brief A PWidget that maintains a TimeRangeSelector
@@ -20,8 +20,7 @@ class PTimeRangeSelector : public PWidget {
 
     ControlExec* _ce;
     QRangeSliderTextCombo* _slider;
-    VLineItem* _timeStampPair;
-    QLabel* _rightTimestamp;
+    VLabelPair* _timeStampPair;
 
 public:
     PTimeRangeSelector(ControlExec* ce);

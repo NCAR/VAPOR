@@ -2,22 +2,19 @@
 #include "vapor/ControlExecutive.h"
 #include "vapor/AnimationParams.h"
 #include "QRangeSliderTextCombo.h"
-#include "VLineItem.h"
+#include "VLabelPair.h"
 
-#include <QLabel>
 #include <cmath>
 
 PTimeRangeSelector::PTimeRangeSelector(ControlExec* ce) 
     : PWidget("", 
         new VGroup({
             _slider = new QRangeSliderTextCombo(),
-            _timeStampPair = new VLineItem("left", _rightTimestamp = new QLabel("right"))
+            _timeStampPair = new VLabelPair(),
         })
       ),
       _ce(ce)
 {
-    
-    _rightTimestamp->setAlignment(Qt::AlignRight);
     _slider->SetNumDigits(0);
     connect(_slider, SIGNAL(ValueChanged(float, float)), this, SLOT(setTimes(float, float)));
 }
@@ -31,8 +28,8 @@ void PTimeRangeSelector::updateGUI() const {
     _slider->SetValue(start, end);
 
     std::vector<std::string> timeCoords = _ce->GetDataStatus()->GetTimeCoordsFormatted();
-    _timeStampPair->SetLabelText(timeCoords[start]);
-    _rightTimestamp->setText(QString::fromStdString(timeCoords[end]));
+    _timeStampPair->SetLeftText(timeCoords[start]);
+    _timeStampPair->SetRightText(timeCoords[end]);
 }
 
 void PTimeRangeSelector::setTimes(float start, float end) {
