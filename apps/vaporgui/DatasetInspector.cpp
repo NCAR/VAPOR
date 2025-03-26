@@ -6,7 +6,6 @@
 #include <QTreeWidget>
 #include "PMetadataClasses.h"
 #include "VScrollGroup.h"
-#include "DatasetTypeLookup.h"
 
 using namespace VAPoR;
 
@@ -27,6 +26,7 @@ DatasetInspector::DatasetInspector(VAPoR::ControlExec *ce)
                _metaVars = new VVariableMetadataTree,
                _metaCoords = new VCoordinateVariableMetadataTree,
            }), "Metadata");
+
     connect(this, &QTabWidget::currentChanged, this, &DatasetInspector::Update);
 }
 

@@ -15,19 +15,12 @@ class VHBoxWidget;
 class VComboBox;
 class VLabel;
 
-struct CaptureModes { 
-    static const std::string CURRENT;
-    static const std::string RANGE;
-};
-
 struct TiffStrings {
-    static const std::string CaptureFileType;
     static const std::string FileFilter;
     static const std::string FileSuffix;
 };
 
 struct PngStrings {
-    static const std::string CaptureFileType;
     static const std::string FileFilter;
     static const std::string FileSuffix;
 };
