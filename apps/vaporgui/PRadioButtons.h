@@ -13,7 +13,6 @@ class PRadioButtons : public PWidget {
     Q_OBJECT
 
     VGroup *_vg;
-    //std::string _paramValue;
     std::vector<std::string> _labels;
     int _paramValue;
 

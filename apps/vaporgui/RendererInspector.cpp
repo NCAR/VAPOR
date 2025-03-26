@@ -27,7 +27,6 @@ void RendererInspector::Update()
 {
     ParamsMgr *paramsMgr = _ce->GetParamsMgr();
     GUIStateParams *guiParams = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    
     string currentViz = guiParams->GetActiveVizName();
     string renClass, renInst, _;
     guiParams->GetActiveRenderer(currentViz, renClass, renInst);

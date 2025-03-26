@@ -42,7 +42,7 @@ COMMON_API std::string ToLower(std::string str);
 COMMON_API std::vector<std::string> Split(std::string str, const std::string &delimeter);
 COMMON_API std::string Join(const std::vector<std::string> &parts, const std::string &delimeter);
 COMMON_API std::string ReplaceAll(std::string source, const std::string &oldSegment, const std::string &newSegment);
-COMMON_API std::string GetDateTimeString();
+COMMON_API std::string GetCurrentDateTimestamp();
 
 template<typename T>
 vector<T> SyncToRemove(const vector<T> &truth, const vector<T> &cache)

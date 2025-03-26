@@ -8,11 +8,11 @@ class QLabel;
 class VLabelPair : public VHBoxWidget {
     Q_OBJECT
 
-    QLabel *_leftTime;
-    QLabel *_rightTime;
+    QLabel *_leftLabel;
+    QLabel *_rightLabel;
 
 public:
     VLabelPair();
-    void SetLeftText(const std::string &text);
-    void SetRightText(const std::string &text);
+    void SetLeftText(const std::string &text) const;
+    void SetRightText(const std::string &text) const;
 };

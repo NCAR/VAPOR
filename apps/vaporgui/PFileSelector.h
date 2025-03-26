@@ -13,6 +13,12 @@ class QString;
 class PFileSelector : public PLineItem {
     Q_OBJECT
 
+    VPushButton *         _button;
+    VLineEdit_Deprecated *_pathTexbox;
+
+    bool        _syncWithSettings = false;
+    std::string _syncWithSettingsTag;
+
 public:
     PFileSelector(const std::string &tag, const std::string &label = "");
     //! Sets the fileTypeFilter parameter in the QFileDialog popup functions.
@@ -20,22 +26,19 @@ public:
     //    PFileSelector *UseDefaultPathSetting(const std::string &tag);
 
 protected:
-    VPushButton *         _button;
-    VLineEdit_Deprecated *_pathTexbox;
-
-    bool        _syncWithSettings = false;
-    std::string _syncWithSettingsTag;
-
     QString _fileTypeFilter = "All Files (*)";
 
     void            updateGUI() const override;
     bool            requireParamsMgr() const override;
     virtual QString selectPath(const std::string &defaultPath) const = 0;
-    std::string     getDefaultPath() const;
 
-protected slots:
-    virtual void buttonClicked();
+private slots:
+    void buttonClicked();
 };
+
+//! \class PFileOpenSelector
+//! A PFileSelector that provides an Open File dialog
+//! \copydoc PFileSelector
 
 class PFileOpenSelector : public PFileSelector {
     Q_OBJECT

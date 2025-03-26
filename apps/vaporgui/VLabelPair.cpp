@@ -4,18 +4,18 @@
 VLabelPair::VLabelPair() : VHBoxWidget() {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-    _leftTime = new QLabel();
-    _rightTime = new QLabel();
-    _rightTime->setAlignment(Qt::AlignRight);
+    _leftLabel = new QLabel();
+    _rightLabel = new QLabel();
+    _rightLabel->setAlignment(Qt::AlignRight);
 
-    layout()->addWidget(_leftTime);
-    layout()->addWidget(_rightTime);
+    layout()->addWidget(_leftLabel);
+    layout()->addWidget(_rightLabel);
 }
 
-void VLabelPair::SetLeftText(const std::string &time) {
-    _leftTime->setText(QString::fromStdString(time));
+void VLabelPair::SetLeftText(const std::string &text) const {
+    _leftLabel->setText(QString::fromStdString(text));
 }
 
-void VLabelPair::SetRightText(const std::string &time) {
-    _rightTime->setText(QString::fromStdString(time));
+void VLabelPair::SetRightText(const std::string &text) const {
+    _rightLabel->setText(QString::fromStdString(text));
 }

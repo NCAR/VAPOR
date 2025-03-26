@@ -26,18 +26,15 @@ PFileSelector *PFileSelector::SetFileTypeFilter(const std::string &filter)
     return this;
 }
 
+// PFileSelector *PFileSelector::UseDefaultPathSetting(const std::string &tag)
+//{
+//    _syncWithSettings = true;
+//    _syncWithSettingsTag = tag;
+//    return this;
+//}
+
 void PFileSelector::buttonClicked()
 {
-    std::string defaultPath = getDefaultPath();
-    QString qSelectedPath = selectPath(defaultPath);
-    if (qSelectedPath.isNull()) return;
-
-    setParamsString(qSelectedPath.toStdString());
-}
-
-bool PFileSelector::requireParamsMgr() const { return _syncWithSettings; }
-
-std::string PFileSelector::getDefaultPath() const {
     string defaultPath;
     string selectedFile = getParamsString();
 
@@ -49,8 +46,14 @@ std::string PFileSelector::getDefaultPath() const {
         else
             defaultPath = Wasp::FileUtils::HomeDir();
     }
-    return defaultPath;
+
+    QString qSelectedPath = selectPath(defaultPath);
+    if (qSelectedPath.isNull()) return;
+
+    setParamsString(qSelectedPath.toStdString());
 }
+
+bool PFileSelector::requireParamsMgr() const { return _syncWithSettings; }
 
 QString PFileOpenSelector::selectPath(const std::string &defaultPath) const { return QFileDialog::getOpenFileName(nullptr, "Select a file", QString::fromStdString(defaultPath), _fileTypeFilter); }
 

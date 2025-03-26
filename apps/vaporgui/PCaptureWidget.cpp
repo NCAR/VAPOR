@@ -93,7 +93,7 @@ void PCaptureHBox::_captureSingleImage() {
     else 
         _mf->CaptureSingleImage(PngStrings::FileFilter, "."+PngStrings::FileSuffix);
 
-    ap->SetValueString(AnimationParams::CaptureFileTimeTag, "Capture file time", STLUtils::GetDateTimeString());
+    ap->SetValueString(AnimationParams::CaptureFileTimeTag, "Capture file time", STLUtils::GetCurrentDateTimestamp());
 }
 
 void PCaptureHBox::_captureTimeSeries() {
@@ -115,7 +115,7 @@ void PCaptureHBox::_captureTimeSeries() {
 
     ap->SetValueString(AnimationParams::CaptureFileDirTag, "Capture animation file directory", FileUtils::Dirname(fileName));
     ap->SetValueString(AnimationParams::CaptureTimeSeriesFileNameTag, "Capture animation file name", FileUtils::Basename(fileName));
-    ap->SetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "Capture file time", STLUtils::GetDateTimeString());
+    ap->SetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "Capture file time", STLUtils::GetCurrentDateTimestamp());
 
     bool rc = _mf->StartAnimCapture(fileName, defaultSuffix);  // User may cancel to prevent file overwrite, so capture return code
     std::cout << "rc " << rc << std::endl;
