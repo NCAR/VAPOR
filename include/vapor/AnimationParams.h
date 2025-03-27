@@ -36,6 +36,9 @@
 
 class PARAMS_API AnimationParams : public VAPoR::ParamsBase {
 public:
+    enum CaptureMode { SingleImage, TimeSeries };
+    enum CaptureType { TIFF, PNG };
+
     AnimationParams(ParamsBase::StateSave *ssave);
 
     AnimationParams(VAPoR::ParamsBase::StateSave *ssave, VAPoR::XmlNode *node);

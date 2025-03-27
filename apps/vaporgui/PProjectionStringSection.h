@@ -30,4 +30,8 @@ protected:
     void updateGUI() const override;
     void datasetDropdownChanged(std::string value);
     void applyClicked();
+    void closeEvent(QCloseEvent *event) override;
+
+signals:
+    void closed();
 };

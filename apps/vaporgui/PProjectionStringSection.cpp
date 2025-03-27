@@ -98,3 +98,8 @@ void PProjectionStringSection::applyClicked()
 
     p->SetProjectionString(proj);
 }
+
+void PProjectionStringSection::closeEvent(QCloseEvent *event) {
+    emit closed();
+    QWidget::closeEvent(event);
+}

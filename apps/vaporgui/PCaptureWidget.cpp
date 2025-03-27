@@ -33,11 +33,11 @@ PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, MainForm *mf)
     _fileLabel = new VLabel("");
     _fileLabel->MakeSelectable();
 
-    _captureButton = new PButton("Capture\nCurrent Frame", [this](VAPoR::ParamsBase*){_captureSingleImage();});
-    _captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, 0);
+    _captureButton = new PButton("Export", [this](VAPoR::ParamsBase*){_captureSingleImage();});
+    _captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, AnimationParams::SingleImage);
 
-    _captureTimeSeriesButton = new PButton("Capture\nTime Series", [this](VAPoR::ParamsBase*){_captureTimeSeries();});
-    _captureTimeSeriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, 1);
+    _captureTimeSeriesButton = new PButton("Export", [this](VAPoR::ParamsBase*){_captureTimeSeries();});
+    _captureTimeSeriesButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, AnimationParams::TimeSeries);
 
     QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(_hBox->layout());
     layout->addWidget(_typeCombo,1);
@@ -48,12 +48,8 @@ PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, MainForm *mf)
 
 void PCaptureHBox::_dropdownIndexChanged(int index) {
     int value;
-    if (_enumMap.empty()) {
-        value = index;
-    } else {
-        VAssert(index >= 0 && index < _enumMap.size());
-        value = _enumMap[index];
-    }
+    if (_enumMap.empty()) value = index; 
+    else value = _enumMap[index];
     setParamsLong(value);
 }
 
@@ -64,7 +60,7 @@ void PCaptureHBox::updateGUI() const {
     // Format the label for the saved file
     std::string file, time;
     std::string dir = ap->GetValueString(AnimationParams::CaptureFileDirTag, "");
-    if (ap->GetValueLong(AnimationParams::CaptureModeTag, 0) == 0) { // Capture signle frame
+    if (ap->GetValueLong(AnimationParams::CaptureModeTag, AnimationParams::SingleImage) == AnimationParams::SingleImage) { // Capture signle frame
         file = ap->GetValueString(AnimationParams::CaptureFileNameTag, "");
         time = ap->GetValueString(AnimationParams::CaptureFileTimeTag, "");
     }
@@ -118,7 +114,6 @@ void PCaptureHBox::_captureTimeSeries() {
     ap->SetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "Capture file time", STLUtils::GetCurrentDateTimestamp());
 
     bool rc = _mf->StartAnimCapture(fileName, defaultSuffix);  // User may cancel to prevent file overwrite, so capture return code
-    std::cout << "rc " << rc << std::endl;
     if (rc) {
         _mf->SetTimeStep(ap->GetStartTimestep());
         _mf->AnimationPlayForward();

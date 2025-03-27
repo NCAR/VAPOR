@@ -2,28 +2,34 @@
 #include "MainForm.h"
 #include "VHBoxWidget.h"
 #include "VLabel.h"
-#include "PButton.h"
 #include "DatasetTypeLookup.h"
 #include "vapor/ControlExecutive.h"
 #include "vapor/GUIStateParams.h"
 #include "vapor/FileUtils.h"
 
 #include <QFileDialog>
+#include <QPushButton>
 
 PImportDataButton::PImportDataButton(VAPoR::ControlExec* ce, MainForm *mf) : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _mf(mf) {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(_hBox->layout());
-    layout->addWidget(_importButton = new PButton("Select File(s)", [this](VAPoR::ParamsBase*){_importDataset();}),1);
+
+    QPushButton *button = new QPushButton("Select File(s)", this);
+    connect(button, &QPushButton::clicked, this, &PImportDataButton::_importDataset);
+    layout->addWidget(button, 1);
     layout->addWidget(_fileLabel = new VLabel(""),3);
 
     _fileLabel->MakeSelectable();
 }
 
 void PImportDataButton::_importDataset() {
-    std::vector<std::string> fileNames;
-    std::string defaultPath = getParams()->GetValueString(GUIStateParams::ImportDataDirTag, FileUtils::HomeDir());
+    GUIStateParams* gsp = dynamic_cast<GUIStateParams *>(getParams());
+    std::vector<std::string> dataSetNames = gsp->GetOpenDataSetNames();
+    std::string defaultPath = dataSetNames.size() ? gsp->GetOpenDataSetPaths(dataSetNames.back())[0] : FileUtils::HomeDir();
+    
     QStringList qfileNames = QFileDialog::getOpenFileNames(this, "Select Filename Prefix", QString::fromStdString(defaultPath));
+    std::vector<std::string> fileNames;
     for (const QString &qStr : qfileNames) fileNames.push_back(qStr.toStdString());
     if (fileNames.empty()) return;
 
@@ -39,12 +45,17 @@ void PImportDataButton::_importDataset() {
 }
 
 void PImportDataButton::updateGUI() const {
-    std::vector<string> files = getParams()->GetValueStringVec(GUIStateParams::ImportDataFilesTag);
-    int count = files.size();
+    GUIStateParams* gsp = dynamic_cast<GUIStateParams *>(getParams());
+
+    std::vector<std::string> dataSetNames = gsp->GetOpenDataSetNames();
+    if (!dataSetNames.size()) return;
+
+    std::vector<std::string> paths = gsp->GetOpenDataSetPaths(dataSetNames.back());
+    int count = paths.size();
+
     if (count > 0) {
-        std::string dir = FileUtils::Dirname(files[0]);
-        _fileLabel->SetText("Imported " + std::to_string(count) + " file(s)\nFrom: " + dir);
+        std::string dir = FileUtils::Basename(paths[0]);
+        _fileLabel->SetText("Imported: " + std::to_string(count) + " file(s)\nFrom: " + dir);
     }
     else _fileLabel->SetText("");
-    _importButton->Update(getParams());
 }

@@ -158,8 +158,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _status->hide();
 
     sideDockWidgetArea->setWidget(new VGroup({leftPanel, _status}));
-    // Only this specific resize method works for dock widgets, all other resize methods are noops
-    resizeDocks({sideDockWidgetArea}, {leftPanel->minimumWidth()}, Qt::Horizontal);
 
     createMenus();
     createToolBars();
@@ -213,7 +211,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _controlExec->SetSaveStateEnabled(true);
     _controlExec->RebaseStateSave();
     _paramsMgr->TriggerManualStateChangeEvent("Init");
-    _stateChangeFlag = false;
 
     if (interactive && GetSettingsParams()->GetAutoCheckForUpdates()) CheckForAndShowUpdate(_controlExec);
     if (interactive && GetSettingsParams()->GetAutoCheckForNotices()) NoticeBoard::CheckForAndShowNotices(_controlExec);
@@ -776,7 +773,6 @@ int MainForm::ImportDataset(const std::vector<string> &files, string format, Dat
 {
     _paramsMgr->BeginSaveStateGroup("Import Dataset");
     if (name.empty()) name = _getDataSetName(files[0], existsAction);
-    if (name.empty()) return;
     int rc = _controlExec->OpenData(files, name, format);
     if (rc < 0) {
         _paramsMgr->EndSaveStateGroup();
@@ -785,9 +781,7 @@ int MainForm::ImportDataset(const std::vector<string> &files, string format, Dat
     }
 
     auto gsp = _controlExec->GetParams<GUIStateParams>();
-    gsp->SetValueString(GUIStateParams::ImportDataDirTag, "", FileUtils::Dirname(files[0]));
     gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Data has just been loaded", 1);
-    gsp->SetValueStringVec(GUIStateParams::ImportDataFilesTag, "Most recently imported data files", {});
     gsp->InsertOpenDataSet(name, format, files);
 
     DataStatus *ds = _controlExec->GetDataStatus();
@@ -996,10 +990,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
 #endif
 
-        setUpdatesEnabled(false);
-        _controlExec->SyncWithParams();
-        setUpdatesEnabled(true);
-
         Render(true);
 
         return true;
@@ -1171,11 +1161,18 @@ void MainForm::launchProjectionDialog()
 {
     if (_projectionSection == nullptr){
         _projectionSection = new PProjectionStringSection(_controlExec);
+        connect(_projectionSection, &PProjectionStringSection::closed, this, &MainForm::closeProjectionSection);
         _projectionSection->adjustSize();
         _guiStateParamsUpdatableElements.insert(_projectionSection);
+        _projectionSection->Update(GetStateParams());
     }
-    _projectionSection->Update(GetStateParams());
     _projectionSection->show();
+}
+
+void MainForm::closeProjectionSection() {
+    _guiStateParamsUpdatableElements.erase(_projectionSection);
+    _projectionSection->close();
+    _projectionSection = nullptr;
 }
 
 void MainForm::capturePngSequence()
