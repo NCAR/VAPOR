@@ -19,11 +19,15 @@ class VSection : public QTabWidget {
     Q_OBJECT
 
     class SettingsMenuButton;
+    class ExpandSectionButton;
+    class AbstractButton;
 
 public:
     VSection(const std::string &title);
     QVBoxLayout *layout() const;
     void         setMenu(QMenu *menu);
+    void         enableExpandedSection();
+    std::string getTitle() const;
 
     void     setLayout(QLayout *layout) = delete;
     int      addTab(QWidget *page, const QString &label) = delete;
@@ -34,6 +38,9 @@ public:
 private:
     QWidget *_tab() const;
     QString  _createStylesheet() const;
+
+signals:
+    void expandButtonClicked();
 };
 
 #include "AbstractWidgetGroup.h"
@@ -52,12 +59,31 @@ public:
     }
 };
 
-class VSection::SettingsMenuButton : public QToolButton {
+class VSection::AbstractButton : public QToolButton {
     Q_OBJECT
+
+protected:
+    AbstractButton() {};
+    void paintEvent(QPaintEvent *event);
+    void configureButton();
+    void setDarkOrLight();
+    virtual void setIconDark(bool darkMode = true) = 0;
+};
+
+class VSection::SettingsMenuButton : public AbstractButton {
+    Q_OBJECT
+
+    void setIconDark(bool darkMode) override;
 
 public:
     SettingsMenuButton();
+};
 
-protected:
-    void paintEvent(QPaintEvent *event);
+class VSection::ExpandSectionButton: public AbstractButton {
+    Q_OBJECT
+
+    void setIconDark(bool darkMode) override;
+
+public:
+    ExpandSectionButton();
 };

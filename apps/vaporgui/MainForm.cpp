@@ -158,6 +158,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _status->hide();
 
     sideDockWidgetArea->setWidget(new VGroup({leftPanel, _status}));
+    // Only this specific resize method works for dock widgets, all other resize methods are noops
+    resizeDocks({sideDockWidgetArea}, {leftPanel->minimumWidth()}, Qt::Horizontal);
 
     createMenus();
     createToolBars();
@@ -211,6 +213,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _controlExec->SetSaveStateEnabled(true);
     _controlExec->RebaseStateSave();
     _paramsMgr->TriggerManualStateChangeEvent("Init");
+    _stateChangeFlag = false;
 
     if (interactive && GetSettingsParams()->GetAutoCheckForUpdates()) CheckForAndShowUpdate(_controlExec);
     if (interactive && GetSettingsParams()->GetAutoCheckForNotices()) NoticeBoard::CheckForAndShowNotices(_controlExec);
@@ -773,6 +776,7 @@ int MainForm::ImportDataset(const std::vector<string> &files, string format, Dat
 {
     _paramsMgr->BeginSaveStateGroup("Import Dataset");
     if (name.empty()) name = _getDataSetName(files[0], existsAction);
+    if (name.empty()) return;
     int rc = _controlExec->OpenData(files, name, format);
     if (rc < 0) {
         _paramsMgr->EndSaveStateGroup();
@@ -991,6 +995,10 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         // Normally GUI doesn't get intermediate changes but this is for testing only
         _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
 #endif
+
+        setUpdatesEnabled(false);
+        _controlExec->SyncWithParams();
+        setUpdatesEnabled(true);
 
         Render(true);
 

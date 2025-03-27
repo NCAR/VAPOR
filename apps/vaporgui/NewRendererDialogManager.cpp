@@ -13,7 +13,7 @@ NewRendererDialogManager::NewRendererDialogManager(VAPoR::ControlExec *ce, QWidg
 
 void NewRendererDialogManager::Show()
 {
-    _nrd->InitializeDataSources(_ce->GetDataStatus());
+    _nrd->InitializeDataSources(_ce);
     _nrd->open();
 }
 

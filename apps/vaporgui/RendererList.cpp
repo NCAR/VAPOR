@@ -259,7 +259,9 @@ void RendererList::showContextMenu(const QPoint& localPos)
             duplicateMenu->addAction(QString::fromStdString(viz), [=](){
                 auto newName = _ce->MakeRendererNameUnique(id);
                 _ce->GetParamsMgr()->BeginSaveStateGroup("Duplicate Ren");
-//                auto newParams = _ce->GetRenderParams(currentViz, dataset, Class, id);
+                auto newParams = _ce->GetRenderParams(currentViz, dataset, Class, id);
+                _ce->GetParamsMgr()->CreateRenderParamsInstance(viz, dataset, newName, newParams);
+
                 _ce->ActivateRender(viz, dataset, Class, newName, false);
                 auto p = _ce->GetRenderParams(viz, dataset, Class, newName);
                 if (!p->GetValueString(p->UserNameTag, "").empty())

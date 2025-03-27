@@ -45,6 +45,7 @@ void LeftPanel::Update()
         for (int tabNum=1; tabNum < count(); tabNum++) setTabEnabled(tabNum, false);
         return;
     }
+    if (_uTabs.empty()) return;
 
     // Otherwise enable and update all tabs
     for (int i = 0; i < count(); ++i) setTabEnabled(i, true);

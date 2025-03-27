@@ -27,6 +27,8 @@ void TFIsoValueMap::paramsUpdate()
     if (_selectedId > -1) UpdateInfo(_isoValues[_selectedId]);
 }
 
+QSizePolicy TFIsoValueMap::GetSizePolicy() const { return QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum); }
+
 #define PROPERTY_INDEX ("index")
 #define PROPERTY_VALUE ("value")
 
