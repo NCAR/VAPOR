@@ -25,6 +25,20 @@ void VSection::setMenu(QMenu *menu)
     menuButton->setMenu(menu);
 }
 
+void VSection::enableExpandedSection()
+{
+    ExpandSectionButton *expandSectionButton = (ExpandSectionButton *)QTabWidget::cornerWidget();
+    if (!expandSectionButton) {
+        expandSectionButton = new ExpandSectionButton;
+        QTabWidget::setCornerWidget(expandSectionButton, Qt::TopLeftCorner);
+    }
+    connect(expandSectionButton, &QToolButton::clicked, this, [this](){ emit this->expandButtonClicked(); });
+}
+
+std::string VSection::getTitle() const {
+    return QTabWidget::tabText(0).toStdString();
+}
+
 QWidget *VSection::_tab() const { return QTabWidget::widget(0); }
 
 QString VSection::_createStylesheet() const
@@ -39,10 +53,24 @@ QString VSection::_createStylesheet() const
     right: 3px;
     }
     )";
+    stylesheet +=
+        R"(
+    QTabWidget::left-corner {
+    top: 24px;
+    left: 3px;
+    }
+    )";
 #else
     stylesheet +=
         R"(
     QTabWidget::right-corner {
+    top: -3px;
+    right: 5px;
+    }
+    )";
+    stylesheet +=
+        R"(
+    QTabWidget::left-corner {
     top: -3px;
     right: 5px;
     }
@@ -52,9 +80,38 @@ QString VSection::_createStylesheet() const
     return QString::fromStdString(stylesheet);
 }
 
-VSection::SettingsMenuButton::SettingsMenuButton()
+VSection::SettingsMenuButton::SettingsMenuButton() : AbstractButton()
 {
     setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/gear-dropdown1.png"))));
+    configureButton();
+}
+
+void VSection::SettingsMenuButton::setIconDark(bool darkMode) {
+    if (darkMode) setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/gear-dropdown1_darkMode.png"))));
+    else setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/gear-dropdown1.png"))));
+}
+
+void VSection::AbstractButton::setDarkOrLight() {
+    QColor textColor = this->palette().color(QPalette::WindowText);
+    if (textColor.lightness() > 128) setIconDark();
+    else setIconDark(false);
+}
+
+void VSection::AbstractButton::paintEvent(QPaintEvent *event)
+{
+    // This function is overridden to prevent Qt from drawing its own dropdown arrow
+    QStylePainter p(this);
+
+    setDarkOrLight();
+
+    QStyleOptionToolButton option;
+    initStyleOption(&option);
+    option.subControls = QStyle::SC_ToolButton;
+    option.features = QStyleOptionToolButton::None;
+    p.drawComplexControl(QStyle::CC_ToolButton, option);
+}
+
+void VSection::AbstractButton::configureButton() {
     setIconSize(QSize(18, 18));
     setCursor(QCursor(Qt::PointingHandCursor));
     setPopupMode(QToolButton::InstantPopup);
@@ -63,15 +120,13 @@ VSection::SettingsMenuButton::SettingsMenuButton()
                   "background-color: none;"
                   "padding: 0px;");
 }
-
-void VSection::SettingsMenuButton::paintEvent(QPaintEvent *event)
+VSection::ExpandSectionButton::ExpandSectionButton() : AbstractButton()
 {
-    // This function is overridden to prevent Qt from drawing its own dropdown arrow
-    QStylePainter p(this);
+    setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/expandSection.png"))));
+    configureButton();
+}
 
-    QStyleOptionToolButton option;
-    initStyleOption(&option);
-    option.subControls = QStyle::SC_ToolButton;
-    option.features = QStyleOptionToolButton::None;
-    p.drawComplexControl(QStyle::CC_ToolButton, option);
+void VSection::ExpandSectionButton::setIconDark(bool darkMode) {
+    if (darkMode) setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/expandSection_darkMode.png"))));
+    else setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/expandSection.png"))));
 }

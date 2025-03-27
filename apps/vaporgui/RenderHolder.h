@@ -30,7 +30,7 @@ public:
                       std::vector<bool> dim2DSupport, std::vector<bool> dim3DSupport, vector<bool> particleSupport);
 
     std::string GetSelectedRenderer() { return _selectedRenderer; }
-    void        InitializeDataSources(VAPoR::DataStatus *dataStatus);
+    void        InitializeDataSources(VAPoR::ControlExec *ce);
 
 private slots:
     void _buttonChecked();

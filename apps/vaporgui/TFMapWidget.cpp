@@ -1,4 +1,6 @@
 #include "TFMapWidget.h"
+#include "TFColorWidget.h"
+#include "TFIsoValueWidget.h"
 #include <QPainter>
 #include <QResizeEvent>
 #include <QMenu>
@@ -87,6 +89,8 @@ void TFMap::hide()
 }
 
 VAPoR::MapperFunction *TFMap::getMapperFunction() const { return _renderParams->GetMapperFunc(getVariableName()); }
+
+QSizePolicy TFMap::GetSizePolicy() const { return QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding); }
 
 std::string TFMap::getVariableName() const { return _variableName; }
 
@@ -199,6 +203,7 @@ TFMapWidget::TFMapWidget(TFMap *map)
     AddMap(map);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(_showContextMenu(const QPoint &)));
+    setSizePolicy(map->GetSizePolicy());
 }
 
 TFMapWidget::~TFMapWidget()

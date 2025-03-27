@@ -28,6 +28,8 @@ TFColorMap::TFColorMap(const std::string &variableNameTag, TFMapWidget *parent)
 
 QSize TFColorMap::minimumSizeHint() const { return QSize(100, 30); }
 
+QSizePolicy TFColorMap::GetSizePolicy() const { return QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum); }
+
 void TFColorMap::LostFocus() { DeselectControlPoint(); }
 
 #define PROPERTY_INDEX ("index")

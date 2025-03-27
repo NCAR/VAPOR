@@ -17,7 +17,6 @@ class PImportDataButton : public PWidget {
     MainForm *_mf;
     VHBoxWidget *_hBox;
     VLabel *_fileLabel;
-    PButton *_importButton;
 
     void _importDataset();
 

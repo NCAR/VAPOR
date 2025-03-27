@@ -56,6 +56,8 @@ class PTFEditor : public PWidget {
     TFColorMap *            _colorMap;
     TFIsoValueMap *         _isoMap;
     TFMappingRangeSelector *_range;
+    PTFEditor*              _expandedPTFEditor = nullptr;
+    bool                    _expandable;
 
     std::vector<QAction *> _colorMapActions;
     std::vector<QAction *> _opacityMapActions;
@@ -72,7 +74,7 @@ public:
     enum Element { Opacity, Histogram, Colormap, IsoValues, RegularIsoArray, Default };
 
     PTFEditor();
-    PTFEditor(const std::string &tag, const std::set<Element> elements = {Default}, const std::string &label = "Transfer Function");
+    PTFEditor(const std::string &tag, const std::set<Element> elements = {Default}, const std::string &label = "Transfer Function", bool expandable = true);
     //! Behaves the same as PWidget::ShowBasedOnParam except shows/hides the opacity controls.
     //! @copydoc PWidget::ShowBasedOnParam
     PTFEditor *ShowOpacityBasedOnParam(const std::string &tag, int value);
@@ -81,10 +83,38 @@ public:
     PTFEditor *ShowColormapBasedOnParam(const std::string &tag, int value);
 
 protected:
+    std::set<Element> _elements;
+    std::string _label;
+
+    void hideEvent(QHideEvent *event) override;
     void updateGUI() const override;
+    void Update(VAPoR::ParamsBase* p, VAPoR::ParamsMgr* pm, VAPoR::DataMgr* dm) override;
+    void getExpandedPTFEditorInfo(std::string &name, std::string &type);
+
+private slots:
+    void showExpandedPTFEditor();
+    void closeExpandedPTFEditor();
 };
 
 class PColormapTFEditor : public PTFEditor {
 public:
     PColormapTFEditor();
 };
+
+//! \class Expanded PTFEditor
+//! A sublcass of PTFEditor that emits a signal when closed
+//! \copydoc PTFEditor
+
+class ExpandedPTFEditor : public PTFEditor {
+    Q_OBJECT
+
+public:
+    using PTFEditor::PTFEditor;
+
+signals:
+    void closed();
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
+};
+

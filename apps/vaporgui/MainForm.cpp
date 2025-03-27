@@ -781,9 +781,8 @@ int MainForm::ImportDataset(const std::vector<string> &files, string format, Dat
     }
 
     auto gsp = _controlExec->GetParams<GUIStateParams>();
-    gsp->SetValueString(GUIStateParams::ImportDataDirTag, "", FileUtils::Dirname(files[0]));
     gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Data has just been loaded", 1);
-    gsp->SetValueStringVec(GUIStateParams::ImportDataFilesTag, "Most recently imported data files", {});
+    //gsp->SetValueStringVec(GUIStateParams::ImportDataFilesTag, "Most recently imported data files", {});
     gsp->InsertOpenDataSet(name, format, files);
 
     DataStatus *ds = _controlExec->GetDataStatus();
@@ -1163,11 +1162,18 @@ void MainForm::launchProjectionDialog()
 {
     if (_projectionSection == nullptr){
         _projectionSection = new PProjectionStringSection(_controlExec);
+        connect(_projectionSection, &PProjectionStringSection::closed, this, &MainForm::closeProjectionSection);
         _projectionSection->adjustSize();
         _guiStateParamsUpdatableElements.insert(_projectionSection);
+        _projectionSection->Update(GetStateParams());
     }
-    _projectionSection->Update(GetStateParams());
     _projectionSection->show();
+}
+
+void MainForm::closeProjectionSection() {
+    _guiStateParamsUpdatableElements.erase(_projectionSection);
+    _projectionSection->close();
+    _projectionSection = nullptr;
 }
 
 void MainForm::capturePngSequence()

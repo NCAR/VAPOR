@@ -218,9 +218,7 @@ public:
     static const string BookmarksTag;
     static const string MovingDomainTrackCameraTag;
     static const string MovingDomainTrackRenderRegionsTag;
-    static const string ImportDataDirTag;
     static const string ImportDataTypeTag;
-    static const string ImportDataFilesTag;
     static const string DataJustLoadedTag;
 
 private:

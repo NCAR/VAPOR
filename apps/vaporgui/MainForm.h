@@ -201,6 +201,7 @@ private:
 private slots:
     void _plotClosed();
     void _statsClosed();
+    void closeProjectionSection();
     void helpAbout();
     void sessionNew();
     void captureTiffSequence();
