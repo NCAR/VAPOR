@@ -142,13 +142,13 @@ void AnimationController::setPlay(int direction)
     }
 }
 
+// TODO Refactor
 void AnimationController::playNextFrame()
 {
     VAssert(_direction == -1 || _direction == 1);
 
     // Draw the frame, and then advance the frame count
-    //
-    emit AnimationDrawSignal();
+    // ^?
 
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
@@ -172,11 +172,7 @@ void AnimationController::playNextFrame()
     _controlExec->GetParamsMgr()->SetSaveStateUndoEnabled(false);
     setCurrentTimestep(currentFrame);
     _controlExec->GetParamsMgr()->SetSaveStateUndoEnabled(undoEnabled);
-
-    // playNextFrame() is called via a timer and bypasses main event
-    // loop. So we need to call updateTab ourselves
-    //
-    _updateTab();
+    emit AnimationDrawSignal();
 }
 
 AnimationParams *AnimationController::GetActiveParams() const { return NavigationUtils::GetAnimationParams(_controlExec); }
