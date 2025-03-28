@@ -60,7 +60,7 @@ public:
     static QWidget* Instance() { assert(_instance); return _instance; }
 
 protected:
-    void Render(bool fast=false);
+    void Render(bool fast=false, bool skipSync=false);
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
