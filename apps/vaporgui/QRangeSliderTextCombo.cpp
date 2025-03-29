@@ -77,6 +77,11 @@ void QRangeSliderTextCombo::SetValue(float left, float right)
         _slider->SetValue((left - _min) / (_max - _min), (right - _min) / (_max - _min));
 }
 
+void QRangeSliderTextCombo::SetNumDigits(int digits) {
+    _leftText->SetNumDigits(digits);
+    _rightText->SetNumDigits(digits);
+}
+
 void QRangeSliderTextCombo::AllowCustomRange()
 {
     if (_allowCustomRange) return;

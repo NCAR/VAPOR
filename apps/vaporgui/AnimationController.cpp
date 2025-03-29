@@ -155,12 +155,10 @@ void AnimationController::playNextFrame()
     int  startFrame = aParams->GetStartTimestep();
     int  endFrame = aParams->GetEndTimestep();
     int  currentFrame = aParams->GetCurrentTimestep();
-    int  frameStepSize = aParams->GetFrameStepSize();
-    bool loop = aParams->GetRepeating();
 
-    currentFrame += (int)(_direction * frameStepSize);
+    currentFrame += (int)(_direction);
 
-    if (!loop && (currentFrame < startFrame || currentFrame > endFrame)) {
+    if ((currentFrame < startFrame || currentFrame > endFrame)) {
         AnimationPause();
         return;
     }

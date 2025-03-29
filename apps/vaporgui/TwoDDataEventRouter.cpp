@@ -22,7 +22,7 @@ TwoDDataEventRouter::TwoDDataEventRouter(QWidget *parent, ControlExec *ce) : Ren
     
     AddAppearanceSubtab((new PTFEditor));
     AddGeometrySubtab(new PGeometrySubtab);
-    AddAnnotationSubtab(new PAnnotationColorbarWidget);
+    AddColorbarSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }
