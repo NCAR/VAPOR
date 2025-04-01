@@ -147,17 +147,18 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _animationController = new AnimationController(_controlExec);
     connect(_animationController, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
 
-    LeftPanel* leftPanel = new LeftPanel(_controlExec, this);
+    //LeftPanel* leftPanel = new LeftPanel(_controlExec, this);
+    _leftPanel = new LeftPanel(_controlExec, this);
     const int dpi = qApp->desktop()->logicalDpiX();
-    leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
-    leftPanel->setMinimumHeight(500);
-    _dependOnLoadedData_insert(leftPanel);
-    _updatableElements.insert(leftPanel);
+    _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
+    _leftPanel->setMinimumHeight(500);
+    _dependOnLoadedData_insert(_leftPanel);
+    _updatableElements.insert(_leftPanel);
 
     _status = new ProgressStatusBar;
     _status->hide();
 
-    sideDockWidgetArea->setWidget(new VGroup({leftPanel, _status}));
+    sideDockWidgetArea->setWidget(new VGroup({_leftPanel, _status}));
 
     createMenus();
     createToolBars();
@@ -597,12 +598,12 @@ retryLoad:
     else
         for (auto name : gsp->GetOpenDataSetNames()) gsp->RemoveOpenDataSet(name);
 
-    gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Data has just been loaded with a session", 1);
-
     _paramsMgr->UndoRedoClear();
     _sessionNewFlag = false;
     _stateChangeFlag = false;
     _paramsMgr->TriggerManualStateChangeEvent("Session Opened");
+
+    _leftPanel->GoToRendererTab();
 }
 
 
@@ -781,7 +782,7 @@ int MainForm::ImportDataset(const std::vector<string> &files, string format, Dat
     }
 
     auto gsp = _controlExec->GetParams<GUIStateParams>();
-    gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Data has just been loaded", 1);
+    //gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Data has just been loaded", 1);
     gsp->InsertOpenDataSet(name, format, files);
 
     DataStatus *ds = _controlExec->GetDataStatus();
@@ -795,6 +796,9 @@ int MainForm::ImportDataset(const std::vector<string> &files, string format, Dat
 
     _sessionNewFlag = false;
     _paramsMgr->EndSaveStateGroup();
+
+    _leftPanel->GoToRendererTab();
+
     return 0;
 }
 

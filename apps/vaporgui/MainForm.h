@@ -114,6 +114,7 @@ private:
     const QObject *                                    _disableUserInputForAllExcept = nullptr;
     bool                                               _insideMessedUpQtEventLoop = false;
 
+    LeftPanel           *_leftPanel;
     Statistics *        _stats = nullptr;
     Plot *              _plot = nullptr;
     PythonVariables *   _pythonVariables = nullptr;

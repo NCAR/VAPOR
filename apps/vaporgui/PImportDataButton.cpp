@@ -54,7 +54,7 @@ void PImportDataButton::updateGUI() const {
     int count = paths.size();
 
     if (count > 0) {
-        std::string dir = FileUtils::Basename(paths[0]);
+        std::string dir = FileUtils::Dirname(paths[0]);
         _fileLabel->SetText("Imported: " + std::to_string(count) + " file(s)\nFrom: " + dir);
     }
     else _fileLabel->SetText("");

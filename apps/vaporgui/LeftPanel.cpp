@@ -52,13 +52,17 @@ void LeftPanel::Update()
     setTabEnabled(currentIndex(),true);
     _uTabs[currentIndex()]->Update();
 
-    if (gsp->GetValueLong(GUIStateParams::DataJustLoadedTag, 0) != 0) {
-        setCurrentIndex(1); // go to Renderer tab
-        gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Unsetting data just loaded tag", 0);
-    }
+    //if (gsp->GetValueLong(GUIStateParams::DataJustLoadedTag, 0) != 0) {
+    //    setCurrentIndex(1); // go to Renderer tab
+    //    gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Unsetting data just loaded tag", 0);
+    //}
 }
 
 void LeftPanel::tabChanged(int i)
 {
     _uTabs[i]->Update();
+}
+
+void LeftPanel::GoToRendererTab() {
+    setCurrentIndex(1);
 }

@@ -29,8 +29,4 @@ public:
 
 protected:
     void updateGUI() const override;
-
-signals:
-    void dataImported();
-
 };
