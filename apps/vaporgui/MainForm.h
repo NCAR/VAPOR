@@ -98,9 +98,9 @@ private:
 
     QToolBar *_animationToolBar;
 
-    QMenu *  _singleImageMenu;
-    QMenu *  _imageSequenceMenu;
-    QAction *_captureEndImageAction;
+    //QMenu *  _singleImageMenu;
+    //QMenu *  _imageSequenceMenu;
+    //QAction *_captureEndImageAction;
     QAction *_stepForwardAction;
     QAction *_stepBackAction;
 
@@ -156,10 +156,10 @@ private:
 
     void showCitationReminder();
 
-    void stopAnimCapture(string vizName)
-    {
-        if (vizName == _capturingAnimationVizName) endAnimCapture();
-    }
+    //void stopAnimCapture(string vizName)
+    //{
+    //    if (vizName == _capturingAnimationVizName) endAnimCapture();
+    //}
 
     GUIStateParams *GetStateParams() const { return ((GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType())); }
     SettingsParams *GetSettingsParams() const { return ((SettingsParams *)_paramsMgr->GetParams(SettingsParams::GetClassType())); }
@@ -176,7 +176,7 @@ private:
     void showOpenSessionGUI();
     optional<ControlExec::LoadStateRelAndAbsPathsExistAction> showSelectRelVAbsDataLoadGUI(const ControlExec::RelAndAbsPathsExistException &e);
     void checkSessionDatasetsExist();
-    void         _createCaptureMenu();
+    //void         _createCaptureMenu();
     void         _createToolsMenu();
     void         _createEditMenu();
     void         _createFileMenu();
@@ -205,9 +205,9 @@ private slots:
     void closeProjectionSection();
     void helpAbout();
     void sessionNew();
-    void captureTiffSequence();
-    void capturePngSequence();
-    void selectAnimCaptureOutput(string filter, string defaultSuffix);
+    //void captureTiffSequence();
+    //void capturePngSequence();
+    //void selectAnimCaptureOutput(string filter, string defaultSuffix);
     void endAnimCapture();
     void launchStats();
     void launchPlotUtility();
