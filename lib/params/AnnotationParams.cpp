@@ -97,14 +97,9 @@ AnnotationParams::AnnotationParams(const AnnotationParams &rhs) : ParamsBase(rhs
 
 void AnnotationParams::_init()
 {
-    vector<double> clr(3, 1.0);
-    SetDomainColor(clr);
-    // SetAxisColor(clr);
-    clr[1] = 0.;
-    clr[2] = 0.;
-    SetRegionColor(clr);
-    clr[0] = 0.;
-    SetBackgroundColor(clr);
+    SetDomainColor({1.0,1.0,1.0});
+    SetRegionColor({1.0,0.0,0.0});
+    SetBackgroundColor({0.118,0.118,0.118});
     SetUseRegionFrame(false);
     SetUseDomainFrame(true);
     SetValueLong(AxisArrowEnabledTag, "Initializing AxisArrowEnabledTag", 0);
