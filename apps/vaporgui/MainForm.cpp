@@ -1117,12 +1117,12 @@ void MainForm::launchProjectionDialog()
 {
     if (_projectionSection == nullptr){
         _projectionSection = new PProjectionStringSection(_controlExec);
-        connect(_projectionSection, &PProjectionStringSection::closed, this, &MainForm::closeProjectionSection);
         _projectionSection->adjustSize();
-        _guiStateParamsUpdatableElements.insert(_projectionSection);
         _projectionSection->Update(GetStateParams());
+        connect(_projectionSection, &PProjectionStringSection::closed, this, &MainForm::closeProjectionSection);
+        _guiStateParamsUpdatableElements.insert(_projectionSection);
     }
-    _projectionSection->show();
+    _projectionSection->raise();
 }
 
 void MainForm::closeProjectionSection() {
