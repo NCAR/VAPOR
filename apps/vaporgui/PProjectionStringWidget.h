@@ -15,7 +15,7 @@ class VComboBox;
 class VPushButton;
 class VLabel;
 
-class PProjectionStringSection : public PWidget {
+class PProjectionStringWidget : public PWidget {
     Q_OBJECT
     ControlExec *   _ce;
     PDisplay *      _currentProjDisp;
@@ -26,7 +26,7 @@ class PProjectionStringSection : public PWidget {
     std::string     _changeToDataset;
 
 public:
-    PProjectionStringSection(ControlExec *ce);
+    PProjectionStringWidget(ControlExec *ce);
 
 protected:
     void updateGUI() const override;
@@ -34,18 +34,18 @@ protected:
     void applyClicked();
 };
 
-class VProjectionStringFrame : public VFrame , public ParamsUpdatable {
-    Q_OBJECT
-   
-    PProjectionStringSection *_section;
- 
-public:
-    VProjectionStringFrame(PProjectionStringSection *psection);
-    void Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *pm = nullptr, VAPoR::DataMgr *dm = nullptr) override;
-
-protected:
-    void closeEvent(QCloseEvent *event) override;
-
-signals:
-    void closed();
-};
+//class VProjectionStringFrame : public VFrame , public ParamsUpdatable {
+//    Q_OBJECT
+//   
+//    PProjectionStringWidget *_section;
+// 
+//public:
+//    VProjectionStringFrame(PProjectionStringWidget *psection);
+//    void Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *pm = nullptr, VAPoR::DataMgr *dm = nullptr) override;
+//
+//protected:
+//    void closeEvent(QCloseEvent *event) override;
+//
+//signals:
+//    void closed();
+//};

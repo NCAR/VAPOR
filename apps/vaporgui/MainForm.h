@@ -193,13 +193,13 @@ private:
 private slots:
     void _plotClosed();
     void _statsClosed();
-    void closeProjectionSection();
+    void closeProjectionFrame();
     void helpAbout();
     void sessionNew();
     void endAnimCapture();
     void launchStats();
     void launchPlotUtility();
     void launchPythonVariables();
-    void launchProjectionDialog();
+    void launchProjectionFrame();
     void _setAnimationOnOff(bool onOff);
 };

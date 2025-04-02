@@ -257,8 +257,10 @@ set (SRCS
     PDatasetTransformWidget.h
     PCameraControlsSection.cpp
     PCameraControlsSection.h
-    PProjectionStringSection.cpp
-    PProjectionStringSection.h
+    PProjectionStringWidget.cpp
+    PProjectionStringWidget.h
+    VProjectionStringFrame.cpp
+    VProjectionStringFrame.h
     POutputResolutionSection.cpp
     POutputResolutionSection.h
     VLabel.cpp

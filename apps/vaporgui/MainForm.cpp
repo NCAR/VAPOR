@@ -42,7 +42,8 @@
 #include "BannerGUI.h"
 #include "Statistics.h"
 #include "PythonVariables.h"
-#include "PProjectionStringSection.h"
+#include "PProjectionStringWidget.h"
+#include "VProjectionStringFrame.h"
 #include "Plot.h"
 #include "ErrorReporter.h"
 #include "MainForm.h"
@@ -457,7 +458,7 @@ void MainForm::_createToolsMenu()
     _dependOnLoadedData_insert(toolMenu->addAction("Plot Utility", this, SLOT(launchPlotUtility())));
     _dependOnLoadedData_insert(toolMenu->addAction("Data Statistics", this, SLOT(launchStats())));
     _dependOnLoadedData_insert(toolMenu->addAction("Python Variables", this, SLOT(launchPythonVariables())));
-    _dependOnLoadedData_insert(toolMenu->addAction("Dataset Projection", this, SLOT(launchProjectionDialog())));
+    _dependOnLoadedData_insert(toolMenu->addAction("Dataset Projection", this, SLOT(launchProjectionFrame())));
 
 #ifdef WIN32
     #define ADD_INSTALL_CLI_TOOLS_ACTION 1
@@ -1116,11 +1117,11 @@ void MainForm::launchPythonVariables()
     _pythonVariables->ShowMe();
 }
 
-void MainForm::launchProjectionDialog()
+void MainForm::launchProjectionFrame()
 {
     if (_projectionFrame == nullptr){
-        _projectionFrame = new VProjectionStringFrame(new PProjectionStringSection(_controlExec));
-        connect(_projectionFrame, &VProjectionStringFrame::closed, this, &MainForm::closeProjectionSection);
+        _projectionFrame = new VProjectionStringFrame(new PProjectionStringWidget(_controlExec));
+        connect(_projectionFrame, &VProjectionStringFrame::closed, this, &MainForm::closeProjectionFrame);
         _projectionFrame->adjustSize();
         _projectionFrame->Update(GetStateParams());
         _guiStateParamsUpdatableElements.insert(_projectionFrame);
@@ -1128,7 +1129,7 @@ void MainForm::launchProjectionDialog()
     _projectionFrame->raise();
 }
 
-void MainForm::closeProjectionSection() {
+void MainForm::closeProjectionFrame() {
     _guiStateParamsUpdatableElements.erase(_projectionFrame);
     _projectionFrame->close();
     _projectionFrame = nullptr;

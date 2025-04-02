@@ -1,6 +1,6 @@
 #include "ImportTab.h"
 #include "PImportDataWidget.h"
-#include "PProjectionStringSection.h"
+#include "PProjectionStringWidget.h"
 #include "VHyperlink.h"
 #include "VSection.h"
 #include "MainForm.h"
@@ -43,7 +43,7 @@ ImportTab::ImportTab(VAPoR::ControlExec *ce, MainForm *mf) : _ce(ce)
     sg->setEnabled(true);
     l->addWidget(sg);
 
-    l->addWidget(_projectionSection = new PProjectionStringSection(_ce));
+    l->addWidget(_projectionWidget = new PProjectionStringWidget(_ce));
 
     l->addStretch(1);
     setLayout(l);
@@ -55,6 +55,6 @@ void ImportTab::Update()
     _importer->Update(guiParams);
 
     bool noDatasetLoaded = guiParams->GetOpenDataSetNames().empty();
-    if (noDatasetLoaded) _projectionSection->hide();
-    else _projectionSection->Update(guiParams);
+    if (noDatasetLoaded) _projectionWidget->hide();
+    else _projectionWidget->Update(guiParams);
 }
