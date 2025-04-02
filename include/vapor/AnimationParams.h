@@ -117,7 +117,6 @@ public:
     static const string CaptureFileNameTag;
     static const string CaptureFileDirTag;
     static const string CaptureFileTimeTag;
-    static const string CaptureTimeSeriesFileDirTag;
     static const string CaptureTimeSeriesFileNameTag;
     static const string CaptureTimeSeriesTimeTag;
 
