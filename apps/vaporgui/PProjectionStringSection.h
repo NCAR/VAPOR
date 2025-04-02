@@ -2,6 +2,8 @@
 
 #include "PWidget.h"
 #include "PWidgetsFwd.h"
+#include "VFrame.h"
+#include "Updatable.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -30,6 +32,18 @@ protected:
     void updateGUI() const override;
     void datasetDropdownChanged(std::string value);
     void applyClicked();
+};
+
+class VProjectionStringFrame : public VFrame , public ParamsUpdatable {
+    Q_OBJECT
+   
+    PProjectionStringSection *_section;
+ 
+public:
+    VProjectionStringFrame(PProjectionStringSection *psection);
+    void Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *pm = nullptr, VAPoR::DataMgr *dm = nullptr) override;
+
+protected:
     void closeEvent(QCloseEvent *event) override;
 
 signals:

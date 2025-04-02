@@ -158,6 +158,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _status->hide();
 
     sideDockWidgetArea->setWidget(new VGroup({_leftPanel, _status}));
+    // Only this specific resize method works for dock widgets, all other resize methods are noops
+    resizeDocks({sideDockWidgetArea}, {_leftPanel->minimumWidth()}, Qt::Horizontal);
 
     createMenus();
     createToolBars();
@@ -211,6 +213,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     _controlExec->SetSaveStateEnabled(true);
     _controlExec->RebaseStateSave();
     _paramsMgr->TriggerManualStateChangeEvent("Init");
+    _stateChangeFlag = false;
 
     if (interactive && GetSettingsParams()->GetAutoCheckForUpdates()) CheckForAndShowUpdate(_controlExec);
     if (interactive && GetSettingsParams()->GetAutoCheckForNotices()) NoticeBoard::CheckForAndShowNotices(_controlExec);
@@ -1115,20 +1118,20 @@ void MainForm::launchPythonVariables()
 
 void MainForm::launchProjectionDialog()
 {
-    if (_projectionSection == nullptr){
-        _projectionSection = new PProjectionStringSection(_controlExec);
-        _projectionSection->adjustSize();
-        _projectionSection->Update(GetStateParams());
-        connect(_projectionSection, &PProjectionStringSection::closed, this, &MainForm::closeProjectionSection);
-        _guiStateParamsUpdatableElements.insert(_projectionSection);
+    if (_projectionFrame == nullptr){
+        _projectionFrame = new VProjectionStringFrame(new PProjectionStringSection(_controlExec));
+        connect(_projectionFrame, &VProjectionStringFrame::closed, this, &MainForm::closeProjectionSection);
+        _projectionFrame->adjustSize();
+        _projectionFrame->Update(GetStateParams());
+        _guiStateParamsUpdatableElements.insert(_projectionFrame);
     }
-    _projectionSection->raise();
+    _projectionFrame->raise();
 }
 
 void MainForm::closeProjectionSection() {
-    _guiStateParamsUpdatableElements.erase(_projectionSection);
-    _projectionSection->close();
-    _projectionSection = nullptr;
+    _guiStateParamsUpdatableElements.erase(_projectionFrame);
+    _projectionFrame->close();
+    _projectionFrame = nullptr;
 }
 
 void MainForm::SetTimeStep(int ts) const {

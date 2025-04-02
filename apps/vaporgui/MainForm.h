@@ -42,7 +42,7 @@ class BannerGUI;
 class Statistics;
 class Plot;
 class PythonVariables;
-class PProjectionStringSection;
+class VProjectionStringFrame;
 class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
@@ -115,7 +115,7 @@ private:
     Statistics *        _stats = nullptr;
     Plot *              _plot = nullptr;
     PythonVariables *   _pythonVariables = nullptr;
-    PProjectionStringSection* _projectionSection = nullptr;
+    VProjectionStringFrame* _projectionFrame = nullptr;
     AppSettingsMenu *   _appSettingsMenu = nullptr;
     BannerGUI *         _banner = nullptr;
     std::set<Updatable *> _updatableElements;
