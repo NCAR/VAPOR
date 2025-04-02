@@ -175,7 +175,8 @@ jobs:
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DDIST_INSTALLER:string=ON -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_OSP=OFF -G 'Visual Studio 16 2019' -A x64
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\project\tmp\workspace\installers
-            Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers
+            #Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers
+            Copy-Item C:\Users\circleci\project\build\bin\Release\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers
             if (!(Test-Path -Path C:\Users\circleci\project\tmp\workspace\installers\*.exe)) {
               Write-Error "Build failed: No installers found"
               exit 1
