@@ -32,30 +32,24 @@ LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
     connect(this, &QTabWidget::currentChanged, this, &LeftPanel::tabChanged);
 }
 
-void LeftPanel::Update()
-{
-    GUIStateParams *gsp = _ce->GetParams<GUIStateParams>();
-    // Enable the only import panel when no data is loaded
-    bool noDatasetLoaded = gsp->GetOpenDataSetNames().empty();
-    if (noDatasetLoaded) { 
+void LeftPanel::setEnabled(bool widgetsEnabled) {
+    if (!widgetsEnabled) {
+        // Only enable the Import tab, which should always be enabled
         setEnabled(true);
         _importTab->setEnabled(true);
-        _importTab->Update();
         setCurrentIndex(0);
         for (int tabNum=1; tabNum < count(); tabNum++) setTabEnabled(tabNum, false);
-        return;
     }
+    else {
+        // Otherwise enable all tabs
+        for (int i = 0; i < count(); ++i) setTabEnabled(i, true);
+    }
+}
+
+void LeftPanel::Update()
+{
     if (_uTabs.empty()) return;
-
-    // Otherwise enable and update all tabs
-    for (int i = 0; i < count(); ++i) setTabEnabled(i, true);
-    setTabEnabled(currentIndex(),true);
     _uTabs[currentIndex()]->Update();
-
-    //if (gsp->GetValueLong(GUIStateParams::DataJustLoadedTag, 0) != 0) {
-    //    setCurrentIndex(1); // go to Renderer tab
-    //    gsp->SetValueLong(GUIStateParams::DataJustLoadedTag, "Unsetting data just loaded tag", 0);
-    //}
 }
 
 void LeftPanel::tabChanged(int i)

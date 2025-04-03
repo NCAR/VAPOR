@@ -4,6 +4,8 @@
 #include <vapor/NavigationUtils.h>
 #include <vapor/GUIStateParams.h>
 
+#include <QAction>
+
 using namespace VAPoR;
 
 AnimationController::AnimationController(VAPoR::ControlExec *ce) : _controlExec(ce), _myTimer(new QTimer(this)) {}
@@ -73,6 +75,7 @@ void AnimationController::AnimationPlayReverse()
 
 void AnimationController::AnimationPlayForward()
 {
+    _capturingImageSequence = qobject_cast<QAction*>(sender()) ? false : true;
     _animationOn = true;
     setPlay(1);
 }
@@ -138,6 +141,7 @@ void AnimationController::setPlay(int direction)
         disconnect(_myTimer, 0, 0, 0);
         _controlExec->GetParamsMgr()->ManuallyAddCurrentStateToUndoStack("End animation playback");
 
+        _capturingImageSequence = false;
         emit AnimationOnOffSignal(false);
     }
 }
@@ -152,8 +156,16 @@ void AnimationController::playNextFrame()
 
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
-    int  startFrame = aParams->GetStartTimestep();
-    int  endFrame = aParams->GetEndTimestep();
+    int startFrame, endFrame;
+    if (_capturingImageSequence) {
+        startFrame = aParams->GetValueLong(AnimationParams::CaptureStartTag, aParams->GetStartTimestep());
+        endFrame = aParams->GetValueLong(AnimationParams::CaptureEndTag, aParams->GetEndTimestep());
+    }
+    else {
+        startFrame = aParams->GetStartTimestep();
+        endFrame = aParams->GetEndTimestep();
+    }
+
     int  currentFrame = aParams->GetCurrentTimestep();
 
     currentFrame += (int)(_direction);

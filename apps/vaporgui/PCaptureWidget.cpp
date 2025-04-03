@@ -13,6 +13,7 @@
 #include "vapor/ControlExecutive.h"
 #include "vapor/STLUtils.h"
 #include "vapor/FileUtils.h"
+#include "vapor/NavigationUtils.h"
 
 #include <QFileDialog>
 #include <QHBoxLayout>
@@ -115,7 +116,7 @@ void PCaptureHBox::_captureTimeSeries() {
 
     bool rc = _mf->StartAnimCapture(fileName, defaultSuffix);  // User may cancel to prevent file overwrite, so capture return code
     if (rc) {
-        _mf->SetTimeStep(ap->GetStartTimestep());
+        NavigationUtils::SetTimestep(_ce, ap->GetValueLong(AnimationParams::CaptureStartTag, ap->GetStartTimestep()));
         _mf->AnimationPlayForward();
     }
 }

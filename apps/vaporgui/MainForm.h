@@ -64,11 +64,10 @@ public:
 
     // Needed for Import/Data widget
     enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
-    int ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
+    void ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
 
     // Needed for Export/Capture widget
     bool StartAnimCapture(string baseFile, string defaultSuffix = "tiff");
-    void SetTimeStep(int ts) const;
     void AnimationPlayForward() const;
 
 public slots:

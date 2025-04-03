@@ -23,8 +23,8 @@ void PTimeRangeSelector::updateGUI() const {
     _slider->SetRange(0, _ce->GetDataStatus()->GetTimeCoordinates().size()-1);
 
     AnimationParams* ap = dynamic_cast<AnimationParams*>(getParams());
-    size_t start = ap->GetStartTimestep();
-    size_t end = ap->GetEndTimestep();
+    size_t start = ap->GetValueLong(AnimationParams::CaptureStartTag, ap->GetStartTimestep());
+    size_t end = ap->GetValueLong(AnimationParams::CaptureEndTag, ap->GetEndTimestep());
     _slider->SetValue(start, end);
 
     std::vector<std::string> timeCoords = _ce->GetDataStatus()->GetTimeCoordsFormatted();
@@ -38,6 +38,6 @@ void PTimeRangeSelector::setTimes(float start, float end) {
     _slider->SetValue(start, end);
 
     AnimationParams* ap = dynamic_cast<AnimationParams*>(getParams());
-    ap->SetStartTimestep(start);
-    ap->SetEndTimestep(end);
+    ap->SetValueLong(AnimationParams::CaptureStartTag, "Set value for capturing imagery start time", start);
+    ap->SetValueLong(AnimationParams::CaptureEndTag, "Set value for capturing imagery end time", end);
 }

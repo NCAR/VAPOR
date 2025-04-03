@@ -17,6 +17,7 @@ public:
     LeftPanel(ControlExec *ce, MainForm* mf);
     void Update() override;
     void GoToRendererTab();
+    void setEnabled(bool enabled);
 
 private:
     void tabChanged(int i);

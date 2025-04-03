@@ -531,6 +531,7 @@ void MainForm::createMenus()
 void MainForm::openSession(const string &path, bool loadData)
 {
     closeAllParamsDatasets();
+    closeProjectionFrame();
 
     auto datasetConflictAction = loadData
         ? ControlExec::LoadStateRelAndAbsPathsExistAction::Ask
@@ -734,7 +735,7 @@ void MainForm::helpAbout()
 }
 
 
-int MainForm::ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction, string name)
+void MainForm::ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction, string name)
 {
     _paramsMgr->BeginSaveStateGroup("Import Dataset");
     if (name.empty()) name = _getDataSetName(files[0], existsAction);
@@ -742,7 +743,7 @@ int MainForm::ImportDataset(const std::vector<string> &files, string format, Dat
     if (rc < 0) {
         _paramsMgr->EndSaveStateGroup();
         MSG_ERR("Failed to load data");
-        return -1;
+        return;
     }
 
     auto gsp = _controlExec->GetParams<GUIStateParams>();
@@ -761,8 +762,6 @@ int MainForm::ImportDataset(const std::vector<string> &files, string format, Dat
     _paramsMgr->EndSaveStateGroup();
 
     _leftPanel->GoToRendererTab();
-
-    return 0;
 }
 
 void MainForm::showImportDatasetGUI(string format)
@@ -856,6 +855,7 @@ void MainForm::sessionNew()
     }
 #endif
 
+    closeProjectionFrame();
     _controlExec->LoadState();
     GetStateParams()->SetActiveVizName(_paramsMgr->CreateVisualizerParamsInstance());
     _paramsMgr->UndoRedoClear();
@@ -996,6 +996,7 @@ void MainForm::updateUI()
     VAssert(_controlExec);
 
     _widgetsEnabled = !GetStateParams()->GetOpenDataSetNames().empty();
+
     for (auto &e : _dependOnLoadedData) e->setEnabled(_widgetsEnabled);
 
     for (const auto &e : _updatableElements) 
@@ -1004,6 +1005,7 @@ void MainForm::updateUI()
     auto sp= _widgetsEnabled ? GetStateParams() : nullptr;
     for (const auto &e : _guiStateParamsUpdatableElements)
         e->Update(sp, _paramsMgr);
+
 
     _timeStepEdit->Update(GetStateParams()); // TODO this needs special handling for animation playback
     updateMenus();
@@ -1130,14 +1132,11 @@ void MainForm::launchProjectionFrame()
 }
 
 void MainForm::closeProjectionFrame() {
-    _guiStateParamsUpdatableElements.erase(_projectionFrame);
-    _projectionFrame->close();
-    _projectionFrame = nullptr;
-}
-
-void MainForm::SetTimeStep(int ts) const {
-    AnimationParams *ap = GetAnimationParams();
-    _animationController->SetTimeStep(ap->GetStartTimestep());
+    if (_projectionFrame != nullptr) {
+        _guiStateParamsUpdatableElements.erase(_projectionFrame);
+        _projectionFrame->close();
+        _projectionFrame = nullptr;
+    }
 }
 
 void MainForm::AnimationPlayForward() const {

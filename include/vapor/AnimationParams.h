@@ -114,6 +114,8 @@ public:
     static const string _currentTimestepTag;
     static const string CaptureModeTag;
     static const string CaptureTypeTag;
+    static const string CaptureStartTag;
+    static const string CaptureEndTag;
     static const string CaptureFileNameTag;
     static const string CaptureFileDirTag;
     static const string CaptureFileTimeTag;
