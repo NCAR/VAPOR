@@ -7,6 +7,7 @@ VIntSpinBox::VIntSpinBox(int min, int max) : VHBoxWidget(), _value(min)
     SetRange(min, max);
     SetValue(min);
     layout()->addWidget(_spinBox);
+    _spinBox->setKeyboardTracking(false);
 
     // Emit when the spinbox loses focus, or when return is pressed
     // Note: when opening a context menu with right click, a QSpinBox will emit the editingFinished signal,
