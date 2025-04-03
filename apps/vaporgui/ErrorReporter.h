@@ -87,6 +87,8 @@ public:
         Message(Type type_, std::string value_, int err_code_ = 0) : type(type_), value(value_), err_code(err_code_) {}
     };
 
+    ErrorReporter(QWidget *parent);
+
     //! Returns the singleton instance of this class with lazy initialization
     //! \retval ErrorReporter instance
     static ErrorReporter *GetInstance();
@@ -109,7 +111,6 @@ public:
     static int OpenLogFile(std::string path);
 
 protected:
-    ErrorReporter(QWidget *parent);
     ~ErrorReporter();
 
 private:
