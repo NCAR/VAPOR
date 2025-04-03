@@ -248,7 +248,6 @@ int Visualizer::paintEvent(bool fast)
             topRenderers.push_back(_renderers[i]);
             continue;
         }
-
         rc = renderRenderer(_renderers[i], fast);
     }
 
@@ -266,6 +265,8 @@ int Visualizer::paintEvent(bool fast)
     GL_ERR_BREAK();
     _vizFeatures->DrawAxisArrows();
     GL_ERR_BREAK();
+
+    // _glManager->ShowDepthBuffer();
 
     glFlush();
 
