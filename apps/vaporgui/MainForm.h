@@ -59,6 +59,17 @@ public:
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
     static QWidget* Instance() { assert(_instance); return _instance; }
 
+    // Needed for Import/Data widget
+    enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
+    void ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
+
+    // Needed for Export/Capture widget
+    bool StartAnimCapture(string baseFile, string defaultSuffix = "tiff");
+    void AnimationPlayForward() const;
+
+public slots:
+    void CaptureSingleImage(string filter, string defaultSuffix);
+
 protected:
     void Render(bool fast=false, bool skipSync=false);
     bool eventFilter(QObject *obj, QEvent *event);
