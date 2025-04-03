@@ -499,7 +499,7 @@ void ParamsMgr::RemoveRenderParamsInstance(string winName, string dataSetName, s
 RenderParams *ParamsMgr::GetRenderParams(string winName, string dataSetName, string className, string instName) const
 {
     RenParamsContainer *container = get_ren_container(winName, dataSetName, className);
-    if (!container) return (NULL);
+    if (!container) { return (NULL); }
 
     return (container->GetParams(instName));
 }
