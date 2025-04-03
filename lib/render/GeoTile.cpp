@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <sstream>
 #include "vapor/GeoTile.h"
+#include "vapor/MyBase.h"
 
 using namespace std;
 using namespace VAPoR;
@@ -74,6 +75,11 @@ const unsigned char *GeoTile::GetTile(string quadkey) const
 
 int GeoTile::GetMap(size_t pixelX0, size_t pixelY0, size_t pixelX1, size_t pixelY1, int lod, unsigned char *map_image) const
 {
+    if (pixelX0 == pixelX1 || pixelY0 == pixelY1) {
+        Wasp::MyBase::SetErrMsg("Data's geographic coordinates appear to be invalid.");
+        return -1;
+    }
+
     //
     // resolution of global map at requested lod
     //
