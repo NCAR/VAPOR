@@ -72,6 +72,10 @@ public:
     //! \return zero if successful.
     int paintEvent(bool fast);
 
+    //! Helper function for paintEvent() to hand off a renderer, call matrix operations, and call paintGL
+    //! \return zero if successful.
+    int renderRenderer(Renderer* renderer, bool fast);
+
     //! Issue the OpenGL resize call.  Must be called from an OpenGL context.
     //! \param[in] w Window width in pixels.
     //! \param[in] h Window height in pixels.
