@@ -4,8 +4,7 @@
 !include "winmessages.nsh"
 
 ; HKLM (all users) vs HKCU (current user) defines
-;!define env_hklm 'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
-!define env_hklm 'HKLM "SYSTEM/CurrentControlSet/Control/Session Manager/Environment"'
+!define env_hklm 'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
 !define env_hkcu 'HKCU "Environment"'
 ; set variable for local machine
 ;
