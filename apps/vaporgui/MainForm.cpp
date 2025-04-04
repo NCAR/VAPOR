@@ -147,6 +147,14 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
 
     _animationController = new AnimationController(_controlExec);
     connect(_animationController, SIGNAL(AnimationOnOffSignal(bool)), this, SLOT(_setAnimationOnOff(bool)));
+    connect(_animationController, &AnimationController::AnimationDrawSignal, [this]() {
+        setUpdatesEnabled(false);
+        _controlExec->SyncWithParams();
+        updateUI();
+        setUpdatesEnabled(true);
+
+        Render(false, true);
+    });
 
     _leftPanel = new LeftPanel(_controlExec, this);
     const int dpi = qApp->desktop()->logicalDpiX();
@@ -888,12 +896,19 @@ void MainForm::showCitationReminder()
     CitationReminder::Show();
 }
 
-void MainForm::Render(bool fast)
+void MainForm::Render(bool fast, bool skipSync)
 {
     bool wasMenuBarEnabled = menuBar()->isEnabled();
     bool wasProgressEnabled = _progressEnabled;
     menuBar()->setEnabled(false);
     _progressEnabled = true;
+
+    if (!skipSync) {
+        setUpdatesEnabled(false);
+        _controlExec->SyncWithParams();
+        setUpdatesEnabled(true);
+    }
+
     _vizWinMgr->Update(fast);
     _progressEnabled = wasProgressEnabled;
     menuBar()->setEnabled(wasMenuBarEnabled);
@@ -943,7 +958,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         updateUI();
         setUpdatesEnabled(true);
 
-        Render();
+        Render(false, true);
 
         QApplication::restoreOverrideCursor();
         return true;
