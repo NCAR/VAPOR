@@ -40,7 +40,7 @@ BarbEventRouter::BarbEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     }));
     
     AddGeometrySubtab(new PGeometrySubtab);
-    AddAnnotationSubtab(new PAnnotationColorbarWidget);
+    AddColorbarSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }

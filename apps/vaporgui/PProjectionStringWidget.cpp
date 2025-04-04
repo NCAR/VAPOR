@@ -1,4 +1,4 @@
-#include "PProjectionStringSection.h"
+#include "PProjectionStringWidget.h"
 
 #include <QLabel>
 #include <QPlainTextEdit>
@@ -16,7 +16,7 @@
 
 using namespace VAPoR;
 
-PProjectionStringSection::PProjectionStringSection(ControlExec *ce)
+PProjectionStringWidget::PProjectionStringWidget(ControlExec *ce)
 : PWidget("", new VSectionGroup("Data Projection",
                                 {
                                     _currentProjDisp = (new PStringDisplay(GUIStateParams::m_proj4StringTag, "Current Projection String"))->Selectable(),
@@ -30,12 +30,12 @@ PProjectionStringSection::PProjectionStringSection(ControlExec *ce)
   _ce(ce)
 {
     _selectedProjDisp->MakeSelectable();
-    connect(_datasetDropdown, &VComboBox::ValueChanged, this, &PProjectionStringSection::datasetDropdownChanged);
-    connect(_applyButton, &VPushButton::ButtonClicked, this, &PProjectionStringSection::applyClicked);
+    connect(_datasetDropdown, &VComboBox::ValueChanged, this, &PProjectionStringWidget::datasetDropdownChanged);
+    connect(_applyButton, &VPushButton::ButtonClicked, this, &PProjectionStringWidget::applyClicked);
 }
 
 
-void PProjectionStringSection::updateGUI() const
+void PProjectionStringWidget::updateGUI() const
 {
     ParamsMgr *pm = _ce->GetParamsMgr();
     auto       stateParams = ((GUIStateParams *)pm->GetParams(GUIStateParams::GetClassType()));
@@ -74,14 +74,14 @@ void PProjectionStringSection::updateGUI() const
 }
 
 
-void PProjectionStringSection::datasetDropdownChanged(std::string value)
+void PProjectionStringWidget::datasetDropdownChanged(std::string value)
 {
     _changeToDataset = value;
     updateGUI();
 }
 
 
-void PProjectionStringSection::applyClicked()
+void PProjectionStringWidget::applyClicked()
 {
     DataStatus * dataStatus = _ce->GetDataStatus();
     const string selected = _datasetDropdown->GetValue();

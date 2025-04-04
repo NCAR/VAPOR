@@ -30,13 +30,20 @@
 #include <vapor/AnimationParams.h>
 
 using namespace VAPoR;
-const string AnimationParams::_repeatTag = "RepeatPlay";
 const string AnimationParams::_maxRateTag = "MaxFrameRate";
-const string AnimationParams::_stepSizeTag = "FrameStepSize";
 const string AnimationParams::_startTimestepTag = "StartTimestep";
 const string AnimationParams::_endTimestepTag = "EndTimestep";
 const string AnimationParams::_currentTimestepTag = "CurrentTimestep";
 const string AnimationParams::_playBackwardsTag = "PlayBackwards";
+const string AnimationParams::CaptureStartTag = "CaptureStartTag";
+const string AnimationParams::CaptureEndTag = "CaptureEndTag";
+const string AnimationParams::CaptureModeTag = "CaptureModeTag";
+const string AnimationParams::CaptureTypeTag = "CaptureTypeTag";
+const string AnimationParams::CaptureFileNameTag = "CaptureFileNameTag";
+const string AnimationParams::CaptureFileDirTag = "CaptureFileDirTag";
+const string AnimationParams::CaptureFileTimeTag = "CaptureFileTimeTag";
+const string AnimationParams::CaptureTimeSeriesFileNameTag = "CaptureTimeSeriesFileNameTag";
+const string AnimationParams::CaptureTimeSeriesTimeTag = "CaptureTimeSeriesTimeTag";
 
 //
 // Register class with object factory!!!
@@ -70,10 +77,12 @@ void AnimationParams::_init()
 {
     // set everything to default state:
     SetPlayBackwards(false);
-    SetRepeating(false);
-    SetFrameStepSize(1);
     SetStartTimestep(0);
     SetEndTimestep(10000000);
     SetCurrentTimestep(0);
     SetMaxFrameRate(10);
+    SetValueLong(AnimationParams::CaptureModeTag, "Set default value for image capture mode", AnimationParams::SingleImage);
+    SetValueLong(AnimationParams::CaptureTypeTag, "Set default value for capture mode image filetype", AnimationParams::TIFF);
+    SetValueLong(AnimationParams::CaptureStartTag, "Set default value for capturing imagery start time", GetStartTimestep());
+    SetValueLong(AnimationParams::CaptureEndTag, "Set default value for capturing imagery end time", GetEndTimestep());
 }

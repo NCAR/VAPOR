@@ -36,6 +36,9 @@
 
 class PARAMS_API AnimationParams : public VAPoR::ParamsBase {
 public:
+    enum CaptureMode { SingleImage, TimeSeries };
+    enum CaptureType { TIFF, PNG };
+
     AnimationParams(ParamsBase::StateSave *ssave);
 
     AnimationParams(VAPoR::ParamsBase::StateSave *ssave, VAPoR::XmlNode *node);
@@ -88,17 +91,6 @@ public:
     //
     void SetPlayBackwards(bool val) { SetValueLong(_playBackwardsTag, "Set play direction", (long)val); }
 
-    //! Get the maximum frame step size for skipping
-    //! \retval int current frame step size.
-    //
-    size_t GetFrameStepSize() const { return (size_t)GetValueLong(_stepSizeTag, 1); }
-
-    //! Set the frame step size (for skipping)
-    //! \param int val step size
-    //! \retval int 0 if successful
-    //
-    void SetFrameStepSize(size_t val) { SetValueLong(_stepSizeTag, "Set frame stepsize", (size_t)val); }
-
     //! Determine max frames per second
     //! \retval double max frames per second
     //
@@ -110,29 +102,25 @@ public:
     //!
     void SetMaxFrameRate(double rate) { SetValueDouble(_maxRateTag, "Set max frame rate", rate); }
 
-    //! Determine if repeat play is on
-    //! \retval bool true if repeating
-    //
-    bool GetRepeating() const { return (GetValueLong(_repeatTag, false)); }
-
-    //! Set the whether repeat play is on
-    //! \param bool repeat is on if true
-    //! \retval int 0 if successful
-    //
-    void SetRepeating(bool onOff) { SetValueLong(_repeatTag, "enable repeat play", (long)onOff); }
-
     // Get static string identifier for this params class
     //
     static string GetClassType() { return ("AnimationParams"); }
 
 public:
-    static const string _repeatTag;
     static const string _maxRateTag;
-    static const string _stepSizeTag;
     static const string _startTimestepTag;
     static const string _endTimestepTag;
     static const string _playBackwardsTag;
     static const string _currentTimestepTag;
+    static const string CaptureModeTag;
+    static const string CaptureTypeTag;
+    static const string CaptureStartTag;
+    static const string CaptureEndTag;
+    static const string CaptureFileNameTag;
+    static const string CaptureFileDirTag;
+    static const string CaptureFileTimeTag;
+    static const string CaptureTimeSeriesFileNameTag;
+    static const string CaptureTimeSeriesTimeTag;
 
 private:
     //! Put a params instance into default state with no data.

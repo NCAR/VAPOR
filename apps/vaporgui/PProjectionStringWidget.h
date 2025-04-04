@@ -2,6 +2,8 @@
 
 #include "PWidget.h"
 #include "PWidgetsFwd.h"
+#include "VFrame.h"
+#include "Updatable.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -13,7 +15,7 @@ class VComboBox;
 class VPushButton;
 class VLabel;
 
-class PProjectionStringSection : public PWidget {
+class PProjectionStringWidget : public PWidget {
     Q_OBJECT
     ControlExec *   _ce;
     PDisplay *      _currentProjDisp;
@@ -24,7 +26,7 @@ class PProjectionStringSection : public PWidget {
     std::string     _changeToDataset;
 
 public:
-    PProjectionStringSection(ControlExec *ce);
+    PProjectionStringWidget(ControlExec *ce);
 
 protected:
     void updateGUI() const override;

@@ -30,7 +30,7 @@ WireFrameEventRouter::WireFrameEventRouter(QWidget *parent, ControlExec *ce) : R
     }));
     
     AddGeometrySubtab(new PGeometrySubtab);
-    AddAnnotationSubtab(new PAnnotationColorbarWidget);
+    AddColorbarSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }

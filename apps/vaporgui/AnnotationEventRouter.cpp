@@ -15,6 +15,16 @@ AnnotationEventRouter::AnnotationEventRouter(ControlExec *ce) : _controlExec(ce)
 {
     setLayout(new QVBoxLayout);
 
+    PGroup *timeAnnotationGroup = new PGroup({new PSection(
+        "Time Annotation", {new PEnumDropdown(AnnotationParams::_timeTypeTag, {"No annotation", "Time step number", "User time", "Formatted date/time"}, {0, 1, 2, 3}, "Annotation type"),
+                            (new PIntegerSliderEdit(VAPoR::AnnotationParams::_timeSizeTag, "Font Size"))->SetRange(24, 100)->EnableDynamicUpdate(),
+                            (new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X Position"))->EnableDynamicUpdate(),
+                            (new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y Position"))->EnableDynamicUpdate(), 
+                            new PColorSelector(AnnotationParams::_timeColorTag, "Text Color")})
+    });
+    layout()->addWidget(timeAnnotationGroup);
+    _groups.push_back(timeAnnotationGroup);
+
     VSection *axisAnnotationTab = new VSection("Axis Annotations");
     PGroup *  axisAnnotationGroup1 = new PGroup(
         {new PCheckbox(AxisAnnotation::_annotationEnabledTag, "Axis Annotations Enabled"), 
@@ -44,16 +54,6 @@ AnnotationEventRouter::AnnotationEventRouter(ControlExec *ce) : _controlExec(ce)
     });
     layout()->addWidget(copyRegionGroup);
     _groups.push_back(copyRegionGroup);
-
-    PGroup *timeAnnotationGroup = new PGroup({new PSection(
-        "Time Annotation", {new PEnumDropdown(AnnotationParams::_timeTypeTag, {"No annotation", "Time step number", "User time", "Formatted date/time"}, {0, 1, 2, 3}, "Annotation type"),
-                            (new PIntegerSliderEdit(VAPoR::AnnotationParams::_timeSizeTag, "Font Size"))->SetRange(24, 100)->EnableDynamicUpdate(),
-                            (new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X Position"))->EnableDynamicUpdate(),
-                            (new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y Position"))->EnableDynamicUpdate(), 
-                            new PColorSelector(AnnotationParams::_timeColorTag, "Text Color")})
-    });
-    layout()->addWidget(timeAnnotationGroup);
-    _groups.push_back(timeAnnotationGroup);
 
     PGroup *axisArrowGroup = new PGroup({new PSection("Orientation Arrows", {(new PCheckbox(AnnotationParams::AxisArrowEnabledTag, "Show arrows (XYZ->RGB)")),
                                                                              (new PDoubleSliderEdit(AnnotationParams::AxisArrowSizeTag, "Size"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
