@@ -171,6 +171,12 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     createToolBars();
     _createProgressWidget();
 
+    // Force creation of the static error reporter, which registers
+    // callback's with the MyBase error logger used by the vapor render
+    // library.
+    //
+    new ErrorReporter(this);
+
     GetSettingsParams()->FindDefaultSettingsPath();
 
     setUpdatesEnabled(true);
