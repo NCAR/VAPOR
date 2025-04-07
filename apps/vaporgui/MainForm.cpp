@@ -160,7 +160,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     const int dpi = qApp->desktop()->logicalDpiX();
     _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     _leftPanel->setMinimumHeight(500);
-    _dependOnLoadedData_insert(_leftPanel);
+    //_dependOnLoadedData_insert(_leftPanel);
     _updatableElements.insert(_leftPanel);
 
     _status = new ProgressStatusBar;
@@ -1013,6 +1013,8 @@ void MainForm::updateUI()
     _widgetsEnabled = !GetStateParams()->GetOpenDataSetNames().empty();
 
     for (auto &e : _dependOnLoadedData) e->setEnabled(_widgetsEnabled);
+
+    _leftPanel->ConfigureEnabledState(_widgetsEnabled);
 
     for (const auto &e : _updatableElements) 
         e->Update();

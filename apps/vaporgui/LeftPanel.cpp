@@ -32,10 +32,9 @@ LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
     connect(this, &QTabWidget::currentChanged, this, &LeftPanel::tabChanged);
 }
 
-void LeftPanel::setEnabled(bool widgetsEnabled) {
+void LeftPanel::ConfigureEnabledState(bool widgetsEnabled) {
     if (!widgetsEnabled) {
         // Only enable the Import tab, which should always be enabled
-        //setEnabled(true);
         _importTab->setEnabled(true);
         setCurrentIndex(0);
         for (int tabNum=1; tabNum < count(); tabNum++) setTabEnabled(tabNum, false);
