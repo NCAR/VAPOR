@@ -6,8 +6,8 @@ set (SRCS
 	GLWidget.cpp
 	ErrorReporter.cpp
 	AnnotationEventRouter.cpp
-	ViewpointTab.cpp
-	ViewpointTab.h
+	ExportTab.cpp
+	ExportTab.h
 	TwoDDataEventRouter.cpp
 	TwoDDataEventRouter.h
 	WireFrameEventRouter.cpp
@@ -197,6 +197,8 @@ set (SRCS
     PAxisAnnotationWidget.cpp
     PAxisAnnotationWidget.h
     PTMSLODInput.h
+    PMovingDomainSettings.cpp
+    PMovingDomainSettings.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
 	VDoubleValidator.cpp
@@ -255,20 +257,24 @@ set (SRCS
     PDatasetTransformWidget.h
     PCameraControlsSection.cpp
     PCameraControlsSection.h
-    PProjectionStringSection.cpp
-    PProjectionStringSection.h
-    PFramebufferSettingsSection.cpp
-    PFramebufferSettingsSection.h
+    PProjectionStringWidget.cpp
+    PProjectionStringWidget.h
+    VProjectionStringFrame.cpp
+    VProjectionStringFrame.h
+    POutputResolutionSection.cpp
+    POutputResolutionSection.h
     VLabel.cpp
     VLabel.h
+    VLabelPair.cpp
+    VLabelPair.h
+    VHyperlink.cpp
+    VHyperlink.h
     PTimestepInput.cpp
     PTimestepInput.h
     PTotalTimestepsDisplay.cpp
     PTotalTimestepsDisplay.h
     AnimationController.cpp
     AnimationController.h
-    AnimationTab.cpp
-    AnimationTab.h
     CheckForNotices.cpp
     CheckForNotices.h
     NoticeBoard.cpp
@@ -318,6 +324,22 @@ set (SRCS
     ViewpointToolbar.h
     CheckForUpdateUI.cpp
     CheckForUpdateUI.h
+    VRadioButton.h
+    VRadioButton.cpp
+    PRadioButtons.h
+    PRadioButtons.cpp
+    PImportDataWidget.h
+    PImportDataWidget.cpp
+    PImportDataButton.h
+    PImportDataButton.cpp
+    PTimeRangeSelector.cpp
+    PTimeRangeSelector.h
+    PCaptureWidget.h
+    PCaptureWidget.cpp
+    ImportTab.h
+    ImportTab.cpp
+    DatasetTypeLookup.h
+    DatasetTypeLookup.cpp
 
 	# Need to include all files that request .ui files
 	Statistics.h

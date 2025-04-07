@@ -7,7 +7,7 @@
 const std::string RenderEventRouterGUI::VariablesTabName = "Variables";
 const std::string RenderEventRouterGUI::AppearanceTabName = "Appearance";
 const std::string RenderEventRouterGUI::GeometryTabName = "Geometry";
-const std::string RenderEventRouterGUI::AnnotationTabName = "Annotation";
+const std::string RenderEventRouterGUI::ColorbarTabName = "Colorbar";
 
 RenderEventRouterGUI::RenderEventRouterGUI(VAPoR::ControlExec *ce, string paramsType)
 : RenderEventRouter(ce)

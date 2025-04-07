@@ -2,17 +2,19 @@
 
 #include "VaporFwd.h"
 #include "PWidgetsFwd.h"
-#include <QWidget>
 #include "Updatable.h"
+#include "VGroup.h"
 
-class ViewpointTab : public QWidget, public Updatable {
+class MainForm;
+
+class ExportTab : public VGroup, public Updatable {
     Q_OBJECT
 
-    ControlExec *_controlExec;
+    ControlExec *_ce;
     PWidget *_pg = nullptr;
     PWidget *_movingDomainSection = nullptr;
 
 public:
-    ViewpointTab(VAPoR::ControlExec *ce);
+    ExportTab(VAPoR::ControlExec *ce, MainForm *mf);
     void Update() override;
 };

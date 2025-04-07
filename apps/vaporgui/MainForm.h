@@ -42,9 +42,12 @@ class BannerGUI;
 class Statistics;
 class Plot;
 class PythonVariables;
+class VProjectionStringFrame;
 class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
+
+class LeftPanel;
 
 using namespace VAPoR;
 using std::optional;
@@ -58,6 +61,17 @@ public:
 
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
     static QWidget* Instance() { assert(_instance); return _instance; }
+
+    // Needed for Import/Data widget
+    enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
+    void ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
+
+    // Needed for Export/Capture widget
+    bool StartAnimCapture(string baseFile, string defaultSuffix = "tiff");
+    void AnimationPlayForward() const;
+
+public slots:
+    void CaptureSingleImage(string filter, string defaultSuffix);
 
 protected:
     void Render(bool fast=false, bool skipSync=false);
@@ -83,9 +97,6 @@ private:
 
     QToolBar *_animationToolBar;
 
-    QMenu *  _singleImageMenu;
-    QMenu *  _imageSequenceMenu;
-    QAction *_captureEndImageAction;
     QAction *_stepForwardAction;
     QAction *_stepBackAction;
 
@@ -99,9 +110,11 @@ private:
     const QObject *                                    _disableUserInputForAllExcept = nullptr;
     bool                                               _insideMessedUpQtEventLoop = false;
 
+    LeftPanel           *_leftPanel;
     Statistics *        _stats = nullptr;
     Plot *              _plot = nullptr;
     PythonVariables *   _pythonVariables = nullptr;
+    VProjectionStringFrame* _projectionFrame = nullptr;
     AppSettingsMenu *   _appSettingsMenu = nullptr;
     BannerGUI *         _banner = nullptr;
     std::set<Updatable *> _updatableElements;
@@ -139,11 +152,6 @@ private:
 
     void showCitationReminder();
 
-    void stopAnimCapture(string vizName)
-    {
-        if (vizName == _capturingAnimationVizName) endAnimCapture();
-    }
-
     GUIStateParams *GetStateParams() const { return ((GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType())); }
     SettingsParams *GetSettingsParams() const { return ((SettingsParams *)_paramsMgr->GetParams(SettingsParams::GetClassType())); }
     AnimationParams *GetAnimationParams() const { return ((AnimationParams *)_paramsMgr->GetParams(AnimationParams::GetClassType())); }
@@ -154,14 +162,11 @@ private:
     static int          checkQStringContainsNonASCIICharacter(const QString &s);
     std::vector<string> getUserFileSelection(string prompt, string dir, string filter, bool multi);
 
-    enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
-    void importDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
     void showImportDatasetGUI(string format);
     void openSession(const string &path, bool loadData=true);
     void showOpenSessionGUI();
     optional<ControlExec::LoadStateRelAndAbsPathsExistAction> showSelectRelVAbsDataLoadGUI(const ControlExec::RelAndAbsPathsExistException &e);
     void checkSessionDatasetsExist();
-    void         _createCaptureMenu();
     void         _createToolsMenu();
     void         _createEditMenu();
     void         _createFileMenu();
@@ -187,16 +192,13 @@ private:
 private slots:
     void _plotClosed();
     void _statsClosed();
+    void closeProjectionFrame();
     void helpAbout();
     void sessionNew();
-    void captureTiffSequence();
-    void capturePngSequence();
-    void selectAnimCatureOutput(string filter, string defaultSuffix);
-    void startAnimCapture(string baseFile, string defaultSuffix = "tiff");
     void endAnimCapture();
-    void captureSingleImage(string filter, string defaultSuffix);
     void launchStats();
     void launchPlotUtility();
     void launchPythonVariables();
+    void launchProjectionFrame();
     void _setAnimationOnOff(bool onOff);
 };

@@ -347,7 +347,6 @@ int ControlExec::LoadState(string stateFile, LoadStateRelAndAbsPathsExistAction 
 
         if (absoluteExist && !relativeExist) continue;
         if (!absoluteExist && relativeExist) {
-//            tmpGsp->InsertOpenDateSet(dataset, tmpGsp->GetOpenDataSetFormat(dataset), relPaths);
             useRelativePaths[dataset] = relPaths;
             continue;
         }
@@ -362,7 +361,6 @@ int ControlExec::LoadState(string stateFile, LoadStateRelAndAbsPathsExistAction 
                 case LoadStateRelAndAbsPathsExistAction::LoadAbs:
                     continue;
                 case LoadStateRelAndAbsPathsExistAction::LoadRel:
-//                    tmpGsp->InsertOpenDateSet(dataset, tmpGsp->GetOpenDataSetFormat(dataset), relPaths);
                     useRelativePaths[dataset] = relPaths;
                     continue;
                 case LoadStateRelAndAbsPathsExistAction::Ask:
@@ -380,7 +378,7 @@ int ControlExec::LoadState(string stateFile, LoadStateRelAndAbsPathsExistAction 
 
     auto gsp = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
     for (const auto &it : useRelativePaths)
-        gsp->InsertOpenDateSet(it.first, gsp->GetOpenDataSetFormat(it.first), it.second);
+        gsp->InsertOpenDataSet(it.first, gsp->GetOpenDataSetFormat(it.first), it.second);
 
     _paramsMgr->EndSaveStateGroup();
     return (0);
@@ -453,7 +451,7 @@ void ControlExec::CloseData(string dataSetName)
     SetDataCacheDirty(dataSetName);
 
     _paramsMgr->BeginSaveStateGroup("Close Dataset");
-    GetParams<GUIStateParams>()->RemoveOpenDateSet(dataSetName);
+    GetParams<GUIStateParams>()->RemoveOpenDataSet(dataSetName);
 
     for (const auto &renName : _paramsMgr->GetRenderParamNamesForDataset(dataSetName)) {
         string vizName, className, _;
@@ -535,7 +533,7 @@ int ControlExec::SaveSession(string filename)
             paths[i] = FileUtils::Realpath(paths[i]);
             relpaths[i] = FileUtils::Relpath(paths[i], filename);
         }
-        gsp->InsertOpenDateSet(dataset, format, paths, relpaths);
+        gsp->InsertOpenDataSet(dataset, format, paths, relpaths);
     }
     _paramsMgr->SetSaveStateEnabled(saveStateEnabled);
 
