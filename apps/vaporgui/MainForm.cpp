@@ -914,7 +914,7 @@ void MainForm::Render(bool fast, bool skipSync)
     menuBar()->setEnabled(wasMenuBarEnabled);
 
     auto ap = GetAnimationParams();
-    if (_animationCapture == true && ap->GetCurrentTimestep() == ap->GetEndTimestep() && !ap->GetPlayBackwards()) {
+    if (_animationCapture == true && ap->GetCurrentTimestep() == ap->GetValueLong(AnimationParams::CaptureEndTag, 1) && !ap->GetPlayBackwards()) {
         endAnimCapture();
     }
 }

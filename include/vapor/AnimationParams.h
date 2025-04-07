@@ -68,7 +68,10 @@ public:
     //! \param int starting timestep
     //! \retval int 0 if successful
     //
-    void SetStartTimestep(size_t ts) { SetValueLong(_startTimestepTag, "Set start timestep", (long)ts); }
+    void SetStartTimestep(size_t ts) { 
+        SetValueLong(_startTimestepTag, "Set start timestep", (long)ts);
+        SetValueLong(CaptureStartTag, "Set end timestep for image capture", (long)ts); 
+    }
 
     //! Identify the ending time step used during playback
     //! \retval int ending timestep
@@ -79,7 +82,10 @@ public:
     //! \param int ending timestep
     //! \retval int 0 if success
     //
-    void SetEndTimestep(size_t val) { SetValueLong(_endTimestepTag, "Set end timestep", (long)val); }
+    void SetEndTimestep(size_t val) { 
+        SetValueLong(_endTimestepTag, "Set end timestep", (long)val);
+        SetValueLong(CaptureEndTag, "Set end timestep for image capture", (long)val); 
+    }
 
     //! Get the current play direction
     //! \retval bool True if playing backwards

@@ -1,8 +1,8 @@
 #include "AnimationController.h"
 #include <vapor/ControlExecutive.h>
 #include <vapor/AnimationParams.h>
-#include <vapor/NavigationUtils.h>
 #include <vapor/GUIStateParams.h>
+#include <vapor/NavigationUtils.h>
 
 #include <QAction>
 
@@ -139,6 +139,10 @@ void AnimationController::setPlay(int direction)
         // Done animating. Disable timer and send notification
         //
         disconnect(_myTimer, 0, 0, 0);
+        GUIStateParams* gsp = NavigationUtils::GetGUIStateParams(_controlExec);
+    
+        string windowName = gsp->GetActiveVizName();
+        _controlExec->EnableAnimationCapture(windowName, false);
         _controlExec->GetParamsMgr()->ManuallyAddCurrentStateToUndoStack("End animation playback");
 
         _capturingImageSequence = false;

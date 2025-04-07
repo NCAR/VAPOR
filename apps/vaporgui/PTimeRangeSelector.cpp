@@ -29,6 +29,7 @@ void PTimeRangeSelector::updateGUI() const {
 
     std::vector<std::string> timeCoords = _ce->GetDataStatus()->GetTimeCoordsFormatted();
     _timeStampPair->SetLeftText(timeCoords[start]);
+    
     _timeStampPair->SetRightText(timeCoords[end]);
 }
 
