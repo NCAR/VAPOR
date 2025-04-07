@@ -20,7 +20,10 @@ TwoDDataEventRouter::TwoDDataEventRouter(QWidget *parent, ControlExec *ce) : Ren
         new POpenVariableMetadataWidget
     }));
     
-    AddAppearanceSubtab((new PTFEditor));
+    AddAppearanceSubtab(new PGroup({
+        new PTFEditor,
+        new PCheckbox(RenderParams::DrawInFrontTag, "Draw renderer in front")
+    }));
     AddGeometrySubtab(new PGeometrySubtab);
     AddColorbarSubtab(new PAnnotationColorbarWidget);
 
