@@ -42,6 +42,8 @@
 #include "BannerGUI.h"
 #include "Statistics.h"
 #include "PythonVariables.h"
+#include "PProjectionStringWidget.h"
+#include "VProjectionStringFrame.h"
 #include "Plot.h"
 #include "ErrorReporter.h"
 #include "MainForm.h"
@@ -62,6 +64,7 @@
 #include "PTimestepInput.h"
 #include "NcarCasperUtils.h"
 #include "ViewpointToolbar.h"
+#include "DatasetTypeLookup.h"
 
 #include <QStyle>
 #include <vapor/Progress.h>
@@ -153,19 +156,19 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         Render(false, true);
     });
 
-    auto leftPanel = new LeftPanel(_controlExec);
+    _leftPanel = new LeftPanel(_controlExec, this);
     const int dpi = qApp->desktop()->logicalDpiX();
-    leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
-    leftPanel->setMinimumHeight(500);
-    _dependOnLoadedData_insert(leftPanel);
-    _updatableElements.insert(leftPanel);
+    _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
+    _leftPanel->setMinimumHeight(500);
+    //_dependOnLoadedData_insert(_leftPanel);
+    _updatableElements.insert(_leftPanel);
 
     _status = new ProgressStatusBar;
     _status->hide();
 
-    sideDockWidgetArea->setWidget(new VGroup({leftPanel, _status}));
+    sideDockWidgetArea->setWidget(new VGroup({_leftPanel, _status}));
     // Only this specific resize method works for dock widgets, all other resize methods are noops
-    resizeDocks({sideDockWidgetArea}, {leftPanel->minimumWidth()}, Qt::Horizontal);
+    resizeDocks({sideDockWidgetArea}, {_leftPanel->minimumWidth()}, Qt::Horizontal);
 
     createMenus();
     createToolBars();
@@ -217,7 +220,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         }
 
         if (!fmt.empty())
-            importDataset(paths, fmt, ReplaceFirst);
+            ImportDataset(paths, fmt, ReplaceFirst);
     }
 
     app->installEventFilter(this);
@@ -256,7 +259,7 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     auto vpp = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
 
     _paramsMgr->BeginSaveStateGroup("test");
-    startAnimCapture(baseFileWithTS);
+    StartAnimCapture(baseFileWithTS);
     ap->SetStartTimestep(start);
     ap->SetEndTimestep(end);
 
@@ -469,6 +472,7 @@ void MainForm::_createToolsMenu()
     _dependOnLoadedData_insert(toolMenu->addAction("Plot Utility", this, SLOT(launchPlotUtility())));
     _dependOnLoadedData_insert(toolMenu->addAction("Data Statistics", this, SLOT(launchStats())));
     _dependOnLoadedData_insert(toolMenu->addAction("Python Variables", this, SLOT(launchPythonVariables())));
+    _dependOnLoadedData_insert(toolMenu->addAction("Dataset Projection", this, SLOT(launchProjectionFrame())));
 
 #ifdef WIN32
     #define ADD_INSTALL_CLI_TOOLS_ACTION 1
@@ -484,49 +488,6 @@ void MainForm::_createToolsMenu()
 #endif
 }
 
-void MainForm::_createCaptureMenu()
-{
-    auto _captureSinglePngAction = new QAction(this);
-    _captureSinglePngAction->setText(tr("PNG"));
-    _captureSinglePngAction->setToolTip("Capture one PNG from current active visualizer");
-    auto _captureSingleTiffAction = new QAction(this);
-    _captureSingleTiffAction->setText(tr("TIFF"));
-    _captureSingleTiffAction->setToolTip("Capture one TIFF from current active visualizer");
-
-    auto _capturePngSequenceAction = new QAction(this);
-    _capturePngSequenceAction->setText(tr("PNG"));
-    _capturePngSequenceAction->setToolTip("Begin saving PNG image files rendered in current active visualizer");
-    auto _captureTiffSequenceAction = new QAction(this);
-    _captureTiffSequenceAction->setText(tr("TIFF"));
-    _captureTiffSequenceAction->setToolTip("Begin saving TIFF image files rendered in current active visualizer");
-
-    _captureEndImageAction = new QAction(this);
-    _captureEndImageAction->setText(tr("End image capture"));
-    _captureEndImageAction->setToolTip("End capture of image files in current active visualizer");
-    _captureEndImageAction->setEnabled(false);
-
-    // Note that the ordering of the following 4 is significant, so that image
-    // capture actions correctly activate each other.
-    //
-    _captureMenu = menuBar()->addMenu(tr("Capture"));
-    _dependOnLoadedData_insert(_captureMenu);
-    _singleImageMenu = _captureMenu->addMenu(tr("Single image"));
-    _singleImageMenu->addAction(_captureSinglePngAction);
-    _singleImageMenu->addAction(_captureSingleTiffAction);
-    _imageSequenceMenu = _captureMenu->addMenu(tr("Image sequence"));
-    _imageSequenceMenu->addAction(_capturePngSequenceAction);
-    _imageSequenceMenu->addAction(_captureTiffSequenceAction);
-    _captureMenu->addAction(_captureEndImageAction);
-
-    connect(_captureSinglePngAction, &QAction::triggered, this, [this](){ captureSingleImage("PNG (*.png)", ".png"); });
-    connect(_captureSingleTiffAction, &QAction::triggered, this, [this](){ captureSingleImage("TIFF (*.tif *.tiff)", ".tiff"); });
-
-    connect(_capturePngSequenceAction, SIGNAL(triggered()), this, SLOT(capturePngSequence()));
-    connect(_captureTiffSequenceAction, SIGNAL(triggered()), this, SLOT(captureTiffSequence()));
-
-    connect(_captureEndImageAction, SIGNAL(triggered()), this, SLOT(endAnimCapture()));
-}
-
 void MainForm::_createHelpMenu()
 {
     auto helpMenu = menuBar()->addMenu(tr("Help"));
@@ -535,7 +496,6 @@ void MainForm::_createHelpMenu()
         if (!success) { MSG_ERR("Unable to launch Web browser for URL"); }
     });
     helpMenu->addSeparator();
-//    helpMenu->addAction(QWhatsThis::createAction(this)); // No longer used
     helpMenu->addAction("About VAPOR", this, &MainForm::helpAbout);
 }
 
@@ -568,7 +528,12 @@ void MainForm::createMenus()
     _createFileMenu();
     _createEditMenu();
     _createToolsMenu();
-    _createCaptureMenu();
+
+    _captureMenu = menuBar()->addMenu(tr("Capture"));
+    QAction* a = new QAction("Image capture controls have been moved to the Export Tab", _captureMenu);
+    a->setEnabled(false);
+    _captureMenu->addAction(a);
+
     _createHelpMenu();
 #ifndef NDEBUG
     _createDeveloperMenu();
@@ -580,6 +545,7 @@ void MainForm::createMenus()
 void MainForm::openSession(const string &path, bool loadData)
 {
     closeAllParamsDatasets();
+    closeProjectionFrame();
 
     auto datasetConflictAction = loadData
         ? ControlExec::LoadStateRelAndAbsPathsExistAction::Ask
@@ -609,11 +575,14 @@ retryLoad:
     if (loadData)
         checkSessionDatasetsExist();
     else
-        for (auto name : gsp->GetOpenDataSetNames()) gsp->RemoveOpenDateSet(name);
+        for (auto name : gsp->GetOpenDataSetNames()) gsp->RemoveOpenDataSet(name);
+
     _paramsMgr->UndoRedoClear();
     _sessionNewFlag = false;
     _stateChangeFlag = false;
     _paramsMgr->TriggerManualStateChangeEvent("Session Opened");
+
+    _leftPanel->GoToRendererTab();
 }
 
 
@@ -663,7 +632,7 @@ void MainForm::checkSessionDatasetsExist()
     for (const auto & dataset : sp->GetOpenDataSetNames()) {
         vector<string> paths = sp->GetOpenDataSetPaths(dataset);
         if (!std::all_of(paths.begin(), paths.end(), [](string path) { return FileUtils::Exists(path); })) {
-            sp->RemoveOpenDateSet(dataset);
+            sp->RemoveOpenDataSet(dataset);
 
             string err = "This session links to the dataset " + dataset + " which was not found. Please open this dataset if it is in a different location";
             string details;
@@ -780,11 +749,10 @@ void MainForm::helpAbout()
 }
 
 
-void MainForm::importDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction, string name)
+void MainForm::ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction, string name)
 {
     _paramsMgr->BeginSaveStateGroup("Import Dataset");
     if (name.empty()) name = _getDataSetName(files[0], existsAction);
-    if (name.empty()) return;
     int rc = _controlExec->OpenData(files, name, format);
     if (rc < 0) {
         _paramsMgr->EndSaveStateGroup();
@@ -793,9 +761,9 @@ void MainForm::importDataset(const std::vector<string> &files, string format, Da
     }
 
     auto gsp = _controlExec->GetParams<GUIStateParams>();
-    DataStatus *ds = _controlExec->GetDataStatus();
+    gsp->InsertOpenDataSet(name, format, files);
 
-    gsp->InsertOpenDateSet(name, format, files);
+    DataStatus *ds = _controlExec->GetDataStatus();
     GetAnimationParams()->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
 
     if (_sessionNewFlag) {
@@ -806,20 +774,13 @@ void MainForm::importDataset(const std::vector<string> &files, string format, Da
 
     _sessionNewFlag = false;
     _paramsMgr->EndSaveStateGroup();
-}
 
+    _leftPanel->GoToRendererTab();
+}
 
 void MainForm::showImportDatasetGUI(string format)
 {
-    static map<string, string> prompts = {
-        {"vdc", "Vapor Data Collection"},
-        {"wrf", "WRF-ARW files"},
-        {"cf", "NetCDF Climate Forecast (CF) convention files"},
-        {"mpas", "MPAS files"},
-        {"bov", "BOV files"},
-        {"dcp", "DCP files"},
-        {"ugrid", "UGRID files"},
-    };
+    static vector<pair<string, string>> prompts = GetDatasets();
 
     string defaultPath;
     auto openDatasets = GetStateParams()->GetOpenDataSetNames();
@@ -828,10 +789,10 @@ void MainForm::showImportDatasetGUI(string format)
     else
         defaultPath = GetSettingsParams()->GetMetadataDir();
 
-    auto files = getUserFileSelection(prompts[format], defaultPath, "", format!="vdc");
+    auto files = getUserFileSelection(DatasetTypeDescriptiveName(format), defaultPath, "", format!="vdc");
     if (files.empty()) return;
 
-    importDataset(files, format, DatasetExistsAction::Prompt);
+    ImportDataset(files, format, DatasetExistsAction::Prompt);
 }
 
 
@@ -908,6 +869,7 @@ void MainForm::sessionNew()
     }
 #endif
 
+    closeProjectionFrame();
     _controlExec->LoadState();
     GetStateParams()->SetActiveVizName(_paramsMgr->CreateVisualizerParamsInstance());
     _paramsMgr->UndoRedoClear();
@@ -956,6 +918,11 @@ void MainForm::Render(bool fast, bool skipSync)
     _vizWinMgr->Update(fast);
     _progressEnabled = wasProgressEnabled;
     menuBar()->setEnabled(wasMenuBarEnabled);
+
+    auto ap = GetAnimationParams();
+    if (_animationCapture == true && ap->GetCurrentTimestep() == ap->GetValueLong(AnimationParams::CaptureEndTag, 1) && !ap->GetPlayBackwards()) {
+        endAnimCapture();
+    }
 }
 
 bool MainForm::eventFilter(QObject *obj, QEvent *event)
@@ -1023,13 +990,6 @@ void MainForm::updateMenus()
 {
     _editUndoAction->setEnabled((bool)_paramsMgr->UndoSize());
     _editRedoAction->setEnabled((bool)_paramsMgr->RedoSize());
-
-    ViewpointParams *VPP = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
-    if (!VPP) return;
-    if (VPP->GetProjectionType() == ViewpointParams::MapOrthographic)
-        _captureMenu->setEnabled(false);
-    else
-        _captureMenu->setEnabled(true);
 }
 
 void MainForm::_performSessionAutoSave()
@@ -1057,14 +1017,18 @@ void MainForm::updateUI()
     VAssert(_controlExec);
 
     _widgetsEnabled = !GetStateParams()->GetOpenDataSetNames().empty();
+
     for (auto &e : _dependOnLoadedData) e->setEnabled(_widgetsEnabled);
 
-    for (const auto &e : _updatableElements)
+    _leftPanel->ConfigureEnabledState(_widgetsEnabled);
+
+    for (const auto &e : _updatableElements) 
         e->Update();
 
     auto sp= _widgetsEnabled ? GetStateParams() : nullptr;
     for (const auto &e : _guiStateParamsUpdatableElements)
         e->Update(sp, _paramsMgr);
+
 
     _timeStepEdit->Update(GetStateParams()); // TODO this needs special handling for animation playback
     updateMenus();
@@ -1090,12 +1054,14 @@ void MainForm::enableAnimationWidgets(bool on)
 }
 
 
-void MainForm::captureSingleImage(string filter, string defaultSuffix)
+void MainForm::CaptureSingleImage(string filter, string defaultSuffix)
 {
     showCitationReminder();
-    auto imageDir = QDir::homePath();
 
-    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir, QString::fromStdString(filter));
+    std::string imageDir = GetAnimationParams()->GetValueString(AnimationParams::CaptureFileDirTag, "");
+    if (imageDir.empty()) imageDir = QDir::homePath().toStdString();
+
+    QFileDialog fileDialog(this, "Specify single image capture file name", QString::fromStdString(imageDir), QString::fromStdString(filter));
 
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
@@ -1107,6 +1073,9 @@ void MainForm::captureSingleImage(string filter, string defaultSuffix)
     QStringList files = fileDialog.selectedFiles();
     if (files.isEmpty()) return;
     QString fn = files[0];
+    auto ap = GetAnimationParams();
+    ap->SetValueString(AnimationParams::CaptureFileNameTag, "Capture file name", FileUtils::Basename(fn.toStdString()));
+    ap->SetValueString(AnimationParams::CaptureFileDirTag, "Capture file directory", FileUtils::Dirname(fn.toStdString()));
 
     QFileInfo fileInfo(fn);
     QString   suffix = fileInfo.suffix();
@@ -1173,41 +1142,31 @@ void MainForm::launchPythonVariables()
     _pythonVariables->ShowMe();
 }
 
-void MainForm::capturePngSequence()
+void MainForm::launchProjectionFrame()
 {
-    string filter = "PNG (*.png)";
-    string defaultSuffix = "png";
-    selectAnimCatureOutput(filter, defaultSuffix);
+    if (_projectionFrame == nullptr){
+        _projectionFrame = new VProjectionStringFrame(new PProjectionStringWidget(_controlExec));
+        connect(_projectionFrame, &VProjectionStringFrame::closed, this, &MainForm::closeProjectionFrame);
+        _projectionFrame->adjustSize();
+        _projectionFrame->Update(GetStateParams());
+        _guiStateParamsUpdatableElements.insert(_projectionFrame);
+    }
+    _projectionFrame->raise();
 }
 
-void MainForm::captureTiffSequence()
-{
-    string filter = "TIFF (*.tif *.tiff)";
-    string defaultSuffix = "tiff";
-    selectAnimCatureOutput(filter, defaultSuffix);
+void MainForm::closeProjectionFrame() {
+    if (_projectionFrame != nullptr) {
+        _guiStateParamsUpdatableElements.erase(_projectionFrame);
+        _projectionFrame->close();
+        _projectionFrame = nullptr;
+    }
 }
 
-// Begin capturing animation images.
-// Launch a file save dialog to specify the names
-// Then start file saving mode.
-void MainForm::selectAnimCatureOutput(string filter, string defaultSuffix)
-{
-    showCitationReminder();
-    auto imageDir = QDir::homePath();
-
-    QFileDialog fileDialog(this, "Specify image sequence file name", imageDir, QString::fromStdString(filter));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    if (fileDialog.exec() != QDialog::Accepted) return;
-
-    // Extract the path, and the root name, from the returned string.
-    QStringList qsl = fileDialog.selectedFiles();
-    if (qsl.isEmpty()) return;
-    QString fileName = qsl[0];
-
-    startAnimCapture(fileName.toStdString(), defaultSuffix);
+void MainForm::AnimationPlayForward() const {
+    _animationController->AnimationPlayForward();
 }
 
-void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
+bool MainForm::StartAnimCapture(string baseFile, string defaultSuffix)
 {
     QString   fileName = QString::fromStdString(baseFile);
     QFileInfo fileInfo = QFileInfo(fileName);
@@ -1266,7 +1225,7 @@ void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
         msgBox.setText(msg);
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
-        if (msgBox.exec() == QMessageBox::No) { return; }
+        if (msgBox.exec() == QMessageBox::No) { return false; }
     }
 
     // Turn on "image capture mode" in the current active visualizer
@@ -1276,9 +1235,7 @@ void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
     _controlExec->EnableAnimationCapture(vizName, true, fpath);
     _capturingAnimationVizName = vizName;
 
-    _captureEndImageAction->setEnabled(true);
-    _imageSequenceMenu->setEnabled(false);
-    _singleImageMenu->setEnabled(false);
+    return true;
 }
 
 void MainForm::endAnimCapture()
@@ -1293,12 +1250,6 @@ void MainForm::endAnimCapture()
     _animationCapture = false;
 
     _capturingAnimationVizName = "";
-
-    _captureEndImageAction->setEnabled(false);
-
-    _imageSequenceMenu->setEnabled(true);
-
-    _singleImageMenu->setEnabled(true);
 }
 
 string MainForm::_getDataSetName(string file, DatasetExistsAction existsAction)

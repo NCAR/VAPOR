@@ -48,7 +48,7 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
         new PGeometrySubtab,
     }));
     
-    AddAnnotationSubtab(new PAnnotationColorbarWidget);
+    AddColorbarSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }

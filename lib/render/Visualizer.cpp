@@ -162,6 +162,27 @@ void Visualizer::syncWithParams()
     }
 }
 
+int Visualizer::renderRenderer(Renderer* renderer, bool fast) {
+    _glManager->matrixManager->MatrixModeModelView();
+    _glManager->matrixManager->PushMatrix();
+
+    if (renderer->IsGLInitialized()) {
+        _applyDatasetTransformsForRenderer(renderer);
+
+        // void *t = _glManager->BeginTimer();
+        int myrc = renderer->paintGL(fast);
+        // printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
+        GL_ERR_BREAK();
+        if (myrc < 0) myrc = -1;
+    }
+    MatrixManager *mm = _glManager->matrixManager;
+    mm->MatrixModeModelView();
+    mm->PopMatrix();
+    int myrc = CheckGLErrorMsg(renderer->GetMyName().c_str());
+    if (myrc < 0) myrc = -1;
+    return myrc;
+}
+
 int Visualizer::paintEvent(bool fast)
 {
     _insideGLContext = true;
@@ -218,25 +239,25 @@ int Visualizer::paintEvent(bool fast)
     _vizFeatures->InScenePaint(_getCurrentTimestep());
     GL_ERR_BREAK();
 
+
+    std::vector<Renderer*> topRenderers;
     int rc = 0;
     for (int i = 0; i < _renderers.size(); i++) {
-        _glManager->matrixManager->MatrixModeModelView();
-        _glManager->matrixManager->PushMatrix();
-
-        if (_renderers[i]->IsGLInitialized()) {
-            _applyDatasetTransformsForRenderer(_renderers[i]);
-
-            //            void *t = _glManager->BeginTimer();
-            int myrc = _renderers[i]->paintGL(fast);
-            //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
-            GL_ERR_BREAK();
-            if (myrc < 0) rc = -1;
+        RenderParams* rp = _paramsMgr->GetRenderParams(_winName, _renderers[i]->GetMyDatasetName(), _renderers[i]->GetMyParamsType(), _renderers[i]->GetMyName());
+        if (rp != nullptr && rp->GetDrawInFront()) {
+            topRenderers.push_back(_renderers[i]);
+            continue;
         }
-        mm->MatrixModeModelView();
-        mm->PopMatrix();
-        int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
-        if (myrc < 0) rc = -1;
+        rc = renderRenderer(_renderers[i], fast);
     }
+
+    glDepthFunc(GL_ALWAYS);
+    glDisable(GL_DEPTH_TEST);
+    for (int i=0; i<topRenderers.size(); i++) {
+        renderRenderer(topRenderers[i], fast);
+    }
+    glDepthFunc(GL_LESS);
+    glDepthMask(GL_TRUE);
 
     _vizFeatures->DrawText();
     GL_ERR_BREAK();
@@ -245,7 +266,7 @@ int Visualizer::paintEvent(bool fast)
     _vizFeatures->DrawAxisArrows();
     GL_ERR_BREAK();
 
-    //    _glManager->ShowDepthBuffer();
+    // _glManager->ShowDepthBuffer();
 
     glFlush();
 

@@ -3,14 +3,14 @@
 #include <vapor/VAssert.h>
 #include "VComboBox.h"
 
-PEnumDropdown::PEnumDropdown(const std::string &tag, const std::vector<std::string> &items, const std::vector<long> &itemValues, const std::string &label)
-: PLineItem(tag, label, _vComboBox = new VComboBox(items)), _enumMap(itemValues)
+PEnumDropdownStandalone::PEnumDropdownStandalone(const std::string &tag, const std::vector<std::string> &items, const std::vector<long> &itemValues)
+: PWidget(tag, _vComboBox = new VComboBox(items)), _enumMap(itemValues)
 {
     VAssert(itemValues.empty() || items.size() == itemValues.size());
-    connect(_vComboBox, &VComboBox::IndexChanged, this, &PEnumDropdown::dropdownIndexChanged);
+    connect(_vComboBox, &VComboBox::IndexChanged, this, &PEnumDropdownStandalone::dropdownIndexChanged);
 }
 
-void PEnumDropdown::updateGUI() const
+void PEnumDropdownStandalone::updateGUI() const
 {
     int value = getParamsLong();
 
@@ -25,7 +25,7 @@ void PEnumDropdown::updateGUI() const
     _vComboBox->SetIndex(index);
 }
 
-void PEnumDropdown::dropdownIndexChanged(int index)
+void PEnumDropdownStandalone::dropdownIndexChanged(int index)
 {
     int value;
     if (_enumMap.empty()) {
@@ -36,3 +36,6 @@ void PEnumDropdown::dropdownIndexChanged(int index)
     }
     setParamsLong(value);
 }
+
+PEnumDropdown::PEnumDropdown(const std::string &tag, const std::vector<std::string> &items, const std::vector<long> &itemValues, const std::string &label)
+: PLineItem(label, new PEnumDropdownStandalone(tag, items, itemValues)) {}

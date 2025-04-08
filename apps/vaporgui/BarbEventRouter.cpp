@@ -35,12 +35,13 @@ BarbEventRouter::BarbEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             (new PDoubleSliderEdit(BP::_lengthScaleTag, "Length Scale"))->SetRange(0.01, 4)->EnableDynamicUpdate(),
             (new PDoubleSliderEdit(BP::_thicknessScaleTag, "Thickness Scale"))->SetRange(0.01, 4)->EnableDynamicUpdate(),
             new PCheckbox(BP::LightingEnabledTag, "Enable Lighting"),
-            new PConstantColorWidget
+            new PConstantColorWidget,
+            new PCheckbox(BP::DrawInFrontTag, "Draw renderer in front")
         }),
     }));
     
     AddGeometrySubtab(new PGeometrySubtab);
-    AddAnnotationSubtab(new PAnnotationColorbarWidget);
+    AddColorbarSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }

@@ -21,14 +21,14 @@ public:
     static const std::string VariablesTabName;
     static const std::string AppearanceTabName;
     static const std::string GeometryTabName;
-    static const std::string AnnotationTabName;
+    static const std::string ColorbarTabName;
 
     RenderEventRouterGUI(VAPoR::ControlExec *ce, string paramsType);
     QWidget *AddSubtab(string title, UWidget *subtab);
     QWidget *AddVariablesSubtab(UWidget *subtab) { return AddSubtab(VariablesTabName, subtab); }
     QWidget *AddAppearanceSubtab(UWidget *subtab) { return AddSubtab(AppearanceTabName, subtab); }
     QWidget *AddGeometrySubtab(UWidget *subtab) { return AddSubtab(GeometryTabName, subtab); }
-    QWidget *AddAnnotationSubtab(UWidget *subtab) { return AddSubtab(AnnotationTabName, subtab); }
+    QWidget *AddColorbarSubtab(UWidget *subtab) { return AddSubtab(ColorbarTabName, subtab); }
 
 
 protected:

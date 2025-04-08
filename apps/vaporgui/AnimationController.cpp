@@ -1,8 +1,10 @@
 #include "AnimationController.h"
 #include <vapor/ControlExecutive.h>
 #include <vapor/AnimationParams.h>
-#include <vapor/NavigationUtils.h>
 #include <vapor/GUIStateParams.h>
+#include <vapor/NavigationUtils.h>
+
+#include <QAction>
 
 using namespace VAPoR;
 
@@ -73,6 +75,7 @@ void AnimationController::AnimationPlayReverse()
 
 void AnimationController::AnimationPlayForward()
 {
+    _capturingImageSequence = qobject_cast<QAction*>(sender()) ? false : true;
     _animationOn = true;
     setPlay(1);
 }
@@ -136,8 +139,13 @@ void AnimationController::setPlay(int direction)
         // Done animating. Disable timer and send notification
         //
         disconnect(_myTimer, 0, 0, 0);
+        GUIStateParams* gsp = NavigationUtils::GetGUIStateParams(_controlExec);
+    
+        string windowName = gsp->GetActiveVizName();
+        _controlExec->EnableAnimationCapture(windowName, false);
         _controlExec->GetParamsMgr()->ManuallyAddCurrentStateToUndoStack("End animation playback");
 
+        _capturingImageSequence = false;
         emit AnimationOnOffSignal(false);
     }
 }
@@ -152,15 +160,21 @@ void AnimationController::playNextFrame()
 
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
-    int  startFrame = aParams->GetStartTimestep();
-    int  endFrame = aParams->GetEndTimestep();
+    int startFrame, endFrame;
+    if (_capturingImageSequence) {
+        startFrame = aParams->GetValueLong(AnimationParams::CaptureStartTag, aParams->GetStartTimestep());
+        endFrame = aParams->GetValueLong(AnimationParams::CaptureEndTag, aParams->GetEndTimestep());
+    }
+    else {
+        startFrame = aParams->GetStartTimestep();
+        endFrame = aParams->GetEndTimestep();
+    }
+
     int  currentFrame = aParams->GetCurrentTimestep();
-    int  frameStepSize = aParams->GetFrameStepSize();
-    bool loop = aParams->GetRepeating();
 
-    currentFrame += (int)(_direction * frameStepSize);
+    currentFrame += (int)(_direction);
 
-    if (!loop && (currentFrame < startFrame || currentFrame > endFrame)) {
+    if ((currentFrame < startFrame || currentFrame > endFrame)) {
         AnimationPause();
         return;
     }

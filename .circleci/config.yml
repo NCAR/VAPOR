@@ -149,7 +149,7 @@ jobs:
             choco install visualstudio2019-workload-vctools -y
             choco install python -y
             choco install git -y
-            choco install cmake -y
+            choco install cmake --version=3.31.6 -y
             choco install nsis -y
             python -m pip install gdown
             setx /M PATH "%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"

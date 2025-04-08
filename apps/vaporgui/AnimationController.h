@@ -18,6 +18,7 @@ class AnimationController : public QObject {
     QTimer *            _myTimer;
     int                 _direction;
     bool                _animationOn = false;
+    bool                _capturingImageSequence;
 
 public:
     AnimationController(VAPoR::ControlExec *ce);

@@ -8,11 +8,11 @@ class ControlExec;
 }
 
 
-class PFramebufferSettingsSection : public PWidgetWrapper {
+class POutputResolutionSection : public PWidgetWrapper {
     VAPoR::ControlExec *_ce;
 
 public:
-    PFramebufferSettingsSection(VAPoR::ControlExec *ce);
+    POutputResolutionSection(VAPoR::ControlExec *ce);
 
 protected:
     VAPoR::ParamsBase *getWrappedParams() const override;

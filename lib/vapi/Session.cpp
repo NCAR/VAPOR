@@ -56,7 +56,7 @@ int Session::OpenDataset(String name, String format, const vector<String> &files
     GUIStateParams *p = getGUIStateParams();
     DataStatus *    ds = _controlExec->GetDataStatus();
     bool            isFirstDataset = p->GetOpenDataSetNames().empty();
-    p->InsertOpenDateSet(name, format, files);
+    p->InsertOpenDataSet(name, format, files);
     getAnimationParams()->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
 
     if (isFirstDataset) {
@@ -243,9 +243,9 @@ void Session::loadAllParamsDatasets()
         vector<string> paths;
         getParamsDatasetInfo(name, &format, &paths);
         if (std::all_of(paths.begin(), paths.end(), FileUtils::Exists)) {
-            if (OpenDataset(format, paths, name) < 0) getGUIStateParams()->RemoveOpenDateSet(name);
+            if (OpenDataset(format, paths, name) < 0) getGUIStateParams()->RemoveOpenDataSet(name);
         } else {
-            getGUIStateParams()->RemoveOpenDateSet(name);
+            getGUIStateParams()->RemoveOpenDataSet(name);
 
             string details = "This session links to the dataset " + name + " which was not found. Please open this dataset if it is in a different location\n";
 
