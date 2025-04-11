@@ -51,4 +51,4 @@ appimagetool=appimagetool-x86_64.AppImage
 rm $appimagetool || true
 wget https://github.com/AppImage/appimagetool/releases/download/continuous/$appimagetool
 chmod 755 $appimagetool
-./$appimagetool $VAPOR
+./$appimagetool -n $VAPOR
