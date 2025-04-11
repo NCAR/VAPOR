@@ -48,7 +48,12 @@ $VAPOR/vapor.desktop \
 ####
 
 appimagetool=appimagetool-x86_64.AppImage
+runtime=runtime-x86_64
 rm $appimagetool || true
 wget https://github.com/AppImage/appimagetool/releases/download/continuous/$appimagetool
+wget https://github.com/AppImage/AppImageKit/releases/download/12/$runtime
 chmod 755 $appimagetool
-./$appimagetool -n $VAPOR
+chmod 755 $runtime
+
+# pass -n to generate an AppImage type 1 for Casper.  This type does not require FUSE
+./$appimagetool -n -r ./$runtime $VAPOR
