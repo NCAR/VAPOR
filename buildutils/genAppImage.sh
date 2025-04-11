@@ -56,4 +56,4 @@ chmod 755 $appimagetool
 chmod 755 $runtime
 
 # pass `-n -r ./$runtime` to generate an AppImage type 1 for Casper.  This type does not require FUSE
-./$appimagetool -n -r ./$runtime $VAPOR
+./$appimagetool -n --runtime-file ./$runtime $VAPOR
