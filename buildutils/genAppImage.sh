@@ -55,5 +55,5 @@ wget https://github.com/AppImage/AppImageKit/releases/download/12/$runtime
 chmod 755 $appimagetool
 chmod 755 $runtime
 
-# pass -n to generate an AppImage type 1 for Casper.  This type does not require FUSE
+# pass `-n -r ./$runtime` to generate an AppImage type 1 for Casper.  This type does not require FUSE
 ./$appimagetool -n -r ./$runtime $VAPOR
