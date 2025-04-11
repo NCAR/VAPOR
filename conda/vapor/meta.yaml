@@ -53,6 +53,8 @@ requirements:
     - jupyter-vapor-widget=1.0 # [not os.environ.get('DEBUG_BUILD', '1').lower() in ('true', '1', '')]
     - vapor-maps=1.0 # [not os.environ.get('DEBUG_BUILD', '1').lower() in ('true', '1', '')]
     - wurlitzer
+    - bqplot
+    - anywidget
     # Both
     - python=3.9 # pin_compatible('python') selects python 3.10 which is not compatible
     - {{ pin_compatible('numpy') }}
