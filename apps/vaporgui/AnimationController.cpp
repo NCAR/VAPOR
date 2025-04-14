@@ -124,17 +124,13 @@ void AnimationController::setPlay(int direction)
         // the frame, etc.
         //
         emit AnimationOnOffSignal(true);
+        emit AnimationDrawSignal();
 
         AnimationParams *aParams = (AnimationParams *)GetActiveParams();
-
         int frameRate = aParams->GetMaxFrameRate();
-
         int msec = (int)(1.0 / (float)frameRate * 1000.0);
-
         connect(_myTimer, SIGNAL(timeout()), this, SLOT(playNextFrame()));
-
         _myTimer->start(msec);
-
     } else {
         // Done animating. Disable timer and send notification
         //
