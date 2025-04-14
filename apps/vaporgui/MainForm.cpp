@@ -882,12 +882,12 @@ void MainForm::_setAnimationOnOff(bool on)
 {
     if (on) {
         enableAnimationWidgets(false);
-//        _App->removeEventFilter(this);
+        _App->removeEventFilter(this);
     } else {
         _playForwardAction->setChecked(false);
         _playBackwardAction->setChecked(false);
         enableAnimationWidgets(true);
-//        _App->installEventFilter(this);
+        _App->installEventFilter(this);
     }
 }
 

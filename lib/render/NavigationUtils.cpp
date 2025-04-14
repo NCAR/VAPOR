@@ -294,7 +294,7 @@ void NavigationUtils::propagateTimestep(ControlExec *ce, size_t ts)
     DataStatus *dataStatus = ce->GetDataStatus();
     ParamsMgr * paramsMgr = ce->GetParamsMgr();
 
-    paramsMgr->BeginSaveStateGroup("Set Timestep");
+    paramsMgr->BeginSaveStateGroup("Set Timestep " + std::to_string(ts));
 
     // First set current *global* timestep in AnimationParams
     //
