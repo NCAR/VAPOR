@@ -167,6 +167,7 @@ jobs:
           shell: bash.exe
       - run:
           name: Build Vapor
+          beforeCompile: git checkout origin/main
           command: |
             Copy-Item site_files\* -Destination .
             mkdir build
@@ -201,7 +202,7 @@ jobs:
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
-          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license
+          beforeCompile: export PATH=/opt/local/bin:$PATH; softwareupdate --install-rosetta --agree-to-license; git checkout origin/main
           compileArgs: |
             -DCMAKE_BUILD_TYPE:String=Release \
             -DDIST_INSTALLER:string=ON \
@@ -223,7 +224,7 @@ jobs:
           sudo: sudo
       - get_macos_dependencies
       - build_vapor:
-          beforeCompile: export PATH=/opt/local/bin:$PATH
+          beforeCompile: export PATH=/opt/local/bin:$PATH; git checkout origin/main
           compileArgs: |
             -DCMAKE_BUILD_TYPE:String=Release \
             -DDIST_INSTALLER:string=ON \
@@ -427,6 +428,7 @@ jobs:
 
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
+          beforeCompile: git checkout origin/main
           compileArgs: |
             -DDIST_APPIMAGE=ON \
             -DBUILD_TEST_APPS=ON \
