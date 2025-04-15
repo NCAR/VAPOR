@@ -78,6 +78,7 @@ fi
 cd build
 
 cmake .. \
+    -G 'Unix Makefiles' \
     -DCONDA_BUILD=ON \
     -DBUILD_PYTHON=ON \
     -DBUILD_DOC=ON \
