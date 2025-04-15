@@ -50,7 +50,6 @@ requirements:
     - py-opencv=4 #=4.5.3
     - hdf5plugin=4
     - cppyy=2.2 #=2.2.0 If this is in build conda will load an old clang compiler which fails to compile macOS headers
-    - jupyter-vapor-widget=1.0 # [not os.environ.get('DEBUG_BUILD', '1').lower() in ('true', '1', '')]
     - vapor-maps=1.0 # [not os.environ.get('DEBUG_BUILD', '1').lower() in ('true', '1', '')]
     - wurlitzer
     - bqplot
