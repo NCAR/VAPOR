@@ -407,8 +407,8 @@ set (TIFF_LIB tiff)
 if (APPLE)
 	set (SRCS ${SRCS}
         core_profile_attributes.mm
-        mac_darkmode.mm
-        mac_darkmode.h
+        mac_helpers.mm
+        mac_helpers.h
         )
 	set (MACOSX_BUNDLE_GUI_IDENTIFIER Vapor3)
 	set (MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}})

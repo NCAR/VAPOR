@@ -9,6 +9,10 @@
 #include "TFMapGroupWidget.h"
 #include "VSection.h"
 #include "PDisplay.h"
+#include "mac_helpers.h"
+
+//#include <QEvent>
+#include <QTimer>
 
 using VAPoR::RenderParams;
 
@@ -31,6 +35,7 @@ PTFEditor::PTFEditor() : PTFEditor(RenderParams::_variableNameTag) {}
 
 PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PWidget(tag, _section = new VSection(label.empty() ? tag : label)), _expandable(expandable)
 {
+    //setWindowFlags(Qt::Window | !Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
     setMaximumSize(1200,720);
     _maps = new TFMapGroupWidget;
     _histogram = new TFHistogramMap(tag);
@@ -172,6 +177,7 @@ void PTFEditor::getExpandedPTFEditorInfo(std::string &name, std::string& type) {
 void PTFEditor::showExpandedPTFEditor() {
     if (_expandedPTFEditor==nullptr) {
         _expandedPTFEditor = new ExpandedPTFEditor(getTag(), _elements, _section->getTitle(), false);
+        //DisableMacFullscreen(_expandedPTFEditor);
         connect(_expandedPTFEditor, SIGNAL(closed()), this, SLOT(closeExpandedPTFEditor()));
 
         if (_showColormapBasedOnParam==true) _expandedPTFEditor->ShowColormapBasedOnParam(_showColormapBasedOnParamTag, _showColormapBasedOnParamValue);
@@ -197,6 +203,50 @@ void PTFEditor::hideEvent(QHideEvent* event) {
 }
 
 PColormapTFEditor::PColormapTFEditor() : PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function") {}
+
+ExpandedPTFEditor::ExpandedPTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PTFEditor(tag, elements, label, expandable) {
+//ExpandedPTFEditor::ExpandedPTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) {
+    //setWindowFlags(this->windowFlags() & ~Qt::WindowMaximizeButtonHint);
+    //setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
+    //setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
+    //setWindowFlags(Qt::Drawer);
+    //setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowResizableHint);
+    //setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint);
+    //setWindowFlags(windowFlags() & ~Qt::WindowFullscreenButtonHint);
+    //setWindowFlags(windowFlags() & ~Qt::WindowMinMaxButtonsHint);
+
+    //setWindowFlags(Qt::Window |
+    //           Qt::WindowTitleHint |
+    //           Qt::WindowSystemMenuHint |
+    //           Qt::WindowMinimizeButtonHint |
+    //           Qt::WindowCloseButtonHint);
+    //DisableMacFullscreen(this);
+#ifdef Q_OS_MAC
+QTimer::singleShot(0, this, [this] {
+    DisableMacFullscreen(this);
+});
+#endif
+    //PTFEditor(tag, elements, label, false);
+}
+
+//bool ExpandedPTFEditor::event(QEvent* event) {
+//    if (event->type() == QEvent::WindowStateChange) {
+//        if (windowState() & Qt::WindowFullScreen) {
+//            setWindowState(windowState() & ~Qt::WindowFullScreen); // Cancel fullscreen
+//            std::cout << "Cancelling" << std::endl;
+//            return true;
+//        }
+//    }
+//    return QWidget::event(event);
+//}
+
+//#import <AppKit/AppKit.h>
+//void ExpandedPTFEditor::disableMacFullscreen() {
+//    NSWindow *nsWindow = (NSWindow *)window()->winId();
+//    NSUInteger behavior = [nsWindow collectionBehavior];
+//    behavior &= ~NSWindowCollectionBehaviorFullScreenPrimary;
+//    [nsWindow setCollectionBehavior:behavior];
+//}
 
 void ExpandedPTFEditor::closeEvent(QCloseEvent *event) {
     emit closed();

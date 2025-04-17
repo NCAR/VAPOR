@@ -57,7 +57,6 @@ class PTFEditor : public PWidget {
     TFIsoValueMap *         _isoMap;
     TFMappingRangeSelector *_range;
     PTFEditor*              _expandedPTFEditor = nullptr;
-    bool                    _expandable;
 
     std::vector<QAction *> _colorMapActions;
     std::vector<QAction *> _opacityMapActions;
@@ -83,6 +82,7 @@ public:
     PTFEditor *ShowColormapBasedOnParam(const std::string &tag, int value);
 
 protected:
+    bool _expandable;
     std::set<Element> _elements;
     std::string _label;
 
@@ -108,13 +108,17 @@ public:
 class ExpandedPTFEditor : public PTFEditor {
     Q_OBJECT
 
+    void disableMacFullscreen();
+
 public:
-    using PTFEditor::PTFEditor;
+    //using PTFEditor::PTFEditor;
+    ExpandedPTFEditor(const std::string &tag, const std::set<Element> elements = {Default}, const std::string &label = "Transfer Function", bool expandable = false);
 
 signals:
     void closed();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
+    //bool event(QEvent* event) override;
 };
 
