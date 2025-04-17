@@ -1,7 +1,10 @@
 #!/bin/bash
 
 if uname -a | grep -i casper; then
+    echo HI
+    echo old $TMPDIR
     unset TMPDIR
+    echo new $TMPDIR
 fi
 
 executables=(
