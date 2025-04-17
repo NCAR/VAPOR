@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if uname -a | grep -qi casper; then
+    unset TMPDIR
+fi
+
 executables=(
     "wrf2vdc"
     "raw2wasp"
