@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if uname -a | grep -qi casper; then
+if uname -a | grep -i casper; then
     unset TMPDIR
 fi
 
