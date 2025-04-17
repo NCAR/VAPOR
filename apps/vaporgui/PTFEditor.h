@@ -109,7 +109,7 @@ class ExpandedPTFEditor : public PTFEditor {
     Q_OBJECT
 
 public:
-    using PTFEditor::PTFEditor;
+    ExpandedPTFEditor(const std::string &tag, const std::set<Element> elements = {Default}, const std::string &label = "Transfer Function", bool expandable = false);
 
 signals:
     void closed();
