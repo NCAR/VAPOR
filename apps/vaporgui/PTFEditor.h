@@ -108,10 +108,7 @@ public:
 class ExpandedPTFEditor : public PTFEditor {
     Q_OBJECT
 
-    void disableMacFullscreen();
-
 public:
-    //using PTFEditor::PTFEditor;
     ExpandedPTFEditor(const std::string &tag, const std::set<Element> elements = {Default}, const std::string &label = "Transfer Function", bool expandable = false);
 
 signals:
@@ -119,6 +116,5 @@ signals:
 
 protected:
     void closeEvent(QCloseEvent *event) override;
-    //bool event(QEvent* event) override;
 };
 

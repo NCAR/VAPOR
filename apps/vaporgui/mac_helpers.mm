@@ -10,21 +10,6 @@ bool MacIsDarkMode()
 }
 
 void DisableMacFullscreen(QWidget* widget) {
-    //widget->winId(); // ensure NSWindow exists
-    //NSView *nsView = (NSView *)widget->window()->winId();
-    //NSWindow *nsWindow = [nsView window]; // 💡 this is the real NSWindow
-    //NSUInteger behavior = [nsWindow collectionBehavior];
-    //behavior &= ~NSWindowCollectionBehaviorFullScreenPrimary;
-    //[nsWindow setCollectionBehavior:behavior];
-
-    //NSView *nsView = (NSView *)widget->window()->winId();
-    //NSWindow *nsWindow = [nsView window];
-    //if (!nsWindow) return;
-
-    //NSUInteger behavior = [nsWindow collectionBehavior];
-    //behavior &= ~NSWindowCollectionBehaviorFullScreenPrimary;
-    //[nsWindow setCollectionBehavior:behavior];
-
     // Ensure native view exists
     widget->winId();
 
@@ -34,12 +19,12 @@ void DisableMacFullscreen(QWidget* widget) {
     NSWindow *nsWindow = [nsView window];
     if (!nsWindow) return;
 
-    // ✅ Remove fullscreen behavior
+    // Remove fullscreen behavior
     NSUInteger behavior = [nsWindow collectionBehavior];
     behavior &= ~NSWindowCollectionBehaviorFullScreenPrimary;
     [nsWindow setCollectionBehavior:behavior];
 
-    // ✅ Keep resizable, but disable fullscreen by overriding standardWindowButton
+    // Keep resizable, but disable fullscreen by overriding standardWindowButton
     NSButton *zoomButton = [nsWindow standardWindowButton:NSWindowZoomButton];
     [zoomButton setTarget:nil];
     [zoomButton setAction:nil];
