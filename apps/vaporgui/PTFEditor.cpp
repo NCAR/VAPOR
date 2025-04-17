@@ -11,8 +11,6 @@
 #include "PDisplay.h"
 #include "mac_helpers.h"
 
-#include <QTimer>
-
 using VAPoR::RenderParams;
 
 template<typename T> PTFMapWidget<T>::PTFMapWidget(const std::string &tag) : PWidget(tag, _tfWidget = new TFColorWidget(tag)) {}
