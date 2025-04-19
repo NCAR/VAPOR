@@ -200,6 +200,10 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
             fprintf(stderr, "Cannot replace dataset from command line in session which contains multiple open datasets.");
             exit(1);
         }
+        if (!FileUtils::Exists(files[0].toStdString())) {
+            MSG_ERR("Provided session file " + files[0].toStdString() + " does not exist.  Initializing new session.");
+            sessionNew();
+        }
     } else {
         sessionNew();
     }
