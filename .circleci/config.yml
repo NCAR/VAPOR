@@ -675,7 +675,7 @@ workflows:
              cron: "0 14 * * 6" #Time is GMT
              filters:
                branches:
-                 only: issue3300
+                 only: main
       jobs:
         - build_linux_installer
         - build_appleSilicon_installer
