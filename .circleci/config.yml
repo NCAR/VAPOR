@@ -83,7 +83,7 @@ commands:
             make installer
             for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
-            find VAPOR* -maxdepth 1 -type f -exec mv {} /tmp/workspace/installers \;
+            find VAPOR* -maxdepth 1 -type f \( -name "*.AppImage" -o -name "*.exe" -o -name "*.dmg" \) -exec mv {} /tmp/workspace/installers \;
             ls /tmp/workspace/installers
           no_output_timeout: 30m
       - store_artifacts:
@@ -672,7 +672,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "0 22 * * 5" #Time is GMT
+             cron: "0 14 * * 6" #Time is GMT
              filters:
                branches:
                  only: main
