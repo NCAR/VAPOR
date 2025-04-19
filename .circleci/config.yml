@@ -83,7 +83,7 @@ commands:
             make installer
             for f in VAPOR3-* ; do mv "$f" "<<parameters.moveToCommand>>" ; done
             mkdir -p /tmp/workspace/installers
-            find VAPOR* -maxdepth 1 -type f -exec mv {} /tmp/workspace/installers \;
+            find VAPOR* -maxdepth 1 -type f \( -name "*.AppImage" -o -name "*.exe" -o -name "*.dmg" \) -exec mv {} /tmp/workspace/installers \;
             ls /tmp/workspace/installers
           no_output_timeout: 30m
       - store_artifacts:
@@ -476,8 +476,8 @@ jobs:
             winSha=$os$sha$endl
             shaMessage="$title$linuxSha$osxSha$siliconSha$winSha"
             date=`date +"%d_%m_%y"`
-            echo $shaMessage
-            echo $shaMessage > "/tmp/workspace/installers/sha256.txt" 
+            echo "$shaMessage"
+            echo "$shaMessage" > "/tmp/workspace/installers/sha256.txt" 
             echo ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
             ghr -b "Weekly installers are untested an may not be stable.  Built with commit ${hash} on ${date} \(DD-MM-YY\)" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate -c ${hash} -n ${tag} ${tag} /tmp/workspace/installers
 
@@ -672,7 +672,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "0 18 * * 4" #Time is GMT
+             cron: "0 14 * * 6" #Time is GMT
              filters:
                branches:
                  only: main
