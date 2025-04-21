@@ -41,7 +41,10 @@ void PImportDataButton::updateGUI() const {
     GUIStateParams* gsp = dynamic_cast<GUIStateParams *>(getParams());
 
     std::vector<std::string> dataSetNames = gsp->GetOpenDataSetNames();
-    if (!dataSetNames.size()) return;
+    if (!dataSetNames.size()) {
+        _fileLabel->SetText("");
+        return;
+    }
 
     std::vector<std::string> paths = gsp->GetOpenDataSetPaths(dataSetNames[0]);
     int count = paths.size();
@@ -50,5 +53,4 @@ void PImportDataButton::updateGUI() const {
         std::string dir = FileUtils::Dirname(paths[0]);
         _fileLabel->SetText("Imported: " + std::to_string(count) + " file(s)\nFrom: " + dir);
     }
-    else _fileLabel->SetText("");
 }

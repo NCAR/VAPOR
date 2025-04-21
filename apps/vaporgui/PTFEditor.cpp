@@ -9,6 +9,7 @@
 #include "TFMapGroupWidget.h"
 #include "VSection.h"
 #include "PDisplay.h"
+#include "mac_helpers.h"
 
 using VAPoR::RenderParams;
 
@@ -197,6 +198,12 @@ void PTFEditor::hideEvent(QHideEvent* event) {
 }
 
 PColormapTFEditor::PColormapTFEditor() : PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function") {}
+
+ExpandedPTFEditor::ExpandedPTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label, bool expandable) : PTFEditor(tag, elements, label, expandable) {
+#ifdef Q_OS_MAC
+    DisableMacFullscreen(this);
+#endif
+}
 
 void ExpandedPTFEditor::closeEvent(QCloseEvent *event) {
     emit closed();

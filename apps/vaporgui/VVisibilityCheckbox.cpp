@@ -1,7 +1,7 @@
 #include "VVisibilityCheckbox.h"
 #include <vapor/ResourcePath.h>
 #include <QVariant>
-#include "mac_darkmode.h"
+#include "mac_helpers.h"
 
 VVisibilityCheckbox::VVisibilityCheckbox()
 {
