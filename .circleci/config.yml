@@ -73,7 +73,6 @@ commands:
             cd build
             #git checkout <<parameters.branch>>
             git reset --hard origin/main
-            git pull
             <<parameters.beforeCompile>>
             cmake \
             -DCMAKE_BUILD_TYPE:String=Release \
