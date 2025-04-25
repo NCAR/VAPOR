@@ -110,6 +110,9 @@ void PCaptureHBox::_captureTimeSeries() {
     std::string fileName = QFileDialog::getSaveFileName(this, "Select Filename Prefix", QString::fromStdString(defaultPath), QString::fromStdString(filter)).toStdString();
     if (fileName.empty()) return;
 
+    // Qt does not always append the filetype to the selection from the QFileDialog, so manually add it if this happens
+    if (fileName.find(defaultSuffix) == std::string::npos) fileName = fileName + "." + defaultSuffix;
+
     ap->SetValueString(AnimationParams::CaptureFileDirTag, "Capture animation file directory", FileUtils::Dirname(fileName));
     ap->SetValueString(AnimationParams::CaptureTimeSeriesFileNameTag, "Capture animation file name", FileUtils::Basename(fileName));
     ap->SetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "Capture file time", STLUtils::GetCurrentDateTimestamp());
