@@ -46,15 +46,11 @@ class CanvasStreamWidget(anywidget.AnyWidget):
         if "debug" in kwargs and kwargs["debug"]:
             self.on_trait_change(self.valueChanged, "value")
             self.on_trait_change(self._DebugShowMousePos, "mousePos")
-        open(os.path.expanduser("~/Desktop/log.txt"), "w").write("")
 
 
     def test(self):
         self.SetImage(Image.new('RGB', self.resolution, (0,0,100)))
         # self.value = 999
-        print("TEST ===============")
-        print("TEST ===============", file=sys.stderr)
-        open(os.path.expanduser("~/Desktop/log.txt"), "a").write("test")
 
     def valueChanged(self):
         print("VALUE CHANGED TO", self.value)
