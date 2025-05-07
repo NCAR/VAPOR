@@ -984,9 +984,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
 #endif
 
-        // When _animationCapture==true, we will render from the AnimationController's
-        // AnimationDrawSignal, not a ParamsChangeEvent.
-        if (_animationCapture == false) Render(false,true);
+        Render(true);
 
         return true;
     }
