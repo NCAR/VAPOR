@@ -135,6 +135,7 @@ void AnimationController::setPlay(int direction)
         // Done animating. Disable timer and send notification
         //
         disconnect(_myTimer, 0, 0, 0);
+        _myTimer->stop();
         GUIStateParams* gsp = NavigationUtils::GetGUIStateParams(_controlExec);
     
         string windowName = gsp->GetActiveVizName();
