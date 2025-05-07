@@ -886,12 +886,12 @@ void MainForm::_setAnimationOnOff(bool on)
 {
     if (on) {
         enableAnimationWidgets(false);
-        _App->removeEventFilter(this);
+        // _App->removeEventFilter(this);
     } else {
         _playForwardAction->setChecked(false);
         _playBackwardAction->setChecked(false);
         enableAnimationWidgets(true);
-        _App->installEventFilter(this);
+        // _App->installEventFilter(this);
     }
 }
 
@@ -968,7 +968,9 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         updateUI();
         setUpdatesEnabled(true);
 
-        Render(false, true);
+        // When _animationCapture==true, we will render from the AnimationController's
+        // AnimationDrawSignal, not a ParamsChangeEvent.
+        if (_animationCapture == false) Render(false,true);        
 
         QApplication::restoreOverrideCursor();
         return true;
@@ -982,7 +984,9 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
 #endif
 
-        Render(true);
+        // When _animationCapture==true, we will render from the AnimationController's
+        // AnimationDrawSignal, not a ParamsChangeEvent.
+        if (_animationCapture == false) Render(false,true);
 
         return true;
     }
