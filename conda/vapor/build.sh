@@ -32,6 +32,7 @@ export CPPFLAGS=" \
     -Wno-deprecated-declarations \
     -Wno-catch-value \
     -Wno-unknown-warning-option \
+    -Wno-array-parameter \
     "
 
 # Vapor legacy configuration
@@ -62,19 +63,8 @@ mkdir -p "$SP_DIR"
 # Our third party libs have a non-standard copy of the GTE library so it is packaged and extracted here.
 unzip -d include buildutils/GTE.zip
 
-if false ; then
-	echo "============================================================"
-	echo "====================     EXPORTS      ======================"
-	echo "============================================================"
-	export
-	echo "============================================================"
-	echo "Python = `python --version`"
-fi
 
-
-if [ ! -d "build" ]; then
-    mkdir build
-fi
+mkdir -p build
 cd build
 
 cmake .. \

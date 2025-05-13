@@ -3,7 +3,7 @@ package:
   version: "3.10.0"
 
 source:
-  path: ../..
+  git_url: https://github.com/NCAR/VAPOR.git
 
 build:
   skip_compile_pyc:
@@ -25,37 +25,48 @@ requirements:
     # Both
     # (Needs to be specified manually in both rather than just in host because otherwise conda will install multiple versions of some packages and break the install)
     # ==========================================
-    - python=3.9.5
+    - python=3.10
+    - proj=7.2.0
+    - glm=0.9.9.4
+    - jpeg=9e
+{% if osx and arm64 %}
     - numpy=1.21.4
     - assimp=5.0.1
     - freetype=2.10.4
     - hdf5=1.12.1
-    - jpeg=9e
     - geotiff=1.6.0
     - udunits2=2.2.28
     - netcdf4=1.5.8
     - libtiff=4.3|4.4
-    - proj=7.2.0
-    - glm=0.9.9.4
     - mesalib=21.2.5
     - expat=2.4
     - libcxx=14.0
+{% else %}
+    - numpy=1.26
+    - assimp=5.3
+    - freetype=2.12
+    - hdf5=1.12
+    - geotiff=1.6
+    - udunits2=2.2
+    - netcdf4=1.6
+    - libtiff=4.4
+    - mesalib=23.0.2
+    - expat=2.7
+    - libcxx=18
     - libxcrypt # [linux]
+{% endif %}
   run:
     # Run only
     - xarray=2022 #=2022.3.0
-    - matplotlib=3 #=3.3.2
     - ipython=8 #=8.3.0 
     - jupyter=1 #=1.0.0
-    - py-opencv=4 #=4.5.3
     - hdf5plugin=4
-    - cppyy=2.2 #=2.2.0 If this is in build conda will load an old clang compiler which fails to compile macOS headers
     - vapor-maps=1.0 # [not os.environ.get('DEBUG_BUILD', '1').lower() in ('true', '1', '')]
     - wurlitzer
     - bqplot
     - anywidget
     # Both
-    - python=3.9 # pin_compatible('python') selects python 3.10 which is not compatible
+    - python=3.10 # pin_compatible('python') sometimes selects incompatible python (e.g. pin_compatible(python=3.9) selects python=3.10)
     - {{ pin_compatible('numpy') }}
     - {{ pin_compatible('assimp') }}
     - {{ pin_compatible('freetype') }}
@@ -64,9 +75,29 @@ requirements:
     - {{ pin_compatible('geotiff') }}
     - {{ pin_compatible('udunits2') }}
     - {{ pin_compatible('netcdf4') }}
-    - libtiff=4.3|4.4 # pin_compatible pins an incompatible version
     - {{ pin_compatible('proj') }}
     - {{ pin_compatible('glm') }}
     - {{ pin_compatible('mesalib') }}
     - {{ pin_compatible('expat') }}
     - {{ pin_compatible('libcxx') }}
+{% if osx and arm64 %}
+    - cppyy=2.2 # If this is in build conda will load an old clang compiler which fails to compile macOS headers
+    - matplotlib=3 #=3.3.2
+    - py-opencv=4 #=4.5.3
+    - libtiff=4.3|4.4 # pin_compatible pins an incompatible version
+{% else %}
+    - cppyy=3.5       # [osx]
+    - cppyy=3.1.2     # [linux]
+    - matplotlib=3.10 # [osx]
+    - matplotlib=3.9  # [linux]
+    - py-opencv=4.6
+    - {{ pin_compatible('libtiff') }}
+{% endif %}
+
+
+about:
+  home: https://www.vapor.ucar.edu
+  license: MIT
+  summary: VAPOR is the Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers
+  dev_url: https://github.com/NCAR/VAPOR
+
