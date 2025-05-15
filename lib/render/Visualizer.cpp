@@ -189,8 +189,6 @@ int Visualizer::paintEvent(bool fast)
     MyBase::SetDiagMsg("Visualizer::paintGL()");
     GL_ERR_BREAK();
 
-    MatrixManager *mm = _glManager->matrixManager;
-
     // Do not proceed if there is no DataMgr
     if (!_paramsMgr->GetDataMgrNames().size()) return (0);
 
