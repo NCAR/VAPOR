@@ -2,7 +2,7 @@ import wurlitzer, re
 with wurlitzer.pipes() as (out, err):
     import cppyy
 print(out.read(), end="")
-print("".join(l for l in err.read().splitlines() if "(ignoring for now)" not in l), end="")
+print("".join(l for l in err.read().splitlines() if not any(x in l for x in ("(ignoring for now)", "building pre-compiled headers"))), end="")
 
 
 from . import config
