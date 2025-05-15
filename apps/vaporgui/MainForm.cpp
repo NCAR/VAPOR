@@ -892,6 +892,7 @@ void MainForm::_setAnimationOnOff(bool on)
         _playBackwardAction->setChecked(false);
         enableAnimationWidgets(true);
         _App->installEventFilter(this);
+        _paramsEventQueued = false;
     }
 }
 
