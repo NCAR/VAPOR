@@ -192,6 +192,10 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     //
 
     if (files.size() && files[0].endsWith(".vs3")) {
+        if (!FileUtils::Exists(files[0].toStdString())) {
+            fprintf(stderr, "Session file \"%s\" does not exist\n", files[0].toStdString().c_str());
+            exit(1);
+        }
         bool loadDatasetsFromSession = files.size() == 1;
         openSession(files[0].toStdString(), loadDatasetsFromSession);
         files.erase(files.begin());
@@ -199,10 +203,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         if (!loadDatasetsFromSession && _controlExec->GetDataNames().size() > 1) {
             fprintf(stderr, "Cannot replace dataset from command line in session which contains multiple open datasets.");
             exit(1);
-        }
-        if (!FileUtils::Exists(files[0].toStdString())) {
-            MSG_ERR("Provided session file " + files[0].toStdString() + " does not exist.  Initializing new session.");
-            sessionNew();
         }
     } else {
         sessionNew();
