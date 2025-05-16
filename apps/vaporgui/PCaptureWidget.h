@@ -9,7 +9,6 @@ class ControlExec;
 class PSection;
 class PEnumDropdownStandalone;
 class VLabel;
-class MainForm;
 class CaptureController;
 class PButton;
 class VHBoxWidget;
@@ -31,7 +30,6 @@ class PCaptureHBox : public PWidget {
 
     ControlExec *_ce;
     CaptureController *_cc;
-    MainForm *_mf;
     VHBoxWidget *_hBox;
     PStringDropdown *_fileTypeSelector;
     const std::vector<long> _enumMap;
@@ -42,7 +40,7 @@ class PCaptureHBox : public PWidget {
     PButton *_captureTimeSeriesButton;
 
 public:
-    PCaptureHBox(VAPoR::ControlExec *ce, CaptureController* cc, MainForm *mf);
+    PCaptureHBox(VAPoR::ControlExec *ce, CaptureController* cc);
 
 protected:
     virtual void updateGUI() const;
@@ -56,11 +54,10 @@ class PCaptureWidget : public PWidget {
     Q_OBJECT
 
     ControlExec *_ce;
-    MainForm *_mf;
     PSection *_section;
 
 public:
-    PCaptureWidget(VAPoR::ControlExec *ce, CaptureController *cc, MainForm *mf);
+    PCaptureWidget(VAPoR::ControlExec *ce, CaptureController *cc);
 
 protected:
     virtual void updateGUI() const;

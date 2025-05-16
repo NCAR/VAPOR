@@ -24,7 +24,7 @@ LeftPanel::LeftPanel(ControlExec *ce, CaptureController *cc, MainForm *mf) : _ce
     add(_importTab, "Import");
     add(new RenderersPanel(ce), "Render");
     add(new AnnotationEventRouter(ce), "Annotate");
-    add(new ExportTab(ce, cc, mf), "Export");
+    add(new ExportTab(ce, cc), "Export");
 
     for (int i=1 ; i<count(); ++i) setTabEnabled(i, false);
     setTabEnabled(0,true);

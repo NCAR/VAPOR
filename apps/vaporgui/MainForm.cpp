@@ -66,6 +66,7 @@
 #include "ViewpointToolbar.h"
 #include "DatasetTypeLookup.h"
 #include "CaptureController.h"
+#include "DatasetImporter.h"
 
 #include <QStyle>
 #include <vapor/Progress.h>
@@ -164,6 +165,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         _animationController->AnimationPlayForward();
     });
 
+    _datasetImporter = new DatasetImporter(_controlExec);
+    
     _leftPanel = new LeftPanel(_controlExec, _captureController, this);
     const int dpi = qApp->desktop()->logicalDpiX();
     _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
@@ -279,13 +282,11 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
 
     //_animationController->AnimationPlayForward();
-    GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
-    _capturingAnimationVizName = p->GetActiveVizName();
-    _animationCapture = true;
-    if (_captureController->EnableAnimationCapture(baseFileWithTS)) _captureController->StartAnimationCapture();
-    else {
-        _animationCapture = false;
-        _capturingAnimationVizName = "";
+    if (_captureController->EnableAnimationCapture(baseFileWithTS)) {
+        GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+        _capturingAnimationVizName = p->GetActiveVizName();
+        _animationCapture = true;
+        _captureController->StartAnimationCapture();
     }
     
     _paramsMgr->EndSaveStateGroup();
