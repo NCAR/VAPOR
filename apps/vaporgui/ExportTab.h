@@ -6,6 +6,7 @@
 #include "VGroup.h"
 
 class MainForm;
+class CaptureController;
 
 class ExportTab : public VGroup, public Updatable {
     Q_OBJECT
@@ -15,6 +16,6 @@ class ExportTab : public VGroup, public Updatable {
     PWidget *_movingDomainSection = nullptr;
 
 public:
-    ExportTab(VAPoR::ControlExec *ce, MainForm *mf);
+    ExportTab(VAPoR::ControlExec *ce, CaptureController *cc, MainForm *mf);
     void Update() override;
 };

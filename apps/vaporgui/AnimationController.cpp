@@ -5,6 +5,8 @@
 #include <vapor/NavigationUtils.h>
 
 #include <QAction>
+#include <QFileDialog>
+#include <QDir>
 
 using namespace VAPoR;
 

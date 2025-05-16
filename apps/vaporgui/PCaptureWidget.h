@@ -10,6 +10,7 @@ class PSection;
 class PEnumDropdownStandalone;
 class VLabel;
 class MainForm;
+class CaptureController;
 class PButton;
 class VHBoxWidget;
 class VComboBox;
@@ -29,6 +30,7 @@ class PCaptureHBox : public PWidget {
     Q_OBJECT;
 
     ControlExec *_ce;
+    CaptureController *_cc;
     MainForm *_mf;
     VHBoxWidget *_hBox;
     PStringDropdown *_fileTypeSelector;
@@ -40,7 +42,7 @@ class PCaptureHBox : public PWidget {
     PButton *_captureTimeSeriesButton;
 
 public:
-    PCaptureHBox(VAPoR::ControlExec *ce, MainForm *mf);
+    PCaptureHBox(VAPoR::ControlExec *ce, CaptureController* cc, MainForm *mf);
 
 protected:
     virtual void updateGUI() const;
@@ -59,7 +61,7 @@ class PCaptureWidget : public PWidget {
     PSection *_section;
 
 public:
-    PCaptureWidget(VAPoR::ControlExec *ce, MainForm *mf);
+    PCaptureWidget(VAPoR::ControlExec *ce, CaptureController *cc, MainForm *mf);
 
 protected:
     virtual void updateGUI() const;

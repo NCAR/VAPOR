@@ -65,6 +65,7 @@
 #include "NcarCasperUtils.h"
 #include "ViewpointToolbar.h"
 #include "DatasetTypeLookup.h"
+#include "CaptureController.h"
 
 #include <QStyle>
 #include <vapor/Progress.h>
@@ -156,11 +157,13 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         Render(false, true);
     });
 
-    _leftPanel = new LeftPanel(_controlExec, this);
+    _captureController = new CaptureController(_controlExec);
+    connect(_captureController, SIGNAL(animationCaptureStarted()), _animationController, SLOT(AnimationPlayForward()));
+
+    _leftPanel = new LeftPanel(_controlExec, _captureController, this);
     const int dpi = qApp->desktop()->logicalDpiX();
     _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     _leftPanel->setMinimumHeight(500);
-    //_dependOnLoadedData_insert(_leftPanel);
     _updatableElements.insert(_leftPanel);
 
     _status = new ProgressStatusBar;
@@ -1056,7 +1059,6 @@ void MainForm::enableAnimationWidgets(bool on)
         _playForwardAction->setEnabled(false);
     }
 }
-
 
 void MainForm::CaptureSingleImage(string filter, string defaultSuffix)
 {
