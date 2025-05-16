@@ -158,7 +158,14 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     });
 
     _captureController = new CaptureController(_controlExec);
-    connect(_captureController, SIGNAL(animationCaptureStarted()), _animationController, SLOT(AnimationPlayForward()));
+    //connect(_captureController, SIGNAL(animationCaptureStarted()), _animationController, SLOT(AnimationPlayForward()));
+    connect(_captureController, &CaptureController::animationCaptureStarted, [this]() {
+        _animationController->AnimationPlayForward();
+
+        GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+        _capturingAnimationVizName = p->GetActiveVizName();
+        _animationCapture = true;
+    });
 
     _leftPanel = new LeftPanel(_controlExec, _captureController, this);
     const int dpi = qApp->desktop()->logicalDpiX();
