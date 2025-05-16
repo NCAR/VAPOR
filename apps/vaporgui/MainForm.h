@@ -68,11 +68,7 @@ public:
     void ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
 
     // Needed for Export/Capture widget
-    bool StartAnimCapture(string baseFile, string defaultSuffix = "tiff");
     void AnimationPlayForward() const;
-
-public slots:
-    void CaptureSingleImage(string filter, string defaultSuffix);
 
 protected:
     void Render(bool fast=false, bool skipSync=false);
@@ -197,7 +193,6 @@ private slots:
     void closeProjectionFrame();
     void helpAbout();
     void sessionNew();
-    void endAnimCapture();
     void launchStats();
     void launchPlotUtility();
     void launchPythonVariables();
