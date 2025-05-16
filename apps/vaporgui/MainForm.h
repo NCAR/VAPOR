@@ -47,6 +47,7 @@ class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
 class CaptureController;
+class DatasetImporter;
 
 class LeftPanel;
 
@@ -123,6 +124,7 @@ private:
     VAPoR::ParamsMgr *  _paramsMgr;
     AnimationController *_animationController;
     CaptureController*  _captureController;
+    DatasetImporter*    _datasetImporter;
     VizWinMgr *         _vizWinMgr;
     string              _capturingAnimationVizName;
 

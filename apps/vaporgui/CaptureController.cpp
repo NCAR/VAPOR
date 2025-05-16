@@ -13,8 +13,9 @@
 #include <QFileDialog>
 
 #include <sstream>
+#include <iomanip>
 
-CaptureController::CaptureController(VAPoR::ControlExec *ce) : _ce(ce), _pm(_ce->GetParamsMgr()) {}
+CaptureController::CaptureController(VAPoR::ControlExec *ce) : _ce(ce) {}
 
 bool CaptureController::EnableAnimationCapture(std::string filePath) {
     if (filePath.empty()) {
@@ -22,8 +23,9 @@ bool CaptureController::EnableAnimationCapture(std::string filePath) {
         if (filePath.empty()) return false;
     }
 
-    GUIStateParams *p = (GUIStateParams*)_pm->GetParams(GUIStateParams::GetClassType());
-    string          vizName = p->GetActiveVizName();
+    //GUIStateParams *p = (GUIStateParams*)_pm->GetParams(GUIStateParams::GetClassType());
+    GUIStateParams* gsp = _ce->GetParams<GUIStateParams>();
+    string vizName = gsp->GetActiveVizName();
     int rc = _ce->EnableAnimationCapture(vizName, true, filePath);
 
     if (rc < 0) {
@@ -37,7 +39,7 @@ void CaptureController::CaptureSingleImage() {
     std::string filePath = _getFileName();
     if (filePath.empty()) return;
 
-    GUIStateParams *gsp = (GUIStateParams*)_pm->GetParams(GUIStateParams::GetClassType());
+    GUIStateParams *gsp = gsp = _ce->GetParams<GUIStateParams>();
     int rc = _ce->EnableImageCapture(filePath, gsp->GetActiveVizName());
     if (rc < 0) MSG_ERR("Error capturing image");
 }
@@ -56,7 +58,7 @@ void CaptureController::EndAnimationCapture() const {
     //if (vizName != _capturingAnimationVizName) { MSG_WARN("Terminating capture in non-active visualizer"); }
     //if (_controlExec->EnableAnimationCapture(_capturingAnimationVizName, false)) MSG_WARN("Image Capture Warning;\nCurrent active visualizer is not capturing images");
     
-    GUIStateParams *gsp = (GUIStateParams*)_pm->GetParams(GUIStateParams::GetClassType());
+    GUIStateParams *gsp = gsp = _ce->GetParams<GUIStateParams>();
     string vizName = gsp->GetActiveVizName();
     if (_ce->EnableAnimationCapture(vizName, false)) MSG_WARN("Image Capture Warning;\nCurrent active visualizer is not capturing images");
 }
@@ -65,7 +67,8 @@ std::string CaptureController::_getFileName() {
     _showCitationReminder();
 
     std::string filter, defaultSuffix;
-    AnimationParams* ap = (AnimationParams*)_pm->GetParams(AnimationParams::GetClassType());
+    //AnimationParams* ap = (AnimationParams*)_pm->GetParams(AnimationParams::GetClassType());
+    AnimationParams* ap = _ce->GetParams<AnimationParams>();
     if (ap->GetValueLong(AnimationParams::CaptureTypeTag, 0) == 0) { // .tiff
          filter = "TIFF (*.tif)";
          defaultSuffix =  "tif";

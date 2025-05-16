@@ -1,4 +1,3 @@
-#include "MainForm.h"
 #include "CaptureController.h"
 #include "PCaptureWidget.h"
 #include "PTimeRangeSelector.h"
@@ -25,8 +24,8 @@ const std::string TiffStrings::FileSuffix = "tif";
 const std::string PngStrings::FileFilter = "PNG (*.png)";
 const std::string PngStrings::FileSuffix = "png";
 
-PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, CaptureController *cc, MainForm *mf)
-    : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _cc(cc), _mf(mf)
+PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, CaptureController *cc)
+    : PWidget("", _hBox = new VHBoxWidget()), _ce(ce)
 {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -91,8 +90,8 @@ void PCaptureHBox::_captureTimeSeries() {
     }
 }
 
-PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, CaptureController *cc, MainForm *mf)
-    : PWidget("", _section = new PSection("Image(s)")), _ce(ce), _mf(mf)
+PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, CaptureController *cc)
+    : PWidget("", _section = new PSection("Image(s)")), _ce(ce)
 {
     _section->Add(new PRadioButtons(AnimationParams::CaptureModeTag, {"Current frame", "Time series range"}));
 
@@ -100,7 +99,7 @@ PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, CaptureController *cc, Ma
     t->EnableBasedOnParam(AnimationParams::CaptureModeTag, 1);
     _section->Add(t);
 
-    _section->Add(new PCaptureHBox(ce, cc, mf));
+    _section->Add(new PCaptureHBox(ce, cc));
 }
 
 void PCaptureWidget::updateGUI() const {    

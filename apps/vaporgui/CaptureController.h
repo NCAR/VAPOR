@@ -1,7 +1,6 @@
 #pragma once
 
-#include <QTimer>
-#include <glm/fwd.hpp>
+#include <QObject>
 
 class AnimationParams;
 namespace VAPoR {
@@ -16,7 +15,6 @@ class ParamsMgr;
 class CaptureController : public QObject {
     Q_OBJECT
     VAPoR::ControlExec *_ce;
-    VAPoR::ParamsMgr   *_pm;
 
     void _showCitationReminder();
     std::string _getFileName();
