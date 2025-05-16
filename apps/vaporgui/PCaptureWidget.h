@@ -49,7 +49,6 @@ protected:
 
 private slots:
     void _dropdownIndexChanged(int index);
-    void _captureSingleImage();
     void _captureTimeSeries();
 };
     

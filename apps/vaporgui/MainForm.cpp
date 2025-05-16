@@ -153,18 +153,15 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         _controlExec->SyncWithParams();
         updateUI();
         setUpdatesEnabled(true);
-
         Render(false, true);
     });
 
     _captureController = new CaptureController(_controlExec);
-    //connect(_captureController, SIGNAL(animationCaptureStarted()), _animationController, SLOT(AnimationPlayForward()));
     connect(_captureController, &CaptureController::animationCaptureStarted, [this]() {
-        _animationController->AnimationPlayForward();
-
         GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
         _capturingAnimationVizName = p->GetActiveVizName();
         _animationCapture = true;
+        _animationController->AnimationPlayForward();
     });
 
     _leftPanel = new LeftPanel(_controlExec, _captureController, this);
@@ -273,7 +270,7 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     auto vpp = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
 
     _paramsMgr->BeginSaveStateGroup("test");
-    StartAnimCapture(baseFileWithTS);
+    //StartAnimCapture(baseFileWithTS);
     ap->SetStartTimestep(start);
     ap->SetEndTimestep(end);
 
@@ -281,11 +278,23 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", width);
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
 
-    _animationController->AnimationPlayForward();
+    //_animationController->AnimationPlayForward();
+    GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    _capturingAnimationVizName = p->GetActiveVizName();
+    _animationCapture = true;
+    if (_captureController->EnableAnimationCapture(baseFileWithTS)) _captureController->StartAnimationCapture();
+    else {
+        _animationCapture = false;
+        _capturingAnimationVizName = "";
+    }
+    
     _paramsMgr->EndSaveStateGroup();
 
     connect(_animationController, &AnimationController::AnimationOnOffSignal, this, [this]() {
-        endAnimCapture();
+        _captureController->EndAnimationCapture();
+        //endAnimCapture();
+        _animationCapture = false;
+        _capturingAnimationVizName = "";
         close();
     });
 
@@ -1063,48 +1072,6 @@ void MainForm::enableAnimationWidgets(bool on)
     }
 }
 
-void MainForm::CaptureSingleImage(string filter, string defaultSuffix)
-{
-    showCitationReminder();
-
-    std::string imageDir = GetAnimationParams()->GetValueString(AnimationParams::CaptureFileDirTag, "");
-    if (imageDir.empty()) imageDir = QDir::homePath().toStdString();
-
-    QFileDialog fileDialog(this, "Specify single image capture file name", QString::fromStdString(imageDir), QString::fromStdString(filter));
-
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.move(pos());
-    fileDialog.resize(450, 450);
-    QStringList mimeTypeFilters;
-    if (fileDialog.exec() != QDialog::Accepted) return;
-
-    // Extract the path, and the root name, from the returned string.
-    QStringList files = fileDialog.selectedFiles();
-    if (files.isEmpty()) return;
-    QString fn = files[0];
-    auto ap = GetAnimationParams();
-    ap->SetValueString(AnimationParams::CaptureFileNameTag, "Capture file name", FileUtils::Basename(fn.toStdString()));
-    ap->SetValueString(AnimationParams::CaptureFileDirTag, "Capture file directory", FileUtils::Dirname(fn.toStdString()));
-
-    QFileInfo fileInfo(fn);
-    QString   suffix = fileInfo.suffix();
-    if (suffix == "") {
-        fn += QString::fromStdString(defaultSuffix);
-        fileInfo.setFile(fn);
-    }
-
-    string file = fileInfo.absoluteFilePath().toStdString();
-    string filepath = fileInfo.path().toStdString();
-
-    // Turn on "image capture mode" in the current active visualizer
-    GUIStateParams *p = GetStateParams();
-    string          vizName = p->GetActiveVizName();
-    int             success = _vizWinMgr->EnableImageCapture(file, vizName);
-
-    if (success < 0) MSG_ERR("Error capturing image");
-}
-
-
 void MainForm::launchStats()
 {
     if (!_stats) {
@@ -1175,91 +1142,19 @@ void MainForm::AnimationPlayForward() const {
     _animationController->AnimationPlayForward();
 }
 
-bool MainForm::StartAnimCapture(string baseFile, string defaultSuffix)
-{
-    QString   fileName = QString::fromStdString(baseFile);
-    QFileInfo fileInfo = QFileInfo(fileName);
-
-    QString suffix = fileInfo.suffix();
-    if (suffix != "" || suffix != "jpg" || suffix != "jpeg" || suffix != "tif" || suffix != "tiff" || suffix != "png") {}
-    if (suffix == "") {
-        suffix = QString::fromStdString(defaultSuffix);
-        fileName += QString::fromStdString(defaultSuffix);
-    } else {
-        fileName = fileInfo.absolutePath() + "/" + fileInfo.baseName();
-    }
-
-    QString fileBaseName = fileInfo.baseName();
-
-    int posn;
-    for (posn = fileBaseName.length() - 1; posn >= 0; posn--) {
-        if (!fileBaseName.at(posn).isDigit()) break;
-    }
-    int startFileNum = 0;
-
-    unsigned int lastDigitPos = posn + 1;
-    if (lastDigitPos < fileBaseName.length()) {
-        startFileNum = fileBaseName.right(fileBaseName.length() - lastDigitPos).toInt();
-        fileBaseName.truncate(lastDigitPos);
-    }
-
-    QString filePath = fileInfo.absolutePath() + "/" + fileBaseName;
-    // Insert up to 4 zeros
-    QString zeroes;
-    if (startFileNum == 0)
-        zeroes = "000";
-    else {
-        switch ((int)log10((float)startFileNum)) {
-        case (0): zeroes = "000"; break;
-        case (1): zeroes = "00"; break;
-        case (2): zeroes = "0"; break;
-        default: zeroes = ""; break;
-        }
-    }
-    filePath += zeroes;
-    filePath += QString::number(startFileNum);
-    filePath += ".";
-    filePath += suffix;
-    string fpath = filePath.toStdString();
-
-    // Check if the numbered file exists.
-    QFileInfo check_file(filePath);
-    if (check_file.exists()) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Are you sure?");
-        QString msg = "The following numbered file exists.\n ";
-        msg += filePath;
-        msg += "\n";
-        msg += "Do you want to continue? You can choose \"No\" to go back and change the file name.";
-        msgBox.setText(msg);
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setDefaultButton(QMessageBox::No);
-        if (msgBox.exec() == QMessageBox::No) { return false; }
-    }
-
-    // Turn on "image capture mode" in the current active visualizer
-    _animationCapture = true;
-    GUIStateParams *p = GetStateParams();
-    string          vizName = p->GetActiveVizName();
-    _controlExec->EnableAnimationCapture(vizName, true, fpath);
-    _capturingAnimationVizName = vizName;
-
-    return true;
-}
-
-void MainForm::endAnimCapture()
-{
-    // Turn off capture mode for the current active visualizer (if it is on!)
-    if (_capturingAnimationVizName.empty()) return;
-    GUIStateParams *p = GetStateParams();
-    string          vizName = p->GetActiveVizName();
-    if (vizName != _capturingAnimationVizName) { MSG_WARN("Terminating capture in non-active visualizer"); }
-    if (_controlExec->EnableAnimationCapture(_capturingAnimationVizName, false)) MSG_WARN("Image Capture Warning;\nCurrent active visualizer is not capturing images");
-
-    _animationCapture = false;
-
-    _capturingAnimationVizName = "";
-}
+//void MainForm::endAnimCapture()
+//{
+//    // Turn off capture mode for the current active visualizer (if it is on!)
+//    if (_capturingAnimationVizName.empty()) return;
+//    GUIStateParams *p = GetStateParams();
+//    string          vizName = p->GetActiveVizName();
+//    if (vizName != _capturingAnimationVizName) { MSG_WARN("Terminating capture in non-active visualizer"); }
+//    if (_controlExec->EnableAnimationCapture(_capturingAnimationVizName, false)) MSG_WARN("Image Capture Warning;\nCurrent active visualizer is not capturing images");
+//
+//    _animationCapture = false;
+//
+//    _capturingAnimationVizName = "";
+//}
 
 string MainForm::_getDataSetName(string file, DatasetExistsAction existsAction)
 {
