@@ -9,7 +9,7 @@
 
 #include <QScrollArea>
 
-LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
+LeftPanel::LeftPanel(ControlExec *ce, CaptureController *cc, MainForm *mf) : _ce(ce)
 {
     auto add = [this](auto &&w, auto &&t) constexpr {
         QScrollArea *scrollArea = new QScrollArea;
@@ -24,7 +24,7 @@ LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
     add(_importTab, "Import");
     add(new RenderersPanel(ce), "Render");
     add(new AnnotationEventRouter(ce), "Annotate");
-    add(new ExportTab(ce, mf), "Export");
+    add(new ExportTab(ce, cc, mf), "Export");
 
     for (int i=1 ; i<count(); ++i) setTabEnabled(i, false);
     setTabEnabled(0,true);

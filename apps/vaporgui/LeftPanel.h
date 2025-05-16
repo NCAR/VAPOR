@@ -6,6 +6,7 @@
 
 class ImportTab;
 class MainForm;
+class CaptureController;
 
 class LeftPanel : public QTabWidget, public Updatable {
     Q_OBJECT
@@ -14,7 +15,7 @@ class LeftPanel : public QTabWidget, public Updatable {
     ImportTab* _importTab;
 
 public:
-    LeftPanel(ControlExec *ce, MainForm* mf);
+    LeftPanel(ControlExec *ce, CaptureController *cc, MainForm* mf);
     void Update() override;
     void GoToRendererTab();
     void ConfigureEnabledState(bool enabled);

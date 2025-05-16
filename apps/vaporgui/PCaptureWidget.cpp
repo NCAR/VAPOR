@@ -1,4 +1,5 @@
 #include "MainForm.h"
+#include "CaptureController.h"
 #include "PCaptureWidget.h"
 #include "PTimeRangeSelector.h"
 #include "PRadioButtons.h"
@@ -24,8 +25,8 @@ const std::string TiffStrings::FileSuffix = "tif";
 const std::string PngStrings::FileFilter = "PNG (*.png)";
 const std::string PngStrings::FileSuffix = "png";
 
-PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, MainForm *mf)
-    : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _mf(mf)
+PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, CaptureController *cc, MainForm *mf)
+    : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _cc(cc), _mf(mf)
 {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -85,10 +86,12 @@ void PCaptureHBox::_captureSingleImage() {
     AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
     std::string defaultPath = ap->GetValueString(AnimationParams::CaptureFileDirTag, FileUtils::HomeDir());
 
+        //_mf->CaptureSingleImage(TiffStrings::FileFilter, "."+TiffStrings::FileSuffix);
+        //_mf->CaptureSingleImage(PngStrings::FileFilter, "."+PngStrings::FileSuffix);
     if (ap->GetValueLong(AnimationParams::CaptureTypeTag, 0) == 0)
-        _mf->CaptureSingleImage(TiffStrings::FileFilter, "."+TiffStrings::FileSuffix);
+        _cc->CaptureSingleImage(TiffStrings::FileFilter, "."+TiffStrings::FileSuffix);
     else 
-        _mf->CaptureSingleImage(PngStrings::FileFilter, "."+PngStrings::FileSuffix);
+        _cc->CaptureSingleImage(PngStrings::FileFilter, "."+PngStrings::FileSuffix);
 
     ap->SetValueString(AnimationParams::CaptureFileTimeTag, "Capture file time", STLUtils::GetCurrentDateTimestamp());
 }
@@ -117,14 +120,16 @@ void PCaptureHBox::_captureTimeSeries() {
     ap->SetValueString(AnimationParams::CaptureTimeSeriesFileNameTag, "Capture animation file name", FileUtils::Basename(fileName));
     ap->SetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "Capture file time", STLUtils::GetCurrentDateTimestamp());
 
-    bool rc = _mf->StartAnimCapture(fileName, defaultSuffix);  // User may cancel to prevent file overwrite, so capture return code
+    //bool rc = _mf->StartAnimCapture(fileName, defaultSuffix);  // User may cancel to prevent file overwrite, so capture return code
+    bool rc = _cc->EnableAnimationCapture(fileName, defaultSuffix);  // User may cancel to prevent file overwrite, so capture return code
     if (rc) {
         NavigationUtils::SetTimestep(_ce, ap->GetValueLong(AnimationParams::CaptureStartTag, ap->GetStartTimestep()));
-        _mf->AnimationPlayForward();
+        _cc->StartAnimationCapture();
+        //_mf->AnimationPlayForward();
     }
 }
 
-PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, MainForm *mf)
+PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, CaptureController *cc, MainForm *mf)
     : PWidget("", _section = new PSection("Image(s)")), _ce(ce), _mf(mf)
 {
     _section->Add(new PRadioButtons(AnimationParams::CaptureModeTag, {"Current frame", "Time series range"}));
@@ -133,7 +138,7 @@ PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, MainForm *mf)
     t->EnableBasedOnParam(AnimationParams::CaptureModeTag, 1);
     _section->Add(t);
 
-    _section->Add(new PCaptureHBox(ce, mf));
+    _section->Add(new PCaptureHBox(ce, cc, mf));
 }
 
 void PCaptureWidget::updateGUI() const {    
