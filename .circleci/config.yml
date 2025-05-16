@@ -71,7 +71,8 @@ commands:
             cp site_files/site.NCAR site.local
             mkdir -p build
             cd build
-            git checkout <<parameters.branch>>
+            #git checkout <<parameters.branch>>
+            git checkout origin/main
             <<parameters.beforeCompile>>
             cmake \
             -DCMAKE_BUILD_TYPE:String=Release \
@@ -652,7 +653,7 @@ workflows:
       #- build_python_api_ubuntu
       #- build_python_api_osx
       - build_win10_installer
-      # - build_macOS_installers
+      - build_macOS_installers
       # - build_appleSilicon_installer
       # - build_macOSx86_installer
       - build_linux_installer
