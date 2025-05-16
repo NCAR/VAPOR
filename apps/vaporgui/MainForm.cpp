@@ -895,6 +895,7 @@ void MainForm::_setAnimationOnOff(bool on)
         _playBackwardAction->setChecked(false);
         enableAnimationWidgets(true);
         _App->installEventFilter(this);
+        _paramsEventQueued = false;
     }
 }
 
@@ -925,11 +926,6 @@ void MainForm::Render(bool fast, bool skipSync)
     _vizWinMgr->Update(fast);
     _progressEnabled = wasProgressEnabled;
     menuBar()->setEnabled(wasMenuBarEnabled);
-
-    auto ap = GetAnimationParams();
-    if (_animationCapture == true && ap->GetCurrentTimestep() == ap->GetValueLong(AnimationParams::CaptureEndTag, 1) && !ap->GetPlayBackwards()) {
-        endAnimCapture();
-    }
 }
 
 bool MainForm::eventFilter(QObject *obj, QEvent *event)
