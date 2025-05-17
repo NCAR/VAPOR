@@ -152,6 +152,7 @@ jobs:
             choco install cmake --version=3.31.6 -y
             choco install nsis -y
             python -m pip install gdown
+            git
             setx /M PATH "%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
             msbuild -version
             pwd
@@ -653,8 +654,8 @@ workflows:
       #- build_python_api_osx
       - build_win10_installer
       # - build_macOS_installers
-      # - build_appleSilicon_installer
-      # - build_macOSx86_installer
+      - build_appleSilicon_installer
+      - build_macOSx86_installer
       - build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
