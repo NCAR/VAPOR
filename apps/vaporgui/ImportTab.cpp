@@ -3,7 +3,7 @@
 #include "PProjectionStringWidget.h"
 #include "VHyperlink.h"
 #include "VSection.h"
-#include "MainForm.h"
+#include "DatasetImporter.h"
 
 #include <vapor/GUIStateParams.h>
 #include <vapor/ControlExecutive.h>
@@ -11,12 +11,12 @@
 
 using namespace VAPoR;
 
-ImportTab::ImportTab(VAPoR::ControlExec *ce, MainForm *mf) : _ce(ce)
+ImportTab::ImportTab(VAPoR::ControlExec *ce, DatasetImporter *di) : _ce(ce)
 {
     QVBoxLayout *l = new QVBoxLayout;
     l->setContentsMargins(0, 0, 0, 0);
 
-    l->addWidget(new VSectionGroup("Import Data", {_importer = new PImportDataWidget(_ce, mf)}));
+    l->addWidget(new VSectionGroup("Import Data", {_importer = new PImportDataWidget(_ce, di)}));
 
     VSectionGroup *sg = new VSectionGroup("Tips", {
         new VHyperlink(

@@ -21,6 +21,7 @@
 #include "AnimationController.h"
 #include "PWidgetsFwd.h"
 #include "QEnableable.h"
+#include "DatasetExistsAction.h"
 
 class QApplication;
 class QSpacerItem;
@@ -63,10 +64,6 @@ public:
 
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
     static QWidget* Instance() { assert(_instance); return _instance; }
-
-    // Needed for Import/Data widget
-    enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
-    void ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
 
     // Needed for Export/Capture widget
     void AnimationPlayForward() const;
@@ -187,7 +184,6 @@ private:
     void SaveSession();
     void SaveSession(string path);
     void SaveSessionAs();
-    string _getDataSetName(string file, DatasetExistsAction existsAction = Prompt);
 
 private slots:
     void _plotClosed();

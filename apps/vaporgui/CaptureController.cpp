@@ -15,11 +15,14 @@
 #include <sstream>
 #include <iomanip>
 
-CaptureController::CaptureController(VAPoR::ControlExec *ce) : _ce(ce) {}
+CaptureController::CaptureController(VAPoR::ControlExec *ce) : _ce(ce) {
+    std::cout << "nullptr? " << (_ce==nullptr) << std::endl;
+}
 
 bool CaptureController::EnableAnimationCapture(std::string filePath) {
     if (filePath.empty()) {
         filePath = _getFileName();
+        std::cout << "nullptr2? " << (_ce==nullptr) << std::endl;
         if (filePath.empty()) return false;
     }
 
@@ -67,7 +70,8 @@ std::string CaptureController::_getFileName() {
     _showCitationReminder();
 
     std::string filter, defaultSuffix;
-    //AnimationParams* ap = (AnimationParams*)_pm->GetParams(AnimationParams::GetClassType());
+    //AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
+    std::cout << "nullptr3? " << (_ce==nullptr) << std::endl;
     AnimationParams* ap = _ce->GetParams<AnimationParams>();
     if (ap->GetValueLong(AnimationParams::CaptureTypeTag, 0) == 0) { // .tiff
          filter = "TIFF (*.tif)";

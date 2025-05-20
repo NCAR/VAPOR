@@ -25,7 +25,7 @@ const std::string PngStrings::FileFilter = "PNG (*.png)";
 const std::string PngStrings::FileSuffix = "png";
 
 PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, CaptureController *cc)
-    : PWidget("", _hBox = new VHBoxWidget()), _ce(ce)
+    : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _cc(cc)
 {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 

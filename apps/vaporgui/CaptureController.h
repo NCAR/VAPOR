@@ -3,9 +3,10 @@
 #include <QObject>
 
 class AnimationParams;
+
 namespace VAPoR {
-class ControlExec;
-class ParamsMgr;
+    class ControlExec;
+    class ParamsMgr;
 }
 
 //! \class CaptureController

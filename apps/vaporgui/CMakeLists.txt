@@ -279,6 +279,7 @@ set (SRCS
     CaptureController.h
     DatasetImporter.cpp
     DatasetImporter.h
+    DatasetExistsAction.h
     CheckForNotices.cpp
     CheckForNotices.h
     NoticeBoard.cpp
