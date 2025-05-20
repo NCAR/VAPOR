@@ -15,9 +15,7 @@
 #include <sstream>
 #include <iomanip>
 
-CaptureController::CaptureController(VAPoR::ControlExec *ce) : _ce(ce) {
-    std::cout << "nullptr? " << (_ce==nullptr) << std::endl;
-}
+CaptureController::CaptureController(VAPoR::ControlExec *ce) : _ce(ce) {}
 
 bool CaptureController::EnableAnimationCapture(std::string filePath) {
     if (filePath.empty()) {
@@ -26,7 +24,6 @@ bool CaptureController::EnableAnimationCapture(std::string filePath) {
         if (filePath.empty()) return false;
     }
 
-    //GUIStateParams *p = (GUIStateParams*)_pm->GetParams(GUIStateParams::GetClassType());
     GUIStateParams* gsp = _ce->GetParams<GUIStateParams>();
     string vizName = gsp->GetActiveVizName();
     int rc = _ce->EnableAnimationCapture(vizName, true, filePath);
@@ -70,21 +67,21 @@ std::string CaptureController::_getFileName() {
     _showCitationReminder();
 
     std::string filter, defaultSuffix;
-    //AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-    std::cout << "nullptr3? " << (_ce==nullptr) << std::endl;
     AnimationParams* ap = _ce->GetParams<AnimationParams>();
-    if (ap->GetValueLong(AnimationParams::CaptureTypeTag, 0) == 0) { // .tiff
+    if (ap->GetValueLong(AnimationParams::CaptureTypeTag, 0) == 0) {
          filter = "TIFF (*.tif)";
          defaultSuffix =  "tif";
     }
-    else {                                                           // .png
+    else {
          filter = "PNG (*.png)";
          defaultSuffix = "png";
     }
 
-    // DontConfirmOverwrite because we do this manually after modifying the user's input
-    // in the case of capturing time series.  DontUseNativeDialog becuase DontConfirmOverwrite will
-    // not work on MacOS without it.
+    // - For this QFileDialog, QFileDialog::DontConfirmOverwrite is needed because we do file overwrite confirmation 
+    //   manually after modifying the user's input filename for capturing time series
+    // 
+    // - QFileDialog::DontUseNativeDialog is needed becuase QFileDialog::DontConfirmOverwrite will not work on MacOS without it
+    //
     std::string defaultPath = ap->GetValueString(AnimationParams::CaptureFileDirTag, FileUtils::HomeDir());
     std::string fileName = QFileDialog::getSaveFileName(
         nullptr, 

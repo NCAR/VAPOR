@@ -94,7 +94,6 @@ MainForm *MainForm::_instance = nullptr;
 
 MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, string filesType, QWidget *parent) : QMainWindow(parent)
 {
-    std::cout << "sanity test" << std::endl;
     _App = app;
     _sessionNewFlag = true;
     _begForCitation = true;
@@ -171,7 +170,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     connect(_datasetImporter, &DatasetImporter::datasetImported, [this](){
         _sessionNewFlag=false;
         _leftPanel->GoToRendererTab();
-        std::cout << "slot done" << std::endl;
     });
     
     _leftPanel = new LeftPanel(_controlExec, _captureController, _datasetImporter);
@@ -240,11 +238,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
             fmt = filesType;
         }
 
-        if (!fmt.empty()) {
-            std::cout << "MainForm->_datasetImporter->ImportDataset" << std::endl;
+        if (!fmt.empty())
             _datasetImporter->ImportDataset(paths, fmt, DatasetExistsAction::ReplaceFirst);
-        }
-            //ImportDataset(paths, fmt, ReplaceFirst);
     }
 
     app->installEventFilter(this);
@@ -283,7 +278,6 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     auto vpp = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
 
     _paramsMgr->BeginSaveStateGroup("test");
-    //StartAnimCapture(baseFileWithTS);
     ap->SetStartTimestep(start);
     ap->SetEndTimestep(end);
 
@@ -291,7 +285,6 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", width);
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
 
-    //_animationController->AnimationPlayForward();
     if (_captureController->EnableAnimationCapture(baseFileWithTS)) {
         GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
         _capturingAnimationVizName = p->GetActiveVizName();
@@ -303,7 +296,6 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
 
     connect(_animationController, &AnimationController::AnimationOnOffSignal, this, [this]() {
         _captureController->EndAnimationCapture();
-        //endAnimCapture();
         _animationCapture = false;
         _capturingAnimationVizName = "";
         close();
