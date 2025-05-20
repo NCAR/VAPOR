@@ -94,6 +94,7 @@ MainForm *MainForm::_instance = nullptr;
 
 MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, string filesType, QWidget *parent) : QMainWindow(parent)
 {
+    std::cout << "sanity test" << std::endl;
     _App = app;
     _sessionNewFlag = true;
     _begForCitation = true;
@@ -166,8 +167,14 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     });
 
     _datasetImporter = new DatasetImporter(_controlExec);
+    _datasetImporter->SetSessionNewFlag(_sessionNewFlag);
+    connect(_datasetImporter, &DatasetImporter::datasetImported, [this](){
+        _sessionNewFlag=false;
+        _leftPanel->GoToRendererTab();
+        std::cout << "slot done" << std::endl;
+    });
     
-    _leftPanel = new LeftPanel(_controlExec, _captureController, this);
+    _leftPanel = new LeftPanel(_controlExec, _captureController, _datasetImporter);
     const int dpi = qApp->desktop()->logicalDpiX();
     _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     _leftPanel->setMinimumHeight(500);
@@ -233,8 +240,11 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
             fmt = filesType;
         }
 
-        if (!fmt.empty())
-            ImportDataset(paths, fmt, ReplaceFirst);
+        if (!fmt.empty()) {
+            std::cout << "MainForm->_datasetImporter->ImportDataset" << std::endl;
+            _datasetImporter->ImportDataset(paths, fmt, DatasetExistsAction::ReplaceFirst);
+        }
+            //ImportDataset(paths, fmt, ReplaceFirst);
     }
 
     app->installEventFilter(this);
@@ -603,6 +613,7 @@ retryLoad:
 
     _paramsMgr->UndoRedoClear();
     _sessionNewFlag = false;
+    _datasetImporter->SetSessionNewFlag(_sessionNewFlag);
     _stateChangeFlag = false;
     _paramsMgr->TriggerManualStateChangeEvent("Session Opened");
 
@@ -772,36 +783,6 @@ void MainForm::helpAbout()
     _banner = new BannerGUI(this, banner_file_name, -1, true, banner_text.c_str(), "http://www.vapor.ucar.edu");
 }
 
-
-void MainForm::ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction, string name)
-{
-    _paramsMgr->BeginSaveStateGroup("Import Dataset");
-    if (name.empty()) name = _getDataSetName(files[0], existsAction);
-    int rc = _controlExec->OpenData(files, name, format);
-    if (rc < 0) {
-        _paramsMgr->EndSaveStateGroup();
-        MSG_ERR("Failed to load data");
-        return;
-    }
-
-    auto gsp = _controlExec->GetParams<GUIStateParams>();
-    gsp->InsertOpenDataSet(name, format, files);
-
-    DataStatus *ds = _controlExec->GetDataStatus();
-    GetAnimationParams()->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
-
-    if (_sessionNewFlag) {
-        NavigationUtils::ViewAll(_controlExec);
-        NavigationUtils::SetHomeViewpoint(_controlExec);
-        gsp->SetProjectionString(ds->GetMapProjection());
-    }
-
-    _sessionNewFlag = false;
-    _paramsMgr->EndSaveStateGroup();
-
-    _leftPanel->GoToRendererTab();
-}
-
 void MainForm::showImportDatasetGUI(string format)
 {
     static vector<pair<string, string>> prompts = GetDatasets();
@@ -816,7 +797,7 @@ void MainForm::showImportDatasetGUI(string format)
     auto files = getUserFileSelection(DatasetTypeDescriptiveName(format), defaultPath, "", format!="vdc");
     if (files.empty()) return;
 
-    ImportDataset(files, format, DatasetExistsAction::Prompt);
+    _datasetImporter->ImportDataset(files, format, DatasetExistsAction::Prompt);
 }
 
 
@@ -900,6 +881,7 @@ void MainForm::sessionNew()
 
     _stateChangeFlag = false;
     _sessionNewFlag = true;
+    _datasetImporter->SetSessionNewFlag(_sessionNewFlag);
 }
 
 void MainForm::_setAnimationOnOff(bool on)
@@ -1141,46 +1123,4 @@ void MainForm::closeProjectionFrame() {
 
 void MainForm::AnimationPlayForward() const {
     _animationController->AnimationPlayForward();
-}
-
-//void MainForm::endAnimCapture()
-//{
-//    // Turn off capture mode for the current active visualizer (if it is on!)
-//    if (_capturingAnimationVizName.empty()) return;
-//    GUIStateParams *p = GetStateParams();
-//    string          vizName = p->GetActiveVizName();
-//    if (vizName != _capturingAnimationVizName) { MSG_WARN("Terminating capture in non-active visualizer"); }
-//    if (_controlExec->EnableAnimationCapture(_capturingAnimationVizName, false)) MSG_WARN("Image Capture Warning;\nCurrent active visualizer is not capturing images");
-//
-//    _animationCapture = false;
-//
-//    _capturingAnimationVizName = "";
-//}
-
-string MainForm::_getDataSetName(string file, DatasetExistsAction existsAction)
-{
-    vector<string> names = _paramsMgr->GetDataMgrNames();
-    if (names.empty() || existsAction == AddNew)
-        return ControlExec::MakeStringConformant(FileUtils::Basename(file));
-    else if (existsAction == ReplaceFirst)
-        return names[0];
-
-    string newSession = "New Dataset";
-
-    QStringList items;
-    items << tr(newSession.c_str());
-    for (int i = 0; i < names.size(); i++)
-        items << tr(names[i].c_str());
-
-    bool    ok;
-    QString item = QInputDialog::getItem(this, tr("Load Data"), tr("Load as new dataset or replace existing"), items, 0, false, &ok);
-    if (!ok || item.isEmpty())
-        return "";
-
-    string dataSetName = item.toStdString();
-
-    if (dataSetName == newSession)
-        dataSetName = ControlExec::MakeStringConformant(FileUtils::Basename(file));
-
-    return dataSetName;
 }
