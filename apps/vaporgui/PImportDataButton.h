@@ -5,7 +5,7 @@
 namespace VAPoR {
     class ControlExec;
 }
-class MainForm;
+class DatasetImporter;
 class VHBoxWidget;
 class VLabel;
 class PButton;
@@ -14,7 +14,7 @@ class PImportDataButton : public PWidget {
     Q_OBJECT
 
     VAPoR::ControlExec *_ce;
-    MainForm *_mf;
+    DatasetImporter *_di;
     VHBoxWidget *_hBox;
     VLabel *_fileLabel;
     PButton *_importButton;
@@ -22,7 +22,7 @@ class PImportDataButton : public PWidget {
     void _importDataset();
 
 public:
-    PImportDataButton(VAPoR::ControlExec* ce, MainForm *mf);
+    PImportDataButton(VAPoR::ControlExec* ce, DatasetImporter *di);
 
 protected:
     void updateGUI() const override;

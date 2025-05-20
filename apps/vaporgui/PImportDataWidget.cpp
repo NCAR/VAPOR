@@ -1,5 +1,5 @@
 #include "DatasetTypeLookup.h"
-#include "MainForm.h"
+#include "DatasetImporter.h"
 #include "PImportDataWidget.h"
 #include "PImportDataButton.h"
 #include "PRadioButtons.h"
@@ -8,10 +8,10 @@
 #include "vapor/ControlExecutive.h"
 #include "vapor/GUIStateParams.h"
 
-PImportDataWidget::PImportDataWidget(VAPoR::ControlExec* ce, MainForm* mf) : PGroup() {
+PImportDataWidget::PImportDataWidget(VAPoR::ControlExec* ce, DatasetImporter* di) : PGroup() {
     std::vector<std::string> types = GetDatasetTypeDescriptions();
     PRadioButtons* prb = new PRadioButtons(GUIStateParams::ImportDataTypeTag, types);
     Add(prb);
     
-    Add(new PImportDataButton(ce, mf));
+    Add(new PImportDataButton(ce, di));
 }

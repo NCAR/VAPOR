@@ -21,6 +21,7 @@
 #include "AnimationController.h"
 #include "PWidgetsFwd.h"
 #include "QEnableable.h"
+#include "DatasetExistsAction.h"
 
 class QApplication;
 class QSpacerItem;
@@ -46,6 +47,8 @@ class VProjectionStringFrame;
 class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
+class CaptureController;
+class DatasetImporter;
 
 class LeftPanel;
 
@@ -62,16 +65,8 @@ public:
     int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
     static QWidget* Instance() { assert(_instance); return _instance; }
 
-    // Needed for Import/Data widget
-    enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
-    void ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction = Prompt, string name="");
-
     // Needed for Export/Capture widget
-    bool StartAnimCapture(string baseFile, string defaultSuffix = "tiff");
     void AnimationPlayForward() const;
-
-public slots:
-    void CaptureSingleImage(string filter, string defaultSuffix);
 
 protected:
     void Render(bool fast=false, bool skipSync=false);
@@ -125,6 +120,8 @@ private:
     VAPoR::ControlExec *_controlExec;
     VAPoR::ParamsMgr *  _paramsMgr;
     AnimationController *_animationController;
+    CaptureController*  _captureController;
+    DatasetImporter*    _datasetImporter;
     VizWinMgr *         _vizWinMgr;
     string              _capturingAnimationVizName;
 
@@ -187,7 +184,6 @@ private:
     void SaveSession();
     void SaveSession(string path);
     void SaveSessionAs();
-    string _getDataSetName(string file, DatasetExistsAction existsAction = Prompt);
 
 private slots:
     void _plotClosed();
@@ -195,7 +191,6 @@ private slots:
     void closeProjectionFrame();
     void helpAbout();
     void sessionNew();
-    void endAnimCapture();
     void launchStats();
     void launchPlotUtility();
     void launchPythonVariables();
