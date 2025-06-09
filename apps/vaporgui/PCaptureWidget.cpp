@@ -1,4 +1,5 @@
 #include "CaptureController.h"
+#include "CaptureUtils.h"
 #include "PCaptureWidget.h"
 #include "PTimeRangeSelector.h"
 #include "PRadioButtons.h"
@@ -34,7 +35,8 @@ PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, CaptureController *cc)
     _fileLabel = new VLabel("");
     _fileLabel->MakeSelectable();
 
-    _captureButton = new PButton("Export", [this](VAPoR::ParamsBase*){_cc->CaptureSingleImage();});
+    //_captureButton = new PButton("Export", [this](VAPoR::ParamsBase*){_cc->CaptureSingleImage();});
+    _captureButton = new PButton("Export", [this](VAPoR::ParamsBase*){CaptureUtils::CaptureSingleImage(_ce);});
     _captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, AnimationParams::SingleImage);
 
     _captureTimeSeriesButton = new PButton("Export", [this](VAPoR::ParamsBase*){_captureTimeSeries();});
@@ -82,11 +84,14 @@ void PCaptureHBox::updateGUI() const {
 }
 
 void PCaptureHBox::_captureTimeSeries() {
-    bool rc = _cc->EnableAnimationCapture();  // User may cancel to prevent file overwrite, so capture return code
+    //bool rc = _cc->EnableAnimationCapture();  // User may cancel to prevent file overwrite, so capture return code
+    bool rc = CaptureUtils::EnableAnimationCapture(_ce);  // User may cancel to prevent file overwrite, so capture return code
     if (rc) {
         AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
         NavigationUtils::SetTimestep(_ce, ap->GetValueLong(AnimationParams::CaptureStartTag, ap->GetStartTimestep()));
-        _cc->StartAnimationCapture();
+        //_cc->StartAnimationCapture();
+        //CaptureUtils::StartAnimationCapture();
+        ap->SetValueLong(AnimationParams::AnimationStartedTag, "Enable tag", true);
     }
 }
 
