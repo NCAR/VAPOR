@@ -24,6 +24,11 @@ void AnimationController::Update()
     DataStatus *     dataStatus = _controlExec->GetDataStatus();
     AnimationParams *aParams = (AnimationParams *)GetActiveParams();
 
+    //if (aParams->GetValueLong(AnimationParams::AnimationStartedTag, 0) == true) {
+    //    aParams->SetValueLong(AnimationParams::AnimationStartedTag, false);
+    //    StartAnimationCapture();
+    //}
+
     size_t numTS = dataStatus->GetTimeCoordinates().size();
     if (numTS == 0) {
         // no data

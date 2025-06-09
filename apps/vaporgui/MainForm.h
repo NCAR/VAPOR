@@ -175,6 +175,7 @@ private:
     void         _createProgressWidget();
     void         _disableProgressWidget();
     void         closeAllParamsDatasets();
+    //void         _configureAnimationCapture();
 
     template<class T> bool isDatasetValidFormat(const std::vector<std::string> &paths) const;
     bool                   determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;

@@ -44,6 +44,7 @@ const string AnimationParams::CaptureFileDirTag = "CaptureFileDirTag";
 const string AnimationParams::CaptureFileTimeTag = "CaptureFileTimeTag";
 const string AnimationParams::CaptureTimeSeriesFileNameTag = "CaptureTimeSeriesFileNameTag";
 const string AnimationParams::CaptureTimeSeriesTimeTag = "CaptureTimeSeriesTimeTag";
+const string AnimationParams::AnimationStartedTag = "AnimationStarted";
 
 //
 // Register class with object factory!!!

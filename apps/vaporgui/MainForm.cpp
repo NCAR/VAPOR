@@ -65,8 +65,12 @@
 #include "NcarCasperUtils.h"
 #include "ViewpointToolbar.h"
 #include "DatasetTypeLookup.h"
+
 #include "CaptureController.h"
 #include "DatasetImporter.h"
+
+#include "CaptureUtils.h"
+//#include "DatasetImportUtils.h"
 
 #include <QStyle>
 #include <vapor/Progress.h>
@@ -158,12 +162,12 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     });
 
     _captureController = new CaptureController(_controlExec);
-    connect(_captureController, &CaptureController::animationCaptureStarted, [this]() {
-        GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
-        _capturingAnimationVizName = p->GetActiveVizName();
-        _animationCapture = true;
-        _animationController->AnimationPlayForward();
-    });
+    //connect(_captureController, &CaptureController::animationCaptureStarted, [this]() {
+    //    GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    //    _capturingAnimationVizName = p->GetActiveVizName();
+    //    _animationCapture = true;
+    //    _animationController->AnimationPlayForward();
+    //});
 
     _datasetImporter = new DatasetImporter(_controlExec);
     _datasetImporter->SetSessionNewFlag(_sessionNewFlag);
@@ -285,17 +289,28 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", width);
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
 
-    if (_captureController->EnableAnimationCapture(baseFileWithTS)) {
+    if (CaptureUtils::EnableAnimationCapture(_controlExec, baseFileWithTS)) {
         GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
         _capturingAnimationVizName = p->GetActiveVizName();
         _animationCapture = true;
-        _captureController->StartAnimationCapture();
+        _animationController->AnimationPlayForward();
+        //CaptureUtils::StartAnimationCapture(
+        //    [this]() {_animationController->AnimationPlayForward();}
+        //);
     }
+
+    //if (_captureController->EnableAnimationCapture(baseFileWithTS)) {
+    //    GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    //    _capturingAnimationVizName = p->GetActiveVizName();
+    //    _animationCapture = true;
+    //    _captureController->StartAnimationCapture();
+    //}
     
     _paramsMgr->EndSaveStateGroup();
 
     connect(_animationController, &AnimationController::AnimationOnOffSignal, this, [this]() {
-        _captureController->EndAnimationCapture();
+        //_captureController->EndAnimationCapture();
+        CaptureUtils::EndAnimationCapture(_controlExec);
         _animationCapture = false;
         _capturingAnimationVizName = "";
         close();
@@ -305,6 +320,13 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
 
     return 0;
 }
+
+//void MainForm::_configureAnimationCapture() {
+//        GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+//        _capturingAnimationVizName = p->GetActiveVizName();
+//        _animationCapture = true;
+//        _animationController->AnimationPlayForward();
+//}
 
 MainForm::~MainForm()
 {
@@ -951,10 +973,20 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     }
 
     if (event->type() == ParamsChangeEvent) {
+        // If PCaptureWidget sets the AnimationParams::AnimationStartedTag parameter,
+        // unset it, issue a call to _animationController->AnimationPlayForward, and reject input
+        AnimationParams* aParams = GetAnimationParams();
+        if (aParams->GetValueLong(AnimationParams::AnimationStartedTag, 0) == true) {
+            aParams->SetValueLong(AnimationParams::AnimationStartedTag, "Disable tag", false);
+            _animationController->AnimationPlayForward();
+            return true;
+        }
+
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
         setUpdatesEnabled(false);
         _controlExec->SyncWithParams();
+
         updateUI();
         setUpdatesEnabled(true);
 
