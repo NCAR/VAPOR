@@ -1,5 +1,4 @@
 #include "ExportTab.h"
-#include "CaptureController.h"
 #include "PCheckbox.h"
 #include "PIntegerInput.h"
 #include "PSliderEdit.h"
@@ -12,10 +11,10 @@
 #include <vapor/AnimationParams.h>
 #include <QLayout>
 
-ExportTab::ExportTab(ControlExec *ce, CaptureController *cc) : _ce(ce)
+ExportTab::ExportTab(ControlExec *ce) : _ce(ce)
 {
     _pg = new PGroup({
-        new PCaptureWidget(_ce, cc),
+        new PCaptureWidget(_ce),
         new POutputResolutionSection(_ce),
         new PCameraControlsSection(_ce),
         _movingDomainSection = new PMovingDomainSettings(_ce),

@@ -1,4 +1,3 @@
-#include "CaptureController.h"
 #include "CaptureUtils.h"
 #include "PCaptureWidget.h"
 #include "PTimeRangeSelector.h"
@@ -25,8 +24,8 @@ const std::string TiffStrings::FileSuffix = "tif";
 const std::string PngStrings::FileFilter = "PNG (*.png)";
 const std::string PngStrings::FileSuffix = "png";
 
-PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, CaptureController *cc)
-    : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _cc(cc)
+PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce)
+    : PWidget("", _hBox = new VHBoxWidget()), _ce(ce)
 {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -35,7 +34,6 @@ PCaptureHBox::PCaptureHBox(VAPoR::ControlExec *ce, CaptureController *cc)
     _fileLabel = new VLabel("");
     _fileLabel->MakeSelectable();
 
-    //_captureButton = new PButton("Export", [this](VAPoR::ParamsBase*){_cc->CaptureSingleImage();});
     _captureButton = new PButton("Export", [this](VAPoR::ParamsBase*){CaptureUtils::CaptureSingleImage(_ce);});
     _captureButton->ShowBasedOnParam(AnimationParams::CaptureModeTag, AnimationParams::SingleImage);
 
@@ -84,18 +82,15 @@ void PCaptureHBox::updateGUI() const {
 }
 
 void PCaptureHBox::_captureTimeSeries() {
-    //bool rc = _cc->EnableAnimationCapture();  // User may cancel to prevent file overwrite, so capture return code
     bool rc = CaptureUtils::EnableAnimationCapture(_ce);  // User may cancel to prevent file overwrite, so capture return code
     if (rc) {
         AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
         NavigationUtils::SetTimestep(_ce, ap->GetValueLong(AnimationParams::CaptureStartTag, ap->GetStartTimestep()));
-        //_cc->StartAnimationCapture();
-        //CaptureUtils::StartAnimationCapture();
         ap->SetValueLong(AnimationParams::AnimationStartedTag, "Enable tag", true);
     }
 }
 
-PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, CaptureController *cc)
+PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce)
     : PWidget("", _section = new PSection("Image(s)")), _ce(ce)
 {
     _section->Add(new PRadioButtons(AnimationParams::CaptureModeTag, {"Current frame", "Time series range"}));
@@ -104,7 +99,7 @@ PCaptureWidget::PCaptureWidget(VAPoR::ControlExec *ce, CaptureController *cc)
     t->EnableBasedOnParam(AnimationParams::CaptureModeTag, 1);
     _section->Add(t);
 
-    _section->Add(new PCaptureHBox(ce, cc));
+    _section->Add(new PCaptureHBox(ce));
 }
 
 void PCaptureWidget::updateGUI() const {    

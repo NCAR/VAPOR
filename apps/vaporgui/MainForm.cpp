@@ -66,11 +66,10 @@
 #include "ViewpointToolbar.h"
 #include "DatasetTypeLookup.h"
 
-#include "CaptureController.h"
 #include "DatasetImporter.h"
 
 #include "CaptureUtils.h"
-//#include "DatasetImportUtils.h"
+#include "DatasetImportUtils.h"
 
 #include <QStyle>
 #include <vapor/Progress.h>
@@ -99,7 +98,7 @@ MainForm *MainForm::_instance = nullptr;
 MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, string filesType, QWidget *parent) : QMainWindow(parent)
 {
     _App = app;
-    _sessionNewFlag = true;
+    //_sessionNewFlag = true;
     _begForCitation = true;
 
     assert(!_instance);
@@ -161,22 +160,17 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         Render(false, true);
     });
 
-    _captureController = new CaptureController(_controlExec);
-    //connect(_captureController, &CaptureController::animationCaptureStarted, [this]() {
-    //    GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
-    //    _capturingAnimationVizName = p->GetActiveVizName();
-    //    _animationCapture = true;
-    //    _animationController->AnimationPlayForward();
+    //_datasetImporter = new DatasetImporter(_controlExec);
+    //GUIStateParams* gsp = GetStateParams();
+    //_datasetImporter->SetSessionNewFlag(gsp->GetValueLong(GUIStateParams::SessionNewTag, true));
+    //connect(_datasetImporter, &DatasetImporter::datasetImported, [this](){
+    //    //_sessionNewFlag=false;
+    //    gsp->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false));
+    //    _leftPanel->GoToRendererTab();
     //});
-
-    _datasetImporter = new DatasetImporter(_controlExec);
-    _datasetImporter->SetSessionNewFlag(_sessionNewFlag);
-    connect(_datasetImporter, &DatasetImporter::datasetImported, [this](){
-        _sessionNewFlag=false;
-        _leftPanel->GoToRendererTab();
-    });
     
-    _leftPanel = new LeftPanel(_controlExec, _captureController, _datasetImporter);
+    //_leftPanel = new LeftPanel(_controlExec, _datasetImporter);
+    _leftPanel = new LeftPanel(_controlExec);
     const int dpi = qApp->desktop()->logicalDpiX();
     _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     _leftPanel->setMinimumHeight(500);
@@ -242,8 +236,15 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
             fmt = filesType;
         }
 
-        if (!fmt.empty())
-            _datasetImporter->ImportDataset(paths, fmt, DatasetExistsAction::ReplaceFirst);
+        if (!fmt.empty()) {
+            if (DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst))
+                _leftPanel->GoToRendererTab();
+            //if (DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst, gsp->GetValueLong(GuiStateParams::SessionNewTag, true)))
+            //    _leftPanel->GoToRendererTab();
+            //if (DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst, _sessionNewFlag))
+            //    _leftPanel->GoToRendererTab();
+            //_datasetImporter->ImportDataset(paths, fmt, DatasetExistsAction::ReplaceFirst);
+        }
     }
 
     app->installEventFilter(this);
@@ -264,7 +265,8 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     if (start == 0 && end == 0) end = INT_MAX;
     start = std::max(0, start);
 
-    if (_sessionNewFlag) {
+    //if (_sessionNewFlag) {
+    if (GetStateParams()->GetValueLong(GUIStateParams::SessionNewTag, false)) {
         fprintf(stderr, "No session loaded\n");
         return -1;
     }
@@ -294,22 +296,11 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
         _capturingAnimationVizName = p->GetActiveVizName();
         _animationCapture = true;
         _animationController->AnimationPlayForward();
-        //CaptureUtils::StartAnimationCapture(
-        //    [this]() {_animationController->AnimationPlayForward();}
-        //);
     }
 
-    //if (_captureController->EnableAnimationCapture(baseFileWithTS)) {
-    //    GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
-    //    _capturingAnimationVizName = p->GetActiveVizName();
-    //    _animationCapture = true;
-    //    _captureController->StartAnimationCapture();
-    //}
-    
     _paramsMgr->EndSaveStateGroup();
 
     connect(_animationController, &AnimationController::AnimationOnOffSignal, this, [this]() {
-        //_captureController->EndAnimationCapture();
         CaptureUtils::EndAnimationCapture(_controlExec);
         _animationCapture = false;
         _capturingAnimationVizName = "";
@@ -320,13 +311,6 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
 
     return 0;
 }
-
-//void MainForm::_configureAnimationCapture() {
-//        GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
-//        _capturingAnimationVizName = p->GetActiveVizName();
-//        _animationCapture = true;
-//        _animationController->AnimationPlayForward();
-//}
 
 MainForm::~MainForm()
 {
@@ -626,8 +610,9 @@ retryLoad:
         for (auto name : gsp->GetOpenDataSetNames()) gsp->RemoveOpenDataSet(name);
 
     _paramsMgr->UndoRedoClear();
-    _sessionNewFlag = false;
-    _datasetImporter->SetSessionNewFlag(_sessionNewFlag);
+    //_sessionNewFlag = false;
+    gsp->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false);
+    //_datasetImporter->SetSessionNewFlag(_sessionNewFlag);
     _stateChangeFlag = false;
     _paramsMgr->TriggerManualStateChangeEvent("Session Opened");
 
@@ -811,7 +796,9 @@ void MainForm::showImportDatasetGUI(string format)
     auto files = getUserFileSelection(DatasetTypeDescriptiveName(format), defaultPath, "", format!="vdc");
     if (files.empty()) return;
 
-    _datasetImporter->ImportDataset(files, format, DatasetExistsAction::Prompt);
+    //DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt);
+    if(DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt))
+        _leftPanel->GoToRendererTab();
 }
 
 
@@ -894,8 +881,10 @@ void MainForm::sessionNew()
     _paramsMgr->UndoRedoClear();
 
     _stateChangeFlag = false;
-    _sessionNewFlag = true;
-    _datasetImporter->SetSessionNewFlag(_sessionNewFlag);
+    //_sessionNewFlag = true;
+    //_datasetImporter->SetSessionNewFlag(_sessionNewFlag);
+    GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Toggle SessionNewTag to true for a new session", true);
+    //_datasetImporter->SetSessionNewFlag(GetStateParams()->GetValueLong(GUIStateParams::SessionNewTag, true));
 }
 
 void MainForm::_setAnimationOnOff(bool on)
@@ -973,10 +962,21 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     }
 
     if (event->type() == ParamsChangeEvent) {
+        std::cout << "Params change event " << GetStateParams()->GetValueLong(GUIStateParams::DatasetImportedTag, true) << std::endl;
+        // If DatasetImportUtils imports a datset, reject the input and go to the RendererTab
+        if (GetStateParams()->GetValueLong(GUIStateParams::DatasetImportedTag, true)) {
+            std::cout << "dataset imported" << std::endl;
+            GetStateParams()->SetValueLong(GUIStateParams::DatasetImportedTag, "Dataset has been imported.  Reset to false.", false);
+            GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false);
+            _leftPanel->GoToRendererTab();
+            return true;
+        }
+
         // If PCaptureWidget sets the AnimationParams::AnimationStartedTag parameter,
         // unset it, issue a call to _animationController->AnimationPlayForward, and reject input
         AnimationParams* aParams = GetAnimationParams();
         if (aParams->GetValueLong(AnimationParams::AnimationStartedTag, 0) == true) {
+            std::cout << "animation started" << std::endl;
             aParams->SetValueLong(AnimationParams::AnimationStartedTag, "Disable tag", false);
             _animationController->AnimationPlayForward();
             return true;

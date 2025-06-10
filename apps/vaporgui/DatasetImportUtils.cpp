@@ -37,7 +37,7 @@ static string GetDataSetName(ParamsMgr *pm, string file, DatasetExistsAction exi
     return name;
 }
 
-bool ImportDataset(ControlExec *ce, const vector<string> &files, string format, DatasetExistsAction action, bool sessionNewFlag, function<void()> onImport) {
+bool ImportDataset(ControlExec *ce, const vector<string> &files, string format, DatasetExistsAction action) {
     ParamsMgr *pm = ce->GetParamsMgr();
     pm->BeginSaveStateGroup("Import Dataset");
 
@@ -60,15 +60,17 @@ bool ImportDataset(ControlExec *ce, const vector<string> &files, string format, 
     auto ap = ce->GetParams<AnimationParams>();
     ap->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
 
-    if (sessionNewFlag) {
+    if (gsp->GetValueLong(GUIStateParams::SessionNewTag, false)) {
         NavigationUtils::ViewAll(ce);
         NavigationUtils::SetHomeViewpoint(ce);
         gsp->SetProjectionString(ds->GetMapProjection());
     }
 
+    gsp->SetValueLong(GUIStateParams::DatasetImportedTag, "Indicates that a dataset has been imported", true);
+    gsp->SetValueLong(GUIStateParams::SessionNewTag, "Reset SessionNewTag to false after data import", false);
+
     pm->EndSaveStateGroup();
 
-    if (onImport) onImport();
     return true;
 }
 

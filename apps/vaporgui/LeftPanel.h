@@ -14,7 +14,8 @@ class LeftPanel : public QTabWidget, public Updatable {
     ImportTab* _importTab;
 
 public:
-    LeftPanel(ControlExec *ce, CaptureController *cc, DatasetImporter *di);
+    //LeftPanel(ControlExec *ce, DatasetImporter *di);
+    LeftPanel(ControlExec *ce);
     void Update() override;
     void GoToRendererTab();
     void ConfigureEnabledState(bool enabled);

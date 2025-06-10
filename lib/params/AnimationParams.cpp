@@ -86,4 +86,5 @@ void AnimationParams::_init()
     SetValueLong(AnimationParams::CaptureTypeTag, "Set default value for capture mode image filetype", AnimationParams::PNG);
     SetValueLong(AnimationParams::CaptureStartTag, "Set default value for capturing imagery start time", GetStartTimestep());
     SetValueLong(AnimationParams::CaptureEndTag, "Set default value for capturing imagery end time", GetEndTimestep());
+    SetValueLong(AnimationParams::AnimationStartedTag, "Inidicates if an animation has started", false);
 }

@@ -34,18 +34,27 @@ std::string GetCaptureFileName(ControlExec *ce) {
     std::string suffix = ap->GetValueLong(AnimationParams::CaptureTypeTag, 0) == 0 ? "tif" : "png";
     std::string defaultPath = ap->GetValueString(AnimationParams::CaptureFileDirTag, FileUtils::HomeDir());
 
+    // - For this QFileDialog, QFileDialog::DontConfirmOverwrite is needed because we do file overwrite confirmation 
+    //   manually after modifying the user's input filename for capturing time series
+    // 
+    // - QFileDialog::DontUseNativeDialog is needed becuase QFileDialog::DontConfirmOverwrite will not work on MacOS without it
+    //
     std::string file = QFileDialog::getSaveFileName(nullptr, "Select Filename", QString::fromStdString(defaultPath), QString::fromStdString(filter), nullptr, QFileDialog::DontConfirmOverwrite | QFileDialog::DontUseNativeDialog).toStdString();
     if (file.empty()) return "";
 
+
+    // Qt does not always append the filetype to the selection from the QFileDialog, so manually add it if this happens
     if (file.find(suffix) == std::string::npos)
         file += "." + suffix;
 
+    // Add zero padding if we are capturing TimeSeries
     if (ap->GetValueLong(AnimationParams::CaptureModeTag, AnimationParams::SingleImage) == AnimationParams::TimeSeries) {
         std::ostringstream oss;
         oss << FileUtils::RemoveExtension(FileUtils::Basename(file)) << std::setw(5) << std::setfill('0') << "." << FileUtils::Extension(file);
         file = FileUtils::JoinPaths({FileUtils::Dirname(file), oss.str()});
     }
 
+    // Warn user about overwriting file
     if (FileUtils::Exists(file)) {
         QMessageBox::StandardButton confirm = QMessageBox::question(nullptr, "File exists", QString::fromStdString(FileUtils::Basename(file) + " exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No);
         if (confirm == QMessageBox::No) return "";
@@ -80,10 +89,6 @@ void CaptureSingleImage(ControlExec *ce) {
     string vizName = ce->GetParams<GUIStateParams>()->GetActiveVizName();
     if (ce->EnableImageCapture(filePath, vizName) < 0)
         MSG_ERR("Error capturing image");
-}
-
-void StartAnimationCapture(std::function<void()> onStart) {
-    if (onStart) onStart();  // Replace signal with function call
 }
 
 void EndAnimationCapture(ControlExec *ce) {

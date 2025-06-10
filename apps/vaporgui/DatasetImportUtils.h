@@ -3,13 +3,14 @@
 #include <vector>
 #include <string>
 
-class ControlExec;
+namespace VAPoR {
+    class ControlExec;
+}
 
 namespace DatasetImportUtils {
-
-enum class DatasetExistsAction { Prompt, ReplaceFirst, AddNew };
-
-bool ImportDataset(ControlExec *ce, const std::vector<std::string> &files, std::string format, DatasetExistsAction action, bool sessionNewFlag, std::function<void()> onImport = nullptr);
-
+    enum class DatasetExistsAction { Prompt, ReplaceFirst, AddNew };
+    //bool ImportDataset(VAPoR::ControlExec *ce, const std::vector<std::string> &files, std::string format, DatasetExistsAction action, bool sessionNewFlag, std::function<void()> onImport = nullptr);
+    //bool ImportDataset(VAPoR::ControlExec *ce, const std::vector<std::string> &files, std::string format, DatasetExistsAction action, bool sessionNewFlag);
+    bool ImportDataset(VAPoR::ControlExec *ce, const std::vector<std::string> &files, std::string format, DatasetExistsAction action);
 }
 
