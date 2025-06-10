@@ -1,5 +1,5 @@
 #include "PImportDataButton.h"
-#include "DatasetImporter.h"
+#include "DatasetImportUtils.h"
 #include "VHBoxWidget.h"
 #include "VLabel.h"
 #include "DatasetTypeLookup.h"
@@ -10,7 +10,7 @@
 #include <QFileDialog>
 #include <QPushButton>
 
-PImportDataButton::PImportDataButton(VAPoR::ControlExec* ce, DatasetImporter *di) : PWidget("", _hBox = new VHBoxWidget()), _ce(ce), _di(di) {
+PImportDataButton::PImportDataButton(VAPoR::ControlExec* ce) : PWidget("", _hBox = new VHBoxWidget()), _ce(ce) {
     _hBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     QHBoxLayout* layout = qobject_cast<QHBoxLayout*>(_hBox->layout());
@@ -34,7 +34,7 @@ void PImportDataButton::_importDataset() {
     if (fileNames.empty()) return;
 
     std::string format = GetDatasets()[getParams()->GetValueLong(GUIStateParams::ImportDataTypeTag, 0)].first;
-    _di->ImportDataset(fileNames, format);
+    DatasetImportUtils::ImportDataset(_ce, fileNames, format, DatasetImportUtils::DatasetExistsAction::Prompt);
 }
 
 void PImportDataButton::updateGUI() const {

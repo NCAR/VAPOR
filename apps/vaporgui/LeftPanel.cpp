@@ -1,5 +1,4 @@
 #include "LeftPanel.h"
-#include "DatasetImporter.h"
 #include "RenderersPanel.h"
 #include "ImportTab.h"
 #include "ExportTab.h"
@@ -9,7 +8,7 @@
 
 #include <QScrollArea>
 
-LeftPanel::LeftPanel(ControlExec *ce, CaptureController *cc, DatasetImporter *di)
+LeftPanel::LeftPanel(ControlExec *ce)
 {
     auto add = [this](auto &&w, auto &&t) constexpr {
         QScrollArea *scrollArea = new QScrollArea;
@@ -20,11 +19,11 @@ LeftPanel::LeftPanel(ControlExec *ce, CaptureController *cc, DatasetImporter *di
         _uTabs.push_back(w);
     };
    
-    _importTab = new ImportTab(ce, di); 
+    _importTab = new ImportTab(ce); 
     add(_importTab, "Import");
     add(new RenderersPanel(ce), "Render");
     add(new AnnotationEventRouter(ce), "Annotate");
-    add(new ExportTab(ce, cc), "Export");
+    add(new ExportTab(ce), "Export");
 
     for (int i=1 ; i<count(); ++i) setTabEnabled(i, false);
     setTabEnabled(0,true);

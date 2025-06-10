@@ -15,6 +15,6 @@ class ExportTab : public VGroup, public Updatable {
     PWidget *_movingDomainSection = nullptr;
 
 public:
-    ExportTab(VAPoR::ControlExec *ce, CaptureController *cc);
+    ExportTab(VAPoR::ControlExec *ce);
     void Update() override;
 };
