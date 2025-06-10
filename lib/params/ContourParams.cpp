@@ -134,6 +134,10 @@ void ContourParams::_init()
 
     float rgb[] = {1., 1., 1.};
     SetConstantColor(rgb);
+
+    GetBox()->SetPlanar(true);
+    GetBox()->SetOrientation(VAPoR::Box::XY);
+    SetDefaultVariables(2, true);
 }
 
 int ContourParams::GetContourCount()
