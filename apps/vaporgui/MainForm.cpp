@@ -65,9 +65,6 @@
 #include "NcarCasperUtils.h"
 #include "ViewpointToolbar.h"
 #include "DatasetTypeLookup.h"
-
-#include "DatasetImporter.h"
-
 #include "CaptureUtils.h"
 #include "DatasetImportUtils.h"
 
@@ -98,7 +95,6 @@ MainForm *MainForm::_instance = nullptr;
 MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, string filesType, QWidget *parent) : QMainWindow(parent)
 {
     _App = app;
-    //_sessionNewFlag = true;
     _begForCitation = true;
 
     assert(!_instance);
@@ -160,16 +156,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         Render(false, true);
     });
 
-    //_datasetImporter = new DatasetImporter(_controlExec);
-    //GUIStateParams* gsp = GetStateParams();
-    //_datasetImporter->SetSessionNewFlag(gsp->GetValueLong(GUIStateParams::SessionNewTag, true));
-    //connect(_datasetImporter, &DatasetImporter::datasetImported, [this](){
-    //    //_sessionNewFlag=false;
-    //    gsp->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false));
-    //    _leftPanel->GoToRendererTab();
-    //});
-    
-    //_leftPanel = new LeftPanel(_controlExec, _datasetImporter);
     _leftPanel = new LeftPanel(_controlExec);
     const int dpi = qApp->desktop()->logicalDpiX();
     _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
@@ -239,11 +225,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         if (!fmt.empty()) {
             if (DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst))
                 _leftPanel->GoToRendererTab();
-            //if (DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst, gsp->GetValueLong(GuiStateParams::SessionNewTag, true)))
-            //    _leftPanel->GoToRendererTab();
-            //if (DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst, _sessionNewFlag))
-            //    _leftPanel->GoToRendererTab();
-            //_datasetImporter->ImportDataset(paths, fmt, DatasetExistsAction::ReplaceFirst);
         }
     }
 
@@ -265,7 +246,6 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     if (start == 0 && end == 0) end = INT_MAX;
     start = std::max(0, start);
 
-    //if (_sessionNewFlag) {
     if (GetStateParams()->GetValueLong(GUIStateParams::SessionNewTag, false)) {
         fprintf(stderr, "No session loaded\n");
         return -1;
@@ -610,9 +590,7 @@ retryLoad:
         for (auto name : gsp->GetOpenDataSetNames()) gsp->RemoveOpenDataSet(name);
 
     _paramsMgr->UndoRedoClear();
-    //_sessionNewFlag = false;
     gsp->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false);
-    //_datasetImporter->SetSessionNewFlag(_sessionNewFlag);
     _stateChangeFlag = false;
     _paramsMgr->TriggerManualStateChangeEvent("Session Opened");
 
@@ -796,9 +774,9 @@ void MainForm::showImportDatasetGUI(string format)
     auto files = getUserFileSelection(DatasetTypeDescriptiveName(format), defaultPath, "", format!="vdc");
     if (files.empty()) return;
 
-    //DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt);
-    if(DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt))
-        _leftPanel->GoToRendererTab();
+    DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt);
+    //if(DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt))
+    //    _leftPanel->GoToRendererTab();
 }
 
 
@@ -881,8 +859,6 @@ void MainForm::sessionNew()
     _paramsMgr->UndoRedoClear();
 
     _stateChangeFlag = false;
-    //_sessionNewFlag = true;
-    //_datasetImporter->SetSessionNewFlag(_sessionNewFlag);
     GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Toggle SessionNewTag to true for a new session", true);
     //_datasetImporter->SetSessionNewFlag(GetStateParams()->GetValueLong(GUIStateParams::SessionNewTag, true));
 }
