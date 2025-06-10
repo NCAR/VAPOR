@@ -275,8 +275,6 @@ set (SRCS
     PTotalTimestepsDisplay.h
     AnimationController.cpp
     AnimationController.h
-    DatasetImporter.cpp
-    DatasetImporter.h
     CaptureUtils.cpp
     CaptureUtils.h
     DatasetImportUtils.cpp
