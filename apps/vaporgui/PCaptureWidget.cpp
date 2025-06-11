@@ -82,7 +82,8 @@ void PCaptureHBox::updateGUI() const {
 }
 
 void PCaptureHBox::_captureTimeSeries() {
-    bool rc = CaptureUtils::EnableAnimationCapture(_ce);  // User may cancel to prevent file overwrite, so capture return code
+    // User may cancel to prevent file overwrite, so capture return code
+    bool rc = CaptureUtils::EnableAnimationCapture(_ce);
     if (rc) {
         AnimationParams* ap = (AnimationParams*)_ce->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
         NavigationUtils::SetTimestep(_ce, ap->GetValueLong(AnimationParams::CaptureStartTag, ap->GetStartTimestep()));

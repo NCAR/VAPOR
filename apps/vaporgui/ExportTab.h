@@ -5,8 +5,6 @@
 #include "Updatable.h"
 #include "VGroup.h"
 
-class CaptureController;
-
 class ExportTab : public VGroup, public Updatable {
     Q_OBJECT
 

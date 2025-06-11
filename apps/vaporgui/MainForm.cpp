@@ -222,10 +222,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
             fmt = filesType;
         }
 
-        if (!fmt.empty()) {
-            if (DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst))
-                _leftPanel->GoToRendererTab();
-        }
+        DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst);
     }
 
     app->installEventFilter(this);
@@ -775,8 +772,6 @@ void MainForm::showImportDatasetGUI(string format)
     if (files.empty()) return;
 
     DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt);
-    //if(DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt))
-    //    _leftPanel->GoToRendererTab();
 }
 
 
@@ -860,7 +855,6 @@ void MainForm::sessionNew()
 
     _stateChangeFlag = false;
     GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Toggle SessionNewTag to true for a new session", true);
-    //_datasetImporter->SetSessionNewFlag(GetStateParams()->GetValueLong(GUIStateParams::SessionNewTag, true));
 }
 
 void MainForm::_setAnimationOnOff(bool on)
@@ -938,10 +932,8 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     }
 
     if (event->type() == ParamsChangeEvent) {
-        std::cout << "Params change event " << GetStateParams()->GetValueLong(GUIStateParams::DatasetImportedTag, true) << std::endl;
         // If DatasetImportUtils imports a datset, reject the input and go to the RendererTab
         if (GetStateParams()->GetValueLong(GUIStateParams::DatasetImportedTag, true)) {
-            std::cout << "dataset imported" << std::endl;
             GetStateParams()->SetValueLong(GUIStateParams::DatasetImportedTag, "Dataset has been imported.  Reset to false.", false);
             GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false);
             _leftPanel->GoToRendererTab();
@@ -949,10 +941,9 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         }
 
         // If PCaptureWidget sets the AnimationParams::AnimationStartedTag parameter,
-        // unset it, issue a call to _animationController->AnimationPlayForward, and reject input
+        // unset it, issue a call to _animationController->AnimationPlayForward(), and reject input
         AnimationParams* aParams = GetAnimationParams();
         if (aParams->GetValueLong(AnimationParams::AnimationStartedTag, 0) == true) {
-            std::cout << "animation started" << std::endl;
             aParams->SetValueLong(AnimationParams::AnimationStartedTag, "Disable tag", false);
             _animationController->AnimationPlayForward();
             return true;
@@ -962,7 +953,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
 
         setUpdatesEnabled(false);
         _controlExec->SyncWithParams();
-
         updateUI();
         setUpdatesEnabled(true);
 

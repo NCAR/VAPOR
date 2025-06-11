@@ -21,7 +21,6 @@
 #include "AnimationController.h"
 #include "PWidgetsFwd.h"
 #include "QEnableable.h"
-#include "DatasetExistsAction.h"
 
 class QApplication;
 class QSpacerItem;
@@ -47,8 +46,6 @@ class VProjectionStringFrame;
 class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
-class CaptureController;
-class DatasetImporter;
 
 class LeftPanel;
 
@@ -120,8 +117,6 @@ private:
     VAPoR::ControlExec *_controlExec;
     VAPoR::ParamsMgr *  _paramsMgr;
     AnimationController *_animationController;
-    CaptureController*  _captureController;
-    DatasetImporter*    _datasetImporter;
     VizWinMgr *         _vizWinMgr;
     string              _capturingAnimationVizName;
 
@@ -175,7 +170,6 @@ private:
     void         _createProgressWidget();
     void         _disableProgressWidget();
     void         closeAllParamsDatasets();
-    //void         _configureAnimationCapture();
 
     template<class T> bool isDatasetValidFormat(const std::vector<std::string> &paths) const;
     bool                   determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;
