@@ -16,7 +16,7 @@ using namespace VAPoR;
 
 namespace DatasetImportUtils {
 
-static string GetDataSetName(ParamsMgr *pm, string file, DatasetExistsAction existsAction) {
+static string GetDatasetName(ParamsMgr *pm, string file, DatasetExistsAction existsAction) {
     auto names = pm->GetDataMgrNames();
     if (names.empty() || existsAction == DatasetExistsAction::AddNew)
         return ControlExec::MakeStringConformant(FileUtils::Basename(file));
@@ -41,7 +41,7 @@ bool ImportDataset(ControlExec *ce, const vector<string> &files, string format, 
     ParamsMgr *pm = ce->GetParamsMgr();
     pm->BeginSaveStateGroup("Import Dataset");
 
-    string name = GetDataSetName(pm, files[0], action);
+    string name = GetDatasetName(pm, files[0], action);
     if (name.empty()) {
         pm->EndSaveStateGroup();
         return false;

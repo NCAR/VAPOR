@@ -279,7 +279,6 @@ set (SRCS
     CaptureUtils.h
     DatasetImportUtils.cpp
     DatasetImportUtils.h
-    DatasetExistsAction.h
     CheckForNotices.cpp
     CheckForNotices.h
     NoticeBoard.cpp
