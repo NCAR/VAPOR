@@ -755,8 +755,10 @@ void MainForm::helpAbout()
 
 void MainForm::ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction, string name)
 {
-    _paramsMgr->BeginSaveStateGroup("Import Dataset");
     if (name.empty()) name = _getDataSetName(files[0], existsAction);
+    if (name.empty()) return; // Cancelled
+
+    _paramsMgr->BeginSaveStateGroup("Import Dataset");
     int rc = _controlExec->OpenData(files, name, format);
     if (rc < 0) {
         _paramsMgr->EndSaveStateGroup();
