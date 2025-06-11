@@ -92,7 +92,6 @@ private:
     QAction *_stepForwardAction;
     QAction *_stepBackAction;
 
-    bool     _animationCapture = false;
     int      _progressSavedFB = -1;
     bool     _progressEnabled = false;
     QAction *_progressEnabledMenuItem = nullptr;

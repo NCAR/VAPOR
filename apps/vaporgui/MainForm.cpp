@@ -222,7 +222,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
             fmt = filesType;
         }
 
-        DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst);
+        if (!fmt.empty())
+            DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst);
     }
 
     app->installEventFilter(this);
@@ -271,7 +272,6 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     if (CaptureUtils::EnableAnimationCapture(_controlExec, baseFileWithTS)) {
         GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
         _capturingAnimationVizName = p->GetActiveVizName();
-        _animationCapture = true;
         _animationController->AnimationPlayForward();
     }
 
@@ -279,7 +279,6 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
 
     connect(_animationController, &AnimationController::AnimationOnOffSignal, this, [this]() {
         CaptureUtils::EndAnimationCapture(_controlExec);
-        _animationCapture = false;
         _capturingAnimationVizName = "";
         close();
     });
@@ -932,7 +931,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     }
 
     if (event->type() == ParamsChangeEvent) {
-        // If DatasetImportUtils imports a datset, reject the input and go to the RendererTab
+        // If DatasetImportUtils imports a datset, go to the RendererTab and reject the input
         if (GetStateParams()->GetValueLong(GUIStateParams::DatasetImportedTag, true)) {
             GetStateParams()->SetValueLong(GUIStateParams::DatasetImportedTag, "Dataset has been imported.  Reset to false.", false);
             GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false);
