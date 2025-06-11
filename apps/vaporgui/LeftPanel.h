@@ -5,16 +5,14 @@
 #include <common.h>
 
 class ImportTab;
-class MainForm;
 
 class LeftPanel : public QTabWidget, public Updatable {
     Q_OBJECT
-    ControlExec *_ce;
     std::vector<Updatable *> _uTabs;
     ImportTab* _importTab;
 
 public:
-    LeftPanel(ControlExec *ce, MainForm* mf);
+    LeftPanel(ControlExec *ce);
     void Update() override;
     void GoToRendererTab();
     void ConfigureEnabledState(bool enabled);

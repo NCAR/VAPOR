@@ -47,6 +47,8 @@ const string GUIStateParams::BookmarksTag = "BookmarksTag";
 const string GUIStateParams::MovingDomainTrackCameraTag = "MovingDomainTrackCameraTag";
 const string GUIStateParams::MovingDomainTrackRenderRegionsTag = "MovingDomainTrackRenderRegionsTag";
 const string GUIStateParams::ImportDataTypeTag = "ImportDataTypeTag";
+const string GUIStateParams::SessionNewTag = "SessionNewTag";
+const string GUIStateParams::DatasetImportedTag = "DatasetImportedTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetRelativePathsTag = "DataSetRelativePathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";
@@ -342,6 +344,8 @@ void GUIStateParams::_init() {
     SetValueLong(MovingDomainTrackCameraTag, "", true);
     SetValueLong(MovingDomainTrackRenderRegionsTag, "", true);
     SetValueString(ImportDataTypeTag, "Default dataset to import", "WRF-ARW") ;
+    SetValueLong(SessionNewTag, "Open dataset as a new session", true);
+    SetValueLong(DatasetImportedTag, "Indicates that a dataset has been imported", false);
 }
 
 void GUIStateParams::ActiveRenderer::SetActiveRenderer(string vizWin, string renderType, string renderInst)
