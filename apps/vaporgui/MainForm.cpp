@@ -242,6 +242,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
 
 int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int width, int height)
 {
+    _controlExec->SyncWithParams();
+
     if (start == 0 && end == 0) end = INT_MAX;
     start = std::max(0, start);
 
@@ -263,7 +265,10 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     auto vpp = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
 
     _paramsMgr->BeginSaveStateGroup("test");
-    StartAnimCapture(baseFileWithTS);
+    if (!StartAnimCapture(baseFileWithTS)) {
+        fprintf(stderr, "Failed to start animation capture\n");
+        exit(1);
+    }
     ap->SetStartTimestep(start);
     ap->SetEndTimestep(end);
 
@@ -1234,7 +1239,8 @@ bool MainForm::StartAnimCapture(string baseFile, string defaultSuffix)
     _animationCapture = true;
     GUIStateParams *p = GetStateParams();
     string          vizName = p->GetActiveVizName();
-    _controlExec->EnableAnimationCapture(vizName, true, fpath);
+    if (_controlExec->EnableAnimationCapture(vizName, true, fpath) != 0)
+        return false;
     _capturingAnimationVizName = vizName;
 
     return true;
