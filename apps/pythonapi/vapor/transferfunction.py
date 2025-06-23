@@ -6,6 +6,7 @@ from typing import Iterable, Any
 import functools
 from pathlib import Path
 import pylab as pl
+import numpy as np
 
 link.include('vapor/MapperFunction.h')
 
@@ -76,11 +77,19 @@ class TransferFunction(ParamsWrapper, wrap=link.VAPoR.MapperFunction):
 
     def SetOpacityControlPoints(self, cp: list[tuple[float, float]]):
         """
-        Sets opacities for x,y values where MinMapValue<=x<=MaxMapValue and 0<=y<=1
+        Sets opacity points for x,y values where MinMapValue<=x<=MaxMapValue and 0<=y<=1
+        Expects a list of form [[x1, y1], [x2, y2], ...] with x representing data values and y representing opacity values
         Warning: The points are stored as normalized coordinates so if the MapValue range changes
         it will not be reflected in the mapping range
         """
         self.SetOpacityNormalizedControlPoints(self.__normalizeControlPoints(cp))
+    
+    def GetOpacityControlPoints(self):
+        """
+        Returns opacity points in the form [[x1, y1], [x2, y2], ...] 
+        with x representing data values and y representing opacity values
+        """
+        return np.array(self._params.GetOpacityMap(0).GetControlPoints()).reshape(-1, 2)
 
     def SetColorNormalizedHSVControlPoints(self, cp: list[tuple[float, Vec3]]):
         """Sets colormap for normalized data values"""
@@ -91,6 +100,10 @@ class TransferFunction(ParamsWrapper, wrap=link.VAPoR.MapperFunction):
     def SetColorHSVList(self, colors: list[Vec3]):
         """Sets colormap as equally spaced control points"""
         self.SetColorNormalizedHSVControlPoints(self.__enumerateNormDist(colors))
+
+    def ReverseColormap(self):
+        """Reverses the colormap"""
+        self.SetColorRGBList([(r, g, b) for r, g, b, _ in list(reversed(self.GetMatPlotLibColormap().colors))])
 
     def SetColorHSVControlPoints(self, cp: list[tuple[float, Vec3]]):
         """
