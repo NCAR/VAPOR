@@ -174,3 +174,96 @@ def animate_camera_keyframes_camerafiles(primary_session, camera_paths, steps = 
             print(f"Rendering Animation [{'#'*round((j+n)*40/total_frames)}{' '*round(40-((j+n)*40/total_frames))}] {(j+1+n)*100/total_frames:.0f}%", end="\r")
         n += steps[i]
     return anim
+
+def animate_keyframes_camerafiles_with_time(primary_session, camera_paths, steps = None, time_strategy="auto", time_steps=None):
+    """
+    Given a session file and a list of paths to saved camera files, returns an
+    animation that performs keyframing with linear interpolation on the saved camera angles.
+    """
+    # Default for steps
+    if steps == None:
+        steps = [30] * (len(camera_paths) - 1)
+    total_frames = sum(steps)
+    
+    if time_strategy == "auto":
+        total_timesteps = primary_session.GetTimesteps()
+        time_frames = np.linspace(0, total_timesteps - 1, total_frames).astype(int)
+
+    # Parameter checks
+    if len(camera_paths) - len(steps) != 1:
+        raise ValueError(f"With {len(camera_paths)} keyframes given, 'steps' should be " +
+                        f"length {len(camera_paths) - 1} (currently {len(steps)})")
+    
+    # Visualization will use renderers from first session in list. Other sessions are only for camera angles
+    anim = Animation(primary_session)
+    cam = primary_session.GetCamera()
+    
+    # Interpolate camera information between each key frame
+    n = 0
+    for i in range(len(camera_paths) - 1):
+        start = camera_paths[i]
+        end = camera_paths[i+1]
+        frames = steps[i]
+
+        # Get starting information
+        primary_session.GetCamera().LoadFromFile(start)
+        cam1 = primary_session.GetCamera()
+        dir1 = cam1.GetDirection()
+        pos1 = cam1.GetPosition()
+        up1 = cam1.GetUp()
+
+        # Get ending information
+        primary_session.GetCamera().LoadFromFile(end)
+        cam2 = primary_session.GetCamera()
+        dir2 = cam2.GetDirection()
+        pos2 = cam2.GetPosition()
+        up2 = cam2.GetUp()
+
+        # Difference between camera positions on each axis
+        dPositionX  = (pos2[0] - pos1[0])
+        dPositionY  = (pos2[1] - pos1[1])
+        dPositionZ  = (pos2[2] - pos1[2])
+
+        # Difference between camera direction vectors on each axis
+        dDirectionX = (dir2[0] - dir1[0])
+        dDirectionY = (dir2[1] - dir1[1])
+        dDirectionZ = (dir2[2] - dir1[2])
+
+        # Difference between camera up vectors on each axis
+        dUpX        = (up2[0] - up1[0])
+        dUpY        = (up2[1] - up1[1])
+        dUpZ        = (up2[2] - up1[2])
+
+        # Linear interpolation between start and end
+        for j in range(frames):
+            position = [
+                pos1[0]+dPositionX*j/frames,
+                pos1[1]+dPositionY*j/frames,
+                pos1[2]+dPositionZ*j/frames
+            ]
+            cam.SetPosition( position )
+
+            direction = [
+                dir1[0]+dDirectionX*j/frames,
+                dir1[1]+dDirectionY*j/frames,
+                dir1[2]+dDirectionZ*j/frames
+            ]
+            cam.SetDirection( direction )
+
+            up = [
+                up1[0]+dUpX*j/frames,
+                up1[1]+dUpY*j/frames,
+                up1[2]+dUpZ*j/frames
+            ]
+            cam.SetUp( up )
+
+            timestep = time_frames[n+j]
+            print(timestep)
+            primary_session.SetTimestep(int(timestep))
+            
+            anim.CaptureFrame()
+            
+            # Print status
+            # print(f"Rendering Animation [{'#'*round((j+n)*40/total_frames)}{' '*round(40-((j+n)*40/total_frames))}] {(j+1+n)*100/total_frames:.0f}%", end="\r")
+        n += steps[i]
+    return anim

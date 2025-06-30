@@ -89,7 +89,12 @@ class TransferFunction(ParamsWrapper, wrap=link.VAPoR.MapperFunction):
         Returns opacity points in the form [[x1, y1], [x2, y2], ...] 
         with x representing data values and y representing opacity values
         """
-        return np.array(self._params.GetOpacityMap(0).GetControlPoints()).reshape(-1, 2)
+        minv, maxv = self.GetMinMapValue(), self.GetMaxMapValue()
+        opacities_normalized = np.array(self._params.GetOpacityMap(0).GetControlPoints()).reshape(-1, 2)
+        y = opacities_normalized[:, 0]
+        x_norm = opacities_normalized[:, 1]
+        x_data = x_norm * (maxv - minv) + minv # undo normalization
+        return np.stack([x_data, y], axis=1)
 
     def SetColorNormalizedHSVControlPoints(self, cp: list[tuple[float, Vec3]]):
         """Sets colormap for normalized data values"""

@@ -52,7 +52,7 @@ def transferFunctionWidget(ses, ren, preserveOpacities = True, nControlPoints=5)
 
     # Create control points
     if(preserveOpacities):
-        init_points = ren.GetOpacityControlPoints()
+        init_points = ren.GetPrimaryTransferFunction().GetOpacityControlPoints()
     else:
         init_points = [[x, 100] for x in np.linspace(min(data), max(data), nControlPoints)]
     # Or this
