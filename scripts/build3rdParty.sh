@@ -124,7 +124,6 @@ ubuntuPrerequisites() {
         libssl-dev \
         libffi-dev
     
-        #libssl1.1 \
     # Qt
     apt-get install -y \
         '^libxcb.*-dev' \
