@@ -414,23 +414,8 @@ jobs:
           paths:
             - /opt/intel/oneapi
 
-      - restore_cache:
-          name: restore third party libraries
-          keys:
-            - ubuntu-libs-mar2023
       - get_libraries:
           fileName: *u20Libs
-      - save_cache:
-          key: ubuntu-libs-mar2023
-          paths:
-            - /usr/local
-      - run:
-          name: test ctypes
-          command: /usr/local/VAPOR-Deps/current/bin/python3.9.vapor
-      - run:
-          name: run it
-          command: import scipy
-
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
           compileArgs: |
