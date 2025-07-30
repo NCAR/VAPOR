@@ -38,7 +38,7 @@ def ShowMatPlotLibHistogram(session: Session, renderer: Renderer, **kwargs):
     GetMatPlotLibHistogram(session, renderer, **kwargs).show()
 
 
-def transferFunctionWidget(ses, ren, nControlPoints=5):
+def transferFunctionWidget(ses, ren, preserveOpacities = True, nControlPoints=5):
     # Histogram setup
     data = np.array(GetSamples(ses, ren, ren._params.GetActualColorMapVariableName()))
     hist_values, edges = np.histogram(data, bins=50)
@@ -51,7 +51,11 @@ def transferFunctionWidget(ses, ren, nControlPoints=5):
     bars = bq.Bars(x=bin_centers, y=hist_values, scales={'x': x_sc, 'y': y_sc})
 
     # Create control points
-    init_points = [[x, 100] for x in np.linspace(min(data), max(data), nControlPoints)]
+    if(preserveOpacities):
+        init_points = ren.GetPrimaryTransferFunction().GetOpacityControlPoints() * 100
+    else:
+        init_points = [[x, 100] for x in np.linspace(min(data), max(data), nControlPoints)]
+    # Or this
     control_x, control_y = zip(*init_points)
     ren.GetPrimaryTransferFunction().SetOpacityControlPoints([[x, float(y)/100] for x, y in init_points])
 
