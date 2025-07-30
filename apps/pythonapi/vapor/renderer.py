@@ -69,7 +69,9 @@ class Renderer(ParamsWrapper, wrap=RenderParams):
         super().__init__(renderParams)
         self.id = id
 
-    def GetTransferFunction(self, varname: str) -> TransferFunction:
+    def GetTransferFunction(self, varname:str=None) -> TransferFunction:
+        if varname is None:
+            return self.GetPrimaryTransferFunction()
         return TransferFunction(self._params.GetMapperFunc(varname))
 
     def GetPrimaryTransferFunction(self) -> TransferFunction:
@@ -142,7 +144,6 @@ link.include('vapor/VolumeParams.h')
 class VolumeRenderer(Renderer, wrap=link.VAPoR.VolumeParams):
     _wrap = FuncWrapperStrList("""
     GetAlgorithm
-    SetAlgorithm
     
     GetSamplingMultiplier
     SetSamplingMultiplier
