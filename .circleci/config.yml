@@ -2,7 +2,7 @@ anchors:
   - &srcLibs          "2024-Sept-src"
   - &macOSx86Libs     "2024-Sept-macOSx86"
   - &appleSiliconLibs "2024-Sept-appleSilicon"
-  - &u20Libs          "2023-Sept-Ubuntu20"
+  - &u20Libs          "2025-July-Ubuntu20"
 
 version: 2.1
 
@@ -357,6 +357,7 @@ jobs:
           command: |
             export DEBIAN_FRONTEND=noninteractive
             apt update
+            apt install -y libffi-dev
             apt install -y curl
             apt install -y xz-utils
             apt install -y git
@@ -392,7 +393,6 @@ jobs:
                 libxcb-render-util0 \
                 libxkbcommon-x11-0 \
                 desktop-file-utils
-
       - restore_cache:
           name: restore intel's oneapi
           keys:
@@ -414,23 +414,13 @@ jobs:
           paths:
             - /opt/intel/oneapi
 
-      - restore_cache:
-          name: restore third party libraries
-          keys:
-            - ubuntu-libs-mar2023
       - get_libraries:
           fileName: *u20Libs
-      - save_cache:
-          key: ubuntu-libs-mar2023
-          paths:
-            - /usr/local
-
       - build_vapor:
           moveToCommand: ${f/Linux/Ubuntu20}
           compileArgs: |
             -DDIST_APPIMAGE=ON \
             -DBUILD_TEST_APPS=ON \
-  
       - smoke_tests
 
   release_weekly_installers:
