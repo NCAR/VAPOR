@@ -17,7 +17,6 @@
 
 CaptureController::CaptureController(VAPoR::ControlExec *ce) : _ce(ce) {}
 
-//std::string CaptureController::GetCaptureFileName(VAPoR::ControlExec *ce) {
 std::string CaptureController::GetCaptureFileName() {
     ShowCitationReminder();
 
@@ -61,7 +60,6 @@ std::string CaptureController::GetCaptureFileName() {
         ap->SetValueString(AnimationParams::CaptureTimeSeriesTimeTag, "Capture file time", STLUtils::GetCurrentDateTimestamp());
     }
 
-    //if (!file.empty()) emit captureStarted();
     return file;
 }
 
