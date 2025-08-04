@@ -65,7 +65,6 @@
 #include "NcarCasperUtils.h"
 #include "ViewpointToolbar.h"
 #include "DatasetTypeLookup.h"
-#include "CaptureUtils.h"
 #include "CaptureController.h"
 #include "DatasetImportUtils.h"
 
@@ -159,8 +158,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
 
     _captureController = new CaptureController(_controlExec);
     connect(_captureController, &CaptureController::captureStarted, [this]() {
-        //AnimationParams* ap = (AnimationParams*)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
-        //std::cout << "Anim play forward " << ap->GetValueLong(AnimationParams::CaptureStartTag, 0) << std::endl;
+        AnimationParams* ap = (AnimationParams*)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
         NavigationUtils::SetTimestep(_controlExec, ap->GetValueLong(AnimationParams::CaptureStartTag, ap->GetStartTimestep()));
         _animationController->AnimationPlayForward();
     });
@@ -278,7 +276,6 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", width);
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
 
-    //if (CaptureUtils::EnableAnimationCapture(_controlExec, baseFileWithTS)) {
     if (_captureController->EnableAnimationCapture(baseFileWithTS)) {
         GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
         _capturingAnimationVizName = p->GetActiveVizName();
@@ -288,7 +285,6 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     _paramsMgr->EndSaveStateGroup();
 
     connect(_animationController, &AnimationController::AnimationOnOffSignal, this, [this]() {
-        //CaptureUtils::EndAnimationCapture(_controlExec);
         _captureController->EndAnimationCapture();
         _capturingAnimationVizName = "";
         close();
