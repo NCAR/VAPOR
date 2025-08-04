@@ -5,6 +5,7 @@
 #include <common.h>
 
 class ImportTab;
+class CaptureController;
 
 class LeftPanel : public QTabWidget, public Updatable {
     Q_OBJECT
@@ -12,7 +13,7 @@ class LeftPanel : public QTabWidget, public Updatable {
     ImportTab* _importTab;
 
 public:
-    LeftPanel(ControlExec *ce);
+    LeftPanel(ControlExec *ce, CaptureController *captureController);
     void Update() override;
     void GoToRendererTab();
     void ConfigureEnabledState(bool enabled);

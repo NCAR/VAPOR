@@ -66,6 +66,7 @@
 #include "ViewpointToolbar.h"
 #include "DatasetTypeLookup.h"
 #include "CaptureUtils.h"
+#include "CaptureController.h"
 #include "DatasetImportUtils.h"
 
 #include <QStyle>
@@ -156,7 +157,15 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         Render(false, true);
     });
 
-    _leftPanel = new LeftPanel(_controlExec);
+    _captureController = new CaptureController(_controlExec);
+    connect(_captureController, &CaptureController::captureStarted, [this]() {
+        //AnimationParams* ap = (AnimationParams*)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
+        //std::cout << "Anim play forward " << ap->GetValueLong(AnimationParams::CaptureStartTag, 0) << std::endl;
+        NavigationUtils::SetTimestep(_controlExec, ap->GetValueLong(AnimationParams::CaptureStartTag, ap->GetStartTimestep()));
+        _animationController->AnimationPlayForward();
+    });
+
+    _leftPanel = new LeftPanel(_controlExec, _captureController);
     const int dpi = qApp->desktop()->logicalDpiX();
     _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     _leftPanel->setMinimumHeight(500);
@@ -269,7 +278,8 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", width);
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
 
-    if (CaptureUtils::EnableAnimationCapture(_controlExec, baseFileWithTS)) {
+    //if (CaptureUtils::EnableAnimationCapture(_controlExec, baseFileWithTS)) {
+    if (_captureController->EnableAnimationCapture(baseFileWithTS)) {
         GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
         _capturingAnimationVizName = p->GetActiveVizName();
         _animationController->AnimationPlayForward();
@@ -278,7 +288,8 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     _paramsMgr->EndSaveStateGroup();
 
     connect(_animationController, &AnimationController::AnimationOnOffSignal, this, [this]() {
-        CaptureUtils::EndAnimationCapture(_controlExec);
+        //CaptureUtils::EndAnimationCapture(_controlExec);
+        _captureController->EndAnimationCapture();
         _capturingAnimationVizName = "";
         close();
     });
@@ -941,12 +952,12 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
 
         // If PCaptureWidget sets the AnimationParams::AnimationStartedTag parameter,
         // unset it, issue a call to _animationController->AnimationPlayForward(), and reject input
-        AnimationParams* aParams = GetAnimationParams();
-        if (aParams->GetValueLong(AnimationParams::AnimationStartedTag, 0) == true) {
-            aParams->SetValueLong(AnimationParams::AnimationStartedTag, "Disable tag", false);
-            _animationController->AnimationPlayForward();
-            return true;
-        }
+        //AnimationParams* aParams = GetAnimationParams();
+        //if (aParams->GetValueLong(AnimationParams::AnimationStartedTag, 0) == true) {
+        //    aParams->SetValueLong(AnimationParams::AnimationStartedTag, "Disable tag", false);
+        //    _animationController->AnimationPlayForward();
+        //    return true;
+        //}
 
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 

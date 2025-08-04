@@ -8,13 +8,14 @@
 #include "PTotalTimestepsDisplay.h"
 #include "PCaptureWidget.h"
 #include "PMovingDomainSettings.h"
+#include "CaptureController.h"
 #include <vapor/AnimationParams.h>
 #include <QLayout>
 
-ExportTab::ExportTab(ControlExec *ce) : _ce(ce)
+ExportTab::ExportTab(ControlExec *ce, CaptureController *captureController) : _ce(ce)
 {
     _pg = new PGroup({
-        new PCaptureWidget(_ce),
+        new PCaptureWidget(_ce, captureController),
         new POutputResolutionSection(_ce),
         new PCameraControlsSection(_ce),
         _movingDomainSection = new PMovingDomainSettings(_ce),

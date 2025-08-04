@@ -46,6 +46,7 @@ class VProjectionStringFrame;
 class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
+class CaptureController;
 
 class LeftPanel;
 
@@ -115,6 +116,7 @@ private:
 
     VAPoR::ControlExec *_controlExec;
     VAPoR::ParamsMgr *  _paramsMgr;
+    CaptureController *_captureController;
     AnimationController *_animationController;
     VizWinMgr *         _vizWinMgr;
     string              _capturingAnimationVizName;
