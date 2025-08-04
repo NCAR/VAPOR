@@ -4,11 +4,12 @@
 #include "ExportTab.h"
 #include "vapor/ControlExecutive.h"
 #include "AnnotationEventRouter.h"
+#include "CaptureController.h"
 #include "vapor/GUIStateParams.h"
 
 #include <QScrollArea>
 
-LeftPanel::LeftPanel(ControlExec *ce)
+LeftPanel::LeftPanel(ControlExec *ce, CaptureController *captureController)
 {
     auto add = [this](auto &&w, auto &&t) constexpr {
         QScrollArea *scrollArea = new QScrollArea;
@@ -23,7 +24,7 @@ LeftPanel::LeftPanel(ControlExec *ce)
     add(_importTab, "Import");
     add(new RenderersPanel(ce), "Render");
     add(new AnnotationEventRouter(ce), "Annotate");
-    add(new ExportTab(ce), "Export");
+    add(new ExportTab(ce, captureController), "Export");
 
     for (int i=1 ; i<count(); ++i) setTabEnabled(i, false);
     setTabEnabled(0,true);

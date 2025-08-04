@@ -13,6 +13,7 @@ class PButton;
 class VHBoxWidget;
 class VComboBox;
 class VLabel;
+class CaptureController;
 
 struct TiffStrings {
     static const std::string FileFilter;
@@ -28,6 +29,7 @@ class PCaptureHBox : public PWidget {
     Q_OBJECT;
 
     ControlExec *_ce;
+    CaptureController *_captureController;
     VHBoxWidget *_hBox;
     PStringDropdown *_fileTypeSelector;
     const std::vector<long> _enumMap;
@@ -38,7 +40,7 @@ class PCaptureHBox : public PWidget {
     PButton *_captureTimeSeriesButton;
 
 public:
-    PCaptureHBox(VAPoR::ControlExec *ce);
+    PCaptureHBox(VAPoR::ControlExec *ce, CaptureController *captureController);
 
 protected:
     virtual void updateGUI() const;
@@ -55,7 +57,7 @@ class PCaptureWidget : public PWidget {
     PSection *_section;
 
 public:
-    PCaptureWidget(VAPoR::ControlExec *ce);
+    PCaptureWidget(VAPoR::ControlExec *ce, CaptureController *captureController);
 
 protected:
     virtual void updateGUI() const;
