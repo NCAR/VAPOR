@@ -5,7 +5,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include "CaptureUtils.h"
 #include "CitationReminder.h"
 #include "ErrorReporter.h"
 

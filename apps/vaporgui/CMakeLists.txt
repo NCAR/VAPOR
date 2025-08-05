@@ -275,12 +275,12 @@ set (SRCS
     PTotalTimestepsDisplay.h
     AnimationController.cpp
     AnimationController.h
-    CaptureUtils.cpp
-    CaptureUtils.h
     CaptureController.cpp
     CaptureController.h
     DatasetImportUtils.cpp
     DatasetImportUtils.h
+    DatasetImportController.cpp
+    DatasetImportController.h
     CheckForNotices.cpp
     CheckForNotices.h
     NoticeBoard.cpp

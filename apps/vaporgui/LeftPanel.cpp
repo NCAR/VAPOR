@@ -1,15 +1,19 @@
 #include "LeftPanel.h"
-#include "RenderersPanel.h"
-#include "ImportTab.h"
-#include "ExportTab.h"
-#include "vapor/ControlExecutive.h"
-#include "AnnotationEventRouter.h"
-#include "CaptureController.h"
-#include "vapor/GUIStateParams.h"
 
 #include <QScrollArea>
 
-LeftPanel::LeftPanel(ControlExec *ce, CaptureController *captureController)
+#include "RenderersPanel.h"
+#include "ImportTab.h"
+#include "ExportTab.h"
+#include "CaptureController.h"
+#include "DatasetImportController.h"
+#include "AnnotationEventRouter.h"
+
+#include "vapor/ControlExecutive.h"
+#include "vapor/GUIStateParams.h"
+
+
+LeftPanel::LeftPanel(ControlExec *ce, CaptureController *captureController, DatasetImportController *datasetImportController)
 {
     auto add = [this](auto &&w, auto &&t) constexpr {
         QScrollArea *scrollArea = new QScrollArea;
@@ -20,7 +24,7 @@ LeftPanel::LeftPanel(ControlExec *ce, CaptureController *captureController)
         _uTabs.push_back(w);
     };
    
-    _importTab = new ImportTab(ce); 
+    _importTab = new ImportTab(ce, datasetImportController); 
     add(_importTab, "Import");
     add(new RenderersPanel(ce), "Render");
     add(new AnnotationEventRouter(ce), "Annotate");
