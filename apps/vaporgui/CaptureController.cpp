@@ -70,7 +70,6 @@ bool CaptureController::EnableAnimationCapture(std::string baseFile) {
 
     string vizName = _ce->GetParams<GUIStateParams>()->GetActiveVizName();
     bool rc = _ce->EnableAnimationCapture(vizName, true, baseFile) >= 0;
-    std::cout << "rc " << rc << " Should be emmitting" << std::endl;
     if (rc) emit captureStarted();
     return rc;
 }
