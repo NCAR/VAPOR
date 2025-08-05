@@ -8,9 +8,11 @@ namespace VAPoR {
     class ControlExec;
 }
 
+class DatasetImportController;
+
 class PImportDataWidget : public PGroup {
     Q_OBJECT
 
 public:
-    PImportDataWidget(VAPoR::ControlExec* ce);
+    PImportDataWidget(VAPoR::ControlExec* ce, DatasetImportController *datasetImportController);
 };
