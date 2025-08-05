@@ -277,8 +277,6 @@ set (SRCS
     AnimationController.h
     CaptureController.cpp
     CaptureController.h
-    DatasetImportUtils.cpp
-    DatasetImportUtils.h
     DatasetImportController.cpp
     DatasetImportController.h
     CheckForNotices.cpp

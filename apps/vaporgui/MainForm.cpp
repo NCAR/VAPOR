@@ -66,7 +66,6 @@
 #include "ViewpointToolbar.h"
 #include "DatasetTypeLookup.h"
 #include "CaptureController.h"
-#include "DatasetImportUtils.h"
 #include "DatasetImportController.h"
 
 #include <QStyle>
@@ -165,6 +164,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
     });
 
     _datasetImportController = new DatasetImportController();
+    connect(_datasetImportController, &DatasetImportController::datasetImported, this, [this](){_leftPanel->GoToRendererTab();});
 
     _leftPanel = new LeftPanel(_controlExec, _captureController, _datasetImportController);
     const int dpi = qApp->desktop()->logicalDpiX();
@@ -233,7 +233,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         }
 
         if (!fmt.empty())
-            //DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst);
             _datasetImportController->ImportDataset(_controlExec, paths, fmt, DatasetImportController::DatasetExistsAction::ReplaceFirst);
     }
 
@@ -781,7 +780,6 @@ void MainForm::showImportDatasetGUI(string format)
     auto files = getUserFileSelection(DatasetTypeDescriptiveName(format), defaultPath, "", format!="vdc");
     if (files.empty()) return;
 
-    //DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt);
     _datasetImportController->ImportDataset(_controlExec, files, format, DatasetImportController::DatasetExistsAction::Prompt);
 }
 
@@ -943,14 +941,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     }
 
     if (event->type() == ParamsChangeEvent) {
-        // If DatasetImportUtils imports a dataset, go to the RendererTab and reject the input
-        //if (GetStateParams()->GetValueLong(GUIStateParams::DatasetImportedTag, true)) {
-        //    GetStateParams()->SetValueLong(GUIStateParams::DatasetImportedTag, "Dataset has been imported.  Reset to false.", false);
-        //    GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false);
-        //    _leftPanel->GoToRendererTab();
-        //    return true;
-        //}
-
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
         setUpdatesEnabled(false);

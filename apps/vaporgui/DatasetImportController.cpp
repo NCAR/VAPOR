@@ -1,4 +1,3 @@
-#include "DatasetImportUtils.h"
 #include "DatasetImportController.h"
 #include "ErrorReporter.h"
 #include "DatasetTypeLookup.h"
@@ -14,8 +13,6 @@
 
 using namespace std;
 using namespace VAPoR;
-
-//namespace DatasetImportUtils {
 
 std::string DatasetImportController::GetDatasetName(ParamsMgr *pm, std::string file, DatasetExistsAction existsAction) {
     auto names = pm->GetDataMgrNames();
@@ -67,10 +64,9 @@ bool DatasetImportController::ImportDataset(ControlExec *ce, const vector<string
         gsp->SetProjectionString(ds->GetMapProjection());
     }
 
-    gsp->SetValueLong(GUIStateParams::DatasetImportedTag, "Indicates that a dataset has been imported", true);
     gsp->SetValueLong(GUIStateParams::SessionNewTag, "Reset SessionNewTag to false after data import", false);
 
     pm->EndSaveStateGroup();
-
+    emit datasetImported();
     return true;
 }
