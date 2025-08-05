@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QObject>
 #include <vector>
 #include <string>
 
