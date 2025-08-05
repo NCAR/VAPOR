@@ -6,6 +6,7 @@
 
 namespace VAPoR {
     class ControlExec;
+    class ParamsMgr;
 }
 
 class DatasetImportController : public QObject {
@@ -14,6 +15,8 @@ class DatasetImportController : public QObject {
 public:
     enum class DatasetExistsAction { Prompt, ReplaceFirst, AddNew };
     bool ImportDataset(VAPoR::ControlExec *ce, const std::vector<std::string> &files, std::string format, DatasetExistsAction action);
+    std::string GetDatasetName(VAPoR::ParamsMgr *pm, std::string file, DatasetExistsAction existsAction);
+
 
 signals:
     void datasetImported();

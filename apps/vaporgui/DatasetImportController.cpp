@@ -1,4 +1,5 @@
 #include "DatasetImportUtils.h"
+#include "DatasetImportController.h"
 #include "ErrorReporter.h"
 #include "DatasetTypeLookup.h"
 
@@ -16,7 +17,7 @@ using namespace VAPoR;
 
 //namespace DatasetImportUtils {
 
-static string DatasetImportController::GetDatasetName(ParamsMgr *pm, string file, DatasetExistsAction existsAction) {
+std::string DatasetImportController::GetDatasetName(ParamsMgr *pm, std::string file, DatasetExistsAction existsAction) {
     auto names = pm->GetDataMgrNames();
     if (names.empty() || existsAction == DatasetExistsAction::AddNew)
         return ControlExec::MakeStringConformant(FileUtils::Basename(file));
@@ -31,17 +32,17 @@ static string DatasetImportController::GetDatasetName(ParamsMgr *pm, string file
     QString choice = QInputDialog::getItem(nullptr, "Load Data", "Load as new dataset or replace existing", items, 0, false, &ok);
     if (!ok || choice.isEmpty()) return "";
 
-    string name = choice.toStdString();
+    std::string name = choice.toStdString();
     if (name == "New Dataset")
         return ControlExec::MakeStringConformant(FileUtils::Basename(file));
     return name;
 }
 
-bool DatasetImportController::ImportDataset(ControlExec *ce, const vector<string> &files, string format, DatasetExistsAction action) {
+bool DatasetImportController::ImportDataset(ControlExec *ce, const vector<string> &files, std::string format, DatasetExistsAction action) {
     ParamsMgr *pm = ce->GetParamsMgr();
     pm->BeginSaveStateGroup("Import Dataset");
 
-    string name = GetDatasetName(pm, files[0], action);
+    std::string name = GetDatasetName(pm, files[0], action);
     if (name.empty()) {
         pm->EndSaveStateGroup();
         return false;
@@ -73,6 +74,3 @@ bool DatasetImportController::ImportDataset(ControlExec *ce, const vector<string
 
     return true;
 }
-
-//}  // namespace DatasetImportUtils
-

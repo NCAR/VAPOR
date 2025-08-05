@@ -157,14 +157,14 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         Render(false, true);
     });
 
-    _datsetImportController = new DatasetImportController();
-
     _captureController = new CaptureController(_controlExec);
     connect(_captureController, &CaptureController::captureStarted, [this]() {
         AnimationParams* ap = (AnimationParams*)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
         NavigationUtils::SetTimestep(_controlExec, ap->GetValueLong(AnimationParams::CaptureStartTag, ap->GetStartTimestep()));
         _animationController->AnimationPlayForward();
     });
+
+    _datasetImportController = new DatasetImportController();
 
     _leftPanel = new LeftPanel(_controlExec, _captureController, _datasetImportController);
     const int dpi = qApp->desktop()->logicalDpiX();
@@ -234,7 +234,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
 
         if (!fmt.empty())
             //DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst);
-            _datsetImportController->ImportDataset(_controlExec, paths, fmt, DatsetImportController::DatasetExistsAction::ReplaceFirst);
+            _datasetImportController->ImportDataset(_controlExec, paths, fmt, DatasetImportController::DatasetExistsAction::ReplaceFirst);
     }
 
     app->installEventFilter(this);
@@ -782,7 +782,7 @@ void MainForm::showImportDatasetGUI(string format)
     if (files.empty()) return;
 
     //DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt);
-    _datasetImportController->ImportDataset(_controlExec, files, format, DatsetImportController::DatasetExistsAction::Prompt);
+    _datasetImportController->ImportDataset(_controlExec, files, format, DatasetImportController::DatasetExistsAction::Prompt);
 }
 
 
@@ -943,7 +943,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     }
 
     if (event->type() == ParamsChangeEvent) {
-        // If DatasetImportUtils imports a datset, go to the RendererTab and reject the input
+        // If DatasetImportUtils imports a dataset, go to the RendererTab and reject the input
         //if (GetStateParams()->GetValueLong(GUIStateParams::DatasetImportedTag, true)) {
         //    GetStateParams()->SetValueLong(GUIStateParams::DatasetImportedTag, "Dataset has been imported.  Reset to false.", false);
         //    GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false);
