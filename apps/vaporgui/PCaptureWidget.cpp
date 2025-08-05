@@ -1,4 +1,3 @@
-#include "CaptureUtils.h"
 #include "CaptureController.h"
 #include "PCaptureWidget.h"
 #include "PTimeRangeSelector.h"

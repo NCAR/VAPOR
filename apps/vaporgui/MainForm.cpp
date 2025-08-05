@@ -67,6 +67,7 @@
 #include "DatasetTypeLookup.h"
 #include "CaptureController.h"
 #include "DatasetImportUtils.h"
+#include "DatasetImportController.h"
 
 #include <QStyle>
 #include <vapor/Progress.h>
@@ -156,6 +157,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         Render(false, true);
     });
 
+    _datsetImportController = new DatasetImportController();
+
     _captureController = new CaptureController(_controlExec);
     connect(_captureController, &CaptureController::captureStarted, [this]() {
         AnimationParams* ap = (AnimationParams*)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
@@ -163,7 +166,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         _animationController->AnimationPlayForward();
     });
 
-    _leftPanel = new LeftPanel(_controlExec, _captureController);
+    _leftPanel = new LeftPanel(_controlExec, _captureController, _datasetImportController);
     const int dpi = qApp->desktop()->logicalDpiX();
     _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     _leftPanel->setMinimumHeight(500);
@@ -230,7 +233,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         }
 
         if (!fmt.empty())
-            DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst);
+            //DatasetImportUtils::ImportDataset(_controlExec, paths, fmt, DatasetImportUtils::DatasetExistsAction::ReplaceFirst);
+            _datsetImportController->ImportDataset(_controlExec, paths, fmt, DatsetImportController::DatasetExistsAction::ReplaceFirst);
     }
 
     app->installEventFilter(this);
@@ -777,7 +781,8 @@ void MainForm::showImportDatasetGUI(string format)
     auto files = getUserFileSelection(DatasetTypeDescriptiveName(format), defaultPath, "", format!="vdc");
     if (files.empty()) return;
 
-    DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt);
+    //DatasetImportUtils::ImportDataset(_controlExec, files, format, DatasetImportUtils::DatasetExistsAction::Prompt);
+    _datasetImportController->ImportDataset(_controlExec, files, format, DatsetImportController::DatasetExistsAction::Prompt);
 }
 
 
@@ -939,19 +944,10 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
 
     if (event->type() == ParamsChangeEvent) {
         // If DatasetImportUtils imports a datset, go to the RendererTab and reject the input
-        if (GetStateParams()->GetValueLong(GUIStateParams::DatasetImportedTag, true)) {
-            GetStateParams()->SetValueLong(GUIStateParams::DatasetImportedTag, "Dataset has been imported.  Reset to false.", false);
-            GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false);
-            _leftPanel->GoToRendererTab();
-            return true;
-        }
-
-        // If PCaptureWidget sets the AnimationParams::AnimationStartedTag parameter,
-        // unset it, issue a call to _animationController->AnimationPlayForward(), and reject input
-        //AnimationParams* aParams = GetAnimationParams();
-        //if (aParams->GetValueLong(AnimationParams::AnimationStartedTag, 0) == true) {
-        //    aParams->SetValueLong(AnimationParams::AnimationStartedTag, "Disable tag", false);
-        //    _animationController->AnimationPlayForward();
+        //if (GetStateParams()->GetValueLong(GUIStateParams::DatasetImportedTag, true)) {
+        //    GetStateParams()->SetValueLong(GUIStateParams::DatasetImportedTag, "Dataset has been imported.  Reset to false.", false);
+        //    GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false);
+        //    _leftPanel->GoToRendererTab();
         //    return true;
         //}
 

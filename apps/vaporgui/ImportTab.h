@@ -5,6 +5,7 @@
 
 class PImportDataWidget;
 class PProjectionStringWidget;
+class DatasetImportController;
 
 class ImportTab : public QWidget, public Updatable {
     Q_OBJECT
@@ -14,6 +15,6 @@ class ImportTab : public QWidget, public Updatable {
     PProjectionStringWidget *_projectionWidget;
 
 public:
-    ImportTab(VAPoR::ControlExec *ce);
+    ImportTab(VAPoR::ControlExec *ce, DatasetImportController *datasetImportController);
     void Update() override;
 };
