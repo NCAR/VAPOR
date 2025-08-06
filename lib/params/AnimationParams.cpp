@@ -44,7 +44,6 @@ const string AnimationParams::CaptureFileDirTag = "CaptureFileDirTag";
 const string AnimationParams::CaptureFileTimeTag = "CaptureFileTimeTag";
 const string AnimationParams::CaptureTimeSeriesFileNameTag = "CaptureTimeSeriesFileNameTag";
 const string AnimationParams::CaptureTimeSeriesTimeTag = "CaptureTimeSeriesTimeTag";
-const string AnimationParams::AnimationStartedTag = "AnimationStarted";
 
 //
 // Register class with object factory!!!
@@ -86,5 +85,4 @@ void AnimationParams::_init()
     SetValueLong(AnimationParams::CaptureTypeTag, "Set default value for capture mode image filetype", AnimationParams::TIFF);
     SetValueLong(AnimationParams::CaptureStartTag, "Set default value for capturing imagery start time", GetStartTimestep());
     SetValueLong(AnimationParams::CaptureEndTag, "Set default value for capturing imagery end time", GetEndTimestep());
-    SetValueLong(AnimationParams::AnimationStartedTag, "Inidicates if an animation has started", false);
 }

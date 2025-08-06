@@ -127,7 +127,6 @@ public:
     static const string CaptureFileTimeTag;
     static const string CaptureTimeSeriesFileNameTag;
     static const string CaptureTimeSeriesTimeTag;
-    static const string AnimationStartedTag;
 
 private:
     //! Put a params instance into default state with no data.
