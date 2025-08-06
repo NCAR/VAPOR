@@ -220,7 +220,6 @@ public:
     static const string MovingDomainTrackRenderRegionsTag;
     static const string ImportDataTypeTag;
     static const string SessionNewTag;
-    static const string DatasetImportedTag;
 
 private:
     MouseModeParams *m_mouseModeParams;

@@ -15,7 +15,6 @@
 #include "vapor/FileUtils.h"
 #include "vapor/NavigationUtils.h"
 
-#include <regex>
 #include <QFileDialog>
 #include <QHBoxLayout>
 
