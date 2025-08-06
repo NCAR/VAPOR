@@ -7,6 +7,15 @@ namespace VAPoR {
     class ControlExec;
 }
 
+struct TiffStrings {
+    static const std::string FileFilter;
+    static const std::string FileSuffix;
+};
+struct PngStrings {
+    static const std::string FileFilter;
+    static const std::string FileSuffix;
+};
+
 class CaptureController : public QObject {
     Q_OBJECT
 

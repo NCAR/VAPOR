@@ -15,16 +15,6 @@ class VComboBox;
 class VLabel;
 class CaptureController;
 
-struct TiffStrings {
-    static const std::string FileFilter;
-    static const std::string FileSuffix;
-};
-
-struct PngStrings {
-    static const std::string FileFilter;
-    static const std::string FileSuffix;
-};
-
 class PCaptureHBox : public PWidget {
     Q_OBJECT;
 
@@ -47,7 +37,6 @@ protected:
 
 private slots:
     void _dropdownIndexChanged(int index);
-    void _captureTimeSeries();
 };
     
 class PCaptureWidget : public PWidget {

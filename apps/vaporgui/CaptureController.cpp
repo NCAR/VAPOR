@@ -14,14 +14,20 @@
 #include "vapor/FileUtils.h"
 #include "vapor/STLUtils.h"
 
+const std::string TiffStrings::FileFilter = "TIFF (*.tif)";
+const std::string TiffStrings::FileSuffix = "tif";
+
+const std::string PngStrings::FileFilter = "PNG (*.png)";
+const std::string PngStrings::FileSuffix = "png";
+
 CaptureController::CaptureController(VAPoR::ControlExec *ce) : _ce(ce) {}
 
 std::string CaptureController::GetCaptureFileName() {
     ShowCitationReminder();
 
     auto *ap = _ce->GetParams<AnimationParams>();
-    std::string filter = ap->GetValueLong(AnimationParams::CaptureTypeTag, 0) == 0 ? "TIFF (*.tif)" : "PNG (*.png)";
-    std::string suffix = ap->GetValueLong(AnimationParams::CaptureTypeTag, 0) == 0 ? "tif" : "png";
+    std::string filter = ap->GetValueLong(AnimationParams::CaptureTypeTag, AnimationParams::TIFF) == false ? TiffStrings::FileFilter : PngStrings::FileFilter;
+    std::string suffix = ap->GetValueLong(AnimationParams::CaptureTypeTag, AnimationParams::TIFF) == false ? TiffStrings::FileSuffix : PngStrings::FileSuffix;
     std::string defaultPath = ap->GetValueString(AnimationParams::CaptureFileDirTag, FileUtils::HomeDir());
 
     // - For this QFileDialog, QFileDialog::DontConfirmOverwrite is needed because we do file overwrite confirmation 
