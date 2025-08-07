@@ -65,6 +65,8 @@
 #include "NcarCasperUtils.h"
 #include "ViewpointToolbar.h"
 #include "DatasetTypeLookup.h"
+#include "CaptureController.h"
+#include "DatasetImportController.h"
 
 #include <QStyle>
 #include <vapor/Progress.h>
@@ -93,7 +95,6 @@ MainForm *MainForm::_instance = nullptr;
 MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, string filesType, QWidget *parent) : QMainWindow(parent)
 {
     _App = app;
-    _sessionNewFlag = true;
     _begForCitation = true;
 
     assert(!_instance);
@@ -152,15 +153,23 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         _controlExec->SyncWithParams();
         updateUI();
         setUpdatesEnabled(true);
-
         Render(false, true);
     });
 
-    _leftPanel = new LeftPanel(_controlExec, this);
+    _captureController = new CaptureController(_controlExec);
+    connect(_captureController, &CaptureController::captureStarted, [this]() {
+        AnimationParams* ap = (AnimationParams*)_controlExec->GetParamsMgr()->GetParams(AnimationParams::GetClassType());
+        NavigationUtils::SetTimestep(_controlExec, ap->GetValueLong(AnimationParams::CaptureStartTag, ap->GetStartTimestep()));
+        _animationController->AnimationPlayForward();
+    });
+
+    _datasetImportController = new DatasetImportController();
+    connect(_datasetImportController, &DatasetImportController::datasetImported, this, [this](){_leftPanel->GoToRendererTab();});
+
+    _leftPanel = new LeftPanel(_controlExec, _captureController, _datasetImportController);
     const int dpi = qApp->desktop()->logicalDpiX();
     _leftPanel->setMinimumWidth(dpi > 96 ? 675 : 460);
     _leftPanel->setMinimumHeight(500);
-    //_dependOnLoadedData_insert(_leftPanel);
     _updatableElements.insert(_leftPanel);
 
     _status = new ProgressStatusBar;
@@ -224,7 +233,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
         }
 
         if (!fmt.empty())
-            ImportDataset(paths, fmt, ReplaceFirst);
+            _datasetImportController->ImportDataset(_controlExec, paths, fmt, DatasetImportController::DatasetExistsAction::ReplaceFirst);
     }
 
     app->installEventFilter(this);
@@ -245,7 +254,7 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     if (start == 0 && end == 0) end = INT_MAX;
     start = std::max(0, start);
 
-    if (_sessionNewFlag) {
+    if (GetStateParams()->GetValueLong(GUIStateParams::SessionNewTag, false)) {
         fprintf(stderr, "No session loaded\n");
         return -1;
     }
@@ -263,7 +272,6 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     auto vpp = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
 
     _paramsMgr->BeginSaveStateGroup("test");
-    StartAnimCapture(baseFileWithTS);
     ap->SetStartTimestep(start);
     ap->SetEndTimestep(end);
 
@@ -271,11 +279,17 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
     vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", width);
     vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
 
-    _animationController->AnimationPlayForward();
+    if (_captureController->EnableAnimationCapture(baseFileWithTS)) {
+        GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+        _capturingAnimationVizName = p->GetActiveVizName();
+        _animationController->AnimationPlayForward();
+    }
+
     _paramsMgr->EndSaveStateGroup();
 
     connect(_animationController, &AnimationController::AnimationOnOffSignal, this, [this]() {
-        endAnimCapture();
+        _captureController->EndAnimationCapture();
+        _capturingAnimationVizName = "";
         close();
     });
 
@@ -582,7 +596,7 @@ retryLoad:
         for (auto name : gsp->GetOpenDataSetNames()) gsp->RemoveOpenDataSet(name);
 
     _paramsMgr->UndoRedoClear();
-    _sessionNewFlag = false;
+    gsp->SetValueLong(GUIStateParams::SessionNewTag, "Open dataset as a new session", false);
     _stateChangeFlag = false;
     _paramsMgr->TriggerManualStateChangeEvent("Session Opened");
 
@@ -752,38 +766,6 @@ void MainForm::helpAbout()
     _banner = new BannerGUI(this, banner_file_name, -1, true, banner_text.c_str(), "http://www.vapor.ucar.edu");
 }
 
-
-void MainForm::ImportDataset(const std::vector<string> &files, string format, DatasetExistsAction existsAction, string name)
-{
-    if (name.empty()) name = _getDataSetName(files[0], existsAction);
-    if (name.empty()) return; // Cancelled
-
-    _paramsMgr->BeginSaveStateGroup("Import Dataset");
-    int rc = _controlExec->OpenData(files, name, format);
-    if (rc < 0) {
-        _paramsMgr->EndSaveStateGroup();
-        MSG_ERR("Failed to load data");
-        return;
-    }
-
-    auto gsp = _controlExec->GetParams<GUIStateParams>();
-    gsp->InsertOpenDataSet(name, format, files);
-
-    DataStatus *ds = _controlExec->GetDataStatus();
-    GetAnimationParams()->SetEndTimestep(ds->GetTimeCoordinates().size() - 1);
-
-    if (_sessionNewFlag) {
-        NavigationUtils::ViewAll(_controlExec);
-        NavigationUtils::SetHomeViewpoint(_controlExec);
-        gsp->SetProjectionString(ds->GetMapProjection());
-    }
-
-    _sessionNewFlag = false;
-    _paramsMgr->EndSaveStateGroup();
-
-    _leftPanel->GoToRendererTab();
-}
-
 void MainForm::showImportDatasetGUI(string format)
 {
     static vector<pair<string, string>> prompts = GetDatasets();
@@ -798,7 +780,7 @@ void MainForm::showImportDatasetGUI(string format)
     auto files = getUserFileSelection(DatasetTypeDescriptiveName(format), defaultPath, "", format!="vdc");
     if (files.empty()) return;
 
-    ImportDataset(files, format, DatasetExistsAction::Prompt);
+    _datasetImportController->ImportDataset(_controlExec, files, format, DatasetImportController::DatasetExistsAction::Prompt);
 }
 
 
@@ -881,7 +863,7 @@ void MainForm::sessionNew()
     _paramsMgr->UndoRedoClear();
 
     _stateChangeFlag = false;
-    _sessionNewFlag = true;
+    GetStateParams()->SetValueLong(GUIStateParams::SessionNewTag, "Toggle SessionNewTag to true for a new session", true);
 }
 
 void MainForm::_setAnimationOnOff(bool on)
@@ -1055,49 +1037,6 @@ void MainForm::enableAnimationWidgets(bool on)
     }
 }
 
-
-void MainForm::CaptureSingleImage(string filter, string defaultSuffix)
-{
-    showCitationReminder();
-
-    std::string imageDir = GetAnimationParams()->GetValueString(AnimationParams::CaptureFileDirTag, "");
-    if (imageDir.empty()) imageDir = QDir::homePath().toStdString();
-
-    QFileDialog fileDialog(this, "Specify single image capture file name", QString::fromStdString(imageDir), QString::fromStdString(filter));
-
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.move(pos());
-    fileDialog.resize(450, 450);
-    QStringList mimeTypeFilters;
-    if (fileDialog.exec() != QDialog::Accepted) return;
-
-    // Extract the path, and the root name, from the returned string.
-    QStringList files = fileDialog.selectedFiles();
-    if (files.isEmpty()) return;
-    QString fn = files[0];
-    auto ap = GetAnimationParams();
-    ap->SetValueString(AnimationParams::CaptureFileNameTag, "Capture file name", FileUtils::Basename(fn.toStdString()));
-    ap->SetValueString(AnimationParams::CaptureFileDirTag, "Capture file directory", FileUtils::Dirname(fn.toStdString()));
-
-    QFileInfo fileInfo(fn);
-    QString   suffix = fileInfo.suffix();
-    if (suffix == "") {
-        fn += QString::fromStdString(defaultSuffix);
-        fileInfo.setFile(fn);
-    }
-
-    string file = fileInfo.absoluteFilePath().toStdString();
-    string filepath = fileInfo.path().toStdString();
-
-    // Turn on "image capture mode" in the current active visualizer
-    GUIStateParams *p = GetStateParams();
-    string          vizName = p->GetActiveVizName();
-    int             success = _vizWinMgr->EnableImageCapture(file, vizName);
-
-    if (success < 0) MSG_ERR("Error capturing image");
-}
-
-
 void MainForm::launchStats()
 {
     if (!_stats) {
@@ -1166,118 +1105,4 @@ void MainForm::closeProjectionFrame() {
 
 void MainForm::AnimationPlayForward() const {
     _animationController->AnimationPlayForward();
-}
-
-bool MainForm::StartAnimCapture(string baseFile, string defaultSuffix)
-{
-    QString   fileName = QString::fromStdString(baseFile);
-    QFileInfo fileInfo = QFileInfo(fileName);
-
-    QString suffix = fileInfo.suffix();
-    if (suffix != "" || suffix != "jpg" || suffix != "jpeg" || suffix != "tif" || suffix != "tiff" || suffix != "png") {}
-    if (suffix == "") {
-        suffix = QString::fromStdString(defaultSuffix);
-        fileName += QString::fromStdString(defaultSuffix);
-    } else {
-        fileName = fileInfo.absolutePath() + "/" + fileInfo.baseName();
-    }
-
-    QString fileBaseName = fileInfo.baseName();
-
-    int posn;
-    for (posn = fileBaseName.length() - 1; posn >= 0; posn--) {
-        if (!fileBaseName.at(posn).isDigit()) break;
-    }
-    int startFileNum = 0;
-
-    unsigned int lastDigitPos = posn + 1;
-    if (lastDigitPos < fileBaseName.length()) {
-        startFileNum = fileBaseName.right(fileBaseName.length() - lastDigitPos).toInt();
-        fileBaseName.truncate(lastDigitPos);
-    }
-
-    QString filePath = fileInfo.absolutePath() + "/" + fileBaseName;
-    // Insert up to 4 zeros
-    QString zeroes;
-    if (startFileNum == 0)
-        zeroes = "000";
-    else {
-        switch ((int)log10((float)startFileNum)) {
-        case (0): zeroes = "000"; break;
-        case (1): zeroes = "00"; break;
-        case (2): zeroes = "0"; break;
-        default: zeroes = ""; break;
-        }
-    }
-    filePath += zeroes;
-    filePath += QString::number(startFileNum);
-    filePath += ".";
-    filePath += suffix;
-    string fpath = filePath.toStdString();
-
-    // Check if the numbered file exists.
-    QFileInfo check_file(filePath);
-    if (check_file.exists()) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Are you sure?");
-        QString msg = "The following numbered file exists.\n ";
-        msg += filePath;
-        msg += "\n";
-        msg += "Do you want to continue? You can choose \"No\" to go back and change the file name.";
-        msgBox.setText(msg);
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setDefaultButton(QMessageBox::No);
-        if (msgBox.exec() == QMessageBox::No) { return false; }
-    }
-
-    // Turn on "image capture mode" in the current active visualizer
-    _animationCapture = true;
-    GUIStateParams *p = GetStateParams();
-    string          vizName = p->GetActiveVizName();
-    _controlExec->EnableAnimationCapture(vizName, true, fpath);
-    _capturingAnimationVizName = vizName;
-
-    return true;
-}
-
-void MainForm::endAnimCapture()
-{
-    // Turn off capture mode for the current active visualizer (if it is on!)
-    if (_capturingAnimationVizName.empty()) return;
-    GUIStateParams *p = GetStateParams();
-    string          vizName = p->GetActiveVizName();
-    if (vizName != _capturingAnimationVizName) { MSG_WARN("Terminating capture in non-active visualizer"); }
-    if (_controlExec->EnableAnimationCapture(_capturingAnimationVizName, false)) MSG_WARN("Image Capture Warning;\nCurrent active visualizer is not capturing images");
-
-    _animationCapture = false;
-
-    _capturingAnimationVizName = "";
-}
-
-string MainForm::_getDataSetName(string file, DatasetExistsAction existsAction)
-{
-    vector<string> names = _paramsMgr->GetDataMgrNames();
-    if (names.empty() || existsAction == AddNew)
-        return ControlExec::MakeStringConformant(FileUtils::Basename(file));
-    else if (existsAction == ReplaceFirst)
-        return names[0];
-
-    string newSession = "New Dataset";
-
-    QStringList items;
-    items << tr(newSession.c_str());
-    for (int i = 0; i < names.size(); i++)
-        items << tr(names[i].c_str());
-
-    bool    ok;
-    QString item = QInputDialog::getItem(this, tr("Load Data"), tr("Load as new dataset or replace existing"), items, 0, false, &ok);
-    if (!ok || item.isEmpty())
-        return "";
-
-    string dataSetName = item.toStdString();
-
-    if (dataSetName == newSession)
-        dataSetName = ControlExec::MakeStringConformant(FileUtils::Basename(file));
-
-    return dataSetName;
 }

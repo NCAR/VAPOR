@@ -1,20 +1,22 @@
 #pragma once
+
 #include <QTabWidget>
-#include "Updatable.h"
-#include "VaporFwd.h"
 #include <common.h>
 
+#include "Updatable.h"
+#include "VaporFwd.h"
+
 class ImportTab;
-class MainForm;
+class CaptureController;
+class DatasetImportController;
 
 class LeftPanel : public QTabWidget, public Updatable {
     Q_OBJECT
-    ControlExec *_ce;
     std::vector<Updatable *> _uTabs;
     ImportTab* _importTab;
 
 public:
-    LeftPanel(ControlExec *ce, MainForm* mf);
+    LeftPanel(ControlExec *ce, CaptureController *captureController, DatasetImportController *datasetImportController);
     void Update() override;
     void GoToRendererTab();
     void ConfigureEnabledState(bool enabled);
