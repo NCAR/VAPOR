@@ -26,8 +26,8 @@ elif [ -z "$baseDir" ]; then
 fi
 #baseDir='/glade/campaign/cisl/vast/vapor/third-party'
 
-srcDir="$baseDir/2024-Aug-src"
-archiveName="2024-Aug-${OS}"
+srcDir="$baseDir/2024-Sept-src"
+archiveName="2025-July-${OS}"
 installDir="$baseDir/current"
 
 echo OS ${OS}
@@ -46,15 +46,17 @@ if [[ "$OS" == "macOSx86" ]]; then
     alias brew='arch -x86_64 /usr/local/bin/brew'
     export PATH="/usr/local/bin:$PATH"
     macOSMinVersion="10.15.0"
+    echo "Homebrew alias:"
+    alias brew
+    echo "PATH ${PATH}"
 elif [[ "$OS" == "appleSilicon" ]]; then
     macOSMinVersion="12.0.0"
     alias brew='/opt/homebrew/bin/brew'
     export PATH="/opt/homebrew/bin:$PATH"
+    echo "Homebrew alias:"
+    alias brew
+    echo "PATH ${PATH}"
 fi
-
-echo "Homebrew alias:"
-alias brew
-echo "PATH ${PATH}"
 
 macOSx86Prerequisites() {
     brew uninstall python@3.9 || true
@@ -119,7 +121,8 @@ ubuntuPrerequisites() {
         libxcb-xinerama0-dev \
         pkg-config \
         unzip \
-        libssl-dev
+        libssl-dev \
+        libffi-dev
     
     # Qt
     apt-get install -y \
@@ -656,10 +659,11 @@ pythonVapor() {
 	    export CFLAGS="$CFLAGS -I/usr/local/include"
 	    export LDFLAGS="$LDFLAGS -L/usr/local/lib"
             args+=(--build=x86_64-apple-darwin)
-	fi
         configure "${args[@]}"
+	fi
     else
         args+=(--with-openssl=$installDir)
+        args+=(--with-system-ffi)
         CC=$CC \
         CXX=$CXX \
         CPPFLAGS=-I$installDir/include \
@@ -669,10 +673,9 @@ pythonVapor() {
 
     make && make install
 
-    $installDir/Resources/bin/python3.9.vapor -m pip install --upgrade pip
+    $installDir/bin/python3.9.vapor -m pip install --upgrade pip
 
-    # As of 5/27/2023, numpy's current version (1.24.3) fails to initialize PyEngine's call to import_array1(-1)
-    $installDir/Resources/bin/python3.9.vapor -m pip install numpy==1.21.4 scipy matplotlib
+    $installDir/bin/python3.9.vapor -m pip install numpy scipy matplotlib
 }
 
 ospray() {
