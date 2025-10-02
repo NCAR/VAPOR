@@ -1,11 +1,11 @@
 #include "vapor/VolumeRenderer.h"
 #include <vapor/VolumeParams.h>
-
 #include <vapor/MatrixManager.h>
 #include <vapor/GLManager.h>
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
 #include <vapor/VolumeRegular.h>
+#include "vapor/VolumeRectilinear.h"
 #include <vapor/VolumeCellTraversal.h>
 #include <vapor/VolumeOSPRay.h>
 
@@ -394,7 +394,8 @@ std::string VolumeRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const
 {
     bool intel = GLManager::GetVendor() == GLManager::Vendor::Intel;
 
-    if (dynamic_cast<const RegularGrid *>(grid)) return VolumeRegular ::GetName();
+    if (dynamic_cast<const RegularGrid *>(grid)) return VolumeRegular::GetName();
+    if (dynamic_cast<const StretchedGrid *>(grid)) return VolumeRectilinear::GetName();
     if (dynamic_cast<const StructuredGrid *>(grid)) return intel ? VolumeRegular::GetName() : VolumeCellTraversal::GetName();
     if (dynamic_cast<const UnstructuredGrid *>(grid)) return VolumeOSPRay::GetName();
     MyBase::SetErrMsg("Unsupported grid type: %s", grid->GetType().c_str());
