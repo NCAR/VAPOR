@@ -95,8 +95,11 @@ int VolumeRectilinear::LoadData(const Grid *grid)
         for (int j = 0; j < dims[i]-1; j++) {
             int start = coords[i][j]*max2DTexDim;
             int end = coords[i][j+1]*max2DTexDim;
-            if (end < start)
-                swap(start, end);
+            if (end < start) {
+                int t = start;
+                start = end;
+                end = t;
+            }
             for (int k = start; k < end; k++)
                 coordLUTData[i*max2DTexDim + k] = (j + (k-start)/(float)(end-start))/(float)(dims[i]-1);
         }
