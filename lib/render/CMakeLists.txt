@@ -45,6 +45,7 @@ set (SRC
 	VolumeAlgorithm.cpp
 	VolumeGLSL.cpp
 	VolumeRegular.cpp
+	VolumeRectilinear.cpp
 	# VolumeResampled.cpp
 	# VolumeTest.cpp
 	# VolumeTest2.cpp
@@ -108,6 +109,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeAlgorithm.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeGLSL.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRegular.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRectilinear.h
 	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeResampled.h
 	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest.h
 	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest2.h
