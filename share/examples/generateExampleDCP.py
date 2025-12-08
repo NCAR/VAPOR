@@ -5,7 +5,7 @@ from netCDF4 import Dataset
 import numpy as np
 
 
-N = 200
+N = 2000
 dim = 3
 np.random.seed(0)
 pos = np.random.random_sample((N,dim))*200-100
@@ -63,7 +63,7 @@ def WriteTimestep(ts: float, positionData: np.ndarray, **kwargs: np.ndarray) -> 
     dataset.close()
 
 
-for ts in range(20):
+for ts in range(400):
     # Compute magnitude of velocity for each particle
     speed = np.sqrt(np.sum(vel**2, axis=-1))
     # Since 3-component properties such as velocity are common for 3D particles,
