@@ -31,6 +31,9 @@
     #pragma warning(disable : 4996)
 #endif
 
+#include "vapor/ContourRenderer.h"
+
+
 #include <vapor/RenderParams.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/regionparams.h>
@@ -47,6 +50,9 @@
 
 #include "vapor/ImageWriter.h"
 #include "vapor/GeoTIFWriter.h"
+#include "vapor/ImageRenderer.h"
+#include "vapor/VolumeRenderer.h"
+#include "vapor/WireFrameRenderer.h"
 
 using namespace VAPoR;
 
@@ -183,6 +189,233 @@ int Visualizer::renderRenderer(Renderer* renderer, bool fast) {
     return myrc;
 }
 
+glm::vec3 box_min(const Box* b)
+{
+    CoordType min, max;
+    b->GetExtents(min, max);
+    return glm::make_vec3(min.data());
+}
+
+glm::vec3 box_max(const Box* b)
+{
+    CoordType min, max;
+    b->GetExtents(min, max);
+    return glm::make_vec3(max.data());
+}
+
+struct AABB {
+    glm::vec3 min, max;
+    AABB() : min(0.f), max(0.f) {}
+    AABB(const glm::vec3 &min, const glm::vec3 &max) : min(min), max(max) {}
+    AABB(const Box *b) : AABB(box_min(b), box_max(b)) {}
+    AABB(const vector<glm::vec3> &pts)
+        : min(pts[0]), max(pts[0])
+    {
+        for (const auto &p : pts) add(p);
+    }
+    void add(const glm::vec3 p)
+    {
+        min = glm::min(min, p);
+        max = glm::max(max, p);
+    }
+    glm::vec3 center() const { return (min+max)*0.5f; }
+    bool intersects(const AABB &b) const { return intersects(*this, b); }
+    static bool intersects(const AABB &a, const AABB &b)
+    {
+        auto al = a.min;
+        auto ah = a.max;
+        auto bl = b.min;
+        auto bh = b.max;
+        return !(
+               bl.x > ah.x
+            || bh.x < al.x
+            || bl.y > ah.y
+            || bh.y < al.y
+            || bl.z > ah.z
+            || bh.z < al.z
+        );
+    }
+    string str() const
+    {
+        return "{ "
+        + std::to_string(min.x) + "->" + std::to_string(max.x) + " "
+        + std::to_string(min.y) + "->" + std::to_string(max.y) + " "
+        + std::to_string(min.z) + "->" + std::to_string(max.z) + " }";
+    }
+};
+
+AABB operator*(const glm::mat4 &m, const AABB &b)
+{
+    vector<glm::vec3> pts = {
+        {b.min.x, b.min.y, b.min.z},
+        {b.max.x, b.min.y, b.min.z},
+        {b.min.x, b.max.y, b.min.z},
+        {b.max.x, b.max.y, b.min.z},
+        {b.min.x, b.min.y, b.max.z},
+        {b.max.x, b.min.y, b.max.z},
+        {b.min.x, b.max.y, b.max.z},
+        {b.max.x, b.max.y, b.max.z},
+    };
+
+    for (int i = 0; i < pts.size(); i++)
+        pts[i] = m * glm::vec4(pts[i], 1.0f);
+
+    return {pts};
+}
+
+AABB rendererTransformedBB(const Renderer *r)
+{
+    MatrixManager mm;
+    AABB b = r->GetActiveParams()->GetBox();
+    r->ApplyTransform(&mm);
+    return mm.GetModelViewMatrix() * b;
+}
+
+glm::vec3 rendererTransformedCenter(const Renderer *r)
+{
+    MatrixManager mm;
+    AABB b = r->GetActiveParams()->GetBox();
+    r->ApplyTransform(&mm);
+    return mm.GetModelViewMatrix() * glm::vec4(b.center(), 1.0f);
+}
+
+double rendererDistanceToCamera(const Renderer *r)
+{
+    const auto vp = r->GetViewpointParams();
+    glm::vec3 cameraPos;
+    {
+        double cameraPosD[3], _[3];
+        vp->ReconstructCamera(vp->GetModelViewMatrix().data(), cameraPosD, _, _);
+        cameraPos = glm::make_vec3(cameraPosD);
+    }
+    glm::vec3 c = rendererTransformedCenter(r);
+    return glm::length(cameraPos - c);
+}
+
+template <typename T> bool approxEqual(T a, T b)
+{
+    return abs(b-a) <= max(a,b) * std::numeric_limits<T>::epsilon();
+}
+
+auto rankRendererTypeOrder(const Renderer *r) {
+    if (dynamic_cast<const ImageRenderer*>(r)) return 0;
+    if (dynamic_cast<const TwoDRenderer*>(r)) return 1;
+    auto w = dynamic_cast<const WireFrameRenderer*>(r);
+    if (w && w->GetActiveParams()->GetRenderDim() == 2) return 2;
+    if (dynamic_cast<const ContourRenderer*>(r)) return 3;
+    return 4;
+};
+
+std::pair<map<Renderer*, vector<double>>, vector<Renderer*>> autoOrder2DRenderers(const vector<Renderer*> &in)
+{
+    if (in.empty()) return {};
+    auto ret = in;
+
+    std::sort(ret.begin(), ret.end(), [](const Renderer *a, const Renderer *b) {
+        float az = rendererTransformedCenter(a).z;
+        float bz = rendererTransformedCenter(b).z;
+        if (!approxEqual(az, bz))
+            return az < bz;
+
+        if (!rendererTransformedBB(a).intersects(rendererTransformedBB(b)))
+            return rendererTransformedCenter(a).x < rendererTransformedCenter(b).x;
+
+        if (rankRendererTypeOrder(a) != rankRendererTypeOrder(b))
+            return rankRendererTypeOrder(a) < rankRendererTypeOrder(b);
+
+        return a->GetInstanceName() < b->GetInstanceName();
+    });
+
+    map<Renderer*, vector<double>> ogTrans;
+
+    int starti = 0;
+    // string startData = in[0]->GetMyDatasetName();
+    double offsetCum = 0;
+    for (int i = 0; i <= ret.size(); i++) {
+        if (i == ret.size() || ret[i]->GetActiveParams()->GetTransform()->GetTranslations()[2] != 0) {
+            for (int j = starti; j < i && i-starti>1; j++) {
+                ogTrans[ret[j]] = ret[j]->GetActiveParams()->GetTransform()->GetTranslations();
+                double offset = rendererDistanceToCamera(ret[j]) * 0.00005;
+                ret[j]->GetActiveParams()->GetTransform()->SetTranslations({ogTrans[ret[j]][0], ogTrans[ret[j]][1], offsetCum + offset});
+                offsetCum += offset;
+            }
+            starti = i;
+            // startData = i==ret.size() ? "" : in[i]->GetMyDatasetName();
+        }
+    }
+
+    return std::make_pair(ogTrans, ret);
+}
+
+vector<Renderer*> getRenderOrder(const vector<Renderer*> &in)
+{
+    if (in.empty()) return {};
+    const auto vp = in[0]->GetViewpointParams();
+    glm::vec3 cameraPos;
+    {
+        double cameraPosD[3], _[3];
+        vp->ReconstructCamera(vp->GetModelViewMatrix().data(), cameraPosD, _, _);
+        cameraPos = glm::make_vec3(cameraPosD);
+    }
+
+    // Not accounting for slice planes since those are currently not considered planar by the code
+
+    list<tuple<Renderer*, glm::vec3, AABB>> order;
+
+    auto transformedRenderer = [](Renderer *r) {
+        MatrixManager mm;
+        AABB b = r->GetActiveParams()->GetBox();
+        r->ApplyTransform(&mm);
+        glm::vec3 c = mm.GetModelViewMatrix() * glm::vec4(b.center(), 1.0f);
+        b = mm.GetModelViewMatrix() * b;
+        return make_tuple(r, c, b);
+    };
+
+    for (auto r : in) {
+        if (dynamic_cast<VolumeRenderer *>(r)) continue;
+        const auto tr = transformedRenderer(r);
+        float cameraDist = glm::length(cameraPos - std::get<1>(tr));
+
+        for (auto it = order.begin();; ++it) {
+            if (it == order.end()) {
+                order.insert(it, tr);
+                break;
+            }
+
+            float itCameraDist = glm::length(cameraPos - std::get<1>(*it));
+            if (cameraDist > itCameraDist) {
+                order.insert(it, tr);
+                break;
+            }
+        }
+    }
+
+    for (auto r : in) {
+        if (!dynamic_cast<VolumeRenderer *>(r)) continue;
+        const auto tr = transformedRenderer(r);
+        float cameraDist = glm::length(cameraPos - std::get<1>(tr));
+
+        for (auto it = order.begin();; ++it) {
+            if (it == order.end()) {
+                order.insert(it, tr);
+                break;
+            }
+
+            float itCameraDist = glm::length(cameraPos - std::get<1>(*it));
+            if (cameraDist > itCameraDist && !std::get<2>(tr).intersects(std::get<2>(*it))) {
+                order.insert(it, tr);
+                break;
+            }
+        }
+    }
+
+    vector<Renderer*> ret;
+    for (auto tr : order)
+        ret.push_back(std::get<0>(tr));
+
+    return ret;
+}
+
 int Visualizer::paintEvent(bool fast)
 {
     _insideGLContext = true;
@@ -237,16 +470,20 @@ int Visualizer::paintEvent(bool fast)
     _vizFeatures->InScenePaint(_getCurrentTimestep());
     GL_ERR_BREAK();
 
+    auto ret = autoOrder2DRenderers(_renderers);
+    auto rendererTransOg = ret.first;
+    auto renderersOrdered = ret.second;
+    renderersOrdered = getRenderOrder(renderersOrdered);
 
     std::vector<Renderer*> topRenderers;
     int rc = 0;
-    for (int i = 0; i < _renderers.size(); i++) {
-        RenderParams* rp = _paramsMgr->GetRenderParams(_winName, _renderers[i]->GetMyDatasetName(), _renderers[i]->GetMyParamsType(), _renderers[i]->GetMyName());
+    for (int i = 0; i < renderersOrdered.size(); i++) {
+        RenderParams* rp = _paramsMgr->GetRenderParams(_winName, renderersOrdered[i]->GetMyDatasetName(), renderersOrdered[i]->GetMyParamsType(), renderersOrdered[i]->GetMyName());
         if (rp != nullptr && rp->GetDrawInFront()) {
-            topRenderers.push_back(_renderers[i]);
+            topRenderers.push_back(renderersOrdered[i]);
             continue;
         }
-        rc = renderRenderer(_renderers[i], fast);
+        rc = renderRenderer(renderersOrdered[i], fast);
     }
 
     glDepthFunc(GL_ALWAYS);
@@ -256,6 +493,10 @@ int Visualizer::paintEvent(bool fast)
     }
     glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
+
+    for (auto it : rendererTransOg) {
+        it.first->GetActiveParams()->GetTransform()->SetTranslations(it.second);
+    }
 
     _vizFeatures->DrawText();
     GL_ERR_BREAK();

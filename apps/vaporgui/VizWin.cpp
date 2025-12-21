@@ -879,7 +879,7 @@ void VizWin::_updateOriginGlyph()
 {
     _glManager->matrixManager->PushMatrix();
     Renderer::ApplyDatasetTransform(_glManager, _getDataMgrTransform());
-    Renderer::ApplyTransform(_glManager, _getDataMgrTransform(), _getRenderParams()->GetTransform());
+    Renderer::ApplyTransform(_glManager->matrixManager, _getDataMgrTransform(), _getRenderParams()->GetTransform());
 
     VAPoR::RenderParams *rp = _getRenderParams();
     double               xOrigin = rp->GetValueDouble(RenderParams::XSlicePlaneOriginTag, 0.);
@@ -943,7 +943,7 @@ void VizWin::_drawContourSliceQuad()
 {
     _glManager->matrixManager->PushMatrix();
     Renderer::ApplyDatasetTransform(_glManager, _getDataMgrTransform());
-    Renderer::ApplyTransform(_glManager, _getDataMgrTransform(), _getRenderParams()->GetTransform());
+    Renderer::ApplyTransform(_glManager->matrixManager, _getDataMgrTransform(), _getRenderParams()->GetTransform());
 
     auto quad = _getRenderParams()->GetSlicePlaneQuad();
 
