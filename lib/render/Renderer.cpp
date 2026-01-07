@@ -122,11 +122,7 @@ int Renderer::paintGL(bool fast)
     mm->MatrixModeModelView();
     mm->PushMatrix();
 
-    if (dynamic_cast<TwoDDataRenderer*>(this) != nullptr) {
-        float zOffset = GetDefaultZ(_dataMgr, GetActiveParams()->GetCurrentTimestep());
-        _glManager->matrixManager->Translate(0, 0, zOffset);
-    }
-    ApplyTransform(_glManager, GetDatasetTransform(), rParams->GetTransform());
+    ApplyTransform(_glManager->matrixManager);
 
     int rc = _paintGL(fast);
 
@@ -143,10 +139,18 @@ int Renderer::paintGL(bool fast)
     return (0);
 }
 
-void Renderer::ApplyTransform(GLManager *gl, const Transform *dataset, const Transform *renderer)
+void Renderer::ApplyTransform(MatrixManager *mm) const
 {
-    MatrixManager *mm = gl->matrixManager;
+    if (dynamic_cast<const TwoDDataRenderer*>(this) != nullptr) {
+        float zOffset = GetDefaultZ(_dataMgr, GetActiveParams()->GetCurrentTimestep());
+        _glManager->matrixManager->Translate(0, 0, zOffset);
+    }
 
+    ApplyTransform(mm, GetDatasetTransform(), GetActiveParams()->GetTransform());
+}
+
+void Renderer::ApplyTransform(MatrixManager *mm, const Transform *dataset, const Transform *renderer)
+{
     vector<double> translate = renderer->GetTranslations();
     vector<double> rotate = renderer->GetRotations();
     vector<double> scale = renderer->GetScales();
