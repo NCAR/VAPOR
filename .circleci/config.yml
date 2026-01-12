@@ -193,7 +193,7 @@ jobs:
   build_macOSx86_installer:
     macos:
       xcode: "14.3.1"
-    resource_class: macos.m1.large.gen1
+    resource_class: macos.m4pro.large
     steps:
       - checkout
       - get_libraries:
@@ -215,7 +215,7 @@ jobs:
   build_appleSilicon_installer:
     macos:
       xcode: "14.3.1"
-    resource_class: macos.m1.large.gen1
+    resource_class: macos.m4pro.large
     steps:
       - checkout
       - get_libraries:
@@ -662,7 +662,7 @@ workflows:
   weekly:
       triggers:
         - schedule:
-             cron: "0 17 * * 1" #Time is GMT
+             cron: "30 17 * * 1" #Time is GMT
              filters:
                branches:
                  only: main
