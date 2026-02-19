@@ -335,7 +335,7 @@ std::pair<map<Renderer*, vector<double>>, vector<Renderer*>> autoOrder2DRenderer
         if (i == ret.size() || ret[i]->GetActiveParams()->GetTransform()->GetTranslations()[2] != 0) {
             for (int j = starti; j < i && i-starti>1; j++) {
                 ogTrans[ret[j]] = ret[j]->GetActiveParams()->GetTransform()->GetTranslations();
-                double offset = rendererDistanceToCamera(ret[j]) * 0.00005;
+                double offset = rendererDistanceToCamera(ret[j]) / ret[j]->GetDatasetTransform()->GetScales()[2] * 0.0003;
                 ret[j]->GetActiveParams()->GetTransform()->SetTranslations({ogTrans[ret[j]][0], ogTrans[ret[j]][1], offsetCum + offset});
                 offsetCum += offset;
             }

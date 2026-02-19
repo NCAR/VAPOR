@@ -824,20 +824,8 @@ void VizWin::updateManip(bool initialize)
 
             // If the flow renderer is 2d, add z extents or the Manip will break
             if (b.size() == 4) {
-                DataStatus *dataStatus = _controlExec->GetDataStatus();
-                string      dataMgrName = _getCurrentDataMgrName();
-                DataMgr *   dataMgr = dataStatus->GetDataMgr(dataMgrName);
-
-                ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
-                AnimationParams *p = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
-                size_t           ts = p->GetCurrentTimestep();
-                string           inst, winName, dataSetName;
-
-                int    refLevel = rParams->GetRefinementLevel();
-                int    lod = rParams->GetCompressionLevel();
-                double defaultZ = VAPoR::DataMgrUtils::Get2DRendererDefaultZ(dataMgr, ts, refLevel, lod);
-                b.push_back(defaultZ);
-                b.push_back(defaultZ);
+                b.push_back(0);
+                b.push_back(0);
             }
 
             llc[0] = b[0];
@@ -867,6 +855,14 @@ void VizWin::updateManip(bool initialize)
     vector<double> urcVec = {urc[0], urc[1], urc[2]};
     vector<double> minExtsVec = {minExts[0], minExts[1], minExts[2]};
     vector<double> maxExtsVec = {maxExts[0], maxExts[1], maxExts[2]};
+
+    if (rParams && rParams->GetRenderDim() == 2) {
+        double defaultZ = DataMgrUtils::Get2DRendererDefaultZ(_controlExec->GetDataStatus()->GetDataMgr(_getCurrentDataMgrName()), rParams->GetCurrentTimestep(), rParams->GetRefinementLevel(), rParams->GetCompressionLevel());
+        llcVec[2] = defaultZ;
+        urcVec[2] = defaultZ;
+        minExtsVec[2] = defaultZ;
+        maxExtsVec[2] = defaultZ;
+    }
 
     _manip->Update(llcVec, urcVec, minExtsVec, maxExtsVec, rpTransform, dmTransform, constrain);
 

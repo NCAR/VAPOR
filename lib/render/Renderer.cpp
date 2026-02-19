@@ -141,11 +141,6 @@ int Renderer::paintGL(bool fast)
 
 void Renderer::ApplyTransform(MatrixManager *mm) const
 {
-    if (dynamic_cast<const TwoDDataRenderer*>(this) != nullptr) {
-        float zOffset = GetDefaultZ(_dataMgr, GetActiveParams()->GetCurrentTimestep());
-        _glManager->matrixManager->Translate(0, 0, zOffset);
-    }
-
     ApplyTransform(mm, GetDatasetTransform(), GetActiveParams()->GetTransform());
 }
 

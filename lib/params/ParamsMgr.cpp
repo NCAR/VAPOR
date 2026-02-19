@@ -377,6 +377,16 @@ string ParamsMgr::CreateVisualizerParamsInstance(string winName)
         auto pvp = get_vp_params(previousVisualizerNames[0]);
         vpParams->SetModelViewMatrix(pvp->GetModelViewMatrix());
         vpParams->SetRotationCenter(pvp->GetRotationCenter());
+
+        for (auto name : pvp->GetTransformNames()) {
+            auto nt = vpParams->GetTransform(name);
+            auto pt = pvp->GetTransform(name);
+            nt->SetTranslations(pt->GetTranslations());
+            nt->SetScales(pt->GetScales());
+            nt->SetRotations(pt->GetRotations());
+            nt->SetOrigin(pt->GetOrigin());
+            nt->SetOriginInitialized(pt->IsOriginInitialized());
+        }
     }
 
     _ssave.EndGroup();
