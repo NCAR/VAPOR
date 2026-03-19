@@ -9,6 +9,7 @@
 #include <vapor/Framebuffer.h>
 
 #include <vapor/GLInclude.h>
+#include <vapor/GLContextProvider.h>
 
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
@@ -16,7 +17,10 @@
 
 using namespace VAPoR;
 
-RenderManager::RenderManager(ControlExec *ce) : _controlExec(ce) {}
+GLContext *RenderManager::_glContext = nullptr;
+
+
+RenderManager::RenderManager(ControlExec *ce, bool useOSGLContext) : _controlExec(ce), _useOSGLContext(useOSGLContext) {}
 
 RenderManager::~RenderManager()
 {
@@ -193,6 +197,9 @@ void RenderManager::setUpModelViewMatrix()
 
 int RenderManager::Render(String imagePath, bool fast)
 {
+    if (_useOSGLContext)
+        GetOSGLContext()->MakeCurrent();
+
     _controlExec->SyncWithParams();
 
     //    GL_ERR_BREAK();
@@ -262,5 +269,13 @@ String RenderManager::GetWinName() const
     assert(not names.empty());
     return names[0];
 }
+
+GLContext *RenderManager::GetOSGLContext()
+{
+    if (_glContext == nullptr)
+        _glContext = GLContextProvider::CreateContext();
+    return _glContext;
+}
+
 
 VAPoR::ViewpointParams *RenderManager::getViewpointParams() const { return _controlExec->GetParamsMgr()->GetViewpointParams(GetWinName()); }

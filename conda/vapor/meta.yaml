@@ -22,6 +22,7 @@ requirements:
     - jupytext=1.13.8 # Generate notebooks
     - doxygen=1.9.1
     - esbuild
+    - git
     # Both
     # (Needs to be specified manually in both rather than just in host because otherwise conda will install multiple versions of some packages and break the install)
     # ==========================================

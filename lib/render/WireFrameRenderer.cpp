@@ -152,7 +152,6 @@ void WireFrameRenderer::_drawCell(const GLuint *cellNodeIndices, int n, bool lay
 //
 void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *heightGrid, vector<GLuint> &nodeMap, bool *GPUOutOfMemory) const
 {
-    WireFrameParams* wfp = (WireFrameParams *)GetActiveParams();
     double mv = grid->GetMissingValue();
     auto   tmp = grid->GetDimensions();
     auto   dims = std::vector<size_t>{tmp[0], tmp[1], tmp[2]};
