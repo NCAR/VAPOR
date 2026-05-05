@@ -1,4 +1,4 @@
-import re
+import re, sys
 import functools
 from . import cppyyDoxygenWrapper
 import cppyy
@@ -91,6 +91,8 @@ class SmartWrapperMeta(cppyyDoxygenWrapper.CPPYYDoxygenWrapperMeta):
                 del clsdict[name]
                 wrappedFunctions = [cls._MakeFunctionWrapper(wrap, f) for f in toWrap]
                 wrappedDict = {val.GetWrappedFunctionName(name, f):f for f in wrappedFunctions}
+                if any((duplicate_name:=n) in clsdict for n in wrappedDict):
+                    print(f'WARNING: Function "{duplicate_name}" exposed multiple times', file=sys.stderr)
                 clsdict.update(wrappedDict)
         return super(SmartWrapperMeta, cls).__new__(cls, clsname, bases, clsdict, wrap=wrap)
 

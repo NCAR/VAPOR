@@ -41,6 +41,7 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
                 (new PDoubleSliderEdit(RenderParams::SampleRateTag, "N Samples"))->SetRange(32, 2000)
             })
         })),
+        new PCheckbox(RenderParams::DrawInFrontTag, "Draw renderer in front")
     }));
     
     AddGeometrySubtab(new PGroup({

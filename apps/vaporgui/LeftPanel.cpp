@@ -1,15 +1,19 @@
 #include "LeftPanel.h"
-#include "MainForm.h"
-#include "RenderersPanel.h"
-#include "ImportTab.h"
-#include "ExportTab.h"
-#include "vapor/ControlExecutive.h"
-#include "AnnotationEventRouter.h"
-#include "vapor/GUIStateParams.h"
 
 #include <QScrollArea>
 
-LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
+#include "RenderersPanel.h"
+#include "ImportTab.h"
+#include "ExportTab.h"
+#include "CaptureController.h"
+#include "DatasetImportController.h"
+#include "AnnotationEventRouter.h"
+
+#include "vapor/ControlExecutive.h"
+#include "vapor/GUIStateParams.h"
+
+
+LeftPanel::LeftPanel(ControlExec *ce, CaptureController *captureController, DatasetImportController *datasetImportController)
 {
     auto add = [this](auto &&w, auto &&t) constexpr {
         QScrollArea *scrollArea = new QScrollArea;
@@ -20,11 +24,11 @@ LeftPanel::LeftPanel(ControlExec *ce, MainForm *mf) : _ce(ce)
         _uTabs.push_back(w);
     };
    
-    _importTab = new ImportTab(_ce, mf); 
+    _importTab = new ImportTab(ce, datasetImportController); 
     add(_importTab, "Import");
     add(new RenderersPanel(ce), "Render");
     add(new AnnotationEventRouter(ce), "Annotate");
-    add(new ExportTab(ce, mf), "Export");
+    add(new ExportTab(ce, captureController), "Export");
 
     for (int i=1 ; i<count(); ++i) setTabEnabled(i, false);
     setTabEnabled(0,true);

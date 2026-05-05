@@ -109,9 +109,9 @@ void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform, std::ve
     VAssert(scales.size() == 3);
     VAssert(origin.size() == 3);
 
-    mm->Scale(1 / parentScales[0], 1 / parentScales[1], 1 / parentScales[2]);
 
     mm->Translate(translations[0], translations[1], translations[2]);
+    mm->Scale(1 / parentScales[0], 1 / parentScales[1], 1 / parentScales[2]);
     mm->Translate(origin[0], origin[1], origin[2]);
     mm->Rotate(glm::radians(rotations[0]), 1, 0, 0);
     mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
@@ -146,10 +146,11 @@ void TranslateStretchManip::Update(std::vector<double> llc, std::vector<double> 
     _cameraPosition[Y] = minv[13];
     _cameraPosition[Z] = minv[14];
 
-    if (llc.size() == 2) llc.push_back(0);
-    if (urc.size() == 2) urc.push_back(0);
-    if (minExts.size() == 2) minExts.push_back(0);
-    if (maxExts.size() == 2) maxExts.push_back(0);
+    double defaultZ = 0;
+    if (llc.size() == 2) llc.push_back(defaultZ);
+    if (urc.size() == 2) urc.push_back(defaultZ);
+    if (minExts.size() == 2) minExts.push_back(defaultZ);
+    if (maxExts.size() == 2) maxExts.push_back(defaultZ);
 
     std::copy(llc.begin(), llc.end(), _selection);
     std::copy(urc.begin(), urc.end(), _selection + 3);

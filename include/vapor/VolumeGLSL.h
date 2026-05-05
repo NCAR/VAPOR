@@ -40,7 +40,9 @@ private:
 
     void      _setShaderUniforms(const ShaderProgram *shader, const bool fast) const;
     glm::vec3 _getVolumeScales() const;
+protected:
     void      _getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::vec3 *userMin, glm::vec3 *userMax) const;
+private:
     bool      _usingColorMapData() const;
 };
 }    // namespace VAPoR

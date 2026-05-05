@@ -102,7 +102,11 @@ static vec3 GetCoordAtIndex(const ivec3 &index, const float *data, const ivec3 &
     const int y = index.y;
     const int z = index.z;
     VAssert(x >= 0 && x < w && y >= 0 && y < h && z >= 0 && z < d);
-    return vec3(data[3 * (z * w * h + y * w + x)], data[3 * (z * w * h + y * w + x) + 1], data[3 * (z * w * h + y * w + x) + 2]);
+    return vec3(
+        data[3 * ((long)z * w * h + y * w + x)],
+        data[3 * ((long)z * w * h + y * w + x) + 1],
+        data[3 * ((long)z * w * h + y * w + x) + 2]
+    );
 }
 
 static void GetFaceVertices(const ivec3 &cellIndex, const ivec3 &face, const float *data, const ivec3 &dims, vec3 &v0, vec3 &v1, vec3 &v2, vec3 &v3)

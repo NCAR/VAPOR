@@ -219,6 +219,7 @@ public:
     static const string MovingDomainTrackCameraTag;
     static const string MovingDomainTrackRenderRegionsTag;
     static const string ImportDataTypeTag;
+    static const string SessionNewTag;
 
 private:
     MouseModeParams *m_mouseModeParams;

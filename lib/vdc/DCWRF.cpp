@@ -1257,7 +1257,7 @@ int DCWRF::_InitVars(NetCDFCollection *ncdfc)
         // variable type must be float or int
         //
         int type = ncdfc->GetXType(vars[i]);
-        if (!(NetCDFSimple::IsNCTypeFloat(type) || NetCDFSimple::IsNCTypeFloat(type))) continue;
+        if (!(NetCDFSimple::IsNCTypeFloat(type) || NetCDFSimple::IsNCTypeInt(type))) continue;
 
         // If variables are in _coordVarsMap then they are coordinate, not
         // data, variables
