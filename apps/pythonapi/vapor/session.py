@@ -13,7 +13,7 @@ link.include('vapor/RenderManager.h')
 @link.FixModuleOwnership
 class Session(link.Session):
     def __init__(self):
-        super().__init__()
+        super().__init__(True)
         self.ce = super()._controlExec
 
     def NewRenderer(self, Class:Renderer, datasetName:str) -> Renderer:
@@ -85,7 +85,7 @@ class Session(link.Session):
 
         img = self.RenderToImage()
 
-        if config.IsRunningFromIPython():
+        if config.IsRunningFromNotebook():
             display(img)
         else:
             img.show()

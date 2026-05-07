@@ -21,7 +21,7 @@ link.Wasp.RegisterResourceFinder(config.GetResourceSafe)
 link.include('vapor/MyPython.h')
 link.Wasp.MyPython.IsRunningFromPython = True
 
-link.include('vapor/GLContextProvider.h')
-ctx = link.GLContextProvider.CreateContext()
+link.include('vapor/RenderManager.h')
+ctx = link.RenderManager.GetOSGLContext()
 print("OpenGL", ctx.GetVersion())
 

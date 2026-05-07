@@ -106,3 +106,16 @@ def IsRunningFromIPython():
         return True
     except NameError:
         return False
+
+
+def IsRunningFromMarimo():
+    try:
+        import marimo as mo
+        return mo.app_meta().mode in ("edit", "run")
+    except:
+        return False
+
+
+def IsRunningFromNotebook():
+    return IsRunningFromIPython() or IsRunningFromMarimo()
+

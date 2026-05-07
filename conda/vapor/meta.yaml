@@ -22,10 +22,11 @@ requirements:
     - jupytext=1.13.8 # Generate notebooks
     - doxygen=1.9.1
     - esbuild
+    - git
     # Both
     # (Needs to be specified manually in both rather than just in host because otherwise conda will install multiple versions of some packages and break the install)
     # ==========================================
-    - python=3.10
+    - python=3.9
     - proj=7.2.0
     - glm=0.9.9.4
     - jpeg=9e
@@ -66,7 +67,7 @@ requirements:
     - bqplot
     - anywidget
     # Both
-    - python=3.10 # pin_compatible('python') sometimes selects incompatible python (e.g. pin_compatible(python=3.9) selects python=3.10)
+    - python=3.9 # pin_compatible('python') sometimes selects incompatible python (e.g. pin_compatible(python=3.9) selects python=3.10)
     - {{ pin_compatible('numpy') }}
     - {{ pin_compatible('assimp') }}
     - {{ pin_compatible('freetype') }}

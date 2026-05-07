@@ -13,8 +13,9 @@ class Session {
 public:
     ControlExec *  _controlExec = nullptr;
     RenderManager *_renderManager = nullptr;
+    bool _useOSGLContext = false;
 
-    Session();
+    Session(bool useOSGLContext = false);
     virtual ~Session();
     void CloseDataset(String name);
     void CloseAllDatasets();

@@ -58,8 +58,8 @@ endfunction()
 
 copy(vapor ${PYTHON_API_DIR} EXCLUDE cmake.py __pycache__ widget.js jquery.js)
 copy(setup.py ${PYTHON_API_DIR})
-copy(examples ${PYTHON_API_DIR} EXCLUDE CMakeLists.txt)
-add_subdirectory (examples)
+copy(example_scripts ${PYTHON_API_DIR} EXCLUDE CMakeLists.txt)
+add_subdirectory (example_scripts)
 
 add_custom_command(
     OUTPUT "${PYTHON_API_DIR}/vapor/widget.js"
