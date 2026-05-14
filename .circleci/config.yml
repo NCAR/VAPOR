@@ -43,7 +43,6 @@ commands:
                 tar -xf <<parameters.fileName>>.tar.xz -C <<parameters.dir>>
               fi
 
-
   build_vapor:
     parameters:
       branch:
