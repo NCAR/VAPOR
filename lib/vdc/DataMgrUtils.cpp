@@ -401,6 +401,25 @@ bool DataMgrUtils::GetFirstExistingVariable(DataMgr *dataMgr, size_t ts, int lev
 {
     varname.clear();
     vector<string> varnames = dataMgr->GetDataVarNames(ndim);
+    // Prefer variables with a vertical transform (terrain-following coords)
+    if (ndim == 3) {
+        for (int i = 0; i < varnames.size(); i++) {
+            if (!dataMgr->VariableExists(ts, varnames[i], level, lod)) continue;
+            vector<string> coordvars;
+            dataMgr->GetVarCoordVars(varnames[i], true, coordvars);
+            if (coordvars.size() < 3) continue;
+            DC::CoordVar cvar;
+            if (!dataMgr->GetCoordVarInfo(coordvars[2], cvar)) continue;
+            string formula_terms;
+            DC::Attribute attr;
+            if (cvar.GetAttribute("formula_terms", attr)) {
+                varname = varnames[i];
+                return true;
+            }
+        }
+    }
+
+    // Fall back to first existing variable
     for (int i = 0; i < varnames.size(); i++) {
         if (dataMgr->VariableExists(ts, varnames[i], level, lod)) {
             varname = varnames[i];
@@ -408,6 +427,13 @@ bool DataMgrUtils::GetFirstExistingVariable(DataMgr *dataMgr, size_t ts, int lev
         }
     }
     return (false);
+    //for (int i = 0; i < varnames.size(); i++) {
+    //    if (dataMgr->VariableExists(ts, varnames[i], level, lod)) {
+    //        varname = varnames[i];
+    //        return (true);
+    //    }
+    //}
+    //return (false);
 }
 
 #ifdef VAPOR3_0_0_ALPHA
