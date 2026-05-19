@@ -111,7 +111,6 @@ std::vector<double> AxisAnnotation::GetAxisColor() const
 
 void AxisAnnotation::SetAxisColor(std::vector<double> color)
 {
-    return;
     string msg = "Axis annotation text color";
     SetValueDoubleVec(_colorTag, msg, color);
 }
