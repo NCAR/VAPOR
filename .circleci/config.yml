@@ -660,7 +660,8 @@ workflows:
       #      - build_appleSilicon_installer
       #      - build_macOSx86_installer
       #      - build_linux_installer
-  weekly:
+  
+    weekly:
       triggers:
         - schedule:
              cron: "30 17 * * 1" #Time is GMT
