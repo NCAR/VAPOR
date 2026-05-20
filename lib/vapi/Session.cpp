@@ -14,7 +14,8 @@
 
 using namespace VAPoR;
 
-Session::Session()
+Session::Session(bool useOSGLContext)
+: _useOSGLContext(useOSGLContext)
 {
     vector<string> myParams;
     myParams.push_back(GUIStateParams::GetClassType());
@@ -148,7 +149,7 @@ void Session::Reset()
 
     
     if (_renderManager) delete _renderManager;
-    _renderManager = new RenderManager(_controlExec);
+    _renderManager = new RenderManager(_controlExec, _useOSGLContext);
     
     _controlExec->GetParamsMgr()->UndoRedoClear();
 }

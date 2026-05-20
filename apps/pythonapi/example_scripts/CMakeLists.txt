@@ -1,0 +1,122 @@
+set(ALL_NOTEBOOKS "")
+set(ALL_MARIMO_NOTEBOOKS "")
+
+function(NOTEBOOK FILE OUT)
+    include(CMakeParseArguments)
+    cmake_parse_arguments(PARSE_ARGV 2
+        "NOTEBOOK"
+        ""
+        ""
+        ""
+        )
+
+    get_filename_component(FILE "${FILE}" REALPATH)
+
+    add_custom_command(
+        OUTPUT "${OUT}"
+        DEPENDS "${FILE}"
+        COMMAND cat "${FILE}" | jupytext --to ipynb > "${OUT}"
+        )
+
+    list(APPEND ALL_NOTEBOOKS "${OUT}")
+    set(ALL_NOTEBOOKS "${ALL_NOTEBOOKS}" PARENT_SCOPE)
+endfunction()
+
+
+function(CONV_MARIMO FILE OUT)
+    include(CMakeParseArguments)
+    cmake_parse_arguments(PARSE_ARGV 2
+        "CONV_MARIMO"
+        ""
+        ""
+        ""
+        )
+
+    get_filename_component(FILE "${FILE}" REALPATH)
+
+    add_custom_command(
+        OUTPUT "${OUT}"
+        DEPENDS "${FILE}"
+        COMMAND marimo -q -y convert "${FILE}" -o "${OUT}"
+        )
+
+    list(APPEND ALL_MARIMO_NOTEBOOKS "${OUT}")
+    set(ALL_MARIMO_NOTEBOOKS "${ALL_MARIMO_NOTEBOOKS}" PARENT_SCOPE)
+endfunction()
+
+
+# copy(vapor ${PYTHON_API_DIR} EXCLUDE cmake.py __pycache__)
+# copy(setup.py ${PYTHON_API_DIR})
+
+find_program(JUPYTEXT "jupytext")
+if (JUPYTEXT)
+    set(EXAMPLE_NOTEBOOK_OUT_DIR "${PYTHON_API_DIR}/example_jupyter_notebooks")
+    file(MAKE_DIRECTORY ${EXAMPLE_NOTEBOOK_OUT_DIR})
+
+    copy(example_utils.py                 ${EXAMPLE_NOTEBOOK_OUT_DIR})
+    notebook(numpy_example.py             ${EXAMPLE_NOTEBOOK_OUT_DIR}/numpy_example.ipynb)
+    notebook(xarray_example.py            ${EXAMPLE_NOTEBOOK_OUT_DIR}/xarray_example.ipynb)
+    notebook(dataset_example.py           ${EXAMPLE_NOTEBOOK_OUT_DIR}/dataset_example.ipynb)
+    notebook(flow_example.py              ${EXAMPLE_NOTEBOOK_OUT_DIR}/flow_example.ipynb)
+    notebook(annotation_example.py        ${EXAMPLE_NOTEBOOK_OUT_DIR}/annotation_example.ipynb)
+    notebook(camera_example.py            ${EXAMPLE_NOTEBOOK_OUT_DIR}/camera_example.ipynb)
+    notebook(transfer_function_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/transfer_function_example.ipynb)
+    notebook(workflow_example.py          ${EXAMPLE_NOTEBOOK_OUT_DIR}/workflow_example.ipynb)
+    notebook(animation_example.py         ${EXAMPLE_NOTEBOOK_OUT_DIR}/animation_example.ipynb)
+    notebook(visualizer_widget_example.py ${EXAMPLE_NOTEBOOK_OUT_DIR}/visualizer_widget_example.ipynb)
+    notebook(rotate_video.py              ${EXAMPLE_NOTEBOOK_OUT_DIR}/rotate_video.ipynb)
+
+    add_custom_target(
+        example_notebooks
+        ALL
+        DEPENDS ${ALL_NOTEBOOKS}
+    )
+else()
+    message(WARNING "jupytext not found")
+    message(WARNING "Skipping generation of jupyter notebooks")
+endif()
+
+find_program(MARIMO "marimo")
+if (JUPYTEXT AND MARIMO)
+    set(EXAMPLE_MARIMO_OUT_DIR "${PYTHON_API_DIR}/example_marimo_notebooks")
+    file(MAKE_DIRECTORY ${EXAMPLE_MARIMO_OUT_DIR})
+
+    copy(example_utils.py                                                   ${EXAMPLE_MARIMO_OUT_DIR})
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/numpy_example.ipynb             ${EXAMPLE_MARIMO_OUT_DIR}/numpy_example.py)
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/xarray_example.ipynb            ${EXAMPLE_MARIMO_OUT_DIR}/xarray_example.py)
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/dataset_example.ipynb           ${EXAMPLE_MARIMO_OUT_DIR}/dataset_example.py)
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/flow_example.ipynb              ${EXAMPLE_MARIMO_OUT_DIR}/flow_example.py)
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/annotation_example.ipynb        ${EXAMPLE_MARIMO_OUT_DIR}/annotation_example.py)
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/camera_example.ipynb            ${EXAMPLE_MARIMO_OUT_DIR}/camera_example.py)
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/transfer_function_example.ipynb ${EXAMPLE_MARIMO_OUT_DIR}/transfer_function_example.py)
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/workflow_example.ipynb          ${EXAMPLE_MARIMO_OUT_DIR}/workflow_example.py)
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/animation_example.ipynb         ${EXAMPLE_MARIMO_OUT_DIR}/animation_example.py)
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/visualizer_widget_example.ipynb ${EXAMPLE_MARIMO_OUT_DIR}/visualizer_widget_example.py)
+    conv_marimo(${EXAMPLE_NOTEBOOK_OUT_DIR}/rotate_video.ipynb              ${EXAMPLE_MARIMO_OUT_DIR}/rotate_video.py)
+
+    add_custom_target(
+        example_marimo_notebooks
+        ALL
+        DEPENDS ${ALL_MARIMO_NOTEBOOKS}
+    )
+else()
+    message(WARNING "marimo (or jupytext) not found")
+    message(WARNING "Skipping generation of marimo notebooks")
+endif()
+
+if (CONDA_BUILD)
+    set(CONDA_SITE_PACKAGE_DIR "$ENV{SP_DIR}")
+    install(
+        DIRECTORY "${PYTHON_API_DIR}/example_scripts"
+		DESTINATION "${CONDA_SITE_PACKAGE_DIR}/vapor"
+		COMPONENT Dependencies
+	)
+    if (JUPYTEXT)
+        install(
+            DIRECTORY "${EXAMPLE_NOTEBOOK_OUT_DIR}"
+		    DESTINATION "${CONDA_SITE_PACKAGE_DIR}/vapor"
+		    COMPONENT Dependencies
+	    )
+    endif()
+endif()
+

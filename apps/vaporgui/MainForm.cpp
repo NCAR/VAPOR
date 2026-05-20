@@ -251,6 +251,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, bool interactive, s
 
 int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int width, int height)
 {
+    _controlExec->SyncWithParams();
+
     if (start == 0 && end == 0) end = INT_MAX;
     start = std::max(0, start);
 
@@ -283,6 +285,9 @@ int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int
         GUIStateParams *p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
         _capturingAnimationVizName = p->GetActiveVizName();
         _animationController->AnimationPlayForward();
+    } else {
+        fprintf(stderr, "Failed to start animation capture\n");
+        exit(1);
     }
 
     _paramsMgr->EndSaveStateGroup();
@@ -1106,3 +1111,4 @@ void MainForm::closeProjectionFrame() {
 void MainForm::AnimationPlayForward() const {
     _animationController->AnimationPlayForward();
 }
+
