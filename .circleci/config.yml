@@ -71,7 +71,8 @@ commands:
             cp site_files/site.NCAR site.local
             mkdir -p build
             cd build
-            git checkout <<parameters.branch>>
+            #git checkout <<parameters.branch>>
+            git reset --hard origin/main
             <<parameters.beforeCompile>>
             cmake \
             -DCMAKE_BUILD_TYPE:String=Release \
