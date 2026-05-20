@@ -660,7 +660,6 @@ workflows:
       #      - build_appleSilicon_installer
       #      - build_macOSx86_installer
       #      - build_linux_installer
-
   weekly:
       triggers:
         - schedule:
