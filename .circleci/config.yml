@@ -71,6 +71,7 @@ commands:
             cp site_files/site.NCAR site.local
             mkdir -p build
             cd build
+            git fetch origin
             git checkout <<parameters.branch>>
             git reset --hard origin/main
             <<parameters.beforeCompile>>
