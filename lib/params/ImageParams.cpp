@@ -2,6 +2,7 @@
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/FileUtils.h>
+#include <vapor/CFuncs.h>
 
 using namespace VAPoR;
 
