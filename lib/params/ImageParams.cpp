@@ -1,6 +1,7 @@
 #include <vapor/ImageParams.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
+#include <vapor/FileUtils.h>
 
 using namespace VAPoR;
 
