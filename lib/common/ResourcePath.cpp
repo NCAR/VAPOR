@@ -90,6 +90,7 @@ std::string Wasp::GetResourcePath(const std::string &name)
     TRY_PATH(FileUtils::JoinPaths({GetInstalledResourceRoot(), name}));
     TRY_PATH(FileUtils::JoinPaths({SOURCE_DIR, name}));
     TRY_PATH(FileUtils::JoinPaths({THIRD_PARTY_DIR, name}));
+    TRY_PATH(FileUtils::JoinPaths({string(Wasp::GetEnvironmentalVariable("APPDIR")), name}));
     TRY_PATH(CallGetAppPathForResourceName(name));
 #endif
 
