@@ -71,9 +71,7 @@ commands:
             cp site_files/site.NCAR site.local
             mkdir -p build
             cd build
-            git fetch origin
             git checkout <<parameters.branch>>
-            git reset --hard origin/main
             <<parameters.beforeCompile>>
             cmake \
             -DCMAKE_BUILD_TYPE:String=Release \
@@ -645,8 +643,8 @@ workflows:
       #- build_python_api_osx
       - build_win10_installer
       # - build_macOS_installers
-      - build_appleSilicon_installer
-      - build_macOSx86_installer
+      # - build_appleSilicon_installer
+      # - build_macOSx86_installer
       - build_linux_installer
       #- build_suse_installer
       #- build_ubuntu20_libs
@@ -661,7 +659,6 @@ workflows:
       #      - build_appleSilicon_installer
       #      - build_macOSx86_installer
       #      - build_linux_installer
-  
   weekly:
       triggers:
         - schedule:
