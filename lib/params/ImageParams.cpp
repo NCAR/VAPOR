@@ -69,16 +69,8 @@ std::string ImageParams::GetImagePath() const
     std::string defaultImage = Wasp::GetSharePath("images/NaturalEarth.tms");
     std::string savedPath = GetValueString(_fileNameTag, defaultImage);
 
-    if (!Wasp::FileUtils::Exists(savedPath)) {
-        std::string appDir = Wasp::GetEnvironmentalVariable("APPDIR");
-        if (!appDir.empty()) {
-            std::string appImagePath = Wasp::FileUtils::JoinPaths({appDir, "share", "images", "NaturalEarth.tms"});
-            if (Wasp::FileUtils::Exists(appImagePath)) {
-                return appImagePath;
-            }
-        }
+    if (!Wasp::FileUtils::Exists(savedPath))
         return defaultImage;
-    }
 
     return savedPath;
 }
