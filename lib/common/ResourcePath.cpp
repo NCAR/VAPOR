@@ -81,6 +81,13 @@ string GetResourcePathFromCallback(const std::string &name)
     return "";
 }
 
+string GetAppImageResourceRoot()
+{
+    string appDir = string(Wasp::GetEnvironmentalVariable("APPDIR"));
+    if (appDir.empty()) return "";
+    return appDir;
+}
+
 std::string Wasp::GetResourcePath(const std::string &name)
 {
 #if FORCE_USE_DEV_LIBS
@@ -88,6 +95,7 @@ std::string Wasp::GetResourcePath(const std::string &name)
 #else
     TRY_PATH(GetResourcePathFromCallback(name));
     TRY_PATH(FileUtils::JoinPaths({GetInstalledResourceRoot(), name}));
+    TRY_PATH(FileUtils::JoinPaths({GetAppImageResourceRoot(), name}));
     TRY_PATH(FileUtils::JoinPaths({SOURCE_DIR, name}));
     TRY_PATH(FileUtils::JoinPaths({THIRD_PARTY_DIR, name}));
     TRY_PATH(CallGetAppPathForResourceName(name));
@@ -96,7 +104,10 @@ std::string Wasp::GetResourcePath(const std::string &name)
     return "";
 }
 
-std::string Wasp::GetSharePath(const std::string &name) { return GetResourcePath("share/" + name); }
+std::string Wasp::GetSharePath(const std::string &name) { 
+    
+    return GetResourcePath("share/" + name); 
+}
 
 #if defined(WIN32)
     #define PYTHON_MODULE_SUBDIR ("python" + string(PYTHON_VERSION))

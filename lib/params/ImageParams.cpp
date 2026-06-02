@@ -1,6 +1,8 @@
 #include <vapor/ImageParams.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
+#include <vapor/FileUtils.h>
+#include <vapor/CFuncs.h>
 
 using namespace VAPoR;
 
@@ -65,6 +67,10 @@ int ImageParams::Initialize()
 std::string ImageParams::GetImagePath() const
 {
     std::string defaultImage = Wasp::GetSharePath("images/NaturalEarth.tms");
+    std::string savedPath = GetValueString(_fileNameTag, defaultImage);
 
-    return GetValueString(_fileNameTag, defaultImage);
+    if (!Wasp::FileUtils::Exists(savedPath))
+        return defaultImage;
+
+    return savedPath;
 }
